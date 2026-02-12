@@ -29,12 +29,12 @@ class SalaahTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
       decoration: BoxDecoration(
         color: isMissedToday
-            ? AppTheme.missed.withOpacity(0.08)
+            ? AppTheme.missed.withValues(alpha: 0.08)
             : AppTheme.surface,
         borderRadius: BorderRadius.circular(14.0),
         border: Border.all(
           color: isMissedToday
-              ? AppTheme.missed.withOpacity(0.30)
+              ? AppTheme.missed.withValues(alpha: 0.30)
               : AppTheme.cardBorder,
         ),
       ),
@@ -49,7 +49,7 @@ class SalaahTile extends StatelessWidget {
               height: 36.0,
               decoration: BoxDecoration(
                 color: isMissedToday
-                    ? AppTheme.missed.withOpacity(0.20)
+                    ? AppTheme.missed.withValues(alpha: 0.20)
                     : AppTheme.surfaceLight,
                 shape: BoxShape.circle,
                 border: Border.all(

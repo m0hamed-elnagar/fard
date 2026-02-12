@@ -33,7 +33,7 @@ class MissedDaysDialog extends StatelessWidget {
               width: 56.0,
               height: 56.0,
               decoration: BoxDecoration(
-                color: AppTheme.accent.withOpacity(0.15),
+                color: AppTheme.accent.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.warning_amber_rounded,

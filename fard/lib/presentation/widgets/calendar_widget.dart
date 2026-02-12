@@ -104,7 +104,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                 },
                 calendarStyle: CalendarStyle(
                   todayDecoration: BoxDecoration(
-                    color: AppTheme.primaryLight.withOpacity(0.30),
+                    color: AppTheme.primaryLight.withValues(alpha: 0.30),
                     shape: BoxShape.circle,
                     border:
                         Border.all(color: AppTheme.primaryLight, width: 2.0),
@@ -122,8 +122,8 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                   weekendTextStyle:
                       const TextStyle(color: AppTheme.textSecondary),
                   outsideTextStyle:
-                      TextStyle(color: AppTheme.textSecondary.withOpacity(0.40)),
-                  cellMargin: const EdgeInsets.all(4.0),
+                  TextStyle(color: AppTheme.textSecondary.withValues(alpha: 0.4)),
+                  cellMargin: const EdgeInsets.all(4),
                   markersMaxCount: 1,
                 ),
                 headerStyle: HeaderStyle(
@@ -169,7 +169,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                                 color: (hasMissed
                                         ? AppTheme.missed
                                         : AppTheme.saved)
-                                    .withOpacity(0.50),
+                                    .withValues(alpha: 0.50),
                                 blurRadius: 4.0,
                               ),
                             ],

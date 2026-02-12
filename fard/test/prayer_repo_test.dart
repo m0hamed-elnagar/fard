@@ -56,14 +56,14 @@ void main() {
     });
 
     test('loadMonth filters records correctly', () async {
-      final Jan1 = DailyRecordEntity(id: '1', dateMillis: DateTime(2024, 1, 1).millisecondsSinceEpoch, missedIndices: [], qadaValues: {});
-      final Jan2 = DailyRecordEntity(id: '2', dateMillis: DateTime(2024, 1, 2).millisecondsSinceEpoch, missedIndices: [], qadaValues: {});
-      final Feb1 = DailyRecordEntity(id: '3', dateMillis: DateTime(2024, 2, 1).millisecondsSinceEpoch, missedIndices: [], qadaValues: {});
+      final jan1 = DailyRecordEntity(id: '1', dateMillis: DateTime(2024, 1, 1).millisecondsSinceEpoch, missedIndices: [], qadaValues: {});
+      final jan2 = DailyRecordEntity(id: '2', dateMillis: DateTime(2024, 1, 2).millisecondsSinceEpoch, missedIndices: [], qadaValues: {});
+      final feb1 = DailyRecordEntity(id: '3', dateMillis: DateTime(2024, 2, 1).millisecondsSinceEpoch, missedIndices: [], qadaValues: {});
 
       when(() => mockBox.toMap()).thenReturn({
-        '1': Jan1,
-        '2': Jan2,
-        '3': Feb1,
+        '1': jan1,
+        '2': jan2,
+        '3': feb1,
       });
 
       final result = await repo.loadMonth(2024, 1);

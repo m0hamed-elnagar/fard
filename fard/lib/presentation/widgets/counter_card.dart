@@ -37,7 +37,7 @@ class _CounterCardState extends State<CounterCard>
           end: Alignment.bottomRight,
           colors: [
             AppTheme.surface,
-            AppTheme.primaryDark.withOpacity(0.15),
+            AppTheme.primaryDark.withValues(alpha: 0.15),
           ],
         ),
         borderRadius: BorderRadius.circular(16.0),
@@ -85,11 +85,11 @@ class _CounterCardState extends State<CounterCard>
                                     horizontal: 8.0, vertical: 2.0),
                                 decoration: BoxDecoration(
                                   color:
-                                      AppTheme.missed.withOpacity(0.15),
+                                      AppTheme.missed.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(8.0),
                                   border: Border.all(
                                       color:
-                                          AppTheme.missed.withOpacity(0.30)),
+                                          AppTheme.missed.withValues(alpha: 0.30)),
                                 ),
                                 child: Text(
                                   '+${widget.todayMissedCount}',
@@ -109,10 +109,10 @@ class _CounterCardState extends State<CounterCard>
                   // Add button
                   Container(
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryLight.withOpacity(0.15),
+                      color: AppTheme.primaryLight.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12.0),
                       border: Border.all(
-                          color: AppTheme.primaryLight.withOpacity(0.30)),
+                          color: AppTheme.primaryLight.withValues(alpha: 0.30)),
                     ),
                     child: IconButton(
                       onPressed: widget.onAddPressed,
