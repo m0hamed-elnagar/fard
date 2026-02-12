@@ -1,0 +1,137 @@
+00:00 +0: loading D:/work/learning/testing/fard/test/prayer_tracker_bloc_test.dart
+00:00 +0: D:/work/learning/testing/fard/test/prayer_tracker_bloc_test.dart: (setUpAll)
+00:00 +0: D:/work/learning/testing/fard/test/prayer_tracker_bloc_test.dart: PrayerTrackerBloc initial state is loading
+00:00 +1: D:/work/learning/testing/fard/test/prayer_tracker_bloc_test.dart: PrayerTrackerBloc emits [loading, loaded, loaded(month)] when Load is added
+00:00 +1 -1: D:/work/learning/testing/fard/test/prayer_tracker_bloc_test.dart: PrayerTrackerBloc emits [loading, loaded, loaded(month)] when Load is added [E]
+  Expected: [
+              _$LoadingImpl:PrayerTrackerState.loading(),
+              <<Instance of 'PrayerTrackerState'> with `first loaded state`: <true>>,
+              <<Instance of 'PrayerTrackerState'> with `second loaded state (month updated)`: <true>>
+            ]
+    Actual: [
+              _$LoadingImpl:PrayerTrackerState.loading(),
+              _$LoadedImpl:PrayerTrackerState.loaded(selectedDate: 2024-01-01 00:00:00.000, missedToday: {}, qadaStatus: {Salaah.fajr: MissedCounter(0), Salaah.dhuhr: MissedCounter(0), Salaah.asr: MissedCounter(0), Salaah.maghrib: MissedCounter(0), Salaah.isha: MissedCounter(0)}, monthRecords: {}, history: [])
+            ]
+     Which: at location [2] is [
+              _$LoadingImpl:PrayerTrackerState.loading(),
+              _$LoadedImpl:PrayerTrackerState.loaded(selectedDate: 2024-01-01 00:00:00.000, missedToday: {}, qadaStatus: {Salaah.fajr: MissedCounter(0), Salaah.dhuhr: MissedCounter(0), Salaah.asr: MissedCounter(0), Salaah.maghrib: MissedCounter(0), Salaah.isha: MissedCounter(0)}, monthRecords: {}, history: [])
+            ] which shorter than expected
+  
+  package:matcher                              expect
+  package:bloc_test/src/bloc_test.dart 220:16  testBloc.<fn>
+  ===== asynchronous gap ===========================
+  dart:async                                   _Completer.completeError
+  package:bloc_test/src/bloc_test.dart 257:43  _runZonedGuarded.<fn>
+  ===== asynchronous gap ===========================
+  dart:async                                   _CustomZone.registerBinaryCallback
+  package:bloc_test/src/bloc_test.dart 254:5   _runZonedGuarded.<fn>
+  dart:async                                   runZonedGuarded
+  package:bloc_test/src/bloc_test.dart 253:3   _runZonedGuarded
+  package:bloc_test/src/bloc_test.dart 200:11  testBloc
+  package:bloc_test/src/bloc_test.dart 156:13  blocTest.<fn>
+  
+00:00 +1 -1: D:/work/learning/testing/fard/test/prayer_tracker_bloc_test.dart: PrayerTrackerBloc calls deleteRecord on repo and reloads month on DeleteRecord event
+00:00 +1 -2: D:/work/learning/testing/fard/test/prayer_tracker_bloc_test.dart: PrayerTrackerBloc calls deleteRecord on repo and reloads month on DeleteRecord event [E]
+  Expected: <1>
+    Actual: <2>
+  Unexpected number of calls
+  
+  package:matcher                              expect
+  package:mocktail/src/mocktail.dart 595:5     VerificationResult.called
+  test\prayer_tracker_bloc_test.dart 78:61     main.<fn>.<fn>
+  package:bloc_test/src/bloc_test.dart 230:21  testBloc.<fn>
+  ===== asynchronous gap ===========================
+  dart:async                                   _Completer.completeError
+  package:bloc_test/src/bloc_test.dart 257:43  _runZonedGuarded.<fn>
+  ===== asynchronous gap ===========================
+  dart:async                                   _CustomZone.registerBinaryCallback
+  package:bloc_test/src/bloc_test.dart 254:5   _runZonedGuarded.<fn>
+  dart:async                                   runZonedGuarded
+  package:bloc_test/src/bloc_test.dart 253:3   _runZonedGuarded
+  package:bloc_test/src/bloc_test.dart 200:11  testBloc
+  package:bloc_test/src/bloc_test.dart 156:13  blocTest.<fn>
+  
+00:00 +1 -2: D:/work/learning/testing/fard/test/prayer_tracker_bloc_test.dart: (tearDownAll)
+00:00 +1 -2: D:/work/learning/testing/fard/test/widget_test.dart: HomeScreen renders key components
+00:00 +1 -3: D:/work/learning/testing/fard/test/widget_test.dart: HomeScreen renders key components [E]
+  Bad state: A test tried to use `any` or `captureAny` on a parameter of type `DailyRecord`, but
+  registerFallbackValue was not previously called to register a fallback value for `DailyRecord`.
+  
+  To fix, do:
+  
+  ```
+  void main() {
+    setUpAll(() {
+      registerFallbackValue(/* create a dummy instance of `DailyRecord` */);
+    });
+  }
+  ```
+  
+  This instance of `DailyRecord` will only be passed around, but never be interacted with.
+  Therefore, if `DailyRecord` is a function, it does not have to return a valid object and
+  could throw unconditionally.
+  If you cannot easily create an instance of `DailyRecord`, consider defining a `Fake`:
+  
+  ```
+  class MyTypeFake extends Fake implements MyType {}
+  
+  void main() {
+    setUpAll(() {
+      registerFallbackValue(MyTypeFake());
+    });
+  }
+  ```
+  
+  Fallbacks are required because mocktail has to know of a valid `DailyRecord` to prevent
+  TypeErrors from being thrown in Dart's sound null safe mode, while still
+  providing a convenient syntax.
+  
+  package:mocktail/src/_register_matcher.dart 49:5    _getFallbackValue
+  package:mocktail/src/_register_matcher.dart 160:25  _registerMatcher
+  package:mocktail/src/_register_matcher.dart 104:10  any
+  test\widget_test.dart 22:31                         main.<fn>.<fn>
+  package:mocktail/src/mocktail.dart 211:9            when.<fn>
+  test\widget_test.dart 22:9                          main.<fn>
+  
+00:00 +1 -3: D:/work/learning/testing/fard/test/widget_test.dart: Tapping Add button opens dialog
+00:00 +1 -4: D:/work/learning/testing/fard/test/widget_test.dart: Tapping Add button opens dialog [E]
+  Bad state: A test tried to use `any` or `captureAny` on a parameter of type `DailyRecord`, but
+  registerFallbackValue was not previously called to register a fallback value for `DailyRecord`.
+  
+  To fix, do:
+  
+  ```
+  void main() {
+    setUpAll(() {
+      registerFallbackValue(/* create a dummy instance of `DailyRecord` */);
+    });
+  }
+  ```
+  
+  This instance of `DailyRecord` will only be passed around, but never be interacted with.
+  Therefore, if `DailyRecord` is a function, it does not have to return a valid object and
+  could throw unconditionally.
+  If you cannot easily create an instance of `DailyRecord`, consider defining a `Fake`:
+  
+  ```
+  class MyTypeFake extends Fake implements MyType {}
+  
+  void main() {
+    setUpAll(() {
+      registerFallbackValue(MyTypeFake());
+    });
+  }
+  ```
+  
+  Fallbacks are required because mocktail has to know of a valid `DailyRecord` to prevent
+  TypeErrors from being thrown in Dart's sound null safe mode, while still
+  providing a convenient syntax.
+  
+  package:mocktail/src/_register_matcher.dart 49:5    _getFallbackValue
+  package:mocktail/src/_register_matcher.dart 160:25  _registerMatcher
+  package:mocktail/src/_register_matcher.dart 104:10  any
+  test\widget_test.dart 22:31                         main.<fn>.<fn>
+  package:mocktail/src/mocktail.dart 211:9            when.<fn>
+  test\widget_test.dart 22:9                          main.<fn>
+  
+00:00 +1 -4: Some tests failed.

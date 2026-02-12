@@ -1,0 +1,8 @@
+Analyzing lib...
+
+  error - presentation\screens\home_screen.dart:77:51 - Undefined class '_Loaded'. Try changing the name to the name of an existing class, or creating a class with the name '_Loaded'. - undefined_class
+   info - data\entities\daily_record_entity.dart:1:8 - The imported package 'hive' isn't a dependency of the importing package. Try adding a dependency for 'hive' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - data\repo\prayer_repo_impl.dart:1:8 - The imported package 'hive' isn't a dependency of the importing package. Try adding a dependency for 'hive' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - presentation\widgets\history_list.dart:74:35 - Unnecessary use of multiple underscores. Try using '_'. - unnecessary_underscores
+
+4 issues found.

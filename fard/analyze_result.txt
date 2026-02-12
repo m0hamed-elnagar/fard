@@ -1,0 +1,8 @@
+Analyzing lib...
+
+  error - presentation\blocs\prayer_tracker\prayer_tracker_bloc.dart:25:8 - The name '_DeleteRecord' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named '_DeleteRecord'. - non_type_as_type_argument
+  error - presentation\blocs\prayer_tracker\prayer_tracker_bloc.dart:29:7 - Undefined class '_DeleteRecord'. Try changing the name to the name of an existing class, or creating a class with the name '_DeleteRecord'. - undefined_class
+  error - presentation\blocs\prayer_tracker\prayer_tracker_event.dart:18:66 - The name '_DeleteRecord' isn't a type and can't be used in a redirected constructor. Try redirecting to a different constructor. - redirect_to_non_class
+   info - presentation\widgets\history_list.dart:75:37 - Unnecessary use of multiple underscores. Try using '_'. - unnecessary_underscores
+
+4 issues found.
