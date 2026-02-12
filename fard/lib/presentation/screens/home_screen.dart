@@ -62,12 +62,12 @@ class _HomeBody extends StatelessWidget {
         return state.when(
           loading: () => const Scaffold(
             body: Center(
-              child: CircularProgressIndicator(color: AppTheme.primaryLight),
+              child: CircularProgressIndicator(color: AppTheme.primaryLight, strokeWidth: 4.0),
             ),
           ),
           missedDaysPrompt: (_) => const Scaffold(
             body: Center(
-              child: CircularProgressIndicator(color: AppTheme.accent),
+              child: CircularProgressIndicator(color: AppTheme.accent, strokeWidth: 4.0),
             ),
           ),
           loaded: (selectedDate, missedToday, qadaStatus, monthRecords,
@@ -98,16 +98,17 @@ class _HomeBody extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
           slivers: [
             // App bar
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 8.0),
                 child: Row(
                   children: [
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: 40.0,
+                      height: 40.0,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [
@@ -115,29 +116,28 @@ class _HomeBody extends StatelessWidget {
                             AppTheme.primaryDark,
                           ],
                         ),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.0),
                       ),
                       child: const Icon(Icons.mosque_rounded,
-                          color: Colors.white, size: 22),
+                          color: Colors.white, size: 22.0),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 12.0),
                     Text(
                       'فرض',
                       style: GoogleFonts.amiri(
                         color: AppTheme.textPrimary,
-                        fontSize: 26,
+                        fontSize: 26.0,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const Spacer(),
-                    // Save button removed (Auto-Save enabled)
                   ],
                 ),
               ),
             ),
             // Calendar
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
               sliver: SliverToBoxAdapter(
                 child: CalendarWidget(
                   selectedDate: selectedDate,
@@ -152,7 +152,7 @@ class _HomeBody extends StatelessWidget {
             // Counter card
             SliverPadding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
               sliver: SliverToBoxAdapter(
                 child: CounterCard(
                   qadaStatus: qadaStatus,
@@ -171,13 +171,13 @@ class _HomeBody extends StatelessWidget {
             ),
             // Section header
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 8.0),
               sliver: SliverToBoxAdapter(
                 child: Text(
                   'صلوات اليوم',
                   style: GoogleFonts.amiri(
                     color: AppTheme.textPrimary,
-                    fontSize: 18,
+                    fontSize: 18.0,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -185,7 +185,7 @@ class _HomeBody extends StatelessWidget {
             ),
             // Salaah list
             SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
@@ -208,7 +208,7 @@ class _HomeBody extends StatelessWidget {
             ),
             // History section
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 24.0),
               sliver: SliverToBoxAdapter(
                 child: HistoryList(
                   records: history,

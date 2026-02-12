@@ -25,16 +25,16 @@ class SalaahTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      margin: const EdgeInsets.only(bottom: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
       decoration: BoxDecoration(
         color: isMissedToday
-            ? AppTheme.missed.withValues(alpha: 0.08)
+            ? AppTheme.missed.withOpacity(0.08)
             : AppTheme.surface,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.0),
         border: Border.all(
           color: isMissedToday
-              ? AppTheme.missed.withValues(alpha: 0.3)
+              ? AppTheme.missed.withOpacity(0.30)
               : AppTheme.cardBorder,
         ),
       ),
@@ -45,28 +45,28 @@ class SalaahTile extends StatelessWidget {
             onTap: onToggleMissed,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              width: 36,
-              height: 36,
+              width: 36.0,
+              height: 36.0,
               decoration: BoxDecoration(
                 color: isMissedToday
-                    ? AppTheme.missed.withValues(alpha: 0.2)
+                    ? AppTheme.missed.withOpacity(0.20)
                     : AppTheme.surfaceLight,
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isMissedToday
                       ? AppTheme.missed
                       : AppTheme.neutral,
-                  width: 2,
+                  width: 2.0,
                 ),
               ),
               child: isMissedToday
                   ? const Icon(Icons.close_rounded,
-                      color: AppTheme.missed, size: 18)
+                      color: AppTheme.missed, size: 18.0)
                   : const Icon(Icons.check_rounded,
-                      color: AppTheme.neutral, size: 18),
+                      color: AppTheme.neutral, size: 18.0),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 12.0),
           // Salaah name
           Expanded(
             child: Column(
@@ -76,7 +76,7 @@ class SalaahTile extends StatelessWidget {
                   salaah.label,
                   style: GoogleFonts.amiri(
                     color: AppTheme.textPrimary,
-                    fontSize: 18,
+                    fontSize: 18.0,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -85,7 +85,7 @@ class SalaahTile extends StatelessWidget {
                     'متبقي: $qadaCount',
                     style: GoogleFonts.outfit(
                       color: AppTheme.textSecondary,
-                      fontSize: 12,
+                      fontSize: 12.0,
                     ),
                   ),
               ],
@@ -95,7 +95,7 @@ class SalaahTile extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               color: AppTheme.surfaceLight,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.0),
               border: Border.all(color: AppTheme.cardBorder),
             ),
             child: Row(
@@ -107,8 +107,8 @@ class SalaahTile extends StatelessWidget {
                 ),
                
                 Container(
-                  constraints: const BoxConstraints(minWidth: 40),
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  constraints: const BoxConstraints(minWidth: 40.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   alignment: Alignment.center,
                   child: Text(
                     '$qadaCount',
@@ -116,7 +116,7 @@ class SalaahTile extends StatelessWidget {
                       color: qadaCount > 0
                           ? AppTheme.accent
                           : AppTheme.textSecondary,
-                      fontSize: 18,
+                      fontSize: 18.0,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -145,16 +145,16 @@ class _CounterButton extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(10.0),
         onTap: onPressed,
         child: Padding(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(8.0),
           child: Icon(
             icon,
             color: onPressed != null
                 ? AppTheme.textPrimary
                 : AppTheme.neutral,
-            size: 20,
+            size: 20.0,
           ),
         ),
       ),

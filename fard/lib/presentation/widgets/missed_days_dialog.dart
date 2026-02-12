@@ -15,59 +15,66 @@ class MissedDaysDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      elevation: 0.0,
+      backgroundColor: Colors.transparent,
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 380),
-        padding: const EdgeInsets.all(24),
+        constraints: const BoxConstraints(maxWidth: 380.0),
+        padding: const EdgeInsets.all(24.0),
+        decoration: BoxDecoration(
+          color: AppTheme.surface,
+          borderRadius: BorderRadius.circular(20.0),
+          border: Border.all(color: AppTheme.cardBorder),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Warning icon
             Container(
-              width: 56,
-              height: 56,
+              width: 56.0,
+              height: 56.0,
               decoration: BoxDecoration(
-                color: AppTheme.accent.withValues(alpha: 0.15),
+                color: AppTheme.accent.withOpacity(0.15),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.warning_amber_rounded,
-                  color: AppTheme.accent, size: 32),
+                  color: AppTheme.accent, size: 32.0),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 16.0),
             // Title
             Text(
               'أيام فائتة',
               style: GoogleFonts.amiri(
                 color: AppTheme.textPrimary,
-                fontSize: 22,
+                fontSize: 22.0,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 8.0),
             Text(
               'لم تسجل ${missedDates.length} ${missedDates.length == 1 ? 'يوم' : 'أيام'}',
               style: GoogleFonts.amiri(
                 color: AppTheme.textSecondary,
-                fontSize: 16,
+                fontSize: 16.0,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 8.0),
             // Date range
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
               decoration: BoxDecoration(
                 color: AppTheme.surfaceLight,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(10.0),
               ),
               child: Text(
                 '${_formatDate(missedDates.first)} — ${_formatDate(missedDates.last)}',
                 style: GoogleFonts.outfit(
                   color: AppTheme.textSecondary,
-                  fontSize: 13,
+                  fontSize: 13.0,
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 24.0),
             // Buttons
             Row(
               children: [
@@ -79,17 +86,17 @@ class MissedDaysDialog extends StatelessWidget {
                     },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppTheme.textSecondary,
-                      side: const BorderSide(color: AppTheme.cardBorder),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      side: const BorderSide(color: AppTheme.cardBorder, width: 1.0),
+                      padding: const EdgeInsets.symmetric(vertical: 12.0),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.0),
                       ),
                     ),
                     child: Text('تخطي',
-                        style: GoogleFonts.amiri(fontSize: 15)),
+                        style: GoogleFonts.amiri(fontSize: 15.0)),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 12.0),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
@@ -98,11 +105,16 @@ class MissedDaysDialog extends StatelessWidget {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.missed,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      foregroundColor: Colors.white,
+                      elevation: 0.0,
+                      padding: const EdgeInsets.symmetric(vertical: 12.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
                     ),
                     child: Text('إضافة الكل',
                         style: GoogleFonts.amiri(
-                            fontSize: 15, fontWeight: FontWeight.w700)),
+                            fontSize: 15.0, fontWeight: FontWeight.w700)),
                   ),
                 ),
               ],

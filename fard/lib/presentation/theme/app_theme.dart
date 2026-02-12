@@ -38,31 +38,31 @@ class AppTheme {
       textTheme: GoogleFonts.outfitTextTheme(
         const TextTheme(
           displayLarge: TextStyle(
-              color: textPrimary, fontWeight: FontWeight.w700, fontSize: 32),
+              color: textPrimary, fontWeight: FontWeight.w700, fontSize: 32.0),
           displayMedium: TextStyle(
-              color: textPrimary, fontWeight: FontWeight.w600, fontSize: 28),
+              color: textPrimary, fontWeight: FontWeight.w600, fontSize: 28.0),
           headlineLarge: TextStyle(
-              color: textPrimary, fontWeight: FontWeight.w600, fontSize: 24),
+              color: textPrimary, fontWeight: FontWeight.w600, fontSize: 24.0),
           headlineMedium: TextStyle(
-              color: textPrimary, fontWeight: FontWeight.w500, fontSize: 20),
+              color: textPrimary, fontWeight: FontWeight.w500, fontSize: 20.0),
           titleLarge: TextStyle(
-              color: textPrimary, fontWeight: FontWeight.w600, fontSize: 18),
+              color: textPrimary, fontWeight: FontWeight.w600, fontSize: 18.0),
           titleMedium: TextStyle(
-              color: textPrimary, fontWeight: FontWeight.w500, fontSize: 16),
+              color: textPrimary, fontWeight: FontWeight.w500, fontSize: 16.0),
           bodyLarge:
-              TextStyle(color: textPrimary, fontWeight: FontWeight.w400, fontSize: 16),
+              TextStyle(color: textPrimary, fontWeight: FontWeight.w400, fontSize: 16.0),
           bodyMedium:
-              TextStyle(color: textSecondary, fontWeight: FontWeight.w400, fontSize: 14),
+              TextStyle(color: textSecondary, fontWeight: FontWeight.w400, fontSize: 14.0),
           labelLarge:
-              TextStyle(color: textPrimary, fontWeight: FontWeight.w500, fontSize: 14),
+              TextStyle(color: textPrimary, fontWeight: FontWeight.w500, fontSize: 14.0),
         ),
       ),
       cardTheme: CardThemeData(
         color: surface,
-        elevation: 0,
+        elevation: 0.0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: cardBorder, width: 1),
+          borderRadius: BorderRadius.circular(16.0),
+          side: const BorderSide(color: cardBorder, width: 1.0),
         ),
       ),
       expansionTileTheme: const ExpansionTileThemeData(
@@ -71,22 +71,22 @@ class AppTheme {
         iconColor: textSecondary,
         collapsedIconColor: textSecondary,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16)),
-          side: BorderSide(color: cardBorder, width: 1),
+          borderRadius: BorderRadius.all(Radius.circular(16.0)),
+          side: BorderSide(color: cardBorder, width: 1.0),
         ),
         collapsedShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16)),
-          side: BorderSide(color: cardBorder, width: 1),
+          borderRadius: BorderRadius.all(Radius.circular(16.0)),
+          side: BorderSide(color: cardBorder, width: 1.0),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryLight,
           foregroundColor: Colors.white,
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          elevation: 0.0,
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 14.0),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.0),
           ),
         ),
       ),
@@ -97,9 +97,10 @@ class AppTheme {
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: surface,
+        elevation: 0.0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: cardBorder, width: 1),
+          borderRadius: BorderRadius.circular(20.0),
+          side: const BorderSide(color: cardBorder, width: 1.0),
         ),
       ),
       tabBarTheme: TabBarThemeData(
@@ -107,13 +108,13 @@ class AppTheme {
         unselectedLabelColor: textSecondary,
         indicatorColor: accent,
         dividerColor: cardBorder,
-        labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 14),
+        labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 14.0),
         unselectedLabelStyle:
-            GoogleFonts.outfit(fontWeight: FontWeight.w400, fontSize: 14),
+            GoogleFonts.outfit(fontWeight: FontWeight.w400, fontSize: 14.0),
       ),
       dividerTheme: const DividerThemeData(
         color: cardBorder,
-        thickness: 1,
+        thickness: 1.0,
       ),
     );
   }

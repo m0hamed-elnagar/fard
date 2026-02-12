@@ -40,9 +40,16 @@ class _AddQadaDialogState extends State<AddQadaDialog>
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      elevation: 0.0,
+      backgroundColor: Colors.transparent,
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 400, maxHeight: 500),
-        padding: const EdgeInsets.all(20),
+        constraints: const BoxConstraints(maxWidth: 400.0, maxHeight: 500.0),
+        padding: const EdgeInsets.all(20.0),
+        decoration: BoxDecoration(
+          color: AppTheme.surface,
+          borderRadius: BorderRadius.circular(20.0),
+          border: Border.all(color: AppTheme.cardBorder),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -51,39 +58,41 @@ class _AddQadaDialogState extends State<AddQadaDialog>
               'إضافة قضاء',
               style: GoogleFonts.amiri(
                 color: AppTheme.textPrimary,
-                fontSize: 22,
+                fontSize: 22.0,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 16.0),
             // Tabs
             Container(
               decoration: BoxDecoration(
                 color: AppTheme.surfaceLight,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.0),
               ),
               child: TabBar(
                 controller: _tabController,
                 indicator: BoxDecoration(
-                  color: AppTheme.primaryLight.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.primaryLight),
+                  color: AppTheme.primaryLight.withOpacity(0.20),
+                  borderRadius: BorderRadius.circular(12.0),
+                  border: Border.all(color: AppTheme.primaryLight, width: 1.0),
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
                 dividerColor: Colors.transparent,
+                labelColor: AppTheme.accent,
+                unselectedLabelColor: AppTheme.textSecondary,
                 tabs: [
                   Tab(
                     child: Text('بالعدد',
-                        style: GoogleFonts.amiri(fontSize: 14)),
+                        style: GoogleFonts.amiri(fontSize: 14.0)),
                   ),
                   Tab(
                     child: Text('بالوقت',
-                        style: GoogleFonts.amiri(fontSize: 14)),
+                        style: GoogleFonts.amiri(fontSize: 14.0)),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 16.0),
             // Tab content
             Expanded(
               child: TabBarView(
@@ -94,7 +103,7 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 12.0),
             // Actions
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -102,14 +111,17 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: Text('إلغاء',
-                      style: GoogleFonts.amiri(color: AppTheme.textSecondary)),
+                      style: GoogleFonts.amiri(color: AppTheme.textSecondary, fontSize: 15.0)),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 8.0),
                 ElevatedButton(
                   onPressed: _onConfirm,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+                  ),
                   child: Text('إضافة',
                       style: GoogleFonts.amiri(
-                          fontWeight: FontWeight.w700, fontSize: 15)),
+                          fontWeight: FontWeight.w700, fontSize: 15.0)),
                 ),
               ],
             ),
@@ -124,25 +136,25 @@ class _AddQadaDialogState extends State<AddQadaDialog>
       child: Column(
         children: Salaah.values.map((salaah) {
           return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.only(bottom: 12.0),
             child: Row(
               children: [
                 SizedBox(
-                  width: 60,
+                  width: 60.0,
                   child: Text(
                     salaah.label,
                     style: GoogleFonts.amiri(
                       color: AppTheme.textPrimary,
-                      fontSize: 16,
+                      fontSize: 16.0,
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 12.0),
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
                       color: AppTheme.surfaceLight,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10.0),
                       border: Border.all(color: AppTheme.cardBorder),
                     ),
                     child: Row(
@@ -156,7 +168,7 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                               setState(() {});
                             }
                           },
-                          icon: const Icon(Icons.remove_rounded, size: 18),
+                          icon: const Icon(Icons.remove_rounded, size: 18.0),
                           color: AppTheme.textSecondary,
                         ),
                         Expanded(
@@ -166,7 +178,7 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                             keyboardType: TextInputType.number,
                             style: GoogleFonts.outfit(
                               color: AppTheme.accent,
-                              fontSize: 18,
+                              fontSize: 18.0,
                               fontWeight: FontWeight.w600,
                             ),
                             decoration: const InputDecoration(
@@ -183,7 +195,7 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                             _controllers[salaah]!.text = '${val + 1}';
                             setState(() {});
                           },
-                          icon: const Icon(Icons.add_rounded, size: 18),
+                          icon: const Icon(Icons.add_rounded, size: 18.0),
                           color: AppTheme.textSecondary,
                         ),
                       ],
@@ -206,11 +218,11 @@ class _AddQadaDialogState extends State<AddQadaDialog>
             'حدد الفترة لحساب عدد الصلوات',
             style: GoogleFonts.amiri(
               color: AppTheme.textSecondary,
-              fontSize: 14,
+              fontSize: 14.0,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 16.0),
           // From date
           _DatePickerRow(
             label: 'من',
@@ -234,7 +246,7 @@ class _AddQadaDialogState extends State<AddQadaDialog>
               if (picked != null) setState(() => _fromDate = picked);
             },
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 12.0),
           // To date
           _DatePickerRow(
             label: 'إلى',
@@ -258,35 +270,35 @@ class _AddQadaDialogState extends State<AddQadaDialog>
               if (picked != null) setState(() => _toDate = picked);
             },
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 20.0),
           if (_fromDate != null && _toDate != null) ...[
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: AppTheme.accent.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
+                color: AppTheme.accent.withOpacity(0.10),
+                borderRadius: BorderRadius.circular(12.0),
                 border:
-                    Border.all(color: AppTheme.accent.withValues(alpha: 0.3)),
+                    Border.all(color: AppTheme.accent.withOpacity(0.30), width: 1.0),
               ),
               child: Column(
                 children: [
                   Text(
                     'عدد الأيام',
                     style: GoogleFonts.amiri(
-                        color: AppTheme.textSecondary, fontSize: 13),
+                        color: AppTheme.textSecondary, fontSize: 13.0),
                   ),
                   Text(
                     '${_toDate!.difference(_fromDate!).inDays.abs() + 1}',
                     style: GoogleFonts.outfit(
                       color: AppTheme.accent,
-                      fontSize: 28,
+                      fontSize: 28.0,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   Text(
                     'صلاة لكل فرض',
                     style: GoogleFonts.amiri(
-                        color: AppTheme.textSecondary, fontSize: 13),
+                        color: AppTheme.textSecondary, fontSize: 13.0),
                   ),
                 ],
               ),
@@ -335,20 +347,20 @@ class _DatePickerRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onPick,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(12.0),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         decoration: BoxDecoration(
           color: AppTheme.surfaceLight,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.cardBorder),
+          borderRadius: BorderRadius.circular(12.0),
+          border: Border.all(color: AppTheme.cardBorder, width: 1.0),
         ),
         child: Row(
           children: [
             Text(
               label,
               style: GoogleFonts.amiri(
-                  color: AppTheme.textSecondary, fontSize: 15),
+                  color: AppTheme.textSecondary, fontSize: 15.0),
             ),
             const Spacer(),
             Text(
@@ -359,12 +371,12 @@ class _DatePickerRow extends StatelessWidget {
                 color: date != null
                     ? AppTheme.textPrimary
                     : AppTheme.textSecondary,
-                fontSize: 14,
+                fontSize: 14.0,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 8.0),
             const Icon(Icons.calendar_today_rounded,
-                color: AppTheme.textSecondary, size: 18),
+                color: AppTheme.textSecondary, size: 18.0),
           ],
         ),
       ),

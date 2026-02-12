@@ -41,29 +41,29 @@ class _CalendarWidgetState extends State<CalendarWidget> {
       curve: Curves.easeInOut,
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.cardBorder),
+        borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: AppTheme.cardBorder, width: 1.0),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Header — always visible
           InkWell(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16.0),
             onTap: () => setState(() => _isExpanded = !_isExpanded),
             child: Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
               child: Row(
                 children: [
                   const Icon(Icons.calendar_month_rounded,
-                      color: AppTheme.accent, size: 22),
-                  const SizedBox(width: 12),
+                      color: AppTheme.accent, size: 22.0),
+                  const SizedBox(width: 12.0),
                   Text(
                     'التقويم',
                     style: GoogleFonts.amiri(
                       color: AppTheme.textPrimary,
-                      fontSize: 18,
+                      fontSize: 18.0,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -72,7 +72,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                     turns: _isExpanded ? 0.5 : 0.0,
                     duration: const Duration(milliseconds: 200),
                     child: const Icon(Icons.keyboard_arrow_down_rounded,
-                        color: AppTheme.textSecondary),
+                        color: AppTheme.textSecondary, size: 24.0),
                   ),
                 ],
               ),
@@ -87,7 +87,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
             firstChild: const SizedBox.shrink(),
             secondChild: Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
               child: TableCalendar(
                 firstDay: DateTime(2020, 1, 1),
                 lastDay: DateTime(2030, 12, 31),
@@ -104,10 +104,10 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                 },
                 calendarStyle: CalendarStyle(
                   todayDecoration: BoxDecoration(
-                    color: AppTheme.primaryLight.withValues(alpha: 0.3),
+                    color: AppTheme.primaryLight.withOpacity(0.30),
                     shape: BoxShape.circle,
                     border:
-                        Border.all(color: AppTheme.primaryLight, width: 2),
+                        Border.all(color: AppTheme.primaryLight, width: 2.0),
                   ),
                   todayTextStyle:
                       const TextStyle(color: AppTheme.textPrimary),
@@ -122,8 +122,8 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                   weekendTextStyle:
                       const TextStyle(color: AppTheme.textSecondary),
                   outsideTextStyle:
-                      TextStyle(color: AppTheme.textSecondary.withValues(alpha: 0.4)),
-                  cellMargin: const EdgeInsets.all(4),
+                      TextStyle(color: AppTheme.textSecondary.withOpacity(0.40)),
+                  cellMargin: const EdgeInsets.all(4.0),
                   markersMaxCount: 1,
                 ),
                 headerStyle: HeaderStyle(
@@ -131,21 +131,23 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                   titleCentered: true,
                   titleTextStyle: GoogleFonts.outfit(
                     color: AppTheme.textPrimary,
-                    fontSize: 16,
+                    fontSize: 16.0,
                     fontWeight: FontWeight.w600,
                   ),
                   leftChevronIcon: const Icon(
                       Icons.chevron_left_rounded,
-                      color: AppTheme.textSecondary),
+                      color: AppTheme.textSecondary,
+                      size: 24.0),
                   rightChevronIcon: const Icon(
                       Icons.chevron_right_rounded,
-                      color: AppTheme.textSecondary),
+                      color: AppTheme.textSecondary,
+                      size: 24.0),
                 ),
                 daysOfWeekStyle: DaysOfWeekStyle(
                   weekdayStyle: GoogleFonts.outfit(
-                      color: AppTheme.textSecondary, fontSize: 12),
+                      color: AppTheme.textSecondary, fontSize: 12.0),
                   weekendStyle: GoogleFonts.outfit(
-                      color: AppTheme.textSecondary, fontSize: 12),
+                      color: AppTheme.textSecondary, fontSize: 12.0),
                 ),
                 calendarBuilders: CalendarBuilders(
                   markerBuilder: (context, date, events) {
@@ -154,10 +156,10 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                     if (record != null) {
                       final hasMissed = record.missedToday.isNotEmpty;
                       return Positioned(
-                        bottom: 4,
+                        bottom: 4.0,
                         child: Container(
-                          width: 6,
-                          height: 6,
+                          width: 6.0,
+                          height: 6.0,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color:
@@ -167,8 +169,8 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                                 color: (hasMissed
                                         ? AppTheme.missed
                                         : AppTheme.saved)
-                                    .withValues(alpha: 0.5),
-                                blurRadius: 4,
+                                    .withOpacity(0.50),
+                                blurRadius: 4.0,
                               ),
                             ],
                           ),

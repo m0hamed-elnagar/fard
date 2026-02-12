@@ -77,19 +77,40 @@ void main() {
         selectedDate: date,
         missedToday: {},
         qadaStatus: {for (var s in Salaah.values) s: const MissedCounter(0)},
-        monthRecords: {},
-        history: [],
+        monthRecords: {
+          date: DailyRecord(
+            id: 'dummy',
+            date: date,
+            missedToday: {},
+            qada: {},
+          )
+        },
+        history: [
+          DailyRecord(
+            id: 'dummy',
+            date: date,
+            missedToday: {},
+            qada: {},
+          )
+        ],
       ),
       act: (bloc) => bloc.add(PrayerTrackerEvent.deleteRecord(date)),
       verify: (_) {
         verify(() => repo.deleteRecord(date)).called(1);
-        verify(() => repo.loadMonth(date.year, date.month)).called(2);
+        verify(() => repo.loadMonth(date.year, date.month)).called(1);
       },
       expect: () => [
-        isA<PrayerTrackerState>(), // Month reload from delete
-        isA<PrayerTrackerState>(), // Loading from load(date)
-        isA<PrayerTrackerState>(), // Loaded from load(date)
-        isA<PrayerTrackerState>(), // Month reload from load(date)
+        isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(
+                loaded: (l) => l.history.isEmpty, orElse: () => false),
+            'optimistic delete',
+            true),
+        const PrayerTrackerState.loading(),
+        isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(loaded: (_) => true, orElse: () => false),
+            'loaded after refresh',
+            true),
+        isA<PrayerTrackerState>(), // loaded with month
       ],
     );
   });
