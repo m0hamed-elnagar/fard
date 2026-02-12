@@ -1,93 +1,42 @@
 00:00 +0: loading D:/work/learning/testing/fard/test/prayer_tracker_bloc_test.dart
-lib/presentation/blocs/prayer_tracker/prayer_tracker_bloc.dart:29:7: Error: Type '_DeleteRecord' not found.
-      _DeleteRecord e, Emitter<PrayerTrackerState> em) async {
-      ^^^^^^^^^^^^^
-test/prayer_tracker_bloc_test.dart:12:47: Error: The class 'DailyRecord' can't be implemented outside of its library because it's a final class.
-class FakeDailyRecord extends Fake implements DailyRecord {}
-                                              ^
-lib/presentation/blocs/prayer_tracker/prayer_tracker_event.dart:18:66: Error: Couldn't find constructor '_DeleteRecord'.
-  const factory PrayerTrackerEvent.deleteRecord(DateTime date) = _DeleteRecord;
-                                                                 ^
-lib/presentation/blocs/prayer_tracker/prayer_tracker_event.dart:18:66: Error: Redirection constructor target not found: '_DeleteRecord'
-  const factory PrayerTrackerEvent.deleteRecord(DateTime date) = _DeleteRecord;
-                                                                 ^
-lib/presentation/blocs/prayer_tracker/prayer_tracker_bloc.dart:25:8: Error: '_DeleteRecord' isn't a type.
-    on<_DeleteRecord>(_onDeleteRecord);
-       ^^^^^^^^^^^^^
-lib/presentation/blocs/prayer_tracker/prayer_tracker_bloc.dart:29:7: Error: '_DeleteRecord' isn't a type.
-      _DeleteRecord e, Emitter<PrayerTrackerState> em) async {
-      ^^^^^^^^^^^^^
-00:00 +0 -1: loading D:/work/learning/testing/fard/test/prayer_tracker_bloc_test.dart [E]
-  Failed to load "D:/work/learning/testing/fard/test/prayer_tracker_bloc_test.dart":
-  Compilation failed for testPath=D:/work/learning/testing/fard/test/prayer_tracker_bloc_test.dart: lib/presentation/blocs/prayer_tracker/prayer_tracker_bloc.dart:29:7: Error: Type '_DeleteRecord' not found.
-        _DeleteRecord e, Emitter<PrayerTrackerState> em) async {
-        ^^^^^^^^^^^^^
-  test/prayer_tracker_bloc_test.dart:12:47: Error: The class 'DailyRecord' can't be implemented outside of its library because it's a final class.
-  class FakeDailyRecord extends Fake implements DailyRecord {}
-                                                ^
-  lib/presentation/blocs/prayer_tracker/prayer_tracker_event.dart:18:66: Error: Couldn't find constructor '_DeleteRecord'.
-    const factory PrayerTrackerEvent.deleteRecord(DateTime date) = _DeleteRecord;
-                                                                   ^
-  lib/presentation/blocs/prayer_tracker/prayer_tracker_event.dart:18:66: Error: Redirection constructor target not found: '_DeleteRecord'
-    const factory PrayerTrackerEvent.deleteRecord(DateTime date) = _DeleteRecord;
-                                                                   ^
-  lib/presentation/blocs/prayer_tracker/prayer_tracker_bloc.dart:25:8: Error: '_DeleteRecord' isn't a type.
-      on<_DeleteRecord>(_onDeleteRecord);
-         ^^^^^^^^^^^^^
-  lib/presentation/blocs/prayer_tracker/prayer_tracker_bloc.dart:29:7: Error: '_DeleteRecord' isn't a type.
-        _DeleteRecord e, Emitter<PrayerTrackerState> em) async {
-        ^^^^^^^^^^^^^
-  .
-  Error: The Dart compiler exited unexpectedly.
-  package:flutter_tools/src/base/common.dart 34:3  throwToolExit
-  package:flutter_tools/src/compile.dart 911:11    DefaultResidentCompiler._compile.<fn>
-  dart:async/zone.dart 1538:47                     _rootRunUnary
-  dart:async/zone.dart 1429:19                     _CustomZone.runUnary
-  dart:async/future_impl.dart 948:45               Future._propagateToListeners.handleValueCallback
-  dart:async/future_impl.dart 977:13               Future._propagateToListeners
-  dart:async/future_impl.dart 862:9                Future._propagateToListeners
-  dart:async/future_impl.dart 720:5                Future._completeWithValue
-  dart:async/future_impl.dart 804:7                Future._asyncCompleteWithValue.<fn>
-  dart:async/zone.dart 1525:13                     _rootRun
-  dart:async/zone.dart 1422:19                     _CustomZone.run
-  dart:async/zone.dart 1321:7                      _CustomZone.runGuarded
-  dart:async/zone.dart 1362:23                     _CustomZone.bindCallbackGuarded.<fn>
-  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
-  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
-  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
-  dart:isolate-patch/isolate_patch.dart 194:5      _RawReceivePort._handleMessage
+00:00 +0: (setUpAll)
+00:00 +0: PrayerTrackerBloc initial state is loading
+00:00 +1: PrayerTrackerBloc Load Event emits [loading, loaded(initial), loaded(withMonth)]
+00:00 +2: PrayerTrackerBloc Management Actions TogglePrayer: optimistic update followed by sync reload
+00:00 +3: PrayerTrackerBloc Management Actions AddQada: optimistic update followed by sync reload
+00:00 +4: PrayerTrackerBloc Deletion optimistic deletion clears history before reloading
+00:00 +4 -1: PrayerTrackerBloc Deletion optimistic deletion clears history before reloading [E]
+  Expected: [
+              <<Instance of 'PrayerTrackerState'> with `optimistic removal`: <true>>,
+              _$LoadingImpl:PrayerTrackerState.loading(),
+              <<Instance of 'PrayerTrackerState'> with `loaded initial`: <true>>,
+              <<Instance of 'PrayerTrackerState'>>
+            ]
+    Actual: [
+              _$LoadedImpl:PrayerTrackerState.loaded(selectedDate: 2024-01-01 00:00:00.000, missedToday: {}, qadaStatus: {Salaah.fajr: MissedCounter(0), Salaah.dhuhr: MissedCounter(0), Salaah.asr: MissedCounter(0), Salaah.maghrib: MissedCounter(0), Salaah.isha: MissedCounter(0)}, monthRecords: {}, history: []),
+              _$LoadingImpl:PrayerTrackerState.loading(),
+              _$LoadedImpl:PrayerTrackerState.loaded(selectedDate: 2024-01-01 00:00:00.000, missedToday: {}, qadaStatus: {Salaah.fajr: MissedCounter(0), Salaah.dhuhr: MissedCounter(0), Salaah.asr: MissedCounter(0), Salaah.maghrib: MissedCounter(0), Salaah.isha: MissedCounter(0)}, monthRecords: {}, history: [])
+            ]
+     Which: at location [3] is [
+              _$LoadedImpl:PrayerTrackerState.loaded(selectedDate: 2024-01-01 00:00:00.000, missedToday: {}, qadaStatus: {Salaah.fajr: MissedCounter(0), Salaah.dhuhr: MissedCounter(0), Salaah.asr: MissedCounter(0), Salaah.maghrib: MissedCounter(0), Salaah.isha: MissedCounter(0)}, monthRecords: {}, history: []),
+              _$LoadingImpl:PrayerTrackerState.loading(),
+              _$LoadedImpl:PrayerTrackerState.loaded(selectedDate: 2024-01-01 00:00:00.000, missedToday: {}, qadaStatus: {Salaah.fajr: MissedCounter(0), Salaah.dhuhr: MissedCounter(0), Salaah.asr: MissedCounter(0), Salaah.maghrib: MissedCounter(0), Salaah.isha: MissedCounter(0)}, monthRecords: {}, history: [])
+            ] which shorter than expected
   
-lib/presentation/blocs/prayer_tracker/prayer_tracker_bloc.dart:29:7: Error: Type '_DeleteRecord' not found.
-      _DeleteRecord e, Emitter<PrayerTrackerState> em) async {
-      ^^^^^^^^^^^^^
-lib/presentation/blocs/prayer_tracker/prayer_tracker_event.dart:18:66: Error: Couldn't find constructor '_DeleteRecord'.
-  const factory PrayerTrackerEvent.deleteRecord(DateTime date) = _DeleteRecord;
-                                                                 ^
-lib/presentation/blocs/prayer_tracker/prayer_tracker_event.dart:18:66: Error: Redirection constructor target not found: '_DeleteRecord'
-  const factory PrayerTrackerEvent.deleteRecord(DateTime date) = _DeleteRecord;
-                                                                 ^
-lib/presentation/blocs/prayer_tracker/prayer_tracker_bloc.dart:25:8: Error: '_DeleteRecord' isn't a type.
-    on<_DeleteRecord>(_onDeleteRecord);
-       ^^^^^^^^^^^^^
-lib/presentation/blocs/prayer_tracker/prayer_tracker_bloc.dart:29:7: Error: '_DeleteRecord' isn't a type.
-      _DeleteRecord e, Emitter<PrayerTrackerState> em) async {
-      ^^^^^^^^^^^^^
-00:00 +0 -2: loading D:/work/learning/testing/fard/test/widget_test.dart [E]
-  Failed to load "D:/work/learning/testing/fard/test/widget_test.dart":
-  Compilation failed for testPath=D:/work/learning/testing/fard/test/widget_test.dart: lib/presentation/blocs/prayer_tracker/prayer_tracker_bloc.dart:29:7: Error: Type '_DeleteRecord' not found.
-        _DeleteRecord e, Emitter<PrayerTrackerState> em) async {
-        ^^^^^^^^^^^^^
-  lib/presentation/blocs/prayer_tracker/prayer_tracker_event.dart:18:66: Error: Couldn't find constructor '_DeleteRecord'.
-    const factory PrayerTrackerEvent.deleteRecord(DateTime date) = _DeleteRecord;
-                                                                   ^
-  lib/presentation/blocs/prayer_tracker/prayer_tracker_event.dart:18:66: Error: Redirection constructor target not found: '_DeleteRecord'
-    const factory PrayerTrackerEvent.deleteRecord(DateTime date) = _DeleteRecord;
-                                                                   ^
-  lib/presentation/blocs/prayer_tracker/prayer_tracker_bloc.dart:25:8: Error: '_DeleteRecord' isn't a type.
-      on<_DeleteRecord>(_onDeleteRecord);
-         ^^^^^^^^^^^^^
-  lib/presentation/blocs/prayer_tracker/prayer_tracker_bloc.dart:29:7: Error: '_DeleteRecord' isn't a type.
-        _DeleteRecord e, Emitter<PrayerTrackerState> em) async {
-        ^^^^^^^^^^^^^
-  .
-00:00 +0 -2: Some tests failed.
+  package:matcher                              expect
+  package:bloc_test/src/bloc_test.dart 220:16  testBloc.<fn>
+  ===== asynchronous gap ===========================
+  dart:async                                   _Completer.completeError
+  package:bloc_test/src/bloc_test.dart 257:43  _runZonedGuarded.<fn>
+  ===== asynchronous gap ===========================
+  dart:async                                   _CustomZone.registerBinaryCallback
+  package:bloc_test/src/bloc_test.dart 254:5   _runZonedGuarded.<fn>
+  dart:async                                   runZonedGuarded
+  package:bloc_test/src/bloc_test.dart 253:3   _runZonedGuarded
+  package:bloc_test/src/bloc_test.dart 200:11  testBloc
+  package:bloc_test/src/bloc_test.dart 156:13  blocTest.<fn>
+  
+00:00 +4 -1: PrayerTrackerBloc Missed Days Flow emits missedDaysPrompt when needed
+00:00 +5 -1: PrayerTrackerBloc Missed Days Flow Acknowledge: reloads and emits expected states
+00:00 +6 -1: (tearDownAll)
+00:00 +6 -1: Some tests failed.

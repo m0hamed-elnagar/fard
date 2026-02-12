@@ -27,22 +27,24 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
 
   Future<void> _onDeleteRecord(
       _DeleteRecord e, Emitter<PrayerTrackerState> em) async {
-    await _repo.deleteRecord(e.date);
     if (state is _Loaded) {
       final s = state as _Loaded;
-      // Refresh month list
-      final month =
-          await _repo.loadMonth(s.selectedDate.year, s.selectedDate.month);
-      final history = month.values.toList()
-        ..sort((a, b) => b.date.compareTo(a.date));
-      em(s.copyWith(monthRecords: month, history: history));
+      final dateKey = DateTime(e.date.year, e.date.month, e.date.day);
 
-      // Reload current day if it matches the deleted date
-      if (s.selectedDate.year == e.date.year &&
-          s.selectedDate.month == e.date.month &&
-          s.selectedDate.day == e.date.day) {
-        add(PrayerTrackerEvent.load(s.selectedDate));
+      // 1. Optimistic Update: Remove from local state immediately
+      final updatedMonth = Map<DateTime, DailyRecord>.from(s.monthRecords);
+      if (updatedMonth.containsKey(dateKey)) {
+        updatedMonth.remove(dateKey);
+        final history = updatedMonth.values.toList()
+          ..sort((a, b) => b.date.compareTo(a.date));
+        em(s.copyWith(monthRecords: updatedMonth, history: history));
       }
+
+      // 2. Perform actual deletion
+      await _repo.deleteRecord(e.date);
+
+      // 3. Trigger reload for current day to refresh counters and ensure DB sync
+      add(PrayerTrackerEvent.load(s.selectedDate));
     }
   }
 

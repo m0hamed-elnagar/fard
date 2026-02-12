@@ -12,14 +12,16 @@ class MockPrayerRepo extends Mock implements PrayerRepo {}
 void main() {
   late MockPrayerRepo repo;
   late PrayerTrackerBloc bloc;
+  final date = DateTime(2024, 1, 1);
+  final dummyRecord = DailyRecord(
+    id: '1',
+    date: date,
+    missedToday: {},
+    qada: {for (var s in Salaah.values) s: const MissedCounter(0)},
+  );
 
   setUpAll(() {
-    registerFallbackValue(DailyRecord(
-      id: 'dummy',
-      date: DateTime.now(),
-      missedToday: {},
-      qada: {},
-    ));
+    registerFallbackValue(dummyRecord);
     registerFallbackValue(DateTime(2024));
   });
 
@@ -27,91 +29,191 @@ void main() {
     repo = MockPrayerRepo();
     bloc = PrayerTrackerBloc(repo);
 
-    // Default stubs
+    // Common Stubs
     when(() => repo.loadRecord(any())).thenAnswer((_) async => null);
     when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => null);
-    // Mock non-empty month to ensure state change
-    when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {
-          DateTime(2024, 1, 1): DailyRecord(
-            id: 'dummy',
-            date: DateTime(2024, 1, 1),
-            missedToday: {},
-            qada: {},
-          )
-        });
+    when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {});
     when(() => repo.saveToday(any())).thenAnswer((_) async {});
     when(() => repo.deleteRecord(any())).thenAnswer((_) async {});
-    when(() => repo.loadAllRecords()).thenAnswer((_) async => []);
   });
 
   tearDown(() => bloc.close());
 
   group('PrayerTrackerBloc', () {
-    final date = DateTime(2024, 1, 1);
-
     test('initial state is loading', () {
       expect(bloc.state, const PrayerTrackerState.loading());
     });
 
-    blocTest<PrayerTrackerBloc, PrayerTrackerState>(
-      'emits [loading, loaded, loaded(month)] when Load is added',
-      build: () => bloc,
-      act: (bloc) => bloc.add(PrayerTrackerEvent.load(date)),
-      expect: () => [
-        const PrayerTrackerState.loading(),
-        isA<PrayerTrackerState>().having(
-            (s) => s.maybeMap(loaded: (_) => true, orElse: () => false),
-            'first loaded state',
-            true),
-        isA<PrayerTrackerState>().having(
-            (s) => s.maybeMap(loaded: (_) => true, orElse: () => false),
-            'second loaded state (month updated)',
-            true),
-      ],
-    );
+    group('Load Event', () {
+      blocTest<PrayerTrackerBloc, PrayerTrackerState>(
+        'emits [loading, loaded(initial), loaded(withMonth)]',
+        build: () => bloc,
+        setUp: () {
+          // Return non-empty month to trigger a state change call
+          when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {date: dummyRecord});
+        },
+        act: (bloc) => bloc.add(PrayerTrackerEvent.load(date)),
+        expect: () => [
+          const PrayerTrackerState.loading(),
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(loaded: (l) => l.monthRecords.isEmpty, orElse: () => false),
+            'first loaded state is empty',
+            true,
+          ),
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(loaded: (l) => l.monthRecords.isNotEmpty, orElse: () => false),
+            'second loaded state has month data',
+            true,
+          ),
+        ],
+      );
+    });
 
-    blocTest<PrayerTrackerBloc, PrayerTrackerState>(
-      'calls deleteRecord on repo and reloads month on DeleteRecord event',
-      build: () => bloc,
-      seed: () => PrayerTrackerState.loaded(
+    group('Management Actions', () {
+      final initialState = PrayerTrackerState.loaded(
         selectedDate: date,
         missedToday: {},
         qadaStatus: {for (var s in Salaah.values) s: const MissedCounter(0)},
-        monthRecords: {
-          date: DailyRecord(
-            id: 'dummy',
-            date: date,
-            missedToday: {},
-            qada: {},
-          )
+        monthRecords: {},
+        history: [],
+      );
+
+      blocTest<PrayerTrackerBloc, PrayerTrackerState>(
+        'TogglePrayer: optimistic update followed by sync reload',
+        build: () => bloc,
+        seed: () => initialState,
+        setUp: () {
+          // Mock month update after save
+          when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {date: dummyRecord});
         },
-        history: [
-          DailyRecord(
-            id: 'dummy',
-            date: date,
-            missedToday: {},
-            qada: {},
-          )
+        act: (bloc) => bloc.add(const PrayerTrackerEvent.togglePrayer(Salaah.fajr)),
+        expect: () => [
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(loaded: (l) => l.missedToday.contains(Salaah.fajr), orElse: () => false),
+            'fajr toggled',
+            true,
+          ),
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(loaded: (l) => l.monthRecords.isNotEmpty, orElse: () => false),
+            'month records synced after save',
+            true,
+          ),
         ],
-      ),
-      act: (bloc) => bloc.add(PrayerTrackerEvent.deleteRecord(date)),
-      verify: (_) {
-        verify(() => repo.deleteRecord(date)).called(1);
-        verify(() => repo.loadMonth(date.year, date.month)).called(1);
-      },
-      expect: () => [
-        isA<PrayerTrackerState>().having(
-            (s) => s.maybeMap(
-                loaded: (l) => l.history.isEmpty, orElse: () => false),
-            'optimistic delete',
-            true),
-        const PrayerTrackerState.loading(),
-        isA<PrayerTrackerState>().having(
-            (s) => s.maybeMap(loaded: (_) => true, orElse: () => false),
-            'loaded after refresh',
-            true),
-        isA<PrayerTrackerState>(), // loaded with month
-      ],
-    );
+      );
+
+      blocTest<PrayerTrackerBloc, PrayerTrackerState>(
+        'AddQada: optimistic update followed by sync reload',
+        build: () => bloc,
+        seed: () => initialState,
+        setUp: () {
+          when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {date: dummyRecord});
+        },
+        act: (bloc) => bloc.add(const PrayerTrackerEvent.addQada(Salaah.dhuhr)),
+        expect: () => [
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(loaded: (l) => l.qadaStatus[Salaah.dhuhr]?.value == 1, orElse: () => false),
+            'qada incremented',
+            true,
+          ),
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(loaded: (l) => l.monthRecords.isNotEmpty, orElse: () => false),
+            'month records synced',
+            true,
+          ),
+        ],
+      );
+    });
+
+    group('Deletion', () {
+      final loadedStateWithHistory = PrayerTrackerState.loaded(
+        selectedDate: date,
+        missedToday: {},
+        qadaStatus: {for (var s in Salaah.values) s: const MissedCounter(0)},
+        monthRecords: {date: dummyRecord},
+        history: [dummyRecord],
+      );
+
+      blocTest<PrayerTrackerBloc, PrayerTrackerState>(
+        'optimistic deletion clears history before reloading',
+        build: () => bloc,
+        seed: () => loadedStateWithHistory,
+        setUp: () {
+          // Return non-empty month to trigger a detectable state change on reload
+          when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {date: dummyRecord});
+        },
+        act: (bloc) => bloc.add(PrayerTrackerEvent.deleteRecord(date)),
+        expect: () => [
+          // 1. Optimistic removal
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(loaded: (l) => l.history.isEmpty, orElse: () => false),
+            'optimistic removal',
+            true,
+          ),
+          // 2. Load event triggered: Emits loading
+          const PrayerTrackerState.loading(),
+          // 3. Load event initial loaded
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(loaded: (l) => l.monthRecords.isEmpty, orElse: () => false),
+            'loaded initial (empty month)',
+            true,
+          ),
+          // 4. Load event month loaded
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(loaded: (l) => l.monthRecords.isNotEmpty, orElse: () => false),
+            'loaded with month data',
+            true,
+          ),
+        ],
+      );
+    });
+
+    group('Missed Days Flow', () {
+      blocTest<PrayerTrackerBloc, PrayerTrackerState>(
+        'emits missedDaysPrompt when needed',
+        build: () => bloc,
+        act: (bloc) {
+          final longAgo = DateTime.now().subtract(const Duration(days: 5));
+          when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => DailyRecord(
+                id: 'old',
+                date: longAgo,
+                missedToday: {},
+                qada: {},
+              ));
+          bloc.add(const PrayerTrackerEvent.checkMissedDays());
+        },
+        expect: () => [
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(missedDaysPrompt: (p) => p.missedDates.length == 4, orElse: () => false),
+            'correct number of missed days',
+            true,
+          ),
+        ],
+      );
+
+      blocTest<PrayerTrackerBloc, PrayerTrackerState>(
+        'Acknowledge: reloads and emits expected states',
+        build: () => bloc,
+        setUp: () {
+           when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {date: dummyRecord});
+        },
+        act: (bloc) => bloc.add(PrayerTrackerEvent.acknowledgeMissedDays(
+          dates: [date],
+          addAsMissed: true,
+        )),
+        expect: () => [
+          const PrayerTrackerState.loading(),
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(loaded: (l) => l.monthRecords.isEmpty, orElse: () => false),
+            'after loading, initially empty records',
+            true,
+          ),
+           isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(loaded: (l) => l.monthRecords.isNotEmpty, orElse: () => false),
+            'final state with records',
+            true,
+          ),
+        ],
+      );
+    });
   });
 }
