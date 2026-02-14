@@ -1,5 +1,4 @@
 import 'package:fard/core/di/injection.dart';
-import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/azkar/presentation/screens/azkar_categories_screen.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/prayer_tracking/presentation/screens/home_screen.dart';
@@ -35,7 +34,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             return bloc;
           },
         ),
-        BlocProvider(create: (_) => getIt<AzkarBloc>()),
       ],
       child: Scaffold(
         body: IndexedStack(

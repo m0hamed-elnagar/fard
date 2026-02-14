@@ -1,4 +1,5 @@
 import 'package:fard/core/di/injection.dart';
+import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/azkar/presentation/screens/main_navigation_screen.dart';
@@ -16,8 +17,11 @@ void main() async {
   final prefs = getIt<SharedPreferences>();
   final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
   runApp(
-    BlocProvider(
-      create: (_) => getIt<SettingsCubit>(),
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => getIt<SettingsCubit>()),
+        BlocProvider(create: (_) => getIt<AzkarBloc>()),
+      ],
       child: QadaTrackerApp(onboardingComplete: onboardingComplete),
     ),
   );

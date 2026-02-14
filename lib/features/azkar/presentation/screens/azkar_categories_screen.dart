@@ -4,8 +4,19 @@ import 'package:google_fonts/google_fonts.dart';
 import '../blocs/azkar_bloc.dart';
 import 'azkar_list_screen.dart';
 
-class AzkarCategoriesScreen extends StatelessWidget {
+class AzkarCategoriesScreen extends StatefulWidget {
   const AzkarCategoriesScreen({super.key});
+
+  @override
+  State<AzkarCategoriesScreen> createState() => _AzkarCategoriesScreenState();
+}
+
+class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<AzkarBloc>().add(const AzkarEvent.loadCategories());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,11 +39,22 @@ class AzkarCategoriesScreen extends StatelessWidget {
                 return _CategoryCard(category: categories[index]);
               },
             ),
-            error: (message) => Center(child: Text(message)),
-            orElse: () {
-              context.read<AzkarBloc>().add(const AzkarEvent.loadCategories());
-              return const SizedBox.shrink();
-            },
+            error: (message) => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                  const SizedBox(height: 16),
+                  Text(message, textAlign: TextAlign.center),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => context.read<AzkarBloc>().add(const AzkarEvent.loadCategories()),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+            orElse: () => const SizedBox.shrink(),
           );
         },
       ),
@@ -59,10 +81,7 @@ class _CategoryCard extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => BlocProvider.value(
-                value: context.read<AzkarBloc>(),
-                child: AzkarListScreen(category: category),
-              ),
+              builder: (context) => AzkarListScreen(category: category),
             ),
           );
         },
