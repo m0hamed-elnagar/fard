@@ -36,7 +36,6 @@ void main() {
       bool addCalled = false;
       bool removeCalled = false;
       bool toggleCalled = false;
-      final testTime = DateTime(2026, 2, 14, 5, 30);
 
       await tester.pumpWidget(createWidgetUnderTest(
         salaah: Salaah.fajr,
@@ -54,6 +53,16 @@ void main() {
       expect(find.text(Salaah.fajr.localizedName(l10n)), findsOneWidget);
       expect(find.text('5'), findsOneWidget);
       expect(find.text('${l10n.remaining}: 5'), findsOneWidget);
+
+      // Test interactions
+      await tester.tap(find.byIcon(Icons.add_rounded));
+      expect(addCalled, isTrue);
+
+      await tester.tap(find.byIcon(Icons.remove_rounded));
+      expect(removeCalled, isTrue);
+
+      await tester.tap(find.byIcon(Icons.close_rounded));
+      expect(toggleCalled, isTrue);
     });
 
     testWidgets('displays prayer time when provided', (WidgetTester tester) async {

@@ -1,4 +1,3 @@
-import 'package:adhan/adhan.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:flutter_test/flutter_test.dart';

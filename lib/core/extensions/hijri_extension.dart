@@ -1,5 +1,4 @@
 import 'package:hijri/hijri_calendar.dart';
-import 'package:intl/intl.dart';
 
 extension HijriDateTimeExtension on DateTime {
   String toHijriDate(String locale) {

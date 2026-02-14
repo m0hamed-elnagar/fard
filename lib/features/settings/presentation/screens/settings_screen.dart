@@ -1,4 +1,3 @@
-import 'package:adhan/adhan.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
@@ -13,7 +12,6 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isRtl = Directionality.of(context) == TextDirection.rtl;
 
     return Scaffold(
       appBar: AppBar(
@@ -147,7 +145,7 @@ class SettingsScreen extends StatelessWidget {
                     trailing: Switch(
                       value: state.locale.languageCode == 'en',
                       onChanged: (_) => context.read<SettingsCubit>().toggleLocale(),
-                      activeColor: AppTheme.accent,
+                      activeThumbColor: AppTheme.accent,
                     ),
                   ),
                 ],

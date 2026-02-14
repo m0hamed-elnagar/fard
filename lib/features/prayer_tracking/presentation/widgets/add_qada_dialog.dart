@@ -1,6 +1,5 @@
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
-import 'package:fard/core/exten'
-    'sions/salaah_extension.dart';
+import 'package:fard/core/extensions/salaah_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
@@ -86,7 +85,7 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                 child: TabBar(
                   controller: _tabController,
                   indicator: BoxDecoration(
-                    color: AppTheme.primaryLight.withOpacity(0.20),
+                    color: AppTheme.primaryLight.withValues(alpha: 0.20),
                     borderRadius: BorderRadius.circular(12.0),
                     border: Border.all(color: AppTheme.primaryLight, width: 1.0),
                   ),
@@ -297,10 +296,10 @@ class _AddQadaDialogState extends State<AddQadaDialog>
             Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: AppTheme.accent.withOpacity(0.10),
+                color: AppTheme.accent.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(12.0),
                 border:
-                    Border.all(color: AppTheme.accent.withOpacity(0.30), width: 1.0),
+                    Border.all(color: AppTheme.accent.withValues(alpha: 0.30), width: 1.0),
               ),
               child: Column(
                 children: [

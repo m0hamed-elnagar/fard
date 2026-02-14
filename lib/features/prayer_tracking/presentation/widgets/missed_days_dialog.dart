@@ -248,7 +248,7 @@ class _CalendarDayItem extends StatelessWidget {
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: AppTheme.accent.withOpacity(0.3),
+                      color: AppTheme.accent.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     )
@@ -273,7 +273,7 @@ class _CalendarDayItem extends StatelessWidget {
               Text(
                 _getMonthName(date.month),
                 style: GoogleFonts.outfit(
-                  color: isSelected ? Colors.white.withOpacity(0.8) : AppTheme.textSecondary,
+                  color: isSelected ? Colors.white.withValues(alpha: 0.8) : AppTheme.textSecondary,
                   fontSize: 10.0,
                 ),
               ),

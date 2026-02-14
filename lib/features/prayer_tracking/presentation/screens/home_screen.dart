@@ -12,14 +12,13 @@ import 'package:fard/features/prayer_tracking/presentation/widgets/add_qada_dial
 import 'package:fard/features/prayer_tracking/presentation/widgets/calendar_widget.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/counter_card.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/history_list.dart';
-import 'package:fard/features/prayer_tracking/presentation/widgets/missed_days_dialog.dart'; // Fixed typo if it existed or matched
+import 'package:fard/features/prayer_tracking/presentation/widgets/missed_days_dialog.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/salaah_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_theme.dart';
-import 'package:adhan/adhan.dart';
 import 'package:intl/intl.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -45,30 +44,6 @@ class HomeScreen extends StatelessWidget {
 
 class _HomeBody extends StatelessWidget {
   const _HomeBody();
-...
-}
-
-class _MosqueIcon extends StatelessWidget {
-  const _MosqueIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 40.0,
-      height: 40.0,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            AppTheme.primaryLight,
-            AppTheme.primaryDark,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: const Icon(Icons.mosque_rounded, color: Colors.white, size: 22.0),
-    );
-  }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -371,6 +346,28 @@ class _MosqueIcon extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _MosqueIcon extends StatelessWidget {
+  const _MosqueIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 40.0,
+      height: 40.0,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            AppTheme.primaryLight,
+            AppTheme.primaryDark,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: const Icon(Icons.mosque_rounded, color: Colors.white, size: 22.0),
     );
   }
 }
