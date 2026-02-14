@@ -13,17 +13,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 final getIt = GetIt.instance;
 
-Future<void> configureDependencies() async {
-  await Hive.initFlutter();
+Future<void> configureDependencies({String? hivePath}) async {
+  if (hivePath != null) {
+    Hive.init(hivePath);
+  } else {
+    await Hive.initFlutter();
+  }
   Hive.registerAdapter(DailyRecordEntityAdapter());
 
   final box = await Hive.openBox<DailyRecordEntity>('daily_records');
+  final azkarBox = await Hive.openBox<int>('azkar_progress');
   final prefs = await SharedPreferences.getInstance();
   
   getIt.registerSingleton<SharedPreferences>(prefs);
   getIt.registerSingleton<LocationService>(LocationService());
   getIt.registerSingleton<PrayerTimeService>(PrayerTimeService());
-  getIt.registerSingleton<AzkarRepository>(AzkarRepository());
+  getIt.registerSingleton<AzkarRepository>(AzkarRepository(azkarBox));
   getIt.registerSingleton<PrayerRepo>(PrayerRepoImpl(box));
   
   getIt.registerFactory<PrayerTrackerBloc>(() => PrayerTrackerBloc(getIt()));

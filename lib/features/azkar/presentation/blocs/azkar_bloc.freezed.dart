@@ -21,6 +21,7 @@ mixin _$AzkarEvent {
     required TResult Function() loadCategories,
     required TResult Function(String category) loadAzkar,
     required TResult Function(int index) incrementCount,
+    required TResult Function(String category) resetCategory,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -28,6 +29,7 @@ mixin _$AzkarEvent {
     TResult? Function()? loadCategories,
     TResult? Function(String category)? loadAzkar,
     TResult? Function(int index)? incrementCount,
+    TResult? Function(String category)? resetCategory,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -35,6 +37,7 @@ mixin _$AzkarEvent {
     TResult Function()? loadCategories,
     TResult Function(String category)? loadAzkar,
     TResult Function(int index)? incrementCount,
+    TResult Function(String category)? resetCategory,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -43,6 +46,7 @@ mixin _$AzkarEvent {
     required TResult Function(_LoadCategories value) loadCategories,
     required TResult Function(_LoadAzkar value) loadAzkar,
     required TResult Function(_IncrementCount value) incrementCount,
+    required TResult Function(_ResetCategory value) resetCategory,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -50,6 +54,7 @@ mixin _$AzkarEvent {
     TResult? Function(_LoadCategories value)? loadCategories,
     TResult? Function(_LoadAzkar value)? loadAzkar,
     TResult? Function(_IncrementCount value)? incrementCount,
+    TResult? Function(_ResetCategory value)? resetCategory,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -57,6 +62,7 @@ mixin _$AzkarEvent {
     TResult Function(_LoadCategories value)? loadCategories,
     TResult Function(_LoadAzkar value)? loadAzkar,
     TResult Function(_IncrementCount value)? incrementCount,
+    TResult Function(_ResetCategory value)? resetCategory,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -121,6 +127,7 @@ class _$LoadCategoriesImpl implements _LoadCategories {
     required TResult Function() loadCategories,
     required TResult Function(String category) loadAzkar,
     required TResult Function(int index) incrementCount,
+    required TResult Function(String category) resetCategory,
   }) {
     return loadCategories();
   }
@@ -131,6 +138,7 @@ class _$LoadCategoriesImpl implements _LoadCategories {
     TResult? Function()? loadCategories,
     TResult? Function(String category)? loadAzkar,
     TResult? Function(int index)? incrementCount,
+    TResult? Function(String category)? resetCategory,
   }) {
     return loadCategories?.call();
   }
@@ -141,6 +149,7 @@ class _$LoadCategoriesImpl implements _LoadCategories {
     TResult Function()? loadCategories,
     TResult Function(String category)? loadAzkar,
     TResult Function(int index)? incrementCount,
+    TResult Function(String category)? resetCategory,
     required TResult orElse(),
   }) {
     if (loadCategories != null) {
@@ -155,6 +164,7 @@ class _$LoadCategoriesImpl implements _LoadCategories {
     required TResult Function(_LoadCategories value) loadCategories,
     required TResult Function(_LoadAzkar value) loadAzkar,
     required TResult Function(_IncrementCount value) incrementCount,
+    required TResult Function(_ResetCategory value) resetCategory,
   }) {
     return loadCategories(this);
   }
@@ -165,6 +175,7 @@ class _$LoadCategoriesImpl implements _LoadCategories {
     TResult? Function(_LoadCategories value)? loadCategories,
     TResult? Function(_LoadAzkar value)? loadAzkar,
     TResult? Function(_IncrementCount value)? incrementCount,
+    TResult? Function(_ResetCategory value)? resetCategory,
   }) {
     return loadCategories?.call(this);
   }
@@ -175,6 +186,7 @@ class _$LoadCategoriesImpl implements _LoadCategories {
     TResult Function(_LoadCategories value)? loadCategories,
     TResult Function(_LoadAzkar value)? loadAzkar,
     TResult Function(_IncrementCount value)? incrementCount,
+    TResult Function(_ResetCategory value)? resetCategory,
     required TResult orElse(),
   }) {
     if (loadCategories != null) {
@@ -256,6 +268,7 @@ class _$LoadAzkarImpl implements _LoadAzkar {
     required TResult Function() loadCategories,
     required TResult Function(String category) loadAzkar,
     required TResult Function(int index) incrementCount,
+    required TResult Function(String category) resetCategory,
   }) {
     return loadAzkar(category);
   }
@@ -266,6 +279,7 @@ class _$LoadAzkarImpl implements _LoadAzkar {
     TResult? Function()? loadCategories,
     TResult? Function(String category)? loadAzkar,
     TResult? Function(int index)? incrementCount,
+    TResult? Function(String category)? resetCategory,
   }) {
     return loadAzkar?.call(category);
   }
@@ -276,6 +290,7 @@ class _$LoadAzkarImpl implements _LoadAzkar {
     TResult Function()? loadCategories,
     TResult Function(String category)? loadAzkar,
     TResult Function(int index)? incrementCount,
+    TResult Function(String category)? resetCategory,
     required TResult orElse(),
   }) {
     if (loadAzkar != null) {
@@ -290,6 +305,7 @@ class _$LoadAzkarImpl implements _LoadAzkar {
     required TResult Function(_LoadCategories value) loadCategories,
     required TResult Function(_LoadAzkar value) loadAzkar,
     required TResult Function(_IncrementCount value) incrementCount,
+    required TResult Function(_ResetCategory value) resetCategory,
   }) {
     return loadAzkar(this);
   }
@@ -300,6 +316,7 @@ class _$LoadAzkarImpl implements _LoadAzkar {
     TResult? Function(_LoadCategories value)? loadCategories,
     TResult? Function(_LoadAzkar value)? loadAzkar,
     TResult? Function(_IncrementCount value)? incrementCount,
+    TResult? Function(_ResetCategory value)? resetCategory,
   }) {
     return loadAzkar?.call(this);
   }
@@ -310,6 +327,7 @@ class _$LoadAzkarImpl implements _LoadAzkar {
     TResult Function(_LoadCategories value)? loadCategories,
     TResult Function(_LoadAzkar value)? loadAzkar,
     TResult Function(_IncrementCount value)? incrementCount,
+    TResult Function(_ResetCategory value)? resetCategory,
     required TResult orElse(),
   }) {
     if (loadAzkar != null) {
@@ -396,6 +414,7 @@ class _$IncrementCountImpl implements _IncrementCount {
     required TResult Function() loadCategories,
     required TResult Function(String category) loadAzkar,
     required TResult Function(int index) incrementCount,
+    required TResult Function(String category) resetCategory,
   }) {
     return incrementCount(index);
   }
@@ -406,6 +425,7 @@ class _$IncrementCountImpl implements _IncrementCount {
     TResult? Function()? loadCategories,
     TResult? Function(String category)? loadAzkar,
     TResult? Function(int index)? incrementCount,
+    TResult? Function(String category)? resetCategory,
   }) {
     return incrementCount?.call(index);
   }
@@ -416,6 +436,7 @@ class _$IncrementCountImpl implements _IncrementCount {
     TResult Function()? loadCategories,
     TResult Function(String category)? loadAzkar,
     TResult Function(int index)? incrementCount,
+    TResult Function(String category)? resetCategory,
     required TResult orElse(),
   }) {
     if (incrementCount != null) {
@@ -430,6 +451,7 @@ class _$IncrementCountImpl implements _IncrementCount {
     required TResult Function(_LoadCategories value) loadCategories,
     required TResult Function(_LoadAzkar value) loadAzkar,
     required TResult Function(_IncrementCount value) incrementCount,
+    required TResult Function(_ResetCategory value) resetCategory,
   }) {
     return incrementCount(this);
   }
@@ -440,6 +462,7 @@ class _$IncrementCountImpl implements _IncrementCount {
     TResult? Function(_LoadCategories value)? loadCategories,
     TResult? Function(_LoadAzkar value)? loadAzkar,
     TResult? Function(_IncrementCount value)? incrementCount,
+    TResult? Function(_ResetCategory value)? resetCategory,
   }) {
     return incrementCount?.call(this);
   }
@@ -450,6 +473,7 @@ class _$IncrementCountImpl implements _IncrementCount {
     TResult Function(_LoadCategories value)? loadCategories,
     TResult Function(_LoadAzkar value)? loadAzkar,
     TResult Function(_IncrementCount value)? incrementCount,
+    TResult Function(_ResetCategory value)? resetCategory,
     required TResult orElse(),
   }) {
     if (incrementCount != null) {
@@ -465,6 +489,152 @@ abstract class _IncrementCount implements AzkarEvent {
   int get index;
   @JsonKey(ignore: true)
   _$$IncrementCountImplCopyWith<_$IncrementCountImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$ResetCategoryImplCopyWith<$Res> {
+  factory _$$ResetCategoryImplCopyWith(
+          _$ResetCategoryImpl value, $Res Function(_$ResetCategoryImpl) then) =
+      __$$ResetCategoryImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({String category});
+}
+
+/// @nodoc
+class __$$ResetCategoryImplCopyWithImpl<$Res>
+    extends _$AzkarEventCopyWithImpl<$Res, _$ResetCategoryImpl>
+    implements _$$ResetCategoryImplCopyWith<$Res> {
+  __$$ResetCategoryImplCopyWithImpl(
+      _$ResetCategoryImpl _value, $Res Function(_$ResetCategoryImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? category = null,
+  }) {
+    return _then(_$ResetCategoryImpl(
+      null == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$ResetCategoryImpl implements _ResetCategory {
+  const _$ResetCategoryImpl(this.category);
+
+  @override
+  final String category;
+
+  @override
+  String toString() {
+    return 'AzkarEvent.resetCategory(category: $category)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$ResetCategoryImpl &&
+            (identical(other.category, category) ||
+                other.category == category));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, category);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$ResetCategoryImplCopyWith<_$ResetCategoryImpl> get copyWith =>
+      __$$ResetCategoryImplCopyWithImpl<_$ResetCategoryImpl>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() loadCategories,
+    required TResult Function(String category) loadAzkar,
+    required TResult Function(int index) incrementCount,
+    required TResult Function(String category) resetCategory,
+  }) {
+    return resetCategory(category);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? loadCategories,
+    TResult? Function(String category)? loadAzkar,
+    TResult? Function(int index)? incrementCount,
+    TResult? Function(String category)? resetCategory,
+  }) {
+    return resetCategory?.call(category);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? loadCategories,
+    TResult Function(String category)? loadAzkar,
+    TResult Function(int index)? incrementCount,
+    TResult Function(String category)? resetCategory,
+    required TResult orElse(),
+  }) {
+    if (resetCategory != null) {
+      return resetCategory(category);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_LoadCategories value) loadCategories,
+    required TResult Function(_LoadAzkar value) loadAzkar,
+    required TResult Function(_IncrementCount value) incrementCount,
+    required TResult Function(_ResetCategory value) resetCategory,
+  }) {
+    return resetCategory(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_LoadCategories value)? loadCategories,
+    TResult? Function(_LoadAzkar value)? loadAzkar,
+    TResult? Function(_IncrementCount value)? incrementCount,
+    TResult? Function(_ResetCategory value)? resetCategory,
+  }) {
+    return resetCategory?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_LoadCategories value)? loadCategories,
+    TResult Function(_LoadAzkar value)? loadAzkar,
+    TResult Function(_IncrementCount value)? incrementCount,
+    TResult Function(_ResetCategory value)? resetCategory,
+    required TResult orElse(),
+  }) {
+    if (resetCategory != null) {
+      return resetCategory(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _ResetCategory implements AzkarEvent {
+  const factory _ResetCategory(final String category) = _$ResetCategoryImpl;
+
+  String get category;
+  @JsonKey(ignore: true)
+  _$$ResetCategoryImplCopyWith<_$ResetCategoryImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 

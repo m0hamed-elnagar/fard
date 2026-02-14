@@ -1,4 +1,4 @@
-﻿import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../data/azkar_repository.dart';
 import '../../domain/azkar_item.dart';
@@ -10,6 +10,7 @@ class AzkarEvent with _$AzkarEvent {
   const factory AzkarEvent.loadCategories() = _LoadCategories;
   const factory AzkarEvent.loadAzkar(String category) = _LoadAzkar;
   const factory AzkarEvent.incrementCount(int index) = _IncrementCount;
+  const factory AzkarEvent.resetCategory(String category) = _ResetCategory;
 }
 
 @freezed
@@ -45,18 +46,31 @@ class AzkarBloc extends Bloc<AzkarEvent, AzkarState> {
       }
     });
 
-    on<_IncrementCount>((event, emit) {
-      state.maybeWhen(
-        azkarLoaded: (category, azkar) {
-          final newList = List<AzkarItem>.from(azkar);
-          final item = newList[event.index];
-          if (item.currentCount < item.count) {
-            newList[event.index] = item.copyWith(currentCount: item.currentCount + 1);
-            emit(AzkarState.azkarLoaded(category, newList));
-          }
-        },
-        orElse: () {},
-      );
+    on<_IncrementCount>((event, emit) async {
+      final currentState = state;
+      if (currentState is _AzkarLoaded) {
+        final newList = List<AzkarItem>.from(currentState.azkar);
+        final item = newList[event.index];
+        if (item.currentCount < item.count) {
+          final updatedItem = item.copyWith(currentCount: item.currentCount + 1);
+          newList[event.index] = updatedItem;
+          
+          // Save to repository (persistence)
+          await _repository.saveProgress(updatedItem);
+          
+          emit(AzkarState.azkarLoaded(currentState.category, newList));
+        }
+      }
+    });
+
+    on<_ResetCategory>((event, emit) async {
+      try {
+        await _repository.resetCategory(event.category);
+        final azkar = await _repository.getAzkarByCategory(event.category);
+        emit(AzkarState.azkarLoaded(event.category, azkar));
+      } catch (e) {
+        emit(AzkarState.error(e.toString()));
+      }
     });
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -9,42 +10,54 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Azkar Integration Test', () {
+    late Directory tempDir;
+
     setUp(() async {
-      // Mocking storage
-      await Hive.initFlutter();
-      await Hive.deleteBoxFromDisk('daily_records');
+      tempDir = await Directory.systemTemp.createTemp('fard_azkar_test_');
       SharedPreferences.setMockInitialValues({'onboarding_complete': true});
     });
 
-    testWidgets('Navigate to Azkar and see categories', (tester) async {
-      app.main();
+    testWidgets('Repeat Azkar Sequence: Choose, Count, Back (2 times)', (tester) async {
+      await tester.pumpWidget(app.QadaTrackerApp(hivePath: tempDir.path));
       await tester.pumpAndSettle();
 
-      // Ensure we are on Home Screen first
-      expect(find.text('Prayer'), findsOneWidget);
-
-      // Tap Azkar tab
-      await tester.tap(find.byIcon(Icons.menu_book_outlined));
-      await tester.pumpAndSettle();
-
-      // Check for Azkar Categories Title (in Arabic as it's the title)
-      expect(find.text('الأذكار'), findsOneWidget);
-
-      // Check if categories are loaded (at least one should be there)
-      // Since it's from a file, we might need a small delay if it's not immediate
+      // Wait for splash
       await tester.pump(const Duration(seconds: 2));
       await tester.pumpAndSettle();
 
-      // Verify some categories exist. Typical Hisn Al-Muslim has 'أذكار الصباح'
-      // We'll search for any Card in the list
-      expect(find.byType(Card), findsAtLeast(1));
-      
-      // Tap the first category
-      await tester.tap(find.byType(ListTile).first);
+      // Tap Azkar tab
+      final azkarTab = find.text('الأذكار').last; 
+      await tester.tap(azkarTab);
       await tester.pumpAndSettle();
 
-      // Verify Azkar items are shown
-      expect(find.textContaining('/'), findsAtLeast(1)); // The counter text like '0 / 3'
+      // Wait for data load
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+
+      // Repeat sequence 2 times
+      for (int i = 0; i < 2; i++) {
+        // Verify categories exist
+        expect(find.byType(ListTile), findsAtLeast(i + 1));
+        
+        // Tap category (i-th category)
+        await tester.tap(find.byType(ListTile).at(i));
+        await tester.pumpAndSettle();
+
+        // Verify items exist
+        expect(find.textContaining('/'), findsAtLeast(1));
+
+        // Tap the first zekr card to increment
+        final zekrCard = find.byType(GestureDetector).at(1); // The first zekr card uses GestureDetector
+        await tester.tap(zekrCard);
+        await tester.pumpAndSettle();
+
+        // Go back to categories
+        await tester.tap(find.byIcon(Icons.arrow_back)); 
+        await tester.pumpAndSettle();
+
+        // Should be back at categories
+        expect(find.text('الأذكار'), findsAtLeast(1));
+      }
     });
   });
 }

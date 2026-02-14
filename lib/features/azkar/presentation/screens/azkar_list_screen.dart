@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:vibration/vibration.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../blocs/azkar_bloc.dart';
 import '../../domain/azkar_item.dart';
@@ -28,6 +29,15 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
           widget.category,
           style: GoogleFonts.amiri(fontWeight: FontWeight.bold),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.read<AzkarBloc>().add(AzkarEvent.resetCategory(widget.category));
+            },
+            icon: const Icon(Icons.refresh_rounded),
+            tooltip: 'Reset Category',
+          ),
+        ],
       ),
       body: BlocBuilder<AzkarBloc, AzkarState>(
         builder: (context, state) {
@@ -39,8 +49,17 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
               itemBuilder: (context, index) {
                 return _ZekrCard(
                   item: azkar[index],
-                  onTap: () {
+                  onTap: () async {
                     context.read<AzkarBloc>().add(AzkarEvent.incrementCount(index));
+                    
+                    // Tactile feedback
+                    if (await Vibration.hasVibrator()) {
+                      if (azkar[index].currentCount + 1 >= azkar[index].count) {
+                        Vibration.vibrate(duration: 100, amplitude: 255);
+                      } else {
+                        Vibration.vibrate(duration: 30);
+                      }
+                    }
                   },
                 );
               },

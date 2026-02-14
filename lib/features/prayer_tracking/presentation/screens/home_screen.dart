@@ -7,7 +7,6 @@ import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
-import 'package:fard/features/settings/presentation/screens/settings_screen.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/add_qada_dialog.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/calendar_widget.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/counter_card.dart';
