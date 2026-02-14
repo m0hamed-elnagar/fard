@@ -1,5 +1,7 @@
 import 'package:fard/core/services/location_service.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
+import 'package:fard/features/azkar/data/azkar_repository.dart';
+import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/prayer_tracking/data/daily_record_entity.dart';
 import 'package:fard/features/prayer_tracking/data/prayer_repo_impl.dart';
 import 'package:fard/features/prayer_tracking/domain/prayer_repo.dart';
@@ -21,8 +23,10 @@ Future<void> configureDependencies() async {
   getIt.registerSingleton<SharedPreferences>(prefs);
   getIt.registerSingleton<LocationService>(LocationService());
   getIt.registerSingleton<PrayerTimeService>(PrayerTimeService());
+  getIt.registerSingleton<AzkarRepository>(AzkarRepository());
   getIt.registerSingleton<PrayerRepo>(PrayerRepoImpl(box));
   
   getIt.registerFactory<PrayerTrackerBloc>(() => PrayerTrackerBloc(getIt()));
   getIt.registerFactory<SettingsCubit>(() => SettingsCubit(getIt(), getIt()));
+  getIt.registerFactory<AzkarBloc>(() => AzkarBloc(getIt()));
 }

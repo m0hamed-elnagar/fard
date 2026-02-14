@@ -1,7 +1,7 @@
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
-import 'package:fard/features/prayer_tracking/presentation/screens/home_screen.dart';
+import 'package:fard/features/azkar/presentation/screens/main_navigation_screen.dart';
 import 'package:fard/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:fard/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +36,7 @@ class QadaTrackerApp extends StatelessWidget {
           onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
           debugShowCheckedModeBanner: false,
           theme: AppTheme.darkTheme,
-          home: onboardingComplete ? const HomeScreen() : const OnboardingScreen(),
+          home: onboardingComplete ? const MainNavigationScreen() : const OnboardingScreen(),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: const [
             AppLocalizations.delegate,
