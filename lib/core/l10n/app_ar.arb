@@ -1,0 +1,83 @@
+{
+  "@@locale": "ar",
+  "appTitle": "فرض - Qada Tracker",
+  "dailyPrayers": "صلوات اليوم",
+  "remaining": "المتبقي",
+  "appName": "فرض",
+  "errorOccurred": "حدث خطأ ما",
+  "retry": "إعادة المحاولة",
+  "onboardingTitle1": "تتبع صلواتك",
+  "onboardingDesc1": "احتفظ بسجل لصلواتك اليومية ولا تفوت أي صلاة.",
+  "onboardingTitle2": "إدارة القضاء",
+  "onboardingDesc2": "تتبع وأكمل صلواتك الفائتة بسهولة مع مرور الوقت.",
+  "getStarted": "ابدأ الآن",
+  "helloWorld": "أهلاً بالعالم!",
+  "calendar": "التقويم",
+  "history": "سجل الشهر",
+  "noHistory": "لا يوجد سجل لهذا الشهر",
+  "deleteRecord": "حذف السجل",
+  "deleteConfirm": "هل أنت متأكد من حذف سجل يوم {date}؟",
+  "@deleteConfirm": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "cancel": "إلغاء",
+  "delete": "حذف",
+  "missedCount": "فاتت {count}",
+  "@missedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addQada": "إضافة قضاء",
+  "byCount": "بالعدد",
+  "byTime": "بالوقت",
+  "add": "إضافة",
+  "selectPeriod": "حدد الفترة لحساب عدد الصلوات",
+  "from": "من",
+  "to": "إلى",
+  "selectDate": "اختر تاريخ",
+  "daysCount": "عدد الأيام",
+  "prayersPerFard": "صلاة لكل فرض",
+  "missedDaysTitle": "أيام فائتة",
+  "missedDaysMessage": "يبدو أنك فوت {count} أيام منذ آخر سجل. هل كنت تصلي خلال هذه الفترة؟ إذا لم تكن كذلك، فسيتم إضافتها إلى صلواتك المتبقية.",
+  "@missedDaysMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yes": "نعم",
+  "no": "لا",
+  "skip": "كنت أصلي",
+  "addAll": "إضافة للمتبقي",
+  "edit": "تعديل",
+  "update": "تحديث",
+  "editQada": "تعديل القضاء",
+  "next": "التالي",
+  "fajr": "فجر",
+  "dhuhr": "ظهر",
+  "asr": "عصر",
+  "maghrib": "مغرب",
+  "isha": "عشاء",
+  "settings": "الإعدادات",
+  "locationSettings": "إعدادات الموقع",
+  "currentLocation": "الموقع الحالي",
+  "prayerSettings": "إعدادات الصلاة",
+  "calculationMethod": "طريقة الحساب",
+  "madhab": "المذهب",
+  "language": "اللغة",
+  "locationDesc": "تفعيل الحساب الدقيق لمواقيت الصلاة بناءً على إحداثيات موقعك الحالي.",
+  "calculationMethodDesc": "اختر الجهة المعتمدة في منطقتك لحساب زوايا الفجر والعشاء.",
+  "madhabDesc": "يحدد طريقة حساب وقت صلاة العصر (الحنفي مقابل المذاهب الأخرى).",
+  "shafiMadhab": "شافعي، مالكي، حنبلي",
+  "hanafiMadhab": "حنفي",
+  "refreshLocation": "تحديث الموقع",
+  "locationNotSet": "الموقع غير محدد"
+}

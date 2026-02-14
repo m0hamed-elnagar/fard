@@ -1,8 +1,8 @@
-import 'package:fard/data/entities/daily_record_entity.dart';
-import 'package:fard/data/mappers/daily_record_mapper.dart';
-import 'package:fard/domain/models/daily_record.dart';
-import 'package:fard/domain/models/missed_counter.dart';
-import 'package:fard/domain/models/salaah.dart';
+import 'package:fard/features/prayer_tracking/data/daily_record_entity.dart';
+import 'package:fard/features/prayer_tracking/data/daily_record_mapper.dart';
+import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
+import 'package:fard/features/prayer_tracking/domain/missed_counter.dart';
+import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

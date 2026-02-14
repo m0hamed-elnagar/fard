@@ -1,0 +1,83 @@
+{
+  "@@locale": "en",
+  "appTitle": "Fard - Qada Tracker",
+  "dailyPrayers": "Daily Prayers",
+  "remaining": "Remaining",
+  "appName": "Fard",
+  "errorOccurred": "An error occurred",
+  "retry": "Retry",
+  "onboardingTitle1": "Track Your Prayers",
+  "onboardingDesc1": "Keep a record of your daily prayers and never miss a beat.",
+  "onboardingTitle2": "Manage Qada",
+  "onboardingDesc2": "Easily track and complete your missed prayers over time.",
+  "getStarted": "Get Started",
+  "helloWorld": "Hello World!",
+  "calendar": "Calendar",
+  "history": "History",
+  "noHistory": "No history for this month",
+  "deleteRecord": "Delete Record",
+  "deleteConfirm": "Are you sure you want to delete the record for {date}?",
+  "@deleteConfirm": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "missedCount": "Missed {count}",
+  "@missedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addQada": "Add Qada",
+  "byCount": "By Count",
+  "byTime": "By Time",
+  "add": "Add",
+  "selectPeriod": "Select period to calculate prayers",
+  "from": "From",
+  "to": "To",
+  "selectDate": "Select Date",
+  "daysCount": "Days Count",
+  "prayersPerFard": "Prayers per fard",
+  "missedDaysTitle": "Missed Days",
+  "missedDaysMessage": "It looks like you missed {count} days since your last record. Were you praying during this period? If not, they will be added to your remaining prayers.",
+  "@missedDaysMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yes": "Yes",
+  "no": "No",
+  "skip": "I was praying",
+  "addAll": "Add to remaining",
+  "edit": "Edit",
+  "update": "Update",
+  "editQada": "Edit Qada",
+  "next": "Next",
+  "fajr": "Fajr",
+  "dhuhr": "Dhuhr",
+  "asr": "Asr",
+  "maghrib": "Maghrib",
+  "isha": "Isha",
+  "settings": "Settings",
+  "locationSettings": "Location Settings",
+  "currentLocation": "Current Location",
+  "prayerSettings": "Prayer Settings",
+  "calculationMethod": "Calculation Method",
+  "madhab": "Madhab",
+  "language": "Language",
+  "locationDesc": "Enables precise calculation of prayer times based on your current coordinates.",
+  "calculationMethodDesc": "Select the authority used in your region for calculating Fajr and Isha angles.",
+  "madhabDesc": "Determines the calculation for Asr prayer time (Hanafi vs. other schools).",
+  "shafiMadhab": "Shafi, Maliki, Hanbali",
+  "hanafiMadhab": "Hanafi",
+  "refreshLocation": "Refresh Location",
+  "locationNotSet": "Location not set"
+}
