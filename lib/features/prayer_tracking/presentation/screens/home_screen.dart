@@ -190,13 +190,6 @@ class _HomeBody extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            IconButton(
-                              onPressed: () => Navigator.of(context).push(
-                                MaterialPageRoute(builder: (_) => const SettingsScreen()),
-                              ),
-                              icon: const Icon(Icons.settings_rounded, color: AppTheme.accent),
-                              tooltip: l10n.settings,
-                            ),
                           ],
                         ),
                         Padding(
