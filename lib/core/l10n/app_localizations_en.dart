@@ -195,4 +195,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get locationNotSet => 'Location not set';
+
+  @override
+  String get azkarSettings => 'Azkar Settings';
+
+  @override
+  String get morningAzkar => 'Morning Azkar';
+
+  @override
+  String get eveningAzkar => 'Evening Azkar';
+
+  @override
+  String get azkarSettingsDesc =>
+      'Configure what time to show morning and evening Azkar reminders.';
+
+  @override
+  String get timeFor => 'Time for';
+
+  @override
+  String get recommended => 'Recommended';
 }

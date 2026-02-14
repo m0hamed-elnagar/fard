@@ -19,6 +19,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_theme.dart';
 import 'package:intl/intl.dart';
+import 'package:fard/features/azkar/presentation/screens/azkar_list_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -279,6 +280,8 @@ class _HomeBody extends StatelessWidget {
                     ),
                   ),
                 ),
+                // Suggested Azkar Section
+                _buildSuggestedAzkarSection(context, settings),
                 // Section header
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 8.0),
@@ -339,6 +342,114 @@ class _HomeBody extends StatelessWidget {
         );
       },
     );
+  }
+
+  Widget _buildSuggestedAzkarSection(BuildContext context, SettingsState settings) {
+    final now = DateTime.now();
+    final morningTime = _parseTime(settings.morningAzkarTime, now);
+    final eveningTime = _parseTime(settings.eveningAzkarTime, now);
+
+    String? category;
+    String? title;
+    IconData? icon;
+    List<Color>? colors;
+
+    final l10n = AppLocalizations.of(context)!;
+
+    if (now.isAfter(morningTime.subtract(const Duration(minutes: 30))) && 
+        now.isBefore(morningTime.add(const Duration(hours: 4)))) {
+      category = 'أذكار الصباح';
+      title = l10n.morningAzkar;
+      icon = Icons.wb_sunny_rounded;
+      colors = [const Color(0xFFFF9800), const Color(0xFFFF5722)];
+    } else if (now.isAfter(eveningTime.subtract(const Duration(minutes: 30))) && 
+               now.isBefore(eveningTime.add(const Duration(hours: 4)))) {
+      category = 'أذكار المساء';
+      title = l10n.eveningAzkar;
+      icon = Icons.nightlight_round;
+      colors = [const Color(0xFF3F51B5), const Color(0xFF2196F3)];
+    }
+
+    if (category == null) return const SliverToBoxAdapter(child: SizedBox.shrink());
+
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      sliver: SliverToBoxAdapter(
+        child: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AzkarListScreen(category: category!),
+              ),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: colors!,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: colors.first.withValues(alpha: 0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 28),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.timeFor,
+                        style: GoogleFonts.outfit(
+                          color: Colors.white.withValues(alpha: 0.8),
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        title!,
+                        style: GoogleFonts.amiri(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 20),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  DateTime _parseTime(String timeStr, DateTime now) {
+    try {
+      final parts = timeStr.split(':');
+      return DateTime(now.year, now.month, now.day, int.parse(parts[0]), int.parse(parts[1]));
+    } catch (_) {
+      return now;
+    }
   }
 }
 

@@ -34,7 +34,7 @@ void main() {
 
   group('AzkarBloc', () {
     blocTest<AzkarBloc, AzkarState>(
-      'emits [loading, categoriesLoaded] when loadCategories is added',
+      'emits correct states when loadCategories is added',
       setUp: () {
         when(() => mockAzkarRepository.getCategories())
             .thenAnswer((_) async => ['Morning', 'Evening']);
@@ -42,13 +42,13 @@ void main() {
       build: () => azkarBloc,
       act: (bloc) => bloc.add(const AzkarEvent.loadCategories()),
       expect: () => [
-        const AzkarState.loading(),
-        const AzkarState.categoriesLoaded(['Morning', 'Evening']),
+        const AzkarState(isLoading: true),
+        const AzkarState(isLoading: false, categories: ['Morning', 'Evening']),
       ],
     );
 
     blocTest<AzkarBloc, AzkarState>(
-      'emits [loading, azkarLoaded] when loadAzkar is added',
+      'emits correct states when loadAzkar is added',
       setUp: () {
         when(() => mockAzkarRepository.getAzkarByCategory('Morning'))
             .thenAnswer((_) async => testAzkar);
@@ -56,8 +56,8 @@ void main() {
       build: () => azkarBloc,
       act: (bloc) => bloc.add(const AzkarEvent.loadAzkar('Morning')),
       expect: () => [
-        const AzkarState.loading(),
-        AzkarState.azkarLoaded('Morning', testAzkar),
+        const AzkarState(isLoading: true),
+        AzkarState(isLoading: false, azkar: testAzkar, currentCategory: 'Morning'),
       ],
     );
 
@@ -68,12 +68,15 @@ void main() {
             .thenAnswer((_) async => {});
       },
       build: () => azkarBloc,
-      seed: () => AzkarState.azkarLoaded('Morning', testAzkar),
+      seed: () => AzkarState(azkar: testAzkar, currentCategory: 'Morning'),
       act: (bloc) => bloc.add(const AzkarEvent.incrementCount(0)),
       expect: () => [
-        AzkarState.azkarLoaded('Morning', [
-          testAzkar[0].copyWith(currentCount: 1),
-        ]),
+        AzkarState(
+          currentCategory: 'Morning',
+          azkar: [
+            testAzkar[0].copyWith(currentCount: 1),
+          ],
+        ),
       ],
       verify: (_) {
         verify(() => mockAzkarRepository.saveProgress(any())).called(1);
@@ -91,7 +94,8 @@ void main() {
       build: () => azkarBloc,
       act: (bloc) => bloc.add(const AzkarEvent.resetCategory('Morning')),
       expect: () => [
-        AzkarState.azkarLoaded('Morning', [testAzkar[0].copyWith(currentCount: 0)]),
+        const AzkarState(isLoading: true),
+        AzkarState(isLoading: false, azkar: [testAzkar[0].copyWith(currentCount: 0)]),
       ],
       verify: (_) {
         verify(() => mockAzkarRepository.resetCategory('Morning')).called(1);

@@ -14,6 +14,8 @@ class SettingsCubit extends Cubit<SettingsState> {
   static const String _cityKey = 'city_name';
   static const String _methodKey = 'calculation_method';
   static const String _madhabKey = 'madhab';
+  static const String _morningAzkarKey = 'morning_azkar_time';
+  static const String _eveningAzkarKey = 'evening_azkar_time';
 
   SettingsCubit(this._prefs, this._locationService)
       : super(SettingsState(
@@ -23,6 +25,8 @@ class SettingsCubit extends Cubit<SettingsState> {
           cityName: _prefs.getString(_cityKey),
           calculationMethod: _prefs.getString(_methodKey) ?? 'muslim_league',
           madhab: _prefs.getString(_madhabKey) ?? 'shafi',
+          morningAzkarTime: _prefs.getString(_morningAzkarKey) ?? '05:00',
+          eveningAzkarTime: _prefs.getString(_eveningAzkarKey) ?? '18:00',
         ));
 
   void updateLocale(Locale locale) {
@@ -112,5 +116,15 @@ class SettingsCubit extends Cubit<SettingsState> {
   void updateMadhab(String madhab) {
     _prefs.setString(_madhabKey, madhab);
     emit(state.copyWith(madhab: madhab));
+  }
+
+  void updateMorningAzkarTime(String time) {
+    _prefs.setString(_morningAzkarKey, time);
+    emit(state.copyWith(morningAzkarTime: time));
+  }
+
+  void updateEveningAzkarTime(String time) {
+    _prefs.setString(_eveningAzkarKey, time);
+    emit(state.copyWith(eveningAzkarTime: time));
   }
 }

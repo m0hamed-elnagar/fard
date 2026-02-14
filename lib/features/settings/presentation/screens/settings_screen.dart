@@ -150,6 +150,42 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 24),
+              _buildSection(
+                context,
+                title: l10n.azkarSettings,
+                icon: Icons.notifications_active_rounded,
+                children: [
+                  Text(
+                    l10n.azkarSettingsDesc,
+                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildTimeSettingItem(
+                    context: context,
+                    title: l10n.morningAzkar,
+                    time: state.morningAzkarTime,
+                    onTap: () async {
+                      final time = await _selectTime(context, state.morningAzkarTime);
+                      if (time != null && context.mounted) {
+                        context.read<SettingsCubit>().updateMorningAzkarTime(time);
+                      }
+                    },
+                  ),
+                  const Divider(height: 24),
+                  _buildTimeSettingItem(
+                    context: context,
+                    title: l10n.eveningAzkar,
+                    time: state.eveningAzkarTime,
+                    onTap: () async {
+                      final time = await _selectTime(context, state.eveningAzkarTime);
+                      if (time != null && context.mounted) {
+                        context.read<SettingsCubit>().updateEveningAzkarTime(time);
+                      }
+                    },
+                  ),
+                ],
+              ),
             ],
           );
         },
@@ -212,5 +248,65 @@ class SettingsScreen extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _buildTimeSettingItem({
+    required BuildContext context,
+    required String title,
+    required String time,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
+      trailing: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppTheme.accent.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          time,
+          style: const TextStyle(
+            color: AppTheme.accent,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+      ),
+      onTap: onTap,
+    );
+  }
+
+  Future<String?> _selectTime(BuildContext context, String currentTime) async {
+    final parts = currentTime.split(':');
+    final initialTime = TimeOfDay(
+      hour: int.parse(parts[0]),
+      minute: int.parse(parts[1]),
+    );
+
+    final selectedTime = await showTimePicker(
+      context: context,
+      initialTime: initialTime,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppTheme.accent,
+              onPrimary: Colors.white,
+              onSurface: AppTheme.textPrimary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (selectedTime != null) {
+      final String hour = selectedTime.hour.toString().padLeft(2, '0');
+      final String minute = selectedTime.minute.toString().padLeft(2, '0');
+      return '$hour:$minute';
+    }
+    return null;
   }
 }

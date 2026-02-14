@@ -451,6 +451,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Location not set'**
   String get locationNotSet;
+
+  /// No description provided for @azkarSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Azkar Settings'**
+  String get azkarSettings;
+
+  /// No description provided for @morningAzkar.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning Azkar'**
+  String get morningAzkar;
+
+  /// No description provided for @eveningAzkar.
+  ///
+  /// In en, this message translates to:
+  /// **'Evening Azkar'**
+  String get eveningAzkar;
+
+  /// No description provided for @azkarSettingsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure what time to show morning and evening Azkar reminders.'**
+  String get azkarSettingsDesc;
+
+  /// No description provided for @timeFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Time for'**
+  String get timeFor;
+
+  /// No description provided for @recommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get recommended;
 }
 
 class _AppLocalizationsDelegate

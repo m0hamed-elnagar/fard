@@ -115,11 +115,11 @@ class HistoryList extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 6.0),
             decoration: BoxDecoration(
               color: isToday
-                  ? AppTheme.primaryLight.withValues(alpha: 0.15)
+                  ? AppTheme.primaryLight.withOpacity(0.15)
                   : AppTheme.surfaceLight,
               borderRadius: BorderRadius.circular(10.0),
               border: isToday
-                  ? Border.all(color: AppTheme.primaryLight.withValues(alpha: 0.40))
+                  ? Border.all(color: AppTheme.primaryLight.withOpacity(0.40))
                   : Border.all(color: Colors.transparent, width: 0.0),
             ),
             child: Column(
@@ -155,7 +155,7 @@ class HistoryList extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6.0, vertical: 2.0),
                         decoration: BoxDecoration(
-                          color: AppTheme.missed.withValues(alpha: 0.15),
+                          color: AppTheme.missed.withOpacity(0.15),
                           borderRadius: BorderRadius.circular(6.0),
                         ),
                         child: Text(
@@ -193,12 +193,12 @@ class HistoryList extends StatelessWidget {
                           horizontal: 6.0, vertical: 3.0),
                       decoration: BoxDecoration(
                         color: wasMissed
-                            ? AppTheme.missed.withValues(alpha: 0.08)
+                            ? AppTheme.missed.withOpacity(0.08)
                             : AppTheme.surfaceLight,
                         borderRadius: BorderRadius.circular(6.0),
                         border: Border.all(
                           color: wasMissed
-                              ? AppTheme.missed.withValues(alpha: 0.20)
+                              ? AppTheme.missed.withOpacity(0.20)
                               : Colors.transparent,
                         ),
                       ),
@@ -301,7 +301,7 @@ class HistoryList extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.history_rounded,
-              color: AppTheme.textSecondary.withValues(alpha: 0.40), size: 20.0),
+              color: AppTheme.textSecondary.withOpacity(0.40), size: 20.0),
           const SizedBox(width: 8.0),
           Text(
             l10n.noHistory,
@@ -315,4 +315,3 @@ class HistoryList extends StatelessWidget {
     );
   }
 }
-

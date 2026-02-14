@@ -1,0 +1,13 @@
+Analyzing fard-2...                                             
+
+warning - Unused import: 'package:hive_flutter/hive_flutter.dart' - integration_test\app_test.dart:7:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\features\azkar\data\azkar_repository.dart:35:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\azkar\data\azkar_repository.dart:46:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\azkar\data\azkar_repository.dart:55:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\azkar\data\azkar_repository.dart:76:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\azkar\data\azkar_repository.dart:80:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\azkar\data\azkar_repository.dart:118:7 - avoid_print
+warning - Dead code - lib\features\azkar\presentation\screens\azkar_list_screen.dart:126:55 - dead_code
+warning - The left operand can't be null, so the right operand is never executed - lib\features\azkar\presentation\screens\azkar_list_screen.dart:126:58 - dead_null_aware_expression
+  error - Invalid constant value - test\features\azkar\azkar_bloc_test.dart:60:51 - invalid_constant
+

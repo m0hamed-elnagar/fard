@@ -22,6 +22,8 @@ mixin _$SettingsState {
   String? get cityName => throw _privateConstructorUsedError;
   String get calculationMethod => throw _privateConstructorUsedError;
   String get madhab => throw _privateConstructorUsedError;
+  String get morningAzkarTime => throw _privateConstructorUsedError;
+  String get eveningAzkarTime => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $SettingsStateCopyWith<SettingsState> get copyWith =>
@@ -40,7 +42,9 @@ abstract class $SettingsStateCopyWith<$Res> {
       double? longitude,
       String? cityName,
       String calculationMethod,
-      String madhab});
+      String madhab,
+      String morningAzkarTime,
+      String eveningAzkarTime});
 }
 
 /// @nodoc
@@ -62,6 +66,8 @@ class _$SettingsStateCopyWithImpl<$Res, $Val extends SettingsState>
     Object? cityName = freezed,
     Object? calculationMethod = null,
     Object? madhab = null,
+    Object? morningAzkarTime = null,
+    Object? eveningAzkarTime = null,
   }) {
     return _then(_value.copyWith(
       locale: null == locale
@@ -88,6 +94,14 @@ class _$SettingsStateCopyWithImpl<$Res, $Val extends SettingsState>
           ? _value.madhab
           : madhab // ignore: cast_nullable_to_non_nullable
               as String,
+      morningAzkarTime: null == morningAzkarTime
+          ? _value.morningAzkarTime
+          : morningAzkarTime // ignore: cast_nullable_to_non_nullable
+              as String,
+      eveningAzkarTime: null == eveningAzkarTime
+          ? _value.eveningAzkarTime
+          : eveningAzkarTime // ignore: cast_nullable_to_non_nullable
+              as String,
     ) as $Val);
   }
 }
@@ -106,7 +120,9 @@ abstract class _$$SettingsStateImplCopyWith<$Res>
       double? longitude,
       String? cityName,
       String calculationMethod,
-      String madhab});
+      String madhab,
+      String morningAzkarTime,
+      String eveningAzkarTime});
 }
 
 /// @nodoc
@@ -126,6 +142,8 @@ class __$$SettingsStateImplCopyWithImpl<$Res>
     Object? cityName = freezed,
     Object? calculationMethod = null,
     Object? madhab = null,
+    Object? morningAzkarTime = null,
+    Object? eveningAzkarTime = null,
   }) {
     return _then(_$SettingsStateImpl(
       locale: null == locale
@@ -152,6 +170,14 @@ class __$$SettingsStateImplCopyWithImpl<$Res>
           ? _value.madhab
           : madhab // ignore: cast_nullable_to_non_nullable
               as String,
+      morningAzkarTime: null == morningAzkarTime
+          ? _value.morningAzkarTime
+          : morningAzkarTime // ignore: cast_nullable_to_non_nullable
+              as String,
+      eveningAzkarTime: null == eveningAzkarTime
+          ? _value.eveningAzkarTime
+          : eveningAzkarTime // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -165,7 +191,9 @@ class _$SettingsStateImpl implements _SettingsState {
       this.longitude,
       this.cityName,
       this.calculationMethod = 'muslim_league',
-      this.madhab = 'shafi'});
+      this.madhab = 'shafi',
+      this.morningAzkarTime = '05:00',
+      this.eveningAzkarTime = '18:00'});
 
   @override
   final Locale locale;
@@ -181,10 +209,16 @@ class _$SettingsStateImpl implements _SettingsState {
   @override
   @JsonKey()
   final String madhab;
+  @override
+  @JsonKey()
+  final String morningAzkarTime;
+  @override
+  @JsonKey()
+  final String eveningAzkarTime;
 
   @override
   String toString() {
-    return 'SettingsState(locale: $locale, latitude: $latitude, longitude: $longitude, cityName: $cityName, calculationMethod: $calculationMethod, madhab: $madhab)';
+    return 'SettingsState(locale: $locale, latitude: $latitude, longitude: $longitude, cityName: $cityName, calculationMethod: $calculationMethod, madhab: $madhab, morningAzkarTime: $morningAzkarTime, eveningAzkarTime: $eveningAzkarTime)';
   }
 
   @override
@@ -201,12 +235,16 @@ class _$SettingsStateImpl implements _SettingsState {
                 other.cityName == cityName) &&
             (identical(other.calculationMethod, calculationMethod) ||
                 other.calculationMethod == calculationMethod) &&
-            (identical(other.madhab, madhab) || other.madhab == madhab));
+            (identical(other.madhab, madhab) || other.madhab == madhab) &&
+            (identical(other.morningAzkarTime, morningAzkarTime) ||
+                other.morningAzkarTime == morningAzkarTime) &&
+            (identical(other.eveningAzkarTime, eveningAzkarTime) ||
+                other.eveningAzkarTime == eveningAzkarTime));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, locale, latitude, longitude,
-      cityName, calculationMethod, madhab);
+      cityName, calculationMethod, madhab, morningAzkarTime, eveningAzkarTime);
 
   @JsonKey(ignore: true)
   @override
@@ -222,7 +260,9 @@ abstract class _SettingsState implements SettingsState {
       final double? longitude,
       final String? cityName,
       final String calculationMethod,
-      final String madhab}) = _$SettingsStateImpl;
+      final String madhab,
+      final String morningAzkarTime,
+      final String eveningAzkarTime}) = _$SettingsStateImpl;
 
   @override
   Locale get locale;
@@ -236,6 +276,10 @@ abstract class _SettingsState implements SettingsState {
   String get calculationMethod;
   @override
   String get madhab;
+  @override
+  String get morningAzkarTime;
+  @override
+  String get eveningAzkarTime;
   @override
   @JsonKey(ignore: true)
   _$$SettingsStateImplCopyWith<_$SettingsStateImpl> get copyWith =>

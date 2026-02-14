@@ -79,5 +79,11 @@
   "shafiMadhab": "شافعي، مالكي، حنبلي",
   "hanafiMadhab": "حنفي",
   "refreshLocation": "تحديث الموقع",
-  "locationNotSet": "الموقع غير محدد"
+  "locationNotSet": "الموقع غير محدد",
+  "azkarSettings": "إعدادات الأذكار",
+  "morningAzkar": "أذكار الصباح",
+  "eveningAzkar": "أذكار المساء",
+  "azkarSettingsDesc": "قم بتكوين الوقت المناسب لعرض تذكيرات أذكار الصباح والمساء.",
+  "timeFor": "حان وقت",
+  "recommended": "مقترح"
 }

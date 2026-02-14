@@ -194,4 +194,23 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get locationNotSet => 'الموقع غير محدد';
+
+  @override
+  String get azkarSettings => 'إعدادات الأذكار';
+
+  @override
+  String get morningAzkar => 'أذكار الصباح';
+
+  @override
+  String get eveningAzkar => 'أذكار المساء';
+
+  @override
+  String get azkarSettingsDesc =>
+      'قم بتكوين الوقت المناسب لعرض تذكيرات أذكار الصباح والمساء.';
+
+  @override
+  String get timeFor => 'حان وقت';
+
+  @override
+  String get recommended => 'مقترح';
 }

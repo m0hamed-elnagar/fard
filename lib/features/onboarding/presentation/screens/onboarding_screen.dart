@@ -78,7 +78,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       decoration: BoxDecoration(
                         color: _currentPage == index
                             ? AppTheme.accent
-                            : AppTheme.textSecondary.withValues(alpha: 0.3),
+                            : AppTheme.textSecondary.withOpacity(0.3),
                         borderRadius: BorderRadius.circular(4.0),
                       ),
                     ),
@@ -141,7 +141,7 @@ class _OnboardingPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(32.0),
             decoration: BoxDecoration(
-              color: AppTheme.primaryLight.withValues(alpha: 0.1),
+              color: AppTheme.primaryLight.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, size: 80.0, color: AppTheme.primaryLight),
@@ -171,4 +171,3 @@ class _OnboardingPage extends StatelessWidget {
     );
   }
 }
-

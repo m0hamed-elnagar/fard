@@ -1,0 +1,23 @@
+Analyzing fard-2...                                             
+
+warning - Unused import: 'package:hive_flutter/hive_flutter.dart' - integration_test\app_test.dart:7:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\features\azkar\data\azkar_repository.dart:35:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\azkar\data\azkar_repository.dart:46:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\azkar\data\azkar_repository.dart:55:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\azkar\data\azkar_repository.dart:76:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\azkar\data\azkar_repository.dart:80:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\azkar\data\azkar_repository.dart:118:7 - avoid_print
+warning - Unused import: 'package:intl/intl.dart' - lib\features\azkar\presentation\screens\azkar_categories_screen.dart:9:8 - unused_import
+warning - Dead code - lib\features\azkar\presentation\screens\azkar_list_screen.dart:126:55 - dead_code
+warning - The left operand can't be null, so the right operand is never executed - lib\features\azkar\presentation\screens\azkar_list_screen.dart:126:58 - dead_null_aware_expression
+warning - Unused import: 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart' - lib\features\prayer_tracking\presentation\screens\home_screen.dart:23:8 - unused_import
+   info - Don't use 'BuildContext's across async gaps - lib\features\settings\presentation\screens\settings_screen.dart:171:25 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\settings\presentation\screens\settings_screen.dart:183:25 - use_build_context_synchronously
+  error - The class 'AzkarState' doesn't have a constant constructor 'loading' - test\features\azkar\azkar_bloc_test.dart:45:26 - const_with_undefined_constructor
+  error - The class 'AzkarState' doesn't have a constant constructor 'categoriesLoaded' - test\features\azkar\azkar_bloc_test.dart:46:26 - const_with_undefined_constructor
+  error - The class 'AzkarState' doesn't have a constant constructor 'loading' - test\features\azkar\azkar_bloc_test.dart:59:26 - const_with_undefined_constructor
+  error - The method 'azkarLoaded' isn't defined for the type 'AzkarState' - test\features\azkar\azkar_bloc_test.dart:60:20 - undefined_method
+  error - The method 'azkarLoaded' isn't defined for the type 'AzkarState' - test\features\azkar\azkar_bloc_test.dart:71:30 - undefined_method
+  error - The method 'azkarLoaded' isn't defined for the type 'AzkarState' - test\features\azkar\azkar_bloc_test.dart:74:20 - undefined_method
+  error - The method 'azkarLoaded' isn't defined for the type 'AzkarState' - test\features\azkar\azkar_bloc_test.dart:94:20 - undefined_method
+

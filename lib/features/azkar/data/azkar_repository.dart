@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
@@ -6,36 +7,58 @@ import '../domain/azkar_item.dart';
 class AzkarRepository {
   final Box<int> _progressBox;
   List<AzkarItem>? _cachedAzkar;
+  Completer<List<AzkarItem>>? _loadingCompleter;
 
   AzkarRepository(this._progressBox);
 
   Future<List<AzkarItem>> getAllAzkar() async {
-    // Basic daily reset logic
-    final now = DateTime.now();
-    final todayKey = 'last_reset_date';
-    final lastReset = _progressBox.get(todayKey);
-    final currentDayHash = now.year * 10000 + now.month * 100 + now.day;
-
-    if (lastReset != currentDayHash) {
-      await _progressBox.clear();
-      await _progressBox.put(todayKey, currentDayHash);
-      _cachedAzkar = null;
+    // If cache is ready, return it immediately
+    if (_cachedAzkar != null && _cachedAzkar!.isNotEmpty) {
+      return _cachedAzkar!;
     }
 
-    if (_cachedAzkar != null) return _cachedAzkar!;
+    // If already loading, wait for that
+    if (_loadingCompleter != null) {
+      return _loadingCompleter!.future;
+    }
+
+    _loadingCompleter = Completer<List<AzkarItem>>();
 
     try {
-      final String response = await rootBundle.loadString('assets/azkar.json');
+      // Basic daily reset logic
+      final now = DateTime.now();
+      const todayKey = 'last_reset_date';
+      final lastReset = _progressBox.get(todayKey);
+      final currentDayHash = now.year * 10000 + now.month * 100 + now.day;
+
+      if (lastReset != currentDayHash) {
+        await _progressBox.clear();
+        await _progressBox.put(todayKey, currentDayHash);
+        _cachedAzkar = null;
+      }
+
+      if (_cachedAzkar != null && _cachedAzkar!.isNotEmpty) {
+        _loadingCompleter!.complete(_cachedAzkar!);
+        return _cachedAzkar!;
+      }
+
+      final String response = await rootBundle
+          .loadString('assets/azkar.json')
+          .timeout(const Duration(seconds: 10));
+      
       final data = await json.decode(response);
       final List<dynamic>? rows = data['rows'];
       
-      if (rows == null) return [];
+      if (rows == null) {
+        _cachedAzkar = [];
+        _loadingCompleter!.complete([]);
+        return [];
+      }
       
       _cachedAzkar = rows.map((row) {
-        final zekr = row.length > 1 ? row[1]?.toString() ?? '' : '';
-        final category = row.length > 0 ? row[0]?.toString() ?? '' : '';
-        // Composite key for unique identification
-        final progressKey = '${category}_${zekr.hashCode}';
+      final zekr = row.length > 1 ? row[1]?.toString() ?? '' : '';
+      final category = row.length > 0 ? row[0]?.toString() ?? '' : '';
+      final progressKey = _getStableKey(category, zekr);
         
         return AzkarItem(
           category: category,
@@ -47,17 +70,21 @@ class AzkarRepository {
         );
       }).toList();
       
+      _loadingCompleter!.complete(_cachedAzkar!);
       return _cachedAzkar!;
-    } catch (e) {
-      return [];
+    } catch (e, stack) {
+      _loadingCompleter!.completeError(e, stack);
+      rethrow;
+    } finally {
+      _loadingCompleter = null;
     }
   }
 
   Future<void> saveProgress(AzkarItem item) async {
-    final progressKey = '${item.category}_${item.zekr.hashCode}';
+    final progressKey = _getStableKey(item.category, item.zekr);
     await _progressBox.put(progressKey, item.currentCount);
     
-    // Update cache
+    // Update cache in place
     if (_cachedAzkar != null) {
       final index = _cachedAzkar!.indexWhere((e) => e.zekr == item.zekr && e.category == item.category);
       if (index != -1) {
@@ -67,19 +94,37 @@ class AzkarRepository {
   }
 
   Future<void> resetCategory(String category) async {
-    final azkar = await getAllAzkar();
-    for (final item in azkar) {
-      if (item.category == category) {
-        final progressKey = '${category}_${item.zekr.hashCode}';
-        await _progressBox.delete(progressKey);
-        
-        // Update cache
-        final index = _cachedAzkar!.indexOf(item);
-        if (index != -1) {
-          _cachedAzkar![index] = item.copyWith(currentCount: 0);
+    // Ensure data is loaded
+    await getAllAzkar();
+    
+    final keysToDelete = <String>[];
+    if (_cachedAzkar != null) {
+      for (int i = 0; i < _cachedAzkar!.length; i++) {
+        final item = _cachedAzkar![i];
+        if (item.category == category) {
+          final progressKey = _getStableKey(category, item.zekr);
+          keysToDelete.add(progressKey);
+          _cachedAzkar![i] = item.copyWith(currentCount: 0);
         }
       }
     }
+    
+    if (keysToDelete.isNotEmpty) {
+      await _progressBox.deleteAll(keysToDelete);
+    }
+  }
+
+  Future<void> resetAll() async {
+    const todayKey = 'last_reset_date';
+    final lastReset = _progressBox.get(todayKey);
+    
+    await _progressBox.clear();
+    
+    if (lastReset != null) {
+      await _progressBox.put(todayKey, lastReset);
+    }
+    
+    _cachedAzkar = null; // Reset cache so next load gets fresh data
   }
 
   Future<List<String>> getCategories() async {
@@ -90,5 +135,15 @@ class AzkarRepository {
   Future<List<AzkarItem>> getAzkarByCategory(String category) async {
     final azkar = await getAllAzkar();
     return azkar.where((e) => e.category == category).toList();
+  }
+
+  String _getStableKey(String category, String zekr) {
+    // Stable hash for persistence
+    int hash = 0;
+    for (var i = 0; i < zekr.length; i++) {
+      hash = 31 * hash + zekr.codeUnitAt(i);
+      hash = hash & 0xFFFFFFFF;
+    }
+    return '${category}_$hash';
   }
 }

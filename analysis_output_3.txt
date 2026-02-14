@@ -1,0 +1,7 @@
+Analyzing fard-2...                                             
+
+   info - Don't invoke 'print' in production code - lib\features\azkar\data\azkar_repository.dart:53:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\azkar\data\azkar_repository.dart:74:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\azkar\data\azkar_repository.dart:78:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\azkar\data\azkar_repository.dart:116:7 - avoid_print
+

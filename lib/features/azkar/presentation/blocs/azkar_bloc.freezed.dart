@@ -22,6 +22,8 @@ mixin _$AzkarEvent {
     required TResult Function(String category) loadAzkar,
     required TResult Function(int index) incrementCount,
     required TResult Function(String category) resetCategory,
+    required TResult Function(int index) resetItem,
+    required TResult Function() resetAll,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -30,6 +32,8 @@ mixin _$AzkarEvent {
     TResult? Function(String category)? loadAzkar,
     TResult? Function(int index)? incrementCount,
     TResult? Function(String category)? resetCategory,
+    TResult? Function(int index)? resetItem,
+    TResult? Function()? resetAll,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -38,6 +42,8 @@ mixin _$AzkarEvent {
     TResult Function(String category)? loadAzkar,
     TResult Function(int index)? incrementCount,
     TResult Function(String category)? resetCategory,
+    TResult Function(int index)? resetItem,
+    TResult Function()? resetAll,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -47,6 +53,8 @@ mixin _$AzkarEvent {
     required TResult Function(_LoadAzkar value) loadAzkar,
     required TResult Function(_IncrementCount value) incrementCount,
     required TResult Function(_ResetCategory value) resetCategory,
+    required TResult Function(_ResetItem value) resetItem,
+    required TResult Function(_ResetAll value) resetAll,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -55,6 +63,8 @@ mixin _$AzkarEvent {
     TResult? Function(_LoadAzkar value)? loadAzkar,
     TResult? Function(_IncrementCount value)? incrementCount,
     TResult? Function(_ResetCategory value)? resetCategory,
+    TResult? Function(_ResetItem value)? resetItem,
+    TResult? Function(_ResetAll value)? resetAll,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -63,6 +73,8 @@ mixin _$AzkarEvent {
     TResult Function(_LoadAzkar value)? loadAzkar,
     TResult Function(_IncrementCount value)? incrementCount,
     TResult Function(_ResetCategory value)? resetCategory,
+    TResult Function(_ResetItem value)? resetItem,
+    TResult Function(_ResetAll value)? resetAll,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -128,6 +140,8 @@ class _$LoadCategoriesImpl implements _LoadCategories {
     required TResult Function(String category) loadAzkar,
     required TResult Function(int index) incrementCount,
     required TResult Function(String category) resetCategory,
+    required TResult Function(int index) resetItem,
+    required TResult Function() resetAll,
   }) {
     return loadCategories();
   }
@@ -139,6 +153,8 @@ class _$LoadCategoriesImpl implements _LoadCategories {
     TResult? Function(String category)? loadAzkar,
     TResult? Function(int index)? incrementCount,
     TResult? Function(String category)? resetCategory,
+    TResult? Function(int index)? resetItem,
+    TResult? Function()? resetAll,
   }) {
     return loadCategories?.call();
   }
@@ -150,6 +166,8 @@ class _$LoadCategoriesImpl implements _LoadCategories {
     TResult Function(String category)? loadAzkar,
     TResult Function(int index)? incrementCount,
     TResult Function(String category)? resetCategory,
+    TResult Function(int index)? resetItem,
+    TResult Function()? resetAll,
     required TResult orElse(),
   }) {
     if (loadCategories != null) {
@@ -165,6 +183,8 @@ class _$LoadCategoriesImpl implements _LoadCategories {
     required TResult Function(_LoadAzkar value) loadAzkar,
     required TResult Function(_IncrementCount value) incrementCount,
     required TResult Function(_ResetCategory value) resetCategory,
+    required TResult Function(_ResetItem value) resetItem,
+    required TResult Function(_ResetAll value) resetAll,
   }) {
     return loadCategories(this);
   }
@@ -176,6 +196,8 @@ class _$LoadCategoriesImpl implements _LoadCategories {
     TResult? Function(_LoadAzkar value)? loadAzkar,
     TResult? Function(_IncrementCount value)? incrementCount,
     TResult? Function(_ResetCategory value)? resetCategory,
+    TResult? Function(_ResetItem value)? resetItem,
+    TResult? Function(_ResetAll value)? resetAll,
   }) {
     return loadCategories?.call(this);
   }
@@ -187,6 +209,8 @@ class _$LoadCategoriesImpl implements _LoadCategories {
     TResult Function(_LoadAzkar value)? loadAzkar,
     TResult Function(_IncrementCount value)? incrementCount,
     TResult Function(_ResetCategory value)? resetCategory,
+    TResult Function(_ResetItem value)? resetItem,
+    TResult Function(_ResetAll value)? resetAll,
     required TResult orElse(),
   }) {
     if (loadCategories != null) {
@@ -269,6 +293,8 @@ class _$LoadAzkarImpl implements _LoadAzkar {
     required TResult Function(String category) loadAzkar,
     required TResult Function(int index) incrementCount,
     required TResult Function(String category) resetCategory,
+    required TResult Function(int index) resetItem,
+    required TResult Function() resetAll,
   }) {
     return loadAzkar(category);
   }
@@ -280,6 +306,8 @@ class _$LoadAzkarImpl implements _LoadAzkar {
     TResult? Function(String category)? loadAzkar,
     TResult? Function(int index)? incrementCount,
     TResult? Function(String category)? resetCategory,
+    TResult? Function(int index)? resetItem,
+    TResult? Function()? resetAll,
   }) {
     return loadAzkar?.call(category);
   }
@@ -291,6 +319,8 @@ class _$LoadAzkarImpl implements _LoadAzkar {
     TResult Function(String category)? loadAzkar,
     TResult Function(int index)? incrementCount,
     TResult Function(String category)? resetCategory,
+    TResult Function(int index)? resetItem,
+    TResult Function()? resetAll,
     required TResult orElse(),
   }) {
     if (loadAzkar != null) {
@@ -306,6 +336,8 @@ class _$LoadAzkarImpl implements _LoadAzkar {
     required TResult Function(_LoadAzkar value) loadAzkar,
     required TResult Function(_IncrementCount value) incrementCount,
     required TResult Function(_ResetCategory value) resetCategory,
+    required TResult Function(_ResetItem value) resetItem,
+    required TResult Function(_ResetAll value) resetAll,
   }) {
     return loadAzkar(this);
   }
@@ -317,6 +349,8 @@ class _$LoadAzkarImpl implements _LoadAzkar {
     TResult? Function(_LoadAzkar value)? loadAzkar,
     TResult? Function(_IncrementCount value)? incrementCount,
     TResult? Function(_ResetCategory value)? resetCategory,
+    TResult? Function(_ResetItem value)? resetItem,
+    TResult? Function(_ResetAll value)? resetAll,
   }) {
     return loadAzkar?.call(this);
   }
@@ -328,6 +362,8 @@ class _$LoadAzkarImpl implements _LoadAzkar {
     TResult Function(_LoadAzkar value)? loadAzkar,
     TResult Function(_IncrementCount value)? incrementCount,
     TResult Function(_ResetCategory value)? resetCategory,
+    TResult Function(_ResetItem value)? resetItem,
+    TResult Function(_ResetAll value)? resetAll,
     required TResult orElse(),
   }) {
     if (loadAzkar != null) {
@@ -415,6 +451,8 @@ class _$IncrementCountImpl implements _IncrementCount {
     required TResult Function(String category) loadAzkar,
     required TResult Function(int index) incrementCount,
     required TResult Function(String category) resetCategory,
+    required TResult Function(int index) resetItem,
+    required TResult Function() resetAll,
   }) {
     return incrementCount(index);
   }
@@ -426,6 +464,8 @@ class _$IncrementCountImpl implements _IncrementCount {
     TResult? Function(String category)? loadAzkar,
     TResult? Function(int index)? incrementCount,
     TResult? Function(String category)? resetCategory,
+    TResult? Function(int index)? resetItem,
+    TResult? Function()? resetAll,
   }) {
     return incrementCount?.call(index);
   }
@@ -437,6 +477,8 @@ class _$IncrementCountImpl implements _IncrementCount {
     TResult Function(String category)? loadAzkar,
     TResult Function(int index)? incrementCount,
     TResult Function(String category)? resetCategory,
+    TResult Function(int index)? resetItem,
+    TResult Function()? resetAll,
     required TResult orElse(),
   }) {
     if (incrementCount != null) {
@@ -452,6 +494,8 @@ class _$IncrementCountImpl implements _IncrementCount {
     required TResult Function(_LoadAzkar value) loadAzkar,
     required TResult Function(_IncrementCount value) incrementCount,
     required TResult Function(_ResetCategory value) resetCategory,
+    required TResult Function(_ResetItem value) resetItem,
+    required TResult Function(_ResetAll value) resetAll,
   }) {
     return incrementCount(this);
   }
@@ -463,6 +507,8 @@ class _$IncrementCountImpl implements _IncrementCount {
     TResult? Function(_LoadAzkar value)? loadAzkar,
     TResult? Function(_IncrementCount value)? incrementCount,
     TResult? Function(_ResetCategory value)? resetCategory,
+    TResult? Function(_ResetItem value)? resetItem,
+    TResult? Function(_ResetAll value)? resetAll,
   }) {
     return incrementCount?.call(this);
   }
@@ -474,6 +520,8 @@ class _$IncrementCountImpl implements _IncrementCount {
     TResult Function(_LoadAzkar value)? loadAzkar,
     TResult Function(_IncrementCount value)? incrementCount,
     TResult Function(_ResetCategory value)? resetCategory,
+    TResult Function(_ResetItem value)? resetItem,
+    TResult Function(_ResetAll value)? resetAll,
     required TResult orElse(),
   }) {
     if (incrementCount != null) {
@@ -561,6 +609,8 @@ class _$ResetCategoryImpl implements _ResetCategory {
     required TResult Function(String category) loadAzkar,
     required TResult Function(int index) incrementCount,
     required TResult Function(String category) resetCategory,
+    required TResult Function(int index) resetItem,
+    required TResult Function() resetAll,
   }) {
     return resetCategory(category);
   }
@@ -572,6 +622,8 @@ class _$ResetCategoryImpl implements _ResetCategory {
     TResult? Function(String category)? loadAzkar,
     TResult? Function(int index)? incrementCount,
     TResult? Function(String category)? resetCategory,
+    TResult? Function(int index)? resetItem,
+    TResult? Function()? resetAll,
   }) {
     return resetCategory?.call(category);
   }
@@ -583,6 +635,8 @@ class _$ResetCategoryImpl implements _ResetCategory {
     TResult Function(String category)? loadAzkar,
     TResult Function(int index)? incrementCount,
     TResult Function(String category)? resetCategory,
+    TResult Function(int index)? resetItem,
+    TResult Function()? resetAll,
     required TResult orElse(),
   }) {
     if (resetCategory != null) {
@@ -598,6 +652,8 @@ class _$ResetCategoryImpl implements _ResetCategory {
     required TResult Function(_LoadAzkar value) loadAzkar,
     required TResult Function(_IncrementCount value) incrementCount,
     required TResult Function(_ResetCategory value) resetCategory,
+    required TResult Function(_ResetItem value) resetItem,
+    required TResult Function(_ResetAll value) resetAll,
   }) {
     return resetCategory(this);
   }
@@ -609,6 +665,8 @@ class _$ResetCategoryImpl implements _ResetCategory {
     TResult? Function(_LoadAzkar value)? loadAzkar,
     TResult? Function(_IncrementCount value)? incrementCount,
     TResult? Function(_ResetCategory value)? resetCategory,
+    TResult? Function(_ResetItem value)? resetItem,
+    TResult? Function(_ResetAll value)? resetAll,
   }) {
     return resetCategory?.call(this);
   }
@@ -620,6 +678,8 @@ class _$ResetCategoryImpl implements _ResetCategory {
     TResult Function(_LoadAzkar value)? loadAzkar,
     TResult Function(_IncrementCount value)? incrementCount,
     TResult Function(_ResetCategory value)? resetCategory,
+    TResult Function(_ResetItem value)? resetItem,
+    TResult Function(_ResetAll value)? resetAll,
     required TResult orElse(),
   }) {
     if (resetCategory != null) {
@@ -639,63 +699,298 @@ abstract class _ResetCategory implements AzkarEvent {
 }
 
 /// @nodoc
-mixin _$AzkarState {
+abstract class _$$ResetItemImplCopyWith<$Res> {
+  factory _$$ResetItemImplCopyWith(
+          _$ResetItemImpl value, $Res Function(_$ResetItemImpl) then) =
+      __$$ResetItemImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({int index});
+}
+
+/// @nodoc
+class __$$ResetItemImplCopyWithImpl<$Res>
+    extends _$AzkarEventCopyWithImpl<$Res, _$ResetItemImpl>
+    implements _$$ResetItemImplCopyWith<$Res> {
+  __$$ResetItemImplCopyWithImpl(
+      _$ResetItemImpl _value, $Res Function(_$ResetItemImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? index = null,
+  }) {
+    return _then(_$ResetItemImpl(
+      null == index
+          ? _value.index
+          : index // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$ResetItemImpl implements _ResetItem {
+  const _$ResetItemImpl(this.index);
+
+  @override
+  final int index;
+
+  @override
+  String toString() {
+    return 'AzkarEvent.resetItem(index: $index)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$ResetItemImpl &&
+            (identical(other.index, index) || other.index == index));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, index);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$ResetItemImplCopyWith<_$ResetItemImpl> get copyWith =>
+      __$$ResetItemImplCopyWithImpl<_$ResetItemImpl>(this, _$identity);
+
+  @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function() initial,
-    required TResult Function() loading,
-    required TResult Function(List<String> categories) categoriesLoaded,
-    required TResult Function(String category, List<AzkarItem> azkar)
-        azkarLoaded,
-    required TResult Function(String message) error,
-  }) =>
-      throw _privateConstructorUsedError;
+    required TResult Function() loadCategories,
+    required TResult Function(String category) loadAzkar,
+    required TResult Function(int index) incrementCount,
+    required TResult Function(String category) resetCategory,
+    required TResult Function(int index) resetItem,
+    required TResult Function() resetAll,
+  }) {
+    return resetItem(index);
+  }
+
+  @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? initial,
-    TResult? Function()? loading,
-    TResult? Function(List<String> categories)? categoriesLoaded,
-    TResult? Function(String category, List<AzkarItem> azkar)? azkarLoaded,
-    TResult? Function(String message)? error,
-  }) =>
-      throw _privateConstructorUsedError;
+    TResult? Function()? loadCategories,
+    TResult? Function(String category)? loadAzkar,
+    TResult? Function(int index)? incrementCount,
+    TResult? Function(String category)? resetCategory,
+    TResult? Function(int index)? resetItem,
+    TResult? Function()? resetAll,
+  }) {
+    return resetItem?.call(index);
+  }
+
+  @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function()? loading,
-    TResult Function(List<String> categories)? categoriesLoaded,
-    TResult Function(String category, List<AzkarItem> azkar)? azkarLoaded,
-    TResult Function(String message)? error,
+    TResult Function()? loadCategories,
+    TResult Function(String category)? loadAzkar,
+    TResult Function(int index)? incrementCount,
+    TResult Function(String category)? resetCategory,
+    TResult Function(int index)? resetItem,
+    TResult Function()? resetAll,
     required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
+  }) {
+    if (resetItem != null) {
+      return resetItem(index);
+    }
+    return orElse();
+  }
+
+  @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(_Initial value) initial,
-    required TResult Function(_Loading value) loading,
-    required TResult Function(_CategoriesLoaded value) categoriesLoaded,
-    required TResult Function(_AzkarLoaded value) azkarLoaded,
-    required TResult Function(_Error value) error,
-  }) =>
-      throw _privateConstructorUsedError;
+    required TResult Function(_LoadCategories value) loadCategories,
+    required TResult Function(_LoadAzkar value) loadAzkar,
+    required TResult Function(_IncrementCount value) incrementCount,
+    required TResult Function(_ResetCategory value) resetCategory,
+    required TResult Function(_ResetItem value) resetItem,
+    required TResult Function(_ResetAll value) resetAll,
+  }) {
+    return resetItem(this);
+  }
+
+  @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Initial value)? initial,
-    TResult? Function(_Loading value)? loading,
-    TResult? Function(_CategoriesLoaded value)? categoriesLoaded,
-    TResult? Function(_AzkarLoaded value)? azkarLoaded,
-    TResult? Function(_Error value)? error,
-  }) =>
-      throw _privateConstructorUsedError;
+    TResult? Function(_LoadCategories value)? loadCategories,
+    TResult? Function(_LoadAzkar value)? loadAzkar,
+    TResult? Function(_IncrementCount value)? incrementCount,
+    TResult? Function(_ResetCategory value)? resetCategory,
+    TResult? Function(_ResetItem value)? resetItem,
+    TResult? Function(_ResetAll value)? resetAll,
+  }) {
+    return resetItem?.call(this);
+  }
+
+  @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Initial value)? initial,
-    TResult Function(_Loading value)? loading,
-    TResult Function(_CategoriesLoaded value)? categoriesLoaded,
-    TResult Function(_AzkarLoaded value)? azkarLoaded,
-    TResult Function(_Error value)? error,
+    TResult Function(_LoadCategories value)? loadCategories,
+    TResult Function(_LoadAzkar value)? loadAzkar,
+    TResult Function(_IncrementCount value)? incrementCount,
+    TResult Function(_ResetCategory value)? resetCategory,
+    TResult Function(_ResetItem value)? resetItem,
+    TResult Function(_ResetAll value)? resetAll,
     required TResult orElse(),
-  }) =>
+  }) {
+    if (resetItem != null) {
+      return resetItem(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _ResetItem implements AzkarEvent {
+  const factory _ResetItem(final int index) = _$ResetItemImpl;
+
+  int get index;
+  @JsonKey(ignore: true)
+  _$$ResetItemImplCopyWith<_$ResetItemImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$ResetAllImplCopyWith<$Res> {
+  factory _$$ResetAllImplCopyWith(
+          _$ResetAllImpl value, $Res Function(_$ResetAllImpl) then) =
+      __$$ResetAllImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$ResetAllImplCopyWithImpl<$Res>
+    extends _$AzkarEventCopyWithImpl<$Res, _$ResetAllImpl>
+    implements _$$ResetAllImplCopyWith<$Res> {
+  __$$ResetAllImplCopyWithImpl(
+      _$ResetAllImpl _value, $Res Function(_$ResetAllImpl) _then)
+      : super(_value, _then);
+}
+
+/// @nodoc
+
+class _$ResetAllImpl implements _ResetAll {
+  const _$ResetAllImpl();
+
+  @override
+  String toString() {
+    return 'AzkarEvent.resetAll()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$ResetAllImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() loadCategories,
+    required TResult Function(String category) loadAzkar,
+    required TResult Function(int index) incrementCount,
+    required TResult Function(String category) resetCategory,
+    required TResult Function(int index) resetItem,
+    required TResult Function() resetAll,
+  }) {
+    return resetAll();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? loadCategories,
+    TResult? Function(String category)? loadAzkar,
+    TResult? Function(int index)? incrementCount,
+    TResult? Function(String category)? resetCategory,
+    TResult? Function(int index)? resetItem,
+    TResult? Function()? resetAll,
+  }) {
+    return resetAll?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? loadCategories,
+    TResult Function(String category)? loadAzkar,
+    TResult Function(int index)? incrementCount,
+    TResult Function(String category)? resetCategory,
+    TResult Function(int index)? resetItem,
+    TResult Function()? resetAll,
+    required TResult orElse(),
+  }) {
+    if (resetAll != null) {
+      return resetAll();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_LoadCategories value) loadCategories,
+    required TResult Function(_LoadAzkar value) loadAzkar,
+    required TResult Function(_IncrementCount value) incrementCount,
+    required TResult Function(_ResetCategory value) resetCategory,
+    required TResult Function(_ResetItem value) resetItem,
+    required TResult Function(_ResetAll value) resetAll,
+  }) {
+    return resetAll(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_LoadCategories value)? loadCategories,
+    TResult? Function(_LoadAzkar value)? loadAzkar,
+    TResult? Function(_IncrementCount value)? incrementCount,
+    TResult? Function(_ResetCategory value)? resetCategory,
+    TResult? Function(_ResetItem value)? resetItem,
+    TResult? Function(_ResetAll value)? resetAll,
+  }) {
+    return resetAll?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_LoadCategories value)? loadCategories,
+    TResult Function(_LoadAzkar value)? loadAzkar,
+    TResult Function(_IncrementCount value)? incrementCount,
+    TResult Function(_ResetCategory value)? resetCategory,
+    TResult Function(_ResetItem value)? resetItem,
+    TResult Function(_ResetAll value)? resetAll,
+    required TResult orElse(),
+  }) {
+    if (resetAll != null) {
+      return resetAll(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _ResetAll implements AzkarEvent {
+  const factory _ResetAll() = _$ResetAllImpl;
+}
+
+/// @nodoc
+mixin _$AzkarState {
+  bool get isLoading => throw _privateConstructorUsedError;
+  List<String> get categories => throw _privateConstructorUsedError;
+  List<AzkarItem> get azkar => throw _privateConstructorUsedError;
+  String? get currentCategory => throw _privateConstructorUsedError;
+  String? get error => throw _privateConstructorUsedError;
+
+  @JsonKey(ignore: true)
+  $AzkarStateCopyWith<AzkarState> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -704,6 +999,13 @@ abstract class $AzkarStateCopyWith<$Res> {
   factory $AzkarStateCopyWith(
           AzkarState value, $Res Function(AzkarState) then) =
       _$AzkarStateCopyWithImpl<$Res, AzkarState>;
+  @useResult
+  $Res call(
+      {bool isLoading,
+      List<String> categories,
+      List<AzkarItem> azkar,
+      String? currentCategory,
+      String? error});
 }
 
 /// @nodoc
@@ -715,458 +1017,126 @@ class _$AzkarStateCopyWithImpl<$Res, $Val extends AzkarState>
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? isLoading = null,
+    Object? categories = null,
+    Object? azkar = null,
+    Object? currentCategory = freezed,
+    Object? error = freezed,
+  }) {
+    return _then(_value.copyWith(
+      isLoading: null == isLoading
+          ? _value.isLoading
+          : isLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
+      categories: null == categories
+          ? _value.categories
+          : categories // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      azkar: null == azkar
+          ? _value.azkar
+          : azkar // ignore: cast_nullable_to_non_nullable
+              as List<AzkarItem>,
+      currentCategory: freezed == currentCategory
+          ? _value.currentCategory
+          : currentCategory // ignore: cast_nullable_to_non_nullable
+              as String?,
+      error: freezed == error
+          ? _value.error
+          : error // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
+  }
 }
 
 /// @nodoc
-abstract class _$$InitialImplCopyWith<$Res> {
-  factory _$$InitialImplCopyWith(
-          _$InitialImpl value, $Res Function(_$InitialImpl) then) =
-      __$$InitialImplCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$InitialImplCopyWithImpl<$Res>
-    extends _$AzkarStateCopyWithImpl<$Res, _$InitialImpl>
-    implements _$$InitialImplCopyWith<$Res> {
-  __$$InitialImplCopyWithImpl(
-      _$InitialImpl _value, $Res Function(_$InitialImpl) _then)
-      : super(_value, _then);
-}
-
-/// @nodoc
-
-class _$InitialImpl implements _Initial {
-  const _$InitialImpl();
-
+abstract class _$$AzkarStateImplCopyWith<$Res>
+    implements $AzkarStateCopyWith<$Res> {
+  factory _$$AzkarStateImplCopyWith(
+          _$AzkarStateImpl value, $Res Function(_$AzkarStateImpl) then) =
+      __$$AzkarStateImplCopyWithImpl<$Res>;
   @override
-  String toString() {
-    return 'AzkarState.initial()';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$InitialImpl);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() initial,
-    required TResult Function() loading,
-    required TResult Function(List<String> categories) categoriesLoaded,
-    required TResult Function(String category, List<AzkarItem> azkar)
-        azkarLoaded,
-    required TResult Function(String message) error,
-  }) {
-    return initial();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? initial,
-    TResult? Function()? loading,
-    TResult? Function(List<String> categories)? categoriesLoaded,
-    TResult? Function(String category, List<AzkarItem> azkar)? azkarLoaded,
-    TResult? Function(String message)? error,
-  }) {
-    return initial?.call();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function()? loading,
-    TResult Function(List<String> categories)? categoriesLoaded,
-    TResult Function(String category, List<AzkarItem> azkar)? azkarLoaded,
-    TResult Function(String message)? error,
-    required TResult orElse(),
-  }) {
-    if (initial != null) {
-      return initial();
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(_Initial value) initial,
-    required TResult Function(_Loading value) loading,
-    required TResult Function(_CategoriesLoaded value) categoriesLoaded,
-    required TResult Function(_AzkarLoaded value) azkarLoaded,
-    required TResult Function(_Error value) error,
-  }) {
-    return initial(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Initial value)? initial,
-    TResult? Function(_Loading value)? loading,
-    TResult? Function(_CategoriesLoaded value)? categoriesLoaded,
-    TResult? Function(_AzkarLoaded value)? azkarLoaded,
-    TResult? Function(_Error value)? error,
-  }) {
-    return initial?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Initial value)? initial,
-    TResult Function(_Loading value)? loading,
-    TResult Function(_CategoriesLoaded value)? categoriesLoaded,
-    TResult Function(_AzkarLoaded value)? azkarLoaded,
-    TResult Function(_Error value)? error,
-    required TResult orElse(),
-  }) {
-    if (initial != null) {
-      return initial(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class _Initial implements AzkarState {
-  const factory _Initial() = _$InitialImpl;
-}
-
-/// @nodoc
-abstract class _$$LoadingImplCopyWith<$Res> {
-  factory _$$LoadingImplCopyWith(
-          _$LoadingImpl value, $Res Function(_$LoadingImpl) then) =
-      __$$LoadingImplCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$LoadingImplCopyWithImpl<$Res>
-    extends _$AzkarStateCopyWithImpl<$Res, _$LoadingImpl>
-    implements _$$LoadingImplCopyWith<$Res> {
-  __$$LoadingImplCopyWithImpl(
-      _$LoadingImpl _value, $Res Function(_$LoadingImpl) _then)
-      : super(_value, _then);
-}
-
-/// @nodoc
-
-class _$LoadingImpl implements _Loading {
-  const _$LoadingImpl();
-
-  @override
-  String toString() {
-    return 'AzkarState.loading()';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$LoadingImpl);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() initial,
-    required TResult Function() loading,
-    required TResult Function(List<String> categories) categoriesLoaded,
-    required TResult Function(String category, List<AzkarItem> azkar)
-        azkarLoaded,
-    required TResult Function(String message) error,
-  }) {
-    return loading();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? initial,
-    TResult? Function()? loading,
-    TResult? Function(List<String> categories)? categoriesLoaded,
-    TResult? Function(String category, List<AzkarItem> azkar)? azkarLoaded,
-    TResult? Function(String message)? error,
-  }) {
-    return loading?.call();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function()? loading,
-    TResult Function(List<String> categories)? categoriesLoaded,
-    TResult Function(String category, List<AzkarItem> azkar)? azkarLoaded,
-    TResult Function(String message)? error,
-    required TResult orElse(),
-  }) {
-    if (loading != null) {
-      return loading();
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(_Initial value) initial,
-    required TResult Function(_Loading value) loading,
-    required TResult Function(_CategoriesLoaded value) categoriesLoaded,
-    required TResult Function(_AzkarLoaded value) azkarLoaded,
-    required TResult Function(_Error value) error,
-  }) {
-    return loading(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Initial value)? initial,
-    TResult? Function(_Loading value)? loading,
-    TResult? Function(_CategoriesLoaded value)? categoriesLoaded,
-    TResult? Function(_AzkarLoaded value)? azkarLoaded,
-    TResult? Function(_Error value)? error,
-  }) {
-    return loading?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Initial value)? initial,
-    TResult Function(_Loading value)? loading,
-    TResult Function(_CategoriesLoaded value)? categoriesLoaded,
-    TResult Function(_AzkarLoaded value)? azkarLoaded,
-    TResult Function(_Error value)? error,
-    required TResult orElse(),
-  }) {
-    if (loading != null) {
-      return loading(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class _Loading implements AzkarState {
-  const factory _Loading() = _$LoadingImpl;
-}
-
-/// @nodoc
-abstract class _$$CategoriesLoadedImplCopyWith<$Res> {
-  factory _$$CategoriesLoadedImplCopyWith(_$CategoriesLoadedImpl value,
-          $Res Function(_$CategoriesLoadedImpl) then) =
-      __$$CategoriesLoadedImplCopyWithImpl<$Res>;
   @useResult
-  $Res call({List<String> categories});
+  $Res call(
+      {bool isLoading,
+      List<String> categories,
+      List<AzkarItem> azkar,
+      String? currentCategory,
+      String? error});
 }
 
 /// @nodoc
-class __$$CategoriesLoadedImplCopyWithImpl<$Res>
-    extends _$AzkarStateCopyWithImpl<$Res, _$CategoriesLoadedImpl>
-    implements _$$CategoriesLoadedImplCopyWith<$Res> {
-  __$$CategoriesLoadedImplCopyWithImpl(_$CategoriesLoadedImpl _value,
-      $Res Function(_$CategoriesLoadedImpl) _then)
+class __$$AzkarStateImplCopyWithImpl<$Res>
+    extends _$AzkarStateCopyWithImpl<$Res, _$AzkarStateImpl>
+    implements _$$AzkarStateImplCopyWith<$Res> {
+  __$$AzkarStateImplCopyWithImpl(
+      _$AzkarStateImpl _value, $Res Function(_$AzkarStateImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? isLoading = null,
     Object? categories = null,
+    Object? azkar = null,
+    Object? currentCategory = freezed,
+    Object? error = freezed,
   }) {
-    return _then(_$CategoriesLoadedImpl(
-      null == categories
+    return _then(_$AzkarStateImpl(
+      isLoading: null == isLoading
+          ? _value.isLoading
+          : isLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
+      categories: null == categories
           ? _value._categories
           : categories // ignore: cast_nullable_to_non_nullable
               as List<String>,
+      azkar: null == azkar
+          ? _value._azkar
+          : azkar // ignore: cast_nullable_to_non_nullable
+              as List<AzkarItem>,
+      currentCategory: freezed == currentCategory
+          ? _value.currentCategory
+          : currentCategory // ignore: cast_nullable_to_non_nullable
+              as String?,
+      error: freezed == error
+          ? _value.error
+          : error // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
 
 /// @nodoc
 
-class _$CategoriesLoadedImpl implements _CategoriesLoaded {
-  const _$CategoriesLoadedImpl(final List<String> categories)
-      : _categories = categories;
+class _$AzkarStateImpl implements _AzkarState {
+  const _$AzkarStateImpl(
+      {this.isLoading = false,
+      final List<String> categories = const [],
+      final List<AzkarItem> azkar = const [],
+      this.currentCategory,
+      this.error})
+      : _categories = categories,
+        _azkar = azkar;
 
+  @override
+  @JsonKey()
+  final bool isLoading;
   final List<String> _categories;
   @override
+  @JsonKey()
   List<String> get categories {
     if (_categories is EqualUnmodifiableListView) return _categories;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_categories);
   }
 
-  @override
-  String toString() {
-    return 'AzkarState.categoriesLoaded(categories: $categories)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$CategoriesLoadedImpl &&
-            const DeepCollectionEquality()
-                .equals(other._categories, _categories));
-  }
-
-  @override
-  int get hashCode => Object.hash(
-      runtimeType, const DeepCollectionEquality().hash(_categories));
-
-  @JsonKey(ignore: true)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$CategoriesLoadedImplCopyWith<_$CategoriesLoadedImpl> get copyWith =>
-      __$$CategoriesLoadedImplCopyWithImpl<_$CategoriesLoadedImpl>(
-          this, _$identity);
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() initial,
-    required TResult Function() loading,
-    required TResult Function(List<String> categories) categoriesLoaded,
-    required TResult Function(String category, List<AzkarItem> azkar)
-        azkarLoaded,
-    required TResult Function(String message) error,
-  }) {
-    return categoriesLoaded(categories);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? initial,
-    TResult? Function()? loading,
-    TResult? Function(List<String> categories)? categoriesLoaded,
-    TResult? Function(String category, List<AzkarItem> azkar)? azkarLoaded,
-    TResult? Function(String message)? error,
-  }) {
-    return categoriesLoaded?.call(categories);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function()? loading,
-    TResult Function(List<String> categories)? categoriesLoaded,
-    TResult Function(String category, List<AzkarItem> azkar)? azkarLoaded,
-    TResult Function(String message)? error,
-    required TResult orElse(),
-  }) {
-    if (categoriesLoaded != null) {
-      return categoriesLoaded(categories);
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(_Initial value) initial,
-    required TResult Function(_Loading value) loading,
-    required TResult Function(_CategoriesLoaded value) categoriesLoaded,
-    required TResult Function(_AzkarLoaded value) azkarLoaded,
-    required TResult Function(_Error value) error,
-  }) {
-    return categoriesLoaded(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Initial value)? initial,
-    TResult? Function(_Loading value)? loading,
-    TResult? Function(_CategoriesLoaded value)? categoriesLoaded,
-    TResult? Function(_AzkarLoaded value)? azkarLoaded,
-    TResult? Function(_Error value)? error,
-  }) {
-    return categoriesLoaded?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Initial value)? initial,
-    TResult Function(_Loading value)? loading,
-    TResult Function(_CategoriesLoaded value)? categoriesLoaded,
-    TResult Function(_AzkarLoaded value)? azkarLoaded,
-    TResult Function(_Error value)? error,
-    required TResult orElse(),
-  }) {
-    if (categoriesLoaded != null) {
-      return categoriesLoaded(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class _CategoriesLoaded implements AzkarState {
-  const factory _CategoriesLoaded(final List<String> categories) =
-      _$CategoriesLoadedImpl;
-
-  List<String> get categories;
-  @JsonKey(ignore: true)
-  _$$CategoriesLoadedImplCopyWith<_$CategoriesLoadedImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class _$$AzkarLoadedImplCopyWith<$Res> {
-  factory _$$AzkarLoadedImplCopyWith(
-          _$AzkarLoadedImpl value, $Res Function(_$AzkarLoadedImpl) then) =
-      __$$AzkarLoadedImplCopyWithImpl<$Res>;
-  @useResult
-  $Res call({String category, List<AzkarItem> azkar});
-}
-
-/// @nodoc
-class __$$AzkarLoadedImplCopyWithImpl<$Res>
-    extends _$AzkarStateCopyWithImpl<$Res, _$AzkarLoadedImpl>
-    implements _$$AzkarLoadedImplCopyWith<$Res> {
-  __$$AzkarLoadedImplCopyWithImpl(
-      _$AzkarLoadedImpl _value, $Res Function(_$AzkarLoadedImpl) _then)
-      : super(_value, _then);
-
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? category = null,
-    Object? azkar = null,
-  }) {
-    return _then(_$AzkarLoadedImpl(
-      null == category
-          ? _value.category
-          : category // ignore: cast_nullable_to_non_nullable
-              as String,
-      null == azkar
-          ? _value._azkar
-          : azkar // ignore: cast_nullable_to_non_nullable
-              as List<AzkarItem>,
-    ));
-  }
-}
-
-/// @nodoc
-
-class _$AzkarLoadedImpl implements _AzkarLoaded {
-  const _$AzkarLoadedImpl(this.category, final List<AzkarItem> azkar)
-      : _azkar = azkar;
-
-  @override
-  final String category;
   final List<AzkarItem> _azkar;
   @override
+  @JsonKey()
   List<AzkarItem> get azkar {
     if (_azkar is EqualUnmodifiableListView) return _azkar;
     // ignore: implicit_dynamic_type
@@ -1174,271 +1144,66 @@ class _$AzkarLoadedImpl implements _AzkarLoaded {
   }
 
   @override
+  final String? currentCategory;
+  @override
+  final String? error;
+
+  @override
   String toString() {
-    return 'AzkarState.azkarLoaded(category: $category, azkar: $azkar)';
+    return 'AzkarState(isLoading: $isLoading, categories: $categories, azkar: $azkar, currentCategory: $currentCategory, error: $error)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$AzkarLoadedImpl &&
-            (identical(other.category, category) ||
-                other.category == category) &&
-            const DeepCollectionEquality().equals(other._azkar, _azkar));
+            other is _$AzkarStateImpl &&
+            (identical(other.isLoading, isLoading) ||
+                other.isLoading == isLoading) &&
+            const DeepCollectionEquality()
+                .equals(other._categories, _categories) &&
+            const DeepCollectionEquality().equals(other._azkar, _azkar) &&
+            (identical(other.currentCategory, currentCategory) ||
+                other.currentCategory == currentCategory) &&
+            (identical(other.error, error) || other.error == error));
   }
 
   @override
   int get hashCode => Object.hash(
-      runtimeType, category, const DeepCollectionEquality().hash(_azkar));
+      runtimeType,
+      isLoading,
+      const DeepCollectionEquality().hash(_categories),
+      const DeepCollectionEquality().hash(_azkar),
+      currentCategory,
+      error);
 
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$AzkarLoadedImplCopyWith<_$AzkarLoadedImpl> get copyWith =>
-      __$$AzkarLoadedImplCopyWithImpl<_$AzkarLoadedImpl>(this, _$identity);
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() initial,
-    required TResult Function() loading,
-    required TResult Function(List<String> categories) categoriesLoaded,
-    required TResult Function(String category, List<AzkarItem> azkar)
-        azkarLoaded,
-    required TResult Function(String message) error,
-  }) {
-    return azkarLoaded(category, azkar);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? initial,
-    TResult? Function()? loading,
-    TResult? Function(List<String> categories)? categoriesLoaded,
-    TResult? Function(String category, List<AzkarItem> azkar)? azkarLoaded,
-    TResult? Function(String message)? error,
-  }) {
-    return azkarLoaded?.call(category, azkar);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function()? loading,
-    TResult Function(List<String> categories)? categoriesLoaded,
-    TResult Function(String category, List<AzkarItem> azkar)? azkarLoaded,
-    TResult Function(String message)? error,
-    required TResult orElse(),
-  }) {
-    if (azkarLoaded != null) {
-      return azkarLoaded(category, azkar);
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(_Initial value) initial,
-    required TResult Function(_Loading value) loading,
-    required TResult Function(_CategoriesLoaded value) categoriesLoaded,
-    required TResult Function(_AzkarLoaded value) azkarLoaded,
-    required TResult Function(_Error value) error,
-  }) {
-    return azkarLoaded(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Initial value)? initial,
-    TResult? Function(_Loading value)? loading,
-    TResult? Function(_CategoriesLoaded value)? categoriesLoaded,
-    TResult? Function(_AzkarLoaded value)? azkarLoaded,
-    TResult? Function(_Error value)? error,
-  }) {
-    return azkarLoaded?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Initial value)? initial,
-    TResult Function(_Loading value)? loading,
-    TResult Function(_CategoriesLoaded value)? categoriesLoaded,
-    TResult Function(_AzkarLoaded value)? azkarLoaded,
-    TResult Function(_Error value)? error,
-    required TResult orElse(),
-  }) {
-    if (azkarLoaded != null) {
-      return azkarLoaded(this);
-    }
-    return orElse();
-  }
+  _$$AzkarStateImplCopyWith<_$AzkarStateImpl> get copyWith =>
+      __$$AzkarStateImplCopyWithImpl<_$AzkarStateImpl>(this, _$identity);
 }
 
-abstract class _AzkarLoaded implements AzkarState {
-  const factory _AzkarLoaded(
-      final String category, final List<AzkarItem> azkar) = _$AzkarLoadedImpl;
+abstract class _AzkarState implements AzkarState {
+  const factory _AzkarState(
+      {final bool isLoading,
+      final List<String> categories,
+      final List<AzkarItem> azkar,
+      final String? currentCategory,
+      final String? error}) = _$AzkarStateImpl;
 
-  String get category;
+  @override
+  bool get isLoading;
+  @override
+  List<String> get categories;
+  @override
   List<AzkarItem> get azkar;
+  @override
+  String? get currentCategory;
+  @override
+  String? get error;
+  @override
   @JsonKey(ignore: true)
-  _$$AzkarLoadedImplCopyWith<_$AzkarLoadedImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class _$$ErrorImplCopyWith<$Res> {
-  factory _$$ErrorImplCopyWith(
-          _$ErrorImpl value, $Res Function(_$ErrorImpl) then) =
-      __$$ErrorImplCopyWithImpl<$Res>;
-  @useResult
-  $Res call({String message});
-}
-
-/// @nodoc
-class __$$ErrorImplCopyWithImpl<$Res>
-    extends _$AzkarStateCopyWithImpl<$Res, _$ErrorImpl>
-    implements _$$ErrorImplCopyWith<$Res> {
-  __$$ErrorImplCopyWithImpl(
-      _$ErrorImpl _value, $Res Function(_$ErrorImpl) _then)
-      : super(_value, _then);
-
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? message = null,
-  }) {
-    return _then(_$ErrorImpl(
-      null == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
-  }
-}
-
-/// @nodoc
-
-class _$ErrorImpl implements _Error {
-  const _$ErrorImpl(this.message);
-
-  @override
-  final String message;
-
-  @override
-  String toString() {
-    return 'AzkarState.error(message: $message)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$ErrorImpl &&
-            (identical(other.message, message) || other.message == message));
-  }
-
-  @override
-  int get hashCode => Object.hash(runtimeType, message);
-
-  @JsonKey(ignore: true)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$ErrorImplCopyWith<_$ErrorImpl> get copyWith =>
-      __$$ErrorImplCopyWithImpl<_$ErrorImpl>(this, _$identity);
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() initial,
-    required TResult Function() loading,
-    required TResult Function(List<String> categories) categoriesLoaded,
-    required TResult Function(String category, List<AzkarItem> azkar)
-        azkarLoaded,
-    required TResult Function(String message) error,
-  }) {
-    return error(message);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? initial,
-    TResult? Function()? loading,
-    TResult? Function(List<String> categories)? categoriesLoaded,
-    TResult? Function(String category, List<AzkarItem> azkar)? azkarLoaded,
-    TResult? Function(String message)? error,
-  }) {
-    return error?.call(message);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function()? loading,
-    TResult Function(List<String> categories)? categoriesLoaded,
-    TResult Function(String category, List<AzkarItem> azkar)? azkarLoaded,
-    TResult Function(String message)? error,
-    required TResult orElse(),
-  }) {
-    if (error != null) {
-      return error(message);
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(_Initial value) initial,
-    required TResult Function(_Loading value) loading,
-    required TResult Function(_CategoriesLoaded value) categoriesLoaded,
-    required TResult Function(_AzkarLoaded value) azkarLoaded,
-    required TResult Function(_Error value) error,
-  }) {
-    return error(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Initial value)? initial,
-    TResult? Function(_Loading value)? loading,
-    TResult? Function(_CategoriesLoaded value)? categoriesLoaded,
-    TResult? Function(_AzkarLoaded value)? azkarLoaded,
-    TResult? Function(_Error value)? error,
-  }) {
-    return error?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Initial value)? initial,
-    TResult Function(_Loading value)? loading,
-    TResult Function(_CategoriesLoaded value)? categoriesLoaded,
-    TResult Function(_AzkarLoaded value)? azkarLoaded,
-    TResult Function(_Error value)? error,
-    required TResult orElse(),
-  }) {
-    if (error != null) {
-      return error(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class _Error implements AzkarState {
-  const factory _Error(final String message) = _$ErrorImpl;
-
-  String get message;
-  @JsonKey(ignore: true)
-  _$$ErrorImplCopyWith<_$ErrorImpl> get copyWith =>
+  _$$AzkarStateImplCopyWith<_$AzkarStateImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

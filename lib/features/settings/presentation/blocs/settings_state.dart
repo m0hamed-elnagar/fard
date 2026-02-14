@@ -12,5 +12,7 @@ class SettingsState with _$SettingsState {
     String? cityName,
     @Default('muslim_league') String calculationMethod,
     @Default('shafi') String madhab,
+    @Default('05:00') String morningAzkarTime,
+    @Default('18:00') String eveningAzkarTime,
   }) = _SettingsState;
 }

@@ -79,5 +79,11 @@
   "shafiMadhab": "Shafi, Maliki, Hanbali",
   "hanafiMadhab": "Hanafi",
   "refreshLocation": "Refresh Location",
-  "locationNotSet": "Location not set"
+  "locationNotSet": "Location not set",
+  "azkarSettings": "Azkar Settings",
+  "morningAzkar": "Morning Azkar",
+  "eveningAzkar": "Evening Azkar",
+  "azkarSettingsDesc": "Configure what time to show morning and evening Azkar reminders.",
+  "timeFor": "Time for",
+  "recommended": "Recommended"
 }

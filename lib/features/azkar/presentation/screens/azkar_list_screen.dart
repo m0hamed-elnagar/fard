@@ -23,38 +23,108 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.category,
-          style: GoogleFonts.amiri(fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              context.read<AzkarBloc>().add(AzkarEvent.resetCategory(widget.category));
-            },
-            icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'Reset Category',
+    return BlocBuilder<AzkarBloc, AzkarState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              widget.category,
+              style: GoogleFonts.amiri(fontWeight: FontWeight.bold),
+            ),
           ),
-        ],
-      ),
-      body: BlocBuilder<AzkarBloc, AzkarState>(
-        builder: (context, state) {
-          return state.maybeWhen(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            azkarLoaded: (category, azkar) => ListView.builder(
+          body: Column(
+            children: [
+              if (state.isLoading) 
+                const LinearProgressIndicator(minHeight: 2),
+              Expanded(
+                child: _buildBody(context, state),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBody(BuildContext context, AzkarState state) {
+    if (state.isLoading && state.azkar.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+          if (state.error != null && state.azkar.isEmpty) {
+            return Center(child: Text(state.error!));
+          }
+
+          final azkar = state.azkar;
+          if (azkar.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.info_outline,
+                      size: 48, color: AppTheme.textSecondary),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'No items found in this category',
+                    style: TextStyle(color: AppTheme.textSecondary),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              context
+                  .read<AzkarBloc>()
+                  .add(AzkarEvent.loadAzkar(widget.category));
+              await context.read<AzkarBloc>().stream.firstWhere((s) => !s.isLoading).timeout(const Duration(seconds: 15), onTimeout: () => state);
+            },
+            child: ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: azkar.length,
+              itemCount: azkar.length + 1,
               itemBuilder: (context, index) {
+                if (index == 0) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 24.0, top: 8.0),
+                    child: ElevatedButton.icon(
+                      onPressed: state.isLoading 
+                        ? null 
+                        : () {
+                            context.read<AzkarBloc>().add(AzkarEvent.resetCategory(widget.category));
+                          },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.accent.withValues(alpha: 0.1),
+                        foregroundColor: AppTheme.accent,
+                        side: const BorderSide(color: AppTheme.accent, width: 1),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      icon: const Icon(Icons.history_rounded),
+                      label: Text(
+                        'Reset All Progress',
+                        style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                    ),
+                  );
+                }
+
+                final itemIndex = index - 1;
+                final item = azkar[itemIndex];
+
                 return _ZekrCard(
-                  item: azkar[index],
+                  item: item,
+                  onReset: () {
+                    context.read<AzkarBloc>().add(AzkarEvent.resetItem(itemIndex));
+                  },
                   onTap: () async {
-                    context.read<AzkarBloc>().add(AzkarEvent.incrementCount(index));
-                    
+                    context
+                        .read<AzkarBloc>()
+                        .add(AzkarEvent.incrementCount(itemIndex));
+
                     // Tactile feedback
                     if (await Vibration.hasVibrator()) {
-                      if (azkar[index].currentCount + 1 >= azkar[index].count) {
+                      if (item.currentCount + 1 >= item.count) {
                         Vibration.vibrate(duration: 100, amplitude: 255);
                       } else {
                         Vibration.vibrate(duration: 30);
@@ -64,20 +134,20 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
                 );
               },
             ),
-            error: (message) => Center(child: Text(message)),
-            orElse: () => const SizedBox.shrink(),
           );
-        },
-      ),
-    );
   }
 }
 
 class _ZekrCard extends StatelessWidget {
   final AzkarItem item;
   final VoidCallback onTap;
+  final VoidCallback onReset;
 
-  const _ZekrCard({required this.item, required this.onTap});
+  const _ZekrCard({
+    required this.item, 
+    required this.onTap, 
+    required this.onReset,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -132,6 +202,15 @@ class _ZekrCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  if (item.currentCount > 0)
+                    IconButton(
+                      onPressed: onReset,
+                      icon: const Icon(Icons.history_rounded, size: 20, color: AppTheme.textSecondary),
+                      tooltip: 'Reset Item',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
