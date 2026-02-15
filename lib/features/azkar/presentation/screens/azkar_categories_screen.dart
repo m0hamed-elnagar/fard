@@ -16,6 +16,10 @@ class AzkarCategoriesScreen extends StatefulWidget {
 }
 
 class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  bool _isSearching = false;
+
   @override
   void initState() {
     super.initState();
@@ -23,6 +27,19 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
     if (bloc.state.categories.isEmpty) {
       bloc.add(const AzkarEvent.loadCategories());
     }
+    _searchController.addListener(() {
+      if (mounted) {
+        setState(() {
+          _searchQuery = _searchController.text.toLowerCase();
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -31,47 +48,84 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
     
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          l10n.azkar,
-          style: GoogleFonts.amiri(fontWeight: FontWeight.bold, fontSize: 24),
-        ),
-        centerTitle: true,
+        leading: _isSearching
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  setState(() {
+                    _isSearching = false;
+                    _searchController.clear();
+                  });
+                },
+              )
+            : null,
+        title: _isSearching
+            ? TextField(
+                key: const Key('azkar_search_field'),
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: l10n.search,
+                  border: InputBorder.none,
+                  hintStyle: const TextStyle(color: Colors.white70),
+                ),
+                style: const TextStyle(color: Colors.white, fontSize: 18),
+              )
+            : Text(
+                l10n.azkar,
+                style: GoogleFonts.amiri(fontWeight: FontWeight.bold, fontSize: 24),
+              ),
+        centerTitle: false,
         actions: [
           IconButton(
-            onPressed: () async {
-              final confirmed = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text(l10n.resetAllProgress, style: GoogleFonts.amiri()),
-                  content: Text(
-                    l10n.localeName == 'ar' 
-                      ? 'هل أنت متأكد من إعادة تعيين جميع تقدم الأذكار؟'
-                      : 'Are you sure you want to reset all azkar progress?',
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.missed,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: Text(l10n.delete),
-                    ),
-                  ],
-                ),
-              );
-
-              if (confirmed == true && context.mounted) {
-                context.read<AzkarBloc>().add(const AzkarEvent.resetAll());
-              }
+            key: const Key('azkar_search_button'),
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            onPressed: () {
+              setState(() {
+                if (_isSearching) {
+                  _searchController.clear();
+                  _isSearching = false;
+                } else {
+                  _isSearching = true;
+                }
+              });
             },
-            icon: const Icon(Icons.refresh_rounded),
-            tooltip: l10n.resetAllProgress,
           ),
+          IconButton(
+            onPressed: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text(l10n.resetAllProgress, style: GoogleFonts.amiri()),
+                    content: Text(
+                      l10n.localeName == 'ar' 
+                        ? 'هل أنت متأكد من إعادة تعيين جميع تقدم الأذكار؟'
+                        : 'Are you sure you want to reset all azkar progress?',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.missed,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: Text(l10n.delete),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirmed == true && context.mounted) {
+                  context.read<AzkarBloc>().add(const AzkarEvent.resetAll());
+                }
+              },
+              icon: const Icon(Icons.refresh_rounded),
+              tooltip: l10n.resetAllProgress,
+            ),
         ],
       ),
       body: BlocBuilder<AzkarBloc, AzkarState>(
@@ -94,7 +148,7 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(32.0),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(Icons.error_outline, color: Colors.red, size: 64),
                     const SizedBox(height: 16),
@@ -126,7 +180,11 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
             );
           }
 
-          if (state.categories.isEmpty && !state.isLoading) {
+          final filteredCategories = state.categories.where((cat) {
+            return cat.toLowerCase().contains(_searchQuery);
+          }).toList();
+
+          if (filteredCategories.isEmpty && !state.isLoading) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -134,17 +192,18 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                   const Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
                   Text(
-                    l10n.noCategoriesFound,
+                    _searchQuery.isEmpty ? l10n.noCategoriesFound : l10n.noSearchResults,
                     style: GoogleFonts.amiri(fontSize: 20),
                   ),
                   const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: () => context
-                        .read<AzkarBloc>()
-                        .add(const AzkarEvent.loadCategories()),
-                    icon: const Icon(Icons.refresh),
-                    label: Text(l10n.refreshData),
-                  ),
+                  if (_searchQuery.isEmpty)
+                    ElevatedButton.icon(
+                      onPressed: () => context
+                          .read<AzkarBloc>()
+                          .add(const AzkarEvent.loadCategories()),
+                      icon: const Icon(Icons.refresh),
+                      label: Text(l10n.refreshData),
+                    ),
                 ],
               ),
             );
@@ -153,7 +212,6 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
           return RefreshIndicator(
             onRefresh: () async {
               context.read<AzkarBloc>().add(const AzkarEvent.loadCategories());
-              // Wait for state to not be loading or a timeout
               await context.read<AzkarBloc>().stream.firstWhere((s) => !s.isLoading).timeout(const Duration(seconds: 15), onTimeout: () => state);
             },
             child: BlocBuilder<SettingsCubit, SettingsState>(
@@ -167,13 +225,15 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                 eveningTime = _parseTime(settingsState.eveningAzkarTime, now);
 
                 return ListView.builder(
+                  key: const Key('azkar_categories_list'),
                   padding: const EdgeInsets.all(16),
-                  itemCount: state.categories.length,
+                  itemCount: filteredCategories.length,
                   itemBuilder: (context, index) {
-                    final category = state.categories[index];
+                    final category = filteredCategories[index];
                     final isRecommended = _checkIsRecommended(category, now, morningTime, eveningTime);
 
                     return _CategoryCard(
+                      key: Key('category_$category'),
                       category: category,
                       isRecommended: isRecommended,
                     );
@@ -198,7 +258,6 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
 
   bool _checkIsRecommended(String category, DateTime now, DateTime morningTime, DateTime eveningTime) {
     if (category.contains('الصباح') || category.contains('Morning')) {
-      // Show within 4 hours of set time
       return now.isAfter(morningTime.subtract(const Duration(minutes: 30))) && 
              now.isBefore(morningTime.add(const Duration(hours: 4)));
     }
@@ -215,6 +274,7 @@ class _CategoryCard extends StatelessWidget {
   final bool isRecommended;
 
   const _CategoryCard({
+    super.key,
     required this.category,
     this.isRecommended = false,
   });

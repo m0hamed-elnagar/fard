@@ -559,6 +559,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Azkar'**
   String get azkarTab;
+
+  /// No description provided for @search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search...'**
+  String get search;
+
+  /// No description provided for @noSearchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No search results found'**
+  String get noSearchResults;
+
+  /// No description provided for @searchCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a category...'**
+  String get searchCategory;
+
+  /// No description provided for @selectCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Category'**
+  String get selectCategory;
 }
 
 class _AppLocalizationsDelegate

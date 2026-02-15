@@ -97,5 +97,9 @@
   "noItemsFound": "لم يتم العثور على عناصر في هذه الفئة",
   "resetItem": "إعادة تعيين العنصر",
   "prayerTab": "الصلاة",
-  "azkarTab": "الأذكار"
+  "azkarTab": "الأذكار",
+  "search": "بحث...",
+  "noSearchResults": "لم يتم العثور على نتائج للبحث",
+  "searchCategory": "ابحث عن فئة...",
+  "selectCategory": "اختر الفئة"
 }

@@ -250,4 +250,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get azkarTab => 'الأذكار';
+
+  @override
+  String get search => 'بحث...';
+
+  @override
+  String get noSearchResults => 'لم يتم العثور على نتائج للبحث';
+
+  @override
+  String get searchCategory => 'ابحث عن فئة...';
+
+  @override
+  String get selectCategory => 'اختر الفئة';
 }

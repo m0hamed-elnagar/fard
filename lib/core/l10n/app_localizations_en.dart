@@ -251,4 +251,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get azkarTab => 'Azkar';
+
+  @override
+  String get search => 'Search...';
+
+  @override
+  String get noSearchResults => 'No search results found';
+
+  @override
+  String get searchCategory => 'Search for a category...';
+
+  @override
+  String get selectCategory => 'Select Category';
 }

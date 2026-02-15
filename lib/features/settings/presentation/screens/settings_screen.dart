@@ -174,6 +174,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       TextButton.icon(
+                        key: const Key('add_reminder_button'),
                         onPressed: () => _showAddReminderDialog(context),
                         icon: const Icon(Icons.add, size: 20),
                         label: Text(l10n.localeName == 'ar' ? 'إضافة' : 'Add'),
@@ -270,96 +271,169 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        return BlocBuilder<AzkarBloc, AzkarState>(
-          bloc: azkarBloc,
-          builder: (context, azkarState) {
-            if (selectedCategory.isEmpty && azkarState.categories.isNotEmpty) {
-              selectedCategory = azkarState.categories.first;
-            }
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return BlocBuilder<AzkarBloc, AzkarState>(
+              bloc: azkarBloc,
+              builder: (context, azkarState) {
+                if (selectedCategory.isEmpty && azkarState.categories.isNotEmpty) {
+                  selectedCategory = azkarState.categories.first;
+                }
 
-            return AlertDialog(
-              title: Text(
-                index == null
-                  ? (l10n.localeName == 'ar' ? 'إضافة تذكير' : 'Add Reminder')
-                  : (l10n.localeName == 'ar' ? 'تعديل التذكير' : 'Edit Reminder'),
-                style: GoogleFonts.amiri(),
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Category Selection
-                    DropdownButtonFormField<String>(
-                      decoration: InputDecoration(
-                        labelText: l10n.localeName == 'ar' ? 'الفئة' : 'Category',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      initialValue: selectedCategory.isNotEmpty && azkarState.categories.contains(selectedCategory)
-                        ? selectedCategory
-                        : (azkarState.categories.isNotEmpty ? azkarState.categories.first : null),
-                      items: azkarState.categories.map((cat) => DropdownMenuItem(
-                        value: cat,
-                        child: Text(cat, style: const TextStyle(fontSize: 14)),
-                      )).toList(),
-                      onChanged: (val) => selectedCategory = val ?? '',
-                    ),
-                    const SizedBox(height: 16),
-                    // Custom Title
-                    TextFormField(
-                      decoration: InputDecoration(
-                        labelText: l10n.localeName == 'ar' ? 'عنوان مخصص (اختياري)' : 'Custom Title (Optional)',
-                        hintText: selectedCategory,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      initialValue: customTitle,
-                      onChanged: (val) => customTitle = val,
-                    ),
-                    const SizedBox(height: 16),
-                    // Time Selection
-                    StatefulBuilder(
-                      builder: (context, setState) {
-                        return _buildTimeSettingItem(
+                return AlertDialog(
+                  title: Text(
+                    index == null
+                      ? (l10n.localeName == 'ar' ? 'إضافة تذكير' : 'Add Reminder')
+                      : (l10n.localeName == 'ar' ? 'تعديل التذكير' : 'Edit Reminder'),
+                    style: GoogleFonts.amiri(),
+                  ),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Searchable Category Selection
+                        InkWell(
+                          onTap: () => _showSearchableCategoryPicker(
+                            context, 
+                            azkarState.categories, 
+                            (val) {
+                              setDialogState(() {
+                                selectedCategory = val;
+                              });
+                            }
+                          ),
+                          child: InputDecorator(
+                            decoration: InputDecoration(
+                              labelText: l10n.localeName == 'ar' ? 'الفئة' : 'Category',
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                              suffixIcon: const Icon(Icons.search),
+                            ),
+                            child: Text(
+                              selectedCategory.isEmpty ? l10n.selectCategory : selectedCategory,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        // Custom Title
+                        TextFormField(
+                          decoration: InputDecoration(
+                            labelText: l10n.localeName == 'ar' ? 'عنوان مخصص (اختياري)' : 'Custom Title (Optional)',
+                            hintText: selectedCategory,
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          initialValue: customTitle,
+                          onChanged: (val) => customTitle = val,
+                        ),
+                        const SizedBox(height: 16),
+                        // Time Selection
+                        _buildTimeSettingItem(
                           context: context,
                           title: l10n.localeName == 'ar' ? 'الوقت' : 'Time',
                           time: selectedTime,
                           onTap: () async {
                             final time = await _selectTime(context, selectedTime);
                             if (time != null) {
-                              setState(() => selectedTime = time);
+                              setDialogState(() => selectedTime = time);
                             }
                           },
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (selectedCategory.isEmpty) return;
+
+                        final newReminder = AzkarReminder(
+                          category: selectedCategory,
+                          time: selectedTime,
+                          title: customTitle.isNotEmpty ? customTitle : selectedCategory,
+                          isEnabled: reminder?.isEnabled ?? true,
                         );
-                      }
+
+                        if (index == null) {
+                          cubit.addReminder(newReminder);
+                        } else {
+                          cubit.updateReminder(index, newReminder);
+                        }
+                        Navigator.pop(context);
+                      },
+                      child: Text(l10n.yes),
                     ),
                   ],
-                ),
+                );
+              },
+            );
+          }
+        );
+      },
+    );
+  }
+
+  void _showSearchableCategoryPicker(BuildContext context, List<String> categories, Function(String) onSelected) {
+    final l10n = AppLocalizations.of(context)!;
+    String sheetSearchQuery = '';
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppTheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            final filteredCategories = categories.where((cat) => 
+              sheetSearchQuery.isEmpty || cat.toLowerCase().contains(sheetSearchQuery)
+            ).toList();
+
+            return Container(
+              padding: EdgeInsets.only(
+                top: 20,
+                left: 16,
+                right: 16,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (selectedCategory.isEmpty) return;
-
-                    final newReminder = AzkarReminder(
-                      category: selectedCategory,
-                      time: selectedTime,
-                      title: customTitle.isNotEmpty ? customTitle : selectedCategory,
-                      isEnabled: reminder?.isEnabled ?? true,
-                    );
-
-                    if (index == null) {
-                      cubit.addReminder(newReminder);
-                    } else {
-                      cubit.updateReminder(index, newReminder);
-                    }
-                    Navigator.pop(context);
-                  },
-                  child: Text(l10n.yes),
-                ),
-              ],
+              height: MediaQuery.of(context).size.height * 0.7,
+              child: Column(
+                children: [
+                  TextField(
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      hintText: l10n.searchCategory,
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onChanged: (val) {
+                      setSheetState(() {
+                        sheetSearchQuery = val.toLowerCase();
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: filteredCategories.length,
+                      itemBuilder: (context, index) {
+                        final cat = filteredCategories[index];
+                        return ListTile(
+                          title: Text(cat, textAlign: l10n.localeName == 'ar' ? TextAlign.right : TextAlign.left),
+                          onTap: () {
+                            onSelected(cat);
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             );
           },
         );

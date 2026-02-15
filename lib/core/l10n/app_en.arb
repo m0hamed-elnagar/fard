@@ -97,5 +97,9 @@
   "noItemsFound": "No items found in this category",
   "resetItem": "Reset Item",
   "prayerTab": "Prayer",
-  "azkarTab": "Azkar"
+  "azkarTab": "Azkar",
+  "search": "Search...",
+  "noSearchResults": "No search results found",
+  "searchCategory": "Search for a category...",
+  "selectCategory": "Select Category"
 }
