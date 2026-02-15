@@ -7,7 +7,7 @@ import '../../domain/azkar_item.dart';
 part 'azkar_bloc.freezed.dart';
 
 @freezed
-class AzkarEvent with _$AzkarEvent {
+sealed class AzkarEvent with _$AzkarEvent {
   const factory AzkarEvent.loadCategories() = _LoadCategories;
   const factory AzkarEvent.loadAzkar(String category) = _LoadAzkar;
   const factory AzkarEvent.incrementCount(int index) = _IncrementCount;
@@ -17,7 +17,7 @@ class AzkarEvent with _$AzkarEvent {
 }
 
 @freezed
-class AzkarState with _$AzkarState {
+sealed class AzkarState with _$AzkarState {
   const factory AzkarState({
     @Default(false) bool isLoading,
     @Default([]) List<String> categories,

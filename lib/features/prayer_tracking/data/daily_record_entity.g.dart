@@ -8,7 +8,7 @@ part of 'daily_record_entity.dart';
 
 class DailyRecordEntityAdapter extends TypeAdapter<DailyRecordEntity> {
   @override
-  final int typeId = 0;
+  final typeId = 0;
 
   @override
   DailyRecordEntity read(BinaryReader reader) {
@@ -18,7 +18,7 @@ class DailyRecordEntityAdapter extends TypeAdapter<DailyRecordEntity> {
     };
     return DailyRecordEntity(
       id: fields[0] as String,
-      dateMillis: fields[1] as int,
+      dateMillis: (fields[1] as num).toInt(),
       missedIndices: (fields[2] as List).cast<int>(),
       qadaValues: (fields[3] as Map).cast<int, int>(),
     );

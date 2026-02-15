@@ -20,7 +20,6 @@ class SettingsCubit extends Cubit<SettingsState> {
   static const String _madhabKey = 'madhab';
   static const String _morningAzkarKey = 'morning_azkar_time';
   static const String _eveningAzkarKey = 'evening_azkar_time';
-  static const String _autoAzkarKey = 'auto_azkar_times';
 
   SettingsCubit(
     this._prefs, 
@@ -36,7 +35,6 @@ class SettingsCubit extends Cubit<SettingsState> {
           madhab: _prefs.getString(_madhabKey) ?? 'shafi',
           morningAzkarTime: _prefs.getString(_morningAzkarKey) ?? '05:00',
           eveningAzkarTime: _prefs.getString(_eveningAzkarKey) ?? '18:00',
-          autoAzkarTimes: _prefs.getBool(_autoAzkarKey) ?? true,
         ));
 
   void updateLocale(Locale locale) {
@@ -144,13 +142,6 @@ class SettingsCubit extends Cubit<SettingsState> {
     _updateReminders();
   }
 
-  void toggleAutoAzkarTimes() {
-    final newValue = !state.autoAzkarTimes;
-    _prefs.setBool(_autoAzkarKey, newValue);
-    emit(state.copyWith(autoAzkarTimes: newValue));
-    _updateReminders();
-  }
-
   Future<void> _updateReminders() async {
     final azkar = await _azkarRepository.getAllAzkar();
     await _notificationService.scheduleAzkarReminders(settings: state, allAzkar: azkar);
@@ -158,14 +149,6 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   Future<void> initReminders() async {
     try {
-      if (state.latitude == null) {
-        // Try to auto-detect location on startup if not set
-        try {
-          await refreshLocation();
-        } catch (_) {
-          // Ignore errors, user can manually retry
-        }
-      }
       await _updateReminders();
     } catch (e) {
       debugPrint('Error initializing reminders: $e');

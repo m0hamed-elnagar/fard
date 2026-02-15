@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:fard/main.dart' as app;
+import 'package:fard/core/di/injection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
+import 'package:fard/features/prayer_tracking/data/daily_record_entity.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +17,21 @@ void main() {
     setUp(() async {
       tempDir = await Directory.systemTemp.createTemp('fard_app_test_');
       SharedPreferences.setMockInitialValues({});
+      await configureDependencies(hivePath: tempDir.path);
+      
+      // Clear boxes in case Hive is reusing the path from previous tests
+      if (Hive.isBoxOpen('daily_records')) {
+        await Hive.box<DailyRecordEntity>('daily_records').clear();
+      }
+      if (Hive.isBoxOpen('azkar_progress')) {
+        await Hive.box<int>('azkar_progress').clear();
+      }
+    });
+
+    tearDown(() async {
+      await Hive.close();
+      await getIt.reset();
+      // Do not delete tempDir as Hive might be locked to it
     });
 
     testWidgets('Onboarding to Home, toggle prayer, and switch language', (tester) async {

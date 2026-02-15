@@ -4,7 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'settings_state.freezed.dart';
 
 @freezed
-class SettingsState with _$SettingsState {
+sealed class SettingsState with _$SettingsState {
   const factory SettingsState({
     required Locale locale,
     double? latitude,
@@ -14,6 +14,5 @@ class SettingsState with _$SettingsState {
     @Default('shafi') String madhab,
     @Default('05:00') String morningAzkarTime,
     @Default('18:00') String eveningAzkarTime,
-    @Default(true) bool autoAzkarTimes,
   }) = _SettingsState;
 }

@@ -9,23 +9,34 @@ import 'package:fard/features/prayer_tracking/domain/prayer_repo.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:get_it/get_it.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/material.dart';
 
 final getIt = GetIt.instance;
 
 Future<void> configureDependencies({String? hivePath}) async {
-  if (hivePath != null) {
-    Hive.init(hivePath);
-  } else {
-    await Hive.initFlutter();
+  try {
+    if (hivePath != null) {
+      Hive.init(hivePath);
+    } else {
+      await Hive.initFlutter();
+    }
+  } catch (e) {
+    debugPrint('Hive initialization warning: $e');
   }
-  Hive.registerAdapter(DailyRecordEntityAdapter());
+  
+  try {
+    Hive.registerAdapter(DailyRecordEntityAdapter());
+  } catch (e) {
+    debugPrint('Adapter registration warning: $e');
+  }
 
   final box = await Hive.openBox<DailyRecordEntity>('daily_records');
   final azkarBox = await Hive.openBox<int>('azkar_progress');
   final prefs = await SharedPreferences.getInstance();
   
+  getIt.registerSingleton<GlobalKey<NavigatorState>>(GlobalKey<NavigatorState>());
   getIt.registerSingleton<SharedPreferences>(prefs);
   getIt.registerSingleton<LocationService>(LocationService());
   getIt.registerSingleton<NotificationService>(NotificationService());

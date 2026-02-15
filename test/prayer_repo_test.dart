@@ -4,7 +4,7 @@ import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
 import 'package:fard/features/prayer_tracking/domain/missed_counter.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockBox extends Mock implements Box<DailyRecordEntity> {}

@@ -105,7 +105,6 @@ void main() {
 }
 
 // Fallback for Mocktail
-class AzkarItemFake extends Fake implements AzkarItem {}
 void setupAzkarFallback() {
   registerFallbackValue(const AzkarItem(
     category: '', zekr: '', description: '', count: 0, reference: ''

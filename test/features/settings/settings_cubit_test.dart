@@ -30,7 +30,6 @@ void main() {
 
     when(() => mockPrefs.getString(any())).thenReturn(null);
     when(() => mockPrefs.getDouble(any())).thenReturn(null);
-    when(() => mockPrefs.getBool(any())).thenReturn(true); // Default for autoAzkarTimes
     when(() => mockPrefs.setString(any(), any())).thenAnswer((_) async => true);
     when(() => mockPrefs.setDouble(any(), any())).thenAnswer((_) async => true);
     when(() => mockPrefs.setBool(any(), any())).thenAnswer((_) async => true);

@@ -1,9 +1,12 @@
 import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
 import '../../features/settings/presentation/blocs/settings_state.dart';
 import '../../features/azkar/domain/azkar_item.dart';
+import '../../features/azkar/presentation/screens/azkar_list_screen.dart';
+import '../di/injection.dart';
 
 class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -37,7 +40,16 @@ class NotificationService {
     await _notificationsPlugin.initialize(
       settings: initializationSettings,
       onDidReceiveNotificationResponse: (details) {
-        // Handle notification tap
+        if (details.payload != null) {
+          final navigatorKey = getIt<GlobalKey<NavigatorState>>();
+          if (navigatorKey.currentState != null) {
+            navigatorKey.currentState!.push(
+              MaterialPageRoute(
+                builder: (_) => AzkarListScreen(category: details.payload!),
+              ),
+            );
+          }
+        }
       },
     );
   }
@@ -54,6 +66,16 @@ class NotificationService {
     DateTime morningDateTime = _parseTime(settings.morningAzkarTime, now);
     DateTime eveningDateTime = _parseTime(settings.eveningAzkarTime, now);
 
+    final morningCategory = allAzkar.firstWhere(
+      (e) => e.category.contains('الصباح') || e.category.contains('Morning'),
+      orElse: () => const AzkarItem(category: 'Morning Azkar', zekr: '', description: '', count: 1, reference: ''),
+    ).category;
+
+    final eveningCategory = allAzkar.firstWhere(
+      (e) => e.category.contains('المساء') || e.category.contains('Evening'),
+      orElse: () => const AzkarItem(category: 'Evening Azkar', zekr: '', description: '', count: 1, reference: ''),
+    ).category;
+
     final morningZekr = _getRandomZekr(allAzkar, 'الصباح', 'Morning');
     final eveningZekr = _getRandomZekr(allAzkar, 'المساء', 'Evening');
 
@@ -62,6 +84,7 @@ class NotificationService {
       title: settings.locale.languageCode == 'ar' ? 'أذكار الصباح' : 'Morning Azkar',
       body: morningZekr,
       scheduledDate: morningDateTime,
+      payload: morningCategory,
     );
 
     await _scheduleDailyNotification(
@@ -69,6 +92,7 @@ class NotificationService {
       title: settings.locale.languageCode == 'ar' ? 'أذكار المساء' : 'Evening Azkar',
       body: eveningZekr,
       scheduledDate: eveningDateTime,
+      payload: eveningCategory,
     );
   }
 
@@ -77,6 +101,7 @@ class NotificationService {
     required String title,
     required String body,
     required DateTime scheduledDate,
+    String? payload,
   }) async {
     var scheduledTzDate = tz.TZDateTime.from(scheduledDate, tz.local);
     
@@ -103,6 +128,7 @@ class NotificationService {
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
+      payload: payload,
     );
   }
 

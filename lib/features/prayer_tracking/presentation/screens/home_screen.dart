@@ -84,25 +84,8 @@ class _HomeBodyState extends State<_HomeBody> {
     DateTime morningTime;
     DateTime eveningTime;
 
-    if (settings.autoAzkarTimes && settings.latitude != null && settings.longitude != null) {
-      try {
-        final prayerTimes = getIt<PrayerTimeService>().getPrayerTimes(
-          latitude: settings.latitude!,
-          longitude: settings.longitude!,
-          method: settings.calculationMethod,
-          madhab: settings.madhab,
-          date: now,
-        );
-        morningTime = prayerTimes.fajr;
-        eveningTime = prayerTimes.asr;
-      } catch (_) {
-        morningTime = _parseTime(settings.morningAzkarTime, now);
-        eveningTime = _parseTime(settings.eveningAzkarTime, now);
-      }
-    } else {
-      morningTime = _parseTime(settings.morningAzkarTime, now);
-      eveningTime = _parseTime(settings.eveningAzkarTime, now);
-    }
+    morningTime = _parseTime(settings.morningAzkarTime, now);
+    eveningTime = _parseTime(settings.eveningAzkarTime, now);
 
     String? category;
     String? title;
@@ -512,25 +495,8 @@ class _HomeBodyState extends State<_HomeBody> {
         DateTime morningTime;
         DateTime eveningTime;
 
-        if (settings.autoAzkarTimes && settings.latitude != null && settings.longitude != null) {
-          try {
-            final prayerTimes = getIt<PrayerTimeService>().getPrayerTimes(
-              latitude: settings.latitude!,
-              longitude: settings.longitude!,
-              method: settings.calculationMethod,
-              madhab: settings.madhab,
-              date: now,
-            );
-            morningTime = prayerTimes.fajr;
-            eveningTime = prayerTimes.asr;
-          } catch (_) {
-            morningTime = _parseTime(settings.morningAzkarTime, now);
-            eveningTime = _parseTime(settings.eveningAzkarTime, now);
-          }
-        } else {
-          morningTime = _parseTime(settings.morningAzkarTime, now);
-          eveningTime = _parseTime(settings.eveningAzkarTime, now);
-        }
+        morningTime = _parseTime(settings.morningAzkarTime, now);
+        eveningTime = _parseTime(settings.eveningAzkarTime, now);
 
         String categoryToOpen = '';
         String? displayTitle;

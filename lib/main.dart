@@ -37,6 +37,7 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
       child: BlocBuilder<SettingsCubit, SettingsState>(
         builder: (context, state) {
           return MaterialApp(
+            navigatorKey: getIt<GlobalKey<NavigatorState>>(),
             locale: state.locale,
             onGenerateTitle: (context) => 'Fard',
             debugShowCheckedModeBanner: false,

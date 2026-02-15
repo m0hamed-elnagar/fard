@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'azkar_item.freezed.dart';
 
 @freezed
-class AzkarItem with _$AzkarItem {
+sealed class AzkarItem with _$AzkarItem {
   const factory AzkarItem({
     required String category,
     required String zekr,

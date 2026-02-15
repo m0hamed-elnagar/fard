@@ -1,5 +1,3 @@
-import 'package:fard/core/di/injection.dart';
-import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -165,20 +163,8 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                 DateTime morningTime;
                 DateTime eveningTime;
 
-                if (settingsState.autoAzkarTimes && settingsState.latitude != null && settingsState.longitude != null) {
-                  final prayerTimes = getIt<PrayerTimeService>().getPrayerTimes(
-                    latitude: settingsState.latitude!,
-                    longitude: settingsState.longitude!,
-                    method: settingsState.calculationMethod,
-                    madhab: settingsState.madhab,
-                    date: now,
-                  );
-                  morningTime = prayerTimes.fajr;
-                  eveningTime = prayerTimes.asr;
-                } else {
-                  morningTime = _parseTime(settingsState.morningAzkarTime, now);
-                  eveningTime = _parseTime(settingsState.eveningAzkarTime, now);
-                }
+                morningTime = _parseTime(settingsState.morningAzkarTime, now);
+                eveningTime = _parseTime(settingsState.eveningAzkarTime, now);
 
                 return ListView.builder(
                   padding: const EdgeInsets.all(16),
