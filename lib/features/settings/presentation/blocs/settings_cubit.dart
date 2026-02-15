@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/features/azkar/data/azkar_repository.dart';
+import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,6 +22,7 @@ class SettingsCubit extends Cubit<SettingsState> {
   static const String _madhabKey = 'madhab';
   static const String _morningAzkarKey = 'morning_azkar_time';
   static const String _eveningAzkarKey = 'evening_azkar_time';
+  static const String _remindersKey = 'azkar_reminders';
 
   SettingsCubit(
     this._prefs, 
@@ -35,7 +38,62 @@ class SettingsCubit extends Cubit<SettingsState> {
           madhab: _prefs.getString(_madhabKey) ?? 'shafi',
           morningAzkarTime: _prefs.getString(_morningAzkarKey) ?? '05:00',
           eveningAzkarTime: _prefs.getString(_eveningAzkarKey) ?? '18:00',
+          reminders: _loadReminders(_prefs, _prefs.getString(_morningAzkarKey) ?? '05:00', _prefs.getString(_eveningAzkarKey) ?? '18:00'),
         ));
+
+  static List<AzkarReminder> _loadReminders(SharedPreferences prefs, String morningTime, String eveningTime) {
+    final String? jsonStr = prefs.getString(_remindersKey);
+    if (jsonStr == null) {
+      return [
+        AzkarReminder(category: 'أذكار الصباح', time: morningTime, title: 'أذكار الصباح'),
+        AzkarReminder(category: 'أذكار المساء', time: eveningTime, title: 'أذكار المساء'),
+      ];
+    }
+    try {
+      final List<dynamic> decoded = jsonDecode(jsonStr);
+      return decoded.map((e) => AzkarReminder.fromJson(e)).toList();
+    } catch (_) {
+      return [
+        AzkarReminder(category: 'أذكار الصباح', time: morningTime, title: 'أذكار الصباح'),
+        AzkarReminder(category: 'أذكار المساء', time: eveningTime, title: 'أذكار المساء'),
+      ];
+    }
+  }
+
+  void _saveReminders(List<AzkarReminder> reminders) {
+    final String jsonStr = jsonEncode(reminders.map((e) => e.toJson()).toList());
+    _prefs.setString(_remindersKey, jsonStr);
+  }
+
+  void addReminder(AzkarReminder reminder) {
+    final newList = List<AzkarReminder>.from(state.reminders)..add(reminder);
+    emit(state.copyWith(reminders: newList));
+    _saveReminders(newList);
+    _updateReminders();
+  }
+
+  void removeReminder(int index) {
+    final newList = List<AzkarReminder>.from(state.reminders)..removeAt(index);
+    emit(state.copyWith(reminders: newList));
+    _saveReminders(newList);
+    _updateReminders();
+  }
+
+  void updateReminder(int index, AzkarReminder reminder) {
+    final newList = List<AzkarReminder>.from(state.reminders);
+    newList[index] = reminder;
+    emit(state.copyWith(reminders: newList));
+    _saveReminders(newList);
+    _updateReminders();
+  }
+
+  void toggleReminder(int index) {
+    final newList = List<AzkarReminder>.from(state.reminders);
+    newList[index] = newList[index].copyWith(isEnabled: !newList[index].isEnabled);
+    emit(state.copyWith(reminders: newList));
+    _saveReminders(newList);
+    _updateReminders();
+  }
 
   void updateLocale(Locale locale) {
     _prefs.setString(_localeKey, locale.languageCode);

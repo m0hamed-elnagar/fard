@@ -14,6 +14,7 @@ import 'package:fard/features/prayer_tracking/presentation/widgets/counter_card.
 import 'package:fard/features/prayer_tracking/presentation/widgets/history_list.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/missed_days_dialog.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/salaah_tile.dart';
+import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -73,43 +74,31 @@ class _HomeBodyState extends State<_HomeBody> {
 
     final now = DateTime.now();
     
-    // Prevent showing multiple times a day for the same category
+    // Prevent showing multiple times for the exact same minute
     if (_lastShownDate != null && 
         _lastShownDate!.year == now.year && 
         _lastShownDate!.month == now.month && 
-        _lastShownDate!.day == now.day) {
+        _lastShownDate!.day == now.day &&
+        _lastShownDate!.hour == now.hour &&
+        _lastShownDate!.minute == now.minute) {
       return;
     }
 
-    DateTime morningTime;
-    DateTime eveningTime;
-
-    morningTime = _parseTime(settings.morningAzkarTime, now);
-    eveningTime = _parseTime(settings.eveningAzkarTime, now);
-
-    String? category;
-    String? title;
-
-    final l10n = AppLocalizations.of(context)!;
-
-    // Show dialog exactly at the time (within the 1-minute window)
-    if (now.hour == morningTime.hour && now.minute == morningTime.minute) {
-      category = azkarState.categories.firstWhere(
-        (c) => c.contains('الصباح') || c.contains('Morning'),
-        orElse: () => '',
-      );
-      title = l10n.morningAzkar;
-    } else if (now.hour == eveningTime.hour && now.minute == eveningTime.minute) {
-      category = azkarState.categories.firstWhere(
-        (c) => c.contains('المساء') || c.contains('Evening'),
-        orElse: () => '',
-      );
-      title = l10n.eveningAzkar;
-    }
-
-    if (category != null && category.isNotEmpty) {
-      _lastShownDate = now;
-      _showAzkarDialog(category, title!);
+    for (final reminder in settings.reminders) {
+      if (!reminder.isEnabled) continue;
+      
+      final reminderTime = _parseTime(reminder.time, now);
+      if (now.hour == reminderTime.hour && now.minute == reminderTime.minute) {
+        final category = azkarState.categories.firstWhere(
+          (c) => c == reminder.category || c.contains(reminder.category),
+          orElse: () => '',
+        );
+        if (category.isNotEmpty) {
+           _lastShownDate = now;
+           _showAzkarDialog(category, reminder.title.isNotEmpty ? reminder.title : category);
+           break;
+        }
+      }
     }
   }
 
@@ -492,44 +481,40 @@ class _HomeBodyState extends State<_HomeBody> {
         if (azkarState.categories.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
 
         final now = DateTime.now();
-        DateTime morningTime;
-        DateTime eveningTime;
-
-        morningTime = _parseTime(settings.morningAzkarTime, now);
-        eveningTime = _parseTime(settings.eveningAzkarTime, now);
-
-        String categoryToOpen = '';
-        String? displayTitle;
-        IconData? icon;
-        List<Color>? colors;
-
-        final l10n = AppLocalizations.of(context)!;
-
-        if (now.isAfter(morningTime.subtract(const Duration(minutes: 30))) && 
-            now.isBefore(morningTime.add(const Duration(hours: 4)))) {
-          categoryToOpen = azkarState.categories.firstWhere(
-            (c) => c.contains('الصباح') || c.contains('Morning'),
-            orElse: () => '',
-          );
-          if (categoryToOpen.isNotEmpty) {
-            displayTitle = l10n.morningAzkar;
-            icon = Icons.wb_sunny_rounded;
-            colors = [AppTheme.accent, AppTheme.accent.withValues(alpha: 0.8)];
-          }
-        } else if (now.isAfter(eveningTime.subtract(const Duration(minutes: 30))) && 
-                   now.isBefore(eveningTime.add(const Duration(hours: 4)))) {
-          categoryToOpen = azkarState.categories.firstWhere(
-            (c) => c.contains('المساء') || c.contains('Evening'),
-            orElse: () => '',
-          );
-          if (categoryToOpen.isNotEmpty) {
-            displayTitle = l10n.eveningAzkar;
-            icon = Icons.nightlight_round;
-            colors = [const Color(0xFF7986CB), const Color(0xFF5C6BC0)];
+        AzkarReminder? activeReminder;
+        
+        // Find the first enabled reminder that is within the suggested window
+        for (final reminder in settings.reminders) {
+          if (!reminder.isEnabled) continue;
+          final reminderTime = _parseTime(reminder.time, now);
+          
+          // Show if within 30 mins before or 4 hours after
+          if (now.isAfter(reminderTime.subtract(const Duration(minutes: 30))) && 
+              now.isBefore(reminderTime.add(const Duration(hours: 4)))) {
+            activeReminder = reminder;
+            break;
           }
         }
 
+        if (activeReminder == null) return const SliverToBoxAdapter(child: SizedBox.shrink());
+
+        final categoryToOpen = azkarState.categories.firstWhere(
+          (c) => c == activeReminder!.category || c.contains(activeReminder!.category),
+          orElse: () => '',
+        );
+
         if (categoryToOpen.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+
+        final l10n = AppLocalizations.of(context)!;
+        final displayTitle = activeReminder.title.isNotEmpty ? activeReminder.title : categoryToOpen;
+        
+        IconData icon = Icons.wb_sunny_rounded;
+        List<Color> colors = [AppTheme.accent, AppTheme.accent.withValues(alpha: 0.8)];
+        
+        if (displayTitle.contains('المساء') || displayTitle.contains('Evening') || now.hour >= 16 || now.hour < 5) {
+          icon = Icons.nightlight_round;
+          colors = [const Color(0xFF7986CB), const Color(0xFF5C6BC0)];
+        }
 
         return SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),

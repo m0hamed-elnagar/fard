@@ -58,42 +58,37 @@ class NotificationService {
     required SettingsState settings, 
     required List<AzkarItem> allAzkar,
   }) async {
-    await _notificationsPlugin.cancel(id: 100); 
-    await _notificationsPlugin.cancel(id: 101); 
+    // Cancel previous azkar notifications in the range we use
+    for (int i = 0; i < 50; i++) {
+      await _notificationsPlugin.cancel(id: 100 + i);
+    }
 
     final now = DateTime.now();
     
-    DateTime morningDateTime = _parseTime(settings.morningAzkarTime, now);
-    DateTime eveningDateTime = _parseTime(settings.eveningAzkarTime, now);
+    for (int i = 0; i < settings.reminders.length; i++) {
+      if (i >= 50) break; // Limit to 50 reminders for safety with IDs
+      
+      final reminder = settings.reminders[i];
+      if (!reminder.isEnabled) continue;
 
-    final morningCategory = allAzkar.firstWhere(
-      (e) => e.category.contains('الصباح') || e.category.contains('Morning'),
-      orElse: () => const AzkarItem(category: 'Morning Azkar', zekr: '', description: '', count: 1, reference: ''),
-    ).category;
+      DateTime scheduledDateTime = _parseTime(reminder.time, now);
+      
+      // Try to find the exact category or one that contains it
+      final matchedCategory = allAzkar.firstWhere(
+        (e) => e.category == reminder.category || e.category.contains(reminder.category),
+        orElse: () => AzkarItem(category: reminder.category, zekr: '', description: '', count: 1, reference: ''),
+      ).category;
 
-    final eveningCategory = allAzkar.firstWhere(
-      (e) => e.category.contains('المساء') || e.category.contains('Evening'),
-      orElse: () => const AzkarItem(category: 'Evening Azkar', zekr: '', description: '', count: 1, reference: ''),
-    ).category;
+      final zekrBody = _getRandomZekr(allAzkar, reminder.category);
 
-    final morningZekr = _getRandomZekr(allAzkar, 'الصباح', 'Morning');
-    final eveningZekr = _getRandomZekr(allAzkar, 'المساء', 'Evening');
-
-    await _scheduleDailyNotification(
-      id: 100,
-      title: settings.locale.languageCode == 'ar' ? 'أذكار الصباح' : 'Morning Azkar',
-      body: morningZekr,
-      scheduledDate: morningDateTime,
-      payload: morningCategory,
-    );
-
-    await _scheduleDailyNotification(
-      id: 101,
-      title: settings.locale.languageCode == 'ar' ? 'أذكار المساء' : 'Evening Azkar',
-      body: eveningZekr,
-      scheduledDate: eveningDateTime,
-      payload: eveningCategory,
-    );
+      await _scheduleDailyNotification(
+        id: 100 + i,
+        title: reminder.title.isNotEmpty ? reminder.title : matchedCategory,
+        body: zekrBody,
+        scheduledDate: scheduledDateTime,
+        payload: matchedCategory,
+      );
+    }
   }
 
   Future<void> _scheduleDailyNotification({
@@ -132,10 +127,12 @@ class NotificationService {
     );
   }
 
-  String _getRandomZekr(List<AzkarItem> azkar, String arKey, String enKey) {
-    final filtered = azkar.where((e) => e.category.contains(arKey) || e.category.contains(enKey)).toList();
+  String _getRandomZekr(List<AzkarItem> azkar, String category) {
+    final filtered = azkar.where((e) => e.category == category || e.category.contains(category)).toList();
     if (filtered.isEmpty) return 'حان وقت الأذكار';
-    return filtered[Random().nextInt(filtered.length)].zekr;
+    // Use a simple zekr if it's too long for a notification body
+    final item = filtered[Random().nextInt(filtered.length)];
+    return item.zekr.length > 100 ? item.zekr.substring(0, 100) + '...' : item.zekr;
   }
 
   DateTime _parseTime(String timeStr, DateTime now) {

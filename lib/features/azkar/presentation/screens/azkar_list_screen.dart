@@ -158,45 +158,95 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
       );
     }
 
-    return PageView.builder(
-      controller: _pageController,
-      onPageChanged: (index) => setState(() => _currentPage = index),
-      itemCount: azkar.length,
-      itemBuilder: (context, index) {
-        final item = azkar[index];
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: _ZekrCard(
-            item: item,
-            onReset: () {
-              context.read<AzkarBloc>().add(AzkarEvent.resetItem(index));
-            },
-            onTap: () async {
-              context.read<AzkarBloc>().add(AzkarEvent.incrementCount(index));
+    return Stack(
+      children: [
+        PageView.builder(
+          controller: _pageController,
+          onPageChanged: (index) => setState(() => _currentPage = index),
+          itemCount: azkar.length,
+          itemBuilder: (context, index) {
+            final item = azkar[index];
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 24),
+              child: _ZekrCard(
+                item: item,
+                onReset: () {
+                  context.read<AzkarBloc>().add(AzkarEvent.resetItem(index));
+                },
+                onTap: () async {
+                  context.read<AzkarBloc>().add(AzkarEvent.incrementCount(index));
 
-              // Tactile feedback
-              if (await Vibration.hasVibrator()) {
-                if (item.currentCount + 1 >= item.count) {
-                  Vibration.vibrate(duration: 100, amplitude: 255);
-                  // Auto-advance to next page if completed
-                  if (index < azkar.length - 1) {
-                    Future.delayed(const Duration(milliseconds: 500), () {
-                      if (mounted) {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 400),
-                          curve: Curves.easeInOut,
-                        );
+                  // Tactile feedback
+                  if (await Vibration.hasVibrator()) {
+                    if (item.currentCount + 1 >= item.count) {
+                      Vibration.vibrate(duration: 100, amplitude: 255);
+                      // Auto-advance to next page if completed
+                      if (index < azkar.length - 1) {
+                        Future.delayed(const Duration(milliseconds: 500), () {
+                          if (mounted) {
+                            _pageController.nextPage(
+                              duration: const Duration(milliseconds: 400),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        });
                       }
-                    });
+                    } else {
+                      Vibration.vibrate(duration: 30);
+                    }
                   }
-                } else {
-                  Vibration.vibrate(duration: 30);
-                }
-              }
-            },
+                },
+              ),
+            );
+          },
+        ),
+        if (_currentPage > 0)
+          PositionedDirectional(
+            start: 4,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppTheme.accent.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_rounded, color: AppTheme.accent, size: 20),
+                  onPressed: () {
+                    _pageController.previousPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                ),
+              ),
+            ),
           ),
-        );
-      },
+        if (_currentPage < azkar.length - 1)
+          PositionedDirectional(
+            end: 4,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppTheme.accent.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_forward_ios_rounded, color: AppTheme.accent, size: 20),
+                  onPressed: () {
+                    _pageController.nextPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

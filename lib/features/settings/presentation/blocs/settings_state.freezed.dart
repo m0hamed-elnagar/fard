@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SettingsState {
 
- Locale get locale; double? get latitude; double? get longitude; String? get cityName; String get calculationMethod; String get madhab; String get morningAzkarTime; String get eveningAzkarTime;
+ Locale get locale; double? get latitude; double? get longitude; String? get cityName; String get calculationMethod; String get madhab; String get morningAzkarTime; String get eveningAzkarTime; List<AzkarReminder> get reminders;
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $SettingsStateCopyWith<SettingsState> get copyWith => _$SettingsStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SettingsState&&(identical(other.locale, locale) || other.locale == locale)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.cityName, cityName) || other.cityName == cityName)&&(identical(other.calculationMethod, calculationMethod) || other.calculationMethod == calculationMethod)&&(identical(other.madhab, madhab) || other.madhab == madhab)&&(identical(other.morningAzkarTime, morningAzkarTime) || other.morningAzkarTime == morningAzkarTime)&&(identical(other.eveningAzkarTime, eveningAzkarTime) || other.eveningAzkarTime == eveningAzkarTime));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SettingsState&&(identical(other.locale, locale) || other.locale == locale)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.cityName, cityName) || other.cityName == cityName)&&(identical(other.calculationMethod, calculationMethod) || other.calculationMethod == calculationMethod)&&(identical(other.madhab, madhab) || other.madhab == madhab)&&(identical(other.morningAzkarTime, morningAzkarTime) || other.morningAzkarTime == morningAzkarTime)&&(identical(other.eveningAzkarTime, eveningAzkarTime) || other.eveningAzkarTime == eveningAzkarTime)&&const DeepCollectionEquality().equals(other.reminders, reminders));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,locale,latitude,longitude,cityName,calculationMethod,madhab,morningAzkarTime,eveningAzkarTime);
+int get hashCode => Object.hash(runtimeType,locale,latitude,longitude,cityName,calculationMethod,madhab,morningAzkarTime,eveningAzkarTime,const DeepCollectionEquality().hash(reminders));
 
 @override
 String toString() {
-  return 'SettingsState(locale: $locale, latitude: $latitude, longitude: $longitude, cityName: $cityName, calculationMethod: $calculationMethod, madhab: $madhab, morningAzkarTime: $morningAzkarTime, eveningAzkarTime: $eveningAzkarTime)';
+  return 'SettingsState(locale: $locale, latitude: $latitude, longitude: $longitude, cityName: $cityName, calculationMethod: $calculationMethod, madhab: $madhab, morningAzkarTime: $morningAzkarTime, eveningAzkarTime: $eveningAzkarTime, reminders: $reminders)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $SettingsStateCopyWith<$Res>  {
   factory $SettingsStateCopyWith(SettingsState value, $Res Function(SettingsState) _then) = _$SettingsStateCopyWithImpl;
 @useResult
 $Res call({
- Locale locale, double? latitude, double? longitude, String? cityName, String calculationMethod, String madhab, String morningAzkarTime, String eveningAzkarTime
+ Locale locale, double? latitude, double? longitude, String? cityName, String calculationMethod, String madhab, String morningAzkarTime, String eveningAzkarTime, List<AzkarReminder> reminders
 });
 
 
@@ -62,7 +62,7 @@ class _$SettingsStateCopyWithImpl<$Res>
 
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? locale = null,Object? latitude = freezed,Object? longitude = freezed,Object? cityName = freezed,Object? calculationMethod = null,Object? madhab = null,Object? morningAzkarTime = null,Object? eveningAzkarTime = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? locale = null,Object? latitude = freezed,Object? longitude = freezed,Object? cityName = freezed,Object? calculationMethod = null,Object? madhab = null,Object? morningAzkarTime = null,Object? eveningAzkarTime = null,Object? reminders = null,}) {
   return _then(_self.copyWith(
 locale: null == locale ? _self.locale : locale // ignore: cast_nullable_to_non_nullable
 as Locale,latitude: freezed == latitude ? _self.latitude : latitude // ignore: cast_nullable_to_non_nullable
@@ -72,7 +72,8 @@ as String?,calculationMethod: null == calculationMethod ? _self.calculationMetho
 as String,madhab: null == madhab ? _self.madhab : madhab // ignore: cast_nullable_to_non_nullable
 as String,morningAzkarTime: null == morningAzkarTime ? _self.morningAzkarTime : morningAzkarTime // ignore: cast_nullable_to_non_nullable
 as String,eveningAzkarTime: null == eveningAzkarTime ? _self.eveningAzkarTime : eveningAzkarTime // ignore: cast_nullable_to_non_nullable
-as String,
+as String,reminders: null == reminders ? _self.reminders : reminders // ignore: cast_nullable_to_non_nullable
+as List<AzkarReminder>,
   ));
 }
 
@@ -154,10 +155,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Locale locale,  double? latitude,  double? longitude,  String? cityName,  String calculationMethod,  String madhab,  String morningAzkarTime,  String eveningAzkarTime)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Locale locale,  double? latitude,  double? longitude,  String? cityName,  String calculationMethod,  String madhab,  String morningAzkarTime,  String eveningAzkarTime,  List<AzkarReminder> reminders)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SettingsState() when $default != null:
-return $default(_that.locale,_that.latitude,_that.longitude,_that.cityName,_that.calculationMethod,_that.madhab,_that.morningAzkarTime,_that.eveningAzkarTime);case _:
+return $default(_that.locale,_that.latitude,_that.longitude,_that.cityName,_that.calculationMethod,_that.madhab,_that.morningAzkarTime,_that.eveningAzkarTime,_that.reminders);case _:
   return orElse();
 
 }
@@ -175,10 +176,10 @@ return $default(_that.locale,_that.latitude,_that.longitude,_that.cityName,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Locale locale,  double? latitude,  double? longitude,  String? cityName,  String calculationMethod,  String madhab,  String morningAzkarTime,  String eveningAzkarTime)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Locale locale,  double? latitude,  double? longitude,  String? cityName,  String calculationMethod,  String madhab,  String morningAzkarTime,  String eveningAzkarTime,  List<AzkarReminder> reminders)  $default,) {final _that = this;
 switch (_that) {
 case _SettingsState():
-return $default(_that.locale,_that.latitude,_that.longitude,_that.cityName,_that.calculationMethod,_that.madhab,_that.morningAzkarTime,_that.eveningAzkarTime);}
+return $default(_that.locale,_that.latitude,_that.longitude,_that.cityName,_that.calculationMethod,_that.madhab,_that.morningAzkarTime,_that.eveningAzkarTime,_that.reminders);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -192,10 +193,10 @@ return $default(_that.locale,_that.latitude,_that.longitude,_that.cityName,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Locale locale,  double? latitude,  double? longitude,  String? cityName,  String calculationMethod,  String madhab,  String morningAzkarTime,  String eveningAzkarTime)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Locale locale,  double? latitude,  double? longitude,  String? cityName,  String calculationMethod,  String madhab,  String morningAzkarTime,  String eveningAzkarTime,  List<AzkarReminder> reminders)?  $default,) {final _that = this;
 switch (_that) {
 case _SettingsState() when $default != null:
-return $default(_that.locale,_that.latitude,_that.longitude,_that.cityName,_that.calculationMethod,_that.madhab,_that.morningAzkarTime,_that.eveningAzkarTime);case _:
+return $default(_that.locale,_that.latitude,_that.longitude,_that.cityName,_that.calculationMethod,_that.madhab,_that.morningAzkarTime,_that.eveningAzkarTime,_that.reminders);case _:
   return null;
 
 }
@@ -207,7 +208,7 @@ return $default(_that.locale,_that.latitude,_that.longitude,_that.cityName,_that
 
 
 class _SettingsState implements SettingsState {
-  const _SettingsState({required this.locale, this.latitude, this.longitude, this.cityName, this.calculationMethod = 'muslim_league', this.madhab = 'shafi', this.morningAzkarTime = '05:00', this.eveningAzkarTime = '18:00'});
+  const _SettingsState({required this.locale, this.latitude, this.longitude, this.cityName, this.calculationMethod = 'muslim_league', this.madhab = 'shafi', this.morningAzkarTime = '05:00', this.eveningAzkarTime = '18:00', final  List<AzkarReminder> reminders = const []}): _reminders = reminders;
   
 
 @override final  Locale locale;
@@ -218,6 +219,13 @@ class _SettingsState implements SettingsState {
 @override@JsonKey() final  String madhab;
 @override@JsonKey() final  String morningAzkarTime;
 @override@JsonKey() final  String eveningAzkarTime;
+ final  List<AzkarReminder> _reminders;
+@override@JsonKey() List<AzkarReminder> get reminders {
+  if (_reminders is EqualUnmodifiableListView) return _reminders;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_reminders);
+}
+
 
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
@@ -229,16 +237,16 @@ _$SettingsStateCopyWith<_SettingsState> get copyWith => __$SettingsStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SettingsState&&(identical(other.locale, locale) || other.locale == locale)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.cityName, cityName) || other.cityName == cityName)&&(identical(other.calculationMethod, calculationMethod) || other.calculationMethod == calculationMethod)&&(identical(other.madhab, madhab) || other.madhab == madhab)&&(identical(other.morningAzkarTime, morningAzkarTime) || other.morningAzkarTime == morningAzkarTime)&&(identical(other.eveningAzkarTime, eveningAzkarTime) || other.eveningAzkarTime == eveningAzkarTime));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SettingsState&&(identical(other.locale, locale) || other.locale == locale)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.cityName, cityName) || other.cityName == cityName)&&(identical(other.calculationMethod, calculationMethod) || other.calculationMethod == calculationMethod)&&(identical(other.madhab, madhab) || other.madhab == madhab)&&(identical(other.morningAzkarTime, morningAzkarTime) || other.morningAzkarTime == morningAzkarTime)&&(identical(other.eveningAzkarTime, eveningAzkarTime) || other.eveningAzkarTime == eveningAzkarTime)&&const DeepCollectionEquality().equals(other._reminders, _reminders));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,locale,latitude,longitude,cityName,calculationMethod,madhab,morningAzkarTime,eveningAzkarTime);
+int get hashCode => Object.hash(runtimeType,locale,latitude,longitude,cityName,calculationMethod,madhab,morningAzkarTime,eveningAzkarTime,const DeepCollectionEquality().hash(_reminders));
 
 @override
 String toString() {
-  return 'SettingsState(locale: $locale, latitude: $latitude, longitude: $longitude, cityName: $cityName, calculationMethod: $calculationMethod, madhab: $madhab, morningAzkarTime: $morningAzkarTime, eveningAzkarTime: $eveningAzkarTime)';
+  return 'SettingsState(locale: $locale, latitude: $latitude, longitude: $longitude, cityName: $cityName, calculationMethod: $calculationMethod, madhab: $madhab, morningAzkarTime: $morningAzkarTime, eveningAzkarTime: $eveningAzkarTime, reminders: $reminders)';
 }
 
 
@@ -249,7 +257,7 @@ abstract mixin class _$SettingsStateCopyWith<$Res> implements $SettingsStateCopy
   factory _$SettingsStateCopyWith(_SettingsState value, $Res Function(_SettingsState) _then) = __$SettingsStateCopyWithImpl;
 @override @useResult
 $Res call({
- Locale locale, double? latitude, double? longitude, String? cityName, String calculationMethod, String madhab, String morningAzkarTime, String eveningAzkarTime
+ Locale locale, double? latitude, double? longitude, String? cityName, String calculationMethod, String madhab, String morningAzkarTime, String eveningAzkarTime, List<AzkarReminder> reminders
 });
 
 
@@ -266,7 +274,7 @@ class __$SettingsStateCopyWithImpl<$Res>
 
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? locale = null,Object? latitude = freezed,Object? longitude = freezed,Object? cityName = freezed,Object? calculationMethod = null,Object? madhab = null,Object? morningAzkarTime = null,Object? eveningAzkarTime = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? locale = null,Object? latitude = freezed,Object? longitude = freezed,Object? cityName = freezed,Object? calculationMethod = null,Object? madhab = null,Object? morningAzkarTime = null,Object? eveningAzkarTime = null,Object? reminders = null,}) {
   return _then(_SettingsState(
 locale: null == locale ? _self.locale : locale // ignore: cast_nullable_to_non_nullable
 as Locale,latitude: freezed == latitude ? _self.latitude : latitude // ignore: cast_nullable_to_non_nullable
@@ -276,7 +284,8 @@ as String?,calculationMethod: null == calculationMethod ? _self.calculationMetho
 as String,madhab: null == madhab ? _self.madhab : madhab // ignore: cast_nullable_to_non_nullable
 as String,morningAzkarTime: null == morningAzkarTime ? _self.morningAzkarTime : morningAzkarTime // ignore: cast_nullable_to_non_nullable
 as String,eveningAzkarTime: null == eveningAzkarTime ? _self.eveningAzkarTime : eveningAzkarTime // ignore: cast_nullable_to_non_nullable
-as String,
+as String,reminders: null == reminders ? _self._reminders : reminders // ignore: cast_nullable_to_non_nullable
+as List<AzkarReminder>,
   ));
 }
 

@@ -6,8 +6,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class SettingsScreen extends StatelessWidget {
+import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
+import 'package:fard/features/settings/domain/azkar_reminder.dart';
+import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<AzkarBloc>().add(const AzkarEvent.loadCategories());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,13 +45,6 @@ class SettingsScreen extends StatelessWidget {
         foregroundColor: AppTheme.textPrimary,
       ),
       body: BlocBuilder<SettingsCubit, SettingsState>(
-        buildWhen: (previous, current) =>
-            previous.cityName != current.cityName ||
-            previous.calculationMethod != current.calculationMethod ||
-            previous.madhab != current.madhab ||
-            previous.locale != current.locale ||
-            previous.morningAzkarTime != current.morningAzkarTime ||
-            previous.eveningAzkarTime != current.eveningAzkarTime,
         builder: (context, state) {
           return ListView(
             padding: const EdgeInsets.all(16.0),
@@ -158,40 +172,206 @@ class SettingsScreen extends StatelessWidget {
                 title: l10n.azkarSettings,
                 icon: Icons.notifications_active_rounded,
                 children: [
-                  Text(
-                    l10n.azkarSettingsDesc,
-                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.azkarSettingsDesc,
+                          style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: () => _showAddReminderDialog(context),
+                        icon: const Icon(Icons.add, size: 20),
+                        label: Text(l10n.localeName == 'ar' ? 'إضافة' : 'Add'),
+                        style: TextButton.styleFrom(foregroundColor: AppTheme.accent),
+                      ),
+                    ],
                   ),
-                  const Divider(height: 24),
-                  _buildTimeSettingItem(
-                    context: context,
-                    title: l10n.morningAzkar,
-                    time: state.morningAzkarTime,
-                    onTap: () async {
-                      final time = await _selectTime(context, state.morningAzkarTime);
-                      if (time != null && context.mounted) {
-                        context.read<SettingsCubit>().updateMorningAzkarTime(time);
-                      }
-                    },
-                  ),
-                  const Divider(height: 24),
-                  _buildTimeSettingItem(
-                    context: context,
-                    title: l10n.eveningAzkar,
-                    time: state.eveningAzkarTime,
-                    onTap: () async {
-                      final time = await _selectTime(context, state.eveningAzkarTime);
-                      if (time != null && context.mounted) {
-                        context.read<SettingsCubit>().updateEveningAzkarTime(time);
-                      }
-                    },
-                  ),
+                  const Divider(height: 12),
+                  if (state.reminders.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Center(
+                        child: Text(
+                          l10n.localeName == 'ar' ? 'لا توجد تذكيرات' : 'No reminders set',
+                          style: const TextStyle(color: AppTheme.textSecondary),
+                        ),
+                      ),
+                    )
+                  else
+                    ...state.reminders.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final reminder = entry.value;
+                      return Column(
+                        children: [
+                          _buildReminderItem(
+                            context: context,
+                            index: index,
+                            reminder: reminder,
+                          ),
+                          if (index < state.reminders.length - 1)
+                            const Divider(height: 1),
+                        ],
+                      );
+                    }),
                 ],
               ),
+              const SizedBox(height: 32),
             ],
           );
         },
       ),
+    );
+  }
+
+  Widget _buildReminderItem({
+    required BuildContext context,
+    required int index,
+    required AzkarReminder reminder,
+  }) {
+    final cubit = context.read<SettingsCubit>();
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(
+        reminder.title.isNotEmpty ? reminder.title : reminder.category,
+        style: TextStyle(
+          fontWeight: FontWeight.w500,
+          color: reminder.isEnabled ? AppTheme.textPrimary : AppTheme.textSecondary,
+        ),
+      ),
+      subtitle: Text(
+        reminder.time,
+        style: const TextStyle(color: AppTheme.accent, fontWeight: FontWeight.bold),
+      ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Switch(
+            value: reminder.isEnabled,
+            onChanged: (_) => cubit.toggleReminder(index),
+            activeColor: AppTheme.accent,
+          ),
+          IconButton(
+            icon: const Icon(Icons.edit_outlined, size: 20, color: AppTheme.textSecondary),
+            onPressed: () => _showAddReminderDialog(context, index: index, reminder: reminder),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline, size: 20, color: AppTheme.missed),
+            onPressed: () => cubit.removeReminder(index),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddReminderDialog(BuildContext context, {int? index, AzkarReminder? reminder}) {
+    final cubit = context.read<SettingsCubit>();
+    final azkarBloc = context.read<AzkarBloc>();
+    final l10n = AppLocalizations.of(context)!;
+    
+    String selectedCategory = reminder?.category ?? '';
+    String selectedTime = reminder?.time ?? '05:00';
+    String customTitle = reminder?.title ?? '';
+    
+    showDialog(
+      context: context,
+      builder: (context) {
+        return BlocBuilder<AzkarBloc, AzkarState>(
+          bloc: azkarBloc,
+          builder: (context, azkarState) {
+            if (selectedCategory.isEmpty && azkarState.categories.isNotEmpty) {
+              selectedCategory = azkarState.categories.first;
+            }
+            
+            return AlertDialog(
+              title: Text(
+                index == null 
+                  ? (l10n.localeName == 'ar' ? 'إضافة تذكير' : 'Add Reminder')
+                  : (l10n.localeName == 'ar' ? 'تعديل التذكير' : 'Edit Reminder'),
+                style: GoogleFonts.amiri(),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Category Selection
+                    DropdownButtonFormField<String>(
+                      decoration: InputDecoration(
+                        labelText: l10n.localeName == 'ar' ? 'الفئة' : 'Category',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      value: selectedCategory.isNotEmpty && azkarState.categories.contains(selectedCategory) 
+                        ? selectedCategory 
+                        : (azkarState.categories.isNotEmpty ? azkarState.categories.first : null),
+                      items: azkarState.categories.map((cat) => DropdownMenuItem(
+                        value: cat,
+                        child: Text(cat, style: const TextStyle(fontSize: 14)),
+                      )).toList(),
+                      onChanged: (val) => selectedCategory = val ?? '',
+                    ),
+                    const SizedBox(height: 16),
+                    // Custom Title
+                    TextFormField(
+                      decoration: InputDecoration(
+                        labelText: l10n.localeName == 'ar' ? 'عنوان مخصص (اختياري)' : 'Custom Title (Optional)',
+                        hintText: selectedCategory,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      initialValue: customTitle,
+                      onChanged: (val) => customTitle = val,
+                    ),
+                    const SizedBox(height: 16),
+                    // Time Selection
+                    StatefulBuilder(
+                      builder: (context, setState) {
+                        return _buildTimeSettingItem(
+                          context: context,
+                          title: l10n.localeName == 'ar' ? 'الوقت' : 'Time',
+                          time: selectedTime,
+                          onTap: () async {
+                            final time = await _selectTime(context, selectedTime);
+                            if (time != null) {
+                              setState(() => selectedTime = time);
+                            }
+                          },
+                        );
+                      }
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (selectedCategory.isEmpty) return;
+                    
+                    final newReminder = AzkarReminder(
+                      category: selectedCategory,
+                      time: selectedTime,
+                      title: customTitle.isNotEmpty ? customTitle : selectedCategory,
+                      isEnabled: reminder?.isEnabled ?? true,
+                    );
+                    
+                    if (index == null) {
+                      cubit.addReminder(newReminder);
+                    } else {
+                      cubit.updateReminder(index, newReminder);
+                    }
+                    Navigator.pop(context);
+                  },
+                  child: Text(l10n.yes),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
@@ -261,18 +441,21 @@ class SettingsScreen extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
-      trailing: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: AppTheme.accent.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          time,
-          style: const TextStyle(
-            color: AppTheme.accent,
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
+      trailing: InkWell(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppTheme.accent.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            time,
+            style: const TextStyle(
+              color: AppTheme.accent,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
           ),
         ),
       ),
