@@ -1,13 +1,5 @@
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_theme.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
-
-import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
@@ -251,7 +243,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Switch(
             value: reminder.isEnabled,
             onChanged: (_) => cubit.toggleReminder(index),
-            activeColor: AppTheme.accent,
+            activeThumbColor: AppTheme.accent,
           ),
           IconButton(
             icon: const Icon(Icons.edit_outlined, size: 20, color: AppTheme.textSecondary),
@@ -270,11 +262,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final cubit = context.read<SettingsCubit>();
     final azkarBloc = context.read<AzkarBloc>();
     final l10n = AppLocalizations.of(context)!;
-    
+
     String selectedCategory = reminder?.category ?? '';
     String selectedTime = reminder?.time ?? '05:00';
     String customTitle = reminder?.title ?? '';
-    
+
     showDialog(
       context: context,
       builder: (context) {
@@ -284,10 +276,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             if (selectedCategory.isEmpty && azkarState.categories.isNotEmpty) {
               selectedCategory = azkarState.categories.first;
             }
-            
+
             return AlertDialog(
               title: Text(
-                index == null 
+                index == null
                   ? (l10n.localeName == 'ar' ? 'إضافة تذكير' : 'Add Reminder')
                   : (l10n.localeName == 'ar' ? 'تعديل التذكير' : 'Edit Reminder'),
                 style: GoogleFonts.amiri(),
@@ -302,8 +294,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         labelText: l10n.localeName == 'ar' ? 'الفئة' : 'Category',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      value: selectedCategory.isNotEmpty && azkarState.categories.contains(selectedCategory) 
-                        ? selectedCategory 
+                      initialValue: selectedCategory.isNotEmpty && azkarState.categories.contains(selectedCategory)
+                        ? selectedCategory
                         : (azkarState.categories.isNotEmpty ? azkarState.categories.first : null),
                       items: azkarState.categories.map((cat) => DropdownMenuItem(
                         value: cat,
@@ -350,14 +342,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ElevatedButton(
                   onPressed: () {
                     if (selectedCategory.isEmpty) return;
-                    
+
                     final newReminder = AzkarReminder(
                       category: selectedCategory,
                       time: selectedTime,
                       title: customTitle.isNotEmpty ? customTitle : selectedCategory,
                       isEnabled: reminder?.isEnabled ?? true,
                     );
-                    
+
                     if (index == null) {
                       cubit.addReminder(newReminder);
                     } else {
@@ -375,7 +367,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSection(BuildContext context, {required String title, required IconData icon, required List<Widget> children}) {
+  Widget _buildSection(BuildContext context, {required String title, required IconData icon, required List<Widget> children}) {   
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(

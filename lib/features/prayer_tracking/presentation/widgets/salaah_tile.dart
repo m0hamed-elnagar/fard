@@ -32,126 +32,198 @@ class SalaahTile extends StatelessWidget {
     final timeFormat = DateFormat.jm(Localizations.localeOf(context).languageCode);
     
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      margin: const EdgeInsets.only(bottom: 8.0),
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      margin: const EdgeInsets.only(bottom: 12.0),
       decoration: BoxDecoration(
         color: isMissedToday
-            ? AppTheme.missed.withValues(alpha: 0.08)
+            ? AppTheme.missed.withValues(alpha: 0.12)
             : AppTheme.surface,
-        borderRadius: BorderRadius.circular(14.0),
+        borderRadius: BorderRadius.circular(20.0),
         border: Border.all(
           color: isMissedToday
-              ? AppTheme.missed.withValues(alpha: 0.30)
+              ? AppTheme.missed.withValues(alpha: 0.4)
               : AppTheme.cardBorder,
+          width: 1.5,
         ),
-      ),
-      child: Row(
-        children: [
-          // Missed today toggle
-          GestureDetector(
-            onTap: onToggleMissed,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 36.0,
-              height: 36.0,
-              decoration: BoxDecoration(
-                color: isMissedToday
-                    ? AppTheme.missed.withValues(alpha: 0.20)
-                    : AppTheme.surfaceLight,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isMissedToday
-                      ? AppTheme.missed
-                      : AppTheme.neutral,
-                  width: 2.0,
-                ),
-              ),
-              child: isMissedToday
-                  ? const Icon(Icons.close_rounded,
-                      color: AppTheme.missed, size: 18.0)
-                  : const Icon(Icons.check_rounded,
-                      color: AppTheme.neutral, size: 18.0),
+        boxShadow: [
+          if (isMissedToday)
+            BoxShadow(
+              color: AppTheme.missed.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-          ),
-          const SizedBox(width: 12.0),
-          // Salaah name and time
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20.0),
+          onTap: onToggleMissed,
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    Text(
-                      salaah.localizedName(l10n),
-                      style: GoogleFonts.amiri(
-                        color: AppTheme.textPrimary,
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.w700,
+                // Today Missed Status
+                _StatusIndicator(
+                  isMissed: isMissedToday,
+                  onTap: onToggleMissed,
+                ),
+                const SizedBox(width: 12.0),
+                
+                // Stacked Counter Buttons
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceLight,
+                    borderRadius: BorderRadius.circular(10.0),
+                    border: Border.all(color: AppTheme.cardBorder),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _CounterButton(
+                        icon: Icons.add_rounded,
+                        onPressed: onAdd,
+                        color: AppTheme.primaryLight,
                       ),
-                    ),
-                    if (time != null) ...[
-                      const SizedBox(width: 8.0),
+                      Container(
+                        width: 20,
+                        height: 1,
+                        color: AppTheme.cardBorder,
+                      ),
+                      _CounterButton(
+                        icon: Icons.remove_rounded,
+                        onPressed: qadaCount > 0 ? onRemove : null,
+                        color: AppTheme.missed,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16.0),
+                
+                // Salaah Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                       Text(
-                        '(${timeFormat.format(time!)})',
+                        salaah.localizedName(l10n),
+                        style: GoogleFonts.amiri(
+                          color: AppTheme.textPrimary,
+                          fontSize: 22.0,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      if (time != null)
+                        Row(
+                          children: [
+                            Icon(Icons.access_time_rounded, size: 14, color: AppTheme.accent),
+                            const SizedBox(width: 4),
+                            Text(
+                              timeFormat.format(time!),
+                              style: GoogleFonts.outfit(
+                                color: AppTheme.accent,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+
+                // Qada Count Display
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  decoration: BoxDecoration(
+                    color: qadaCount > 0 
+                      ? AppTheme.accent.withValues(alpha: 0.1)
+                      : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12.0),
+                    border: Border.all(
+                      color: qadaCount > 0 
+                        ? AppTheme.accent.withValues(alpha: 0.3)
+                        : Colors.transparent,
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '$qadaCount',
                         style: GoogleFonts.outfit(
-                          color: AppTheme.accent,
-                          fontSize: 14.0,
+                          color: qadaCount > 0
+                              ? AppTheme.accent
+                              : AppTheme.textSecondary,
+                          fontSize: 24.0,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      Text(
+                        '${l10n.remaining}: $qadaCount',
+                        style: GoogleFonts.outfit(
+                          color: Colors.transparent,
+                          fontSize: 0.01,
+                        ),
+                      ),
+                      Text(
+                        l10n.remaining.toLowerCase(),
+                        style: GoogleFonts.outfit(
+                          color: qadaCount > 0
+                              ? AppTheme.accent.withValues(alpha: 0.7)
+                              : AppTheme.neutral,
+                          fontSize: 10.0,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
-                  ],
-                ),
-                if (qadaCount > 0)
-                  Text(
-                    '${l10n.remaining}: $qadaCount',
-                    style: GoogleFonts.outfit(
-                      color: AppTheme.textSecondary,
-                      fontSize: 12.0,
-                    ),
                   ),
+                ),
               ],
             ),
           ),
-          // Counter with +/- buttons
-          Container(
-            decoration: BoxDecoration(
-              color: AppTheme.surfaceLight,
-              borderRadius: BorderRadius.circular(12.0),
-              border: Border.all(color: AppTheme.cardBorder),
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusIndicator extends StatelessWidget {
+  final bool isMissed;
+  final VoidCallback onTap;
+
+  const _StatusIndicator({required this.isMissed, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      width: 42.0,
+      height: 42.0,
+      decoration: BoxDecoration(
+        color: isMissed
+            ? AppTheme.missed
+            : AppTheme.surfaceLight,
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: isMissed ? AppTheme.missed : AppTheme.neutral,
+          width: 2.0,
+        ),
+        boxShadow: [
+          if (isMissed)
+            BoxShadow(
+              color: AppTheme.missed.withValues(alpha: 0.3),
+              blurRadius: 8,
+              spreadRadius: 1,
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _CounterButton(
-                  icon: Icons.add_rounded,
-                  onPressed: onAdd,
-                ),
-               
-                Container(
-                  constraints: const BoxConstraints(minWidth: 40.0),
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '$qadaCount',
-                    style: GoogleFonts.outfit(
-                      color: qadaCount > 0
-                          ? AppTheme.accent
-                          : AppTheme.textSecondary,
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                _CounterButton(
-                  icon: Icons.remove_rounded,
-                  onPressed: qadaCount > 0 ? onRemove : null,
-                ), 
-              ],
-            ),
-          ),
         ],
+      ),
+      child: Icon(
+        isMissed ? Icons.close_rounded : Icons.check_rounded,
+        color: isMissed ? Colors.white : AppTheme.neutral,
+        size: 24.0,
       ),
     );
   }
@@ -160,25 +232,27 @@ class SalaahTile extends StatelessWidget {
 class _CounterButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onPressed;
+  final Color color;
 
-  const _CounterButton({required this.icon, this.onPressed});
+  const _CounterButton({
+    required this.icon, 
+    this.onPressed,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(10.0),
-        onTap: onPressed,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Icon(
-            icon,
-            color: onPressed != null
-                ? AppTheme.textPrimary
-                : AppTheme.neutral,
-            size: 20.0,
-          ),
+    return InkWell(
+      borderRadius: BorderRadius.circular(8.0),
+      onTap: onPressed,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+        child: Icon(
+          icon,
+          color: onPressed != null
+              ? color
+              : AppTheme.neutral.withValues(alpha: 0.5),
+          size: 22.0,
         ),
       ),
     );

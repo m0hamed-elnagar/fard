@@ -497,27 +497,47 @@ class _HomeBodyState extends State<_HomeBody> {
         }
 
         if (activeReminder == null) return const SliverToBoxAdapter(child: SizedBox.shrink());
+        
+        final reminder = activeReminder;
 
         final categoryToOpen = azkarState.categories.firstWhere(
-          (c) => c == activeReminder!.category || c.contains(activeReminder!.category),
+          (c) => c == reminder.category || c.contains(reminder.category),
           orElse: () => '',
         );
 
         if (categoryToOpen.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
 
         final l10n = AppLocalizations.of(context)!;
-        final displayTitle = activeReminder.title.isNotEmpty ? activeReminder.title : categoryToOpen;
+        final displayTitle = reminder.title.isNotEmpty ? reminder.title : categoryToOpen;
         
+        final isEvening = displayTitle.contains('المساء') || 
+                          displayTitle.contains('Evening') || 
+                          (now.hour >= 16 || now.hour < 3);
+        
+        final isMorning = displayTitle.contains('الصباح') || 
+                          displayTitle.contains('Morning');
+
+        // Prioritize title for icon/color selection
+        final effectiveIsEvening = isEvening && !isMorning;
+
         IconData icon = Icons.wb_sunny_rounded;
-        List<Color> colors = [AppTheme.accent, AppTheme.accent.withValues(alpha: 0.8)];
+        List<Color> gradientColors = [
+          const Color(0xFFFFD54F), // Amber
+          const Color(0xFFF9A825), // Orange/Gold
+        ];
+        Color mainColor = const Color(0xFFF9A825);
         
-        if (displayTitle.contains('المساء') || displayTitle.contains('Evening') || now.hour >= 16 || now.hour < 5) {
+        if (effectiveIsEvening) {
           icon = Icons.nightlight_round;
-          colors = [const Color(0xFF7986CB), const Color(0xFF5C6BC0)];
+          gradientColors = [
+            const Color(0xFF7986CB), // Indigo Light
+            const Color(0xFF303F9F), // Indigo Dark
+          ];
+          mainColor = const Color(0xFF7986CB);
         }
 
         return SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           sliver: SliverToBoxAdapter(
             child: GestureDetector(
               onTap: () {
@@ -529,68 +549,99 @@ class _HomeBodyState extends State<_HomeBody> {
                 );
               },
               child: Container(
-                padding: const EdgeInsets.all(16),
+                clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
                   color: AppTheme.surface,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: colors!.first.withValues(alpha: 0.3), width: 1.5),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: mainColor.withValues(alpha: 0.2),
+                    width: 1.5,
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: colors.first.withValues(alpha: 0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      color: mainColor.withValues(alpha: 0.1),
+                      blurRadius: 15,
+                      offset: const Offset(0, 6),
                     ),
                   ],
                 ),
-                child: Row(
+                child: Stack(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: colors.first.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
+                    // Decorative background element
+                    Positioned(
+                      right: -20,
+                      top: -20,
+                      child: Icon(
+                        icon,
+                        size: 100,
+                        color: mainColor.withValues(alpha: 0.05),
                       ),
-                      child: Icon(icon, color: colors.first, size: 24),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
                         children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  color: colors.first,
-                                  shape: BoxShape.circle,
-                                ),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: gradientColors,
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
-                              const SizedBox(width: 6),
-                              Text(
-                                l10n.timeFor,
-                                style: GoogleFonts.outfit(
-                                  color: colors.first,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.5,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: gradientColors.first.withValues(alpha: 0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
+                            child: Icon(icon, color: Colors.white, size: 28),
                           ),
-                          Text(
-                            displayTitle!,
-                            style: GoogleFonts.amiri(
-                              color: AppTheme.textPrimary,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                          const SizedBox(width: 20),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.timeFor.toUpperCase(),
+                                  style: GoogleFonts.outfit(
+                                    color: mainColor,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.2,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  displayTitle,
+                                  style: GoogleFonts.amiri(
+                                    color: AppTheme.textPrimary,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    height: 1.2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: mainColor.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              color: mainColor,
+                              size: 16,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    Icon(Icons.arrow_forward_ios_rounded, color: colors.first, size: 18),
                   ],
                 ),
               ),
