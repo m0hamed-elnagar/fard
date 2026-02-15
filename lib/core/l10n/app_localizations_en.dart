@@ -263,4 +263,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectCategory => 'Select Category';
+
+  @override
+  String get azanSettings => 'Azan & Reminder Settings';
+
+  @override
+  String get azan => 'Azan';
+
+  @override
+  String get reminder => 'Reminder';
+
+  @override
+  String minutesBefore(int minutes) {
+    return '$minutes minutes before';
+  }
+
+  @override
+  String get azanVoice => 'Azan Voice';
+
+  @override
+  String get enableAzan => 'Enable Azan';
+
+  @override
+  String get enableReminder => 'Enable Reminder';
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/azkar_reminder.dart';
+import '../../domain/salaah_settings.dart';
 
 part 'settings_state.freezed.dart';
 
@@ -16,5 +17,7 @@ sealed class SettingsState with _$SettingsState {
     @Default('05:00') String morningAzkarTime,
     @Default('18:00') String eveningAzkarTime,
     @Default([]) List<AzkarReminder> reminders,
+    @Default([]) List<SalaahSettings> salaahSettings,
+    @Default(false) bool isAzanVoiceDownloading,
   }) = _SettingsState;
 }

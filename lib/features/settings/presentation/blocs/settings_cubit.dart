@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/features/azkar/data/azkar_repository.dart';
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
+import 'package:fard/features/settings/domain/salaah_settings.dart';
+import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,6 +25,7 @@ class SettingsCubit extends Cubit<SettingsState> {
   static const String _morningAzkarKey = 'morning_azkar_time';
   static const String _eveningAzkarKey = 'evening_azkar_time';
   static const String _remindersKey = 'azkar_reminders';
+  static const String _salaahSettingsKey = 'salaah_settings';
 
   SettingsCubit(
     this._prefs, 
@@ -39,7 +42,21 @@ class SettingsCubit extends Cubit<SettingsState> {
           morningAzkarTime: _prefs.getString(_morningAzkarKey) ?? '05:00',
           eveningAzkarTime: _prefs.getString(_eveningAzkarKey) ?? '18:00',
           reminders: _loadReminders(_prefs, _prefs.getString(_morningAzkarKey) ?? '05:00', _prefs.getString(_eveningAzkarKey) ?? '18:00'),
+          salaahSettings: _loadSalaahSettings(_prefs),
         ));
+
+  static List<SalaahSettings> _loadSalaahSettings(SharedPreferences prefs) {
+    final String? jsonStr = prefs.getString(_salaahSettingsKey);
+    if (jsonStr == null) {
+      return Salaah.values.map((s) => SalaahSettings(salaah: s)).toList();
+    }
+    try {
+      final List<dynamic> decoded = jsonDecode(jsonStr);
+      return decoded.map((e) => SalaahSettings.fromJson(e)).toList();
+    } catch (_) {
+      return Salaah.values.map((s) => SalaahSettings(salaah: s)).toList();
+    }
+  }
 
   static List<AzkarReminder> _loadReminders(SharedPreferences prefs, String morningTime, String eveningTime) {
     final String? jsonStr = prefs.getString(_remindersKey);
@@ -85,6 +102,24 @@ class SettingsCubit extends Cubit<SettingsState> {
     emit(state.copyWith(reminders: newList));
     _saveReminders(newList);
     _updateReminders();
+  }
+
+  void updateSalaahSettings(SalaahSettings settings) {
+    final newList = List<SalaahSettings>.from(state.salaahSettings);
+    final index = newList.indexWhere((e) => e.salaah == settings.salaah);
+    if (index != -1) {
+      newList[index] = settings;
+    } else {
+      newList.add(settings);
+    }
+    emit(state.copyWith(salaahSettings: newList));
+    _saveSalaahSettings(newList);
+    _updateReminders();
+  }
+
+  void _saveSalaahSettings(List<SalaahSettings> settings) {
+    final String jsonStr = jsonEncode(settings.map((e) => e.toJson()).toList());
+    _prefs.setString(_salaahSettingsKey, jsonStr);
   }
 
   void toggleReminder(int index) {
@@ -203,6 +238,7 @@ class SettingsCubit extends Cubit<SettingsState> {
   Future<void> _updateReminders() async {
     final azkar = await _azkarRepository.getAllAzkar();
     await _notificationService.scheduleAzkarReminders(settings: state, allAzkar: azkar);
+    await _notificationService.schedulePrayerNotifications(settings: state);
   }
 
   Future<void> initReminders() async {

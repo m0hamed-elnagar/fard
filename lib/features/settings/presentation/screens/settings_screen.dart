@@ -1,7 +1,13 @@
+
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/di/injection.dart';
+import 'package:fard/core/services/notification_service.dart';
+import 'package:fard/core/services/voice_download_service.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
+import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
+import 'package:fard/features/settings/domain/salaah_settings.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:flutter/material.dart';
@@ -144,6 +150,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 24),
               _buildSection(
                 context,
+                title: l10n.azanSettings,
+                icon: Icons.notifications_active_rounded,
+                children: [
+                  ...state.salaahSettings.map((salaahSetting) {
+                    return _buildSalaahSettingItem(
+                      context: context,
+                      settings: salaahSetting,
+                      l10n: l10n,
+                    );
+                  }),
+                ],
+              ),
+              const SizedBox(height: 24),
+              _buildSection(
+                context,
                 title: l10n.language,
                 icon: Icons.language_rounded,
                 children: [
@@ -216,6 +237,164 @@ class _SettingsScreenState extends State<SettingsScreen> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildSalaahSettingItem({
+    required BuildContext context,
+    required SalaahSettings settings,
+    required AppLocalizations l10n,
+  }) {
+    final String salaahName = _getLocalizedSalaahName(settings.salaah, l10n);
+    
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(salaahName, style: const TextStyle(fontWeight: FontWeight.w600)),
+      subtitle: Text(
+        '${settings.isAzanEnabled ? l10n.azan : ""} ${settings.isAzanEnabled && settings.isReminderEnabled ? "&" : ""} ${settings.isReminderEnabled ? "${l10n.reminder} (${l10n.minutesBefore(settings.reminderMinutesBefore)})" : ""}',
+        style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+      ),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+      onTap: () => _showSalaahSettingsDialog(context, settings, l10n),
+    );
+  }
+
+  String _getLocalizedSalaahName(Salaah salaah, AppLocalizations l10n) {
+    switch (salaah) {
+      case Salaah.fajr: return l10n.fajr;
+      case Salaah.dhuhr: return l10n.dhuhr;
+      case Salaah.asr: return l10n.asr;
+      case Salaah.maghrib: return l10n.maghrib;
+      case Salaah.isha: return l10n.isha;
+    }
+  }
+
+  void _showSalaahSettingsDialog(BuildContext context, SalaahSettings settings, AppLocalizations l10n) {
+    final cubit = context.read<SettingsCubit>();
+    
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            bool isAzanEnabled = settings.isAzanEnabled;
+            bool isReminderEnabled = settings.isReminderEnabled;
+            int reminderMinutes = settings.reminderMinutesBefore;
+            String? selectedVoice = settings.azanSound;
+            bool isDownloading = false;
+
+            return AlertDialog(
+              title: Text(
+                _getLocalizedSalaahName(settings.salaah, l10n),
+                style: GoogleFonts.amiri(),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SwitchListTile(
+                    title: Text(l10n.enableAzan),
+                    value: isAzanEnabled,
+                    onChanged: (val) => setDialogState(() => isAzanEnabled = val),
+                    activeThumbColor: AppTheme.accent,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  if (isAzanEnabled)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Column(
+                        children: [
+                          DropdownButtonFormField<String>(
+                            decoration: InputDecoration(
+                              labelText: l10n.azanVoice,
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            initialValue: VoiceDownloadService.azanVoices.keys.contains(selectedVoice) || selectedVoice == null ? selectedVoice : null,
+                            items: [
+                              const DropdownMenuItem(value: null, child: Text('Default')),
+                              ...VoiceDownloadService.azanVoices.keys.map((v) => DropdownMenuItem(value: v, child: Text(v))),
+                            ],
+                            onChanged: (val) async {
+                              if (val != null) {
+                                final downloader = getIt<VoiceDownloadService>();
+                                if (!(await downloader.isDownloaded(val))) {
+                                  setDialogState(() => isDownloading = true);
+                                  final path = await downloader.downloadAzan(val);
+                                  setDialogState(() {
+                                    isDownloading = false;
+                                    if (path != null) selectedVoice = path;
+                                  });
+                                } else {
+                                  final path = await downloader.getLocalPath(val);
+                                  setDialogState(() => selectedVoice = path);
+                                }
+                              } else {
+                                setDialogState(() => selectedVoice = null);
+                              }
+                            },
+                          ),
+                          if (isDownloading)
+                            const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: LinearProgressIndicator(),
+                            ),
+                          TextButton.icon(
+                            onPressed: isDownloading ? null : () => getIt<NotificationService>().testAzan(settings.salaah, selectedVoice),
+                            icon: const Icon(Icons.play_arrow_rounded),
+                            label: const Text('تجربة الصوت'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  const Divider(height: 32),
+                  SwitchListTile(
+                    title: Text(l10n.enableReminder),
+                    value: isReminderEnabled,
+                    onChanged: (val) => setDialogState(() => isReminderEnabled = val),
+                    activeThumbColor: AppTheme.accent,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  if (isReminderEnabled)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Row(
+                        children: [
+                          Expanded(child: Text(l10n.minutesBefore(reminderMinutes))),
+                          IconButton(
+                            icon: const Icon(Icons.remove_circle_outline),
+                            onPressed: reminderMinutes > 1 ? () => setDialogState(() => reminderMinutes--) : null,
+                          ),
+                          Text('$reminderMinutes'),
+                          IconButton(
+                            icon: const Icon(Icons.add_circle_outline),
+                            onPressed: reminderMinutes < 60 ? () => setDialogState(() => reminderMinutes++) : null,
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    cubit.updateSalaahSettings(settings.copyWith(
+                      isAzanEnabled: isAzanEnabled,
+                      isReminderEnabled: isReminderEnabled,
+                      reminderMinutesBefore: reminderMinutes,
+                      azanSound: selectedVoice,
+                    ));
+                    Navigator.pop(context);
+                  },
+                  child: Text(l10n.update),
+                ),
+              ],
+            );
+          }
+        );
+      },
     );
   }
 

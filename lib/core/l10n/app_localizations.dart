@@ -583,6 +583,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select Category'**
   String get selectCategory;
+
+  /// No description provided for @azanSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Azan & Reminder Settings'**
+  String get azanSettings;
+
+  /// No description provided for @azan.
+  ///
+  /// In en, this message translates to:
+  /// **'Azan'**
+  String get azan;
+
+  /// No description provided for @reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder'**
+  String get reminder;
+
+  /// No description provided for @minutesBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} minutes before'**
+  String minutesBefore(int minutes);
+
+  /// No description provided for @azanVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Azan Voice'**
+  String get azanVoice;
+
+  /// No description provided for @enableAzan.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Azan'**
+  String get enableAzan;
+
+  /// No description provided for @enableReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Reminder'**
+  String get enableReminder;
 }
 
 class _AppLocalizationsDelegate

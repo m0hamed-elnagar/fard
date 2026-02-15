@@ -40,6 +40,10 @@ void main() {
       allAzkar: any(named: 'allAzkar'),
     )).thenAnswer((_) async {});
 
+    when(() => mockNotificationService.schedulePrayerNotifications(
+      settings: any(named: 'settings'),
+    )).thenAnswer((_) async {});
+
     // Mock Azkar Repository
     when(() => mockAzkarRepository.getAllAzkar()).thenAnswer((_) async => []);
 
@@ -54,7 +58,7 @@ void main() {
   // Need to register fallback values for Mocktail if we use any() with complex types
   setUpAll(() {
     registerFallbackValue(const Locale('en'));
-    registerFallbackValue(const SettingsState(locale: Locale('ar')));
+    registerFallbackValue(const SettingsState(locale: Locale('ar'), isAzanVoiceDownloading: false));
     registerFallbackValue(<AzkarItem>[]);
   });
 
@@ -62,6 +66,20 @@ void main() {
     test('initial state is correct', () {
       expect(cubit.state.locale, const Locale('ar'));
       expect(cubit.state.calculationMethod, 'muslim_league');
+      expect(cubit.state.salaahSettings, isNotEmpty);
+    });
+
+    test('updateSalaahSettings updates state, saves to prefs and schedules notifications', () async {
+      final initialSettings = cubit.state.salaahSettings.first;
+      final updatedSettings = initialSettings.copyWith(isAzanEnabled: false);
+
+      cubit.updateSalaahSettings(updatedSettings);
+      
+      await Future.delayed(Duration.zero); // Allow async _updateReminders to run
+
+      expect(cubit.state.salaahSettings.first.isAzanEnabled, false);
+      verify(() => mockPrefs.setString('salaah_settings', any())).called(1);
+      verify(() => mockNotificationService.schedulePrayerNotifications(settings: any(named: 'settings'))).called(1);
     });
 
     test('updateLocale updates state and prefs', () {

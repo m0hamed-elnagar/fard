@@ -262,4 +262,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get selectCategory => 'اختر الفئة';
+
+  @override
+  String get azanSettings => 'إعدادات الأذان والتنبيهات';
+
+  @override
+  String get azan => 'الأذان';
+
+  @override
+  String get reminder => 'التنبيه';
+
+  @override
+  String minutesBefore(int minutes) {
+    return 'قبل $minutes دقائق';
+  }
+
+  @override
+  String get azanVoice => 'صوت الأذان';
+
+  @override
+  String get enableAzan => 'تفعيل الأذان';
+
+  @override
+  String get enableReminder => 'تفعيل التنبيه';
 }

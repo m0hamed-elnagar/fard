@@ -1,4 +1,5 @@
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
+import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:fard/features/prayer_tracking/presentation/screens/home_screen.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
@@ -71,6 +72,10 @@ void main() {
       locale: const Locale('en'),
       morningAzkarTime: timeStr,
       eveningAzkarTime: '23:59',
+      isAzanVoiceDownloading: false,
+      reminders: [
+        AzkarReminder(category: 'Morning Azkar', time: timeStr, title: 'Morning Azkar'),
+      ],
     ));
 
     when(() => mockAzkarBloc.state).thenReturn(const AzkarState(
@@ -94,6 +99,10 @@ void main() {
       locale: const Locale('en'),
       morningAzkarTime: '00:00',
       eveningAzkarTime: timeStr,
+      isAzanVoiceDownloading: false,
+      reminders: [
+        AzkarReminder(category: 'Evening Azkar', time: timeStr, title: 'Evening Azkar'),
+      ],
     ));
 
     when(() => mockAzkarBloc.state).thenReturn(const AzkarState(

@@ -101,5 +101,19 @@
   "search": "بحث...",
   "noSearchResults": "لم يتم العثور على نتائج للبحث",
   "searchCategory": "ابحث عن فئة...",
-  "selectCategory": "اختر الفئة"
+  "selectCategory": "اختر الفئة",
+  "azanSettings": "إعدادات الأذان والتنبيهات",
+  "azan": "الأذان",
+  "reminder": "التنبيه",
+  "minutesBefore": "قبل {minutes} دقائق",
+  "@minutesBefore": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "azanVoice": "صوت الأذان",
+  "enableAzan": "تفعيل الأذان",
+  "enableReminder": "تفعيل التنبيه"
 }

@@ -101,5 +101,19 @@
   "search": "Search...",
   "noSearchResults": "No search results found",
   "searchCategory": "Search for a category...",
-  "selectCategory": "Select Category"
+  "selectCategory": "Select Category",
+  "azanSettings": "Azan & Reminder Settings",
+  "azan": "Azan",
+  "reminder": "Reminder",
+  "minutesBefore": "{minutes} minutes before",
+  "@minutesBefore": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "azanVoice": "Azan Voice",
+  "enableAzan": "Enable Azan",
+  "enableReminder": "Enable Reminder"
 }

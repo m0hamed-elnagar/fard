@@ -10,7 +10,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
-import 'package:fard/core/theme/app_theme.dart';
 
 class MockSettingsCubit extends MockCubit<SettingsState> implements SettingsCubit {}
 class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState> implements AzkarBloc {}
@@ -31,6 +30,7 @@ void main() {
       morningAzkarTime: '05:00',
       eveningAzkarTime: '18:00',
       reminders: [],
+      isAzanVoiceDownloading: false,
     ));
 
     when(() => mockAzkarBloc.state).thenReturn(const AzkarState(
@@ -134,10 +134,12 @@ void main() {
 
       // Verify bottom sheet is shown with search field
       expect(find.byType(TextField), findsAtLeast(1));
-      expect(find.text('Search category...'), findsOneWidget);
+      
+      final searchHint = AppLocalizations.of(tester.element(addButton))!.searchCategory;
+      expect(find.text(searchHint), findsOneWidget);
 
       // Filter categories in bottom sheet
-      await tester.enterText(find.widgetWithText(TextField, 'Search category...'), 'travel');
+      await tester.enterText(find.widgetWithText(TextField, searchHint), 'travel');
       await tester.pumpAndSettle();
 
       // Verify filtered results in bottom sheet
