@@ -69,9 +69,3 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 }
-
-// Extension for localized tabs
-extension TabL10n on AppLocalizations {
-  String get prayerTab => localeName == 'ar' ? 'الصلاة' : 'Prayer';
-  String get azkarTab => localeName == 'ar' ? 'الأذكار' : 'Azkar';
-}

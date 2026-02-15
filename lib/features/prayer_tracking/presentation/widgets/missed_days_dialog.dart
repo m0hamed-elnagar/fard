@@ -193,7 +193,10 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
                       ),
                     ),
                     child: Text(l10n.addAll,
-                        style: GoogleFonts.amiri(fontWeight: FontWeight.w700)),
+                        style: GoogleFonts.amiri(
+                          color: AppTheme.onAccent,
+                          fontWeight: FontWeight.w700,
+                        )),
                   ),
                 ),
               ],
@@ -265,7 +268,7 @@ class _CalendarDayItem extends StatelessWidget {
               Text(
                 '${date.day}',
                 style: GoogleFonts.outfit(
-                  color: isSelected ? Colors.white : AppTheme.textPrimary,
+                  color: isSelected ? AppTheme.onAccent : AppTheme.textPrimary,
                   fontSize: 16.0,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 ),
@@ -273,7 +276,7 @@ class _CalendarDayItem extends StatelessWidget {
               Text(
                 _getMonthName(date.month),
                 style: GoogleFonts.outfit(
-                  color: isSelected ? Colors.white.withValues(alpha: 0.8) : AppTheme.textSecondary,
+                  color: isSelected ? AppTheme.onAccent.withValues(alpha: 0.8) : AppTheme.textSecondary,
                   fontSize: 10.0,
                 ),
               ),

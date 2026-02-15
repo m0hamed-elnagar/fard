@@ -209,8 +209,45 @@ class AppLocalizationsAr extends AppLocalizations {
       'قم بتكوين الوقت المناسب لعرض تذكيرات أذكار الصباح والمساء.';
 
   @override
+  String get autoAzkarTimes => 'تلقائي (حسب مواقيت الصلاة)';
+
+  @override
+  String get autoAzkarTimesDesc =>
+      'تحديد مواعيد الأذكار تلقائياً بناءً على صلاتي الفجر والعصر.';
+
+  @override
   String get timeFor => 'حان وقت';
 
   @override
   String get recommended => 'مقترح';
+
+  @override
+  String get azkar => 'الأذكار';
+
+  @override
+  String get loadingAzkar => 'جاري تحميل الأذكار...';
+
+  @override
+  String get errorLoadingAzkar => 'خطأ في تحميل الأذكار';
+
+  @override
+  String get noCategoriesFound => 'لم يتم العثور على فئات';
+
+  @override
+  String get refreshData => 'تحديث البيانات';
+
+  @override
+  String get resetAllProgress => 'إعادة تعيين التقدم';
+
+  @override
+  String get noItemsFound => 'لم يتم العثور على عناصر في هذه الفئة';
+
+  @override
+  String get resetItem => 'إعادة تعيين العنصر';
+
+  @override
+  String get prayerTab => 'الصلاة';
+
+  @override
+  String get azkarTab => 'الأذكار';
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import '../domain/azkar_item.dart';
@@ -42,9 +43,17 @@ class AzkarRepository {
         return _cachedAzkar!;
       }
 
-      final String response = await rootBundle
-          .loadString('assets/azkar.json')
-          .timeout(const Duration(seconds: 10));
+      String response;
+      try {
+        response = await rootBundle
+            .loadString('assets/azkar.json')
+            .timeout(const Duration(seconds: 10));
+      } catch (e) {
+        debugPrint('Failed to load assets/azkar.json: $e');
+        _cachedAzkar = [];
+        _loadingCompleter!.complete([]);
+        return [];
+      }
       
       final data = await json.decode(response);
       final List<dynamic>? rows = data['rows'];

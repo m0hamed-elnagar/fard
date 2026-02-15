@@ -1,6 +1,7 @@
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/extensions/hijri_extension.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
+import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
 import 'package:fard/features/prayer_tracking/domain/missed_counter.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
@@ -20,30 +21,161 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 import 'package:fard/features/azkar/presentation/screens/azkar_list_screen.dart';
+import 'package:fard/features/settings/presentation/screens/settings_screen.dart';
+
+import 'dart:async';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (_) {
-            final bloc = getIt<PrayerTrackerBloc>();
-            bloc.add(const PrayerTrackerEvent.checkMissedDays());
-            bloc.add(PrayerTrackerEvent.load(DateTime.now()));
-            return bloc;
-          },
-        ),
-      ],
-      child: const _HomeBody(),
-    );
+    return const _HomeBody();
   }
 }
 
-class _HomeBody extends StatelessWidget {
+class _HomeBody extends StatefulWidget {
   const _HomeBody();
+
+  @override
+  State<_HomeBody> createState() => _HomeBodyState();
+}
+
+class _HomeBodyState extends State<_HomeBody> {
+  Timer? _azkarTimer;
+  DateTime? _lastShownDate;
+
+  @override
+  void initState() {
+    super.initState();
+    // Check every minute
+    _azkarTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      _checkAzkarTime();
+    });
+    // Initial check
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAzkarTime();
+    });
+  }
+
+  @override
+  void dispose() {
+    _azkarTimer?.cancel();
+    super.dispose();
+  }
+
+  void _checkAzkarTime() {
+    if (!mounted) return;
+
+    final settings = context.read<SettingsCubit>().state;
+    final azkarState = context.read<AzkarBloc>().state;
+    if (azkarState.categories.isEmpty) return;
+
+    final now = DateTime.now();
+    
+    // Prevent showing multiple times a day for the same category
+    if (_lastShownDate != null && 
+        _lastShownDate!.year == now.year && 
+        _lastShownDate!.month == now.month && 
+        _lastShownDate!.day == now.day) {
+      return;
+    }
+
+    DateTime morningTime;
+    DateTime eveningTime;
+
+    if (settings.autoAzkarTimes && settings.latitude != null && settings.longitude != null) {
+      try {
+        final prayerTimes = getIt<PrayerTimeService>().getPrayerTimes(
+          latitude: settings.latitude!,
+          longitude: settings.longitude!,
+          method: settings.calculationMethod,
+          madhab: settings.madhab,
+          date: now,
+        );
+        morningTime = prayerTimes.fajr;
+        eveningTime = prayerTimes.asr;
+      } catch (_) {
+        morningTime = _parseTime(settings.morningAzkarTime, now);
+        eveningTime = _parseTime(settings.eveningAzkarTime, now);
+      }
+    } else {
+      morningTime = _parseTime(settings.morningAzkarTime, now);
+      eveningTime = _parseTime(settings.eveningAzkarTime, now);
+    }
+
+    String? category;
+    String? title;
+
+    final l10n = AppLocalizations.of(context)!;
+
+    // Show dialog exactly at the time (within the 1-minute window)
+    if (now.hour == morningTime.hour && now.minute == morningTime.minute) {
+      category = azkarState.categories.firstWhere(
+        (c) => c.contains('الصباح') || c.contains('Morning'),
+        orElse: () => '',
+      );
+      title = l10n.morningAzkar;
+    } else if (now.hour == eveningTime.hour && now.minute == eveningTime.minute) {
+      category = azkarState.categories.firstWhere(
+        (c) => c.contains('المساء') || c.contains('Evening'),
+        orElse: () => '',
+      );
+      title = l10n.eveningAzkar;
+    }
+
+    if (category != null && category.isNotEmpty) {
+      _lastShownDate = now;
+      _showAzkarDialog(category, title!);
+    }
+  }
+
+  void _showAzkarDialog(String category, String title) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.notifications_active, color: AppTheme.accent),
+            const SizedBox(width: 12),
+            Text(l10n.timeFor, style: GoogleFonts.amiri(fontSize: 18)),
+          ],
+        ),
+        content: Text(
+          '${l10n.localeName == 'ar' ? 'حان وقت' : 'It is time for'} $title. ${l10n.localeName == 'ar' ? 'هل تريد قراءتها الآن؟' : 'Would you like to read it now?'}',
+          style: const TextStyle(fontSize: 16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AzkarListScreen(category: category),
+                ),
+              );
+            },
+            child: Text(l10n.yes),
+          ),
+        ],
+      ),
+    );
+  }
+
+  DateTime _parseTime(String timeStr, DateTime now) {
+    try {
+      final parts = timeStr.split(':');
+      return DateTime(now.year, now.month, now.day, int.parse(parts[0]), int.parse(parts[1]));
+    } catch (_) {
+      return now;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -226,6 +358,33 @@ class _HomeBody extends StatelessWidget {
                                 fontSize: 12.0,
                               ),
                             ),
+                          )
+                        else
+                          Padding(
+                            padding: const EdgeInsets.only(left: 52.0, top: 4.0),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                                );
+                              },
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.location_off_rounded, size: 14, color: AppTheme.missed),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    l10n.locationNotSet,
+                                    style: const TextStyle(
+                                      color: AppTheme.missed,
+                                      fontSize: 12.0,
+                                      fontWeight: FontWeight.w500,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                       ],
                     ),
@@ -345,111 +504,150 @@ class _HomeBody extends StatelessWidget {
   }
 
   Widget _buildSuggestedAzkarSection(BuildContext context, SettingsState settings) {
-    final now = DateTime.now();
-    final morningTime = _parseTime(settings.morningAzkarTime, now);
-    final eveningTime = _parseTime(settings.eveningAzkarTime, now);
+    return BlocBuilder<AzkarBloc, AzkarState>(
+      builder: (context, azkarState) {
+        if (azkarState.categories.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
 
-    String? category;
-    String? title;
-    IconData? icon;
-    List<Color>? colors;
+        final now = DateTime.now();
+        DateTime morningTime;
+        DateTime eveningTime;
 
-    final l10n = AppLocalizations.of(context)!;
-
-    if (now.isAfter(morningTime.subtract(const Duration(minutes: 30))) && 
-        now.isBefore(morningTime.add(const Duration(hours: 4)))) {
-      category = 'أذكار الصباح';
-      title = l10n.morningAzkar;
-      icon = Icons.wb_sunny_rounded;
-      colors = [const Color(0xFFFF9800), const Color(0xFFFF5722)];
-    } else if (now.isAfter(eveningTime.subtract(const Duration(minutes: 30))) && 
-               now.isBefore(eveningTime.add(const Duration(hours: 4)))) {
-      category = 'أذكار المساء';
-      title = l10n.eveningAzkar;
-      icon = Icons.nightlight_round;
-      colors = [const Color(0xFF3F51B5), const Color(0xFF2196F3)];
-    }
-
-    if (category == null) return const SliverToBoxAdapter(child: SizedBox.shrink());
-
-    return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      sliver: SliverToBoxAdapter(
-        child: GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => AzkarListScreen(category: category!),
-              ),
+        if (settings.autoAzkarTimes && settings.latitude != null && settings.longitude != null) {
+          try {
+            final prayerTimes = getIt<PrayerTimeService>().getPrayerTimes(
+              latitude: settings.latitude!,
+              longitude: settings.longitude!,
+              method: settings.calculationMethod,
+              madhab: settings.madhab,
+              date: now,
             );
-          },
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: colors!,
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+            morningTime = prayerTimes.fajr;
+            eveningTime = prayerTimes.asr;
+          } catch (_) {
+            morningTime = _parseTime(settings.morningAzkarTime, now);
+            eveningTime = _parseTime(settings.eveningAzkarTime, now);
+          }
+        } else {
+          morningTime = _parseTime(settings.morningAzkarTime, now);
+          eveningTime = _parseTime(settings.eveningAzkarTime, now);
+        }
+
+        String categoryToOpen = '';
+        String? displayTitle;
+        IconData? icon;
+        List<Color>? colors;
+
+        final l10n = AppLocalizations.of(context)!;
+
+        if (now.isAfter(morningTime.subtract(const Duration(minutes: 30))) && 
+            now.isBefore(morningTime.add(const Duration(hours: 4)))) {
+          categoryToOpen = azkarState.categories.firstWhere(
+            (c) => c.contains('الصباح') || c.contains('Morning'),
+            orElse: () => '',
+          );
+          if (categoryToOpen.isNotEmpty) {
+            displayTitle = l10n.morningAzkar;
+            icon = Icons.wb_sunny_rounded;
+            colors = [AppTheme.accent, AppTheme.accent.withValues(alpha: 0.8)];
+          }
+        } else if (now.isAfter(eveningTime.subtract(const Duration(minutes: 30))) && 
+                   now.isBefore(eveningTime.add(const Duration(hours: 4)))) {
+          categoryToOpen = azkarState.categories.firstWhere(
+            (c) => c.contains('المساء') || c.contains('Evening'),
+            orElse: () => '',
+          );
+          if (categoryToOpen.isNotEmpty) {
+            displayTitle = l10n.eveningAzkar;
+            icon = Icons.nightlight_round;
+            colors = [const Color(0xFF7986CB), const Color(0xFF5C6BC0)];
+          }
+        }
+
+        if (categoryToOpen.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+
+        return SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          sliver: SliverToBoxAdapter(
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AzkarListScreen(category: categoryToOpen),
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: colors!.first.withValues(alpha: 0.3), width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colors.first.withValues(alpha: 0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: colors.first.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(icon, color: colors.first, size: 24),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: colors.first,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                l10n.timeFor,
+                                style: GoogleFonts.outfit(
+                                  color: colors.first,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            displayTitle!,
+                            style: GoogleFonts.amiri(
+                              color: AppTheme.textPrimary,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.arrow_forward_ios_rounded, color: colors.first, size: 18),
+                  ],
+                ),
               ),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: colors.first.withValues(alpha: 0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, color: Colors.white, size: 28),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.timeFor,
-                        style: GoogleFonts.outfit(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 14,
-                        ),
-                      ),
-                      Text(
-                        title!,
-                        style: GoogleFonts.amiri(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 20),
-              ],
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
-  }
-
-  DateTime _parseTime(String timeStr, DateTime now) {
-    try {
-      final parts = timeStr.split(':');
-      return DateTime(now.year, now.month, now.day, int.parse(parts[0]), int.parse(parts[1]));
-    } catch (_) {
-      return now;
-    }
   }
 }
 
@@ -470,7 +668,7 @@ class _MosqueIcon extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(12.0),
       ),
-      child: const Icon(Icons.mosque_rounded, color: Colors.white, size: 22.0),
+      child: Icon(Icons.mosque_rounded, color: AppTheme.onPrimary, size: 22.0),
     );
   }
 }

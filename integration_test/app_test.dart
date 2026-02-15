@@ -20,10 +20,6 @@ void main() {
       await tester.pumpWidget(app.QadaTrackerApp(hivePath: tempDir.path));
       await tester.pumpAndSettle();
 
-      // Wait for splash screen
-      await tester.pump(const Duration(seconds: 2));
-      await tester.pumpAndSettle();
-
       // --- Onboarding Page 1 ---
       expect(find.text('تتبع صلواتك'), findsOneWidget);
       await tester.tap(find.text('التالي')); 

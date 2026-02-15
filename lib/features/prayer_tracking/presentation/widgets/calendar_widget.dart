@@ -4,6 +4,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_theme.dart';
+import 'package:hijri/hijri_calendar.dart';
 
 class CalendarWidget extends StatefulWidget {
   final DateTime selectedDate;
@@ -34,6 +35,52 @@ class _CalendarWidgetState extends State<CalendarWidget> {
   }
 
   DateTime _normalize(DateTime d) => DateTime(d.year, d.month, d.day);
+
+  Widget _buildCell(DateTime day, bool isSelected, {bool isToday = false}) {
+    final hijri = HijriCalendar.fromDate(day);
+    return Container(
+      margin: const EdgeInsets.all(4.0),
+      decoration: BoxDecoration(
+        color: isSelected
+            ? AppTheme.accent
+            : (isToday ? AppTheme.primaryLight.withValues(alpha: 0.20) : null),
+        shape: BoxShape.circle,
+        border: isToday && !isSelected
+            ? Border.all(color: AppTheme.primaryLight, width: 1.0)
+            : null,
+      ),
+      child: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              '${day.day}',
+              style: GoogleFonts.outfit(
+                color: isSelected ? Colors.black87 : AppTheme.textPrimary,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                fontSize: 14.0,
+              ),
+            ),
+            const SizedBox(width: 2),
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                '${hijri.hDay}',
+                style: GoogleFonts.amiri(
+                  color: isSelected
+                      ? Colors.black54
+                      : AppTheme.textSecondary.withValues(alpha: 0.6),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 9.0,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,6 +140,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                 firstDay: DateTime(2020, 1, 1),
                 lastDay: DateTime(2030, 12, 31),
                 focusedDay: _focusedDay,
+                rowHeight: 48.0,
                 selectedDayPredicate: (day) =>
                     isSameDay(day, widget.selectedDate),
                 onDaySelected: (selectedDay, focusedDay) {
@@ -103,28 +151,13 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                   setState(() => _focusedDay = focusedDay);
                   widget.onMonthChanged(focusedDay.year, focusedDay.month);
                 },
-                calendarStyle: CalendarStyle(
-                  todayDecoration: BoxDecoration(
-                    color: AppTheme.primaryLight.withOpacity(0.30),
-                    shape: BoxShape.circle,
-                    border:
-                        Border.all(color: AppTheme.primaryLight, width: 2.0),
-                  ),
-                  todayTextStyle:
-                      const TextStyle(color: AppTheme.textPrimary),
-                  selectedDecoration: const BoxDecoration(
-                    color: AppTheme.accent,
-                    shape: BoxShape.circle,
-                  ),
-                  selectedTextStyle:
-                      const TextStyle(color: Colors.black87, fontWeight: FontWeight.w700),
-                  defaultTextStyle:
-                      const TextStyle(color: AppTheme.textPrimary),
-                  weekendTextStyle:
-                      const TextStyle(color: AppTheme.textSecondary),
-                  outsideTextStyle:
-                  TextStyle(color: AppTheme.textSecondary.withOpacity(0.4)),
-                  cellMargin: const EdgeInsets.all(4),
+                calendarStyle: const CalendarStyle(
+                  todayTextStyle: TextStyle(color: AppTheme.textPrimary),
+                  selectedTextStyle: TextStyle(color: Colors.black87, fontWeight: FontWeight.w700),
+                  defaultTextStyle: TextStyle(color: AppTheme.textPrimary),
+                  weekendTextStyle: TextStyle(color: AppTheme.textSecondary),
+                  outsideTextStyle: TextStyle(color: Color(0x66C9D1D9)),
+                  cellMargin: EdgeInsets.all(4),
                   markersMaxCount: 1,
                 ),
                 headerStyle: HeaderStyle(
@@ -151,6 +184,9 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                       color: AppTheme.textSecondary, fontSize: 12.0),
                 ),
                 calendarBuilders: CalendarBuilders(
+                  defaultBuilder: (context, day, focusedDay) => _buildCell(day, false),
+                  selectedBuilder: (context, day, focusedDay) => _buildCell(day, true),
+                  todayBuilder: (context, day, focusedDay) => _buildCell(day, false, isToday: true),
                   markerBuilder: (context, date, events) {
                     final normalized = _normalize(date);
                     final record = widget.monthRecords[normalized];
@@ -170,7 +206,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                                 color: (hasMissed
                                         ? AppTheme.missed
                                         : AppTheme.saved)
-                                    .withOpacity(0.50),
+                                    .withValues(alpha: 0.50),
                                 blurRadius: 4.0,
                               ),
                             ],

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_theme.dart';
+import 'package:intl/intl.dart';
+import 'dart:ui' as ui;
 
 class HistoryList extends StatelessWidget {
   final List<DailyRecord> records;
@@ -24,75 +26,84 @@ class HistoryList extends StatelessWidget {
       return _buildEmptyState(context);
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(color: AppTheme.cardBorder),
-      ),
-      child: ExpansionTile(
-        key: const PageStorageKey('history_list_expansion'),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
-        collapsedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
-        initiallyExpanded: false,
-        tilePadding: const EdgeInsets.fromLTRB(16.0, 8.0, 8.0, 8.0),
-        childrenPadding: EdgeInsets.zero,
-        iconColor: AppTheme.accent,
-        collapsedIconColor: AppTheme.textSecondary,
-        title: Row(
-          children: [
-            const Icon(Icons.history_rounded,
-                color: AppTheme.accent, size: 20.0),
-            const SizedBox(width: 12.0),
-            Text(
-              l10n.history,
-              style: GoogleFonts.amiri(
-                color: AppTheme.textPrimary,
-                fontSize: 18.0,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(width: 8.0),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
-              decoration: BoxDecoration(
-                color: AppTheme.surfaceLight,
-                borderRadius: BorderRadius.circular(12.0),
-                border: Border.all(color: AppTheme.cardBorder),
-              ),
-              child: Text(
-                '${records.length}',
-                style: GoogleFonts.outfit(
-                  color: AppTheme.textSecondary,
-                  fontSize: 12.0,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-        children: [
-          const Divider(height: 1.0, color: AppTheme.cardBorder),
-          // Using a Column instead of ListView to avoid ScrollPosition restoration 
-          // issues (bool vs double? cast errors) on Windows.
-          Column(
-            children: [
-              for (int i = 0; i < records.length; i++) ...[
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onLongPress: () => _confirmDelete(context, records[i]),
-                    child: _buildRecordItem(context, records[i]),
+    // Group records by month/year
+    final Map<String, List<DailyRecord>> grouped = {};
+    for (final r in records) {
+      final key = DateFormat('MMMM yyyy', l10n.localeName).format(r.date);
+      grouped.putIfAbsent(key, () => []).add(r);
+    }
+
+    final sortedKeys = grouped.keys.toList();
+
+    return Column(
+      children: sortedKeys.map((monthKey) {
+        final monthRecords = grouped[monthKey]!;
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12.0),
+          decoration: BoxDecoration(
+            color: AppTheme.surface,
+            borderRadius: BorderRadius.circular(16.0),
+            border: Border.all(color: AppTheme.cardBorder),
+          ),
+          child: ExpansionTile(
+            key: PageStorageKey('history_$monthKey'),
+            initiallyExpanded: monthKey == sortedKeys.first,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+            collapsedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+            tilePadding: const EdgeInsets.fromLTRB(16.0, 8.0, 12.0, 8.0),
+            title: Row(
+              children: [
+                const Icon(Icons.history_rounded, color: AppTheme.accent, size: 20.0),
+                const SizedBox(width: 12.0),
+                Text(
+                  monthKey,
+                  style: GoogleFonts.amiri(
+                    color: AppTheme.textPrimary,
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                if (i < records.length - 1)
-                  const Divider(height: 1.0, color: AppTheme.cardBorder),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceLight,
+                    borderRadius: BorderRadius.circular(12.0),
+                    border: Border.all(color: AppTheme.cardBorder),
+                  ),
+                  child: Text(
+                    '${monthRecords.length}',
+                    style: GoogleFonts.outfit(
+                      color: AppTheme.textSecondary,
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ],
+            ),
+            children: [
+              const Divider(height: 1.0, color: AppTheme.cardBorder),
+              Column(
+                children: [
+                  for (int i = 0; i < monthRecords.length; i++) ...[
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onLongPress: () => _confirmDelete(context, monthRecords[i]),
+                        child: _buildRecordItem(context, monthRecords[i]),
+                      ),
+                    ),
+                    if (i < monthRecords.length - 1)
+                      const Divider(height: 1.0, color: AppTheme.cardBorder),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 8.0),
             ],
           ),
-          const SizedBox(height: 8.0),
-        ],
-      ),
+        );
+      }).toList(),
     );
   }
 
@@ -103,6 +114,8 @@ class HistoryList extends StatelessWidget {
     final isToday = record.date.year == today.year &&
         record.date.month == today.month &&
         record.date.day == today.day;
+
+    final performedToday = 5 - record.missedToday.length;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
@@ -115,11 +128,11 @@ class HistoryList extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 6.0),
             decoration: BoxDecoration(
               color: isToday
-                  ? AppTheme.primaryLight.withOpacity(0.15)
+                  ? AppTheme.primaryLight.withValues(alpha: 0.15)
                   : AppTheme.surfaceLight,
               borderRadius: BorderRadius.circular(10.0),
               border: isToday
-                  ? Border.all(color: AppTheme.primaryLight.withOpacity(0.40))
+                  ? Border.all(color: AppTheme.primaryLight.withValues(alpha: 0.40))
                   : Border.all(color: Colors.transparent, width: 0.0),
             ),
             child: Column(
@@ -150,12 +163,29 @@ class HistoryList extends StatelessWidget {
               children: [
                 Row(
                   children: [
+                    // Performed Count (Finished)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                      decoration: BoxDecoration(
+                        color: AppTheme.saved.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6.0),
+                      ),
+                      child: Text(
+                        '${l10n.localeName == 'ar' ? 'تم' : 'Done'} $performedToday',
+                        style: GoogleFonts.amiri(
+                          color: AppTheme.saved,
+                          fontSize: 11.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6.0),
                     if (record.missedToday.isNotEmpty) ...[
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6.0, vertical: 2.0),
                         decoration: BoxDecoration(
-                          color: AppTheme.missed.withOpacity(0.15),
+                          color: AppTheme.missed.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6.0),
                         ),
                         child: Text(
@@ -166,7 +196,6 @@ class HistoryList extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 6.0),
                     ],
                     const Spacer(),
                     Text(
@@ -178,28 +207,27 @@ class HistoryList extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 6.0),
+                const SizedBox(height: 8.0),
                 // Per-salaah mini row
                 Wrap(
-                  spacing: 6.0,
-                  runSpacing: 4.0,
+                  spacing: 8.0,
+                  runSpacing: 6.0,
                   children: Salaah.values.map((s) {
                     final count = record.qada[s]?.value ?? 0;
                     final wasMissed = record.missedToday.contains(s);
-                    // Only show if count > 0 or was missed
-                    if (count == 0 && !wasMissed) return const SizedBox.shrink();
+                    
                     return Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6.0, vertical: 3.0),
                       decoration: BoxDecoration(
                         color: wasMissed
-                            ? AppTheme.missed.withOpacity(0.08)
-                            : AppTheme.surfaceLight,
+                            ? AppTheme.missed.withValues(alpha: 0.08)
+                            : AppTheme.saved.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(6.0),
                         border: Border.all(
                           color: wasMissed
-                              ? AppTheme.missed.withOpacity(0.20)
-                              : Colors.transparent,
+                              ? AppTheme.missed.withValues(alpha: 0.20)
+                              : AppTheme.saved.withValues(alpha: 0.10),
                         ),
                       ),
                       child: Row(
@@ -215,16 +243,21 @@ class HistoryList extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 4.0),
-                          Text(
-                            '$count',
-                            style: GoogleFonts.outfit(
-                              color: wasMissed
-                                  ? AppTheme.missed
-                                  : AppTheme.textPrimary,
-                              fontSize: 11.0,
-                              fontWeight: FontWeight.w600,
+                          if (wasMissed)
+                            Text(
+                              '$count',
+                              style: GoogleFonts.outfit(
+                                color: AppTheme.missed,
+                                fontSize: 11.0,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            )
+                          else
+                            const Icon(
+                              Icons.check_rounded,
+                              color: AppTheme.saved,
+                              size: 12.0,
                             ),
-                          ),
                         ],
                       ),
                     );
@@ -244,8 +277,8 @@ class HistoryList extends StatelessWidget {
       context: context,
       builder: (context) => Directionality(
         textDirection: Localizations.localeOf(context).languageCode == 'ar' 
-            ? TextDirection.rtl 
-            : TextDirection.ltr,
+            ? ui.TextDirection.rtl 
+            : ui.TextDirection.ltr,
         child: AlertDialog(
           backgroundColor: AppTheme.surface,
           title: Text(
@@ -301,7 +334,7 @@ class HistoryList extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.history_rounded,
-              color: AppTheme.textSecondary.withOpacity(0.40), size: 20.0),
+              color: AppTheme.textSecondary.withValues(alpha: 0.40), size: 20.0),
           const SizedBox(width: 8.0),
           Text(
             l10n.noHistory,

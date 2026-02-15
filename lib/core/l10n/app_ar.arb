@@ -84,6 +84,18 @@
   "morningAzkar": "أذكار الصباح",
   "eveningAzkar": "أذكار المساء",
   "azkarSettingsDesc": "قم بتكوين الوقت المناسب لعرض تذكيرات أذكار الصباح والمساء.",
+  "autoAzkarTimes": "تلقائي (حسب مواقيت الصلاة)",
+  "autoAzkarTimesDesc": "تحديد مواعيد الأذكار تلقائياً بناءً على صلاتي الفجر والعصر.",
   "timeFor": "حان وقت",
-  "recommended": "مقترح"
+  "recommended": "مقترح",
+  "azkar": "الأذكار",
+  "loadingAzkar": "جاري تحميل الأذكار...",
+  "errorLoadingAzkar": "خطأ في تحميل الأذكار",
+  "noCategoriesFound": "لم يتم العثور على فئات",
+  "refreshData": "تحديث البيانات",
+  "resetAllProgress": "إعادة تعيين التقدم",
+  "noItemsFound": "لم يتم العثور على عناصر في هذه الفئة",
+  "resetItem": "إعادة تعيين العنصر",
+  "prayerTab": "الصلاة",
+  "azkarTab": "الأذكار"
 }

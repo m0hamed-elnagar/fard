@@ -7,9 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
-  final VoidCallback onInitialized;
-  final String? hivePath;
-  const SplashScreen({super.key, required this.onInitialized, this.hivePath});
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -19,28 +17,16 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _initialize();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initialize();
+    });
   }
 
   Future<void> _initialize() async {
-    try {
-      final startTime = DateTime.now();
-      await configureDependencies(hivePath: widget.hivePath);
-      
-      final elapsed = DateTime.now().difference(startTime);
-      if (elapsed < const Duration(seconds: 1)) {
-        await Future.delayed(const Duration(seconds: 1) - elapsed);
-      }
-
-      if (mounted) {
-        widget.onInitialized();
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error initializing app: $e')),
-        );
-      }
+    if (mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const SplashScreenNavigate()),
+      );
     }
   }
 
@@ -61,7 +47,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
                 borderRadius: BorderRadius.circular(24.0),
               ),
-              child: const Icon(Icons.mosque_rounded, color: Colors.white, size: 50.0),
+              child: Icon(Icons.mosque_rounded, color: AppTheme.onPrimary, size: 50.0),
             ),
             const SizedBox(height: 24.0),
             Text(

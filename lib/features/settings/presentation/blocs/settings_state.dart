@@ -14,5 +14,6 @@ class SettingsState with _$SettingsState {
     @Default('shafi') String madhab,
     @Default('05:00') String morningAzkarTime,
     @Default('18:00') String eveningAzkarTime,
+    @Default(true) bool autoAzkarTimes,
   }) = _SettingsState;
 }

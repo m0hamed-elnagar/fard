@@ -1,3 +1,5 @@
+import 'package:fard/core/services/notification_service.dart';
+import 'package:fard/features/azkar/data/azkar_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,6 +9,8 @@ import 'settings_state.dart';
 class SettingsCubit extends Cubit<SettingsState> {
   final SharedPreferences _prefs;
   final LocationService _locationService;
+  final NotificationService _notificationService;
+  final AzkarRepository _azkarRepository;
 
   static const String _localeKey = 'locale';
   static const String _latKey = 'latitude';
@@ -16,9 +20,14 @@ class SettingsCubit extends Cubit<SettingsState> {
   static const String _madhabKey = 'madhab';
   static const String _morningAzkarKey = 'morning_azkar_time';
   static const String _eveningAzkarKey = 'evening_azkar_time';
+  static const String _autoAzkarKey = 'auto_azkar_times';
 
-  SettingsCubit(this._prefs, this._locationService)
-      : super(SettingsState(
+  SettingsCubit(
+    this._prefs, 
+    this._locationService, 
+    this._notificationService, 
+    this._azkarRepository,
+  ) : super(SettingsState(
           locale: Locale(_prefs.getString(_localeKey) ?? 'ar'),
           latitude: _prefs.getDouble(_latKey),
           longitude: _prefs.getDouble(_lonKey),
@@ -27,11 +36,13 @@ class SettingsCubit extends Cubit<SettingsState> {
           madhab: _prefs.getString(_madhabKey) ?? 'shafi',
           morningAzkarTime: _prefs.getString(_morningAzkarKey) ?? '05:00',
           eveningAzkarTime: _prefs.getString(_eveningAzkarKey) ?? '18:00',
+          autoAzkarTimes: _prefs.getBool(_autoAzkarKey) ?? true,
         ));
 
   void updateLocale(Locale locale) {
     _prefs.setString(_localeKey, locale.languageCode);
     emit(state.copyWith(locale: locale));
+    _updateReminders();
   }
 
   void toggleLocale() {
@@ -75,6 +86,7 @@ class SettingsCubit extends Cubit<SettingsState> {
         cityName: cityName,
         calculationMethod: method,
       ));
+      _updateReminders();
     }
   }
 
@@ -111,20 +123,52 @@ class SettingsCubit extends Cubit<SettingsState> {
   void updateCalculationMethod(String method) {
     _prefs.setString(_methodKey, method);
     emit(state.copyWith(calculationMethod: method));
+    _updateReminders();
   }
 
   void updateMadhab(String madhab) {
     _prefs.setString(_madhabKey, madhab);
     emit(state.copyWith(madhab: madhab));
+    _updateReminders();
   }
 
   void updateMorningAzkarTime(String time) {
     _prefs.setString(_morningAzkarKey, time);
     emit(state.copyWith(morningAzkarTime: time));
+    _updateReminders();
   }
 
   void updateEveningAzkarTime(String time) {
     _prefs.setString(_eveningAzkarKey, time);
     emit(state.copyWith(eveningAzkarTime: time));
+    _updateReminders();
+  }
+
+  void toggleAutoAzkarTimes() {
+    final newValue = !state.autoAzkarTimes;
+    _prefs.setBool(_autoAzkarKey, newValue);
+    emit(state.copyWith(autoAzkarTimes: newValue));
+    _updateReminders();
+  }
+
+  Future<void> _updateReminders() async {
+    final azkar = await _azkarRepository.getAllAzkar();
+    await _notificationService.scheduleAzkarReminders(settings: state, allAzkar: azkar);
+  }
+
+  Future<void> initReminders() async {
+    try {
+      if (state.latitude == null) {
+        // Try to auto-detect location on startup if not set
+        try {
+          await refreshLocation();
+        } catch (_) {
+          // Ignore errors, user can manually retry
+        }
+      }
+      await _updateReminders();
+    } catch (e) {
+      debugPrint('Error initializing reminders: $e');
+    }
   }
 }

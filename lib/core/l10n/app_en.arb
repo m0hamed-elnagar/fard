@@ -84,6 +84,18 @@
   "morningAzkar": "Morning Azkar",
   "eveningAzkar": "Evening Azkar",
   "azkarSettingsDesc": "Configure what time to show morning and evening Azkar reminders.",
+  "autoAzkarTimes": "Auto (Follow Prayer Times)",
+  "autoAzkarTimesDesc": "Automatically set Azkar times based on Fajr and Asr prayers.",
   "timeFor": "Time for",
-  "recommended": "Recommended"
+  "recommended": "Recommended",
+  "azkar": "Azkar",
+  "loadingAzkar": "Loading Azkar...",
+  "errorLoadingAzkar": "Error Loading Azkar",
+  "noCategoriesFound": "No categories found",
+  "refreshData": "Refresh Data",
+  "resetAllProgress": "Reset All Progress",
+  "noItemsFound": "No items found in this category",
+  "resetItem": "Reset Item",
+  "prayerTab": "Prayer",
+  "azkarTab": "Azkar"
 }

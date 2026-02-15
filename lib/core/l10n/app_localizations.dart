@@ -476,6 +476,18 @@ abstract class AppLocalizations {
   /// **'Configure what time to show morning and evening Azkar reminders.'**
   String get azkarSettingsDesc;
 
+  /// No description provided for @autoAzkarTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto (Follow Prayer Times)'**
+  String get autoAzkarTimes;
+
+  /// No description provided for @autoAzkarTimesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically set Azkar times based on Fajr and Asr prayers.'**
+  String get autoAzkarTimesDesc;
+
   /// No description provided for @timeFor.
   ///
   /// In en, this message translates to:
@@ -487,6 +499,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recommended'**
   String get recommended;
+
+  /// No description provided for @azkar.
+  ///
+  /// In en, this message translates to:
+  /// **'Azkar'**
+  String get azkar;
+
+  /// No description provided for @loadingAzkar.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading Azkar...'**
+  String get loadingAzkar;
+
+  /// No description provided for @errorLoadingAzkar.
+  ///
+  /// In en, this message translates to:
+  /// **'Error Loading Azkar'**
+  String get errorLoadingAzkar;
+
+  /// No description provided for @noCategoriesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories found'**
+  String get noCategoriesFound;
+
+  /// No description provided for @refreshData.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh Data'**
+  String get refreshData;
+
+  /// No description provided for @resetAllProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset All Progress'**
+  String get resetAllProgress;
+
+  /// No description provided for @noItemsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No items found in this category'**
+  String get noItemsFound;
+
+  /// No description provided for @resetItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Item'**
+  String get resetItem;
+
+  /// No description provided for @prayerTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer'**
+  String get prayerTab;
+
+  /// No description provided for @azkarTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Azkar'**
+  String get azkarTab;
 }
 
 class _AppLocalizationsDelegate

@@ -13,12 +13,16 @@ class AppTheme {
   static const Color background = Color(0xFF0D1117);
   static const Color surface = Color(0xFF161B22);
   static const Color surfaceLight = Color(0xFF21262D);
-  static const Color cardBorder = Color(0xFF30363D);
+  static const Color cardBorder = Color(0xFF3D444D); // Slightly lighter for visibility
   static const Color textPrimary = Color(0xFFF0F6FC);
-  static const Color textSecondary = Color(0xFF8B949E);
-  static const Color missed = Color(0xFFE53935);
-  static const Color saved = Color(0xFF4CAF50);
-  static const Color neutral = Color(0xFF484F58);
+  static const Color textSecondary = Color(0xFFD1D5DA); // Brighter gray
+  static const Color missed = Color(0xFFF85149); // Brighter red
+  static const Color onMissed = Colors.white;
+  static const Color saved = Color(0xFF3FB950); // Brighter green
+  static const Color onSaved = Color(0xFF003300);
+  static const Color onPrimary = Color(0xFF003300);
+  static const Color neutral = Color(0xFF8B949E); // Much brighter neutral (GitHub's secondary text color)
+  static const Color onAccent = Color(0xFF3E2723);
 
   static ThemeData get darkTheme {
     return ThemeData(
@@ -31,9 +35,10 @@ class AppTheme {
         surface: surface,
         error: missed,
         onPrimary: Color(0xFF003300),
-        onSecondary: Color(0xFF3E2723),
+        onSecondary: onAccent,
         onSurface: textPrimary,
         outline: cardBorder,
+        surfaceContainer: surface,
       ),
       textTheme: GoogleFonts.outfitTextTheme(
         const TextTheme(
@@ -57,13 +62,44 @@ class AppTheme {
               TextStyle(color: textPrimary, fontWeight: FontWeight.w500, fontSize: 14.0),
         ),
       ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: background,
+        elevation: 0,
+        centerTitle: true,
+        foregroundColor: textPrimary,
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: surface,
+        indicatorColor: accent.withValues(alpha: 0.2),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return GoogleFonts.outfit(
+                color: accent, fontWeight: FontWeight.w600, fontSize: 12);
+          }
+          return GoogleFonts.outfit(
+              color: textSecondary, fontWeight: FontWeight.w400, fontSize: 12);
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(color: accent, size: 24);
+          }
+          return const IconThemeData(color: textSecondary, size: 24);
+        }),
+      ),
       cardTheme: CardThemeData(
         color: surface,
         elevation: 0.0,
+        margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.0),
           side: const BorderSide(color: cardBorder, width: 1.0),
         ),
+      ),
+      listTileTheme: const ListTileThemeData(
+        iconColor: textSecondary,
+        textColor: textPrimary,
+        titleTextStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        subtitleTextStyle: TextStyle(fontSize: 14, color: textSecondary),
       ),
       expansionTileTheme: const ExpansionTileThemeData(
         backgroundColor: surface,
@@ -82,7 +118,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryLight,
-          foregroundColor: Colors.white,
+          foregroundColor: Color(0xFF003300), // High contrast on green
           elevation: 0.0,
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 14.0),
           shape: RoundedRectangleBorder(

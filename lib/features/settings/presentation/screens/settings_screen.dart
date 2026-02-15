@@ -1,3 +1,5 @@
+import 'package:fard/core/di/injection.dart';
+import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
@@ -5,6 +7,7 @@ import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -28,8 +31,31 @@ class SettingsScreen extends StatelessWidget {
             previous.cityName != current.cityName ||
             previous.calculationMethod != current.calculationMethod ||
             previous.madhab != current.madhab ||
-            previous.locale != current.locale,
+            previous.locale != current.locale ||
+            previous.morningAzkarTime != current.morningAzkarTime ||
+            previous.eveningAzkarTime != current.eveningAzkarTime ||
+            previous.autoAzkarTimes != current.autoAzkarTimes,
         builder: (context, state) {
+          String morningTimeToShow = state.morningAzkarTime;
+          String eveningTimeToShow = state.eveningAzkarTime;
+
+          if (state.autoAzkarTimes && state.latitude != null && state.longitude != null) {
+            try {
+              final now = DateTime.now();
+              final prayerTimes = getIt<PrayerTimeService>().getPrayerTimes(
+                latitude: state.latitude!,
+                longitude: state.longitude!,
+                method: state.calculationMethod,
+                madhab: state.madhab,
+                date: now,
+              );
+              morningTimeToShow = DateFormat.Hm().format(prayerTimes.fajr);
+              eveningTimeToShow = DateFormat.Hm().format(prayerTimes.asr);
+            } catch (e) {
+              // Fallback to state times if prayer times calculation fails
+            }
+          }
+
           return ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
@@ -161,34 +187,85 @@ class SettingsScreen extends StatelessWidget {
                     style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
                   ),
                   const SizedBox(height: 12),
-                  _buildTimeSettingItem(
-                    context: context,
-                    title: l10n.morningAzkar,
-                    time: state.morningAzkarTime,
-                    onTap: () async {
-                      final time = await _selectTime(context, state.morningAzkarTime);
-                      if (time != null && context.mounted) {
-                        context.read<SettingsCubit>().updateMorningAzkarTime(time);
-                      }
-                    },
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l10n.autoAzkarTimes, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
+                    subtitle: Text(l10n.autoAzkarTimesDesc, style: const TextStyle(fontSize: 12)),
+                    value: state.autoAzkarTimes,
+                    onChanged: (_) => context.read<SettingsCubit>().toggleAutoAzkarTimes(),
+                    activeThumbColor: AppTheme.accent,
                   ),
-                  const Divider(height: 24),
-                  _buildTimeSettingItem(
-                    context: context,
-                    title: l10n.eveningAzkar,
-                    time: state.eveningAzkarTime,
-                    onTap: () async {
-                      final time = await _selectTime(context, state.eveningAzkarTime);
-                      if (time != null && context.mounted) {
-                        context.read<SettingsCubit>().updateEveningAzkarTime(time);
-                      }
-                    },
-                  ),
+                  if (state.autoAzkarTimes) ...[
+                    const Divider(height: 24),
+                    _buildInfoItem(
+                      title: l10n.morningAzkar,
+                      time: morningTimeToShow,
+                      icon: Icons.wb_sunny_rounded,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildInfoItem(
+                      title: l10n.eveningAzkar,
+                      time: eveningTimeToShow,
+                      icon: Icons.nightlight_round,
+                    ),
+                  ] else ...[
+                    const Divider(height: 24),
+                    _buildTimeSettingItem(
+                      context: context,
+                      title: l10n.morningAzkar,
+                      time: state.morningAzkarTime,
+                      onTap: () async {
+                        final time = await _selectTime(context, state.morningAzkarTime);
+                        if (time != null && context.mounted) {
+                          context.read<SettingsCubit>().updateMorningAzkarTime(time);
+                        }
+                      },
+                    ),
+                    const Divider(height: 24),
+                    _buildTimeSettingItem(
+                      context: context,
+                      title: l10n.eveningAzkar,
+                      time: state.eveningAzkarTime,
+                      onTap: () async {
+                        final time = await _selectTime(context, state.eveningAzkarTime);
+                        if (time != null && context.mounted) {
+                          context.read<SettingsCubit>().updateEveningAzkarTime(time);
+                        }
+                      },
+                    ),
+                  ],
                 ],
               ),
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildInfoItem({required String title, required String time, required IconData icon}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceLight.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.cardBorder),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: AppTheme.textSecondary),
+          const SizedBox(width: 12),
+          Text(title, style: const TextStyle(fontSize: 14, color: AppTheme.textSecondary)),
+          const Spacer(),
+          Text(
+            time,
+            style: const TextStyle(
+              color: AppTheme.textPrimary,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -291,10 +368,20 @@ class SettingsScreen extends StatelessWidget {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
+            colorScheme: const ColorScheme.dark(
               primary: AppTheme.accent,
-              onPrimary: Colors.white,
+              onPrimary: Colors.black,
+              surface: AppTheme.surfaceLight,
               onSurface: AppTheme.textPrimary,
+              secondary: AppTheme.accent,
+            ),
+            dialogTheme: DialogThemeData(
+              backgroundColor: AppTheme.surface,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: AppTheme.accent,
+              ),
             ),
           ),
           child: child!,

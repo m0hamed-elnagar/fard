@@ -210,8 +210,45 @@ class AppLocalizationsEn extends AppLocalizations {
       'Configure what time to show morning and evening Azkar reminders.';
 
   @override
+  String get autoAzkarTimes => 'Auto (Follow Prayer Times)';
+
+  @override
+  String get autoAzkarTimesDesc =>
+      'Automatically set Azkar times based on Fajr and Asr prayers.';
+
+  @override
   String get timeFor => 'Time for';
 
   @override
   String get recommended => 'Recommended';
+
+  @override
+  String get azkar => 'Azkar';
+
+  @override
+  String get loadingAzkar => 'Loading Azkar...';
+
+  @override
+  String get errorLoadingAzkar => 'Error Loading Azkar';
+
+  @override
+  String get noCategoriesFound => 'No categories found';
+
+  @override
+  String get refreshData => 'Refresh Data';
+
+  @override
+  String get resetAllProgress => 'Reset All Progress';
+
+  @override
+  String get noItemsFound => 'No items found in this category';
+
+  @override
+  String get resetItem => 'Reset Item';
+
+  @override
+  String get prayerTab => 'Prayer';
+
+  @override
+  String get azkarTab => 'Azkar';
 }

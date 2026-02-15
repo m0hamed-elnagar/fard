@@ -24,6 +24,7 @@ mixin _$SettingsState {
   String get madhab => throw _privateConstructorUsedError;
   String get morningAzkarTime => throw _privateConstructorUsedError;
   String get eveningAzkarTime => throw _privateConstructorUsedError;
+  bool get autoAzkarTimes => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $SettingsStateCopyWith<SettingsState> get copyWith =>
@@ -44,7 +45,8 @@ abstract class $SettingsStateCopyWith<$Res> {
       String calculationMethod,
       String madhab,
       String morningAzkarTime,
-      String eveningAzkarTime});
+      String eveningAzkarTime,
+      bool autoAzkarTimes});
 }
 
 /// @nodoc
@@ -68,6 +70,7 @@ class _$SettingsStateCopyWithImpl<$Res, $Val extends SettingsState>
     Object? madhab = null,
     Object? morningAzkarTime = null,
     Object? eveningAzkarTime = null,
+    Object? autoAzkarTimes = null,
   }) {
     return _then(_value.copyWith(
       locale: null == locale
@@ -102,6 +105,10 @@ class _$SettingsStateCopyWithImpl<$Res, $Val extends SettingsState>
           ? _value.eveningAzkarTime
           : eveningAzkarTime // ignore: cast_nullable_to_non_nullable
               as String,
+      autoAzkarTimes: null == autoAzkarTimes
+          ? _value.autoAzkarTimes
+          : autoAzkarTimes // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -122,7 +129,8 @@ abstract class _$$SettingsStateImplCopyWith<$Res>
       String calculationMethod,
       String madhab,
       String morningAzkarTime,
-      String eveningAzkarTime});
+      String eveningAzkarTime,
+      bool autoAzkarTimes});
 }
 
 /// @nodoc
@@ -144,6 +152,7 @@ class __$$SettingsStateImplCopyWithImpl<$Res>
     Object? madhab = null,
     Object? morningAzkarTime = null,
     Object? eveningAzkarTime = null,
+    Object? autoAzkarTimes = null,
   }) {
     return _then(_$SettingsStateImpl(
       locale: null == locale
@@ -178,6 +187,10 @@ class __$$SettingsStateImplCopyWithImpl<$Res>
           ? _value.eveningAzkarTime
           : eveningAzkarTime // ignore: cast_nullable_to_non_nullable
               as String,
+      autoAzkarTimes: null == autoAzkarTimes
+          ? _value.autoAzkarTimes
+          : autoAzkarTimes // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -193,7 +206,8 @@ class _$SettingsStateImpl implements _SettingsState {
       this.calculationMethod = 'muslim_league',
       this.madhab = 'shafi',
       this.morningAzkarTime = '05:00',
-      this.eveningAzkarTime = '18:00'});
+      this.eveningAzkarTime = '18:00',
+      this.autoAzkarTimes = true});
 
   @override
   final Locale locale;
@@ -215,10 +229,13 @@ class _$SettingsStateImpl implements _SettingsState {
   @override
   @JsonKey()
   final String eveningAzkarTime;
+  @override
+  @JsonKey()
+  final bool autoAzkarTimes;
 
   @override
   String toString() {
-    return 'SettingsState(locale: $locale, latitude: $latitude, longitude: $longitude, cityName: $cityName, calculationMethod: $calculationMethod, madhab: $madhab, morningAzkarTime: $morningAzkarTime, eveningAzkarTime: $eveningAzkarTime)';
+    return 'SettingsState(locale: $locale, latitude: $latitude, longitude: $longitude, cityName: $cityName, calculationMethod: $calculationMethod, madhab: $madhab, morningAzkarTime: $morningAzkarTime, eveningAzkarTime: $eveningAzkarTime, autoAzkarTimes: $autoAzkarTimes)';
   }
 
   @override
@@ -239,12 +256,23 @@ class _$SettingsStateImpl implements _SettingsState {
             (identical(other.morningAzkarTime, morningAzkarTime) ||
                 other.morningAzkarTime == morningAzkarTime) &&
             (identical(other.eveningAzkarTime, eveningAzkarTime) ||
-                other.eveningAzkarTime == eveningAzkarTime));
+                other.eveningAzkarTime == eveningAzkarTime) &&
+            (identical(other.autoAzkarTimes, autoAzkarTimes) ||
+                other.autoAzkarTimes == autoAzkarTimes));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, locale, latitude, longitude,
-      cityName, calculationMethod, madhab, morningAzkarTime, eveningAzkarTime);
+  int get hashCode => Object.hash(
+      runtimeType,
+      locale,
+      latitude,
+      longitude,
+      cityName,
+      calculationMethod,
+      madhab,
+      morningAzkarTime,
+      eveningAzkarTime,
+      autoAzkarTimes);
 
   @JsonKey(ignore: true)
   @override
@@ -262,7 +290,8 @@ abstract class _SettingsState implements SettingsState {
       final String calculationMethod,
       final String madhab,
       final String morningAzkarTime,
-      final String eveningAzkarTime}) = _$SettingsStateImpl;
+      final String eveningAzkarTime,
+      final bool autoAzkarTimes}) = _$SettingsStateImpl;
 
   @override
   Locale get locale;
@@ -280,6 +309,8 @@ abstract class _SettingsState implements SettingsState {
   String get morningAzkarTime;
   @override
   String get eveningAzkarTime;
+  @override
+  bool get autoAzkarTimes;
   @override
   @JsonKey(ignore: true)
   _$$SettingsStateImplCopyWith<_$SettingsStateImpl> get copyWith =>

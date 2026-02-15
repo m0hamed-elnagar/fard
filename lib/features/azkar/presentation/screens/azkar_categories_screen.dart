@@ -1,3 +1,5 @@
+import 'package:fard/core/di/injection.dart';
+import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,25 +21,58 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<AzkarBloc>().add(const AzkarEvent.loadCategories());
+    final bloc = context.read<AzkarBloc>();
+    if (bloc.state.categories.isEmpty) {
+      bloc.add(const AzkarEvent.loadCategories());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'الأذكار',
+          l10n.azkar,
           style: GoogleFonts.amiri(fontWeight: FontWeight.bold, fontSize: 24),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () {
-              context.read<AzkarBloc>().add(const AzkarEvent.resetAll());
+            onPressed: () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text(l10n.resetAllProgress, style: GoogleFonts.amiri()),
+                  content: Text(
+                    l10n.localeName == 'ar' 
+                      ? 'هل أنت متأكد من إعادة تعيين جميع تقدم الأذكار؟'
+                      : 'Are you sure you want to reset all azkar progress?',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.missed,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text(l10n.delete),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirmed == true && context.mounted) {
+                context.read<AzkarBloc>().add(const AzkarEvent.resetAll());
+              }
             },
             icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'Reset All Progress',
+            tooltip: l10n.resetAllProgress,
           ),
         ],
       ),
@@ -50,7 +85,7 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                 children: [
                   const CircularProgressIndicator(),
                   const SizedBox(height: 16),
-                  Text('Loading Azkar...', style: GoogleFonts.amiri()),
+                  Text(l10n.loadingAzkar, style: GoogleFonts.amiri()),
                 ],
               ),
             );
@@ -66,7 +101,7 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                     const Icon(Icons.error_outline, color: Colors.red, size: 64),
                     const SizedBox(height: 16),
                     Text(
-                      'Error Loading Azkar',
+                      l10n.errorLoadingAzkar,
                       style: GoogleFonts.amiri(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -85,7 +120,7 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                           .read<AzkarBloc>()
                           .add(const AzkarEvent.loadCategories()),
                       icon: const Icon(Icons.refresh),
-                      label: const Text('Retry'),
+                      label: Text(l10n.retry),
                     ),
                   ],
                 ),
@@ -101,7 +136,7 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                   const Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
                   Text(
-                    'No categories found',
+                    l10n.noCategoriesFound,
                     style: GoogleFonts.amiri(fontSize: 20),
                   ),
                   const SizedBox(height: 24),
@@ -110,7 +145,7 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                         .read<AzkarBloc>()
                         .add(const AzkarEvent.loadCategories()),
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Refresh Data'),
+                    label: Text(l10n.refreshData),
                   ),
                 ],
               ),
@@ -126,8 +161,24 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
             child: BlocBuilder<SettingsCubit, SettingsState>(
               builder: (context, settingsState) {
                 final now = DateTime.now();
-                final morningTime = _parseTime(settingsState.morningAzkarTime, now);
-                final eveningTime = _parseTime(settingsState.eveningAzkarTime, now);
+                
+                DateTime morningTime;
+                DateTime eveningTime;
+
+                if (settingsState.autoAzkarTimes && settingsState.latitude != null && settingsState.longitude != null) {
+                  final prayerTimes = getIt<PrayerTimeService>().getPrayerTimes(
+                    latitude: settingsState.latitude!,
+                    longitude: settingsState.longitude!,
+                    method: settingsState.calculationMethod,
+                    madhab: settingsState.madhab,
+                    date: now,
+                  );
+                  morningTime = prayerTimes.fajr;
+                  eveningTime = prayerTimes.asr;
+                } else {
+                  morningTime = _parseTime(settingsState.morningAzkarTime, now);
+                  eveningTime = _parseTime(settingsState.eveningAzkarTime, now);
+                }
 
                 return ListView.builder(
                   padding: const EdgeInsets.all(16),
@@ -236,12 +287,12 @@ class _CategoryCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text('★', style: TextStyle(color: Colors.white, fontSize: 10)),
+                      const Text('★', style: TextStyle(color: AppTheme.onAccent, fontSize: 10)),
                       const SizedBox(width: 4),
                       Text(
                         AppLocalizations.of(context)!.recommended,
                         style: const TextStyle(
-                          color: Colors.white, 
+                          color: AppTheme.onAccent, 
                           fontSize: 10, 
                           fontWeight: FontWeight.bold
                         ),

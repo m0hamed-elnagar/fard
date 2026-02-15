@@ -1,4 +1,5 @@
 import 'package:fard/core/services/location_service.dart';
+import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/features/azkar/data/azkar_repository.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
@@ -27,11 +28,17 @@ Future<void> configureDependencies({String? hivePath}) async {
   
   getIt.registerSingleton<SharedPreferences>(prefs);
   getIt.registerSingleton<LocationService>(LocationService());
+  getIt.registerSingleton<NotificationService>(NotificationService());
   getIt.registerSingleton<PrayerTimeService>(PrayerTimeService());
   getIt.registerSingleton<AzkarRepository>(AzkarRepository(azkarBox));
   getIt.registerSingleton<PrayerRepo>(PrayerRepoImpl(box));
   
   getIt.registerFactory<PrayerTrackerBloc>(() => PrayerTrackerBloc(getIt()));
-  getIt.registerFactory<SettingsCubit>(() => SettingsCubit(getIt(), getIt()));
-  getIt.registerFactory<AzkarBloc>(() => AzkarBloc(getIt()));
+  getIt.registerSingleton<SettingsCubit>(SettingsCubit(
+        getIt(),
+        getIt(),
+        getIt(),
+        getIt(),
+      ));
+  getIt.registerSingleton<AzkarBloc>(AzkarBloc(getIt()));
 }
