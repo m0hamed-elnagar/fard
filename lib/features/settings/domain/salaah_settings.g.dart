@@ -6,15 +6,18 @@ part of 'salaah_settings.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_SalaahSettings _$SalaahSettingsFromJson(Map<String, dynamic> json) =>
-    _SalaahSettings(
-      salaah: $enumDecode(_$SalaahEnumMap, json['salaah']),
-      isAzanEnabled: json['isAzanEnabled'] as bool? ?? true,
-      isReminderEnabled: json['isReminderEnabled'] as bool? ?? true,
-      reminderMinutesBefore:
-          (json['reminderMinutesBefore'] as num?)?.toInt() ?? 15,
-      azanSound: json['azanSound'] as String?,
-    );
+_SalaahSettings _$SalaahSettingsFromJson(
+  Map<String, dynamic> json,
+) => _SalaahSettings(
+  salaah: $enumDecode(_$SalaahEnumMap, json['salaah']),
+  isAzanEnabled: json['isAzanEnabled'] as bool? ?? true,
+  isReminderEnabled: json['isReminderEnabled'] as bool? ?? true,
+  reminderMinutesBefore: (json['reminderMinutesBefore'] as num?)?.toInt() ?? 15,
+  isAfterSalahAzkarEnabled: json['isAfterSalahAzkarEnabled'] as bool? ?? true,
+  afterSalaahAzkarMinutes:
+      (json['afterSalaahAzkarMinutes'] as num?)?.toInt() ?? 5,
+  azanSound: json['azanSound'] as String?,
+);
 
 Map<String, dynamic> _$SalaahSettingsToJson(_SalaahSettings instance) =>
     <String, dynamic>{
@@ -22,6 +25,8 @@ Map<String, dynamic> _$SalaahSettingsToJson(_SalaahSettings instance) =>
       'isAzanEnabled': instance.isAzanEnabled,
       'isReminderEnabled': instance.isReminderEnabled,
       'reminderMinutesBefore': instance.reminderMinutesBefore,
+      'isAfterSalahAzkarEnabled': instance.isAfterSalahAzkarEnabled,
+      'afterSalaahAzkarMinutes': instance.afterSalaahAzkarMinutes,
       'azanSound': instance.azanSound,
     };
 

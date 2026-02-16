@@ -4,6 +4,7 @@ import 'package:fard/core/services/voice_download_service.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/azkar/data/azkar_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,6 +18,7 @@ class MockFlutterLocalNotificationsPlugin extends Mock implements FlutterLocalNo
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 class MockVoiceDownloadService extends Mock implements VoiceDownloadService {}
 class MockAndroidFlutterLocalNotificationsPlugin extends Mock implements AndroidFlutterLocalNotificationsPlugin {}
+class MockAzkarRepository extends Mock implements AzkarRepository {}
 class FakePrayerTimes extends Fake implements PrayerTimes {}
 
 void main() {
@@ -25,6 +27,7 @@ void main() {
   late MockPrayerTimeService mockPrayerTimeService;
   late MockVoiceDownloadService mockVoiceDownloadService;
   late MockAndroidFlutterLocalNotificationsPlugin mockAndroidPlugin;
+  late MockAzkarRepository mockAzkarRepository;
 
   setUpAll(() {
     tz.initializeTimeZones();
@@ -44,14 +47,18 @@ void main() {
     mockPrayerTimeService = MockPrayerTimeService();
     mockVoiceDownloadService = MockVoiceDownloadService();
     mockAndroidPlugin = MockAndroidFlutterLocalNotificationsPlugin();
+    mockAzkarRepository = MockAzkarRepository();
 
     final getIt = GetIt.instance;
     await getIt.reset();
     getIt.registerSingleton<PrayerTimeService>(mockPrayerTimeService);
     getIt.registerSingleton<VoiceDownloadService>(mockVoiceDownloadService);
+    getIt.registerSingleton<AzkarRepository>(mockAzkarRepository);
     getIt.registerSingleton<GlobalKey<NavigatorState>>(GlobalKey<NavigatorState>());
 
     notificationService = NotificationService(mockNotificationsPlugin);
+
+    when(() => mockAzkarRepository.getAllAzkar()).thenAnswer((_) async => []);
 
     when(() => mockNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>())
         .thenReturn(mockAndroidPlugin);

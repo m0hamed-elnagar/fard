@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:fard/core/theme/app_theme.dart';
 import '../blocs/azkar_bloc.dart';
 import 'azkar_list_screen.dart';
@@ -269,6 +270,120 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
   }
 }
 
+void _showAddReminderDialog(BuildContext context, String category) {
+  final cubit = context.read<SettingsCubit>();
+  final l10n = AppLocalizations.of(context)!;
+
+  String selectedTime = '05:00';
+  String customTitle = category;
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            title: Text(
+              l10n.localeName == 'ar' ? 'إضافة تنبيه' : 'Add Alarm',
+              style: GoogleFonts.amiri(),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  title: Text(l10n.localeName == 'ar' ? 'الفئة' : 'Category'),
+                  subtitle: Text(category, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  contentPadding: EdgeInsets.zero,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: l10n.localeName == 'ar' ? 'العنوان' : 'Title',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  initialValue: customTitle,
+                  onChanged: (val) => customTitle = val,
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.localeName == 'ar' ? 'الوقت' : 'Time'),
+                  trailing: InkWell(
+                    onTap: () async {
+                      final time = await _selectTime(context, selectedTime);
+                      if (time != null) {
+                        setDialogState(() => selectedTime = time);
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppTheme.accent.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        selectedTime,
+                        style: const TextStyle(
+                          color: AppTheme.accent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  cubit.addReminder(AzkarReminder(
+                    category: category,
+                    time: selectedTime,
+                    title: customTitle,
+                    isEnabled: true,
+                  ));
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(l10n.localeName == 'ar' ? 'تمت إضافة التنبيه' : 'Alarm added'),
+                      backgroundColor: AppTheme.accent,
+                    ),
+                  );
+                },
+                child: Text(l10n.yes),
+              ),
+            ],
+          );
+        }
+      );
+    },
+  );
+}
+
+Future<String?> _selectTime(BuildContext context, String currentTime) async {
+  final parts = currentTime.split(':');
+  final initialTime = TimeOfDay(
+    hour: int.parse(parts[0]),
+    minute: int.parse(parts[1]),
+  );
+
+  final selectedTime = await showTimePicker(
+    context: context,
+    initialTime: initialTime,
+  );
+
+  if (selectedTime != null) {
+    final String hour = selectedTime.hour.toString().padLeft(2, '0');
+    final String minute = selectedTime.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+  return null;
+}
+
 class _CategoryCard extends StatelessWidget {
   final String category;
   final bool isRecommended;
@@ -281,6 +396,8 @@ class _CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: isRecommended ? 4 : 1,
@@ -303,6 +420,19 @@ class _CategoryCard extends StatelessWidget {
                 color: isRecommended ? AppTheme.accent : null,
               ),
               textAlign: TextAlign.right,
+            ),
+            subtitle: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton.icon(
+                  onPressed: () => _showAddReminderDialog(context, category),
+                  icon: const Icon(Icons.alarm_add_rounded, size: 16, color: AppTheme.accent),
+                  label: Text(
+                    l10n.localeName == 'ar' ? 'إضافة تنبيه' : 'Add Alarm',
+                    style: const TextStyle(fontSize: 12, color: AppTheme.accent),
+                  ),
+                ),
+              ],
             ),
             trailing: Icon(
               Icons.arrow_forward_ios, 

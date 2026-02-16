@@ -105,7 +105,6 @@ void main() {
       final sound = androidDetails!.sound as UriAndroidNotificationSound;
       
       expect(sound.sound, contains('azan%20voice.mp3'));
-      print('Actual encoded sound URI: ${sound.sound}');
       
       await tempDir.delete(recursive: true);
     });

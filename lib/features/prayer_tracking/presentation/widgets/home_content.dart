@@ -122,6 +122,52 @@ class HomeContent extends StatelessWidget {
                 ),
                 // Suggested Azkar Section
                 SuggestedAzkarSection(settings: settings),
+                // Location Warning
+                if (settings.latitude == null || settings.longitude == null)
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
+                    sliver: SliverToBoxAdapter(
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppTheme.missed.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppTheme.missed.withValues(alpha: 0.3)),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.location_off_rounded, color: AppTheme.missed),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    l10n.locationWarning,
+                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: () => context.read<SettingsCubit>().refreshLocation(),
+                                icon: const Icon(Icons.my_location, size: 18),
+                                label: Text(l10n.givePermission),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.missed,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 // Section header
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 8.0),

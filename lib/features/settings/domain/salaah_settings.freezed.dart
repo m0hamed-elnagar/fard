@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SalaahSettings {
 
- Salaah get salaah; bool get isAzanEnabled; bool get isReminderEnabled; int get reminderMinutesBefore; String? get azanSound;
+ Salaah get salaah; bool get isAzanEnabled; bool get isReminderEnabled; int get reminderMinutesBefore; bool get isAfterSalahAzkarEnabled; int get afterSalaahAzkarMinutes; String? get azanSound;
 /// Create a copy of SalaahSettings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $SalaahSettingsCopyWith<SalaahSettings> get copyWith => _$SalaahSettingsCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SalaahSettings&&(identical(other.salaah, salaah) || other.salaah == salaah)&&(identical(other.isAzanEnabled, isAzanEnabled) || other.isAzanEnabled == isAzanEnabled)&&(identical(other.isReminderEnabled, isReminderEnabled) || other.isReminderEnabled == isReminderEnabled)&&(identical(other.reminderMinutesBefore, reminderMinutesBefore) || other.reminderMinutesBefore == reminderMinutesBefore)&&(identical(other.azanSound, azanSound) || other.azanSound == azanSound));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SalaahSettings&&(identical(other.salaah, salaah) || other.salaah == salaah)&&(identical(other.isAzanEnabled, isAzanEnabled) || other.isAzanEnabled == isAzanEnabled)&&(identical(other.isReminderEnabled, isReminderEnabled) || other.isReminderEnabled == isReminderEnabled)&&(identical(other.reminderMinutesBefore, reminderMinutesBefore) || other.reminderMinutesBefore == reminderMinutesBefore)&&(identical(other.isAfterSalahAzkarEnabled, isAfterSalahAzkarEnabled) || other.isAfterSalahAzkarEnabled == isAfterSalahAzkarEnabled)&&(identical(other.afterSalaahAzkarMinutes, afterSalaahAzkarMinutes) || other.afterSalaahAzkarMinutes == afterSalaahAzkarMinutes)&&(identical(other.azanSound, azanSound) || other.azanSound == azanSound));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,salaah,isAzanEnabled,isReminderEnabled,reminderMinutesBefore,azanSound);
+int get hashCode => Object.hash(runtimeType,salaah,isAzanEnabled,isReminderEnabled,reminderMinutesBefore,isAfterSalahAzkarEnabled,afterSalaahAzkarMinutes,azanSound);
 
 @override
 String toString() {
-  return 'SalaahSettings(salaah: $salaah, isAzanEnabled: $isAzanEnabled, isReminderEnabled: $isReminderEnabled, reminderMinutesBefore: $reminderMinutesBefore, azanSound: $azanSound)';
+  return 'SalaahSettings(salaah: $salaah, isAzanEnabled: $isAzanEnabled, isReminderEnabled: $isReminderEnabled, reminderMinutesBefore: $reminderMinutesBefore, isAfterSalahAzkarEnabled: $isAfterSalahAzkarEnabled, afterSalaahAzkarMinutes: $afterSalaahAzkarMinutes, azanSound: $azanSound)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $SalaahSettingsCopyWith<$Res>  {
   factory $SalaahSettingsCopyWith(SalaahSettings value, $Res Function(SalaahSettings) _then) = _$SalaahSettingsCopyWithImpl;
 @useResult
 $Res call({
- Salaah salaah, bool isAzanEnabled, bool isReminderEnabled, int reminderMinutesBefore, String? azanSound
+ Salaah salaah, bool isAzanEnabled, bool isReminderEnabled, int reminderMinutesBefore, bool isAfterSalahAzkarEnabled, int afterSalaahAzkarMinutes, String? azanSound
 });
 
 
@@ -65,12 +65,14 @@ class _$SalaahSettingsCopyWithImpl<$Res>
 
 /// Create a copy of SalaahSettings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? salaah = null,Object? isAzanEnabled = null,Object? isReminderEnabled = null,Object? reminderMinutesBefore = null,Object? azanSound = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? salaah = null,Object? isAzanEnabled = null,Object? isReminderEnabled = null,Object? reminderMinutesBefore = null,Object? isAfterSalahAzkarEnabled = null,Object? afterSalaahAzkarMinutes = null,Object? azanSound = freezed,}) {
   return _then(_self.copyWith(
 salaah: null == salaah ? _self.salaah : salaah // ignore: cast_nullable_to_non_nullable
 as Salaah,isAzanEnabled: null == isAzanEnabled ? _self.isAzanEnabled : isAzanEnabled // ignore: cast_nullable_to_non_nullable
 as bool,isReminderEnabled: null == isReminderEnabled ? _self.isReminderEnabled : isReminderEnabled // ignore: cast_nullable_to_non_nullable
 as bool,reminderMinutesBefore: null == reminderMinutesBefore ? _self.reminderMinutesBefore : reminderMinutesBefore // ignore: cast_nullable_to_non_nullable
+as int,isAfterSalahAzkarEnabled: null == isAfterSalahAzkarEnabled ? _self.isAfterSalahAzkarEnabled : isAfterSalahAzkarEnabled // ignore: cast_nullable_to_non_nullable
+as bool,afterSalaahAzkarMinutes: null == afterSalaahAzkarMinutes ? _self.afterSalaahAzkarMinutes : afterSalaahAzkarMinutes // ignore: cast_nullable_to_non_nullable
 as int,azanSound: freezed == azanSound ? _self.azanSound : azanSound // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
@@ -154,10 +156,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Salaah salaah,  bool isAzanEnabled,  bool isReminderEnabled,  int reminderMinutesBefore,  String? azanSound)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Salaah salaah,  bool isAzanEnabled,  bool isReminderEnabled,  int reminderMinutesBefore,  bool isAfterSalahAzkarEnabled,  int afterSalaahAzkarMinutes,  String? azanSound)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SalaahSettings() when $default != null:
-return $default(_that.salaah,_that.isAzanEnabled,_that.isReminderEnabled,_that.reminderMinutesBefore,_that.azanSound);case _:
+return $default(_that.salaah,_that.isAzanEnabled,_that.isReminderEnabled,_that.reminderMinutesBefore,_that.isAfterSalahAzkarEnabled,_that.afterSalaahAzkarMinutes,_that.azanSound);case _:
   return orElse();
 
 }
@@ -175,10 +177,10 @@ return $default(_that.salaah,_that.isAzanEnabled,_that.isReminderEnabled,_that.r
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Salaah salaah,  bool isAzanEnabled,  bool isReminderEnabled,  int reminderMinutesBefore,  String? azanSound)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Salaah salaah,  bool isAzanEnabled,  bool isReminderEnabled,  int reminderMinutesBefore,  bool isAfterSalahAzkarEnabled,  int afterSalaahAzkarMinutes,  String? azanSound)  $default,) {final _that = this;
 switch (_that) {
 case _SalaahSettings():
-return $default(_that.salaah,_that.isAzanEnabled,_that.isReminderEnabled,_that.reminderMinutesBefore,_that.azanSound);}
+return $default(_that.salaah,_that.isAzanEnabled,_that.isReminderEnabled,_that.reminderMinutesBefore,_that.isAfterSalahAzkarEnabled,_that.afterSalaahAzkarMinutes,_that.azanSound);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -192,10 +194,10 @@ return $default(_that.salaah,_that.isAzanEnabled,_that.isReminderEnabled,_that.r
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Salaah salaah,  bool isAzanEnabled,  bool isReminderEnabled,  int reminderMinutesBefore,  String? azanSound)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Salaah salaah,  bool isAzanEnabled,  bool isReminderEnabled,  int reminderMinutesBefore,  bool isAfterSalahAzkarEnabled,  int afterSalaahAzkarMinutes,  String? azanSound)?  $default,) {final _that = this;
 switch (_that) {
 case _SalaahSettings() when $default != null:
-return $default(_that.salaah,_that.isAzanEnabled,_that.isReminderEnabled,_that.reminderMinutesBefore,_that.azanSound);case _:
+return $default(_that.salaah,_that.isAzanEnabled,_that.isReminderEnabled,_that.reminderMinutesBefore,_that.isAfterSalahAzkarEnabled,_that.afterSalaahAzkarMinutes,_that.azanSound);case _:
   return null;
 
 }
@@ -207,13 +209,15 @@ return $default(_that.salaah,_that.isAzanEnabled,_that.isReminderEnabled,_that.r
 @JsonSerializable()
 
 class _SalaahSettings implements SalaahSettings {
-  const _SalaahSettings({required this.salaah, this.isAzanEnabled = true, this.isReminderEnabled = true, this.reminderMinutesBefore = 15, this.azanSound});
+  const _SalaahSettings({required this.salaah, this.isAzanEnabled = true, this.isReminderEnabled = true, this.reminderMinutesBefore = 15, this.isAfterSalahAzkarEnabled = true, this.afterSalaahAzkarMinutes = 5, this.azanSound});
   factory _SalaahSettings.fromJson(Map<String, dynamic> json) => _$SalaahSettingsFromJson(json);
 
 @override final  Salaah salaah;
 @override@JsonKey() final  bool isAzanEnabled;
 @override@JsonKey() final  bool isReminderEnabled;
 @override@JsonKey() final  int reminderMinutesBefore;
+@override@JsonKey() final  bool isAfterSalahAzkarEnabled;
+@override@JsonKey() final  int afterSalaahAzkarMinutes;
 @override final  String? azanSound;
 
 /// Create a copy of SalaahSettings
@@ -229,16 +233,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SalaahSettings&&(identical(other.salaah, salaah) || other.salaah == salaah)&&(identical(other.isAzanEnabled, isAzanEnabled) || other.isAzanEnabled == isAzanEnabled)&&(identical(other.isReminderEnabled, isReminderEnabled) || other.isReminderEnabled == isReminderEnabled)&&(identical(other.reminderMinutesBefore, reminderMinutesBefore) || other.reminderMinutesBefore == reminderMinutesBefore)&&(identical(other.azanSound, azanSound) || other.azanSound == azanSound));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SalaahSettings&&(identical(other.salaah, salaah) || other.salaah == salaah)&&(identical(other.isAzanEnabled, isAzanEnabled) || other.isAzanEnabled == isAzanEnabled)&&(identical(other.isReminderEnabled, isReminderEnabled) || other.isReminderEnabled == isReminderEnabled)&&(identical(other.reminderMinutesBefore, reminderMinutesBefore) || other.reminderMinutesBefore == reminderMinutesBefore)&&(identical(other.isAfterSalahAzkarEnabled, isAfterSalahAzkarEnabled) || other.isAfterSalahAzkarEnabled == isAfterSalahAzkarEnabled)&&(identical(other.afterSalaahAzkarMinutes, afterSalaahAzkarMinutes) || other.afterSalaahAzkarMinutes == afterSalaahAzkarMinutes)&&(identical(other.azanSound, azanSound) || other.azanSound == azanSound));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,salaah,isAzanEnabled,isReminderEnabled,reminderMinutesBefore,azanSound);
+int get hashCode => Object.hash(runtimeType,salaah,isAzanEnabled,isReminderEnabled,reminderMinutesBefore,isAfterSalahAzkarEnabled,afterSalaahAzkarMinutes,azanSound);
 
 @override
 String toString() {
-  return 'SalaahSettings(salaah: $salaah, isAzanEnabled: $isAzanEnabled, isReminderEnabled: $isReminderEnabled, reminderMinutesBefore: $reminderMinutesBefore, azanSound: $azanSound)';
+  return 'SalaahSettings(salaah: $salaah, isAzanEnabled: $isAzanEnabled, isReminderEnabled: $isReminderEnabled, reminderMinutesBefore: $reminderMinutesBefore, isAfterSalahAzkarEnabled: $isAfterSalahAzkarEnabled, afterSalaahAzkarMinutes: $afterSalaahAzkarMinutes, azanSound: $azanSound)';
 }
 
 
@@ -249,7 +253,7 @@ abstract mixin class _$SalaahSettingsCopyWith<$Res> implements $SalaahSettingsCo
   factory _$SalaahSettingsCopyWith(_SalaahSettings value, $Res Function(_SalaahSettings) _then) = __$SalaahSettingsCopyWithImpl;
 @override @useResult
 $Res call({
- Salaah salaah, bool isAzanEnabled, bool isReminderEnabled, int reminderMinutesBefore, String? azanSound
+ Salaah salaah, bool isAzanEnabled, bool isReminderEnabled, int reminderMinutesBefore, bool isAfterSalahAzkarEnabled, int afterSalaahAzkarMinutes, String? azanSound
 });
 
 
@@ -266,12 +270,14 @@ class __$SalaahSettingsCopyWithImpl<$Res>
 
 /// Create a copy of SalaahSettings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? salaah = null,Object? isAzanEnabled = null,Object? isReminderEnabled = null,Object? reminderMinutesBefore = null,Object? azanSound = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? salaah = null,Object? isAzanEnabled = null,Object? isReminderEnabled = null,Object? reminderMinutesBefore = null,Object? isAfterSalahAzkarEnabled = null,Object? afterSalaahAzkarMinutes = null,Object? azanSound = freezed,}) {
   return _then(_SalaahSettings(
 salaah: null == salaah ? _self.salaah : salaah // ignore: cast_nullable_to_non_nullable
 as Salaah,isAzanEnabled: null == isAzanEnabled ? _self.isAzanEnabled : isAzanEnabled // ignore: cast_nullable_to_non_nullable
 as bool,isReminderEnabled: null == isReminderEnabled ? _self.isReminderEnabled : isReminderEnabled // ignore: cast_nullable_to_non_nullable
 as bool,reminderMinutesBefore: null == reminderMinutesBefore ? _self.reminderMinutesBefore : reminderMinutesBefore // ignore: cast_nullable_to_non_nullable
+as int,isAfterSalahAzkarEnabled: null == isAfterSalahAzkarEnabled ? _self.isAfterSalahAzkarEnabled : isAfterSalahAzkarEnabled // ignore: cast_nullable_to_non_nullable
+as bool,afterSalaahAzkarMinutes: null == afterSalaahAzkarMinutes ? _self.afterSalaahAzkarMinutes : afterSalaahAzkarMinutes // ignore: cast_nullable_to_non_nullable
 as int,azanSound: freezed == azanSound ? _self.azanSound : azanSound // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
