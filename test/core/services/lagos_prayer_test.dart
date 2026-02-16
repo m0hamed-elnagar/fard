@@ -29,13 +29,6 @@ void main() {
       // Fajr should be around 5:30 AM UTC+1
       // Dhuhr should be around 12:50 PM UTC+1
       // (Approximate values for verification)
-      
-      print('Lagos Feb 15 Prayer Times:');
-      print('Fajr: ${times.fajr}');
-      print('Dhuhr: ${times.dhuhr}');
-      print('Asr: ${times.asr}');
-      print('Maghrib: ${times.maghrib}');
-      print('Isha: ${times.isha}');
     });
   });
 }

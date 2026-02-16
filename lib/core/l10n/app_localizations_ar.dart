@@ -285,4 +285,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get enableReminder => 'تفعيل التنبيه';
+
+  @override
+  String get qibla => 'القبلة';
+
+  @override
+  String get afterSalahAzkar => 'الأذكار بعد الصلاة';
+
+  @override
+  String get afterSalahAzkarDesc =>
+      'تنبيه لقراءة الأذكار بعد 15 دقيقة من الأذان';
 }

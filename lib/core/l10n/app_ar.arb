@@ -115,5 +115,8 @@
   },
   "azanVoice": "صوت الأذان",
   "enableAzan": "تفعيل الأذان",
-  "enableReminder": "تفعيل التنبيه"
+  "enableReminder": "تفعيل التنبيه",
+  "qibla": "القبلة",
+  "afterSalahAzkar": "الأذكار بعد الصلاة",
+  "afterSalahAzkarDesc": "تنبيه لقراءة الأذكار بعد 15 دقيقة من الأذان"
 }

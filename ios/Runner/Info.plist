@@ -49,5 +49,7 @@
 	<string>This app needs access to location when open to calculate prayer times.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This app needs access to location to calculate prayer times.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>This app needs motion sensors for the Qibla compass functionality.</string>
 </dict>
 </plist>

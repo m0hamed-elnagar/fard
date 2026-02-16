@@ -16,6 +16,7 @@ sealed class SettingsState with _$SettingsState {
     @Default('shafi') String madhab,
     @Default('05:00') String morningAzkarTime,
     @Default('18:00') String eveningAzkarTime,
+    @Default(false) bool isAfterSalahAzkarEnabled,
     @Default([]) List<AzkarReminder> reminders,
     @Default([]) List<SalaahSettings> salaahSettings,
     @Default(false) bool isAzanVoiceDownloading,

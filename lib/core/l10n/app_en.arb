@@ -115,5 +115,8 @@
   },
   "azanVoice": "Azan Voice",
   "enableAzan": "Enable Azan",
-  "enableReminder": "Enable Reminder"
+  "enableReminder": "Enable Reminder",
+  "qibla": "Qibla",
+  "afterSalahAzkar": "Azkar after Salah",
+  "afterSalahAzkarDesc": "Reminder to read azkar 15 minutes after azan"
 }

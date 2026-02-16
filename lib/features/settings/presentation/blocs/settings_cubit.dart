@@ -24,6 +24,7 @@ class SettingsCubit extends Cubit<SettingsState> {
   static const String _madhabKey = 'madhab';
   static const String _morningAzkarKey = 'morning_azkar_time';
   static const String _eveningAzkarKey = 'evening_azkar_time';
+  static const String _afterSalahAzkarKey = 'is_after_salah_azkar_enabled';
   static const String _remindersKey = 'azkar_reminders';
   static const String _salaahSettingsKey = 'salaah_settings';
 
@@ -41,6 +42,7 @@ class SettingsCubit extends Cubit<SettingsState> {
           madhab: _prefs.getString(_madhabKey) ?? 'shafi',
           morningAzkarTime: _prefs.getString(_morningAzkarKey) ?? '05:00',
           eveningAzkarTime: _prefs.getString(_eveningAzkarKey) ?? '18:00',
+          isAfterSalahAzkarEnabled: _prefs.getBool(_afterSalahAzkarKey) ?? false,
           reminders: _loadReminders(_prefs, _prefs.getString(_morningAzkarKey) ?? '05:00', _prefs.getString(_eveningAzkarKey) ?? '18:00'),
           salaahSettings: _loadSalaahSettings(_prefs),
         ));
@@ -234,6 +236,24 @@ class SettingsCubit extends Cubit<SettingsState> {
   void updateEveningAzkarTime(String time) {
     _prefs.setString(_eveningAzkarKey, time);
     emit(state.copyWith(eveningAzkarTime: time));
+    _updateReminders();
+  }
+
+  void toggleAfterSalahAzkar() {
+    final newValue = !state.isAfterSalahAzkarEnabled;
+    _prefs.setBool(_afterSalahAzkarKey, newValue);
+    
+    // Update all individual salaah settings to match the global toggle
+    final updatedSalaahSettings = state.salaahSettings.map((s) => s.copyWith(
+      isAfterSalahAzkarEnabled: newValue
+    )).toList();
+    
+    _saveSalaahSettings(updatedSalaahSettings);
+    
+    emit(state.copyWith(
+      isAfterSalahAzkarEnabled: newValue,
+      salaahSettings: updatedSalaahSettings,
+    ));
     _updateReminders();
   }
 

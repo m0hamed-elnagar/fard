@@ -286,4 +286,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enableReminder => 'Enable Reminder';
+
+  @override
+  String get qibla => 'Qibla';
+
+  @override
+  String get afterSalahAzkar => 'Azkar after Salah';
+
+  @override
+  String get afterSalahAzkarDesc =>
+      'Reminder to read azkar 15 minutes after azan';
 }
