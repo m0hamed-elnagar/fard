@@ -7,6 +7,7 @@ import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
+import 'package:fard/core/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,6 +21,7 @@ class MockSettingsCubit extends MockCubit<SettingsState> implements SettingsCubi
 class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState> implements AzkarBloc {}
 class MockPrayerTrackerBloc extends MockBloc<PrayerTrackerEvent, PrayerTrackerState> implements PrayerTrackerBloc {}
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
+class MockNotificationService extends Mock implements NotificationService {}
 
 void main() {
   setUpAll(() {
@@ -31,6 +33,7 @@ void main() {
   late MockAzkarBloc mockAzkarBloc;
   late MockPrayerTrackerBloc mockPrayerTrackerBloc;
   late MockPrayerTimeService mockPrayerTimeService;
+  late MockNotificationService mockNotificationService;
 
   setUp(() {
     mockPrefs = MockSharedPreferences();
@@ -38,12 +41,17 @@ void main() {
     mockAzkarBloc = MockAzkarBloc();
     mockPrayerTrackerBloc = MockPrayerTrackerBloc();
     mockPrayerTimeService = MockPrayerTimeService();
+    mockNotificationService = MockNotificationService();
 
     final getIt = GetIt.instance;
     getIt.reset();
     getIt.registerSingleton<SharedPreferences>(mockPrefs);
     getIt.registerSingleton<PrayerTrackerBloc>(mockPrayerTrackerBloc);
     getIt.registerSingleton<PrayerTimeService>(mockPrayerTimeService);
+    getIt.registerSingleton<NotificationService>(mockNotificationService);
+    getIt.registerSingleton<GlobalKey<NavigatorState>>(GlobalKey<NavigatorState>());
+
+    when(() => mockNotificationService.canScheduleExactNotifications()).thenAnswer((_) async => true);
 
     when(() => mockSettingsCubit.state).thenReturn(SettingsState(locale: const Locale('en')));
     when(() => mockAzkarBloc.state).thenReturn(AzkarState.initial());

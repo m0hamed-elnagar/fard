@@ -1,5 +1,8 @@
+import 'package:fard/core/services/notification_service.dart';
+import 'package:fard/core/services/voice_download_service.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/azkar/presentation/screens/azkar_categories_screen.dart';
+import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/settings/presentation/screens/settings_screen.dart';
@@ -13,17 +16,32 @@ import 'package:get_it/get_it.dart';
 
 class MockSettingsCubit extends MockCubit<SettingsState> implements SettingsCubit {}
 class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState> implements AzkarBloc {}
+class MockNotificationService extends Mock implements NotificationService {}
+class MockVoiceDownloadService extends Mock implements VoiceDownloadService {}
 
 void main() {
+  setUpAll(() {
+    registerFallbackValue(Salaah.fajr);
+  });
+
   late MockSettingsCubit mockSettingsCubit;
   late MockAzkarBloc mockAzkarBloc;
+  late MockNotificationService mockNotificationService;
+  late MockVoiceDownloadService mockVoiceDownloadService;
 
   setUp(() {
     mockSettingsCubit = MockSettingsCubit();
     mockAzkarBloc = MockAzkarBloc();
+    mockNotificationService = MockNotificationService();
+    mockVoiceDownloadService = MockVoiceDownloadService();
 
     final getIt = GetIt.instance;
     getIt.reset();
+    getIt.registerSingleton<NotificationService>(mockNotificationService);
+    getIt.registerSingleton<VoiceDownloadService>(mockVoiceDownloadService);
+
+    when(() => mockNotificationService.canScheduleExactNotifications()).thenAnswer((_) async => true);
+    when(() => mockNotificationService.testReminder(any(), any())).thenAnswer((_) async {});
 
     when(() => mockSettingsCubit.state).thenReturn(const SettingsState(
       locale: Locale('en'),
@@ -42,6 +60,13 @@ void main() {
 
   group('AzkarCategoriesScreen Search', () {
     Widget createWidgetUnderTest() {
+      final getIt = GetIt.instance;
+      if (!getIt.isRegistered<NotificationService>()) {
+        getIt.registerSingleton<NotificationService>(mockNotificationService);
+      }
+      if (!getIt.isRegistered<VoiceDownloadService>()) {
+        getIt.registerSingleton<VoiceDownloadService>(mockVoiceDownloadService);
+      }
       return MultiBlocProvider(
         providers: [
           BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
@@ -92,6 +117,13 @@ void main() {
 
   group('Settings Reminder Search', () {
     Widget createWidgetUnderTest() {
+      final getIt = GetIt.instance;
+      if (!getIt.isRegistered<NotificationService>()) {
+        getIt.registerSingleton<NotificationService>(mockNotificationService);
+      }
+      if (!getIt.isRegistered<VoiceDownloadService>()) {
+        getIt.registerSingleton<VoiceDownloadService>(mockVoiceDownloadService);
+      }
       return MultiBlocProvider(
         providers: [
           BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),

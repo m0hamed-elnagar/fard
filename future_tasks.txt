@@ -4,6 +4,6 @@ lso add  btn in the azkar to add it to the alarm list in the settings so he can 
     and one in the azan dialog if the user want to add it to some of the sallahs not all of them
        // put the btns  of add and remove  in top of each others  beside the  todaay check box
        // add the qadda u madde in the record in history
-ADD AUDIO TO THE AZKAR
+ADD AUDIO TO THE AZKAR //not important for now
 ADD COMPOSE
 REMOVE THE SpLASH SCREEN

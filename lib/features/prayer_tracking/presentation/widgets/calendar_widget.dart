@@ -27,6 +27,7 @@ class CalendarWidget extends StatefulWidget {
 class _CalendarWidgetState extends State<CalendarWidget> {
   bool _isExpanded = false;
   late DateTime _focusedDay;
+  final Map<DateTime, HijriCalendar> _hijriCache = {};
 
   @override
   void initState() {
@@ -36,8 +37,13 @@ class _CalendarWidgetState extends State<CalendarWidget> {
 
   DateTime _normalize(DateTime d) => DateTime(d.year, d.month, d.day);
 
+  HijriCalendar _getHijriDate(DateTime date) {
+    final normalized = _normalize(date);
+    return _hijriCache.putIfAbsent(normalized, () => HijriCalendar.fromDate(date));
+  }
+
   Widget _buildCell(DateTime day, bool isSelected, {bool isToday = false}) {
-    final hijri = HijriCalendar.fromDate(day);
+    final hijri = _getHijriDate(day);
     return Container(
       margin: const EdgeInsets.all(4.0),
       decoration: BoxDecoration(

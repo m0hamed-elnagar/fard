@@ -1,5 +1,6 @@
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/services/notification_service.dart';
+import 'package:fard/core/services/voice_download_service.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
@@ -14,21 +15,27 @@ import 'package:get_it/get_it.dart';
 
 class MockSettingsCubit extends Mock implements SettingsCubit {}
 class MockNotificationService extends Mock implements NotificationService {}
+class MockVoiceDownloadService extends Mock implements VoiceDownloadService {}
 class MockAzkarBloc extends Mock implements AzkarBloc {}
 
 void main() {
   late MockSettingsCubit mockSettingsCubit;
   late MockNotificationService mockNotificationService;
+  late MockVoiceDownloadService mockVoiceDownloadService;
   late MockAzkarBloc mockAzkarBloc;
 
   setUp(() {
     mockSettingsCubit = MockSettingsCubit();
     mockNotificationService = MockNotificationService();
+    mockVoiceDownloadService = MockVoiceDownloadService();
     mockAzkarBloc = MockAzkarBloc();
 
     final getIt = GetIt.instance;
     getIt.reset();
     getIt.registerSingleton<NotificationService>(mockNotificationService);
+    getIt.registerSingleton<VoiceDownloadService>(mockVoiceDownloadService);
+
+    when(() => mockNotificationService.canScheduleExactNotifications()).thenAnswer((_) async => true);
 
     when(() => mockSettingsCubit.state).thenReturn(
       const SettingsState(
