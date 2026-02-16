@@ -118,5 +118,23 @@
   "enableReminder": "Enable Reminder",
   "qibla": "Qibla",
   "afterSalahAzkar": "Azkar after Salah",
-  "afterSalahAzkarDesc": "Reminder to read azkar 15 minutes after azan"
+  "afterSalahAzkarDesc": "Reminder to read azkar 15 minutes after azan",
+  "quran": "Quran",
+  "loadingQuran": "Loading Quran...",
+  "errorLoadingQuran": "Error Loading Quran",
+  "searchSurah": "Search for a Surah...",
+  "ayah": "Ayah",
+  "surah": "Surah",
+  "quranTab": "Quran",
+  "locationWarning": "Prayer times cannot be calculated without your location.",
+  "givePermission": "Give Permission",
+  "afterSalaahAzkar": "Azkar al-Salaah",
+  "minutesAfter": "{minutes} minutes after",
+  "@minutesAfter": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -368,6 +368,24 @@ abstract class AppLocalizations {
   /// **'Isha'**
   String get isha;
 
+  /// No description provided for @qibla.
+  ///
+  /// In en, this message translates to:
+  /// **'Qibla'**
+  String get qibla;
+
+  /// No description provided for @afterSalahAzkar.
+  ///
+  /// In en, this message translates to:
+  /// **'Azkar after Salah'**
+  String get afterSalahAzkar;
+
+  /// No description provided for @afterSalahAzkarDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder to read azkar 15 minutes after azan'**
+  String get afterSalahAzkarDesc;
+
   /// No description provided for @settings.
   ///
   /// In en, this message translates to:
@@ -626,23 +644,71 @@ abstract class AppLocalizations {
   /// **'Enable Reminder'**
   String get enableReminder;
 
-  /// No description provided for @qibla.
+  /// No description provided for @quran.
   ///
   /// In en, this message translates to:
-  /// **'Qibla'**
-  String get qibla;
+  /// **'Quran'**
+  String get quran;
 
-  /// No description provided for @afterSalahAzkar.
+  /// No description provided for @loadingQuran.
   ///
   /// In en, this message translates to:
-  /// **'Azkar after Salah'**
-  String get afterSalahAzkar;
+  /// **'Loading Quran...'**
+  String get loadingQuran;
 
-  /// No description provided for @afterSalahAzkarDesc.
+  /// No description provided for @errorLoadingQuran.
   ///
   /// In en, this message translates to:
-  /// **'Reminder to read azkar 15 minutes after azan'**
-  String get afterSalahAzkarDesc;
+  /// **'Error Loading Quran'**
+  String get errorLoadingQuran;
+
+  /// No description provided for @searchSurah.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a Surah...'**
+  String get searchSurah;
+
+  /// No description provided for @ayah.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah'**
+  String get ayah;
+
+  /// No description provided for @surah.
+  ///
+  /// In en, this message translates to:
+  /// **'Surah'**
+  String get surah;
+
+  /// No description provided for @quranTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Quran'**
+  String get quranTab;
+
+  /// No description provided for @locationWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer times cannot be calculated without your location.'**
+  String get locationWarning;
+
+  /// No description provided for @givePermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Give Permission'**
+  String get givePermission;
+
+  /// No description provided for @afterSalaahAzkar.
+  ///
+  /// In en, this message translates to:
+  /// **'Azkar al-Salaah'**
+  String get afterSalaahAzkar;
+
+  /// No description provided for @minutesAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} minutes after'**
+  String minutesAfter(int minutes);
 }
 
 class _AppLocalizationsDelegate

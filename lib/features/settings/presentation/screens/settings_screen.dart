@@ -1,4 +1,3 @@
-
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/core/di/injection.dart';
@@ -95,6 +94,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 title: l10n.locationSettings,
                 icon: Icons.location_on_rounded,
                 children: [
+                  if (state.latitude == null || state.longitude == null)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppTheme.missed.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppTheme.missed.withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.location_off_rounded, color: AppTheme.missed, size: 20),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              l10n.locationWarning,
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   Text(
                     l10n.locationDesc,
                     style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
@@ -228,18 +249,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 title: l10n.azkarSettings,
                 icon: Icons.notifications_active_rounded,
                 children: [
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.afterSalahAzkar),
-                    subtitle: Text(
-                      l10n.afterSalahAzkarDesc,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    value: state.isAfterSalahAzkarEnabled,
-                    onChanged: (_) => context.read<SettingsCubit>().toggleAfterSalahAzkar(),
-                    activeThumbColor: AppTheme.accent,
-                  ),
-                  const Divider(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -347,6 +356,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool isReminderEnabled = settings.isReminderEnabled;
     bool isAfterSalahAzkarEnabled = settings.isAfterSalahAzkarEnabled;
     int reminderMinutes = settings.reminderMinutesBefore;
+    int afterSalaahMinutes = settings.afterSalaahAzkarMinutes;
     String? selectedVoice = settings.azanSound;
     bool isDownloading = false;
 
@@ -440,7 +450,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ],
                         ),
                       ),
-                    const Divider(height: 16),
+                    const Divider(height: 32),
                     SwitchListTile(
                       title: Text(l10n.enableReminder),
                       value: isReminderEnabled,
@@ -475,18 +485,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ],
                         ),
                       ),
-                    const Divider(height: 16),
+                    const Divider(height: 32),
                     SwitchListTile(
-                      title: Text(l10n.afterSalahAzkar),
-                      subtitle: Text(
-                        l10n.localeName == 'ar' ? 'تذكير بعد 15 دقيقة من الأذان' : 'Reminder 15 min after azan',
-                        style: const TextStyle(fontSize: 12),
-                      ),
+                      title: Text(l10n.afterSalaahAzkar),
                       value: isAfterSalahAzkarEnabled,
                       onChanged: (val) => setDialogState(() => isAfterSalahAzkarEnabled = val),
                       activeThumbColor: AppTheme.accent,
                       contentPadding: EdgeInsets.zero,
                     ),
+                    if (isAfterSalahAzkarEnabled)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(child: Text(l10n.minutesAfter(afterSalaahMinutes))),
+                                IconButton(
+                                  icon: const Icon(Icons.remove_circle_outline),
+                                  onPressed: afterSalaahMinutes > 0 ? () => setDialogState(() => afterSalaahMinutes--) : null,
+                                ),
+                                Text('$afterSalaahMinutes'),
+                                IconButton(
+                                  icon: const Icon(Icons.add_circle_outline),
+                                  onPressed: afterSalaahMinutes < 60 ? () => setDialogState(() => afterSalaahMinutes++) : null,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -500,8 +528,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     cubit.updateSalaahSettings(settings.copyWith(
                       isAzanEnabled: isAzanEnabled,
                       isReminderEnabled: isReminderEnabled,
-                      isAfterSalahAzkarEnabled: isAfterSalahAzkarEnabled,
                       reminderMinutesBefore: reminderMinutes,
+                      isAfterSalahAzkarEnabled: isAfterSalahAzkarEnabled,
+                      afterSalaahAzkarMinutes: afterSalaahMinutes,
                       azanSound: selectedVoice,
                     ));
                     Navigator.pop(context);

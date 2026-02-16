@@ -5,5 +5,11 @@ lso add  btn in the azkar to add it to the alarm list in the settings so he can 
        // put the btns  of add and remove  in top of each others  beside the  todaay check box
        // add the qadda u madde in the record in history
 ADD AUDIO TO THE AZKAR //not important for now
+<<<<<<< Updated upstream
  > ADD COMPOSE for the qebla and quraan
  REMOVE THE SpLASH SCREEN
+=======
+ADD COMPOSE
+REMOVE THE SpLASH SCREEN
+add editing for aazkr el salaah time
+>>>>>>> Stashed changes

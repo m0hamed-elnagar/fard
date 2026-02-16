@@ -91,7 +91,7 @@
   "azkar": "الأذكار",
   "loadingAzkar": "جاري تحميل الأذكار...",
   "errorLoadingAzkar": "خطأ في تحميل الأذكار",
-  "noCategoriesFound": "لم يتم العثور على فئات",
+  "noCategoriesFound": "لم يتم العور على فئات",
   "refreshData": "تحديث البيانات",
   "resetAllProgress": "إعادة تعيين التقدم",
   "noItemsFound": "لم يتم العثور على عناصر في هذه الفئة",
@@ -118,5 +118,23 @@
   "enableReminder": "تفعيل التنبيه",
   "qibla": "القبلة",
   "afterSalahAzkar": "الأذكار بعد الصلاة",
-  "afterSalahAzkarDesc": "تنبيه لقراءة الأذكار بعد 15 دقيقة من الأذان"
+  "afterSalahAzkarDesc": "تنبيه لقراءة الأذكار بعد 15 دقيقة من الأذان",
+  "quran": "القرآن الكريم",
+  "loadingQuran": "جاري تحميل القرآن...",
+  "errorLoadingQuran": "خطأ في تحميل القرآن",
+  "searchSurah": "البحث عن سورة...",
+  "ayah": "آية",
+  "surah": "سورة",
+  "quranTab": "القرآن",
+  "locationWarning": "لا يمكن معرفة مواقيت الصلاة بدون تحديد الموقع.",
+  "givePermission": "تفعيل الموقع",
+  "afterSalaahAzkar": "أذكار بعد الصلاة",
+  "minutesAfter": "بعد {minutes} دقائق",
+  "@minutesAfter": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  }
 }

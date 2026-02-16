@@ -294,6 +294,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get afterSalahAzkar => 'Azkar after Salah';
 
   @override
-  String get afterSalahAzkarDesc =>
-      'Reminder to read azkar 15 minutes after azan';
+  String get afterSalahAzkarDesc => 'Reminder to read azkar 15 minutes after azan';
+
+  @override
+  String get quran => 'Quran';
+
+  @override
+  String get loadingQuran => 'Loading Quran...';
+
+  @override
+  String get errorLoadingQuran => 'Error Loading Quran';
+
+  @override
+  String get searchSurah => 'Search for a Surah...';
+
+  @override
+  String get ayah => 'Ayah';
+
+  @override
+  String get surah => 'Surah';
+
+  @override
+  String get quranTab => 'Quran';
+
+  @override
+  String get locationWarning =>
+      'Prayer times cannot be calculated without your location.';
+
+  @override
+  String get givePermission => 'Give Permission';
+
+  @override
+  String get afterSalaahAzkar => 'Azkar al-Salaah';
+
+  @override
+  String minutesAfter(int minutes) {
+    return '$minutes minutes after';
+  }
 }

@@ -6,6 +6,7 @@ import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
+import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState> implements AzkarBlo
 class MockPrayerTrackerBloc extends MockBloc<PrayerTrackerEvent, PrayerTrackerState> implements PrayerTrackerBloc {}
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 class MockNotificationService extends Mock implements NotificationService {}
+class MockQuranBloc extends MockBloc<QuranEvent, QuranState> implements QuranBloc {}
 
 void main() {
   setUpAll(() {
@@ -34,6 +36,7 @@ void main() {
   late MockPrayerTrackerBloc mockPrayerTrackerBloc;
   late MockPrayerTimeService mockPrayerTimeService;
   late MockNotificationService mockNotificationService;
+  late MockQuranBloc mockQuranBloc;
 
   setUp(() {
     mockPrefs = MockSharedPreferences();
@@ -42,6 +45,7 @@ void main() {
     mockPrayerTrackerBloc = MockPrayerTrackerBloc();
     mockPrayerTimeService = MockPrayerTimeService();
     mockNotificationService = MockNotificationService();
+    mockQuranBloc = MockQuranBloc();
 
     final getIt = GetIt.instance;
     getIt.reset();
@@ -50,12 +54,14 @@ void main() {
     getIt.registerSingleton<PrayerTimeService>(mockPrayerTimeService);
     getIt.registerSingleton<NotificationService>(mockNotificationService);
     getIt.registerSingleton<GlobalKey<NavigatorState>>(GlobalKey<NavigatorState>());
+    getIt.registerFactory<QuranBloc>(() => mockQuranBloc);
 
     when(() => mockNotificationService.canScheduleExactNotifications()).thenAnswer((_) async => true);
 
     when(() => mockSettingsCubit.state).thenReturn(SettingsState(locale: const Locale('en')));
     when(() => mockAzkarBloc.state).thenReturn(AzkarState.initial());
     when(() => mockPrayerTrackerBloc.state).thenReturn(const PrayerTrackerState.loading());
+    when(() => mockQuranBloc.state).thenReturn(const QuranState());
   });
 
   tearDown(() {
