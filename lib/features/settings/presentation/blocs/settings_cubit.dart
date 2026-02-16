@@ -206,6 +206,8 @@ class SettingsCubit extends Cubit<SettingsState> {
       case 'US':
       case 'CA':
         return 'north_america';
+      case 'NG':
+        return 'muslim_league';
       default:
         return 'muslim_league';
     }
