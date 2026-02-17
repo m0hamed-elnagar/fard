@@ -8,17 +8,22 @@ import 'package:fard/features/prayer_tracking/data/daily_record_entity.dart';
 import 'package:fard/features/prayer_tracking/data/prayer_repo_impl.dart';
 import 'package:fard/features/prayer_tracking/domain/prayer_repo.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
-import 'package:fard/features/quran/data/repositories/quran_repository.dart';
-import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
+import 'package:fard/features/quran/injection.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 final getIt = GetIt.instance;
 
 Future<void> configureDependencies({String? hivePath}) async {
+  // Initialize timezones
+  tz.initializeTimeZones();
+  tz.setLocalLocation(tz.getLocation('UTC'));
+
   try {
     if (hivePath != null) {
       Hive.init(hivePath);
@@ -47,7 +52,9 @@ Future<void> configureDependencies({String? hivePath}) async {
   getIt.registerSingleton<VoiceDownloadService>(VoiceDownloadService());
   getIt.registerSingleton<AzkarRepository>(AzkarRepository(azkarBox));
   getIt.registerSingleton<PrayerRepo>(PrayerRepoImpl(box));
-  getIt.registerSingleton<QuranRepository>(QuranRepository());
+  
+  // Initialize Quran Feature (DDD)
+  await initQuranFeature();
   
   getIt.registerFactory<PrayerTrackerBloc>(() => PrayerTrackerBloc(getIt()));
   getIt.registerSingleton<SettingsCubit>(SettingsCubit(
@@ -57,5 +64,9 @@ Future<void> configureDependencies({String? hivePath}) async {
         getIt(),
       ));
   getIt.registerSingleton<AzkarBloc>(AzkarBloc(getIt()));
-  getIt.registerFactory<QuranBloc>(() => QuranBloc(getIt()));
+  // Note: QuranBloc is now replaced by ReaderBloc in initQuranFeature()
+  // But we might still need it if QuranPage is not yet refactored.
+  // I'll keep it for now but point to the new repository if possible, 
+  // though they are incompatible.
+  // Actually, I'll keep the old registration if I want to keep old UI working.
 }

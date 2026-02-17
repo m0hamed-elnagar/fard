@@ -294,7 +294,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get afterSalahAzkar => 'Azkar after Salah';
 
   @override
-  String get afterSalahAzkarDesc => 'Reminder to read azkar 15 minutes after azan';
+  String get afterSalahAzkarDesc =>
+      'Reminder to read azkar 15 minutes after azan';
 
   @override
   String get quran => 'Quran';

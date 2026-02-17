@@ -85,7 +85,10 @@ switch (_that) {
 case _LoadSurahs():
 return loadSurahs(_that);case _LoadSurahDetails():
 return loadSurahDetails(_that);case _Search():
-return search(_that);}
+return search(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -150,7 +153,10 @@ switch (_that) {
 case _LoadSurahs():
 return loadSurahs();case _LoadSurahDetails():
 return loadSurahDetails(_that.surahNumber);case _Search():
-return search(_that.query);}
+return search(_that.query);case _:
+  throw StateError('Unexpected subclass');
+
+}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -344,7 +350,7 @@ as String,
 /// @nodoc
 mixin _$QuranState {
 
- bool get isLoading; List<Surah> get surahs; List<Ayah> get ayahs; Surah? get selectedSurah; SurahDetail? get selectedSurahDetail; String? get error; List<Ayah> get searchResults;
+ bool get isLoading; List<Surah> get surahs; List<Ayah> get ayahs; Surah? get selectedSurah; String? get error; List<SearchResult> get searchResults;
 /// Create a copy of QuranState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -355,16 +361,16 @@ $QuranStateCopyWith<QuranState> get copyWith => _$QuranStateCopyWithImpl<QuranSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuranState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other.surahs, surahs)&&const DeepCollectionEquality().equals(other.ayahs, ayahs)&&(identical(other.selectedSurah, selectedSurah) || other.selectedSurah == selectedSurah)&&(identical(other.selectedSurahDetail, selectedSurahDetail) || other.selectedSurahDetail == selectedSurahDetail)&&(identical(other.error, error) || other.error == error)&&const DeepCollectionEquality().equals(other.searchResults, searchResults));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuranState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other.surahs, surahs)&&const DeepCollectionEquality().equals(other.ayahs, ayahs)&&(identical(other.selectedSurah, selectedSurah) || other.selectedSurah == selectedSurah)&&(identical(other.error, error) || other.error == error)&&const DeepCollectionEquality().equals(other.searchResults, searchResults));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(surahs),const DeepCollectionEquality().hash(ayahs),selectedSurah,selectedSurahDetail,error,const DeepCollectionEquality().hash(searchResults));
+int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(surahs),const DeepCollectionEquality().hash(ayahs),selectedSurah,error,const DeepCollectionEquality().hash(searchResults));
 
 @override
 String toString() {
-  return 'QuranState(isLoading: $isLoading, surahs: $surahs, ayahs: $ayahs, selectedSurah: $selectedSurah, selectedSurahDetail: $selectedSurahDetail, error: $error, searchResults: $searchResults)';
+  return 'QuranState(isLoading: $isLoading, surahs: $surahs, ayahs: $ayahs, selectedSurah: $selectedSurah, error: $error, searchResults: $searchResults)';
 }
 
 
@@ -375,11 +381,11 @@ abstract mixin class $QuranStateCopyWith<$Res>  {
   factory $QuranStateCopyWith(QuranState value, $Res Function(QuranState) _then) = _$QuranStateCopyWithImpl;
 @useResult
 $Res call({
- bool isLoading, List<Surah> surahs, List<Ayah> ayahs, Surah? selectedSurah, SurahDetail? selectedSurahDetail, String? error, List<Ayah> searchResults
+ bool isLoading, List<Surah> surahs, List<Ayah> ayahs, Surah? selectedSurah, String? error, List<SearchResult> searchResults
 });
 
 
-$SurahCopyWith<$Res>? get selectedSurah;$SurahDetailCopyWith<$Res>? get selectedSurahDetail;
+
 
 }
 /// @nodoc
@@ -392,43 +398,18 @@ class _$QuranStateCopyWithImpl<$Res>
 
 /// Create a copy of QuranState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? isLoading = null,Object? surahs = null,Object? ayahs = null,Object? selectedSurah = freezed,Object? selectedSurahDetail = freezed,Object? error = freezed,Object? searchResults = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? isLoading = null,Object? surahs = null,Object? ayahs = null,Object? selectedSurah = freezed,Object? error = freezed,Object? searchResults = null,}) {
   return _then(_self.copyWith(
 isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,surahs: null == surahs ? _self.surahs : surahs // ignore: cast_nullable_to_non_nullable
 as List<Surah>,ayahs: null == ayahs ? _self.ayahs : ayahs // ignore: cast_nullable_to_non_nullable
 as List<Ayah>,selectedSurah: freezed == selectedSurah ? _self.selectedSurah : selectedSurah // ignore: cast_nullable_to_non_nullable
-as Surah?,selectedSurahDetail: freezed == selectedSurahDetail ? _self.selectedSurahDetail : selectedSurahDetail // ignore: cast_nullable_to_non_nullable
-as SurahDetail?,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as Surah?,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,searchResults: null == searchResults ? _self.searchResults : searchResults // ignore: cast_nullable_to_non_nullable
-as List<Ayah>,
+as List<SearchResult>,
   ));
 }
-/// Create a copy of QuranState
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$SurahCopyWith<$Res>? get selectedSurah {
-    if (_self.selectedSurah == null) {
-    return null;
-  }
 
-  return $SurahCopyWith<$Res>(_self.selectedSurah!, (value) {
-    return _then(_self.copyWith(selectedSurah: value));
-  });
-}/// Create a copy of QuranState
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$SurahDetailCopyWith<$Res>? get selectedSurahDetail {
-    if (_self.selectedSurahDetail == null) {
-    return null;
-  }
-
-  return $SurahDetailCopyWith<$Res>(_self.selectedSurahDetail!, (value) {
-    return _then(_self.copyWith(selectedSurahDetail: value));
-  });
-}
 }
 
 
@@ -472,7 +453,10 @@ return $default(_that);case _:
 final _that = this;
 switch (_that) {
 case _QuranState():
-return $default(_that);}
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -507,10 +491,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isLoading,  List<Surah> surahs,  List<Ayah> ayahs,  Surah? selectedSurah,  SurahDetail? selectedSurahDetail,  String? error,  List<Ayah> searchResults)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isLoading,  List<Surah> surahs,  List<Ayah> ayahs,  Surah? selectedSurah,  String? error,  List<SearchResult> searchResults)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _QuranState() when $default != null:
-return $default(_that.isLoading,_that.surahs,_that.ayahs,_that.selectedSurah,_that.selectedSurahDetail,_that.error,_that.searchResults);case _:
+return $default(_that.isLoading,_that.surahs,_that.ayahs,_that.selectedSurah,_that.error,_that.searchResults);case _:
   return orElse();
 
 }
@@ -528,10 +512,13 @@ return $default(_that.isLoading,_that.surahs,_that.ayahs,_that.selectedSurah,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isLoading,  List<Surah> surahs,  List<Ayah> ayahs,  Surah? selectedSurah,  SurahDetail? selectedSurahDetail,  String? error,  List<Ayah> searchResults)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isLoading,  List<Surah> surahs,  List<Ayah> ayahs,  Surah? selectedSurah,  String? error,  List<SearchResult> searchResults)  $default,) {final _that = this;
 switch (_that) {
 case _QuranState():
-return $default(_that.isLoading,_that.surahs,_that.ayahs,_that.selectedSurah,_that.selectedSurahDetail,_that.error,_that.searchResults);}
+return $default(_that.isLoading,_that.surahs,_that.ayahs,_that.selectedSurah,_that.error,_that.searchResults);case _:
+  throw StateError('Unexpected subclass');
+
+}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -545,10 +532,10 @@ return $default(_that.isLoading,_that.surahs,_that.ayahs,_that.selectedSurah,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isLoading,  List<Surah> surahs,  List<Ayah> ayahs,  Surah? selectedSurah,  SurahDetail? selectedSurahDetail,  String? error,  List<Ayah> searchResults)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isLoading,  List<Surah> surahs,  List<Ayah> ayahs,  Surah? selectedSurah,  String? error,  List<SearchResult> searchResults)?  $default,) {final _that = this;
 switch (_that) {
 case _QuranState() when $default != null:
-return $default(_that.isLoading,_that.surahs,_that.ayahs,_that.selectedSurah,_that.selectedSurahDetail,_that.error,_that.searchResults);case _:
+return $default(_that.isLoading,_that.surahs,_that.ayahs,_that.selectedSurah,_that.error,_that.searchResults);case _:
   return null;
 
 }
@@ -560,7 +547,7 @@ return $default(_that.isLoading,_that.surahs,_that.ayahs,_that.selectedSurah,_th
 
 
 class _QuranState implements QuranState {
-  const _QuranState({this.isLoading = false, final  List<Surah> surahs = const [], final  List<Ayah> ayahs = const [], this.selectedSurah, this.selectedSurahDetail, this.error, final  List<Ayah> searchResults = const []}): _surahs = surahs,_ayahs = ayahs,_searchResults = searchResults;
+  const _QuranState({this.isLoading = false, final  List<Surah> surahs = const [], final  List<Ayah> ayahs = const [], this.selectedSurah, this.error, final  List<SearchResult> searchResults = const []}): _surahs = surahs,_ayahs = ayahs,_searchResults = searchResults;
   
 
 @override@JsonKey() final  bool isLoading;
@@ -579,10 +566,9 @@ class _QuranState implements QuranState {
 }
 
 @override final  Surah? selectedSurah;
-@override final  SurahDetail? selectedSurahDetail;
 @override final  String? error;
- final  List<Ayah> _searchResults;
-@override@JsonKey() List<Ayah> get searchResults {
+ final  List<SearchResult> _searchResults;
+@override@JsonKey() List<SearchResult> get searchResults {
   if (_searchResults is EqualUnmodifiableListView) return _searchResults;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_searchResults);
@@ -599,16 +585,16 @@ _$QuranStateCopyWith<_QuranState> get copyWith => __$QuranStateCopyWithImpl<_Qur
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuranState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other._surahs, _surahs)&&const DeepCollectionEquality().equals(other._ayahs, _ayahs)&&(identical(other.selectedSurah, selectedSurah) || other.selectedSurah == selectedSurah)&&(identical(other.selectedSurahDetail, selectedSurahDetail) || other.selectedSurahDetail == selectedSurahDetail)&&(identical(other.error, error) || other.error == error)&&const DeepCollectionEquality().equals(other._searchResults, _searchResults));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuranState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other._surahs, _surahs)&&const DeepCollectionEquality().equals(other._ayahs, _ayahs)&&(identical(other.selectedSurah, selectedSurah) || other.selectedSurah == selectedSurah)&&(identical(other.error, error) || other.error == error)&&const DeepCollectionEquality().equals(other._searchResults, _searchResults));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(_surahs),const DeepCollectionEquality().hash(_ayahs),selectedSurah,selectedSurahDetail,error,const DeepCollectionEquality().hash(_searchResults));
+int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(_surahs),const DeepCollectionEquality().hash(_ayahs),selectedSurah,error,const DeepCollectionEquality().hash(_searchResults));
 
 @override
 String toString() {
-  return 'QuranState(isLoading: $isLoading, surahs: $surahs, ayahs: $ayahs, selectedSurah: $selectedSurah, selectedSurahDetail: $selectedSurahDetail, error: $error, searchResults: $searchResults)';
+  return 'QuranState(isLoading: $isLoading, surahs: $surahs, ayahs: $ayahs, selectedSurah: $selectedSurah, error: $error, searchResults: $searchResults)';
 }
 
 
@@ -619,11 +605,11 @@ abstract mixin class _$QuranStateCopyWith<$Res> implements $QuranStateCopyWith<$
   factory _$QuranStateCopyWith(_QuranState value, $Res Function(_QuranState) _then) = __$QuranStateCopyWithImpl;
 @override @useResult
 $Res call({
- bool isLoading, List<Surah> surahs, List<Ayah> ayahs, Surah? selectedSurah, SurahDetail? selectedSurahDetail, String? error, List<Ayah> searchResults
+ bool isLoading, List<Surah> surahs, List<Ayah> ayahs, Surah? selectedSurah, String? error, List<SearchResult> searchResults
 });
 
 
-@override $SurahCopyWith<$Res>? get selectedSurah;@override $SurahDetailCopyWith<$Res>? get selectedSurahDetail;
+
 
 }
 /// @nodoc
@@ -636,44 +622,19 @@ class __$QuranStateCopyWithImpl<$Res>
 
 /// Create a copy of QuranState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? isLoading = null,Object? surahs = null,Object? ayahs = null,Object? selectedSurah = freezed,Object? selectedSurahDetail = freezed,Object? error = freezed,Object? searchResults = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? isLoading = null,Object? surahs = null,Object? ayahs = null,Object? selectedSurah = freezed,Object? error = freezed,Object? searchResults = null,}) {
   return _then(_QuranState(
 isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,surahs: null == surahs ? _self._surahs : surahs // ignore: cast_nullable_to_non_nullable
 as List<Surah>,ayahs: null == ayahs ? _self._ayahs : ayahs // ignore: cast_nullable_to_non_nullable
 as List<Ayah>,selectedSurah: freezed == selectedSurah ? _self.selectedSurah : selectedSurah // ignore: cast_nullable_to_non_nullable
-as Surah?,selectedSurahDetail: freezed == selectedSurahDetail ? _self.selectedSurahDetail : selectedSurahDetail // ignore: cast_nullable_to_non_nullable
-as SurahDetail?,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as Surah?,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,searchResults: null == searchResults ? _self._searchResults : searchResults // ignore: cast_nullable_to_non_nullable
-as List<Ayah>,
+as List<SearchResult>,
   ));
 }
 
-/// Create a copy of QuranState
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$SurahCopyWith<$Res>? get selectedSurah {
-    if (_self.selectedSurah == null) {
-    return null;
-  }
 
-  return $SurahCopyWith<$Res>(_self.selectedSurah!, (value) {
-    return _then(_self.copyWith(selectedSurah: value));
-  });
-}/// Create a copy of QuranState
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$SurahDetailCopyWith<$Res>? get selectedSurahDetail {
-    if (_self.selectedSurahDetail == null) {
-    return null;
-  }
-
-  return $SurahDetailCopyWith<$Res>(_self.selectedSurahDetail!, (value) {
-    return _then(_self.copyWith(selectedSurahDetail: value));
-  });
-}
 }
 
 // dart format on

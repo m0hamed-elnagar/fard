@@ -9,7 +9,9 @@ ADD AUDIO TO THE AZKAR //not important for now
  > ADD COMPOSE for the qebla and quraan
  REMOVE THE SpLASH SCREEN
 =======
-ADD COMPOSE
 REMOVE THE SpLASH SCREEN
 add editing for aazkr el salaah time
+improve the ui
+add logo
+get the report of every feature to make a prompt of enhancing the functionalities and ui
 >>>>>>> Stashed changes

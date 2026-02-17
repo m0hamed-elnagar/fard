@@ -231,7 +231,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorLoadingAzkar => 'خطأ في تحميل الأذكار';
 
   @override
-  String get noCategoriesFound => 'لم يتم العثور على فئات';
+  String get noCategoriesFound => 'لم يتم العور على فئات';
 
   @override
   String get refreshData => 'تحديث البيانات';
@@ -318,7 +318,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get quranTab => 'القرآن';
 
   @override
-  String get locationWarning => 'لا يمكن معرفة مواقيت الصلاة بدون تحديد الموقع.';
+  String get locationWarning =>
+      'لا يمكن معرفة مواقيت الصلاة بدون تحديد الموقع.';
 
   @override
   String get givePermission => 'تفعيل الموقع';

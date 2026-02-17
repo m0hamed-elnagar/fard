@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -5,7 +7,6 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-import java.util.Properties
 
 val keystorePropertiesFile = rootProject.projectDir.resolve("key.properties")
 val keystoreProperties = Properties()

@@ -4,7 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
-import 'surah_detail_page.dart';
+import 'quran_reader_page.dart';
+// import 'surah_detail_page.dart';
 
 class QuranPage extends StatefulWidget {
   const QuranPage({super.key});
@@ -142,8 +143,8 @@ class _QuranPageState extends State<QuranPage> {
 
             final filteredSurahs = state.surahs.where((surah) {
               return surah.name.contains(_searchQuery) ||
-                  surah.englishName.toLowerCase().contains(_searchQuery) ||
-                  surah.number.toString().contains(_searchQuery);
+                  (surah.englishName?.toLowerCase().contains(_searchQuery) ?? false) ||
+                  surah.number.value.toString().contains(_searchQuery);
             }).toList();
 
             if (filteredSurahs.isEmpty && !state.isLoading) {
@@ -173,14 +174,14 @@ class _QuranPageState extends State<QuranPage> {
                   leading: CircleAvatar(
                     backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                     child: Text(
-                      surah.number.toString(),
+                      surah.number.value.toString(),
                       style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                   ),
                   title: Row(
                     children: [
                       Text(
-                        surah.englishName,
+                        surah.englishName ?? '',
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const Spacer(),
@@ -195,7 +196,7 @@ class _QuranPageState extends State<QuranPage> {
                     ],
                   ),
                   subtitle: Text(
-                    '${surah.englishNameTranslation} • ${surah.numberOfAyahs} ${l10n.ayah}',
+                    '${surah.englishNameTranslation ?? ''} • ${surah.numberOfAyahs} ${l10n.ayah}',
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 14),
@@ -203,7 +204,7 @@ class _QuranPageState extends State<QuranPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => SurahDetailPage(surah: surah),
+                        builder: (context) => QuranReaderPage(surahNumber: surah.number.value),
                       ),
                     );
                   },

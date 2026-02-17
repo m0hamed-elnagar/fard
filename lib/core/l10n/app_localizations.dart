@@ -368,24 +368,6 @@ abstract class AppLocalizations {
   /// **'Isha'**
   String get isha;
 
-  /// No description provided for @qibla.
-  ///
-  /// In en, this message translates to:
-  /// **'Qibla'**
-  String get qibla;
-
-  /// No description provided for @afterSalahAzkar.
-  ///
-  /// In en, this message translates to:
-  /// **'Azkar after Salah'**
-  String get afterSalahAzkar;
-
-  /// No description provided for @afterSalahAzkarDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Reminder to read azkar 15 minutes after azan'**
-  String get afterSalahAzkarDesc;
-
   /// No description provided for @settings.
   ///
   /// In en, this message translates to:
@@ -643,6 +625,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enable Reminder'**
   String get enableReminder;
+
+  /// No description provided for @qibla.
+  ///
+  /// In en, this message translates to:
+  /// **'Qibla'**
+  String get qibla;
+
+  /// No description provided for @afterSalahAzkar.
+  ///
+  /// In en, this message translates to:
+  /// **'Azkar after Salah'**
+  String get afterSalahAzkar;
+
+  /// No description provided for @afterSalahAzkarDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder to read azkar 15 minutes after azan'**
+  String get afterSalahAzkarDesc;
 
   /// No description provided for @quran.
   ///
