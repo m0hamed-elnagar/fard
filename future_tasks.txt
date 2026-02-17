@@ -14,4 +14,5 @@ add editing for aazkr el salaah time
 improve the ui
 add logo
 get the report of every feature to make a prompt of enhancing the functionalities and ui
+
 >>>>>>> Stashed changes
