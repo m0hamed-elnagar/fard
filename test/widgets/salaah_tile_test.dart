@@ -55,11 +55,15 @@ void main() {
       expect(find.text('${l10n.remaining}: 5'), findsOneWidget);
 
       // Test interactions
-      await tester.tap(find.byIcon(Icons.add_rounded));
-      expect(addCalled, isTrue);
-
+      // In the new logic, add button is only active if we just removed one in the same session
+      // to fix mistakes. For new qada, users use the top button.
       await tester.tap(find.byIcon(Icons.remove_rounded));
       expect(removeCalled, isTrue);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.add_rounded));
+      expect(addCalled, isTrue);
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byIcon(Icons.close_rounded));
       expect(toggleCalled, isTrue);

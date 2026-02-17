@@ -65,4 +65,54 @@ class PrayerTimeService {
         return prayerTimes.isha;
     }
   }
+
+  bool isPassed(Salaah salaah, {PrayerTimes? prayerTimes, DateTime? date}) {
+    final now = DateTime.now();
+    final targetDate = date ?? now;
+    final today = DateTime(now.year, now.month, now.day);
+    final normalizedTarget = DateTime(targetDate.year, targetDate.month, targetDate.day);
+    
+    if (normalizedTarget.isBefore(today)) return true;
+    if (normalizedTarget.isAfter(today)) return false;
+    
+    if (prayerTimes != null) {
+      final time = getTimeForSalaah(prayerTimes, salaah);
+      return time != null && time.isBefore(now);
+    }
+    
+    // Conservative fallbacks when no location is available
+    final hour = now.hour;
+    switch (salaah) {
+      case Salaah.fajr: return hour >= 6;
+      case Salaah.dhuhr: return hour >= 13;
+      case Salaah.asr: return hour >= 16;
+      case Salaah.maghrib: return hour >= 19;
+      case Salaah.isha: return hour >= 21;
+    }
+  }
+
+  bool isUpcoming(Salaah salaah, {PrayerTimes? prayerTimes, DateTime? date}) {
+    final now = DateTime.now();
+    final targetDate = date ?? now;
+    final today = DateTime(now.year, now.month, now.day);
+    final normalizedTarget = DateTime(targetDate.year, targetDate.month, targetDate.day);
+    
+    if (normalizedTarget.isBefore(today)) return false;
+    if (normalizedTarget.isAfter(today)) return true;
+    
+    if (prayerTimes != null) {
+      final time = getTimeForSalaah(prayerTimes, salaah);
+      return time != null && time.isAfter(now);
+    }
+    
+    // Conservative fallbacks when no location is available
+    final hour = now.hour;
+    switch (salaah) {
+      case Salaah.fajr: return hour < 5;
+      case Salaah.dhuhr: return hour < 12;
+      case Salaah.asr: return hour < 15;
+      case Salaah.maghrib: return hour < 18;
+      case Salaah.isha: return hour < 20;
+    }
+  }
 }

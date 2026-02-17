@@ -209,7 +209,7 @@ return $default(_that.salaah,_that.isAzanEnabled,_that.isReminderEnabled,_that.r
 @JsonSerializable()
 
 class _SalaahSettings implements SalaahSettings {
-  const _SalaahSettings({required this.salaah, this.isAzanEnabled = true, this.isReminderEnabled = true, this.reminderMinutesBefore = 15, this.isAfterSalahAzkarEnabled = true, this.afterSalaahAzkarMinutes = 5, this.azanSound});
+  const _SalaahSettings({required this.salaah, this.isAzanEnabled = true, this.isReminderEnabled = true, this.reminderMinutesBefore = 15, this.isAfterSalahAzkarEnabled = false, this.afterSalaahAzkarMinutes = 5, this.azanSound});
   factory _SalaahSettings.fromJson(Map<String, dynamic> json) => _$SalaahSettingsFromJson(json);
 
 @override final  Salaah salaah;

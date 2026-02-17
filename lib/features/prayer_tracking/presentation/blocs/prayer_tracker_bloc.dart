@@ -1,9 +1,12 @@
+import 'package:adhan/adhan.dart';
+import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
 import 'package:fard/features/prayer_tracking/domain/missed_counter.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/prayer_tracking/domain/prayer_repo.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'prayer_tracker_bloc.freezed.dart';
 part 'prayer_tracker_event.dart';
@@ -11,8 +14,14 @@ part 'prayer_tracker_state.dart';
 
 class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
   final PrayerRepo _repo;
+  final SharedPreferences _prefs;
+  final PrayerTimeService _prayerTimeService;
 
-  PrayerTrackerBloc(this._repo) : super(const PrayerTrackerState.loading()) {
+  PrayerTrackerBloc(
+    this._repo,
+    this._prefs,
+    this._prayerTimeService,
+  ) : super(const PrayerTrackerState.loading()) {
     on<_Load>(_onLoad);
     on<_TogglePrayer>(_onTogglePrayer);
     on<_AddQada>(_onAddQada);
@@ -66,14 +75,77 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
       em(const PrayerTrackerState.loading());
       final record = await _repo.loadRecord(e.date);
       final lastSaved = await _repo.loadLastSavedRecord();
-      final missedToday = record?.missedToday ?? <Salaah>{};
-      // If not records exists, carry over qada
+      
+      // Default missedToday for a NEW record is only prayers that have PASSED their time
+      // If record exists, use its missedToday.
+      Set<Salaah> missedToday;
+      if (record != null) {
+        missedToday = record.missedToday;
+      } else {
+        final lat = _prefs.getDouble('latitude');
+        final lon = _prefs.getDouble('longitude');
+        
+        PrayerTimes? prayerTimes;
+        if (lat != null && lon != null) {
+          final method = _prefs.getString('calculation_method') ?? 'muslim_league';
+          final madhab = _prefs.getString('madhab') ?? 'shafi';
+          prayerTimes = _prayerTimeService.getPrayerTimes(
+            latitude: lat,
+            longitude: lon,
+            method: method,
+            madhab: madhab,
+            date: e.date,
+          );
+        }
+
+        missedToday = <Salaah>{};
+        for (final s in Salaah.values) {
+          if (_prayerTimeService.isPassed(s, prayerTimes: prayerTimes, date: e.date)) {
+            missedToday.add(s);
+          }
+        }
+      }
+      
+      // If no records exist, carry over qada
       Map<Salaah, MissedCounter> qada;
       if (record != null) {
         qada = record.qada;
+      } else if (lastSaved != null) {
+        // Carry over base qada AND add missed prayers from days between lastSaved and e.date
+        final lastDate = DateTime(lastSaved.date.year, lastSaved.date.month, lastSaved.date.day);
+        final targetDate = DateTime(e.date.year, e.date.month, e.date.day);
+        
+        qada = Map<Salaah, MissedCounter>.from(lastSaved.qada);
+        
+        if (targetDate.isAfter(lastDate)) {
+          // Add 5 prayers for every FULL day missed between lastDate and targetDate
+          // We use UTC for consistent day difference calculation
+          final lastUtc = DateTime.utc(lastDate.year, lastDate.month, lastDate.day);
+          final targetUtc = DateTime.utc(targetDate.year, targetDate.month, targetDate.day);
+          final fullDaysDiff = targetUtc.difference(lastUtc).inDays;
+          
+          if (fullDaysDiff > 1) {
+            final missedFullDays = fullDaysDiff - 1;
+            for (final s in Salaah.values) {
+              final current = qada[s] ?? const MissedCounter(0);
+              qada[s] = MissedCounter(current.value + missedFullDays);
+            }
+          }
+        }
       } else {
-        qada = lastSaved?.qada ??
-            {for (final s in Salaah.values) s: const MissedCounter(0)};
+        qada = {for (final s in Salaah.values) s: const MissedCounter(0)};
+      }
+
+      // If this is Today and we just initialized qada from lastSaved, 
+      // we need to add the current day's missedToday into the live qada balance.
+      final now = DateTime.now();
+      final isToday = e.date.year == now.year &&
+                      e.date.month == now.month &&
+                      e.date.day == now.day;
+      if (record == null && isToday) {
+        for (final s in missedToday) {
+          qada[s] = (qada[s] ?? const MissedCounter(0)).addMissed();
+        }
       }
 
       // Initial state without month records first to show UI quickly
@@ -82,7 +154,7 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
         missedToday: missedToday,
         qadaStatus: qada,
         monthRecords: {},
-        history: [], // We'll populate this from monthRecords in UI or Bloc
+        history: [], 
       ));
 
       // Load month data
@@ -104,12 +176,24 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
     final s = state as _Loaded;
     final updated = Set<Salaah>.from(s.missedToday);
     final qada = Map<Salaah, MissedCounter>.from(s.qadaStatus);
+    
+    final now = DateTime.now();
+    final isToday = s.selectedDate.year == now.year &&
+                    s.selectedDate.month == now.month &&
+                    s.selectedDate.day == now.day;
+
     if (updated.contains(e.prayer)) {
+      // It was missed, now it's prayed
       updated.remove(e.prayer);
-      qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).removeMissed();
+      if (isToday) {
+        qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).removeMissed();
+      }
     } else {
+      // It was prayed, now it's missed
       updated.add(e.prayer);
-      qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).addMissed();
+      if (isToday) {
+        qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).addMissed();
+      }
     }
     final newState = s.copyWith(missedToday: updated, qadaStatus: qada);
     em(newState);
@@ -201,7 +285,12 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
   Future<void> _onAcknowledgeMissedDays(
       _AcknowledgeMissedDays e, Emitter<PrayerTrackerState> em) async {
     if (e.selectedDates.isEmpty) {
-      add(PrayerTrackerEvent.load(DateTime.now()));
+      final s = state;
+      if (s is _Loaded) {
+        add(PrayerTrackerEvent.load(s.selectedDate));
+      } else {
+        add(PrayerTrackerEvent.load(DateTime.now()));
+      }
       return;
     }
 
@@ -232,8 +321,8 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
     );
     await _repo.saveToday(record);
 
-    // Load today after handling
-    add(PrayerTrackerEvent.load(DateTime.now()));
+    // Load the latest record date after handling to reflect the new state
+    add(PrayerTrackerEvent.load(latestDate));
   }
 
   Future<void> _onBulkAddQada(

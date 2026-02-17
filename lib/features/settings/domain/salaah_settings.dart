@@ -11,7 +11,7 @@ sealed class SalaahSettings with _$SalaahSettings {
     @Default(true) bool isAzanEnabled,
     @Default(true) bool isReminderEnabled,
     @Default(15) int reminderMinutesBefore,
-    @Default(true) bool isAfterSalahAzkarEnabled,
+    @Default(false) bool isAfterSalahAzkarEnabled,
     @Default(5) int afterSalaahAzkarMinutes,
     String? azanSound,
   }) = _SalaahSettings;

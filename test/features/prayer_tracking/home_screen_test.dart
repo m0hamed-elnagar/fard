@@ -54,6 +54,14 @@ void main() {
     getIt.registerSingleton<SharedPreferences>(MockSharedPreferences());
     getIt.registerSingleton<PrayerTrackerBloc>(mockPrayerTrackerBloc);
     getIt.registerSingleton<PrayerTimeService>(mockPrayerTimeService);
+
+    // Default mocks for PrayerTimeService
+    when(() => mockPrayerTimeService.isUpcoming(any(), 
+        prayerTimes: any(named: 'prayerTimes'), 
+        date: any(named: 'date'))).thenReturn(false);
+    when(() => mockPrayerTimeService.isPassed(any(), 
+        prayerTimes: any(named: 'prayerTimes'), 
+        date: any(named: 'date'))).thenReturn(true);
   });
 
   Widget createWidgetUnderTest() {

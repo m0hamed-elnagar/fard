@@ -6,99 +6,285 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
-class SalaahTile extends StatelessWidget {
+class SalaahTile extends StatefulWidget {
+
   final Salaah salaah;
+
   final int qadaCount;
+
   final bool isMissedToday;
+
+  final bool isUpcoming;
+
   final DateTime? time;
+
   final VoidCallback onAdd;
+
   final VoidCallback onRemove;
+
   final VoidCallback onToggleMissed;
 
+
+
   const SalaahTile({
+
     super.key,
+
     required this.salaah,
+
     required this.qadaCount,
+
     required this.isMissedToday,
+
+    this.isUpcoming = false,
+
     this.time,
+
     required this.onAdd,
+
     required this.onRemove,
+
     required this.onToggleMissed,
+
   });
 
+
+
   @override
+
+  State<SalaahTile> createState() => _SalaahTileState();
+
+}
+
+
+
+class _SalaahTileState extends State<SalaahTile> {
+
+  int _removedInSession = 0;
+
+
+
+  @override
+
   Widget build(BuildContext context) {
+
     final l10n = AppLocalizations.of(context)!;
+
     final timeFormat = DateFormat.jm(Localizations.localeOf(context).languageCode);
+
     
+
     return AnimatedContainer(
+
       duration: const Duration(milliseconds: 300),
+
       curve: Curves.easeInOut,
+
       margin: const EdgeInsets.only(bottom: 12.0),
+
       decoration: BoxDecoration(
-        color: isMissedToday
-            ? AppTheme.missed.withValues(alpha: 0.12)
-            : AppTheme.surface,
+
+        color: widget.isUpcoming
+
+            ? Colors.transparent
+
+            : widget.isMissedToday
+
+                ? AppTheme.missed.withValues(alpha: 0.12)
+
+                : AppTheme.surface,
+
         borderRadius: BorderRadius.circular(20.0),
+
         border: Border.all(
-          color: isMissedToday
-              ? AppTheme.missed.withValues(alpha: 0.4)
-              : AppTheme.cardBorder,
+
+          color: widget.isUpcoming
+
+              ? AppTheme.cardBorder.withValues(alpha: 0.5)
+
+              : widget.isMissedToday
+
+                  ? AppTheme.missed.withValues(alpha: 0.4)
+
+                  : AppTheme.cardBorder,
+
           width: 1.5,
+
         ),
+
         boxShadow: [
-          if (isMissedToday)
+
+          if (widget.isMissedToday && !widget.isUpcoming)
+
             BoxShadow(
+
               color: AppTheme.missed.withValues(alpha: 0.1),
+
               blurRadius: 10,
+
               offset: const Offset(0, 4),
+
             ),
+
         ],
+
       ),
+
       child: Material(
+
         color: Colors.transparent,
+
         child: InkWell(
+
           borderRadius: BorderRadius.circular(20.0),
-          onTap: onToggleMissed,
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Row(
-              children: [
-                // Today Missed Status
-                _StatusIndicator(
-                  isMissed: isMissedToday,
-                  onTap: onToggleMissed,
-                ),
-                const SizedBox(width: 12.0),
-                
-                // Stacked Counter Buttons
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppTheme.surfaceLight,
-                    borderRadius: BorderRadius.circular(10.0),
-                    border: Border.all(color: AppTheme.cardBorder),
+
+          onTap: widget.isUpcoming ? null : widget.onToggleMissed,
+
+          child: Opacity(
+
+            opacity: widget.isUpcoming ? 0.6 : 1.0,
+
+            child: Padding(
+
+              padding: const EdgeInsets.all(12.0),
+
+              child: Row(
+
+                children: [
+
+                  // Today Missed Status
+
+                  _StatusIndicator(
+
+                    isMissed: widget.isUpcoming ? false : widget.isMissedToday,
+
+                    isUpcoming: widget.isUpcoming,
+
+                    onTap: widget.isUpcoming ? () {} : widget.onToggleMissed,
+
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _CounterButton(
-                        icon: Icons.add_rounded,
-                        onPressed: onAdd,
-                        color: AppTheme.primaryLight,
-                      ),
-                      Container(
-                        width: 20,
-                        height: 1,
-                        color: AppTheme.cardBorder,
-                      ),
-                      _CounterButton(
-                        icon: Icons.remove_rounded,
-                        onPressed: qadaCount > 0 ? onRemove : null,
-                        color: AppTheme.missed,
-                      ),
-                    ],
+
+                  const SizedBox(width: 12.0),
+
+                  
+
+                  // Stacked Counter Buttons
+
+                  Container(
+
+                    decoration: BoxDecoration(
+
+                      color: AppTheme.surfaceLight,
+
+                      borderRadius: BorderRadius.circular(10.0),
+
+                      border: Border.all(color: AppTheme.cardBorder),
+
+                    ),
+
+                    child: Column(
+
+                      mainAxisSize: MainAxisSize.min,
+
+                      children: [
+
+                        _CounterButton(
+
+                          icon: Icons.add_rounded,
+
+                          onPressed: widget.isUpcoming ? null : () {
+
+                            if (_removedInSession > 0) {
+
+                              widget.onAdd();
+
+                              setState(() {
+
+                                _removedInSession--;
+
+                              });
+
+                            } else {
+
+                              ScaffoldMessenger.of(context).clearSnackBars();
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+
+                                SnackBar(
+
+                                  content: Text(
+
+                                    l10n.localeName == 'ar' 
+
+                                      ? 'استخدم "إضافة قضاء" في أعلى الصفحة لإضافة صلوات جديدة'
+
+                                      : 'Use "Add Qada" at the top to add new missed prayers',
+
+                                    style: GoogleFonts.outfit(color: Colors.white),
+
+                                  ),
+
+                                  backgroundColor: AppTheme.surfaceLight,
+
+                                  behavior: SnackBarBehavior.floating,
+
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+
+                                  duration: const Duration(seconds: 2),
+
+                                ),
+
+                              );
+
+                            }
+
+                          },
+
+                          color: (_removedInSession > 0 && !widget.isUpcoming)
+
+                              ? AppTheme.primaryLight 
+
+                              : AppTheme.neutral.withValues(alpha: 0.5),
+
+                        ),
+
+                        Container(
+
+                          width: 20,
+
+                          height: 1,
+
+                          color: AppTheme.cardBorder,
+
+                        ),
+
+                        _CounterButton(
+
+                          icon: Icons.remove_rounded,
+
+                          onPressed: (widget.qadaCount > 0 && !widget.isUpcoming) ? () {
+
+                            widget.onRemove();
+
+                            setState(() {
+
+                              _removedInSession++;
+
+                            });
+
+                          } : null,
+
+                          color: AppTheme.missed,
+
+                        ),
+
+                      ],
+
+                    ),
+
                   ),
-                ),
+
+
                 const SizedBox(width: 16.0),
                 
                 // Salaah Info
@@ -108,20 +294,20 @@ class SalaahTile extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        salaah.localizedName(l10n),
+                        widget.salaah.localizedName(l10n),
                         style: GoogleFonts.amiri(
                           color: AppTheme.textPrimary,
                           fontSize: 22.0,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      if (time != null)
+                      if (widget.time != null)
                         Row(
                           children: [
                             Icon(Icons.access_time_rounded, size: 14, color: AppTheme.accent),
                             const SizedBox(width: 4),
                             Text(
-                              timeFormat.format(time!),
+                              timeFormat.format(widget.time!),
                               style: GoogleFonts.outfit(
                                 color: AppTheme.accent,
                                 fontSize: 14.0,
@@ -138,12 +324,12 @@ class SalaahTile extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   decoration: BoxDecoration(
-                    color: qadaCount > 0 
+                    color: widget.qadaCount > 0 
                       ? AppTheme.accent.withValues(alpha: 0.1)
                       : Colors.transparent,
                     borderRadius: BorderRadius.circular(12.0),
                     border: Border.all(
-                      color: qadaCount > 0 
+                      color: widget.qadaCount > 0 
                         ? AppTheme.accent.withValues(alpha: 0.3)
                         : Colors.transparent,
                     ),
@@ -152,9 +338,9 @@ class SalaahTile extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        '$qadaCount',
+                        '${widget.qadaCount}',
                         style: GoogleFonts.outfit(
-                          color: qadaCount > 0
+                          color: widget.qadaCount > 0
                               ? AppTheme.accent
                               : AppTheme.textSecondary,
                           fontSize: 24.0,
@@ -162,7 +348,7 @@ class SalaahTile extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '${l10n.remaining}: $qadaCount',
+                        '${l10n.remaining}: ${widget.qadaCount}',
                         style: GoogleFonts.outfit(
                           color: Colors.transparent,
                           fontSize: 0.01,
@@ -171,7 +357,7 @@ class SalaahTile extends StatelessWidget {
                       Text(
                         l10n.remaining.toLowerCase(),
                         style: GoogleFonts.outfit(
-                          color: qadaCount > 0
+                          color: widget.qadaCount > 0
                               ? AppTheme.accent.withValues(alpha: 0.7)
                               : AppTheme.neutral,
                           fontSize: 10.0,
@@ -186,44 +372,68 @@ class SalaahTile extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 class _StatusIndicator extends StatelessWidget {
   final bool isMissed;
+  final bool isUpcoming;
   final VoidCallback onTap;
 
-  const _StatusIndicator({required this.isMissed, required this.onTap});
+  const _StatusIndicator({
+    required this.isMissed,
+    this.isUpcoming = false,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      width: 42.0,
-      height: 42.0,
-      decoration: BoxDecoration(
-        color: isMissed
-            ? AppTheme.missed
-            : AppTheme.surfaceLight,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: isMissed ? AppTheme.missed : AppTheme.neutral,
-          width: 2.0,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(21.0),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        width: 42.0,
+        height: 42.0,
+        decoration: BoxDecoration(
+          color: isUpcoming
+              ? Colors.transparent
+              : isMissed
+                  ? AppTheme.missed
+                  : AppTheme.surfaceLight,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: isUpcoming
+                ? AppTheme.neutral.withValues(alpha: 0.3)
+                : isMissed
+                    ? AppTheme.missed
+                    : AppTheme.neutral,
+            width: 2.0,
+          ),
+          boxShadow: [
+            if (isMissed && !isUpcoming)
+              BoxShadow(
+                color: AppTheme.missed.withValues(alpha: 0.3),
+                blurRadius: 8,
+                spreadRadius: 1,
+              ),
+          ],
         ),
-        boxShadow: [
-          if (isMissed)
-            BoxShadow(
-              color: AppTheme.missed.withValues(alpha: 0.3),
-              blurRadius: 8,
-              spreadRadius: 1,
-            ),
-        ],
-      ),
-      child: Icon(
-        isMissed ? Icons.close_rounded : Icons.check_rounded,
-        color: isMissed ? Colors.white : AppTheme.neutral,
-        size: 24.0,
+        child: Icon(
+          isUpcoming
+              ? Icons.hourglass_empty_rounded
+              : isMissed
+                  ? Icons.close_rounded
+                  : Icons.check_rounded,
+          color: isUpcoming
+              ? AppTheme.neutral.withValues(alpha: 0.5)
+              : isMissed
+                  ? Colors.white
+                  : AppTheme.neutral,
+          size: isUpcoming ? 20.0 : 24.0,
+        ),
       ),
     );
   }

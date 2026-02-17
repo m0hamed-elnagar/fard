@@ -210,54 +210,42 @@ class HistoryList extends StatelessWidget {
                 const SizedBox(height: 8.0),
                 // Per-salaah mini row
                 Wrap(
-                  spacing: 8.0,
+                  spacing: 6.0,
                   runSpacing: 6.0,
                   children: Salaah.values.map((s) {
-                    final count = record.qada[s]?.value ?? 0;
                     final wasMissed = record.missedToday.contains(s);
                     
                     return Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 6.0, vertical: 3.0),
+                          horizontal: 8.0, vertical: 4.0),
                       decoration: BoxDecoration(
                         color: wasMissed
                             ? AppTheme.missed.withValues(alpha: 0.08)
-                            : AppTheme.saved.withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(6.0),
+                            : AppTheme.saved.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(8.0),
                         border: Border.all(
                           color: wasMissed
                               ? AppTheme.missed.withValues(alpha: 0.20)
-                              : AppTheme.saved.withValues(alpha: 0.10),
+                              : AppTheme.saved.withValues(alpha: 0.20),
                         ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          Icon(
+                            wasMissed ? Icons.close_rounded : Icons.check_circle_rounded,
+                            color: wasMissed ? AppTheme.missed : AppTheme.saved,
+                            size: 14.0,
+                          ),
+                          const SizedBox(width: 4.0),
                           Text(
                             s.localizedName(l10n),
                             style: GoogleFonts.amiri(
-                              color: wasMissed
-                                  ? AppTheme.missed
-                                  : AppTheme.textSecondary,
-                              fontSize: 10.0,
+                              color: wasMissed ? AppTheme.missed : AppTheme.saved,
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(width: 4.0),
-                          if (wasMissed)
-                            Text(
-                              '$count',
-                              style: GoogleFonts.outfit(
-                                color: AppTheme.missed,
-                                fontSize: 11.0,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            )
-                          else
-                            const Icon(
-                              Icons.check_rounded,
-                              color: AppTheme.saved,
-                              size: 12.0,
-                            ),
                         ],
                       ),
                     );

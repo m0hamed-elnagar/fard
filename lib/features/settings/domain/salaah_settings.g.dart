@@ -13,7 +13,7 @@ _SalaahSettings _$SalaahSettingsFromJson(
   isAzanEnabled: json['isAzanEnabled'] as bool? ?? true,
   isReminderEnabled: json['isReminderEnabled'] as bool? ?? true,
   reminderMinutesBefore: (json['reminderMinutesBefore'] as num?)?.toInt() ?? 15,
-  isAfterSalahAzkarEnabled: json['isAfterSalahAzkarEnabled'] as bool? ?? true,
+  isAfterSalahAzkarEnabled: json['isAfterSalahAzkarEnabled'] as bool? ?? false,
   afterSalaahAzkarMinutes:
       (json['afterSalaahAzkarMinutes'] as num?)?.toInt() ?? 5,
   azanSound: json['azanSound'] as String?,

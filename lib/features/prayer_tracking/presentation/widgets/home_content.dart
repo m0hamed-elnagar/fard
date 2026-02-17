@@ -189,15 +189,21 @@ class HomeContent extends StatelessWidget {
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final salaah = Salaah.values[index];
-                        DateTime? time;
-                        if (prayerTimes != null) {
-                          time = getIt<PrayerTimeService>().getTimeForSalaah(prayerTimes, salaah);
-                        }
+                        final time = prayerTimes != null 
+                            ? getIt<PrayerTimeService>().getTimeForSalaah(prayerTimes, salaah)
+                            : null;
+                        
+                        final isUpcoming = getIt<PrayerTimeService>().isUpcoming(
+                          salaah, 
+                          prayerTimes: prayerTimes, 
+                          date: selectedDate,
+                        );
                         
                         return SalaahTile(
                           salaah: salaah,
                           qadaCount: qadaStatus[salaah]?.value ?? 0,
                           isMissedToday: missedToday.contains(salaah),
+                          isUpcoming: isUpcoming,
                           time: time,
                           onAdd: () =>
                               bloc.add(PrayerTrackerEvent.addQada(salaah)),

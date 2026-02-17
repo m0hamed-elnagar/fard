@@ -12,6 +12,7 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
+import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 
 class MockSettingsCubit extends MockCubit<SettingsState> implements SettingsCubit {}
@@ -27,6 +28,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(PrayerTrackerEvent.load(DateTime.now()));
+    registerFallbackValue(Salaah.fajr);
   });
 
   setUp(() {
@@ -38,7 +40,16 @@ void main() {
     getIt.reset();
     getIt.registerSingleton<SharedPreferences>(MockSharedPreferences());
     getIt.registerSingleton<PrayerTrackerBloc>(mockPrayerTrackerBloc);
-    getIt.registerSingleton<PrayerTimeService>(MockPrayerTimeService());
+    final mockPrayerTimeService = MockPrayerTimeService();
+    getIt.registerSingleton<PrayerTimeService>(mockPrayerTimeService);
+
+    // Default mocks for PrayerTimeService
+    when(() => mockPrayerTimeService.isUpcoming(any(), 
+        prayerTimes: any(named: 'prayerTimes'), 
+        date: any(named: 'date'))).thenReturn(false);
+    when(() => mockPrayerTimeService.isPassed(any(), 
+        prayerTimes: any(named: 'prayerTimes'), 
+        date: any(named: 'date'))).thenReturn(true);
 
     when(() => mockPrayerTrackerBloc.state).thenReturn(PrayerTrackerState.loaded(
       selectedDate: DateTime.now(),

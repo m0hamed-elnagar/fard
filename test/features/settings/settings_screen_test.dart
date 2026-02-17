@@ -101,7 +101,7 @@ void main() {
 
     // Scroll to Fajr
     final fajrFinder = find.text('Fajr');
-    await tester.ensureVisible(fajrFinder);
+    await tester.scrollUntilVisible(fajrFinder, 500);
     await tester.pumpAndSettle();
     
     await tester.tap(fajrFinder);

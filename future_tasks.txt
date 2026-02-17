@@ -14,5 +14,18 @@ add editing for aazkr el salaah time
 improve the ui
 add logo
 get the report of every feature to make a prompt of enhancing the functionalities and ui
-
->>>>>>> Stashed changes
+finalize it
+minfing if didn't yet
+can i fix the debug aand release have the sme package i need to test debug without needing to remove messed up the release
+ fix the l10n in the project some are not completly fix check them
+ *make the missed salaah  only for the ones that already pass time  so if i just
+  finished the asr why do i see that i missed the isha while it didn't come yet so only add
+   them and show them in red when  they pass time and didn't yet be completed by the user
+    but don't make them complete too find a good fix that don't add them to complete of missed
+    if there time didn't come yet
+also  the check is the today btn is effecting the qada wrongly or not
+show the line of days we are in while the calender is shrinked
+the today  fard and the past qada isn't working right can u search and make a plan  to fix it  i need u to know that the qada is the missed from the other days  and each day i will have more sallahs if i didn't pray it will be the qada of the next day and so on search to get the hol of what u need to do and make a plane with testing and everything and excute the plan
+mke sure the localization is  finished right nothing is missed or wrong
+can I share a pic to the cli  to make it  use if aa refrance for ui
+/>>>>>>> Stashed changes

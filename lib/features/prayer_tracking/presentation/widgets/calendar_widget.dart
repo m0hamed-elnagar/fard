@@ -131,103 +131,101 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                 ],
               ),
             ),
-          ),
-          // Calendar body
-          AnimatedCrossFade(
-            duration: const Duration(milliseconds: 300),
-            crossFadeState: _isExpanded
-                ? CrossFadeState.showSecond
-                : CrossFadeState.showFirst,
-            firstChild: const SizedBox.shrink(),
-            secondChild: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-              child: TableCalendar(
-                firstDay: DateTime(2020, 1, 1),
-                lastDay: DateTime(2030, 12, 31),
-                focusedDay: _focusedDay,
-                rowHeight: 48.0,
-                selectedDayPredicate: (day) =>
-                    isSameDay(day, widget.selectedDate),
-                onDaySelected: (selectedDay, focusedDay) {
-                  setState(() => _focusedDay = focusedDay);
-                  widget.onDaySelected(selectedDay);
-                },
-                onPageChanged: (focusedDay) {
-                  setState(() => _focusedDay = focusedDay);
-                  widget.onMonthChanged(focusedDay.year, focusedDay.month);
-                },
-                calendarStyle: const CalendarStyle(
-                  todayTextStyle: TextStyle(color: AppTheme.textPrimary),
-                  selectedTextStyle: TextStyle(color: Colors.black87, fontWeight: FontWeight.w700),
-                  defaultTextStyle: TextStyle(color: AppTheme.textPrimary),
-                  weekendTextStyle: TextStyle(color: AppTheme.textSecondary),
-                  outsideTextStyle: TextStyle(color: Color(0x66C9D1D9)),
-                  cellMargin: EdgeInsets.all(4),
-                  markersMaxCount: 1,
-                ),
-                headerStyle: HeaderStyle(
-                  formatButtonVisible: false,
-                  titleCentered: true,
-                  titleTextStyle: GoogleFonts.outfit(
-                    color: AppTheme.textPrimary,
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  leftChevronIcon: const Icon(
-                      Icons.chevron_left_rounded,
-                      color: AppTheme.textSecondary,
-                      size: 24.0),
-                  rightChevronIcon: const Icon(
-                      Icons.chevron_right_rounded,
-                      color: AppTheme.textSecondary,
-                      size: 24.0),
-                ),
-                daysOfWeekStyle: DaysOfWeekStyle(
-                  weekdayStyle: GoogleFonts.outfit(
-                      color: AppTheme.textSecondary, fontSize: 12.0),
-                  weekendStyle: GoogleFonts.outfit(
-                      color: AppTheme.textSecondary, fontSize: 12.0),
-                ),
-                calendarBuilders: CalendarBuilders(
-                  defaultBuilder: (context, day, focusedDay) => _buildCell(day, false),
-                  selectedBuilder: (context, day, focusedDay) => _buildCell(day, true),
-                  todayBuilder: (context, day, focusedDay) => _buildCell(day, false, isToday: true),
-                  markerBuilder: (context, date, events) {
-                    final normalized = _normalize(date);
-                    final record = widget.monthRecords[normalized];
-                    if (record != null) {
-                      final hasMissed = record.missedToday.isNotEmpty;
-                      return Positioned(
-                        bottom: 4.0,
-                        child: Container(
-                          width: 6.0,
-                          height: 6.0,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color:
-                                hasMissed ? AppTheme.missed : AppTheme.saved,
-                            boxShadow: [
-                              BoxShadow(
-                                color: (hasMissed
-                                        ? AppTheme.missed
-                                        : AppTheme.saved)
-                                    .withValues(alpha: 0.50),
-                                blurRadius: 4.0,
-                              ),
-                            ],
-                          ),
+                    ),
+                    // Calendar body
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                      child: TableCalendar(
+                        firstDay: DateTime(2020, 1, 1),
+                        lastDay: DateTime(2030, 12, 31),
+                        focusedDay: _focusedDay,
+                        calendarFormat:
+                            _isExpanded ? CalendarFormat.month : CalendarFormat.week,
+                        rowHeight: 48.0,
+                        availableCalendarFormats: const {
+                          CalendarFormat.month: 'Month',
+                          CalendarFormat.week: 'Week',
+                        },
+                        headerVisible: _isExpanded,
+                        selectedDayPredicate: (day) =>
+                            isSameDay(day, widget.selectedDate),
+                        onDaySelected: (selectedDay, focusedDay) {
+                          setState(() => _focusedDay = focusedDay);
+                          widget.onDaySelected(selectedDay);
+                        },
+                        onPageChanged: (focusedDay) {
+                          setState(() => _focusedDay = focusedDay);
+                          widget.onMonthChanged(focusedDay.year, focusedDay.month);
+                        },
+                        calendarStyle: const CalendarStyle(
+                          todayTextStyle: TextStyle(color: AppTheme.textPrimary),
+                          selectedTextStyle:
+                              TextStyle(color: Colors.black87, fontWeight: FontWeight.w700),
+                          defaultTextStyle: TextStyle(color: AppTheme.textPrimary),
+                          weekendTextStyle: TextStyle(color: AppTheme.textSecondary),
+                          outsideTextStyle: TextStyle(color: Color(0x66C9D1D9)),
+                          cellMargin: EdgeInsets.all(4),
+                          markersMaxCount: 1,
                         ),
-                      );
-                    }
-                    return null;
-                  },
+                        headerStyle: HeaderStyle(
+                          formatButtonVisible: false,
+                          titleCentered: true,
+                          titleTextStyle: GoogleFonts.outfit(
+                            color: AppTheme.textPrimary,
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          leftChevronIcon: const Icon(Icons.chevron_left_rounded,
+                              color: AppTheme.textSecondary, size: 24.0),
+                          rightChevronIcon: const Icon(Icons.chevron_right_rounded,
+                              color: AppTheme.textSecondary, size: 24.0),
+                        ),
+                        daysOfWeekStyle: DaysOfWeekStyle(
+                          weekdayStyle: GoogleFonts.outfit(
+                              color: AppTheme.textSecondary, fontSize: 12.0),
+                          weekendStyle: GoogleFonts.outfit(
+                              color: AppTheme.textSecondary, fontSize: 12.0),
+                        ),
+                        calendarBuilders: CalendarBuilders(
+                          defaultBuilder: (context, day, focusedDay) =>
+                              _buildCell(day, false),
+                          selectedBuilder: (context, day, focusedDay) =>
+                              _buildCell(day, true),
+                          todayBuilder: (context, day, focusedDay) =>
+                              _buildCell(day, false, isToday: true),
+                          markerBuilder: (context, date, events) {
+                            final normalized = _normalize(date);
+                            final record = widget.monthRecords[normalized];
+                            if (record != null) {
+                              final hasMissed = record.missedToday.isNotEmpty;
+                              return Positioned(
+                                bottom: 4.0,
+                                child: Container(
+                                  width: 6.0,
+                                  height: 6.0,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: hasMissed ? AppTheme.missed : AppTheme.saved,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color:
+                                            (hasMissed ? AppTheme.missed : AppTheme.saved)
+                                                .withValues(alpha: 0.50),
+                                        blurRadius: 4.0,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+              );
+          
   }
 }

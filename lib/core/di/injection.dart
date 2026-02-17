@@ -56,7 +56,11 @@ Future<void> configureDependencies({String? hivePath}) async {
   // Initialize Quran Feature (DDD)
   await initQuranFeature();
   
-  getIt.registerFactory<PrayerTrackerBloc>(() => PrayerTrackerBloc(getIt()));
+  getIt.registerFactory<PrayerTrackerBloc>(() => PrayerTrackerBloc(
+        getIt<PrayerRepo>(),
+        getIt<SharedPreferences>(),
+        getIt<PrayerTimeService>(),
+      ));
   getIt.registerSingleton<SettingsCubit>(SettingsCubit(
         getIt(),
         getIt(),

@@ -7,6 +7,7 @@ import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
+import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +29,7 @@ class MockQuranBloc extends MockBloc<QuranEvent, QuranState> implements QuranBlo
 void main() {
   setUpAll(() {
     registerFallbackValue(PrayerTrackerEvent.load(DateTime.now()));
+    registerFallbackValue(Salaah.fajr);
   });
 
   late MockSharedPreferences mockPrefs;
@@ -57,6 +59,14 @@ void main() {
     getIt.registerFactory<QuranBloc>(() => mockQuranBloc);
 
     when(() => mockNotificationService.canScheduleExactNotifications()).thenAnswer((_) async => true);
+    
+    // Default mocks for PrayerTimeService
+    when(() => mockPrayerTimeService.isUpcoming(any(), 
+        prayerTimes: any(named: 'prayerTimes'), 
+        date: any(named: 'date'))).thenReturn(false);
+    when(() => mockPrayerTimeService.isPassed(any(), 
+        prayerTimes: any(named: 'prayerTimes'), 
+        date: any(named: 'date'))).thenReturn(true);
 
     when(() => mockSettingsCubit.state).thenReturn(SettingsState(locale: const Locale('en')));
     when(() => mockAzkarBloc.state).thenReturn(AzkarState.initial());
