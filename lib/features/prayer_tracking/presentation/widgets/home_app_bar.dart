@@ -25,71 +25,67 @@ class HomeAppBar extends StatelessWidget {
 
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 8.0),
+        padding: const EdgeInsets.fromLTRB(20.0, 8.0, 20.0, 8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const _MosqueIcon(),
-                const SizedBox(width: 12.0),
                 Expanded(
                   child: Text(
                     l10n.appName,
                     style: GoogleFonts.amiri(
                       color: AppTheme.textPrimary,
-                      fontSize: 26.0,
+                      fontSize: 22.0,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
+                if (cityName != null)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.location_on_rounded, size: 14, color: AppTheme.accent),
+                      const SizedBox(width: 4),
+                      Text(
+                        cityName!,
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 52.0, top: 0.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    DateFormat.yMMMMEEEEd(locale).format(selectedDate),
-                    style: GoogleFonts.outfit(
-                      color: AppTheme.textSecondary,
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  Text(
-                    hijriDate,
-                    style: GoogleFonts.amiri(
-                      color: AppTheme.accent,
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+            const SizedBox(height: 4),
+            Text(
+              DateFormat.yMMMMEEEEd(locale).format(selectedDate),
+              style: GoogleFonts.outfit(
+                color: AppTheme.textSecondary,
+                fontSize: 14.0,
+                fontWeight: FontWeight.w400,
               ),
             ),
-            if (cityName != null)
-              Padding(
-                padding: const EdgeInsets.only(left: 52.0),
-                child: Text(
-                  cityName!,
-                  style: const TextStyle(
-                    color: AppTheme.textSecondary,
-                    fontSize: 12.0,
-                  ),
-                ),
-              )
-            else
-              Padding(
-                padding: const EdgeInsets.only(left: 52.0, top: 4.0),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const SettingsScreen()),
-                    );
-                  },
+            Text(
+              hijriDate,
+              style: GoogleFonts.amiri(
+                color: AppTheme.accent,
+                fontSize: 18.0,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            if (cityName == null)
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
                   child: Row(
                     children: [
                       const Icon(Icons.location_off_rounded, size: 14, color: AppTheme.missed),
@@ -114,24 +110,4 @@ class HomeAppBar extends StatelessWidget {
   }
 }
 
-class _MosqueIcon extends StatelessWidget {
-  const _MosqueIcon();
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 40.0,
-      height: 40.0,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            AppTheme.primaryLight,
-            AppTheme.primaryDark,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: const Icon(Icons.mosque_rounded, color: AppTheme.onPrimary, size: 22.0),
-    );
-  }
-}

@@ -77,6 +77,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addQada => 'إضافة قضاء';
 
   @override
+  String get totalQada => 'إجمالي القضاء';
+
+  @override
   String get byCount => 'بالعدد';
 
   @override

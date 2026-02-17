@@ -78,6 +78,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addQada => 'Add Qada';
 
   @override
+  String get totalQada => 'Total Qada';
+
+  @override
   String get byCount => 'By Count';
 
   @override

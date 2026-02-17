@@ -16,8 +16,6 @@ add logo
 get the report of every feature to make a prompt of enhancing the functionalities and ui
 finalize it
 minfing if didn't yet
-can i fix the debug aand release have the sme package i need to test debug without needing to remove messed up the release
- fix the l10n in the project some are not completly fix check them
  *make the missed salaah  only for the ones that already pass time  so if i just
   finished the asr why do i see that i missed the isha while it didn't come yet so only add
    them and show them in red when  they pass time and didn't yet be completed by the user
@@ -29,3 +27,6 @@ the today  fard and the past qada isn't working right can u search and make a pl
 mke sure the localization is  finished right nothing is missed or wrong
 can I share a pic to the cli  to make it  use if aa refrance for ui
 />>>>>>> Stashed changes
+can i fix the debug aand release have the sme package i need to test debug without needing to remove messed up the release
+ fix the l10n in the project some are not completly fix check them
+the location is showing that it can't be knowing in the pc but it works fine in android

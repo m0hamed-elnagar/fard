@@ -8,11 +8,11 @@ import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/add_qada_dialog.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/calendar_widget.dart';
-import 'package:fard/features/prayer_tracking/presentation/widgets/counter_card.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/history_list.dart';
-import 'package:fard/features/prayer_tracking/presentation/widgets/home_app_bar.dart';
+import 'package:fard/features/prayer_tracking/presentation/widgets/home_hero.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/salaah_tile.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/suggested_azkar_section.dart';
+import 'package:fard/features/settings/presentation/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -62,18 +62,54 @@ class HomeContent extends StatelessWidget {
             : null;
 
         return Scaffold(
+          backgroundColor: AppTheme.background,
           body: SafeArea(
             child: CustomScrollView(
               physics: const BouncingScrollPhysics(),
               slivers: [
-                HomeAppBar(
-                  selectedDate: selectedDate,
-                  locale: locale,
-                  cityName: settings.cityName,
+                // Consolidated Header (Dome + Branding + Location + Qada)
+                SliverToBoxAdapter(
+                  child: HomeHero(
+                    qadaStatus: qadaStatus,
+                    selectedDate: selectedDate,
+                    locale: locale,
+                    cityName: settings.cityName,
+                    onAddPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (_) => AddQadaDialog(
+                          onConfirm: (counts) =>
+                              bloc.add(PrayerTrackerEvent.bulkAddQada(counts)),
+                        ),
+                      );
+                    },
+                    onEditPressed: () {
+                      final currentCounts = {
+                        for (final s in Salaah.values)
+                          s: qadaStatus[s]?.value ?? 0
+                      };
+                      showDialog(
+                        context: context,
+                        builder: (_) => AddQadaDialog(
+                          title: l10n.editQada,
+                          initialCounts: currentCounts,
+                          onConfirm: (counts) =>
+                              bloc.add(PrayerTrackerEvent.updateQada(counts)),
+                        ),
+                      );
+                    },
+                    onLocationTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                      );
+                    },
+                  ),
                 ),
-                // Calendar
+                
+                // Calendar section with subtle top padding
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+                  padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 8.0),
                   sliver: SliverToBoxAdapter(
                     child: CalendarWidget(
                       selectedDate: selectedDate,
@@ -85,43 +121,10 @@ class HomeContent extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Counter card
-                SliverPadding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-                  sliver: SliverToBoxAdapter(
-                    child: CounterCard(
-                      qadaStatus: qadaStatus,
-                      todayMissedCount: missedToday.length,
-                      onAddPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (_) => AddQadaDialog(
-                            onConfirm: (counts) =>
-                                bloc.add(PrayerTrackerEvent.bulkAddQada(counts)),
-                          ),
-                        );
-                      },
-                      onEditPressed: () {
-                        final currentCounts = {
-                          for (final s in Salaah.values)
-                            s: qadaStatus[s]?.value ?? 0
-                        };
-                        showDialog(
-                          context: context,
-                          builder: (_) => AddQadaDialog(
-                            title: l10n.editQada,
-                            initialCounts: currentCounts,
-                            onConfirm: (counts) =>
-                                bloc.add(PrayerTrackerEvent.updateQada(counts)),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
+                
                 // Suggested Azkar Section
                 SuggestedAzkarSection(settings: settings),
+                
                 // Location Warning
                 if (settings.latitude == null || settings.longitude == null)
                   SliverPadding(
@@ -168,20 +171,29 @@ class HomeContent extends StatelessWidget {
                       ),
                     ),
                   ),
-                // Section header
+                
+                // Today's Prayers Section Header
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 8.0),
+                  padding: const EdgeInsets.fromLTRB(20.0, 24.0, 20.0, 12.0),
                   sliver: SliverToBoxAdapter(
-                    child: Text(
-                      l10n.dailyPrayers,
-                      style: GoogleFonts.amiri(
-                        color: AppTheme.textPrimary,
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.today_rounded, color: AppTheme.accent, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          l10n.dailyPrayers,
+                          key: const Key('daily_prayers_header'),
+                          style: GoogleFonts.amiri(
+                            color: AppTheme.textPrimary,
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
+                
                 // Salaah list
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -217,9 +229,10 @@ class HomeContent extends StatelessWidget {
                     ),
                   ),
                 ),
+                
                 // History section
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 24.0),
+                  padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 40.0),
                   sliver: SliverToBoxAdapter(
                     child: HistoryList(
                       records: history,

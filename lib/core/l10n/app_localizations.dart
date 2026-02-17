@@ -224,6 +224,12 @@ abstract class AppLocalizations {
   /// **'Add Qada'**
   String get addQada;
 
+  /// No description provided for @totalQada.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Qada'**
+  String get totalQada;
+
   /// No description provided for @byCount.
   ///
   /// In en, this message translates to:

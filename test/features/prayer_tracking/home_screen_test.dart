@@ -104,8 +104,17 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Fard'), findsOneWidget);
+    expect(find.text('Total Qada'), findsOneWidget);
     expect(find.text('Test City'), findsOneWidget);
-    expect(find.text('Daily Prayers'), findsAtLeast(1));
+    
+    // Use dragUntilVisible for slivers
+    final dailyPrayersFinder = find.text('Daily Prayers');
+    await tester.dragUntilVisible(
+      dailyPrayersFinder,
+      find.byType(CustomScrollView),
+      const Offset(0, -200),
+    );
+    expect(dailyPrayersFinder, findsAtLeast(1));
     
     // Verify Salaah Time is displayed (mocked time service should return something if we setup correctly, 
     // but here we didn't setup mock return for getTimeForSalaah. Let's do that)
@@ -144,12 +153,22 @@ void main() {
       date: any(named: 'date'),
     )).thenReturn(prayerTimes);
 
-    when(() => mockPrayerTimeService.getTimeForSalaah(any(), any()))
+    // Only return time for Fajr to avoid "Too many elements" in scroll
+    when(() => mockPrayerTimeService.getTimeForSalaah(any(), Salaah.fajr))
         .thenReturn(time);
+    when(() => mockPrayerTimeService.getTimeForSalaah(any(), any(that: isNot(Salaah.fajr))))
+        .thenReturn(null);
 
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('5:00'), findsAtLeast(1));
+    // Drag to see SalaahTiles
+    final timeFinder = find.textContaining('5:00');
+    await tester.dragUntilVisible(
+      timeFinder,
+      find.byType(CustomScrollView),
+      const Offset(0, -200),
+    );
+    expect(timeFinder, findsAtLeast(1));
   });
 }
