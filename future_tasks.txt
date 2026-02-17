@@ -30,3 +30,4 @@ can I share a pic to the cli  to make it  use if aa refrance for ui
 can i fix the debug aand release have the sme package i need to test debug without needing to remove messed up the release
  fix the l10n in the project some are not completly fix check them
 the location is showing that it can't be knowing in the pc but it works fine in android
+i should add each salaah myself   but it's by default added  check it and make tests for it
