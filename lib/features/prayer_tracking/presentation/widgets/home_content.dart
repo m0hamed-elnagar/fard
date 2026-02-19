@@ -22,6 +22,7 @@ import 'package:fard/core/theme/app_theme.dart';
 class HomeContent extends StatelessWidget {
   final DateTime selectedDate;
   final Set<Salaah> missedToday;
+  final Set<Salaah> completedToday;
   final Map<Salaah, MissedCounter> qadaStatus;
   final Map<DateTime, DailyRecord> monthRecords;
   final List<DailyRecord> history;
@@ -30,6 +31,7 @@ class HomeContent extends StatelessWidget {
     super.key,
     required this.selectedDate,
     required this.missedToday,
+    required this.completedToday,
     required this.qadaStatus,
     required this.monthRecords,
     required this.history,
@@ -47,7 +49,8 @@ class HomeContent extends StatelessWidget {
           previous.calculationMethod != current.calculationMethod ||
           previous.madhab != current.madhab ||
           previous.locale != current.locale ||
-          previous.cityName != current.cityName,
+          previous.cityName != current.cityName ||
+          previous.isQadaEnabled != current.isQadaEnabled,
       builder: (context, settings) {
         final locale = settings.locale.languageCode;
         
@@ -74,6 +77,7 @@ class HomeContent extends StatelessWidget {
                     selectedDate: selectedDate,
                     locale: locale,
                     cityName: settings.cityName,
+                    isQadaEnabled: settings.isQadaEnabled,
                     onAddPressed: () {
                       showDialog(
                         context: context,
@@ -215,8 +219,10 @@ class HomeContent extends StatelessWidget {
                           salaah: salaah,
                           qadaCount: qadaStatus[salaah]?.value ?? 0,
                           isMissedToday: missedToday.contains(salaah),
+                          isCompletedToday: completedToday.contains(salaah),
                           isUpcoming: isUpcoming,
                           time: time,
+                          isQadaEnabled: settings.isQadaEnabled,
                           onAdd: () =>
                               bloc.add(PrayerTrackerEvent.addQada(salaah)),
                           onRemove: () =>

@@ -27,6 +27,7 @@ class SettingsCubit extends Cubit<SettingsState> {
   static const String _afterSalahAzkarKey = 'is_after_salah_azkar_enabled';
   static const String _remindersKey = 'azkar_reminders';
   static const String _salaahSettingsKey = 'salaah_settings';
+  static const String _qadaKey = 'is_qada_enabled';
 
   SettingsCubit(
     this._prefs, 
@@ -43,6 +44,7 @@ class SettingsCubit extends Cubit<SettingsState> {
           morningAzkarTime: _prefs.getString(_morningAzkarKey) ?? '05:00',
           eveningAzkarTime: _prefs.getString(_eveningAzkarKey) ?? '18:00',
           isAfterSalahAzkarEnabled: _prefs.getBool(_afterSalahAzkarKey) ?? false,
+          isQadaEnabled: _prefs.getBool(_qadaKey) ?? true,
           reminders: _loadReminders(_prefs, _prefs.getString(_morningAzkarKey) ?? '05:00', _prefs.getString(_eveningAzkarKey) ?? '18:00'),
           salaahSettings: _loadSalaahSettings(_prefs),
         ));
@@ -255,6 +257,47 @@ class SettingsCubit extends Cubit<SettingsState> {
       salaahSettings: updatedSalaahSettings,
     ));
     _updateReminders();
+  }
+
+  void updateAllAzanEnabled(bool enabled) {
+    final updated = state.salaahSettings.map((s) => s.copyWith(isAzanEnabled: enabled)).toList();
+    _saveSalaahSettings(updated);
+    emit(state.copyWith(salaahSettings: updated));
+    _updateReminders();
+  }
+
+  void updateAllReminderEnabled(bool enabled) {
+    final updated = state.salaahSettings.map((s) => s.copyWith(isReminderEnabled: enabled)).toList();
+    _saveSalaahSettings(updated);
+    emit(state.copyWith(salaahSettings: updated));
+    _updateReminders();
+  }
+
+  void updateAllAzanSound(String? sound) {
+    final updated = state.salaahSettings.map((s) => s.copyWith(azanSound: sound)).toList();
+    _saveSalaahSettings(updated);
+    emit(state.copyWith(salaahSettings: updated));
+    _updateReminders();
+  }
+
+  void updateAllReminderMinutes(int minutes) {
+    final updated = state.salaahSettings.map((s) => s.copyWith(reminderMinutesBefore: minutes)).toList();
+    _saveSalaahSettings(updated);
+    emit(state.copyWith(salaahSettings: updated));
+    _updateReminders();
+  }
+
+  void updateAllAfterSalahMinutes(int minutes) {
+    final updated = state.salaahSettings.map((s) => s.copyWith(afterSalaahAzkarMinutes: minutes)).toList();
+    _saveSalaahSettings(updated);
+    emit(state.copyWith(salaahSettings: updated));
+    _updateReminders();
+  }
+
+  void toggleQadaEnabled() {
+    final newValue = !state.isQadaEnabled;
+    _prefs.setBool(_qadaKey, newValue);
+    emit(state.copyWith(isQadaEnabled: newValue));
   }
 
   Future<void> _updateReminders() async {

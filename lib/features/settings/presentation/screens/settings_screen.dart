@@ -212,33 +212,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
               const SizedBox(height: 24),
+              // NEW GLOBAL SETTINGS SECTION
               _buildSection(
                 context,
-                title: l10n.azanSettings,
-                icon: Icons.notifications_active_rounded,
+                title: l10n.globalSettings,
+                icon: Icons.settings_suggest_rounded,
                 children: [
-                  ...state.salaahSettings.map((salaahSetting) {
-                    return _buildSalaahSettingItem(
-                      context: context,
-                      settings: salaahSetting,
-                      l10n: l10n,
-                    );
-                  }),
+                  Text(
+                    l10n.globalSettingsDesc,
+                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                  ),
+                  const SizedBox(height: 16),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l10n.applyToAll),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () => _showGlobalSettingsDialog(context, state, l10n),
+                          icon: const Icon(Icons.tune_rounded, size: 18),
+                          label: Text(l10n.edit),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 24),
+              // INDIVIDUAL SETTINGS (now in an expansion tile for better organization)
               _buildSection(
                 context,
-                title: l10n.language,
-                icon: Icons.language_rounded,
+                title: l10n.individualSettings,
+                icon: Icons.notifications_active_rounded,
                 children: [
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(state.locale.languageCode == 'ar' ? 'العربية' : 'English'),
-                    trailing: Switch(
-                      value: state.locale.languageCode == 'en',
-                      onChanged: (_) => context.read<SettingsCubit>().toggleLocale(),
-                      activeThumbColor: AppTheme.accent,
+                  Theme(
+                    data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                    child: ExpansionTile(
+                      tilePadding: EdgeInsets.zero,
+                      title: Text(
+                        l10n.localeName == 'ar' ? 'تعديل كل صلاة' : 'Edit each prayer',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                      children: state.salaahSettings.map((salaahSetting) {
+                        return _buildSalaahSettingItem(
+                          context: context,
+                          settings: salaahSetting,
+                          l10n: l10n,
+                        );
+                      }).toList(),
                     ),
                   ),
                 ],
@@ -247,7 +269,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildSection(
                 context,
                 title: l10n.azkarSettings,
-                icon: Icons.notifications_active_rounded,
+                icon: Icons.auto_stories_rounded,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -296,11 +318,203 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     }),
                 ],
               ),
+              const SizedBox(height: 24),
+              _buildSection(
+                context,
+                title: l10n.generalSettings,
+                icon: Icons.apps_rounded,
+                children: [
+                  _buildSettingItem(
+                    title: l10n.language,
+                    description: state.locale.languageCode == 'ar' ? 'العربية' : 'English',
+                    trailing: Switch(
+                      value: state.locale.languageCode == 'en',
+                      onChanged: (_) => context.read<SettingsCubit>().toggleLocale(),
+                      activeThumbColor: AppTheme.accent,
+                    ),
+                  ),
+                  const Divider(height: 32),
+                  _buildSettingItem(
+                    title: l10n.qadaTracker,
+                    description: l10n.qadaTrackerDesc,
+                    trailing: Switch(
+                      value: state.isQadaEnabled,
+                      onChanged: (_) => context.read<SettingsCubit>().toggleQadaEnabled(),
+                      activeThumbColor: AppTheme.accent,
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 32),
             ],
           );
         },
       ),
+    );
+  }
+
+  void _showGlobalSettingsDialog(BuildContext context, SettingsState state, AppLocalizations l10n) {
+    final cubit = context.read<SettingsCubit>();
+    
+    // Initial values from first prayer as proxy
+    final first = state.salaahSettings.first;
+    bool isAzanEnabled = first.isAzanEnabled;
+    bool isReminderEnabled = first.isReminderEnabled;
+    bool isAfterSalahAzkarEnabled = first.isAfterSalahAzkarEnabled;
+    int reminderMinutes = first.reminderMinutesBefore;
+    int afterSalaahMinutes = first.afterSalaahAzkarMinutes;
+    String? selectedVoice = first.azanSound;
+    bool isDownloading = false;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text(
+                l10n.globalSettings,
+                style: GoogleFonts.amiri(),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SwitchListTile(
+                      title: Text(l10n.enableAzan),
+                      value: isAzanEnabled,
+                      onChanged: (val) => setDialogState(() => isAzanEnabled = val),
+                      activeThumbColor: AppTheme.accent,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    if (isAzanEnabled)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Column(
+                          children: [
+                            DropdownButtonFormField<String>(
+                              isExpanded: true,
+                              decoration: InputDecoration(
+                                labelText: l10n.azanVoice,
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                              initialValue: () {
+                                if (selectedVoice == null) return null;
+                                for (var key in VoiceDownloadService.azanVoices.keys) {
+                                  if (selectedVoice == key) return key;
+                                  final sanitized = key.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
+                                  if (selectedVoice!.contains('${sanitized}_azan.mp3')) return key;
+                                }
+                                return null;
+                              }(),
+                              items: [
+                                const DropdownMenuItem(value: null, child: Text('Default')),
+                                ...VoiceDownloadService.azanVoices.keys.map((v) => DropdownMenuItem(value: v, child: Text(v))),
+                              ],
+                              onChanged: (val) async {
+                                if (val != null) {
+                                  final downloader = getIt<VoiceDownloadService>();
+                                  if (!(await downloader.isDownloaded(val))) {
+                                    setDialogState(() => isDownloading = true);
+                                    final path = await downloader.downloadAzan(val);
+                                    if (path != null) {
+                                      final accessiblePath = await downloader.getAccessiblePath(val);
+                                      setDialogState(() {
+                                        isDownloading = false;
+                                        if (accessiblePath != null) selectedVoice = accessiblePath;
+                                      });
+                                    } else {
+                                      setDialogState(() => isDownloading = false);
+                                    }
+                                  } else {
+                                    final accessiblePath = await downloader.getAccessiblePath(val);
+                                    setDialogState(() => selectedVoice = accessiblePath);
+                                  }
+                                } else {
+                                  setDialogState(() => selectedVoice = null);
+                                }
+                              },
+                            ),
+                            if (isDownloading) const Padding(padding: EdgeInsets.all(8.0), child: LinearProgressIndicator()),
+                          ],
+                        ),
+                      ),
+                    const Divider(height: 32),
+                    SwitchListTile(
+                      title: Text(l10n.enableReminder),
+                      value: isReminderEnabled,
+                      onChanged: (val) => setDialogState(() => isReminderEnabled = val),
+                      activeThumbColor: AppTheme.accent,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    if (isReminderEnabled)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Row(
+                          children: [
+                            Expanded(child: Text(l10n.minutesBefore(reminderMinutes))),
+                            IconButton(
+                              icon: const Icon(Icons.remove_circle_outline),
+                              onPressed: reminderMinutes > 1 ? () => setDialogState(() => reminderMinutes--) : null,
+                            ),
+                            Text('$reminderMinutes'),
+                            IconButton(
+                              icon: const Icon(Icons.add_circle_outline),
+                              onPressed: reminderMinutes < 60 ? () => setDialogState(() => reminderMinutes++) : null,
+                            ),
+                          ],
+                        ),
+                      ),
+                    const Divider(height: 32),
+                    SwitchListTile(
+                      title: Text(l10n.afterSalaahAzkar),
+                      value: isAfterSalahAzkarEnabled,
+                      onChanged: (val) => setDialogState(() => isAfterSalahAzkarEnabled = val),
+                      activeThumbColor: AppTheme.accent,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    if (isAfterSalahAzkarEnabled)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Row(
+                          children: [
+                            Expanded(child: Text(l10n.minutesAfter(afterSalaahMinutes))),
+                            IconButton(
+                              icon: const Icon(Icons.remove_circle_outline),
+                              onPressed: afterSalaahMinutes > 0 ? () => setDialogState(() => afterSalaahMinutes--) : null,
+                            ),
+                            Text('$afterSalaahMinutes'),
+                            IconButton(
+                              icon: const Icon(Icons.add_circle_outline),
+                              onPressed: afterSalaahMinutes < 60 ? () => setDialogState(() => afterSalaahMinutes++) : null,
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    cubit.updateAllAzanEnabled(isAzanEnabled);
+                    cubit.updateAllReminderEnabled(isReminderEnabled);
+                    cubit.updateAllAzanSound(selectedVoice);
+                    cubit.updateAllReminderMinutes(reminderMinutes);
+                    cubit.updateAllAfterSalahMinutes(afterSalaahMinutes);
+                    Navigator.pop(context);
+                  },
+                  child: Text(l10n.applyToAll),
+                ),
+              ],
+            );
+          }
+        );
+      },
     );
   }
 

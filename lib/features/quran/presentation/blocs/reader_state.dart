@@ -7,6 +7,7 @@ class ReaderState with _$ReaderState {
   const factory ReaderState.loaded({
     required Surah surah,
     Ayah? highlightedAyah,
+    Ayah? lastReadAyah,
     @Default(1.0) double textScale,
   }) = _Loaded;
   const factory ReaderState.error(String message) = _Error;

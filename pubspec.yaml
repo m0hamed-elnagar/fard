@@ -37,6 +37,7 @@ dependencies:
   flutter_compass: ^0.8.1
   just_audio: ^0.10.5
   just_audio_background: ^0.0.1-beta.15
+  quran_library: 3.0.1
 
 dev_dependencies:
   flutter_test:

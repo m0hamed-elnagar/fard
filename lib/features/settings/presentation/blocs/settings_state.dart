@@ -20,5 +20,6 @@ sealed class SettingsState with _$SettingsState {
     @Default([]) List<AzkarReminder> reminders,
     @Default([]) List<SalaahSettings> salaahSettings,
     @Default(false) bool isAzanVoiceDownloading,
+    @Default(true) bool isQadaEnabled,
   }) = _SettingsState;
 }

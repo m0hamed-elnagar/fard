@@ -13,6 +13,7 @@ class HomeHero extends StatelessWidget {
   final DateTime selectedDate;
   final String locale;
   final String? cityName;
+  final bool isQadaEnabled;
   final VoidCallback onAddPressed;
   final VoidCallback onEditPressed;
   final VoidCallback onLocationTap;
@@ -23,6 +24,7 @@ class HomeHero extends StatelessWidget {
     required this.selectedDate,
     required this.locale,
     this.cityName,
+    this.isQadaEnabled = true,
     required this.onAddPressed,
     required this.onEditPressed,
     required this.onLocationTap,
@@ -45,7 +47,7 @@ class HomeHero extends StatelessWidget {
               ClipPath(
                 clipper: IslamicMosqueClipper(),
                 child: Container(
-                  height: 480, // Increased height to prevent overlapping
+                  height: isQadaEnabled ? 480 : 380, // Reduced height when Qada is disabled
                   width: double.infinity,
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
@@ -99,57 +101,72 @@ class HomeHero extends StatelessWidget {
                     // Crescent Icon at top of Dome
                     const Icon(Icons.nightlight_round, color: AppTheme.accent, size: 28),
                     const SizedBox(height: 8),
-                    // Debt Info
-                    Text(
-                      l10n.totalQada,
-                      style: GoogleFonts.amiri(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        fontSize: 22,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Text(
-                      totalQada.toString().replaceAllMapped(
-                        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                        (Match m) => '${m[1]},',
-                      ),
-                      style: GoogleFonts.outfit(
-                        color: Colors.white,
-                        fontSize: 72,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -2,
-                      ),
-                    ),
-                    Text(
-                      l10n.localeName == 'ar' ? 'صلوات مفروضة لإكمالها' : 'Fard Prayers to Complete',
-                      style: GoogleFonts.outfit(
-                        color: Colors.white.withValues(alpha: 0.7),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    // Actions
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _ModernActionButton(
-                          icon: Icons.add_circle_outline_rounded,
-                          label: l10n.add,
-                          onPressed: onAddPressed,
+                    
+                    if (isQadaEnabled) ...[
+                      // Debt Info
+                      Text(
+                        l10n.totalQada,
+                        style: GoogleFonts.amiri(
+                          color: Colors.white.withValues(alpha: 0.8),
+                          fontSize: 22,
+                          fontWeight: FontWeight.w500,
                         ),
-                        const SizedBox(width: 16),
-                        _ModernActionButton(
-                          icon: Icons.edit_note_rounded,
-                          label: l10n.edit,
-                          onPressed: onEditPressed,
+                      ),
+                      Text(
+                        totalQada.toString().replaceAllMapped(
+                          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                          (Match m) => '${m[1]},',
                         ),
-                      ],
-                    ),
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 72,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -2,
+                        ),
+                      ),
+                      Text(
+                        l10n.localeName == 'ar' ? 'صلوات مفروضة لإكمالها' : 'Fard Prayers to Complete',
+                        style: GoogleFonts.outfit(
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      // Actions
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _ModernActionButton(
+                            icon: Icons.add_circle_outline_rounded,
+                            label: l10n.add,
+                            onPressed: onAddPressed,
+                          ),
+                          const SizedBox(width: 16),
+                          _ModernActionButton(
+                            icon: Icons.edit_note_rounded,
+                            label: l10n.edit,
+                            onPressed: onEditPressed,
+                          ),
+                        ],
+                      ),
+                    ] else ...[
+                      const SizedBox(height: 40),
+                      Text(
+                        l10n.appName,
+                        style: GoogleFonts.amiri(
+                          color: Colors.white,
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+
                     const Spacer(),
                     // Date & Hijri - Positioned carefully above the cards
                     Container(
-                      margin: const EdgeInsets.only(bottom: 12),
+                      margin: EdgeInsets.only(bottom: isQadaEnabled ? 12 : 32),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.3),
@@ -179,26 +196,27 @@ class HomeHero extends StatelessWidget {
                       ),
                     ),
                     // This padding ensures we don't overlap with the cards at the very bottom
-                    const SizedBox(height: 80),
+                    SizedBox(height: isQadaEnabled ? 80 : 20),
                   ],
                 ),
               ),
               
               // 3. Prayer Cards - Floating perfectly at the bottom
-              Positioned(
-                left: 16,
-                right: 16,
-                bottom: 10,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: Salaah.values.map((salaah) {
-                    return _TraditionalPrayerCard(
-                      salaah: salaah,
-                      count: qadaStatus[salaah]?.value ?? 0,
-                    );
-                  }).toList(),
+              if (isQadaEnabled)
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  bottom: 10,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: Salaah.values.map((salaah) {
+                      return _TraditionalPrayerCard(
+                        salaah: salaah,
+                        count: qadaStatus[salaah]?.value ?? 0,
+                      );
+                    }).toList(),
+                  ),
                 ),
-              ),
             ],
           ),
         ],

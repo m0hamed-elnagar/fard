@@ -1,5 +1,6 @@
 import 'package:fard/features/azkar/presentation/manager/azkar_dialog_manager.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
+import 'package:fard/features/prayer_tracking/presentation/widgets/add_qada_dialog.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/home_content.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/missed_days_dialog.dart';
 import 'package:flutter/material.dart';
@@ -9,16 +10,63 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_theme.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final bool showAddQadaOnStart;
+  const HomeScreen({super.key, this.showAddQadaOnStart = false});
 
   @override
   Widget build(BuildContext context) {
-    return const AzkarDialogManager(child: _HomeBody());
+    return AzkarDialogManager(child: _HomeBody(showAddQadaOnStart: showAddQadaOnStart));
   }
 }
 
-class _HomeBody extends StatelessWidget {
-  const _HomeBody();
+class _HomeBody extends StatefulWidget {
+  final bool showAddQadaOnStart;
+  const _HomeBody({this.showAddQadaOnStart = false});
+
+  @override
+  State<_HomeBody> createState() => _HomeBodyState();
+}
+
+class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    if (widget.showAddQadaOnStart) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showInitialAddQadaDialog();
+      });
+    }
+  }
+
+  void _showInitialAddQadaDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AddQadaDialog(
+        onConfirm: (counts) => context
+            .read<PrayerTrackerBloc>()
+            .add(PrayerTrackerEvent.bulkAddQada(counts)),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      final bloc = context.read<PrayerTrackerBloc>();
+      bloc.state.whenOrNull(
+        loaded: (selectedDate, _, __, ___, ____, _____) {
+          bloc.add(PrayerTrackerEvent.load(selectedDate));
+        },
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,11 +139,12 @@ class _HomeBody extends StatelessWidget {
                   color: AppTheme.accent, strokeWidth: 4.0),
             ),
           ),
-          loaded: (selectedDate, missedToday, qadaStatus, monthRecords,
+          loaded: (selectedDate, missedToday, completedToday, qadaStatus, monthRecords,
                   history) =>
               HomeContent(
             selectedDate: selectedDate,
             missedToday: missedToday,
+            completedToday: completedToday,
             qadaStatus: qadaStatus,
             monthRecords: monthRecords,
             history: history,

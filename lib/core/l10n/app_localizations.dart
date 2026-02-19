@@ -715,6 +715,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{minutes} minutes after'**
   String minutesAfter(int minutes);
+
+  /// No description provided for @qadaTracker.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed Prayers Tracker'**
+  String get qadaTracker;
+
+  /// No description provided for @qadaTrackerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Track missed prayers (Qada) and set goals to complete them.'**
+  String get qadaTrackerDesc;
+
+  /// No description provided for @qadaOnboardingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Qada Tracking'**
+  String get qadaOnboardingTitle;
+
+  /// No description provided for @qadaOnboardingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to track your missed prayers (Qada) and set goals to complete them?'**
+  String get qadaOnboardingDesc;
+
+  /// No description provided for @enableQada.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Qada Tracking'**
+  String get enableQada;
+
+  /// No description provided for @disableQada.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable for now'**
+  String get disableQada;
+
+  /// No description provided for @globalSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Global Notification Settings'**
+  String get globalSettings;
+
+  /// No description provided for @globalSettingsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply these settings to all five prayers at once.'**
+  String get globalSettingsDesc;
+
+  /// No description provided for @individualSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Individual Prayer Settings'**
+  String get individualSettings;
+
+  /// No description provided for @applyToAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply to all'**
+  String get applyToAll;
+
+  /// No description provided for @generalSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'General App Settings'**
+  String get generalSettings;
 }
 
 class _AppLocalizationsDelegate

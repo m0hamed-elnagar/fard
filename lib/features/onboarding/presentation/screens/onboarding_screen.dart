@@ -17,13 +17,21 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+  bool _isQadaEnabled = true;
 
   Future<void> _completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_complete', true);
+    
     if (mounted) {
+      if (!_isQadaEnabled) {
+        context.read<SettingsCubit>().toggleQadaEnabled();
+      }
+      
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+        MaterialPageRoute(
+          builder: (_) => MainNavigationScreen(showAddQadaOnStart: _isQadaEnabled),
+        ),
       );
     }
   }
@@ -49,6 +57,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 description: l10n.onboardingDesc2,
                 icon: Icons.history_rounded,
               ),
+              _QadaSelectionPage(
+                isEnabled: _isQadaEnabled,
+                onChanged: (val) => setState(() => _isQadaEnabled = val),
+              ),
             ],
           ),
           Positioned(
@@ -69,7 +81,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
-                    2,
+                    3,
                     (index) => AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       margin: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -89,7 +101,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   width: double.infinity,
                   height: 56.0,
                   child: ElevatedButton(
-                    onPressed: _currentPage == 1
+                    onPressed: _currentPage == 2
                         ? _completeOnboarding
                         : () => _pageController.nextPage(
                               duration: const Duration(milliseconds: 300),
@@ -103,7 +115,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                     ),
                     child: Text(
-                      _currentPage == 1 ? l10n.getStarted : l10n.next,
+                      _currentPage == 2 ? l10n.getStarted : l10n.next,
                       style: GoogleFonts.outfit(
                         fontSize: 18.0,
                         fontWeight: FontWeight.w600,
@@ -112,6 +124,81 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QadaSelectionPage extends StatelessWidget {
+  final bool isEnabled;
+  final ValueChanged<bool> onChanged;
+
+  const _QadaSelectionPage({
+    required this.isEnabled,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.all(40.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(32.0),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryLight.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.check_circle_outline_rounded,
+              size: 80.0,
+              color: AppTheme.primaryLight,
+            ),
+          ),
+          const SizedBox(height: 48.0),
+          Text(
+            l10n.qadaOnboardingTitle,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.amiri(
+              color: AppTheme.textPrimary,
+              fontSize: 32.0,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 16.0),
+          Text(
+            l10n.qadaOnboardingDesc,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.outfit(
+              color: AppTheme.textSecondary,
+              fontSize: 18.0,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 40.0),
+          Container(
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceLight,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppTheme.cardBorder),
+            ),
+            child: SwitchListTile(
+              title: Text(
+                isEnabled ? l10n.enableQada : l10n.disableQada,
+                style: GoogleFonts.outfit(
+                  fontWeight: FontWeight.w600,
+                  color: isEnabled ? AppTheme.accent : AppTheme.textSecondary,
+                ),
+              ),
+              value: isEnabled,
+              onChanged: onChanged,
+              activeColor: AppTheme.accent,
             ),
           ),
         ],

@@ -334,4 +334,40 @@ class AppLocalizationsAr extends AppLocalizations {
   String minutesAfter(int minutes) {
     return 'بعد $minutes دقائق';
   }
+
+  @override
+  String get qadaTracker => 'تتبع الصلوات الفائتة (القضاء)';
+
+  @override
+  String get qadaTrackerDesc =>
+      'تتبع الصلوات التي فاتتك وحدد أهدافاً لإتمامها.';
+
+  @override
+  String get qadaOnboardingTitle => 'تتبع القضاء';
+
+  @override
+  String get qadaOnboardingDesc =>
+      'هل تود تتبع صلواتك الفائتة (القضاء) وتحديد أهداف لإتمامها؟';
+
+  @override
+  String get enableQada => 'تفعيل تتبع القضاء';
+
+  @override
+  String get disableQada => 'تعطيل الآن';
+
+  @override
+  String get globalSettings => 'إعدادات التنبيهات للكل';
+
+  @override
+  String get globalSettingsDesc =>
+      'تطبيق هذه الإعدادات على جميع الصلوات الخمس معاً.';
+
+  @override
+  String get individualSettings => 'إعدادات كل صلاة على حدة';
+
+  @override
+  String get applyToAll => 'تطبيق على الكل';
+
+  @override
+  String get generalSettings => 'إعدادات التطبيق العامة';
 }

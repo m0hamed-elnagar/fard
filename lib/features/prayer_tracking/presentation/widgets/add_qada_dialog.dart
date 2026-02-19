@@ -31,6 +31,7 @@ class _AddQadaDialogState extends State<AddQadaDialog>
   @override
   void initState() {
     super.initState();
+    _toDate = DateTime.now();
     _tabController = TabController(
         length: widget.initialCounts == null ? 2 : 1, vsync: this);
     for (final s in Salaah.values) {

@@ -5,14 +5,16 @@ import 'package:fard/features/quran/domain/entities/ayah.dart';
 import 'package:fard/features/quran/domain/usecases/get_tafsir.dart';
 import 'package:fard/features/quran/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/quran/domain/repositories/audio_player_service.dart';
+import 'package:fard/features/quran/presentation/widgets/reciter_selector.dart';
+import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 
 class AyahDetailSheet extends StatelessWidget {
   final Ayah ayah;
+  final int? surahAyahCount;
 
-  const AyahDetailSheet({super.key, required this.ayah});
+  const AyahDetailSheet({super.key, required this.ayah, this.surahAyahCount});
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +56,31 @@ class AyahDetailSheet extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
+                      BlocBuilder<ReaderBloc, ReaderState>(
+                        builder: (context, state) {
+                          final isLastRead = state.maybeMap(
+                            loaded: (s) => s.lastReadAyah?.number == ayah.number,
+                            orElse: () => false,
+                          );
+
+                          return IconButton(
+                            icon: Icon(
+                              isLastRead ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                              color: isLastRead ? Theme.of(context).colorScheme.primary : null,
+                            ),
+                            tooltip: 'Mark as last read',
+                            onPressed: () {
+                              context.read<ReaderBloc>().add(ReaderEvent.saveLastRead(ayah));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Marked as last read'),
+                                  duration: Duration(seconds: 1),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
                       IconButton(
                         icon: const Icon(Icons.close),
                         onPressed: () => Navigator.pop(context),
@@ -65,14 +92,18 @@ class AyahDetailSheet extends StatelessWidget {
                   labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold),
                   tabs: [
                     const Tab(text: 'التفسير'), // Tafsir in Arabic
-                    const Tab(text: 'Audio'),
+                    const Tab(text: 'صوتيات'), // Audio in Arabic
                   ],
                 ),
                 Expanded(
                   child: TabBarView(
                     children: [
                       _TafsirTab(ayah: ayah, controller: scrollController),
-                      _AudioTab(ayah: ayah, controller: scrollController),
+                      _AudioTab(
+                        ayah: ayah, 
+                        controller: scrollController,
+                        surahAyahCount: surahAyahCount,
+                      ),
                     ],
                   ),
                 ),
@@ -121,6 +152,24 @@ class _TafsirTab extends StatelessWidget {
           controller: controller,
           padding: const EdgeInsets.all(24),
           children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                ayah.uthmaniText,
+                style: GoogleFonts.amiri(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  height: 1.6,
+                ),
+                textAlign: TextAlign.center,
+                textDirection: TextDirection.rtl,
+              ),
+            ),
+            const SizedBox(height: 24),
              Text(
               _cleanHtml(tafsir),
               style: GoogleFonts.amiri(
@@ -141,32 +190,40 @@ class _TafsirTab extends StatelessWidget {
 class _AudioTab extends StatelessWidget {
   final Ayah ayah;
   final ScrollController controller;
+  final int? surahAyahCount;
 
-  const _AudioTab({required this.ayah, required this.controller});
+  const _AudioTab({
+    required this.ayah, 
+    required this.controller,
+    this.surahAyahCount,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AudioBloc, AudioState>(
       builder: (context, state) {
-        final status = state.maybeMap(
-          loaded: (s) => s.status,
-          orElse: () => AudioStatus.idle,
-        );
-        
-        final isLoading = state.maybeMap(loading: (_) => true, orElse: () => false);
-        final isPlaying = status == AudioStatus.playing;
-        final isError = status == AudioStatus.error || state.maybeMap(error: (_) => true, orElse: () => false);
+        final status = state.status;
+        final isLoading = state.isLoading;
+        final isPlaying = state.isPlaying;
+        final isError = state.hasError;
 
         return ListView(
           controller: controller,
           padding: const EdgeInsets.all(20),
           children: [
-            const Center(
-              child: Icon(Icons.headset, size: 64, color: AppTheme.accent),
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.headset_rounded, size: 64, color: Theme.of(context).colorScheme.primary),
+              ),
             ),
             const SizedBox(height: 24),
             Text(
-              isError ? 'خطأ في تشغيل الصوت' : 'Listen to Quran',
+              isError ? 'خطأ في تشغيل الصوت: ${state.error}' : 'تلاوة القرآن الكريم',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18, 
@@ -180,13 +237,12 @@ class _AudioTab extends StatelessWidget {
               children: [
                 _AudioButton(
                   icon: Icons.repeat_one_rounded,
-                  label: 'Ayah',
+                  label: 'الآية',
                   onPressed: () {
-                    context.read<AudioBloc>().add(AudioEvent.play(
-                      ayah: ayah.number,
-                      reciterId: '7',
-                      audioUrl: ayah.audioUrl,
-                      mode: AudioPlayMode.ayah,
+                    context.read<AudioBloc>().add(AudioEvent.playAyah(
+                      surahNumber: ayah.number.surahNumber,
+                      ayahNumber: ayah.number.ayahNumberInSurah,
+                      reciter: state.currentReciter,
                     ));
                   },
                 ),
@@ -220,15 +276,15 @@ class _AudioTab extends StatelessWidget {
                             ),
                             onPressed: () {
                               if (isPlaying) {
-                                context.read<AudioBloc>().add(const AudioEvent.pause());
+                                context.read<AudioBloc>().add(AudioEvent.pause());
                               } else if (status == AudioStatus.paused) {
-                                context.read<AudioBloc>().add(const AudioEvent.resume());
+                                context.read<AudioBloc>().add(AudioEvent.resume());
                               } else {
-                                context.read<AudioBloc>().add(AudioEvent.play(
-                                  ayah: ayah.number,
-                                  reciterId: '7',
-                                  audioUrl: ayah.audioUrl,
-                                  mode: AudioPlayMode.surah,
+                                context.read<AudioBloc>().add(AudioEvent.playSurah(
+                                  surahNumber: ayah.number.surahNumber,
+                                  startAyah: ayah.number.ayahNumberInSurah,
+                                  ayahCount: surahAyahCount,
+                                  reciter: state.currentReciter,
                                 ));
                               }
                             },
@@ -236,7 +292,7 @@ class _AudioTab extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      isPlaying ? 'Pause' : 'Play Surah',
+                      isPlaying ? 'إيقاف مؤقت' : 'تشغيل السورة',
                       style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                   ],
@@ -244,24 +300,38 @@ class _AudioTab extends StatelessWidget {
                 const SizedBox(width: 32),
                 _AudioButton(
                   icon: Icons.stop_rounded,
-                  label: 'Stop',
+                  label: 'إيقاف',
                   onPressed: () {
-                    context.read<AudioBloc>().add(const AudioEvent.stop());
+                    context.read<AudioBloc>().add(AudioEvent.stop());
                   },
                 ),
               ],
             ),
 
             const SizedBox(height: 40),
-            const ListTile(
-              leading: Icon(Icons.person_outline),
-              title: Text('Reciter'),
-              subtitle: Text('Mishary Rashid Alafasy'),
-              trailing: Icon(Icons.chevron_right),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.person_outline),
+              title: const Text('القاريء'),
+              subtitle: Text(state.currentReciter?.name ?? 'اختر القاريء'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _showReciterSelector(context),
             ),
           ],
         );
       },
+    );
+  }
+
+  void _showReciterSelector(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => BlocProvider.value(
+        value: context.read<AudioBloc>(),
+        child: const ReciterSelector(),
+      ),
     );
   }
 }

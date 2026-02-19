@@ -6,6 +6,10 @@ import 'package:fard/features/quran/domain/usecases/get_surah.dart';
 import 'package:fard/features/quran/domain/usecases/get_page.dart';
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
 
+import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
+import 'package:fard/features/quran/domain/usecases/update_last_read.dart';
+import 'package:fard/features/quran/domain/usecases/watch_last_read.dart';
+
 part 'reader_bloc.freezed.dart';
 part 'reader_event.dart';
 part 'reader_state.dart';
@@ -13,16 +17,21 @@ part 'reader_state.dart';
 class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
   final GetSurah getSurah;
   final GetPage getPage;
+  final UpdateLastRead updateLastRead;
+  final WatchLastRead watchLastRead;
   
   ReaderBloc({
     required this.getSurah,
     required this.getPage,
+    required this.updateLastRead,
+    required this.watchLastRead,
   }) : super(const ReaderState.initial()) {
     on<ReaderEvent>((event, emit) async {
       await event.when(
         loadSurah: (surahNumber, translation) => _onLoadSurah(_LoadSurah(surahNumber: surahNumber, translation: translation), emit),
         loadPage: (pageNumber, translation) => _onLoadPage(_LoadPage(pageNumber: pageNumber, translation: translation), emit),
         selectAyah: (ayah) async => _onSelectAyah(_SelectAyah(ayah), emit),
+        saveLastRead: (ayah) async => _onSaveLastRead(_SaveLastRead(ayah), emit),
         updateScale: (scale) async => _onUpdateScale(_UpdateScale(scale), emit),
       );
     });
@@ -39,11 +48,43 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
       translation: event.translation,
     ));
     
-    result.fold(
-      (failure) => emit(ReaderState.error(failure.message)),
-      (surah) => emit(ReaderState.loaded(
-        surah: surah,
-      )),
+    await result.fold(
+      (failure) async => emit(ReaderState.error(failure.message)),
+      (surah) async {
+        // Get initial last read
+        final lastReadRes = await watchLastRead().first;
+        final lastReadAyahPos = lastReadRes.data;
+
+        Ayah? lastReadInThisSurah;
+        if (lastReadAyahPos != null && lastReadAyahPos.ayahNumber.surahNumber == surah.number.value) {
+          try {
+            lastReadInThisSurah = surah.ayahs.firstWhere(
+              (a) => a.number.ayahNumberInSurah == lastReadAyahPos.ayahNumber.ayahNumberInSurah
+            );
+          } catch (_) {}
+        }
+
+        emit(ReaderState.loaded(
+          surah: surah,
+          lastReadAyah: lastReadInThisSurah,
+        ));
+      },
+    );
+  }
+
+  Future<void> _onSaveLastRead(
+    _SaveLastRead event,
+    Emitter<ReaderState> emit,
+  ) async {
+    await updateLastRead(LastReadPosition(
+      ayahNumber: event.ayah.number,
+      updatedAt: DateTime.now(),
+    ));
+    
+    state.mapOrNull(
+      loaded: (s) {
+        emit(s.copyWith(lastReadAyah: event.ayah));
+      },
     );
   }
   

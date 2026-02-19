@@ -137,5 +137,16 @@
         "type": "int"
       }
     }
-  }
+  },
+  "qadaTracker": "تتبع الصلوات الفائتة (القضاء)",
+  "qadaTrackerDesc": "تتبع الصلوات التي فاتتك وحدد أهدافاً لإتمامها.",
+  "qadaOnboardingTitle": "تتبع القضاء",
+  "qadaOnboardingDesc": "هل تود تتبع صلواتك الفائتة (القضاء) وتحديد أهداف لإتمامها؟",
+  "enableQada": "تفعيل تتبع القضاء",
+  "disableQada": "تعطيل الآن",
+  "globalSettings": "إعدادات التنبيهات للكل",
+  "globalSettingsDesc": "تطبيق هذه الإعدادات على جميع الصلوات الخمس معاً.",
+  "individualSettings": "إعدادات كل صلاة على حدة",
+  "applyToAll": "تطبيق على الكل",
+  "generalSettings": "إعدادات التطبيق العامة"
 }

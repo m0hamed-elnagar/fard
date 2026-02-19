@@ -1,8 +1,9 @@
+import 'dart:io';
+
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
-import 'package:fard/features/azkar/presentation/screens/main_navigation_screen.dart';
-import 'package:fard/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:fard/features/onboarding/presentation/screens/splash_screen.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/core/theme/app_theme.dart';
@@ -10,14 +11,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:just_audio_background/just_audio_background.dart';
+import 'package:quran_library/quran_library.dart';
 
 void main() async {
+  debugPrint('App starting...');
   WidgetsFlutterBinding.ensureInitialized();
+  debugPrint('WidgetsFlutterBinding initialized');
+
+  // Initialize Quran Library
+  debugPrint('Initializing QuranLibrary...');
+  await QuranLibrary.init();
+  debugPrint('QuranLibrary initialized');
+
+  if (Platform.isAndroid || Platform.isIOS) {
+    debugPrint('Initializing JustAudioBackground...');
+    await JustAudioBackground.init(
+      androidNotificationChannelId: 'com.nagar.fard.channel.audio',
+      androidNotificationChannelName: 'Quran Audio Playback',
+      androidNotificationOngoing: true,
+    );
+    debugPrint('JustAudioBackground initialized');
+  }
+
+  debugPrint('Configuring dependencies...');
   await configureDependencies();
+  debugPrint('Dependencies configured');
+
   final notificationService = getIt<NotificationService>();
+  debugPrint('Initializing NotificationService...');
   await notificationService.init();
+  debugPrint('NotificationService initialized');
   
+  debugPrint('Running app...');
   runApp(const QadaTrackerApp());
   
   // Handle notification that launched the app
@@ -44,9 +70,6 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
 
   @override
   Widget build(BuildContext context) {
-    final prefs = getIt<SharedPreferences>();
-    final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
-
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => getIt<SettingsCubit>()),
@@ -60,7 +83,7 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
             onGenerateTitle: (context) => 'Fard',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.darkTheme,
-            home: onboardingComplete ? const MainNavigationScreen() : const OnboardingScreen(),
+            home: const SplashScreen(),
             supportedLocales: AppLocalizations.supportedLocales,
             localizationsDelegates: const [
               AppLocalizations.delegate,

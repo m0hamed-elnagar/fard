@@ -14,5 +14,7 @@ class ReaderEvent with _$ReaderEvent {
 
   const factory ReaderEvent.selectAyah(Ayah ayah) = _SelectAyah;
   
+  const factory ReaderEvent.saveLastRead(Ayah ayah) = _SaveLastRead;
+  
   const factory ReaderEvent.updateScale(double scale) = _UpdateScale;
 }

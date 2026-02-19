@@ -8,7 +8,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest_all.dart' as tz;
 import '../../features/settings/presentation/blocs/settings_state.dart';
 import '../../features/azkar/domain/azkar_item.dart';
 import '../../features/azkar/presentation/screens/azkar_list_screen.dart';
@@ -23,9 +22,10 @@ class NotificationService {
   static const String reminderChannelId = 'prayer_reminders_v1';
 
   Future<void> init() async {
-    tz.initializeTimeZones();
+    debugPrint('NotificationService: init starting');
     try {
-      final timeZoneName = await FlutterTimezone.getLocalTimezone();
+      debugPrint('NotificationService: getting local timezone...');
+      final timeZoneName = await FlutterTimezone.getLocalTimezone().timeout(const Duration(seconds: 5));
       tz.setLocalLocation(tz.getLocation(timeZoneName.toString()));
       debugPrint('Local timezone set to: $timeZoneName');
     } catch (e) {
@@ -56,6 +56,7 @@ class NotificationService {
       windows: initializationSettingsWindows,
     );
 
+    debugPrint('NotificationService: initializing plugin...');
     await _notificationsPlugin.initialize(
       settings: initializationSettings,
       onDidReceiveNotificationResponse: (details) {
@@ -76,46 +77,56 @@ class NotificationService {
     );
 
     // Request permissions for Android 13+
-    await _notificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
-    
-    await _notificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestExactAlarmsPermission();
+    if (Platform.isAndroid) {
+      debugPrint('NotificationService: requesting Android permissions...');
+      await _notificationsPlugin
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+          ?.requestNotificationsPermission();
+      
+      await _notificationsPlugin
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+          ?.requestExactAlarmsPermission();
 
-    // Create notification channels for Android
-    await _createNotificationChannels();
+      // Create notification channels for Android
+      await _createNotificationChannels();
 
-    // Check exact alarm permission state
-    final canSchedule = await _notificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-        ?.canScheduleExactNotifications();
-    debugPrint('Can schedule exact notifications: $canSchedule');
+      // Check exact alarm permission state
+      final canSchedule = await _notificationsPlugin
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+          ?.canScheduleExactNotifications();
+      debugPrint('Can schedule exact notifications: $canSchedule');
+    }
+    debugPrint('NotificationService: init complete');
   }
 
   Future<void> handleInitialNotification() async {
-    final NotificationAppLaunchDetails? notificationAppLaunchDetails =
-        await _notificationsPlugin.getNotificationAppLaunchDetails();
-    
-    if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
-      final payload = notificationAppLaunchDetails?.notificationResponse?.payload;
-      if (payload != null && payload.startsWith('category:')) {
-        final category = payload.replaceFirst('category:', '');
-        final navigatorKey = getIt<GlobalKey<NavigatorState>>();
-        
-        // Wait for the navigator to be ready if needed, though usually it is after splash
-        Future.delayed(const Duration(seconds: 2), () {
-          if (navigatorKey.currentState != null) {
-            navigatorKey.currentState!.push(
-              MaterialPageRoute(
-                builder: (_) => AzkarListScreen(category: category),
-              ),
-            );
-          }
-        });
+    debugPrint('NotificationService: handleInitialNotification starting');
+    try {
+      final NotificationAppLaunchDetails? notificationAppLaunchDetails =
+          await _notificationsPlugin.getNotificationAppLaunchDetails().timeout(const Duration(seconds: 5));
+      
+      if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
+        final payload = notificationAppLaunchDetails?.notificationResponse?.payload;
+        if (payload != null && payload.startsWith('category:')) {
+          final category = payload.replaceFirst('category:', '');
+          final navigatorKey = getIt<GlobalKey<NavigatorState>>();
+          
+          // Wait for the navigator to be ready if needed, though usually it is after splash
+          Future.delayed(const Duration(seconds: 2), () {
+            if (navigatorKey.currentState != null) {
+              navigatorKey.currentState!.push(
+                MaterialPageRoute(
+                  builder: (_) => AzkarListScreen(category: category),
+                ),
+              );
+            }
+          });
+        }
       }
+    } catch (e) {
+      debugPrint('Error handling initial notification: $e');
     }
+    debugPrint('NotificationService: handleInitialNotification complete');
   }
 
   String _getChannelId(String salaahId, String sound) {

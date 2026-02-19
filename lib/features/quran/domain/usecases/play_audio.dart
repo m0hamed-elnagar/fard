@@ -56,8 +56,8 @@ class PlayAudioParams {
   const PlayAudioParams({
     required this.ayah,
     required this.reciterId,
-    this.quality = AudioQuality.medium,
+    this.quality = AudioQuality.medium64,
     this.audioUrl,
-    this.mode = AudioPlayMode.surah,
+    this.mode = AudioPlayMode.ayah,
   });
 }

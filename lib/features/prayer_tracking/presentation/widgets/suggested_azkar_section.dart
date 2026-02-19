@@ -166,6 +166,54 @@ class SuggestedAzkarSection extends StatelessWidget {
                               ],
                             ),
                           ),
+                          const SizedBox(width: 8),
+                          // Individual Reset Button
+                          IconButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text(l10n.resetItem, style: GoogleFonts.amiri()),
+                                  content: Text(
+                                    l10n.localeName == 'ar'
+                                        ? 'هل تريد إعادة تعيين هذا القسم؟'
+                                        : 'Do you want to reset this section?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        context.read<AzkarBloc>().add(AzkarEvent.resetCategory(categoryToOpen));
+                                        Navigator.pop(context);
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              l10n.localeName == 'ar'
+                                                  ? 'تم إعادة التعيين بنجاح'
+                                                  : 'Reset successful',
+                                            ),
+                                            backgroundColor: AppTheme.primaryLight,
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                      },
+                                      child: Text(l10n.yes, style: const TextStyle(color: AppTheme.missed)),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            icon: Icon(
+                              Icons.refresh_rounded,
+                              color: mainColor.withValues(alpha: 0.6),
+                              size: 22,
+                            ),
+                            tooltip: l10n.resetItem,
+                          ),
+                          const SizedBox(width: 4),
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/features/quran/domain/entities/surah.dart';
 import 'package:fard/features/quran/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/quran/domain/repositories/audio_player_service.dart';
+import 'package:fard/features/quran/presentation/widgets/reciter_selector.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 
@@ -36,69 +37,79 @@ class SurahHeader extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            surah.englishName ?? '',
-            style: GoogleFonts.outfit(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _InfoChip(
                 icon: Icons.place_outlined,
-                label: surah.revelationType,
+                label: surah.revelationType == 'Meccan' ? 'مكية' : 'مدنية',
               ),
               const SizedBox(width: 12),
               _InfoChip(
                 icon: Icons.format_list_numbered,
-                label: '${surah.numberOfAyahs} ${l10n.ayah}',
+                label: '${surah.numberOfAyahs} آية',
               ),
             ],
           ),
           const SizedBox(height: 24),
           BlocBuilder<AudioBloc, AudioState>(
             builder: (context, state) {
-              final status = state.maybeMap(
-                loaded: (s) => s.status,
-                orElse: () => AudioStatus.idle,
-              );
-              final isPlaying = status == AudioStatus.playing;
-              final isLoading = state.maybeMap(loading: (_) => true, orElse: () => false);
+              final isPlaying = state.isPlaying;
+              final isLoading = state.isLoading;
+              final isThisSurah = state.currentSurah == surah.number.value;
 
-              return ElevatedButton.icon(
-                onPressed: () {
-                  if (isPlaying) {
-                    context.read<AudioBloc>().add(const AudioEvent.pause());
-                  } else if (status == AudioStatus.paused) {
-                    context.read<AudioBloc>().add(const AudioEvent.resume());
-                  } else {
-                    // Play first ayah of surah
-                    if (surah.ayahs.isNotEmpty) {
-                      context.read<AudioBloc>().add(AudioEvent.play(
-                        ayah: surah.ayahs.first.number,
-                        reciterId: '7',
-                        audioUrl: surah.ayahs.first.audioUrl,
-                        mode: AudioPlayMode.surah,
-                      ));
-                    }
-                  }
-                },
-                icon: isLoading 
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : Icon(isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded),
-                label: Text(isPlaying ? 'Pause Surah' : 'Play Surah'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                ),
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      if (isPlaying && isThisSurah) {
+                        context.read<AudioBloc>().add(AudioEvent.pause());
+                      } else if (state.status == AudioStatus.paused && isThisSurah) {
+                        context.read<AudioBloc>().add(AudioEvent.resume());
+                      } else {
+                        context.read<AudioBloc>().add(AudioEvent.playSurah(
+                          surahNumber: surah.number.value,
+                          ayahCount: surah.numberOfAyahs,
+                          reciter: state.currentReciter,
+                        ));
+                      }
+                    },
+                    icon: isLoading && isThisSurah
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : Icon(isPlaying && isThisSurah ? Icons.pause_rounded : Icons.play_arrow_rounded),
+                    label: Text(isPlaying && isThisSurah ? 'إيقاف' : 'تشغيل السورة'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  ActionChip(
+                    avatar: const Icon(Icons.person_outline, size: 18),
+                    label: Text(
+                      state.currentReciter?.name.split(' ').first ?? 'القاريء'
+                    ),
+                    onPressed: () => _showReciterSelector(context),
+                  ),
+                ],
               );
             },
           ),
         ],
+      ),
+    );
+  }
+
+  void _showReciterSelector(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => BlocProvider.value(
+        value: context.read<AudioBloc>(),
+        child: const ReciterSelector(),
       ),
     );
   }

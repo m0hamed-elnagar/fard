@@ -20,16 +20,20 @@ import 'package:timezone/timezone.dart' as tz;
 final getIt = GetIt.instance;
 
 Future<void> configureDependencies({String? hivePath}) async {
+  debugPrint('configureDependencies: Starting...');
   // Initialize timezones
   tz.initializeTimeZones();
   tz.setLocalLocation(tz.getLocation('UTC'));
+  debugPrint('configureDependencies: Timezones initialized');
 
   try {
     if (hivePath != null) {
       Hive.init(hivePath);
     } else {
+      debugPrint('configureDependencies: Initializing Hive...');
       await Hive.initFlutter();
     }
+    debugPrint('configureDependencies: Hive initialized');
   } catch (e) {
     debugPrint('Hive initialization warning: $e');
   }
@@ -40,9 +44,14 @@ Future<void> configureDependencies({String? hivePath}) async {
     debugPrint('Adapter registration warning: $e');
   }
 
+  debugPrint('configureDependencies: Opening boxes...');
   final box = await Hive.openBox<DailyRecordEntity>('daily_records');
   final azkarBox = await Hive.openBox<int>('azkar_progress');
+  debugPrint('configureDependencies: Boxes opened');
+  
+  debugPrint('configureDependencies: Getting SharedPreferences...');
   final prefs = await SharedPreferences.getInstance();
+  debugPrint('configureDependencies: SharedPreferences ready');
   
   getIt.registerSingleton<GlobalKey<NavigatorState>>(GlobalKey<NavigatorState>());
   getIt.registerSingleton<SharedPreferences>(prefs);
@@ -53,8 +62,10 @@ Future<void> configureDependencies({String? hivePath}) async {
   getIt.registerSingleton<AzkarRepository>(AzkarRepository(azkarBox));
   getIt.registerSingleton<PrayerRepo>(PrayerRepoImpl(box));
   
+  debugPrint('configureDependencies: Initializing Quran Feature...');
   // Initialize Quran Feature (DDD)
   await initQuranFeature();
+  debugPrint('configureDependencies: Quran Feature initialized');
   
   getIt.registerFactory<PrayerTrackerBloc>(() => PrayerTrackerBloc(
         getIt<PrayerRepo>(),

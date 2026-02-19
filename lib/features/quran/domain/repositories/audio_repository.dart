@@ -5,12 +5,34 @@ import 'package:fard/features/quran/domain/entities/reciter.dart';
 import 'package:equatable/equatable.dart';
 
 enum AudioQuality {
-  low,
-  medium,
-  high,
+  low32('32'),
+  medium64('64'),
+  high128('128');
+  
+  final String kbps;
+  const AudioQuality(this.kbps);
 }
 
 abstract interface class AudioRepository {
+  /// Fetch all available audio reciters from Al Quran Cloud
+  Future<Result<List<Reciter>>> getAvailableReciters();
+  
+  /// Get audio URL for specific ayah
+  String getAyahAudioUrl({
+    required String reciterId, // e.g., 'ar.alafasy'
+    required int surahNumber,
+    required int ayahNumber,
+    AudioQuality quality = AudioQuality.high128,
+  });
+  
+  /// Get list of URLs for full surah playback
+  Future<Result<List<String>>> getSurahAudioUrls({
+    required String reciterId,
+    required int surahNumber,
+    int? ayahCount,
+    AudioQuality quality = AudioQuality.high128,
+  });
+
   Future<Result<AudioSource>> getAudioUrl({
     required AyahNumber ayah,
     required String reciterId,
@@ -34,7 +56,11 @@ abstract interface class AudioRepository {
     required String reciterId,
   });
   
-  Future<Result<List<Reciter>>> getAvailableReciters();
+  /// Cache reciter list locally
+  Future<void> cacheReciters(List<Reciter> reciters);
+  
+  /// Get cached reciters
+  Future<Result<List<Reciter>>> getCachedReciters();
 }
 
 class AudioSource extends Equatable {

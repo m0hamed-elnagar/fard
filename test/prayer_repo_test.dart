@@ -18,6 +18,7 @@ void main() {
     dateMillis: date.millisecondsSinceEpoch,
     missedIndices: [0], // fajr
     qadaValues: {0: 5, 1: 3},
+    completedIndices: [],
   );
 
   setUpAll(() {
@@ -35,6 +36,7 @@ void main() {
         id: '1',
         date: date,
         missedToday: {Salaah.fajr},
+        completedToday: const {},
         qada: {Salaah.fajr: const MissedCounter(5), Salaah.dhuhr: const MissedCounter(3)},
       );
 
@@ -56,9 +58,9 @@ void main() {
     });
 
     test('loadMonth filters records correctly', () async {
-      final jan1 = DailyRecordEntity(id: '1', dateMillis: DateTime(2024, 1, 1).millisecondsSinceEpoch, missedIndices: [], qadaValues: {});
-      final jan2 = DailyRecordEntity(id: '2', dateMillis: DateTime(2024, 1, 2).millisecondsSinceEpoch, missedIndices: [], qadaValues: {});
-      final feb1 = DailyRecordEntity(id: '3', dateMillis: DateTime(2024, 2, 1).millisecondsSinceEpoch, missedIndices: [], qadaValues: {});
+      final jan1 = DailyRecordEntity(id: '1', dateMillis: DateTime(2024, 1, 1).millisecondsSinceEpoch, missedIndices: [], qadaValues: {}, completedIndices: []);
+      final jan2 = DailyRecordEntity(id: '2', dateMillis: DateTime(2024, 1, 2).millisecondsSinceEpoch, missedIndices: [], qadaValues: {}, completedIndices: []);
+      final feb1 = DailyRecordEntity(id: '3', dateMillis: DateTime(2024, 2, 1).millisecondsSinceEpoch, missedIndices: [], qadaValues: {}, completedIndices: []);
 
       when(() => mockBox.toMap()).thenReturn({
         '1': jan1,
@@ -79,12 +81,14 @@ void main() {
         dateMillis: DateTime(2024, 1, 1).millisecondsSinceEpoch,
         missedIndices: [],
         qadaValues: {0: 10}, // Fajr: 10
+        completedIndices: [],
       );
       final r2 = DailyRecordEntity(
         id: '2',
         dateMillis: DateTime(2024, 1, 5).millisecondsSinceEpoch,
         missedIndices: [],
         qadaValues: {0: 5, 1: 5}, // Fajr: 5, Dhuhr: 5
+        completedIndices: [],
       );
 
       when(() => mockBox.values).thenReturn([r1, r2]);
@@ -97,8 +101,8 @@ void main() {
     });
 
     test('loadLastSavedRecord returns newest record', () async {
-       final old = DailyRecordEntity(id: 'old', dateMillis: DateTime(2024, 1, 1).millisecondsSinceEpoch, missedIndices: [], qadaValues: {});
-       final newest = DailyRecordEntity(id: 'new', dateMillis: DateTime(2024, 1, 10).millisecondsSinceEpoch, missedIndices: [], qadaValues: {});
+       final old = DailyRecordEntity(id: 'old', dateMillis: DateTime(2024, 1, 1).millisecondsSinceEpoch, missedIndices: [], qadaValues: {}, completedIndices: []);
+       final newest = DailyRecordEntity(id: 'new', dateMillis: DateTime(2024, 1, 10).millisecondsSinceEpoch, missedIndices: [], qadaValues: {}, completedIndices: []);
 
        when(() => mockBox.isEmpty).thenReturn(false);
        when(() => mockBox.values).thenReturn([old, newest]);

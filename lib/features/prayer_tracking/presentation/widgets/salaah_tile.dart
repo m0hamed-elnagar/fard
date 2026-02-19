@@ -14,9 +14,13 @@ class SalaahTile extends StatefulWidget {
 
   final bool isMissedToday;
 
+  final bool isCompletedToday;
+
   final bool isUpcoming;
 
   final DateTime? time;
+
+  final bool isQadaEnabled;
 
   final VoidCallback onAdd;
 
@@ -36,9 +40,13 @@ class SalaahTile extends StatefulWidget {
 
     required this.isMissedToday,
 
+    required this.isCompletedToday,
+
     this.isUpcoming = false,
 
     this.time,
+
+    this.isQadaEnabled = true,
 
     required this.onAdd,
 
@@ -82,54 +90,31 @@ class _SalaahTileState extends State<SalaahTile> {
 
       margin: const EdgeInsets.only(bottom: 12.0),
 
-      decoration: BoxDecoration(
-
-        color: widget.isUpcoming
-
-            ? Colors.transparent
-
-            : widget.isMissedToday
-
-                ? AppTheme.missed.withValues(alpha: 0.12)
-
-                : AppTheme.surface,
-
-        borderRadius: BorderRadius.circular(20.0),
-
-        border: Border.all(
-
-          color: widget.isUpcoming
-
-              ? AppTheme.cardBorder.withValues(alpha: 0.5)
-
-              : widget.isMissedToday
-
-                  ? AppTheme.missed.withValues(alpha: 0.4)
-
-                  : AppTheme.cardBorder,
-
-          width: 1.5,
-
-        ),
-
-        boxShadow: [
-
-          if (widget.isMissedToday && !widget.isUpcoming)
-
-            BoxShadow(
-
-              color: AppTheme.missed.withValues(alpha: 0.1),
-
-              blurRadius: 10,
-
-              offset: const Offset(0, 4),
-
-            ),
-
-        ],
-
-      ),
-
+                  decoration: BoxDecoration(
+                    color: widget.isUpcoming
+                        ? Colors.transparent
+                        : widget.isCompletedToday
+                            ? AppTheme.primaryLight.withValues(alpha: 0.12)
+                            : AppTheme.missed.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20.0),
+                    border: Border.all(
+                      color: widget.isUpcoming
+                          ? AppTheme.cardBorder.withValues(alpha: 0.5)
+                          : widget.isCompletedToday
+                              ? AppTheme.primaryLight.withValues(alpha: 0.4)
+                              : AppTheme.missed.withValues(alpha: 0.4),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      if (!widget.isUpcoming)
+                        BoxShadow(
+                          color: (widget.isCompletedToday ? AppTheme.primaryLight : AppTheme.missed).withValues(alpha: 0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                    ],
+                  ),
+            
       child: Material(
 
         color: Colors.transparent,
@@ -153,15 +138,11 @@ class _SalaahTileState extends State<SalaahTile> {
                 children: [
 
                   // Today Missed Status
-
                   _StatusIndicator(
-
-                    isMissed: widget.isUpcoming ? false : widget.isMissedToday,
-
+                    isMissed: !widget.isUpcoming && !widget.isCompletedToday,
+                    isCompleted: widget.isCompletedToday,
                     isUpcoming: widget.isUpcoming,
-
                     onTap: widget.isUpcoming ? () {} : widget.onToggleMissed,
-
                   ),
 
                   const SizedBox(width: 12.0),
@@ -169,7 +150,7 @@ class _SalaahTileState extends State<SalaahTile> {
                   
 
                   // Stacked Counter Buttons
-
+                  if (widget.isQadaEnabled)
                   Container(
 
                     decoration: BoxDecoration(
@@ -321,6 +302,7 @@ class _SalaahTileState extends State<SalaahTile> {
                 ),
 
                 // Qada Count Display
+                if (widget.isQadaEnabled)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   decoration: BoxDecoration(
@@ -379,11 +361,13 @@ class _SalaahTileState extends State<SalaahTile> {
 
 class _StatusIndicator extends StatelessWidget {
   final bool isMissed;
+  final bool isCompleted;
   final bool isUpcoming;
   final VoidCallback onTap;
 
   const _StatusIndicator({
     required this.isMissed,
+    this.isCompleted = false,
     this.isUpcoming = false,
     required this.onTap,
   });
@@ -400,22 +384,26 @@ class _StatusIndicator extends StatelessWidget {
         decoration: BoxDecoration(
           color: isUpcoming
               ? Colors.transparent
-              : isMissed
-                  ? AppTheme.missed
-                  : AppTheme.surfaceLight,
+              : isCompleted
+                  ? AppTheme.primaryLight
+                  : isMissed
+                      ? AppTheme.missed
+                      : AppTheme.surfaceLight,
           shape: BoxShape.circle,
           border: Border.all(
             color: isUpcoming
                 ? AppTheme.neutral.withValues(alpha: 0.3)
-                : isMissed
-                    ? AppTheme.missed
-                    : AppTheme.neutral,
+                : isCompleted
+                    ? AppTheme.primaryLight
+                    : isMissed
+                        ? AppTheme.missed
+                        : AppTheme.neutral,
             width: 2.0,
           ),
           boxShadow: [
-            if (isMissed && !isUpcoming)
+            if ((isMissed || isCompleted) && !isUpcoming)
               BoxShadow(
-                color: AppTheme.missed.withValues(alpha: 0.3),
+                color: (isCompleted ? AppTheme.primaryLight : AppTheme.missed).withValues(alpha: 0.3),
                 blurRadius: 8,
                 spreadRadius: 1,
               ),
@@ -424,12 +412,12 @@ class _StatusIndicator extends StatelessWidget {
         child: Icon(
           isUpcoming
               ? Icons.hourglass_empty_rounded
-              : isMissed
-                  ? Icons.close_rounded
-                  : Icons.check_rounded,
+              : isCompleted
+                  ? Icons.check_rounded
+                  : Icons.close_rounded,
           color: isUpcoming
               ? AppTheme.neutral.withValues(alpha: 0.5)
-              : isMissed
+              : (isMissed || isCompleted)
                   ? Colors.white
                   : AppTheme.neutral,
           size: isUpcoming ? 20.0 : 24.0,

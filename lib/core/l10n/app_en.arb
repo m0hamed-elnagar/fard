@@ -137,5 +137,16 @@
         "type": "int"
       }
     }
-  }
+  },
+  "qadaTracker": "Missed Prayers Tracker",
+  "qadaTrackerDesc": "Track missed prayers (Qada) and set goals to complete them.",
+  "qadaOnboardingTitle": "Qada Tracking",
+  "qadaOnboardingDesc": "Would you like to track your missed prayers (Qada) and set goals to complete them?",
+  "enableQada": "Enable Qada Tracking",
+  "disableQada": "Disable for now",
+  "globalSettings": "Global Notification Settings",
+  "globalSettingsDesc": "Apply these settings to all five prayers at once.",
+  "individualSettings": "Individual Prayer Settings",
+  "applyToAll": "Apply to all",
+  "generalSettings": "General App Settings"
 }

@@ -15,6 +15,7 @@ void main() {
         dateMillis: date.millisecondsSinceEpoch,
         missedIndices: [0, 2], // fajr, asr
         qadaValues: {0: 10, 1: 5},
+        completedIndices: [],
       );
 
       final domain = DailyRecordMapper.toDomain(entity);
@@ -31,6 +32,7 @@ void main() {
         id: '2',
         date: date,
         missedToday: {Salaah.maghrib},
+        completedToday: const {},
         qada: {Salaah.maghrib: const MissedCounter(20)},
       );
 

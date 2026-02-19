@@ -1,4 +1,5 @@
 import 'package:fard/core/di/injection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
 import 'package:fard/features/quran/domain/usecases/get_all_surahs.dart';
@@ -6,6 +7,8 @@ import 'package:fard/features/quran/domain/usecases/get_surah.dart';
 import 'package:fard/features/quran/domain/usecases/get_page.dart';
 import 'package:fard/features/quran/domain/usecases/get_tafsir.dart';
 import 'package:fard/features/quran/domain/usecases/play_audio.dart';
+import 'package:fard/features/quran/domain/usecases/update_last_read.dart';
+import 'package:fard/features/quran/domain/usecases/watch_last_read.dart';
 import 'package:fard/features/quran/domain/repositories/audio_repository.dart';
 import 'package:fard/features/quran/domain/repositories/audio_player_service.dart';
 import 'package:fard/features/quran/data/datasources/remote/quran_remote_source.dart';
@@ -28,18 +31,22 @@ Future<void> initQuranFeature() async {
   } catch (_) {}
 
   // Hive Box
+  debugPrint('initQuranFeature: Opening surahBox...');
   final surahBox = await Hive.openBox<SurahEntity>(QuranLocalSourceImpl.boxName);
+  debugPrint('initQuranFeature: surahBox ready');
 
   // Blocs
   getIt.registerFactory(() => ReaderBloc(
     getSurah: getIt(),
     getPage: getIt(),
+    updateLastRead: getIt(),
+    watchLastRead: getIt(),
   ));
 
-  getIt.registerFactory(() => QuranBloc(getIt()));
+  getIt.registerFactory(() => QuranBloc(getIt(), getIt()));
 
   getIt.registerFactory(() => AudioBloc(
-    playAudio: getIt(),
+    audioRepository: getIt(),
     playerService: getIt(),
   ));
 
@@ -52,6 +59,8 @@ Future<void> initQuranFeature() async {
     audioRepository: getIt(),
     playerService: getIt(),
   ));
+  getIt.registerLazySingleton(() => UpdateLastRead(getIt()));
+  getIt.registerLazySingleton(() => WatchLastRead(getIt()));
 
   // Services
   getIt.registerLazySingleton<AudioPlayerService>(() => AudioPlayerServiceImpl());
@@ -60,6 +69,7 @@ Future<void> initQuranFeature() async {
   getIt.registerLazySingleton<QuranRepository>(() => QuranRepositoryImpl(
     remoteSource: getIt(),
     localSource: getIt(),
+    sharedPreferences: getIt(),
   ));
 
   getIt.registerLazySingleton<AudioRepository>(() => AudioRepositoryImpl(

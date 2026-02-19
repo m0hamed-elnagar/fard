@@ -4,19 +4,50 @@ import 'package:fard/features/quran/domain/entities/page.dart';
 import 'package:fard/features/quran/domain/entities/juz.dart';
 import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
+import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
 import 'package:fard/features/quran/data/datasources/remote/quran_remote_source.dart';
 import 'package:fard/features/quran/data/datasources/local/quran_local_source.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
+import 'dart:convert';
 
 class QuranRepositoryImpl implements QuranRepository {
   final QuranRemoteSource remoteSource;
   final QuranLocalSource localSource;
+  final SharedPreferences sharedPreferences;
+
+  final _lastReadController = StreamController<Result<LastReadPosition>>.broadcast();
+  static const String _lastReadKey = 'last_read_position';
 
   QuranRepositoryImpl({
     required this.remoteSource,
     required this.localSource,
-  });
+    required this.sharedPreferences,
+  }) {
+    // Emit initial value
+    final initial = _getCachedLastRead();
+    if (initial != null) {
+      _lastReadController.add(Result.success(initial));
+    }
+  }
+
+  LastReadPosition? _getCachedLastRead() {
+    final jsonStr = sharedPreferences.getString(_lastReadKey);
+    if (jsonStr == null) return null;
+    try {
+      final Map<String, dynamic> data = json.decode(jsonStr);
+      return LastReadPosition(
+        ayahNumber: AyahNumber.create(
+          surahNumber: data['surah'],
+          ayahNumberInSurah: data['ayah'],
+        ).data!,
+        updatedAt: DateTime.parse(data['updatedAt']),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
 
   @override
   Future<Result<List<Surah>>> getSurahs() async {
@@ -120,13 +151,30 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   Stream<Result<LastReadPosition>> watchLastReadPosition() {
-    // Mocking for now
-    return Stream.value(Result.failure(const UnknownFailure('Not implemented yet')));
+    // Start with current value
+    final current = _getCachedLastRead();
+    if (current != null) {
+      Timer.run(() => _lastReadController.add(Result.success(current)));
+    } else {
+      Timer.run(() => _lastReadController.add(Result.failure(const CacheFailure('No last read position found'))));
+    }
+    return _lastReadController.stream;
   }
 
   @override
   Future<Result<void>> updateLastReadPosition(LastReadPosition position) async {
-    return Result.failure(const UnknownFailure('Not implemented yet'));
+    try {
+      final jsonStr = json.encode({
+        'surah': position.ayahNumber.surahNumber,
+        'ayah': position.ayahNumber.ayahNumberInSurah,
+        'updatedAt': position.updatedAt.toIso8601String(),
+      });
+      await sharedPreferences.setString(_lastReadKey, jsonStr);
+      _lastReadController.add(Result.success(position));
+      return Result.success(null);
+    } catch (e) {
+      return Result.failure(UnknownFailure(e.toString()));
+    }
   }
 
   @override

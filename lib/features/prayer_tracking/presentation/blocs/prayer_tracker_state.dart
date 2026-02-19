@@ -6,6 +6,7 @@ class PrayerTrackerState with _$PrayerTrackerState {
   const factory PrayerTrackerState.loaded({
     required DateTime selectedDate,
     required Set<Salaah> missedToday,
+    @Default({}) Set<Salaah> completedToday,
     required Map<Salaah, MissedCounter> qadaStatus,
     required Map<DateTime, DailyRecord> monthRecords,
     required List<DailyRecord> history,

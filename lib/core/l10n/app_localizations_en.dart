@@ -335,4 +335,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String minutesAfter(int minutes) {
     return '$minutes minutes after';
   }
+
+  @override
+  String get qadaTracker => 'Missed Prayers Tracker';
+
+  @override
+  String get qadaTrackerDesc =>
+      'Track missed prayers (Qada) and set goals to complete them.';
+
+  @override
+  String get qadaOnboardingTitle => 'Qada Tracking';
+
+  @override
+  String get qadaOnboardingDesc =>
+      'Would you like to track your missed prayers (Qada) and set goals to complete them?';
+
+  @override
+  String get enableQada => 'Enable Qada Tracking';
+
+  @override
+  String get disableQada => 'Disable for now';
+
+  @override
+  String get globalSettings => 'Global Notification Settings';
+
+  @override
+  String get globalSettingsDesc =>
+      'Apply these settings to all five prayers at once.';
+
+  @override
+  String get individualSettings => 'Individual Prayer Settings';
+
+  @override
+  String get applyToAll => 'Apply to all';
+
+  @override
+  String get generalSettings => 'General App Settings';
 }

@@ -31,3 +31,62 @@ can i fix the debug aand release have the sme package i need to test debug witho
  fix the l10n in the project some are not completly fix check them
 the location is showing that it can't be knowing in the pc but it works fine in android
 i should add each salaah myself   but it's by default added  check it and make tests for it
+don't push to github without asking me  ever again
+in the tafsir show the ayah in the top instead of just the number of it
+don't need the speed changer in the player
+check why it's not downloading right  using this  https://github.com/fawazahmed0/quran-api and test it till it works
+ chrunk the voice to make it faster
+ fix the salaah when it's time come it should need the user to press complete  other wise it needs to be missed
+ the switch between surah and ayah isn't working and i think i need to remove it specially when it's making errors now
+ i need to make the names of quran in arabic only
+ i  need to check the reciters that aren't working to remove them  try them and get me a list n=of the names are'nt working before u reomve them ask me
+make only the   qada number showing and   it will show the  data  with edit or  update  so e can remove the btns from it
+ abdurrahmaan assudais
+ the surah should start with بسم الله الرحمن الرحيم  most of them  don't say it  but some do
+ remove english at the end
+
+ integrate  one of thous two beside the main quraan to see witch is better
+ https://pub.dev/packages/quran_library
+ https://pub.dev/packages/flutter_quran
+ make the to  default  is today in the add bolk missed dialog
+ make  the add bulk qada ask the user if he wanna add  the qada at the first time he open the app after  the onboarding
+
+A RenderFlex overflowed by 5.0 pixels on the bottom.
+and  remove the surah just make the ayah    in the bottom player
+also check after the surah is finished i get  errore somthing like slider  the value is more than the maxmum
+======== Exception caught by widgets library =======================================================
+The following assertion was thrown building BlocBuilder<AudioBloc, AudioState>(bloc: null, has builder, dirty, dependencies: [InheritedCupertinoTheme, _InheritedProviderScope<AudioBloc?>, _InheritedTheme, _LocalizationsScope-[GlobalKey#4d3d3]], state: _BlocBuilderBaseState<AudioBloc, AudioState>#a917c):
+Value 13246.0 is not between minimum 0.0 and maximum 13244.0
+'package:flutter/src/material/slider.dart':
+Failed assertion: line 202 pos 10: 'value >= min && value <= max'
+
+The relevant error-causing widget was:
+  BlocBuilder<AudioBloc, AudioState> BlocBuilder:file:///C:/Users/NAGAR/IdeaProjects/fard-2/lib/features/quran/presentation/widgets/audio_player_bar.dart:12:12
+When the exception was thrown, this was the stack:
+#2      new Slider (package:flutter/src/material/slider.dart:202:10)
+#3      AudioPlayerBar.build.<anonymous closure> (package:fard/features/quran/presentation/widgets/audio_player_bar.dart:37:19)
+#4      BlocBuilder.build (package:flutter_bloc/src/bloc_builder.dart:91:57)
+#5      _BlocBuilderBaseState.build (package:flutter_bloc/src/bloc_builder.dart:188:21)
+#6      StatefulElement.build (package:flutter/src/widgets/framework.dart:5931:27)
+#7      ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5817:15)
+#8      StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5982:11)
+#9      Element.rebuild (package:flutter/src/widgets/framework.dart:5529:7)
+#10     BuildScope._tryRebuild (package:flutter/src/widgets/framework.dart:2750:15)
+#11     BuildScope._flushDirtyElements (package:flutter/src/widgets/framework.dart:2807:11)
+#12     BuildOwner.buildScope (package:flutter/src/widgets/framework.dart:3111:18)
+#13     WidgetsBinding.drawFrame (package:flutter/src/widgets/binding.dart:1302:21)
+#14     RendererBinding._handlePersistentFrameCallback (package:flutter/src/rendering/binding.dart:495:5)
+#15     SchedulerBinding._invokeFrameCallback (package:flutter/src/scheduler/binding.dart:1430:15)
+#16     SchedulerBinding.handleDrawFrame (package:flutter/src/scheduler/binding.dart:1345:9)
+#17     SchedulerBinding._handleDrawFrame (package:flutter/src/scheduler/binding.dart:1198:5)
+#18     _invoke (dart:ui/hooks.dart:356:13)
+#19     PlatformDispatcher._drawFrame (dart:ui/platform_dispatcher.dart:444:5)
+#20     _drawFrame (dart:ui/hooks.dart:328:31)
+(elided 2 frames from class _AssertionError)
+====================================================================================================
+D/BufferPoolAccessor2.0( 4348): bufferpool2 0xb4000071757f2b18 : 5(40960 size) total buffers - 3(24576 size) used buffers - 2699/2704 (recycle/alloc) - 15/5324 (fetch/transfer)
+D/BufferPoolAccessor2.0( 4348): evictor expired: 1, evicted: 1
+I/VRI[AudioServiceActivity]@a3e6188( 4348): call setFrameRateCategory for touch hint category=high hint, reason=touch, vri=VRI[AudioServiceActivity]@a3e6188
+I/VRI[AudioServiceActivity]@a3e6188( 4348): call setFrameRateCategory for touch hint category=no preference, reason=boost timeout, vri=VRI[AudioServiceActivity]@a3e6188
+I/VRI[AudioServiceActivity]@a3e6188( 4348): call setFrameRateCategory for touch hint category=high hint, reason=touch, vri=VRI[AudioServiceActivity]@a3e6188
+I/VRI[AudioServiceActivity]@a3e6188( 4348): call setFrame

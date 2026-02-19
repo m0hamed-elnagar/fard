@@ -1,4 +1,5 @@
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:fard/core/errors/failure.dart';
 import 'package:fard/features/quran/domain/repositories/audio_player_service.dart';
 import 'dart:async';
@@ -31,16 +32,25 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
     }, onError: (e) {
       _statusController.add(AudioStatus.error);
     });
+
+    _player.playbackEventStream.listen((event) {}, onError: (e) {
+       _statusController.add(AudioStatus.error);
+    });
   }
 
   @override
   Future<Result<void>> playStreaming(String url, {AudioPlayMode mode = AudioPlayMode.surah}) async {
     try {
       _currentMode = mode;
-      await _player.setUrl(url).catchError((err) {
-        _statusController.add(AudioStatus.error);
-        throw err;
-      });
+      final source = AudioSource.uri(
+        Uri.parse(url),
+        tag: MediaItem(
+          id: url,
+          title: "Quran Ayah",
+          album: "Al Quran Cloud",
+        ),
+      );
+      await _player.setAudioSource(source);
       _player.play();
       return Result.success(null);
     } catch (e) {
@@ -50,10 +60,43 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
   }
 
   @override
-  Future<Result<void>> playLocal(String path, {AudioPlayMode mode = AudioPlayMode.surah}) async {
+  Future<Result<void>>
+  playLocal(String path, {AudioPlayMode mode = AudioPlayMode.surah}) async {
     try {
       _currentMode = mode;
-      await _player.setFilePath(path);
+      final source = AudioSource.file(
+        path,
+        tag: MediaItem(
+          id: path,
+          title: "Quran Ayah (Downloaded)",
+          album: "Al Quran Cloud",
+        ),
+      );
+      await _player.setAudioSource(source);
+      _player.play();
+      return Result.success(null);
+    } catch (e) {
+      _statusController.add(AudioStatus.error);
+      return Result.failure(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> playPlaylist(List<String> urls, {int initialIndex = 0, AudioPlayMode mode = AudioPlayMode.surah}) async {
+    try {
+      _currentMode = mode;
+      final sources = urls.asMap().entries.map((entry) {
+        return AudioSource.uri(
+          Uri.parse(entry.value),
+          tag: MediaItem(
+            id: entry.value,
+            title: "Ayah ${entry.key + 1}",
+            album: "Al Quran Cloud",
+          ),
+        );
+      }).toList();
+      
+      await _player.setAudioSources(sources, initialIndex: initialIndex);
       _player.play();
       return Result.success(null);
     } catch (e) {
@@ -81,10 +124,43 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
   }
 
   @override
+  Future<Result<void>> seek(Duration position) async {
+    await _player.seek(position);
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<void>> setSpeed(double speed) async {
+    await _player.setSpeed(speed);
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<void>> setLoopMode(bool enabled) async {
+    await _player.setLoopMode(enabled ? LoopMode.one : LoopMode.off);
+    return Result.success(null);
+  }
+
+  @override
+  void setMode(AudioPlayMode mode) {
+    _currentMode = mode;
+  }
+
+  @override
   Stream<AudioStatus> watchStatus() => _statusController.stream;
 
-  void dispose() {
-    _player.dispose();
+  @override
+  Stream<Duration> watchPosition() => _player.positionStream;
+
+  @override
+  Stream<Duration?> watchDuration() => _player.durationStream;
+
+  @override
+  Stream<int?> watchCurrentIndex() => _player.currentIndexStream;
+
+  @override
+  Future<void> dispose() async {
+    await _player.dispose();
     _statusController.close();
   }
 }

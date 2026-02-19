@@ -1,4 +1,8 @@
+import 'package:fard/core/di/injection.dart';
+import 'package:fard/core/services/prayer_time_service.dart';
+import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/core/extensions/salaah_extension.dart';
 import 'package:flutter/material.dart';
@@ -109,13 +113,36 @@ class HistoryList extends StatelessWidget {
 
   Widget _buildRecordItem(BuildContext context, DailyRecord record) {
     final l10n = AppLocalizations.of(context)!;
+    final prayerTimeService = getIt<PrayerTimeService>();
+    final settings = context.read<SettingsCubit>().state;
+    
+    // Get prayer times for this specific record date to accurately determine if passed
+    final prayerTimes = (settings.latitude != null && settings.longitude != null)
+        ? prayerTimeService.getPrayerTimes(
+            latitude: settings.latitude!,
+            longitude: settings.longitude!,
+            method: settings.calculationMethod,
+            madhab: settings.madhab,
+            date: record.date,
+          )
+        : null;
+
+    // A prayer is "missed" ONLY if it has passed and is NOT completed.
+    // However, the record already stores missedToday and completedToday.
+    // We should only show prayers that have PASSED their time.
+    final passedPrayers = Salaah.values.where((s) => 
+      prayerTimeService.isPassed(s, prayerTimes: prayerTimes, date: record.date)
+    ).toList();
+
+    // Actual missed count for the record based on what passed
+    final actualMissedCount = record.missedToday.where((s) => passedPrayers.contains(s)).length;
+    final performedToday = record.completedToday.where((s) => passedPrayers.contains(s)).length;
+
     var totalQada = record.qada.values.fold(0, (sum, c) => sum + c.value);
     final today = DateTime.now();
     final isToday = record.date.year == today.year &&
         record.date.month == today.month &&
         record.date.day == today.day;
-
-    final performedToday = 5 - record.missedToday.length;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
@@ -180,7 +207,7 @@ class HistoryList extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 6.0),
-                    if (record.missedToday.isNotEmpty) ...[
+                    if (actualMissedCount > 0) ...[
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6.0, vertical: 2.0),
@@ -189,7 +216,7 @@ class HistoryList extends StatelessWidget {
                           borderRadius: BorderRadius.circular(6.0),
                         ),
                         child: Text(
-                          l10n.missedCount(record.missedToday.length),
+                          l10n.missedCount(actualMissedCount),
                           style: GoogleFonts.amiri(
                             color: AppTheme.missed,
                             fontSize: 11.0,
@@ -212,7 +239,7 @@ class HistoryList extends StatelessWidget {
                 Wrap(
                   spacing: 6.0,
                   runSpacing: 6.0,
-                  children: Salaah.values.map((s) {
+                  children: passedPrayers.map((s) {
                     final wasMissed = record.missedToday.contains(s);
                     
                     return Container(

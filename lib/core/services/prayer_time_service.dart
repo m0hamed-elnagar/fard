@@ -83,11 +83,11 @@ class PrayerTimeService {
     // Conservative fallbacks when no location is available
     final hour = now.hour;
     switch (salaah) {
-      case Salaah.fajr: return hour >= 6;
-      case Salaah.dhuhr: return hour >= 13;
-      case Salaah.asr: return hour >= 16;
-      case Salaah.maghrib: return hour >= 19;
-      case Salaah.isha: return hour >= 21;
+      case Salaah.fajr: return hour >= 5;
+      case Salaah.dhuhr: return hour >= 12;
+      case Salaah.asr: return hour >= 15;
+      case Salaah.maghrib: return hour >= 18;
+      case Salaah.isha: return hour >= 20;
     }
   }
 

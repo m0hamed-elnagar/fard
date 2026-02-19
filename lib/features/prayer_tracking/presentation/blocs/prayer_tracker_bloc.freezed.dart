@@ -1026,11 +1026,11 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  loading,TResult Function( DateTime selectedDate,  Set<Salaah> missedToday,  Map<Salaah, MissedCounter> qadaStatus,  Map<DateTime, DailyRecord> monthRecords,  List<DailyRecord> history)?  loaded,TResult Function( List<DateTime> missedDates)?  missedDaysPrompt,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  loading,TResult Function( DateTime selectedDate,  Set<Salaah> missedToday,  Set<Salaah> completedToday,  Map<Salaah, MissedCounter> qadaStatus,  Map<DateTime, DailyRecord> monthRecords,  List<DailyRecord> history)?  loaded,TResult Function( List<DateTime> missedDates)?  missedDaysPrompt,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Loading() when loading != null:
 return loading();case _Loaded() when loaded != null:
-return loaded(_that.selectedDate,_that.missedToday,_that.qadaStatus,_that.monthRecords,_that.history);case _MissedDaysPrompt() when missedDaysPrompt != null:
+return loaded(_that.selectedDate,_that.missedToday,_that.completedToday,_that.qadaStatus,_that.monthRecords,_that.history);case _MissedDaysPrompt() when missedDaysPrompt != null:
 return missedDaysPrompt(_that.missedDates);case _Error() when error != null:
 return error(_that.message);case _:
   return orElse();
@@ -1050,11 +1050,11 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  loading,required TResult Function( DateTime selectedDate,  Set<Salaah> missedToday,  Map<Salaah, MissedCounter> qadaStatus,  Map<DateTime, DailyRecord> monthRecords,  List<DailyRecord> history)  loaded,required TResult Function( List<DateTime> missedDates)  missedDaysPrompt,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  loading,required TResult Function( DateTime selectedDate,  Set<Salaah> missedToday,  Set<Salaah> completedToday,  Map<Salaah, MissedCounter> qadaStatus,  Map<DateTime, DailyRecord> monthRecords,  List<DailyRecord> history)  loaded,required TResult Function( List<DateTime> missedDates)  missedDaysPrompt,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Loading():
 return loading();case _Loaded():
-return loaded(_that.selectedDate,_that.missedToday,_that.qadaStatus,_that.monthRecords,_that.history);case _MissedDaysPrompt():
+return loaded(_that.selectedDate,_that.missedToday,_that.completedToday,_that.qadaStatus,_that.monthRecords,_that.history);case _MissedDaysPrompt():
 return missedDaysPrompt(_that.missedDates);case _Error():
 return error(_that.message);case _:
   throw StateError('Unexpected subclass');
@@ -1073,11 +1073,11 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  loading,TResult? Function( DateTime selectedDate,  Set<Salaah> missedToday,  Map<Salaah, MissedCounter> qadaStatus,  Map<DateTime, DailyRecord> monthRecords,  List<DailyRecord> history)?  loaded,TResult? Function( List<DateTime> missedDates)?  missedDaysPrompt,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  loading,TResult? Function( DateTime selectedDate,  Set<Salaah> missedToday,  Set<Salaah> completedToday,  Map<Salaah, MissedCounter> qadaStatus,  Map<DateTime, DailyRecord> monthRecords,  List<DailyRecord> history)?  loaded,TResult? Function( List<DateTime> missedDates)?  missedDaysPrompt,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Loading() when loading != null:
 return loading();case _Loaded() when loaded != null:
-return loaded(_that.selectedDate,_that.missedToday,_that.qadaStatus,_that.monthRecords,_that.history);case _MissedDaysPrompt() when missedDaysPrompt != null:
+return loaded(_that.selectedDate,_that.missedToday,_that.completedToday,_that.qadaStatus,_that.monthRecords,_that.history);case _MissedDaysPrompt() when missedDaysPrompt != null:
 return missedDaysPrompt(_that.missedDates);case _Error() when error != null:
 return error(_that.message);case _:
   return null;
@@ -1123,7 +1123,7 @@ String toString() {
 
 
 class _Loaded implements PrayerTrackerState {
-  const _Loaded({required this.selectedDate, required final  Set<Salaah> missedToday, required final  Map<Salaah, MissedCounter> qadaStatus, required final  Map<DateTime, DailyRecord> monthRecords, required final  List<DailyRecord> history}): _missedToday = missedToday,_qadaStatus = qadaStatus,_monthRecords = monthRecords,_history = history;
+  const _Loaded({required this.selectedDate, required final  Set<Salaah> missedToday, final  Set<Salaah> completedToday = const {}, required final  Map<Salaah, MissedCounter> qadaStatus, required final  Map<DateTime, DailyRecord> monthRecords, required final  List<DailyRecord> history}): _missedToday = missedToday,_completedToday = completedToday,_qadaStatus = qadaStatus,_monthRecords = monthRecords,_history = history;
   
 
  final  DateTime selectedDate;
@@ -1132,6 +1132,13 @@ class _Loaded implements PrayerTrackerState {
   if (_missedToday is EqualUnmodifiableSetView) return _missedToday;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableSetView(_missedToday);
+}
+
+ final  Set<Salaah> _completedToday;
+@JsonKey() Set<Salaah> get completedToday {
+  if (_completedToday is EqualUnmodifiableSetView) return _completedToday;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableSetView(_completedToday);
 }
 
  final  Map<Salaah, MissedCounter> _qadaStatus;
@@ -1166,16 +1173,16 @@ _$LoadedCopyWith<_Loaded> get copyWith => __$LoadedCopyWithImpl<_Loaded>(this, _
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loaded&&(identical(other.selectedDate, selectedDate) || other.selectedDate == selectedDate)&&const DeepCollectionEquality().equals(other._missedToday, _missedToday)&&const DeepCollectionEquality().equals(other._qadaStatus, _qadaStatus)&&const DeepCollectionEquality().equals(other._monthRecords, _monthRecords)&&const DeepCollectionEquality().equals(other._history, _history));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loaded&&(identical(other.selectedDate, selectedDate) || other.selectedDate == selectedDate)&&const DeepCollectionEquality().equals(other._missedToday, _missedToday)&&const DeepCollectionEquality().equals(other._completedToday, _completedToday)&&const DeepCollectionEquality().equals(other._qadaStatus, _qadaStatus)&&const DeepCollectionEquality().equals(other._monthRecords, _monthRecords)&&const DeepCollectionEquality().equals(other._history, _history));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,selectedDate,const DeepCollectionEquality().hash(_missedToday),const DeepCollectionEquality().hash(_qadaStatus),const DeepCollectionEquality().hash(_monthRecords),const DeepCollectionEquality().hash(_history));
+int get hashCode => Object.hash(runtimeType,selectedDate,const DeepCollectionEquality().hash(_missedToday),const DeepCollectionEquality().hash(_completedToday),const DeepCollectionEquality().hash(_qadaStatus),const DeepCollectionEquality().hash(_monthRecords),const DeepCollectionEquality().hash(_history));
 
 @override
 String toString() {
-  return 'PrayerTrackerState.loaded(selectedDate: $selectedDate, missedToday: $missedToday, qadaStatus: $qadaStatus, monthRecords: $monthRecords, history: $history)';
+  return 'PrayerTrackerState.loaded(selectedDate: $selectedDate, missedToday: $missedToday, completedToday: $completedToday, qadaStatus: $qadaStatus, monthRecords: $monthRecords, history: $history)';
 }
 
 
@@ -1186,7 +1193,7 @@ abstract mixin class _$LoadedCopyWith<$Res> implements $PrayerTrackerStateCopyWi
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
 @useResult
 $Res call({
- DateTime selectedDate, Set<Salaah> missedToday, Map<Salaah, MissedCounter> qadaStatus, Map<DateTime, DailyRecord> monthRecords, List<DailyRecord> history
+ DateTime selectedDate, Set<Salaah> missedToday, Set<Salaah> completedToday, Map<Salaah, MissedCounter> qadaStatus, Map<DateTime, DailyRecord> monthRecords, List<DailyRecord> history
 });
 
 
@@ -1203,10 +1210,11 @@ class __$LoadedCopyWithImpl<$Res>
 
 /// Create a copy of PrayerTrackerState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? selectedDate = null,Object? missedToday = null,Object? qadaStatus = null,Object? monthRecords = null,Object? history = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? selectedDate = null,Object? missedToday = null,Object? completedToday = null,Object? qadaStatus = null,Object? monthRecords = null,Object? history = null,}) {
   return _then(_Loaded(
 selectedDate: null == selectedDate ? _self.selectedDate : selectedDate // ignore: cast_nullable_to_non_nullable
 as DateTime,missedToday: null == missedToday ? _self._missedToday : missedToday // ignore: cast_nullable_to_non_nullable
+as Set<Salaah>,completedToday: null == completedToday ? _self._completedToday : completedToday // ignore: cast_nullable_to_non_nullable
 as Set<Salaah>,qadaStatus: null == qadaStatus ? _self._qadaStatus : qadaStatus // ignore: cast_nullable_to_non_nullable
 as Map<Salaah, MissedCounter>,monthRecords: null == monthRecords ? _self._monthRecords : monthRecords // ignore: cast_nullable_to_non_nullable
 as Map<DateTime, DailyRecord>,history: null == history ? _self._history : history // ignore: cast_nullable_to_non_nullable
