@@ -81,11 +81,14 @@ void main() {
     expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Location Settings'), findsOneWidget);
     
-    await tester.scrollUntilVisible(find.text('Azan & Reminder Settings'), 500);
-    expect(find.text('Azan & Reminder Settings'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Global Notification Settings'), 500);
+    expect(find.text('Global Notification Settings'), findsOneWidget);
     
-    await tester.scrollUntilVisible(find.text('Language'), 500);
-    expect(find.text('Language'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Individual Prayer Settings'), 500);
+    expect(find.text('Individual Prayer Settings'), findsOneWidget);
+
+    await tester.scrollUntilVisible(find.text('General App Settings'), 500);
+    expect(find.text('General App Settings'), findsOneWidget);
   });
 
   testWidgets('shows current location city', (WidgetTester tester) async {
@@ -97,6 +100,16 @@ void main() {
 
   testWidgets('tapping a prayer opens azan settings dialog', (WidgetTester tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    // Scroll to Individual Prayer Settings
+    final individualSettingsFinder = find.text('Individual Prayer Settings');
+    await tester.scrollUntilVisible(individualSettingsFinder, 500);
+    await tester.pumpAndSettle();
+
+    // Tap "Edit each prayer" ExpansionTile
+    final editEachPrayerFinder = find.text('Edit each prayer');
+    await tester.tap(editEachPrayerFinder);
     await tester.pumpAndSettle();
 
     // Scroll to Fajr

@@ -8,5 +8,6 @@ abstract interface class PrayerRepo {
   Future<Map<DateTime, DailyRecord>> loadMonth(int year, int month);
   Future<Map<Salaah, int>> calculateRemaining(DateTime from, DateTime to);
   Future<DailyRecord?> loadLastSavedRecord();
+  Future<DailyRecord?> loadLastRecordBefore(DateTime date);
   Future<List<DailyRecord>> loadAllRecords();
 }

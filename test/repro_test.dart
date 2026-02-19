@@ -29,6 +29,7 @@ void main() {
       id: '1',
       date: date,
       missedToday: {},
+      completedToday: const {},
       qada: {},
     ));
   });
@@ -46,6 +47,7 @@ void main() {
 
     when(() => repo.loadRecord(any())).thenAnswer((_) async => null);
     when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => null);
+    when(() => repo.loadLastRecordBefore(any())).thenAnswer((_) async => null);
     when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {});
     when(() => repo.saveToday(any())).thenAnswer((_) async {});
 
@@ -54,11 +56,16 @@ void main() {
         prayerTimes: any(named: 'prayerTimes'), 
         date: any(named: 'date'))).thenAnswer((invocation) {
           final d = invocation.namedArguments[#date] as DateTime?;
+          final s = invocation.positionalArguments[0] as Salaah;
           if (d != null) {
             final now = DateTime.now();
             final today = DateTime(now.year, now.month, now.day);
             final normalized = DateTime(d.year, d.month, d.day);
             if (normalized.isBefore(today)) return true;
+            if (normalized.isAtSameMomentAs(today)) {
+              // For testing purposes, assume Fajr has passed today
+              if (s == Salaah.fajr) return true;
+            }
           }
           return false;
         });
@@ -71,6 +78,7 @@ void main() {
         id: '2024-01-01',
         date: date,
         missedToday: {Salaah.fajr},
+        completedToday: const {},
         qada: {
           Salaah.fajr: const MissedCounter(1),
           Salaah.dhuhr: const MissedCounter(0),
@@ -121,6 +129,14 @@ void main() {
         id: 'last',
         date: pastDate.subtract(const Duration(days: 1)),
         missedToday: {},
+        completedToday: const {},
+        qada: {Salaah.fajr: const MissedCounter(10)},
+      ));
+      when(() => repo.loadLastRecordBefore(pastDate)).thenAnswer((_) async => DailyRecord(
+        id: 'last',
+        date: pastDate.subtract(const Duration(days: 1)),
+        missedToday: {},
+        completedToday: const {},
         qada: {Salaah.fajr: const MissedCounter(10)},
       ));
 
@@ -131,10 +147,10 @@ void main() {
         bloc.stream,
         emitsThrough(isA<PrayerTrackerState>().having(
           (s) => s.maybeMap(
-            loaded: (l) => l.missedToday.contains(Salaah.fajr) && l.qadaStatus[Salaah.fajr]?.value == 10,
+            loaded: (l) => l.missedToday.contains(Salaah.fajr) && l.qadaStatus[Salaah.fajr]?.value == 11,
             orElse: () => false,
           ),
-          'past date defaults to missed, but Qada stays at base 10',
+          'past date defaults to missed, but Qada stays at base 11 (10 carried + 1 newly missed)',
           true,
         )),
       );
@@ -142,15 +158,15 @@ void main() {
       // Now toggle Fajr to PRAYED on that past date
       bloc.add(const PrayerTrackerEvent.togglePrayer(Salaah.fajr));
 
-      // Check result: Fajr missedToday should be false, and Qada should REMAIN at 10
+      // Check result: Fajr missedToday should be false, and Qada should REMAIN at 11
       await expectLater(
         bloc.stream,
         emitsThrough(isA<PrayerTrackerState>().having(
           (s) => s.maybeMap(
-            loaded: (l) => !l.missedToday.contains(Salaah.fajr) && l.qadaStatus[Salaah.fajr]?.value == 10,
+            loaded: (l) => !l.missedToday.contains(Salaah.fajr) && l.qadaStatus[Salaah.fajr]?.value == 11,
             orElse: () => false,
           ),
-          'fajr marked as prayed on past date, qada remains unchanged at 10',
+          'fajr marked as prayed on past date, qada remains unchanged at 11',
           true,
         )),
       );

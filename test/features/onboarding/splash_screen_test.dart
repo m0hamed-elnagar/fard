@@ -96,7 +96,8 @@ void main() {
     when(() => mockPrefs.getBool('onboarding_complete')).thenReturn(false);
 
     await tester.pumpWidget(createWidgetUnderTest());
-    await tester.pumpAndSettle(); // Wait for navigation
+    await tester.pump(); // Trigger initState callback
+    await tester.pump(const Duration(seconds: 1)); // Wait for navigation animation
 
     expect(find.byType(OnboardingScreen), findsOneWidget);
   });
@@ -112,7 +113,8 @@ void main() {
     ));
 
     await tester.pumpWidget(createWidgetUnderTest());
-    await tester.pumpAndSettle(); // Wait for navigation
+    await tester.pump(); // Trigger initState callback
+    await tester.pump(const Duration(seconds: 1)); // Wait for navigation animation
 
     expect(find.byType(MainNavigationScreen), findsOneWidget);
   });

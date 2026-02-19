@@ -25,6 +25,7 @@ void main() {
     id: '1',
     date: date,
     missedToday: {},
+    completedToday: const {},
     qada: {for (var s in Salaah.values) s: const MissedCounter(0)},
   );
 
@@ -48,6 +49,8 @@ void main() {
     // Common Stubs
     when(() => repo.loadRecord(any())).thenAnswer((_) async => null);
     when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => null);
+    when(() => repo.loadLastRecordBefore(any())).thenAnswer((_) async => null);
+    when(() => repo.loadAllRecords()).thenAnswer((_) async => []);
     when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {});
     when(() => repo.saveToday(any())).thenAnswer((_) async {});
     when(() => repo.deleteRecord(any())).thenAnswer((_) async {});
@@ -72,6 +75,7 @@ void main() {
         setUp: () {
           // Return non-empty month to trigger a state change call
           when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {date: dummyRecord});
+          when(() => repo.loadLastRecordBefore(any())).thenAnswer((_) async => null);
         },
         act: (bloc) => bloc.add(PrayerTrackerEvent.load(date)),
         expect: () => [
@@ -110,8 +114,8 @@ void main() {
         act: (bloc) => bloc.add(const PrayerTrackerEvent.togglePrayer(Salaah.fajr)),
         expect: () => [
           isA<PrayerTrackerState>().having(
-            (s) => s.maybeMap(loaded: (l) => l.missedToday.contains(Salaah.fajr), orElse: () => false),
-            'fajr toggled',
+            (s) => s.maybeMap(loaded: (l) => l.completedToday.contains(Salaah.fajr), orElse: () => false),
+            'fajr toggled to completed',
             true,
           ),
           isA<PrayerTrackerState>().having(
@@ -232,30 +236,26 @@ void main() {
       );
 
       blocTest<PrayerTrackerBloc, PrayerTrackerState>(
-        'optimistic deletion clears history before reloading',
+        'deletion triggers reload',
         build: () => bloc,
         seed: () => loadedStateWithHistory,
         setUp: () {
           // Return non-empty month to trigger a detectable state change on reload
           when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {date: dummyRecord});
+          when(() => repo.loadLastRecordBefore(any())).thenAnswer((_) async => null);
+          when(() => repo.loadAllRecords()).thenAnswer((_) async => []);
         },
         act: (bloc) => bloc.add(PrayerTrackerEvent.deleteRecord(date)),
         expect: () => [
-          // 1. Optimistic removal
-          isA<PrayerTrackerState>().having(
-            (s) => s.maybeMap(loaded: (l) => l.history.isEmpty, orElse: () => false),
-            'optimistic removal',
-            true,
-          ),
-          // 2. Load event triggered: Emits loading
+          // 1. Load event triggered: Emits loading
           const PrayerTrackerState.loading(),
-          // 3. Load event initial loaded
+          // 2. Load event initial loaded
           isA<PrayerTrackerState>().having(
             (s) => s.maybeMap(loaded: (l) => l.monthRecords.isEmpty, orElse: () => false),
             'loaded initial (empty month)',
             true,
           ),
-          // 4. Load event month loaded
+          // 3. Load event month loaded
           isA<PrayerTrackerState>().having(
             (s) => s.maybeMap(loaded: (l) => l.monthRecords.isNotEmpty, orElse: () => false),
             'loaded with month data',
@@ -275,6 +275,7 @@ void main() {
                 id: 'old',
                 date: longAgo,
                 missedToday: {},
+                completedToday: const {},
                 qada: {},
               ));
           bloc.add(const PrayerTrackerEvent.checkMissedDays());
@@ -297,6 +298,7 @@ void main() {
                 id: 'old',
                 date: date.subtract(const Duration(days: 2)),
                 missedToday: {},
+                completedToday: const {},
                 qada: {
                   for (var s in Salaah.values)
                     s: s == Salaah.fajr ? const MissedCounter(10) : const MissedCounter(0)

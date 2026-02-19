@@ -21,8 +21,6 @@ void main() {
 
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
-  final yesterday = today.subtract(const Duration(days: 1));
-  final dayBeforeYesterday = today.subtract(const Duration(days: 2));
 
   setUpAll(() {
     registerFallbackValue(Salaah.fajr);
@@ -31,6 +29,7 @@ void main() {
       id: '1',
       date: today,
       missedToday: {},
+      completedToday: const {},
       qada: {},
     ));
   });
@@ -48,6 +47,7 @@ void main() {
 
     when(() => repo.loadRecord(any())).thenAnswer((_) async => null);
     when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => null);
+    when(() => repo.loadLastRecordBefore(any())).thenAnswer((_) async => null);
     when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {});
     when(() => repo.saveToday(any())).thenAnswer((_) async {});
 
@@ -71,6 +71,7 @@ void main() {
         id: 'yesterday',
         date: yesterdayInBloc,
         missedToday: {Salaah.fajr},
+        completedToday: const {},
         qada: {
           for (var s in Salaah.values) 
             s: s == Salaah.fajr ? const MissedCounter(10) : const MissedCounter(0)
@@ -78,6 +79,7 @@ void main() {
       );
 
       when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => lastRecord);
+      when(() => repo.loadLastRecordBefore(any())).thenAnswer((_) async => lastRecord);
       
       bloc.add(PrayerTrackerEvent.load(todayInBloc));
 
@@ -102,10 +104,12 @@ void main() {
         id: 'db-yesterday',
         date: dbYesterdayInBloc,
         missedToday: {},
+        completedToday: const {},
         qada: {for (var s in Salaah.values) s: const MissedCounter(0)},
       );
 
       when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => lastRecord);
+      when(() => repo.loadLastRecordBefore(any())).thenAnswer((_) async => lastRecord);
       
       bloc.add(PrayerTrackerEvent.load(todayInBloc));
 
@@ -128,12 +132,15 @@ void main() {
     });
 
     test('Scenario 3: Toggling today prayer affects qada immediately', () async {
-       when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => DailyRecord(
+       final lastRecord = DailyRecord(
         id: 'yesterday',
         date: yesterdayInBloc,
         missedToday: {},
+        completedToday: const {},
         qada: {for (var s in Salaah.values) s: const MissedCounter(5)},
-      ));
+      );
+       when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => lastRecord);
+       when(() => repo.loadLastRecordBefore(todayInBloc)).thenAnswer((_) async => lastRecord);
 
       bloc.add(PrayerTrackerEvent.load(todayInBloc));
       
@@ -191,9 +198,11 @@ void main() {
         id: 'today',
         date: todayInBloc,
         missedToday: {Salaah.fajr},
+        completedToday: const {},
         qada: {for (var s in Salaah.values) s: s == Salaah.fajr ? const MissedCounter(1) : const MissedCounter(0)},
       );
       when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => lastRecord);
+      when(() => repo.loadLastRecordBefore(any())).thenAnswer((_) async => lastRecord);
 
       bloc.add(PrayerTrackerEvent.load(tomorrow));
 

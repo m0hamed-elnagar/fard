@@ -73,6 +73,19 @@ class PrayerRepoImpl implements PrayerRepo {
   }
 
   @override
+  Future<DailyRecord?> loadLastRecordBefore(DateTime date) async {
+    if (_box.isEmpty) return null;
+    final dateMillis = DateTime(date.year, date.month, date.day).millisecondsSinceEpoch;
+    final sortedBefore = _box.values
+        .where((e) => e.dateMillis < dateMillis)
+        .toList()
+      ..sort((a, b) => b.dateMillis.compareTo(a.dateMillis));
+    
+    if (sortedBefore.isEmpty) return null;
+    return DailyRecordMapper.toDomain(sortedBefore.first);
+  }
+
+  @override
   Future<List<DailyRecord>> loadAllRecords() async {
     final sorted = _box.values.toList()
       ..sort((a, b) => b.dateMillis.compareTo(a.dateMillis));
