@@ -39,186 +39,187 @@ class HomeHero extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: AppTheme.background,
-      child: Column(
+      child: Stack(
         children: [
-          Stack(
-            children: [
-              // 1. Authentic Islamic Background with Dome & Minarets
-              ClipPath(
-                clipper: IslamicMosqueClipper(),
-                child: Container(
-                  height: isQadaEnabled ? 480 : 380, // Reduced height when Qada is disabled
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0xFF064E3B), // Emerald Green Dark
-                        Color(0xFF065F46), // Emerald Green Medium
-                        Color(0xFF047857), // Emerald Green Light
-                      ],
-                    ),
+          // 1. Authentic Islamic Background with Dome & Minarets - Now fills the stack
+          Positioned.fill(
+            child: ClipPath(
+              clipper: IslamicMosqueClipper(),
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFF064E3B), // Emerald Green Dark
+                      Color(0xFF065F46), // Emerald Green Medium
+                      Color(0xFF047857), // Emerald Green Light
+                    ],
                   ),
-                  child: Opacity(
-                    opacity: 0.05,
-                    child: CustomPaint(
-                      painter: GeometricPatternPainter(),
-                    ),
+                ),
+                child: Opacity(
+                  opacity: 0.05,
+                  child: CustomPaint(
+                    painter: GeometricPatternPainter(),
                   ),
                 ),
               ),
-              
-              // 2. Content Column - Using a Column inside the stack for vertical flow
-              // but we'll use Positioned.fill to ensure it spans the whole height
-              Positioned.fill(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 16),
-                    // App Bar Row
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            l10n.appName,
-                            style: GoogleFonts.amiri(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          _LocationChip(
-                            cityName: cityName,
-                            onTap: onLocationTap,
-                            l10n: l10n,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    // Crescent Icon at top of Dome
-                    const Icon(Icons.nightlight_round, color: AppTheme.accent, size: 28),
-                    const SizedBox(height: 8),
-                    
-                    if (isQadaEnabled) ...[
-                      // Debt Info
-                      Text(
-                        l10n.totalQada,
-                        style: GoogleFonts.amiri(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 22,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      Text(
-                        totalQada.toString().replaceAllMapped(
-                          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                          (Match m) => '${m[1]},',
-                        ),
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontSize: 72,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -2,
-                        ),
-                      ),
-                      Text(
-                        l10n.localeName == 'ar' ? 'صلوات مفروضة لإكمالها' : 'Fard Prayers to Complete',
-                        style: GoogleFonts.outfit(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      // Actions
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _ModernActionButton(
-                            icon: Icons.add_circle_outline_rounded,
-                            label: l10n.add,
-                            onPressed: onAddPressed,
-                          ),
-                          const SizedBox(width: 16),
-                          _ModernActionButton(
-                            icon: Icons.edit_note_rounded,
-                            label: l10n.edit,
-                            onPressed: onEditPressed,
-                          ),
-                        ],
-                      ),
-                    ] else ...[
-                      const SizedBox(height: 40),
+            ),
+          ),
+          
+          // 2. Content Column - Determines the height of the stack
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: isQadaEnabled ? 460 : 360,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 20),
+                // App Bar Row
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
                       Text(
                         l10n.appName,
                         style: GoogleFonts.amiri(
                           color: Colors.white,
-                          fontSize: 48,
+                          fontSize: 28,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 10),
+                      _LocationChip(
+                        cityName: cityName,
+                        onTap: onLocationTap,
+                        l10n: l10n,
+                      ),
                     ],
-
-                    const Spacer(),
-                    // Date & Hijri - Positioned carefully above the cards
-                    Container(
-                      margin: EdgeInsets.only(bottom: isQadaEnabled ? 12 : 32),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.white10),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            DateFormat.yMMMMEEEEd(locale).format(selectedDate),
-                            style: GoogleFonts.outfit(
-                              color: Colors.white.withValues(alpha: 0.9),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          Text(
-                            hijriDate,
-                            style: GoogleFonts.amiri(
-                              color: AppTheme.accent,
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // This padding ensures we don't overlap with the cards at the very bottom
-                    SizedBox(height: isQadaEnabled ? 80 : 20),
-                  ],
-                ),
-              ),
-              
-              // 3. Prayer Cards - Floating perfectly at the bottom
-              if (isQadaEnabled)
-                Positioned(
-                  left: 16,
-                  right: 16,
-                  bottom: 10,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: Salaah.values.map((salaah) {
-                      return _TraditionalPrayerCard(
-                        salaah: salaah,
-                        count: qadaStatus[salaah]?.value ?? 0,
-                      );
-                    }).toList(),
                   ),
                 ),
-            ],
+                const SizedBox(height: 12),
+                // Crescent Icon at top of Dome
+                const Icon(Icons.nightlight_round, color: AppTheme.accent, size: 28),
+                const SizedBox(height: 8),
+                
+                if (isQadaEnabled) ...[
+                  // Debt Info
+                  Text(
+                    l10n.totalQada,
+                    style: GoogleFonts.amiri(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontSize: 22,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    totalQada.toString().replaceAllMapped(
+                      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                      (Match m) => '${m[1]},',
+                    ),
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 64, // Slightly reduced to help with responsiveness
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -2,
+                    ),
+                  ),
+                  Text(
+                    l10n.localeName == 'ar' ? 'صلوات مفروضة لإكمالها' : 'Fard Prayers to Complete',
+                    style: GoogleFonts.outfit(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Actions
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _ModernActionButton(
+                        icon: Icons.add_circle_outline_rounded,
+                        label: l10n.add,
+                        onPressed: onAddPressed,
+                      ),
+                      const SizedBox(width: 16),
+                      _ModernActionButton(
+                        icon: Icons.edit_note_rounded,
+                        label: l10n.edit,
+                        onPressed: onEditPressed,
+                      ),
+                    ],
+                  ),
+                ] else ...[
+                  const SizedBox(height: 40),
+                  Text(
+                    l10n.appName,
+                    style: GoogleFonts.amiri(
+                      color: Colors.white,
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+
+                // Use a flexible gap instead of Spacer to avoid forcing height
+                const SizedBox(height: 40),
+                
+                // Date & Hijri - Positioned carefully above the cards
+                Container(
+                  margin: EdgeInsets.only(bottom: isQadaEnabled ? 12 : 32),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white10),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        DateFormat.yMMMMEEEEd(locale).format(selectedDate),
+                        style: GoogleFonts.outfit(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        hijriDate,
+                        style: GoogleFonts.amiri(
+                          color: AppTheme.accent,
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Bottom padding to clear the prayer cards
+                SizedBox(height: isQadaEnabled ? 90 : 20),
+              ],
+            ),
           ),
+          
+          // 3. Prayer Cards - Floating perfectly at the bottom
+          if (isQadaEnabled)
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 10,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: Salaah.values.map((salaah) {
+                  return _TraditionalPrayerCard(
+                    salaah: salaah,
+                    count: qadaStatus[salaah]?.value ?? 0,
+                  );
+                }).toList(),
+              ),
+            ),
         ],
       ),
     );
@@ -373,29 +374,32 @@ class IslamicMosqueClipper extends CustomClipper<Path> {
     final path = Path();
     final w = size.width;
     final h = size.height;
-    final baseH = h * 0.95;
-
-    path.moveTo(0, h);
-    path.lineTo(w, h);
+    
+    // Fill from the top
+    path.lineTo(w, 0);
+    
+    // Base line for the mosque silhouette at the bottom
+    final baseH = h * 0.9; 
     path.lineTo(w, baseH);
 
+    // Mosque silhouette from right to left (pointing UP as notches)
     // Right Minaret
     path.lineTo(w * 0.95, baseH);
-    path.lineTo(w * 0.95, baseH - 120);
-    path.lineTo(w * 0.92, baseH - 130); // Tip
-    path.lineTo(w * 0.89, baseH - 120);
+    path.lineTo(w * 0.95, baseH - 80);
+    path.lineTo(w * 0.92, baseH - 90); // Tip
+    path.lineTo(w * 0.89, baseH - 80);
     path.lineTo(w * 0.89, baseH);
     
     // Shoulder to Dome
     path.lineTo(w * 0.8, baseH);
-    path.quadraticBezierTo(w * 0.8, baseH - 80, w * 0.5, baseH - 120); // Dome peak
-    path.quadraticBezierTo(w * 0.2, baseH - 80, w * 0.2, baseH);
+    path.quadraticBezierTo(w * 0.8, baseH - 60, w * 0.5, baseH - 100); // Dome peak
+    path.quadraticBezierTo(w * 0.2, baseH - 60, w * 0.2, baseH);
 
     // Left Minaret
     path.lineTo(w * 0.11, baseH);
-    path.lineTo(w * 0.11, baseH - 120);
-    path.lineTo(w * 0.08, baseH - 130); // Tip
-    path.lineTo(w * 0.05, baseH - 120);
+    path.lineTo(w * 0.11, baseH - 80);
+    path.lineTo(w * 0.08, baseH - 90); // Tip
+    path.lineTo(w * 0.05, baseH - 80);
     path.lineTo(w * 0.05, baseH);
     
     path.lineTo(0, baseH);

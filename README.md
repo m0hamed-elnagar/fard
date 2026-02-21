@@ -10,6 +10,7 @@ A premium Flutter application for tracking missed Islamic prayers (Qada). Featur
 - **Add Qada**: Quickly add missed prayers by count or by date range (time).
 - **History**: View past records and daily snapshots.
 - **Premium UI**: Dark theme with Islamic-inspired aesthetics (Emerald & Gold).
+- **Audio Player**: Listen to Quran recitations (currently supported on phone devices only).
 
 ## Tech Stack
 
