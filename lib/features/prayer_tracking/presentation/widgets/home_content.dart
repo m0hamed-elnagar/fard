@@ -24,6 +24,7 @@ class HomeContent extends StatelessWidget {
   final Set<Salaah> missedToday;
   final Set<Salaah> completedToday;
   final Map<Salaah, MissedCounter> qadaStatus;
+  final Map<Salaah, int> completedQadaToday;
   final Map<DateTime, DailyRecord> monthRecords;
   final List<DailyRecord> history;
 
@@ -33,6 +34,7 @@ class HomeContent extends StatelessWidget {
     required this.missedToday,
     required this.completedToday,
     required this.qadaStatus,
+    required this.completedQadaToday,
     required this.monthRecords,
     required this.history,
   });
@@ -218,6 +220,7 @@ class HomeContent extends StatelessWidget {
                         return SalaahTile(
                           salaah: salaah,
                           qadaCount: qadaStatus[salaah]?.value ?? 0,
+                          completedQadaCount: completedQadaToday[salaah] ?? 0,
                           isMissedToday: missedToday.contains(salaah),
                           isCompletedToday: completedToday.contains(salaah),
                           isUpcoming: isUpcoming,

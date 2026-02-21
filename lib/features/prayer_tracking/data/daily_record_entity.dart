@@ -14,6 +14,8 @@ class DailyRecordEntity {
   Map<int, int> qadaValues;
   @HiveField(4)
   List<int>? completedIndices;
+  @HiveField(5)
+  Map<int, int>? completedQadaValues;
 
   DailyRecordEntity({
     required this.id,
@@ -21,5 +23,6 @@ class DailyRecordEntity {
     required this.missedIndices,
     required this.qadaValues,
     this.completedIndices,
+    this.completedQadaValues,
   });
 }

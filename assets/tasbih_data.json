@@ -1,0 +1,262 @@
+{
+  "completion_duas": [
+    {
+      "id": "tahmid_after_tasbih",
+      "title": "Tahmid after Tasbih",
+      "arabic": "لَا إِلَٰهَ إِلَّا ٱللَّٰهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ ٱلْمُلْكُ وَلَهُ ٱلْحَمْدُ، وَهو عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ",
+      "transliteration": "La ilaha illallah wahdahu la sharika lahu, lahul-mulku wa lahul-hamdu, wa huwa 'ala kulli shay'in qadir",
+      "translation": "There is no god but Allah alone, without partner. His is the dominion and His is the praise, and He is over all things competent",
+      "source": "Sahih Muslim 2716"
+    },
+    {
+      "id": "final_takbir",
+      "title": "Final Takbir",
+      "arabic": "ٱللَّٰهُ أَكْبَرُ",
+      "transliteration": "Allahu Akbar",
+      "translation": "Allah is the Greatest",
+      "source": "Sahih Muslim 2731"
+    },
+    {
+      "id": "istighfar_3_times",
+      "title": "Istighfar",
+      "arabic": "أَسْتَغْفِرُ ٱللَّٰهَ (ثَلَاثًا)",
+      "transliteration": "Astaghfirullah (3 times)",
+      "translation": "I seek Allah's forgiveness",
+      "source": "Sahih Muslim 591"
+    },
+    {
+      "id": "allahumma_ainni",
+      "title": "Dua for Help in Worship",
+      "arabic": "اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ",
+      "transliteration": "Allahumma a'inni 'ala dhikrika wa shukrika wa husni 'ibadatik",
+      "translation": "O Allah, help me in remembering You, thanking You, and worshipping You in the best manner",
+      "source": "Sunan Abi Dawud 1522"
+    },
+    {
+      "id": "kaffaratul_majlis",
+      "title": "Kaffaratul Majlis",
+      "arabic": "سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا أَنْتَ، أَسْتَغْفِرُكَ وَأَتُوبُ إِلَيْكَ",
+      "transliteration": "Subhanaka Allahumma wa bihamdika, ash-hadu an la ilaha illa Anta, astaghfiruka wa atubu ilayk",
+      "translation": "Glory be to You, O Allah, and all praise. I bear witness that there is no god but You. I seek Your forgiveness and I turn to You in repentance",
+      "source": "Sunan at-Tirmidhi 3433"
+    },
+    {
+      "id": "allahumma_antas_salam",
+      "title": "Allahumma Antas-Salam",
+      "arabic": "اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ، تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ",
+      "transliteration": "Allahumma Antas-Salam wa minkas-salam, tabarakta ya Dhal-Jalali wal-Ikram",
+      "translation": "O Allah, You are Peace and from You comes peace. Blessed are You, O Owner of Majesty and Honor",
+      "source": "Sahih Muslim 591"
+    }
+  ],
+  "tasbih_categories": [
+    {
+      "id": "tasbih_after_salah",
+      "name": "Tasbih after Salah",
+      "description": "33x SubhanAllah, Alhamdulillah, Allahu Akbar + Dua",
+      "sequence_mode": "rotating",
+      "cycles": 3,
+      "counts_per_cycle": 33,
+      "completion_trigger": 99,
+      "default_completion_dua_id": "tahmid_after_tasbih",
+      "items": [
+        {
+          "order": 1,
+          "id": "subhanallah",
+          "arabic": "سُبْحَانَ ٱللَّٰهِ",
+          "transliteration": "SubhanAllah",
+          "translation": "Glory be to Allah",
+          "target_count": 33
+        },
+        {
+          "order": 2,
+          "id": "alhamdulillah",
+          "arabic": "ٱلْحَمْدُ لِلَّٰهِ",
+          "transliteration": "Alhamdulillah",
+          "translation": "Praise be to Allah",
+          "target_count": 33
+        },
+        {
+          "order": 3,
+          "id": "allahu_akbar",
+          "arabic": "ٱللَّٰهُ أَكْبَرُ",
+          "transliteration": "Allahu Akbar",
+          "translation": "Allah is the Greatest",
+          "target_count": 33
+        }
+      ]
+    },
+    {
+      "id": "tasbih_fatimah",
+      "name": "Tasbih Fatimah (Bedtime)",
+      "description": "33x SubhanAllah, 33x Alhamdulillah, 34x Allahu Akbar",
+      "sequence_mode": "rotating",
+      "cycles": 3,
+      "counts_per_cycle": 33,
+      "completion_trigger": 100,
+      "default_completion_dua_id": "allahumma_ainni",
+      "items": [
+        {
+          "order": 1,
+          "id": "subhanallah",
+          "arabic": "سُبْحَانَ ٱللَّٰهِ",
+          "transliteration": "SubhanAllah",
+          "translation": "Glory be to Allah",
+          "target_count": 33
+        },
+        {
+          "order": 2,
+          "id": "alhamdulillah",
+          "arabic": "ٱلْحَمْدُ لِلَّٰهِ",
+          "transliteration": "Alhamdulillah",
+          "translation": "Praise be to Allah",
+          "target_count": 33
+        },
+        {
+          "order": 3,
+          "id": "allahu_akbar_34",
+          "arabic": "ٱللَّٰهُ أَكْبَرُ",
+          "transliteration": "Allahu Akbar",
+          "translation": "Allah is the Greatest",
+          "target_count": 34
+        }
+      ]
+    },
+    {
+      "id": "four_foundations",
+      "name": "The Four Foundations",
+      "description": "The most beloved words to Allah",
+      "sequence_mode": "rotating",
+      "cycles": 4,
+      "counts_per_cycle": 25,
+      "completion_trigger": 100,
+      "items": [
+        {
+          "order": 1,
+          "id": "subhanallah_4",
+          "arabic": "سُبْحَانَ ٱللَّٰهِ",
+          "transliteration": "SubhanAllah",
+          "translation": "Glory be to Allah",
+          "target_count": 25
+        },
+        {
+          "order": 2,
+          "id": "alhamdulillah_4",
+          "arabic": "ٱلْحَمْدُ لِلَّٰهِ",
+          "transliteration": "Alhamdulillah",
+          "translation": "Praise be to Allah",
+          "target_count": 25
+        },
+        {
+          "order": 3,
+          "id": "la_ilaha_illallah_4",
+          "arabic": "لَا إِلَٰهَ إِلَّا ٱللَّٰهُ",
+          "transliteration": "La ilaha illallah",
+          "translation": "There is no god but Allah",
+          "target_count": 25
+        },
+        {
+          "order": 4,
+          "id": "allahu_akbar_4",
+          "arabic": "ٱللَّٰهُ أَكْبَرُ",
+          "transliteration": "Allahu Akbar",
+          "translation": "Allah is the Greatest",
+          "target_count": 25
+        }
+      ]
+    },
+    {
+      "id": "yunus_dhikr",
+      "name": "Dhikr of Prophet Yunus",
+      "description": "Supplication for relief from distress",
+      "sequence_mode": "individual",
+      "items": [
+        {
+          "id": "yunus_dua",
+          "arabic": "لَا إِلَٰهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ",
+          "transliteration": "La ilaha illa Anta subhanaka inni kuntu minaz-zalimin",
+          "translation": "There is no god but You, Glory be to You! Indeed, I have been of the wrongdoers",
+          "target_count": 100,
+          "source": "Quran 21:87"
+        }
+      ]
+    },
+    {
+      "id": "morning_evening",
+      "name": "Morning & Evening Adhkar",
+      "description": "Daily remembrances for morning and evening",
+      "sequence_mode": "individual",
+      "items": [
+        {
+          "id": "sayyidul_istighfar",
+          "name": "Sayyidul Istighfar",
+          "arabic": "ٱللَّٰهُمَّ أَنْتَ رَبِّي لَا إِلَٰهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَىٰ عَهْدِكَ وَوَعْدِكَ مَا ٱسْتَطعتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعِّتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ لَكَ بِذَنْبِي فَٱغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ ٱلذُّنُوبَ إِلَّا أَنْتَ",
+          "transliteration": "Allahumma anta rabbi la ilaha illa anta, khalaqtani wa ana abduka, wa ana 'ala ahdika wa wa'dika mastata'tu, a'udhu bika min sharri ma sana'tu, abu'u laka bi ni'matika 'alayya, wa abu'u laka bi dhanbi faghfir li fa innahu la yaghfirudh-dhunuba illa anta",
+          "translation": "O Allah, You are my Lord. There is no god but You. You created me, and I am Your servant, and I am faithful to my covenant and my promise to You to the best of my ability. I seek refuge with You from the evil of what I have done. I acknowledge before You Your blessings bestowed upon me, and I confess to You my sins; so forgive me, for none forgives sins but You",
+          "target_count": 1,
+          "time": "morning_evening",
+          "virtue": "Whoever says it in the morning and dies that day is guaranteed Paradise, and whoever says it in the evening and dies that night is guaranteed Paradise",
+          "source": "Sahih Bukhari 6306"
+        },
+        {
+          "id": "bismillahilladhi",
+          "name": "Bismillahilladhi",
+          "arabic": "بِسْمِ ٱللَّٰهِ ٱلَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي ٱلْأَرْضِ وَلَا فِي ٱلسَّمَاءُ، وَهو ٱلسَّمِيعُ ٱلْعَلِيمُ",
+          "transliteration": "Bismillahilladhi la yadurru ma'asmihi shay'un fil-ardi wa la fis-sama'i, wa huwas-sami'ul 'alim",
+          "translation": "In the name of Allah, with whose name nothing can cause harm in the earth nor in the heavens, and He is the All-Hearing, the All-Knowing",
+          "target_count": 3,
+          "time": "morning_evening",
+          "virtue": "Whoever says it three times in the morning and evening, nothing will harm them until they return",
+          "source": "Sunan Ibn Majah 3869"
+        },
+        {
+          "id": "raditu_billah",
+          "name": "Raditu Billah",
+          "arabic": "رَضِيتُ بِٱللَّٰهِ رَبًّا، وَبِٱلْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ صَلَّىٰ ٱللَّٰهُ عَلَيْهِ وَسَلَّمَ نَبِيًّا",
+          "transliteration": "Raditu billahi rabban, wa bil-islami dina, wa bi muhammadin sallallahu alayhi wa sallama nabiyyan",
+          "translation": "I am pleased with Allah as my Lord, with Islam as my religion, and with Muhammad (peace be upon him) as my Prophet",
+          "target_count": 3,
+          "time": "morning_evening",
+          "virtue": "Whoever says it three times in the morning and evening, Allah will make them pleased on the Day of Judgment",
+          "source": "Sunan Abu Dawud 5072"
+        }
+      ]
+    },
+    {
+      "id": "istighfar",
+      "name": "Istighfar (Seeking Forgiveness)",
+      "description": "Various forms of seeking Allah's forgiveness",
+      "sequence_mode": "individual",
+      "items": [
+        {
+          "id": "astaghfirullah",
+          "name": "Astaghfirullah",
+          "arabic": "أَسْتَغْفِرُ ٱللَّٰهَ",
+          "transliteration": "Astaghfirullah",
+          "translation": "I seek forgiveness from Allah",
+          "target_count": 100,
+          "virtue": "Whoever seeks forgiveness frequently, Allah will provide for them from every hardship and ease"
+        },
+        {
+          "id": "astaghfirullah_al_adheem",
+          "name": "Astaghfirullah Al-Adheem",
+          "arabic": "أَسْتَغْفِرُ ٱللَّٰهَ ٱلْعَظِيمَ",
+          "transliteration": "Astaghfirullah al-'Adheem",
+          "translation": "I seek forgiveness from Allah the Magnificent",
+          "target_count": 100
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "default_category": "tasbih_after_salah",
+    "haptic_feedback": true,
+    "sound_effect": false,
+    "auto_reset": true,
+    "show_transliteration": true,
+    "show_translation": true,
+    "dark_mode": false,
+    "keep_screen_on": true,
+    "stats_tracking": true
+  }
+}

@@ -5,8 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:fard/core/errors/failure.dart';
 import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
-import 'package:fard/features/quran/domain/entities/reciter.dart';
-import 'package:fard/features/quran/domain/repositories/audio_repository.dart';
+import 'package:fard/features/audio/domain/entities/reciter.dart';
+import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AudioRepositoryImpl implements AudioRepository {
@@ -18,17 +18,23 @@ class AudioRepositoryImpl implements AudioRepository {
   static const String _audioCdnBaseUrl = 'https://cdn.islamic.network/quran/audio';
   static const String _recitersCacheKey = 'cached_reciters';
 
-  static const Map<String, String> _reciterEveryAyahMap = {
-    'ar.alafasy': 'Alafasy_128kbps',
-    'ar.husary': 'Husary_128kbps',
-    'ar.minshawi': 'Minshawy_Murattal_128kbps',
-    'ar.abdulbasitmurattal': 'Abdul_Basit_Murattal_192kbps',
-    'ar.ahmedajamy': 'Ahmed_ibn_Ali_al-Ajamy_128kbps_ketaballah.net',
-    'ar.abdurrahmaansudais': 'Abdurrahmaan_As-Sudais_192kbps',
-    'ar.saoodshuraym': 'Saood_ash-Shuraym_128kbps',
-    'ar.mahermuaiqly': 'MaherAlMuaiqly128kbps',
-    'ar.hudhaify': 'Hudhaify_128kbps',
-    'ar.abdullahbasfar': 'Abdullah_Basfar_192kbps',
+  static const Map<String, Map<int, String>> _everyAyahMapping = {
+    'ar.alafasy': {64: 'Alafasy_64kbps', 128: 'Alafasy_128kbps'},
+    'ar.husary': {64: 'Husary_64kbps', 128: 'Husary_128kbps'},
+    'ar.minshawi': {128: 'Minshawy_Murattal_128kbps'},
+    'ar.abdulbasitmurattal': {64: 'Abdul_Basit_Murattal_64kbps', 192: 'Abdul_Basit_Murattal_192kbps'},
+    'ar.ahmedajamy': {128: 'Ahmed_ibn_Ali_al-Ajamy_128kbps_ketaballah.net'},
+    'ar.abdurrahmaansudais': {192: 'Abdurrahmaan_As-Sudais_192kbps'},
+    'ar.saoodshuraym': {128: 'Saood_ash-Shuraym_128kbps'},
+    'ar.mahermuaiqly': {128: 'MaherAlMuaiqly128kbps'},
+    'ar.hudhaify': {128: 'Hudhaify_128kbps'},
+    'ar.abdullahbasfar': {64: 'Abdullah_Basfar_64kbps', 192: 'Abdullah_Basfar_192kbps'},
+    'ar.ghamadi': {64: 'Ghamadi_40kbps', 128: 'Ghamadi_40kbps'}, // 40kbps is the only one
+    'ar.shatree': {64: 'Abu_Bakr_Ash-Shaatree_64kbps', 128: 'Abu_Bakr_Ash-Shaatree_128kbps'},
+    'ar.abdulbasitmujawwad': {128: 'Abdul_Basit_Mujawwad_128kbps'},
+    'ar.minshawimujawwad': {64: 'Minshawy_Mujawwad_64kbps', 128: 'Minshawy_Mujawwad_192kbps', 192: 'Minshawy_Mujawwad_192kbps'},
+    'ar.husarymuallim': {128: 'Husary_Muallim_128kbps'},
+    'ar.aymanswayd': {64: 'Ayman_Sowaid_64kbps'},
   };
 
   @override
@@ -42,9 +48,8 @@ class AudioRepositoryImpl implements AudioRepository {
         final Map<String, dynamic> data = json.decode(response.body);
         final List<dynamic> editions = data['data'];
         
-        // Only include reciters that we have mapped to reliable sources (EveryAyah)
+        // Include all reciters from Al Quran Cloud as we have a CDN fallback for all
         final reciters = editions
-            .where((e) => _reciterEveryAyahMap.containsKey(e['identifier']))
             .map((e) => Reciter(
           identifier: e['identifier'],
           name: e['name'],
@@ -86,22 +91,57 @@ class AudioRepositoryImpl implements AudioRepository {
     return count + ayah;
   }
 
+  int _getActualBitrate(String reciterId, AudioQuality requested) {
+    final requestedValue = int.tryParse(requested.kbps) ?? 128;
+    final bitrates = _everyAyahMapping[reciterId]?.keys.toList();
+    
+    if (bitrates != null && bitrates.isNotEmpty) {
+      bitrates.sort();
+      // Find the best available bitrate that is <= requestedValue
+      int best = bitrates.first;
+      for (final available in bitrates) {
+        if (available <= requestedValue) {
+          best = available;
+        }
+      }
+      return best;
+    }
+    
+    return requestedValue;
+  }
+
+  bool _needsBismillahPrepend(int surahNumber, String reciterId) {
+    // 1. Surah 1 (Al-Fatihah) and Surah 9 (At-Tawbah) NEVER need prepend.
+    // Al-Fatihah's first ayah IS Bismillah. At-Tawbah doesn't have it.
+    if (surahNumber == 1 || surahNumber == 9) return false;
+
+    // 2. We prepend Bismillah for all other surahs. 
+    // Even if some reciters embed it in Ayah 1, playing it again is often preferred
+    // to ensure it's always heard clearly at the start of a session.
+    return true;
+  }
+
   @override
   String getAyahAudioUrl({
     required String reciterId,
     required int surahNumber,
     required int ayahNumber,
-    AudioQuality quality = AudioQuality.high128,
+    AudioQuality quality = AudioQuality.medium128,
   }) {
     final surahStr = surahNumber.toString().padLeft(3, '0');
     final ayahStr = ayahNumber.toString().padLeft(3, '0');
     
-    if (_reciterEveryAyahMap.containsKey(reciterId)) {
-      return 'https://everyayah.com/data/${_reciterEveryAyahMap[reciterId]}/$surahStr$ayahStr.mp3';
+    final actualBitrate = _getActualBitrate(reciterId, quality);
+    final mappedFolder = _everyAyahMapping[reciterId]?[actualBitrate];
+
+    // If reciter and bitrate are explicitly mapped for EveryAyah
+    if (mappedFolder != null) {
+      return 'https://everyayah.com/data/$mappedFolder/$surahStr$ayahStr.mp3';
     }
 
+    // Fallback to Islamic Network CDN for other bitrates or unmapped reciters
     final globalAyahNumber = _getGlobalAyahNumber(surahNumber, ayahNumber);
-    return '$_audioCdnBaseUrl/${quality.kbps}/$reciterId/$globalAyahNumber.mp3';
+    return '$_audioCdnBaseUrl/$actualBitrate/$reciterId/$globalAyahNumber.mp3';
   }
 
   @override
@@ -109,7 +149,7 @@ class AudioRepositoryImpl implements AudioRepository {
     required String reciterId,
     required int surahNumber,
     int? ayahCount,
-    AudioQuality quality = AudioQuality.high128,
+    AudioQuality quality = AudioQuality.medium128,
   }) async {
     int count = ayahCount ?? 0;
     
@@ -127,7 +167,19 @@ class AudioRepositoryImpl implements AudioRepository {
       }
     }
 
-    final urls = List.generate(
+    final urls = <String>[];
+    
+    // Prepend Bismillah (1:1) if needed for this surah and reciter
+    if (_needsBismillahPrepend(surahNumber, reciterId)) {
+      urls.add(getAyahAudioUrl(
+        reciterId: reciterId, 
+        surahNumber: 1, 
+        ayahNumber: 1, 
+        quality: quality,
+      ));
+    }
+
+    urls.addAll(List.generate(
       count, 
       (i) => getAyahAudioUrl(
         reciterId: reciterId, 
@@ -135,8 +187,13 @@ class AudioRepositoryImpl implements AudioRepository {
         ayahNumber: i + 1,
         quality: quality,
       )
-    );
+    ));
     return Result.success(urls);
+  }
+
+  @override
+  bool shouldPrependBismillah(int surahNumber, String reciterId) {
+    return _needsBismillahPrepend(surahNumber, reciterId);
   }
 
   @override
@@ -182,7 +239,7 @@ class AudioRepositoryImpl implements AudioRepository {
       final audioResult = await getAudioUrl(
         ayah: ayah, 
         reciterId: reciterId, 
-        quality: AudioQuality.high128,
+        quality: AudioQuality.medium128,
       );
       
       if (audioResult.isFailure) return Result.failure(audioResult.failure!);

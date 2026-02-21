@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
@@ -7,22 +5,18 @@ import 'package:fard/features/onboarding/presentation/screens/splash_screen.dart
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:just_audio_background/just_audio_background.dart';
-import 'package:quran_library/quran_library.dart';
 
 void main() async {
   debugPrint('App starting...');
   WidgetsFlutterBinding.ensureInitialized();
   debugPrint('WidgetsFlutterBinding initialized');
-
-  // Initialize Quran Library
-  debugPrint('Initializing QuranLibrary...');
-  await QuranLibrary.init();
-  debugPrint('QuranLibrary initialized');
 
   if (Platform.isAndroid || Platform.isIOS) {
     debugPrint('Initializing JustAudioBackground...');
@@ -74,6 +68,7 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
       providers: [
         BlocProvider(create: (_) => getIt<SettingsCubit>()),
         BlocProvider(create: (_) => getIt<AzkarBloc>()..add(const AzkarEvent.loadCategories())),
+        BlocProvider(create: (_) => getIt<AudioBloc>()),
       ],
       child: BlocBuilder<SettingsCubit, SettingsState>(
         builder: (context, state) {
@@ -83,7 +78,7 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
             onGenerateTitle: (context) => 'Fard',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.darkTheme,
-            home: const SplashScreen(),
+            home: const RootScreen(),
             supportedLocales: AppLocalizations.supportedLocales,
             localizationsDelegates: const [
               AppLocalizations.delegate,
@@ -91,6 +86,14 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
+            builder: (context, child) {
+              return Directionality(
+                textDirection: state.locale.languageCode == 'ar' 
+                    ? TextDirection.rtl 
+                    : TextDirection.ltr,
+                child: child!,
+              );
+            },
           );
         },
       ),

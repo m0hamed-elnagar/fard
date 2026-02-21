@@ -121,7 +121,7 @@ class AudioPlayerBar extends StatelessWidget {
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
                           icon: const Icon(Icons.skip_next_rounded),
-                          onPressed: () => context.read<AudioBloc>().add(AudioEvent.skipToNext()),
+                          onPressed: () => context.read<AudioBloc>().add(AudioEvent.skipToPrevious()),
                         ),
                         const SizedBox(width: 4),
                         // Play/Pause
@@ -151,7 +151,7 @@ class AudioPlayerBar extends StatelessWidget {
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
                           icon: const Icon(Icons.skip_previous_rounded),
-                          onPressed: () => context.read<AudioBloc>().add(AudioEvent.skipToPrevious()),
+                          onPressed: () => context.read<AudioBloc>().add(AudioEvent.skipToNext()),
                         ),
                       ],
                     ),

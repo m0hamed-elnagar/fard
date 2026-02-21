@@ -134,9 +134,10 @@ class HistoryList extends StatelessWidget {
       prayerTimeService.isPassed(s, prayerTimes: prayerTimes, date: record.date)
     ).toList();
 
-    // Actual missed count for the record based on what passed
-    final actualMissedCount = record.missedToday.where((s) => passedPrayers.contains(s)).length;
+    // A prayer is "missed" if it has passed and is NOT completed.
+    final actualMissedCount = passedPrayers.where((s) => !record.completedToday.contains(s)).length;
     final performedToday = record.completedToday.where((s) => passedPrayers.contains(s)).length;
+    final qadaCompletedToday = record.completedQada.values.fold(0, (sum, val) => sum + val);
 
     var totalQada = record.qada.values.fold(0, (sum, c) => sum + c.value);
     final today = DateTime.now();
@@ -206,6 +207,24 @@ class HistoryList extends StatelessWidget {
                         ),
                       ),
                     ),
+                    if (settings.isQadaEnabled && qadaCompletedToday > 0) ...[
+                      const SizedBox(width: 6.0),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryLight.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6.0),
+                        ),
+                        child: Text(
+                          '${l10n.localeName == 'ar' ? 'قضاء' : 'Qada'} $qadaCompletedToday',
+                          style: GoogleFonts.amiri(
+                            color: AppTheme.primaryLight,
+                            fontSize: 11.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                     const SizedBox(width: 6.0),
                     if (actualMissedCount > 0) ...[
                       Container(
@@ -225,6 +244,7 @@ class HistoryList extends StatelessWidget {
                       ),
                     ],
                     const Spacer(),
+                    if (settings.isQadaEnabled)
                     Text(
                       '${l10n.remaining}: $totalQada',
                       style: GoogleFonts.outfit(
@@ -240,7 +260,8 @@ class HistoryList extends StatelessWidget {
                   spacing: 6.0,
                   runSpacing: 6.0,
                   children: passedPrayers.map((s) {
-                    final wasMissed = record.missedToday.contains(s);
+                    final wasCompleted = record.completedToday.contains(s);
+                    final wasMissed = !wasCompleted;
                     
                     return Container(
                       padding: const EdgeInsets.symmetric(

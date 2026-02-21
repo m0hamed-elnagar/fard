@@ -60,9 +60,9 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       final bloc = context.read<PrayerTrackerBloc>();
-      bloc.state.whenOrNull(
-        loaded: (selectedDate, _, __, ___, ____, _____) {
-          bloc.add(PrayerTrackerEvent.load(selectedDate));
+      bloc.state.mapOrNull(
+        loaded: (s) {
+          bloc.add(PrayerTrackerEvent.load(s.selectedDate));
         },
       );
     }
@@ -139,13 +139,14 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
                   color: AppTheme.accent, strokeWidth: 4.0),
             ),
           ),
-          loaded: (selectedDate, missedToday, completedToday, qadaStatus, monthRecords,
+          loaded: (selectedDate, missedToday, completedToday, qadaStatus, completedQadaToday, monthRecords,
                   history) =>
               HomeContent(
             selectedDate: selectedDate,
             missedToday: missedToday,
             completedToday: completedToday,
             qadaStatus: qadaStatus,
+            completedQadaToday: completedQadaToday,
             monthRecords: monthRecords,
             history: history,
           ),

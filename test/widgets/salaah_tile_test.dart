@@ -29,6 +29,7 @@ void main() {
             onAdd: onAdd ?? () {},
             onRemove: onRemove ?? () {},
             onToggleMissed: onToggleMissed ?? () {},
+            completedQadaCount: 0,
           ),
         ),
       );
@@ -88,6 +89,7 @@ void main() {
             onAdd: () {},
             onRemove: () {},
             onToggleMissed: () {},
+            completedQadaCount: 0,
           ),
         ),
       ));

@@ -265,6 +265,7 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
         missedToday: missedToday,
         completedToday: completedToday,
         qadaStatus: qada,
+        completedQadaToday: record?.completedQada ?? {},
         monthRecords: (state is _Loaded) ? (state as _Loaded).monthRecords : {},
         history: (state is _Loaded) ? (state as _Loaded).history : [], 
       );
@@ -362,8 +363,36 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
   Future<void> _onAddQada(_AddQada e, Emitter<PrayerTrackerState> em) async {
     final s = state as _Loaded;
     final qada = Map<Salaah, MissedCounter>.from(s.qadaStatus);
+    final missed = Set<Salaah>.from(s.missedToday);
+    final completed = Set<Salaah>.from(s.completedToday);
+    
+    final now = DateTime.now();
+    final isToday = s.selectedDate.year == now.year &&
+                    s.selectedDate.month == now.month &&
+                    s.selectedDate.day == now.day;
+
+    bool isUndoingTodayRecovery = false;
+    if (isToday && completed.contains(e.prayer)) {
+       // It was completed today, now it's missed again
+       completed.remove(e.prayer);
+       missed.add(e.prayer);
+       isUndoingTodayRecovery = true;
+    }
+
     qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).addMissed();
-    final newState = s.copyWith(qadaStatus: qada);
+    
+    // Decrement completed today ONLY if we weren't just undoing today's missed recovery
+    final completedQada = Map<Salaah, int>.from(s.completedQadaToday);
+    if (!isUndoingTodayRecovery && (completedQada[e.prayer] ?? 0) > 0) {
+      completedQada[e.prayer] = (completedQada[e.prayer] ?? 0) - 1;
+    }
+    
+    final newState = s.copyWith(
+      qadaStatus: qada, 
+      completedQadaToday: completedQada,
+      missedToday: missed,
+      completedToday: completed,
+    );
     em(newState);
     await _saveInternal(newState, em);
   }
@@ -379,15 +408,29 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
                     s.selectedDate.month == now.month &&
                     s.selectedDate.day == now.day;
 
+    bool isRecoveringToday = false;
     if (isToday && missed.contains(e.prayer)) {
       // If user is removing qada for today's prayer that was missed, 
       // it means they prayed it now.
       missed.remove(e.prayer);
       completed.add(e.prayer);
+      isRecoveringToday = true;
     }
     
     qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).removeMissed();
-    final newState = s.copyWith(missedToday: missed, completedToday: completed, qadaStatus: qada);
+    
+    // Increment completed today ONLY if we weren't just recovering today's missed prayer
+    final completedQada = Map<Salaah, int>.from(s.completedQadaToday);
+    if (!isRecoveringToday) {
+      completedQada[e.prayer] = (completedQada[e.prayer] ?? 0) + 1;
+    }
+    
+    final newState = s.copyWith(
+      missedToday: missed, 
+      completedToday: completed, 
+      qadaStatus: qada,
+      completedQadaToday: completedQada,
+    );
     em(newState);
     await _saveInternal(newState, em);
   }
@@ -410,6 +453,7 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
         missedToday: s.missedToday,
         completedToday: s.completedToday,
         qada: s.qadaStatus,
+        completedQada: s.completedQadaToday,
       );
       await _repo.saveToday(record);
 

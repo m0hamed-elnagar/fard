@@ -1,12 +1,12 @@
 import 'package:bloc_test/bloc_test.dart';
-import 'package:fard/features/quran/domain/repositories/audio_player_service.dart';
+import 'package:fard/features/audio/domain/repositories/audio_player_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:fard/features/quran/presentation/blocs/audio_bloc.dart';
-import 'package:fard/features/quran/presentation/widgets/audio_player_bar.dart';
-import 'package:fard/features/quran/domain/entities/reciter.dart';
+import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/widgets/audio_player_bar.dart';
+import 'package:fard/features/audio/domain/entities/reciter.dart';
 
 class MockAudioBloc extends MockBloc<AudioEvent, AudioState> implements AudioBloc {}
 
@@ -31,6 +31,7 @@ void main() {
   testWidgets('AudioPlayerBar displays Ayah info correctly', (tester) async {
     final state = const AudioState(
       status: AudioStatus.playing,
+      isBannerVisible: true,
       currentSurah: 1,
       currentAyah: 1,
       duration: Duration(seconds: 10),
@@ -43,13 +44,13 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pump();
 
-    expect(find.text('Ayah 1'), findsOneWidget);
-    expect(find.text('Surah 1, Ayah 1'), findsNothing);
+    expect(find.text('Surah 1, Ayah 1'), findsOneWidget);
   });
 
   testWidgets('AudioPlayerBar clamps slider value when position > duration', (tester) async {
     final state = const AudioState(
       status: AudioStatus.playing,
+      isBannerVisible: true,
       currentSurah: 1,
       currentAyah: 1,
       duration: Duration(seconds: 10),

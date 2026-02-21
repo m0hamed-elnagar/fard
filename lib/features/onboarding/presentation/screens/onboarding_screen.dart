@@ -198,7 +198,7 @@ class _QadaSelectionPage extends StatelessWidget {
               ),
               value: isEnabled,
               onChanged: onChanged,
-              activeColor: AppTheme.accent,
+              activeThumbColor: AppTheme.accent,
             ),
           ),
         ],

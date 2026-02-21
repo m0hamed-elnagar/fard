@@ -4,9 +4,10 @@ import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_
 import 'package:fard/features/prayer_tracking/presentation/screens/home_screen.dart';
 import 'package:fard/features/prayer_tracking/presentation/screens/qibla_screen.dart';
 import 'package:fard/features/quran/presentation/pages/quran_page.dart';
-import 'package:fard/features/quran_library_wrapper/presentation/pages/quran_library_page.dart';
+import 'package:fard/features/tasbih/presentation/pages/tasbih_page.dart';
 import 'package:fard/features/settings/presentation/screens/settings_screen.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/features/audio/presentation/widgets/audio_player_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -28,8 +29,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     _screens = [
       HomeScreen(showAddQadaOnStart: widget.showAddQadaOnStart),
       const QuranPage(),
-      const QuranLibraryPage(),
       const AzkarCategoriesScreen(),
+      const TasbihPage(),
       const QiblaScreen(),
       const SettingsScreen(),
     ];
@@ -52,9 +53,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ],
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        body: IndexedStack(
-          index: _selectedIndex,
-          children: _screens,
+        body: Column(
+          children: [
+            Expanded(
+              child: IndexedStack(
+                index: _selectedIndex,
+                children: _screens,
+              ),
+            ),
+            const AudioPlayerBar(),
+          ],
         ),
         bottomNavigationBar: NavigationBar(
           selectedIndex: _selectedIndex,
@@ -72,14 +80,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               label: l10n.quranTab,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.library_books_outlined),
-              selectedIcon: const Icon(Icons.library_books_rounded),
-              label: 'المصحف',
-            ),
-            NavigationDestination(
               icon: const Icon(Icons.auto_stories_outlined),
               selectedIcon: const Icon(Icons.auto_stories_rounded),
               label: l10n.azkarTab,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.touch_app_outlined),
+              selectedIcon: const Icon(Icons.touch_app_rounded),
+              label: l10n.tasbihTab,
             ),
             NavigationDestination(
               icon: const Icon(Icons.explore_outlined),

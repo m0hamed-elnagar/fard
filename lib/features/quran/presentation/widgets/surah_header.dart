@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/features/quran/domain/entities/surah.dart';
-import 'package:fard/features/quran/presentation/blocs/audio_bloc.dart';
-import 'package:fard/features/quran/domain/repositories/audio_player_service.dart';
-import 'package:fard/features/quran/presentation/widgets/reciter_selector.dart';
+import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/domain/repositories/audio_player_service.dart';
+import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:fard/core/l10n/app_localizations.dart';
 
 class SurahHeader extends StatelessWidget {
   final Surah surah;
@@ -14,8 +13,6 @@ class SurahHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
@@ -109,7 +106,11 @@ class SurahHeader extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => BlocProvider.value(
         value: context.read<AudioBloc>(),
-        child: const ReciterSelector(),
+        child: const Material(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          clipBehavior: Clip.antiAlias,
+          child: ReciterSelector(),
+        ),
       ),
     );
   }

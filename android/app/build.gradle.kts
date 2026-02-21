@@ -62,7 +62,7 @@ android {
             manifestPlaceholders["appLabel"] = "fard"
         }
         debug {
-            applicationIdSuffix = ".debug"
+            applicationIdSuffix = ".debug1"
             manifestPlaceholders["appLabel"] = "fard (Debug)"
         }
     }

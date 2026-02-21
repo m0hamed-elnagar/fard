@@ -8,6 +8,7 @@ class PrayerTrackerState with _$PrayerTrackerState {
     required Set<Salaah> missedToday,
     @Default({}) Set<Salaah> completedToday,
     required Map<Salaah, MissedCounter> qadaStatus,
+    @Default({}) Map<Salaah, int> completedQadaToday,
     required Map<DateTime, DailyRecord> monthRecords,
     required List<DailyRecord> history,
   }) = _Loaded;

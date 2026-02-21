@@ -149,11 +149,11 @@ void main() {
       );
 
       blocTest<PrayerTrackerBloc, PrayerTrackerState>(
-        'RemoveQada: optimistic update followed by sync reload',
+        'RemoveQada: increments completedQadaToday only for non-today missed prayers',
         build: () => bloc,
         seed: () => PrayerTrackerState.loaded(
           selectedDate: date,
-          missedToday: {},
+          missedToday: {}, // Fajr NOT missed today
           qadaStatus: {for (var s in Salaah.values) s: const MissedCounter(1)},
           monthRecords: {},
           history: [],
@@ -161,11 +161,77 @@ void main() {
         setUp: () {
           when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {date: dummyRecord});
         },
-        act: (bloc) => bloc.add(const PrayerTrackerEvent.removeQada(Salaah.dhuhr)),
+        act: (bloc) => bloc.add(const PrayerTrackerEvent.removeQada(Salaah.fajr)),
         expect: () => [
           isA<PrayerTrackerState>().having(
-            (s) => s.maybeMap(loaded: (l) => l.qadaStatus[Salaah.dhuhr]?.value == 0, orElse: () => false),
-            'qada decremented',
+            (s) => s.maybeMap(
+              loaded: (l) => l.completedQadaToday[Salaah.fajr] == 1,
+              orElse: () => false,
+            ),
+            'completedQadaToday incremented',
+            true,
+          ),
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(loaded: (l) => l.monthRecords.isNotEmpty, orElse: () => false),
+            'month records synced',
+            true,
+          ),
+        ],
+      );
+
+      blocTest<PrayerTrackerBloc, PrayerTrackerState>(
+        'RemoveQada: does NOT increment completedQadaToday when recovering today missed',
+        build: () => bloc,
+        seed: () => PrayerTrackerState.loaded(
+          selectedDate: DateTime.now(), // Today
+          missedToday: {Salaah.fajr}, // Fajr IS missed today
+          qadaStatus: {for (var s in Salaah.values) s: const MissedCounter(1)},
+          monthRecords: {},
+          history: [],
+        ),
+        setUp: () {
+          when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {DateTime.now(): dummyRecord});
+        },
+        act: (bloc) => bloc.add(const PrayerTrackerEvent.removeQada(Salaah.fajr)),
+        expect: () => [
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(
+              loaded: (l) => (l.completedQadaToday[Salaah.fajr] ?? 0) == 0 && l.completedToday.contains(Salaah.fajr),
+              orElse: () => false,
+            ),
+            'completedQadaToday NOT incremented, but completedToday updated',
+            true,
+          ),
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(loaded: (l) => l.monthRecords.isNotEmpty, orElse: () => false),
+            'month records synced',
+            true,
+          ),
+        ],
+      );
+
+      blocTest<PrayerTrackerBloc, PrayerTrackerState>(
+        'AddQada: decrements completedQadaToday (undo removal)',
+        build: () => bloc,
+        seed: () => PrayerTrackerState.loaded(
+          selectedDate: date,
+          missedToday: {},
+          qadaStatus: {for (var s in Salaah.values) s: const MissedCounter(0)},
+          completedQadaToday: {Salaah.fajr: 1},
+          monthRecords: {},
+          history: [],
+        ),
+        setUp: () {
+          when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {date: dummyRecord});
+        },
+        act: (bloc) => bloc.add(const PrayerTrackerEvent.addQada(Salaah.fajr)),
+        expect: () => [
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(
+              loaded: (l) => l.completedQadaToday[Salaah.fajr] == 0,
+              orElse: () => false,
+            ),
+            'completedQadaToday decremented',
             true,
           ),
           isA<PrayerTrackerState>().having(

@@ -13,6 +13,10 @@ class DailyRecordMapper {
           for (final entry in e.qadaValues.entries)
             Salaah.values[entry.key]: MissedCounter(entry.value),
         },
+        completedQada: {
+          for (final entry in (e.completedQadaValues ?? {}).entries)
+            Salaah.values[entry.key]: entry.value,
+        },
       );
 
   static DailyRecordEntity toEntity(DailyRecord m) => DailyRecordEntity(
@@ -21,5 +25,6 @@ class DailyRecordMapper {
         missedIndices: m.missedToday.map((s) => s.index).toList(),
         qadaValues: m.qada.map((k, v) => MapEntry(k.index, v.value)),
         completedIndices: m.completedToday.map((s) => s.index).toList(),
+        completedQadaValues: m.completedQada.map((k, v) => MapEntry(k.index, v)),
       );
 }

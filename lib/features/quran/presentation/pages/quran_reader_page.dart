@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
-import 'package:fard/features/quran/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/widgets/audio_player_bar.dart';
 import 'package:fard/features/quran/presentation/widgets/ayah_text.dart';
 import 'package:fard/features/quran/presentation/widgets/surah_header.dart';
 import 'package:fard/features/quran/presentation/widgets/ayah_detail_sheet.dart';
 import 'package:fard/features/quran/presentation/widgets/reader_settings_sheet.dart';
-import 'package:fard/features/quran/presentation/widgets/audio_player_bar.dart';
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
 import 'package:fard/features/quran/domain/entities/ayah.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -40,9 +40,6 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
             return getIt<ReaderBloc>()
               ..add(ReaderEvent.loadSurah(surahNumber: surahNumResult.data!));
           },
-        ),
-        BlocProvider(
-          create: (context) => getIt<AudioBloc>(),
         ),
       ],
       child: Builder(
@@ -81,125 +78,134 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                 ),
               ],
             ),
-            body: BlocListener<ReaderBloc, ReaderState>(
-              listener: (context, state) {
-                state.mapOrNull(
-                  loaded: (s) {
-                    if (!_hasHandledInitialAyah && widget.initialAyahNumber != null) {
-                      _hasHandledInitialAyah = true;
-                      try {
-                        final ayah = s.surah.ayahs.firstWhere(
-                          (a) => a.number.ayahNumberInSurah == widget.initialAyahNumber
-                        );
-                        context.read<ReaderBloc>().add(ReaderEvent.selectAyah(ayah));
-                      } catch (_) {}
-                    }
-                  },
-                );
-              },
-              child: BlocBuilder<ReaderBloc, ReaderState>(
-                builder: (context, state) {
-                  return state.map(
-                    initial: (_) => const Center(child: CircularProgressIndicator()),
-                    loading: (_) => const Center(child: CircularProgressIndicator()),
-                    error: (e) => Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                            const SizedBox(height: 16),
-                            Text(e.message, textAlign: TextAlign.center),
-                            const SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: () {
-                                 final surahNumResult = SurahNumber.create(widget.surahNumber);
-                                 context.read<ReaderBloc>().add(ReaderEvent.loadSurah(surahNumber: surahNumResult.data!));
-                              },
-                              child: const Text('Retry'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    loaded: (s) {
-                      // Update audio bloc with current surah and first ayah for the player bar
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        context.read<AudioBloc>().add(
-                          AudioEvent.updateCurrentPosition(
-                            surahNumber: s.surah.number.value,
-                            ayahNumber: s.surah.ayahs.isNotEmpty ? s.surah.ayahs.first.number.ayahNumberInSurah : null,
-                          ),
-                        );
-                      });
-                      return GestureDetector(
-                      onScaleStart: (details) {
-                        _baseScale = s.textScale;
-                      },
-                      onScaleUpdate: (details) {
-                        context.read<ReaderBloc>().add(
-                              ReaderEvent.updateScale(_baseScale * details.scale),
-                            );
-                      },
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Column(
-                          children: [
-                            SurahHeader(surah: s.surah),
-                            
-                            // Bismillah logic: 
-                            // - Not for Surah 9 (At-Tawbah)
-                            // - Only if first ayah doesn't already start with it (like Surah 1)
-                            if (widget.surahNumber != 9 && 
-                                s.surah.ayahs.isNotEmpty && 
-                                !s.surah.ayahs.first.uthmaniText.startsWith('بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ'))
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 32.0),
-                                child: Text(
-                                  'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ',
-                                  style: GoogleFonts.amiri(
-                                    fontSize: 32 * s.textScale,
-                                    fontWeight: FontWeight.bold,
+            body: Stack(
+              children: [
+                Positioned.fill(
+                  child: BlocListener<ReaderBloc, ReaderState>(
+                    listener: (context, state) {
+                      state.mapOrNull(
+                        loaded: (s) {
+                          if (!_hasHandledInitialAyah && widget.initialAyahNumber != null) {
+                            _hasHandledInitialAyah = true;
+                            try {
+                              final ayah = s.surah.ayahs.firstWhere(
+                                (a) => a.number.ayahNumberInSurah == widget.initialAyahNumber
+                              );
+                              context.read<ReaderBloc>().add(ReaderEvent.selectAyah(ayah));
+                            } catch (_) {}
+                          }
+                        },
+                      );
+                    },
+                    child: BlocBuilder<ReaderBloc, ReaderState>(
+                      builder: (context, state) {
+                        return state.map(
+                          initial: (_) => const Center(child: CircularProgressIndicator()),
+                          loading: (_) => const Center(child: CircularProgressIndicator()),
+                          error: (e) => Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                                  const SizedBox(height: 16),
+                                  Text(e.message, textAlign: TextAlign.center),
+                                  const SizedBox(height: 16),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                       final surahNumResult = SurahNumber.create(widget.surahNumber);
+                                       context.read<ReaderBloc>().add(ReaderEvent.loadSurah(surahNumber: surahNumResult.data!));
+                                    },
+                                    child: const Text('Retry'),
                                   ),
-                                  textAlign: TextAlign.center,
+                                ],
+                              ),
+                            ),
+                          ),
+                          loaded: (s) {
+                            // Update audio bloc with current surah and first ayah for the player bar
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              context.read<AudioBloc>().add(
+                                AudioEvent.updateCurrentPosition(
+                                  surahNumber: s.surah.number.value,
+                                  ayahNumber: s.surah.ayahs.isNotEmpty ? s.surah.ayahs.first.number.ayahNumberInSurah : null,
+                                ),
+                              );
+                            });
+                            return GestureDetector(
+                              onScaleStart: (details) {
+                                _baseScale = s.textScale;
+                              },
+                              onScaleUpdate: (details) {
+                                context.read<ReaderBloc>().add(
+                                      ReaderEvent.updateScale(_baseScale * details.scale),
+                                    );
+                              },
+                              child: SingleChildScrollView(
+                                padding: const EdgeInsets.all(20.0),
+                                child: Column(
+                                  children: [
+                                    SurahHeader(surah: s.surah),
+                                    
+                                    // Bismillah logic
+                                    if (widget.surahNumber != 9 && 
+                                        s.surah.ayahs.isNotEmpty && 
+                                        !s.surah.ayahs.first.uthmaniText.startsWith('بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ'))
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 32.0),
+                                        child: Text(
+                                          'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ',
+                                          style: GoogleFonts.amiri(
+                                            fontSize: 32 * s.textScale,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                      
+                                    BlocBuilder<AudioBloc, AudioState>(
+                                      builder: (context, audioState) {
+                                        final isThisSurah = audioState.currentSurah == widget.surahNumber;
+                                        final playingAyah = isThisSurah && audioState.isActive 
+                                          ? s.surah.ayahs.firstWhere(
+                                              (a) => a.number.ayahNumberInSurah == audioState.currentAyah,
+                                              orElse: () => s.surah.ayahs.first,
+                                            ) 
+                                          : null;
+
+                                        return AyahText(
+                                          ayahs: s.surah.ayahs,
+                                          highlightedAyah: playingAyah ?? s.highlightedAyah ?? s.lastReadAyah,
+                                          textScale: s.textScale,
+                                          onAyahTap: (ayah) {
+                                            context.read<ReaderBloc>().add(ReaderEvent.selectAyah(ayah));
+                                          },
+                                          onAyahLongPress: (ayah) {
+                                            _showAyahDetail(context, ayah);
+                                          },
+                                        );
+                                      },
+                                    ),
+                                    const SizedBox(height: 100),
+                                  ],
                                 ),
                               ),
-                              
-                            BlocBuilder<AudioBloc, AudioState>(
-                              builder: (context, audioState) {
-                                final isThisSurah = audioState.currentSurah == widget.surahNumber;
-                                final playingAyah = isThisSurah && audioState.isActive 
-                                  ? s.surah.ayahs.firstWhere(
-                                      (a) => a.number.ayahNumberInSurah == audioState.currentAyah,
-                                      orElse: () => s.surah.ayahs.first,
-                                    ) 
-                                  : null;
-
-                                return AyahText(
-                                  ayahs: s.surah.ayahs,
-                                  highlightedAyah: playingAyah ?? s.highlightedAyah ?? s.lastReadAyah,
-                                  textScale: s.textScale,
-                                  onAyahTap: (ayah) {
-                                    context.read<ReaderBloc>().add(ReaderEvent.selectAyah(ayah));
-                                  },
-                                  onAyahLongPress: (ayah) {
-                                    _showAyahDetail(context, ayah);
-                                  },
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 100),
-                          ],
-                        ),
-                      ),
-                    );
-                    },
-                  );
-                },
-              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                const Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: AudioPlayerBar(),
+                ),
+              ],
             ),
-            bottomNavigationBar: const AudioPlayerBar(),
           );
         }
       ),
@@ -207,7 +213,6 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
   }
 
   void _showAyahDetail(BuildContext context, Ayah ayah) {
-    final audioBloc = context.read<AudioBloc>();
     final readerBloc = context.read<ReaderBloc>();
     final readerState = readerBloc.state;
     int? count;
@@ -220,11 +225,8 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => MultiBlocProvider(
-        providers: [
-          BlocProvider.value(value: audioBloc),
-          BlocProvider.value(value: readerBloc),
-        ],
+      builder: (_) => BlocProvider.value(
+        value: readerBloc,
         child: AyahDetailSheet(ayah: ayah, surahAyahCount: count),
       ),
     );

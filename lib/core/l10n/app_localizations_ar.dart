@@ -321,6 +321,118 @@ class AppLocalizationsAr extends AppLocalizations {
   String get quranTab => 'القرآن';
 
   @override
+  String get tasbihTab => 'تسبيح';
+
+  @override
+  String get tasbih => 'المسبحة';
+
+  @override
+  String get selectDhikrCategory => 'اختر فئة الذكر';
+
+  @override
+  String get tasbihSettings => 'إعدادات المسبحة';
+
+  @override
+  String get hapticFeedback => 'الاهتزاز عند اللمس';
+
+  @override
+  String get showTranslation => 'إظهار الترجمة';
+
+  @override
+  String get showTransliteration => 'إظهار النطق';
+
+  @override
+  String get resetCounter => 'إعادة تعيين العداد؟';
+
+  @override
+  String get resetProgressWarning =>
+      'سيؤدي هذا إلى إعادة ضبط تقدمك الحالي إلى الصفر.';
+
+  @override
+  String get finishAndReset => 'إنهاء وإعادة تعيين';
+
+  @override
+  String get errorLoadingTasbih => 'خطأ في تحميل بيانات المسبحة';
+
+  @override
+  String get rememberDua => 'تذكر هذا الدعاء';
+
+  @override
+  String get changeDua => 'تغيير الدعاء';
+
+  @override
+  String get duaSaved => 'تم حفظ الدعاء للمرات القادمة';
+
+  @override
+  String get finish => 'إنهاء';
+
+  @override
+  String get tasbih_after_salah_name => 'الأذكار بعد الصلاة';
+
+  @override
+  String get tasbih_after_salah_desc =>
+      '33 مرة: سبحان الله، الحمد لله، الله أكبر + الدعاء';
+
+  @override
+  String get tasbih_fatimah_name => 'تسبيح الزهراء (عند النوم)';
+
+  @override
+  String get tasbih_fatimah_desc =>
+      '33 مرة: سبحان الله، الحمد لله، و34 مرة: الله أكبر';
+
+  @override
+  String get four_foundations_name => 'الباقيات الصالحات';
+
+  @override
+  String get four_foundations_desc =>
+      'سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر';
+
+  @override
+  String get yunus_dhikr_name => 'دعاء ذي النون';
+
+  @override
+  String get yunus_dhikr_desc => 'لا إله إلا أنت سبحانك إني كنت من الظالمين';
+
+  @override
+  String get morning_evening_name => 'أذكار الصباح والمساء';
+
+  @override
+  String get morning_evening_desc => 'الأذكار اليومية للمسلم';
+
+  @override
+  String get istighfar_name => 'الاستغفار';
+
+  @override
+  String get istighfar_desc => 'طلب المغفرة من الله عز وجل';
+
+  @override
+  String get salat_ibrahimiyyah_name => 'الصلاة الإبراهيمية';
+
+  @override
+  String get salat_ibrahimiyyah_desc => 'الصلاة على النبي صلى الله عليه وسلم';
+
+  @override
+  String get tahlil_takbir_tahmid_name => 'التهليل والتكبير والتحميد';
+
+  @override
+  String get tahlil_takbir_tahmid_desc => 'إعلان التوحيد والتمجيد لله';
+
+  @override
+  String get quran_adhkar_name => 'أذكار من القرآن الكريم';
+
+  @override
+  String get quran_adhkar_desc => 'أدعية من كتاب الله عز وجل';
+
+  @override
+  String get ruqyah_protection_name => 'الرقية والتحصين';
+
+  @override
+  String get ruqyah_protection_desc => 'أدعية الحماية والتحصين من الشرور';
+
+  @override
+  String get chooseCompletionDua => 'اختر دعاء الختام';
+
+  @override
   String get locationWarning =>
       'لا يمكن معرفة مواقيت الصلاة بدون تحديد الموقع.';
 

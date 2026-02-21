@@ -10,12 +10,14 @@ final class DailyRecord extends Equatable {
   final Set<Salaah> missedToday;
   final Set<Salaah> completedToday;
   final Map<Salaah, MissedCounter> qada;
+  final Map<Salaah, int> completedQada;
   const DailyRecord({
     required this.id,
     required this.date,
     required this.missedToday,
     required this.completedToday,
     required this.qada,
+    this.completedQada = const {},
   });
 
   DailyRecord copyWith({
@@ -24,6 +26,7 @@ final class DailyRecord extends Equatable {
     Set<Salaah>? missedToday,
     Set<Salaah>? completedToday,
     Map<Salaah, MissedCounter>? qada,
+    Map<Salaah, int>? completedQada,
   }) {
     return DailyRecord(
       id: id ?? this.id,
@@ -31,9 +34,10 @@ final class DailyRecord extends Equatable {
       missedToday: missedToday ?? this.missedToday,
       completedToday: completedToday ?? this.completedToday,
       qada: qada ?? this.qada,
+      completedQada: completedQada ?? this.completedQada,
     );
   }
 
   @override
-  List<Object> get props => [id, date, missedToday, completedToday, qada];
+  List<Object> get props => [id, date, missedToday, completedToday, qada, completedQada];
 }

@@ -322,6 +322,119 @@ class AppLocalizationsEn extends AppLocalizations {
   String get quranTab => 'Quran';
 
   @override
+  String get tasbihTab => 'Tasbih';
+
+  @override
+  String get tasbih => 'Tasbih';
+
+  @override
+  String get selectDhikrCategory => 'Select Dhikr Category';
+
+  @override
+  String get tasbihSettings => 'Tasbih Settings';
+
+  @override
+  String get hapticFeedback => 'Haptic Feedback';
+
+  @override
+  String get showTranslation => 'Show Translation';
+
+  @override
+  String get showTransliteration => 'Show Transliteration';
+
+  @override
+  String get resetCounter => 'Reset Counter?';
+
+  @override
+  String get resetProgressWarning =>
+      'This will reset your current progress to zero.';
+
+  @override
+  String get finishAndReset => 'Finish & Reset';
+
+  @override
+  String get errorLoadingTasbih => 'Error loading Tasbih data';
+
+  @override
+  String get rememberDua => 'Remember this Dua';
+
+  @override
+  String get changeDua => 'Change Dua';
+
+  @override
+  String get duaSaved => 'Dua saved for next time';
+
+  @override
+  String get finish => 'Finish';
+
+  @override
+  String get tasbih_after_salah_name => 'Tasbih after Salah';
+
+  @override
+  String get tasbih_after_salah_desc =>
+      '33x SubhanAllah, Alhamdulillah, Allahu Akbar + Dua';
+
+  @override
+  String get tasbih_fatimah_name => 'Tasbih Fatimah (Bedtime)';
+
+  @override
+  String get tasbih_fatimah_desc =>
+      '33x SubhanAllah, 33x Alhamdulillah, 34x Allahu Akbar';
+
+  @override
+  String get four_foundations_name => 'The Four Foundations';
+
+  @override
+  String get four_foundations_desc =>
+      'SubhanAllah, Alhamdulillah, La ilaha illallah, Allahu Akbar';
+
+  @override
+  String get yunus_dhikr_name => 'Dhikr of Prophet Yunus';
+
+  @override
+  String get yunus_dhikr_desc => 'La ilaha illa anta subhanaka...';
+
+  @override
+  String get morning_evening_name => 'Morning & Evening Adhkar';
+
+  @override
+  String get morning_evening_desc =>
+      'Daily remembrances for morning and evening';
+
+  @override
+  String get istighfar_name => 'Istighfar';
+
+  @override
+  String get istighfar_desc => 'Seeking Allah\'s forgiveness';
+
+  @override
+  String get salat_ibrahimiyyah_name => 'Salat Ibrahimiyyah';
+
+  @override
+  String get salat_ibrahimiyyah_desc => 'Salutations upon the Prophet (PBUH)';
+
+  @override
+  String get tahlil_takbir_tahmid_name => 'Tahlil, Takbir & Tahmid';
+
+  @override
+  String get tahlil_takbir_tahmid_desc => 'Fundamental declarations of faith';
+
+  @override
+  String get quran_adhkar_name => 'Adhkar from Quran';
+
+  @override
+  String get quran_adhkar_desc => 'Supplications directly from the Quran';
+
+  @override
+  String get ruqyah_protection_name => 'Ruqyah & Protection';
+
+  @override
+  String get ruqyah_protection_desc => 'Supplications for protection from harm';
+
+  @override
+  String get chooseCompletionDua => 'Choose Completion Dua';
+
+  @override
   String get locationWarning =>
       'Prayer times cannot be calculated without your location.';
 

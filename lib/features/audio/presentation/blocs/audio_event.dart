@@ -18,10 +18,15 @@ abstract class AudioEvent extends Equatable {
   static AudioEvent resume() => const Resume();
   static AudioEvent stop() => const Stop();
   static AudioEvent seekTo(Duration position) => SeekTo(position);
+  static AudioEvent skipToNext() => const SkipToNext();
+  static AudioEvent skipToPrevious() => const SkipToPrevious();
   static AudioEvent changeSpeed(double speed) => ChangeSpeed(speed);
   static AudioEvent toggleRepeat() => const ToggleRepeat();
   static AudioEvent changePlaybackMode(AudioPlayMode mode) => ChangePlaybackMode(mode);
+  static AudioEvent changeQuality(AudioQuality quality) => ChangeQuality(quality);
+  static AudioEvent hideBanner() => const HideBanner();
   static AudioEvent statusChanged(AudioStatus status) => StatusChanged(status);
+  static AudioEvent lastErrorChanged(String? error) => LastErrorChanged(error);
   static AudioEvent positionChanged(Duration position) => PositionChanged(position);
   static AudioEvent durationChanged(Duration duration) => DurationChanged(duration);
   static AudioEvent indexChanged(int? index) => IndexChanged(index);
@@ -90,6 +95,14 @@ class SeekTo extends AudioEvent {
   List<Object?> get props => [position];
 }
 
+class SkipToNext extends AudioEvent {
+  const SkipToNext();
+}
+
+class SkipToPrevious extends AudioEvent {
+  const SkipToPrevious();
+}
+
 class ChangeSpeed extends AudioEvent {
   final double speed;
   const ChangeSpeed(this.speed);
@@ -108,11 +121,29 @@ class ChangePlaybackMode extends AudioEvent {
   List<Object?> get props => [mode];
 }
 
+class ChangeQuality extends AudioEvent {
+  final AudioQuality quality;
+  const ChangeQuality(this.quality);
+  @override
+  List<Object?> get props => [quality];
+}
+
+class HideBanner extends AudioEvent {
+  const HideBanner();
+}
+
 class StatusChanged extends AudioEvent {
   final AudioStatus status;
   const StatusChanged(this.status);
   @override
   List<Object?> get props => [status];
+}
+
+class LastErrorChanged extends AudioEvent {
+  final String? error;
+  const LastErrorChanged(this.error);
+  @override
+  List<Object?> get props => [error];
 }
 
 class PositionChanged extends AudioEvent {
@@ -147,10 +178,15 @@ extension AudioEventMapper on AudioEvent {
     required R Function(Resume) resume,
     required R Function(Stop) stop,
     required R Function(SeekTo) seekTo,
+    required R Function(SkipToNext) skipToNext,
+    required R Function(SkipToPrevious) skipToPrevious,
     required R Function(ChangeSpeed) changeSpeed,
     required R Function(ToggleRepeat) toggleRepeat,
     required R Function(ChangePlaybackMode) changePlaybackMode,
+    required R Function(ChangeQuality) changeQuality,
+    required R Function(HideBanner) hideBanner,
     required R Function(StatusChanged) statusChanged,
+    required R Function(LastErrorChanged) lastErrorChanged,
     required R Function(PositionChanged) positionChanged,
     required R Function(DurationChanged) durationChanged,
     required R Function(IndexChanged) indexChanged,
@@ -166,10 +202,15 @@ extension AudioEventMapper on AudioEvent {
     if (event is Resume) return resume(event);
     if (event is Stop) return stop(event);
     if (event is SeekTo) return seekTo(event);
+    if (event is SkipToNext) return skipToNext(event);
+    if (event is SkipToPrevious) return skipToPrevious(event);
     if (event is ChangeSpeed) return changeSpeed(event);
     if (event is ToggleRepeat) return toggleRepeat(event);
     if (event is ChangePlaybackMode) return changePlaybackMode(event);
+    if (event is ChangeQuality) return changeQuality(event);
+    if (event is HideBanner) return hideBanner(event);
     if (event is StatusChanged) return statusChanged(event);
+    if (event is LastErrorChanged) return lastErrorChanged(event);
     if (event is PositionChanged) return positionChanged(event);
     if (event is DurationChanged) return durationChanged(event);
     if (event is IndexChanged) return indexChanged(event);

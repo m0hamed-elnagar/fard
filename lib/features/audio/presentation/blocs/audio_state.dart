@@ -7,11 +7,14 @@ class AudioState extends Equatable {
   final int? currentAyah;
   final List<Reciter> availableReciters;
   final AudioPlayMode mode;
+  final AudioQuality quality;
   final Duration position;
   final Duration duration;
   final double speed;
   final bool isRepeating;
+  final bool isBannerVisible;
   final String? error;
+  final String? lastErrorMessage;
 
   const AudioState({
     this.status = AudioStatus.idle,
@@ -20,11 +23,14 @@ class AudioState extends Equatable {
     this.currentAyah,
     this.availableReciters = const [],
     this.mode = AudioPlayMode.ayah,
+    this.quality = AudioQuality.medium128,
     this.position = Duration.zero,
     this.duration = Duration.zero,
     this.speed = 1.0,
     this.isRepeating = false,
+    this.isBannerVisible = false,
     this.error,
+    this.lastErrorMessage,
   });
 
   AudioState copyWith({
@@ -34,11 +40,14 @@ class AudioState extends Equatable {
     int? currentAyah,
     List<Reciter>? availableReciters,
     AudioPlayMode? mode,
+    AudioQuality? quality,
     Duration? position,
     Duration? duration,
     double? speed,
     bool? isRepeating,
+    bool? isBannerVisible,
     String? error,
+    String? lastErrorMessage,
   }) {
     return AudioState(
       status: status ?? this.status,
@@ -47,11 +56,14 @@ class AudioState extends Equatable {
       currentAyah: currentAyah ?? this.currentAyah,
       availableReciters: availableReciters ?? this.availableReciters,
       mode: mode ?? this.mode,
+      quality: quality ?? this.quality,
       position: position ?? this.position,
       duration: duration ?? this.duration,
       speed: speed ?? this.speed,
       isRepeating: isRepeating ?? this.isRepeating,
+      isBannerVisible: isBannerVisible ?? this.isBannerVisible,
       error: error ?? this.error,
+      lastErrorMessage: lastErrorMessage ?? this.lastErrorMessage,
     );
   }
 
@@ -63,11 +75,14 @@ class AudioState extends Equatable {
         currentAyah,
         availableReciters,
         mode,
+        quality,
         position,
         duration,
         speed,
         isRepeating,
+        isBannerVisible,
         error,
+        lastErrorMessage,
       ];
 }
 

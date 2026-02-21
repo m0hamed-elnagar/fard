@@ -692,6 +692,222 @@ abstract class AppLocalizations {
   /// **'Quran'**
   String get quranTab;
 
+  /// No description provided for @tasbihTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasbih'**
+  String get tasbihTab;
+
+  /// No description provided for @tasbih.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasbih'**
+  String get tasbih;
+
+  /// No description provided for @selectDhikrCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Dhikr Category'**
+  String get selectDhikrCategory;
+
+  /// No description provided for @tasbihSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasbih Settings'**
+  String get tasbihSettings;
+
+  /// No description provided for @hapticFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Haptic Feedback'**
+  String get hapticFeedback;
+
+  /// No description provided for @showTranslation.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Translation'**
+  String get showTranslation;
+
+  /// No description provided for @showTransliteration.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Transliteration'**
+  String get showTransliteration;
+
+  /// No description provided for @resetCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Counter?'**
+  String get resetCounter;
+
+  /// No description provided for @resetProgressWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This will reset your current progress to zero.'**
+  String get resetProgressWarning;
+
+  /// No description provided for @finishAndReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish & Reset'**
+  String get finishAndReset;
+
+  /// No description provided for @errorLoadingTasbih.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading Tasbih data'**
+  String get errorLoadingTasbih;
+
+  /// No description provided for @rememberDua.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember this Dua'**
+  String get rememberDua;
+
+  /// No description provided for @changeDua.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Dua'**
+  String get changeDua;
+
+  /// No description provided for @duaSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Dua saved for next time'**
+  String get duaSaved;
+
+  /// No description provided for @finish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get finish;
+
+  /// No description provided for @tasbih_after_salah_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasbih after Salah'**
+  String get tasbih_after_salah_name;
+
+  /// No description provided for @tasbih_after_salah_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'33x SubhanAllah, Alhamdulillah, Allahu Akbar + Dua'**
+  String get tasbih_after_salah_desc;
+
+  /// No description provided for @tasbih_fatimah_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasbih Fatimah (Bedtime)'**
+  String get tasbih_fatimah_name;
+
+  /// No description provided for @tasbih_fatimah_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'33x SubhanAllah, 33x Alhamdulillah, 34x Allahu Akbar'**
+  String get tasbih_fatimah_desc;
+
+  /// No description provided for @four_foundations_name.
+  ///
+  /// In en, this message translates to:
+  /// **'The Four Foundations'**
+  String get four_foundations_name;
+
+  /// No description provided for @four_foundations_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'SubhanAllah, Alhamdulillah, La ilaha illallah, Allahu Akbar'**
+  String get four_foundations_desc;
+
+  /// No description provided for @yunus_dhikr_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Dhikr of Prophet Yunus'**
+  String get yunus_dhikr_name;
+
+  /// No description provided for @yunus_dhikr_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'La ilaha illa anta subhanaka...'**
+  String get yunus_dhikr_desc;
+
+  /// No description provided for @morning_evening_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning & Evening Adhkar'**
+  String get morning_evening_name;
+
+  /// No description provided for @morning_evening_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily remembrances for morning and evening'**
+  String get morning_evening_desc;
+
+  /// No description provided for @istighfar_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Istighfar'**
+  String get istighfar_name;
+
+  /// No description provided for @istighfar_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeking Allah\'s forgiveness'**
+  String get istighfar_desc;
+
+  /// No description provided for @salat_ibrahimiyyah_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Salat Ibrahimiyyah'**
+  String get salat_ibrahimiyyah_name;
+
+  /// No description provided for @salat_ibrahimiyyah_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Salutations upon the Prophet (PBUH)'**
+  String get salat_ibrahimiyyah_desc;
+
+  /// No description provided for @tahlil_takbir_tahmid_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Tahlil, Takbir & Tahmid'**
+  String get tahlil_takbir_tahmid_name;
+
+  /// No description provided for @tahlil_takbir_tahmid_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Fundamental declarations of faith'**
+  String get tahlil_takbir_tahmid_desc;
+
+  /// No description provided for @quran_adhkar_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Adhkar from Quran'**
+  String get quran_adhkar_name;
+
+  /// No description provided for @quran_adhkar_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplications directly from the Quran'**
+  String get quran_adhkar_desc;
+
+  /// No description provided for @ruqyah_protection_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Ruqyah & Protection'**
+  String get ruqyah_protection_name;
+
+  /// No description provided for @ruqyah_protection_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplications for protection from harm'**
+  String get ruqyah_protection_desc;
+
+  /// No description provided for @chooseCompletionDua.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Completion Dua'**
+  String get chooseCompletionDua;
+
   /// No description provided for @locationWarning.
   ///
   /// In en, this message translates to:

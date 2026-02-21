@@ -9,7 +9,11 @@ import 'package:fard/features/prayer_tracking/data/prayer_repo_impl.dart';
 import 'package:fard/features/prayer_tracking/domain/prayer_repo.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/quran/injection.dart';
+import 'package:fard/features/audio/injection.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
+import 'package:fard/features/tasbih/data/tasbih_repository_impl.dart';
+import 'package:fard/features/tasbih/domain/tasbih_repository.dart';
+import 'package:fard/features/tasbih/presentation/bloc/tasbih_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -47,6 +51,9 @@ Future<void> configureDependencies({String? hivePath}) async {
   debugPrint('configureDependencies: Opening boxes...');
   final box = await Hive.openBox<DailyRecordEntity>('daily_records');
   final azkarBox = await Hive.openBox<int>('azkar_progress');
+  final tasbihProgressBox = await Hive.openBox<int>('tasbih_progress');
+  final tasbihHistoryBox = await Hive.openBox<int>('tasbih_history');
+  final tasbihPreferredDuaBox = await Hive.openBox<String>('tasbih_preferred_dua');
   debugPrint('configureDependencies: Boxes opened');
   
   debugPrint('configureDependencies: Getting SharedPreferences...');
@@ -61,7 +68,17 @@ Future<void> configureDependencies({String? hivePath}) async {
   getIt.registerSingleton<VoiceDownloadService>(VoiceDownloadService());
   getIt.registerSingleton<AzkarRepository>(AzkarRepository(azkarBox));
   getIt.registerSingleton<PrayerRepo>(PrayerRepoImpl(box));
+  getIt.registerSingleton<TasbihRepository>(TasbihRepositoryImpl(
+    tasbihProgressBox, 
+    tasbihHistoryBox, 
+    tasbihPreferredDuaBox,
+    prefs,
+  ));
   
+  debugPrint('configureDependencies: Initializing Audio Feature...');
+  await initAudioFeature();
+  debugPrint('configureDependencies: Audio Feature initialized');
+
   debugPrint('configureDependencies: Initializing Quran Feature...');
   // Initialize Quran Feature (DDD)
   await initQuranFeature();
@@ -79,6 +96,7 @@ Future<void> configureDependencies({String? hivePath}) async {
         getIt(),
       ));
   getIt.registerSingleton<AzkarBloc>(AzkarBloc(getIt()));
+  getIt.registerFactory<TasbihBloc>(() => TasbihBloc(getIt()));
   // Note: QuranBloc is now replaced by ReaderBloc in initQuranFeature()
   // But we might still need it if QuranPage is not yet refactored.
   // I'll keep it for now but point to the new repository if possible, 

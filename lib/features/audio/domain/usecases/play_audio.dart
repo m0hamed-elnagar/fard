@@ -1,7 +1,7 @@
 import 'package:fard/core/errors/failure.dart';
 import 'package:fard/core/usecases/usecase.dart';
-import 'package:fard/features/quran/domain/repositories/audio_repository.dart';
-import 'package:fard/features/quran/domain/repositories/audio_player_service.dart';
+import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
+import 'package:fard/features/audio/domain/repositories/audio_player_service.dart';
 import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
 
 class PlayAudio implements UseCase<void, PlayAudioParams> {
@@ -56,7 +56,7 @@ class PlayAudioParams {
   const PlayAudioParams({
     required this.ayah,
     required this.reciterId,
-    this.quality = AudioQuality.medium64,
+    this.quality = AudioQuality.low64,
     this.audioUrl,
     this.mode = AudioPlayMode.ayah,
   });

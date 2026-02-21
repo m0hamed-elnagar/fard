@@ -36,8 +36,8 @@ dependencies:
   flutter_timezone: ^5.0.1
   flutter_compass: ^0.8.1
   just_audio: ^0.10.5
+  just_audio_windows: ^0.2.2
   just_audio_background: ^0.0.1-beta.15
-  quran_library: 3.0.1
 
 dev_dependencies:
   flutter_test:
@@ -59,3 +59,4 @@ flutter:
   generate: true
   assets:
     - assets/azkar.json
+    - assets/tasbih_data.json

@@ -12,6 +12,8 @@ class SalaahTile extends StatefulWidget {
 
   final int qadaCount;
 
+  final int completedQadaCount;
+
   final bool isMissedToday;
 
   final bool isCompletedToday;
@@ -37,6 +39,8 @@ class SalaahTile extends StatefulWidget {
     required this.salaah,
 
     required this.qadaCount,
+
+    required this.completedQadaCount,
 
     required this.isMissedToday,
 
@@ -175,15 +179,15 @@ class _SalaahTileState extends State<SalaahTile> {
 
                           onPressed: widget.isUpcoming ? null : () {
 
-                            if (_removedInSession > 0) {
+                            if (_removedInSession > 0 || widget.completedQadaCount > 0) {
 
                               widget.onAdd();
 
-                              setState(() {
-
-                                _removedInSession--;
-
-                              });
+                              if (_removedInSession > 0) {
+                                setState(() {
+                                  _removedInSession--;
+                                });
+                              }
 
                             } else {
 
@@ -303,51 +307,82 @@ class _SalaahTileState extends State<SalaahTile> {
 
                 // Qada Count Display
                 if (widget.isQadaEnabled)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  decoration: BoxDecoration(
-                    color: widget.qadaCount > 0 
-                      ? AppTheme.accent.withValues(alpha: 0.1)
-                      : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12.0),
-                    border: Border.all(
-                      color: widget.qadaCount > 0 
-                        ? AppTheme.accent.withValues(alpha: 0.3)
-                        : Colors.transparent,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.completedQadaCount > 0)
+                      Container(
+                        margin: const EdgeInsets.only(right: 8.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryLight.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10.0),
+                          border: Border.all(
+                            color: AppTheme.primaryLight.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${widget.completedQadaCount}',
+                              style: GoogleFonts.outfit(
+                                color: AppTheme.primaryLight,
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            Text(
+                              l10n.localeName == 'ar' ? 'تم' : 'Done',
+                              style: GoogleFonts.outfit(
+                                color: AppTheme.primaryLight.withValues(alpha: 0.7),
+                                fontSize: 9.0,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      decoration: BoxDecoration(
+                        color: widget.qadaCount > 0 
+                          ? AppTheme.accent.withValues(alpha: 0.1)
+                          : Colors.transparent,
+                        borderRadius: BorderRadius.circular(12.0),
+                        border: Border.all(
+                          color: widget.qadaCount > 0 
+                            ? AppTheme.accent.withValues(alpha: 0.3)
+                            : Colors.transparent,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${widget.qadaCount}',
+                            style: GoogleFonts.outfit(
+                              color: widget.qadaCount > 0
+                                  ? AppTheme.accent
+                                  : AppTheme.textSecondary,
+                              fontSize: 24.0,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(
+                            l10n.remaining.toLowerCase(),
+                            style: GoogleFonts.outfit(
+                              color: widget.qadaCount > 0
+                                  ? AppTheme.accent.withValues(alpha: 0.7)
+                                  : AppTheme.neutral,
+                              fontSize: 10.0,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${widget.qadaCount}',
-                        style: GoogleFonts.outfit(
-                          color: widget.qadaCount > 0
-                              ? AppTheme.accent
-                              : AppTheme.textSecondary,
-                          fontSize: 24.0,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      Text(
-                        '${l10n.remaining}: ${widget.qadaCount}',
-                        style: GoogleFonts.outfit(
-                          color: Colors.transparent,
-                          fontSize: 0.01,
-                        ),
-                      ),
-                      Text(
-                        l10n.remaining.toLowerCase(),
-                        style: GoogleFonts.outfit(
-                          color: widget.qadaCount > 0
-                              ? AppTheme.accent.withValues(alpha: 0.7)
-                              : AppTheme.neutral,
-                          fontSize: 10.0,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
               ],
             ),

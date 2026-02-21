@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/features/quran/domain/entities/ayah.dart';
 import 'package:fard/features/quran/domain/usecases/get_tafsir.dart';
-import 'package:fard/features/quran/presentation/blocs/audio_bloc.dart';
-import 'package:fard/features/quran/domain/repositories/audio_player_service.dart';
-import 'package:fard/features/quran/presentation/widgets/reciter_selector.dart';
+import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/domain/repositories/audio_player_service.dart';
+import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
 import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
@@ -45,45 +45,79 @@ class AyahDetailSheet extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+                  child: Column(
                     children: [
-                      Text(
-                        '${l10n.ayah} ${ayah.number.ayahNumberInSurah}',
-                        style: GoogleFonts.outfit(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Spacer(),
-                      BlocBuilder<ReaderBloc, ReaderState>(
-                        builder: (context, state) {
-                          final isLastRead = state.maybeMap(
-                            loaded: (s) => s.lastReadAyah?.number == ayah.number,
-                            orElse: () => false,
-                          );
-
-                          return IconButton(
-                            icon: Icon(
-                              isLastRead ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-                              color: isLastRead ? Theme.of(context).colorScheme.primary : null,
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(20),
                             ),
-                            tooltip: 'Mark as last read',
-                            onPressed: () {
-                              context.read<ReaderBloc>().add(ReaderEvent.saveLastRead(ayah));
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Marked as last read'),
-                                  duration: Duration(seconds: 1),
+                            child: Text(
+                              '${l10n.ayah} ${ayah.number.ayahNumberInSurah}',
+                              style: GoogleFonts.outfit(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
+                          BlocBuilder<ReaderBloc, ReaderState>(
+                            builder: (context, state) {
+                              final isLastRead = state.maybeMap(
+                                loaded: (s) => s.lastReadAyah?.number == ayah.number,
+                                orElse: () => false,
+                              );
+
+                              return IconButton(
+                                icon: Icon(
+                                  isLastRead ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                                  color: isLastRead ? Theme.of(context).colorScheme.primary : null,
                                 ),
+                                tooltip: 'Mark as last read',
+                                onPressed: () {
+                                  context.read<ReaderBloc>().add(ReaderEvent.saveLastRead(ayah));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Marked as last read'),
+                                      duration: Duration(seconds: 1),
+                                    ),
+                                  );
+                                },
                               );
                             },
-                          );
-                        },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
+                      const SizedBox(height: 16),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        child: Text(
+                          ayah.uthmaniText,
+                          style: GoogleFonts.amiri(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            height: 1.6,
+                          ),
+                          textAlign: TextAlign.center,
+                          textDirection: TextDirection.rtl,
+                        ),
                       ),
                     ],
                   ),
@@ -150,27 +184,9 @@ class _TafsirTab extends StatelessWidget {
         
         return ListView(
           controller: controller,
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                ayah.uthmaniText,
-                style: GoogleFonts.amiri(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  height: 1.6,
-                ),
-                textAlign: TextAlign.center,
-                textDirection: TextDirection.rtl,
-              ),
-            ),
-            const SizedBox(height: 24),
-             Text(
+            Text(
               _cleanHtml(tafsir),
               style: GoogleFonts.amiri(
                 fontSize: 20,
@@ -232,8 +248,11 @@ class _AudioTab extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 24,
+              runSpacing: 16,
               children: [
                 _AudioButton(
                   icon: Icons.repeat_one_rounded,
@@ -246,32 +265,32 @@ class _AudioTab extends StatelessWidget {
                     ));
                   },
                 ),
-                const SizedBox(width: 32),
                 Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      width: 80,
-                      height: 80,
+                      width: 72,
+                      height: 72,
                       decoration: BoxDecoration(
                         color: isError ? Colors.red : Theme.of(context).colorScheme.primary,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
                             color: (isError ? Colors.red : Theme.of(context).colorScheme.primary).withValues(alpha: 0.3),
-                            blurRadius: 12,
+                            blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
                         ],
                       ),
                       child: isLoading 
                         ? const Padding(
-                            padding: EdgeInsets.all(20.0),
+                            padding: EdgeInsets.all(18.0),
                             child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
                           )
                         : IconButton(
                             icon: Icon(
                               isError ? Icons.refresh_rounded : (isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded), 
-                              size: 48, 
+                              size: 40, 
                               color: Colors.white
                             ),
                             onPressed: () {
@@ -293,11 +312,11 @@ class _AudioTab extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       isPlaying ? 'إيقاف مؤقت' : 'تشغيل السورة',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                      maxLines: 1,
                     ),
                   ],
                 ),
-                const SizedBox(width: 32),
                 _AudioButton(
                   icon: Icons.stop_rounded,
                   label: 'إيقاف',

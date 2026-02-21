@@ -1,13 +1,13 @@
 import 'package:fard/core/errors/failure.dart';
 import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
-import 'package:fard/features/quran/domain/entities/reciter.dart';
+import 'package:fard/features/audio/domain/entities/reciter.dart';
 import 'package:equatable/equatable.dart';
 
 enum AudioQuality {
-  low32('32'),
-  medium64('64'),
-  high128('128');
+  low64('64'),
+  medium128('128'),
+  high192('192');
   
   final String kbps;
   const AudioQuality(this.kbps);
@@ -22,7 +22,7 @@ abstract interface class AudioRepository {
     required String reciterId, // e.g., 'ar.alafasy'
     required int surahNumber,
     required int ayahNumber,
-    AudioQuality quality = AudioQuality.high128,
+    AudioQuality quality = AudioQuality.medium128,
   });
   
   /// Get list of URLs for full surah playback
@@ -30,8 +30,10 @@ abstract interface class AudioRepository {
     required String reciterId,
     required int surahNumber,
     int? ayahCount,
-    AudioQuality quality = AudioQuality.high128,
+    AudioQuality quality = AudioQuality.medium128,
   });
+
+  bool shouldPrependBismillah(int surahNumber, String reciterId);
 
   Future<Result<AudioSource>> getAudioUrl({
     required AyahNumber ayah,

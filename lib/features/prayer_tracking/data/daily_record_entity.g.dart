@@ -22,13 +22,14 @@ class DailyRecordEntityAdapter extends TypeAdapter<DailyRecordEntity> {
       missedIndices: (fields[2] as List).cast<int>(),
       qadaValues: (fields[3] as Map).cast<int, int>(),
       completedIndices: (fields[4] as List?)?.cast<int>(),
+      completedQadaValues: (fields[5] as Map?)?.cast<int, int>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, DailyRecordEntity obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class DailyRecordEntityAdapter extends TypeAdapter<DailyRecordEntity> {
       ..writeByte(3)
       ..write(obj.qadaValues)
       ..writeByte(4)
-      ..write(obj.completedIndices);
+      ..write(obj.completedIndices)
+      ..writeByte(5)
+      ..write(obj.completedQadaValues);
   }
 
   @override
