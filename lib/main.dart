@@ -12,6 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 void main() async {
   debugPrint('App starting...');
@@ -72,26 +73,28 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
       ],
       child: BlocBuilder<SettingsCubit, SettingsState>(
         builder: (context, state) {
-          return MaterialApp(
-            navigatorKey: getIt<GlobalKey<NavigatorState>>(),
-            locale: state.locale,
-            onGenerateTitle: (context) => 'Fard',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.darkTheme,
-            home: const RootScreen(),
-            supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
+          return ScreenUtilInit(
+            designSize: const Size(360, 690),
+            minTextAdapt: true,
+            splitScreenMode: true,
             builder: (context, child) {
-              return Directionality(
-                textDirection: state.locale.languageCode == 'ar' 
-                    ? TextDirection.rtl 
-                    : TextDirection.ltr,
-                child: child!,
+              return MaterialApp(
+                navigatorKey: getIt<GlobalKey<NavigatorState>>(),
+                locale: state.locale,
+                onGenerateTitle: (context) => 'Fard',
+                debugShowCheckedModeBanner: false,
+                theme: AppTheme.darkTheme,
+                home: const RootScreen(),
+                supportedLocales: AppLocalizations.supportedLocales,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                builder: (context, child) {
+                  return child!;
+                },
               );
             },
           );

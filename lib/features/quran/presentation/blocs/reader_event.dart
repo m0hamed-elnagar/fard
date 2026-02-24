@@ -17,4 +17,10 @@ class ReaderEvent with _$ReaderEvent {
   const factory ReaderEvent.saveLastRead(Ayah ayah) = _SaveLastRead;
   
   const factory ReaderEvent.updateScale(double scale) = _UpdateScale;
+
+  const factory ReaderEvent.toggleBookmark(Ayah ayah) = _ToggleBookmark;
+  
+  const factory ReaderEvent.checkBookmarkStatus(AyahNumber ayahNumber) = _CheckBookmarkStatus;
+
+  const factory ReaderEvent.updateTafsir(int tafsirId) = _UpdateTafsir;
 }

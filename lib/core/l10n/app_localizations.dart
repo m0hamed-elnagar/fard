@@ -716,6 +716,18 @@ abstract class AppLocalizations {
   /// **'Tasbih Settings'**
   String get tasbihSettings;
 
+  /// No description provided for @customTasbihTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Target'**
+  String get customTasbihTarget;
+
+  /// No description provided for @customTasbihTargetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Default: {count}'**
+  String customTasbihTargetHint(int count);
+
   /// No description provided for @hapticFeedback.
   ///
   /// In en, this message translates to:

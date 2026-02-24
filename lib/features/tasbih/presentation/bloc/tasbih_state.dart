@@ -13,6 +13,7 @@ sealed class TasbihState with _$TasbihState {
     @Default(false) bool isLoading,
     String? error,
     @Default(false) bool duaRemembered,
+    int? customTasbihTarget,
   }) = _TasbihState;
 
   factory TasbihState.initial() => TasbihState(

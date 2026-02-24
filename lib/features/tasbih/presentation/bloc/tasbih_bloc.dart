@@ -22,6 +22,7 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
     on<_ToggleTransliteration>(_onToggleTransliteration);
     on<_SelectCompletionDua>(_onSelectCompletionDua);
     on<_RememberCompletionDua>(_onRememberCompletionDua);
+    on<_UpdateCustomTarget>(_onUpdateCustomTarget);
   }
 
   Future<void> _onLoadData(_LoadData event, Emitter<TasbihState> emit) async {
@@ -46,6 +47,7 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
         totalCount: progress,
         currentCycleCount: progress == 0 ? 0 : (progress - 1) % defaultCategory.countsPerCycle + 1,
         currentCycleIndex: progress == 0 ? 0 : (progress - 1) ~/ defaultCategory.countsPerCycle,
+        customTasbihTarget: data.settings.customTasbihTarget,
       ));
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: e.toString()));
@@ -73,6 +75,7 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
       currentCycleIndex: progress == 0 ? 0 : (progress - 1) ~/ category.countsPerCycle,
       showCompletionDua: false,
       duaRemembered: false,
+      customTasbihTarget: state.data.settings.customTasbihTarget, // Keep the custom target across categories
     ));
   }
 
@@ -105,9 +108,10 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
         }
       }
     } else {
-      final targetCount = state.currentCategory.items.isNotEmpty 
-          ? state.currentCategory.items.first.targetCount 
-          : 33;
+      final targetCount = state.customTasbihTarget ?? 
+                           (state.currentCategory.items.isNotEmpty 
+                           ? state.currentCategory.items.first.targetCount 
+                           : 33);
           
       if (nextTotalCount >= targetCount) {
         emit(state.copyWith(
@@ -182,5 +186,14 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
     final newSettings = state.data.settings.copyWith(showTransliteration: !state.data.settings.showTransliteration);
     await _repository.saveSettings(newSettings);
     emit(state.copyWith(data: state.data.copyWith(settings: newSettings)));
+  }
+
+  Future<void> _onUpdateCustomTarget(_UpdateCustomTarget event, Emitter<TasbihState> emit) async {
+    final newSettings = state.data.settings.copyWith(customTasbihTarget: event.target);
+    await _repository.saveSettings(newSettings);
+    emit(state.copyWith(
+      data: state.data.copyWith(settings: newSettings),
+      customTasbihTarget: event.target,
+    ));
   }
 }

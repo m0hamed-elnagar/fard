@@ -12,4 +12,5 @@ class TasbihEvent with _$TasbihEvent {
   const factory TasbihEvent.toggleTransliteration() = _ToggleTransliteration;
   const factory TasbihEvent.selectCompletionDua(String duaId) = _SelectCompletionDua;
   const factory TasbihEvent.rememberCompletionDua() = _RememberCompletionDua;
+  const factory TasbihEvent.updateCustomTarget(int? target) = _UpdateCustomTarget;
 }

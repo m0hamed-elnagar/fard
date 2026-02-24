@@ -121,6 +121,7 @@ _TasbihSettings _$TasbihSettingsFromJson(Map<String, dynamic> json) =>
       darkMode: json['dark_mode'] as bool? ?? false,
       keepScreenOn: json['keep_screen_on'] as bool? ?? true,
       statsTracking: json['stats_tracking'] as bool? ?? true,
+      customTasbihTarget: (json['custom_tasbih_target'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$TasbihSettingsToJson(_TasbihSettings instance) =>
@@ -134,4 +135,5 @@ Map<String, dynamic> _$TasbihSettingsToJson(_TasbihSettings instance) =>
       'dark_mode': instance.darkMode,
       'keep_screen_on': instance.keepScreenOn,
       'stats_tracking': instance.statsTracking,
+      'custom_tasbih_target': instance.customTasbihTarget,
     };

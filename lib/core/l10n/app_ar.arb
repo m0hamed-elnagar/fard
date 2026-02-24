@@ -131,6 +131,15 @@
   "tasbih": "المسبحة",
   "selectDhikrCategory": "اختر فئة الذكر",
   "tasbihSettings": "إعدادات المسبحة",
+  "customTasbihTarget": "هدف مخصص",
+  "customTasbihTargetHint": "الافتراضي: {count}",
+  "@customTasbihTargetHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "hapticFeedback": "الاهتزاز عند اللمس",
   "showTranslation": "إظهار الترجمة",
   "showTransliteration": "إظهار النطق",

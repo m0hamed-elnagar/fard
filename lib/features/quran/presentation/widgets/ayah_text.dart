@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fard/features/quran/domain/entities/ayah.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,6 +10,7 @@ class AyahText extends StatelessWidget {
   final ValueChanged<Ayah> onAyahTap;
   final ValueChanged<Ayah>? onAyahLongPress;
   final double textScale;
+  final Map<int, GlobalKey>? ayahKeys;
 
   const AyahText({
     super.key,
@@ -19,6 +19,7 @@ class AyahText extends StatelessWidget {
     required this.onAyahTap,
     this.onAyahLongPress,
     this.textScale = 1.0,
+    this.ayahKeys,
   });
 
   @override
@@ -27,126 +28,67 @@ class AyahText extends StatelessWidget {
     
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: Text.rich(
-        TextSpan(
-          children: ayahs.expand((ayah) {
-            final isHighlighted = ayah == highlightedAyah;
-            final recognizer = _CombinedGestureRecognizer(
-              onTap: () => onAyahTap(ayah),
-              onDoubleTap: () => onAyahLongPress?.call(ayah),
-              onLongPress: () => onAyahLongPress?.call(ayah),
-            );
-            
-            final highlightStyle = GoogleFonts.amiri(
-              fontSize: 28 * textScale,
-              height: 1.8,
-              wordSpacing: -2, // Reduce space between words
-              backgroundColor: isHighlighted 
-                  ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
-                  : null,
-              color: isHighlighted 
-                  ? Theme.of(context).colorScheme.primary 
-                  : textTheme.bodyLarge?.color,
-              fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
-            );
-            
-            return [
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        runSpacing: 16,
+        children: ayahs.map((ayah) {
+          final isHighlighted = ayah == highlightedAyah;
+          final key = ayahKeys?[ayah.number.ayahNumberInSurah];
+          
+          return GestureDetector(
+            onTap: () => onAyahTap(ayah),
+            onLongPress: () => onAyahLongPress?.call(ayah),
+            child: Text.rich(
+              key: key,
               TextSpan(
-                text: ayah.uthmaniText.trim(), // Trim to control spaces manually
-                style: highlightStyle,
-                recognizer: recognizer,
-              ),
-              WidgetSpan(
-                alignment: PlaceholderAlignment.middle,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => onAyahTap(ayah),
-                  onDoubleTap: () => onAyahLongPress?.call(ayah),
-                  onLongPress: () => onAyahLongPress?.call(ayah),
-                  child: Container(
-                    color: isHighlighted 
-                        ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
-                        : null,
-                    padding: const EdgeInsets.symmetric(horizontal: 6.0), // Space between marker and words
-                    child: AyahNumberMarker(
-                      number: ayah.number.ayahNumberInSurah,
-                      size: 24 * textScale,
-                      color: isHighlighted ? Theme.of(context).colorScheme.primary : null,
+                children: [
+                  TextSpan(
+                    text: ayah.uthmaniText.trim(),
+                    style: GoogleFonts.amiri(
+                      fontSize: 28 * textScale,
+                      height: 2.2,
+                      wordSpacing: 4,
+                      backgroundColor: isHighlighted 
+                          ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
+                          : null,
+                      color: isHighlighted 
+                          ? Theme.of(context).colorScheme.primary 
+                          : textTheme.bodyLarge?.color,
+                      fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
-                ),
-              ),
-              if (ayah.isSajdah && ayah.sajdahType != null)
-                WidgetSpan(
-                  alignment: PlaceholderAlignment.top,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => onAyahTap(ayah),
-                    onDoubleTap: () => onAyahLongPress?.call(ayah),
-                    onLongPress: () => onAyahLongPress?.call(ayah),
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
                     child: Container(
                       color: isHighlighted 
                           ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
                           : null,
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: SajdahIndicator(type: ayah.sajdahType!),
+                      padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                      child: AyahNumberMarker(
+                        number: ayah.number.ayahNumberInSurah,
+                        size: 24 * textScale,
+                        color: isHighlighted ? Theme.of(context).colorScheme.primary : null,
+                      ),
                     ),
                   ),
-                ),
-            ];
-          }).toList(),
-        ),
-        textAlign: TextAlign.center,
+                  if (ayah.isSajdah && ayah.sajdahType != null)
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.top,
+                      child: Container(
+                        color: isHighlighted 
+                            ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
+                            : null,
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: SajdahIndicator(type: ayah.sajdahType!),
+                      ),
+                    ),
+                ],
+              ),
+              textAlign: TextAlign.center,
+            ),
+          );
+        }).toList(),
       ),
     );
-  }
-}
-
-class _CombinedGestureRecognizer extends GestureRecognizer {
-  final VoidCallback? onTap;
-  final VoidCallback? onDoubleTap;
-  final VoidCallback? onLongPress;
-
-  _CombinedGestureRecognizer({
-    this.onTap,
-    this.onDoubleTap,
-    this.onLongPress,
-  });
-
-  late final TapGestureRecognizer _tapRecognizer = TapGestureRecognizer()
-    ..onTap = onTap;
-  late final DoubleTapGestureRecognizer _doubleTapRecognizer = DoubleTapGestureRecognizer()
-    ..onDoubleTap = onDoubleTap;
-  late final LongPressGestureRecognizer _longPressRecognizer = LongPressGestureRecognizer()
-    ..onLongPress = onLongPress;
-
-  @override
-  void addPointer(PointerDownEvent event) {
-    _tapRecognizer.addPointer(event);
-    _doubleTapRecognizer.addPointer(event);
-    _longPressRecognizer.addPointer(event);
-  }
-
-  @override
-  void dispose() {
-    _tapRecognizer.dispose();
-    _doubleTapRecognizer.dispose();
-    _longPressRecognizer.dispose();
-    super.dispose();
-  }
-
-  @override
-  String get debugDescription => 'CombinedGestureRecognizer';
-
-  @override
-  void rejectGesture(int pointer) {
-    _tapRecognizer.rejectGesture(pointer);
-    _doubleTapRecognizer.rejectGesture(pointer);
-    _longPressRecognizer.rejectGesture(pointer);
-  }
-
-  @override
-  void acceptGesture(int pointer) {
-    // This is tricky, but let the individual recognizers handle their acceptance
   }
 }

@@ -55,14 +55,16 @@ extension QuranEventPatterns on QuranEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _LoadSurahs value)?  loadSurahs,TResult Function( _LoadSurahDetails value)?  loadSurahDetails,TResult Function( _Search value)?  search,TResult Function( _LastReadUpdated value)?  lastReadUpdated,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _LoadSurahs value)?  loadSurahs,TResult Function( _LoadSurahDetails value)?  loadSurahDetails,TResult Function( _Search value)?  search,TResult Function( _LastReadUpdated value)?  lastReadUpdated,TResult Function( _LoadBookmarks value)?  loadBookmarks,TResult Function( _BookmarksUpdated value)?  bookmarksUpdated,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _LoadSurahs() when loadSurahs != null:
 return loadSurahs(_that);case _LoadSurahDetails() when loadSurahDetails != null:
 return loadSurahDetails(_that);case _Search() when search != null:
 return search(_that);case _LastReadUpdated() when lastReadUpdated != null:
-return lastReadUpdated(_that);case _:
+return lastReadUpdated(_that);case _LoadBookmarks() when loadBookmarks != null:
+return loadBookmarks(_that);case _BookmarksUpdated() when bookmarksUpdated != null:
+return bookmarksUpdated(_that);case _:
   return orElse();
 
 }
@@ -80,14 +82,16 @@ return lastReadUpdated(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _LoadSurahs value)  loadSurahs,required TResult Function( _LoadSurahDetails value)  loadSurahDetails,required TResult Function( _Search value)  search,required TResult Function( _LastReadUpdated value)  lastReadUpdated,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _LoadSurahs value)  loadSurahs,required TResult Function( _LoadSurahDetails value)  loadSurahDetails,required TResult Function( _Search value)  search,required TResult Function( _LastReadUpdated value)  lastReadUpdated,required TResult Function( _LoadBookmarks value)  loadBookmarks,required TResult Function( _BookmarksUpdated value)  bookmarksUpdated,}){
 final _that = this;
 switch (_that) {
 case _LoadSurahs():
 return loadSurahs(_that);case _LoadSurahDetails():
 return loadSurahDetails(_that);case _Search():
 return search(_that);case _LastReadUpdated():
-return lastReadUpdated(_that);case _:
+return lastReadUpdated(_that);case _LoadBookmarks():
+return loadBookmarks(_that);case _BookmarksUpdated():
+return bookmarksUpdated(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -104,14 +108,16 @@ return lastReadUpdated(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _LoadSurahs value)?  loadSurahs,TResult? Function( _LoadSurahDetails value)?  loadSurahDetails,TResult? Function( _Search value)?  search,TResult? Function( _LastReadUpdated value)?  lastReadUpdated,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _LoadSurahs value)?  loadSurahs,TResult? Function( _LoadSurahDetails value)?  loadSurahDetails,TResult? Function( _Search value)?  search,TResult? Function( _LastReadUpdated value)?  lastReadUpdated,TResult? Function( _LoadBookmarks value)?  loadBookmarks,TResult? Function( _BookmarksUpdated value)?  bookmarksUpdated,}){
 final _that = this;
 switch (_that) {
 case _LoadSurahs() when loadSurahs != null:
 return loadSurahs(_that);case _LoadSurahDetails() when loadSurahDetails != null:
 return loadSurahDetails(_that);case _Search() when search != null:
 return search(_that);case _LastReadUpdated() when lastReadUpdated != null:
-return lastReadUpdated(_that);case _:
+return lastReadUpdated(_that);case _LoadBookmarks() when loadBookmarks != null:
+return loadBookmarks(_that);case _BookmarksUpdated() when bookmarksUpdated != null:
+return bookmarksUpdated(_that);case _:
   return null;
 
 }
@@ -128,13 +134,15 @@ return lastReadUpdated(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  loadSurahs,TResult Function( int surahNumber)?  loadSurahDetails,TResult Function( String query)?  search,TResult Function( LastReadPosition position)?  lastReadUpdated,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  loadSurahs,TResult Function( int surahNumber)?  loadSurahDetails,TResult Function( String query)?  search,TResult Function( LastReadPosition position)?  lastReadUpdated,TResult Function()?  loadBookmarks,TResult Function( List<Bookmark> bookmarks)?  bookmarksUpdated,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _LoadSurahs() when loadSurahs != null:
 return loadSurahs();case _LoadSurahDetails() when loadSurahDetails != null:
 return loadSurahDetails(_that.surahNumber);case _Search() when search != null:
 return search(_that.query);case _LastReadUpdated() when lastReadUpdated != null:
-return lastReadUpdated(_that.position);case _:
+return lastReadUpdated(_that.position);case _LoadBookmarks() when loadBookmarks != null:
+return loadBookmarks();case _BookmarksUpdated() when bookmarksUpdated != null:
+return bookmarksUpdated(_that.bookmarks);case _:
   return orElse();
 
 }
@@ -152,13 +160,15 @@ return lastReadUpdated(_that.position);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  loadSurahs,required TResult Function( int surahNumber)  loadSurahDetails,required TResult Function( String query)  search,required TResult Function( LastReadPosition position)  lastReadUpdated,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  loadSurahs,required TResult Function( int surahNumber)  loadSurahDetails,required TResult Function( String query)  search,required TResult Function( LastReadPosition position)  lastReadUpdated,required TResult Function()  loadBookmarks,required TResult Function( List<Bookmark> bookmarks)  bookmarksUpdated,}) {final _that = this;
 switch (_that) {
 case _LoadSurahs():
 return loadSurahs();case _LoadSurahDetails():
 return loadSurahDetails(_that.surahNumber);case _Search():
 return search(_that.query);case _LastReadUpdated():
-return lastReadUpdated(_that.position);case _:
+return lastReadUpdated(_that.position);case _LoadBookmarks():
+return loadBookmarks();case _BookmarksUpdated():
+return bookmarksUpdated(_that.bookmarks);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -175,13 +185,15 @@ return lastReadUpdated(_that.position);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  loadSurahs,TResult? Function( int surahNumber)?  loadSurahDetails,TResult? Function( String query)?  search,TResult? Function( LastReadPosition position)?  lastReadUpdated,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  loadSurahs,TResult? Function( int surahNumber)?  loadSurahDetails,TResult? Function( String query)?  search,TResult? Function( LastReadPosition position)?  lastReadUpdated,TResult? Function()?  loadBookmarks,TResult? Function( List<Bookmark> bookmarks)?  bookmarksUpdated,}) {final _that = this;
 switch (_that) {
 case _LoadSurahs() when loadSurahs != null:
 return loadSurahs();case _LoadSurahDetails() when loadSurahDetails != null:
 return loadSurahDetails(_that.surahNumber);case _Search() when search != null:
 return search(_that.query);case _LastReadUpdated() when lastReadUpdated != null:
-return lastReadUpdated(_that.position);case _:
+return lastReadUpdated(_that.position);case _LoadBookmarks() when loadBookmarks != null:
+return loadBookmarks();case _BookmarksUpdated() when bookmarksUpdated != null:
+return bookmarksUpdated(_that.bookmarks);case _:
   return null;
 
 }
@@ -420,9 +432,113 @@ as LastReadPosition,
 }
 
 /// @nodoc
+
+
+class _LoadBookmarks implements QuranEvent {
+  const _LoadBookmarks();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LoadBookmarks);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'QuranEvent.loadBookmarks()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _BookmarksUpdated implements QuranEvent {
+  const _BookmarksUpdated(final  List<Bookmark> bookmarks): _bookmarks = bookmarks;
+  
+
+ final  List<Bookmark> _bookmarks;
+ List<Bookmark> get bookmarks {
+  if (_bookmarks is EqualUnmodifiableListView) return _bookmarks;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_bookmarks);
+}
+
+
+/// Create a copy of QuranEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$BookmarksUpdatedCopyWith<_BookmarksUpdated> get copyWith => __$BookmarksUpdatedCopyWithImpl<_BookmarksUpdated>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BookmarksUpdated&&const DeepCollectionEquality().equals(other._bookmarks, _bookmarks));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_bookmarks));
+
+@override
+String toString() {
+  return 'QuranEvent.bookmarksUpdated(bookmarks: $bookmarks)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$BookmarksUpdatedCopyWith<$Res> implements $QuranEventCopyWith<$Res> {
+  factory _$BookmarksUpdatedCopyWith(_BookmarksUpdated value, $Res Function(_BookmarksUpdated) _then) = __$BookmarksUpdatedCopyWithImpl;
+@useResult
+$Res call({
+ List<Bookmark> bookmarks
+});
+
+
+
+
+}
+/// @nodoc
+class __$BookmarksUpdatedCopyWithImpl<$Res>
+    implements _$BookmarksUpdatedCopyWith<$Res> {
+  __$BookmarksUpdatedCopyWithImpl(this._self, this._then);
+
+  final _BookmarksUpdated _self;
+  final $Res Function(_BookmarksUpdated) _then;
+
+/// Create a copy of QuranEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? bookmarks = null,}) {
+  return _then(_BookmarksUpdated(
+null == bookmarks ? _self._bookmarks : bookmarks // ignore: cast_nullable_to_non_nullable
+as List<Bookmark>,
+  ));
+}
+
+
+}
+
+/// @nodoc
 mixin _$QuranState {
 
- bool get isLoading; List<Surah> get surahs; List<Ayah> get ayahs; Surah? get selectedSurah; String? get error; List<SearchResult> get searchResults; LastReadPosition? get lastReadPosition;
+ bool get isLoading; List<Surah> get surahs; List<Ayah> get ayahs; Surah? get selectedSurah; String? get error; List<SearchResult> get searchResults; LastReadPosition? get lastReadPosition; List<Bookmark> get bookmarks;
 /// Create a copy of QuranState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -433,16 +549,16 @@ $QuranStateCopyWith<QuranState> get copyWith => _$QuranStateCopyWithImpl<QuranSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuranState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other.surahs, surahs)&&const DeepCollectionEquality().equals(other.ayahs, ayahs)&&(identical(other.selectedSurah, selectedSurah) || other.selectedSurah == selectedSurah)&&(identical(other.error, error) || other.error == error)&&const DeepCollectionEquality().equals(other.searchResults, searchResults)&&(identical(other.lastReadPosition, lastReadPosition) || other.lastReadPosition == lastReadPosition));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuranState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other.surahs, surahs)&&const DeepCollectionEquality().equals(other.ayahs, ayahs)&&(identical(other.selectedSurah, selectedSurah) || other.selectedSurah == selectedSurah)&&(identical(other.error, error) || other.error == error)&&const DeepCollectionEquality().equals(other.searchResults, searchResults)&&(identical(other.lastReadPosition, lastReadPosition) || other.lastReadPosition == lastReadPosition)&&const DeepCollectionEquality().equals(other.bookmarks, bookmarks));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(surahs),const DeepCollectionEquality().hash(ayahs),selectedSurah,error,const DeepCollectionEquality().hash(searchResults),lastReadPosition);
+int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(surahs),const DeepCollectionEquality().hash(ayahs),selectedSurah,error,const DeepCollectionEquality().hash(searchResults),lastReadPosition,const DeepCollectionEquality().hash(bookmarks));
 
 @override
 String toString() {
-  return 'QuranState(isLoading: $isLoading, surahs: $surahs, ayahs: $ayahs, selectedSurah: $selectedSurah, error: $error, searchResults: $searchResults, lastReadPosition: $lastReadPosition)';
+  return 'QuranState(isLoading: $isLoading, surahs: $surahs, ayahs: $ayahs, selectedSurah: $selectedSurah, error: $error, searchResults: $searchResults, lastReadPosition: $lastReadPosition, bookmarks: $bookmarks)';
 }
 
 
@@ -453,7 +569,7 @@ abstract mixin class $QuranStateCopyWith<$Res>  {
   factory $QuranStateCopyWith(QuranState value, $Res Function(QuranState) _then) = _$QuranStateCopyWithImpl;
 @useResult
 $Res call({
- bool isLoading, List<Surah> surahs, List<Ayah> ayahs, Surah? selectedSurah, String? error, List<SearchResult> searchResults, LastReadPosition? lastReadPosition
+ bool isLoading, List<Surah> surahs, List<Ayah> ayahs, Surah? selectedSurah, String? error, List<SearchResult> searchResults, LastReadPosition? lastReadPosition, List<Bookmark> bookmarks
 });
 
 
@@ -470,7 +586,7 @@ class _$QuranStateCopyWithImpl<$Res>
 
 /// Create a copy of QuranState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? isLoading = null,Object? surahs = null,Object? ayahs = null,Object? selectedSurah = freezed,Object? error = freezed,Object? searchResults = null,Object? lastReadPosition = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? isLoading = null,Object? surahs = null,Object? ayahs = null,Object? selectedSurah = freezed,Object? error = freezed,Object? searchResults = null,Object? lastReadPosition = freezed,Object? bookmarks = null,}) {
   return _then(_self.copyWith(
 isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,surahs: null == surahs ? _self.surahs : surahs // ignore: cast_nullable_to_non_nullable
@@ -479,7 +595,8 @@ as List<Ayah>,selectedSurah: freezed == selectedSurah ? _self.selectedSurah : se
 as Surah?,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,searchResults: null == searchResults ? _self.searchResults : searchResults // ignore: cast_nullable_to_non_nullable
 as List<SearchResult>,lastReadPosition: freezed == lastReadPosition ? _self.lastReadPosition : lastReadPosition // ignore: cast_nullable_to_non_nullable
-as LastReadPosition?,
+as LastReadPosition?,bookmarks: null == bookmarks ? _self.bookmarks : bookmarks // ignore: cast_nullable_to_non_nullable
+as List<Bookmark>,
   ));
 }
 
@@ -564,10 +681,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isLoading,  List<Surah> surahs,  List<Ayah> ayahs,  Surah? selectedSurah,  String? error,  List<SearchResult> searchResults,  LastReadPosition? lastReadPosition)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isLoading,  List<Surah> surahs,  List<Ayah> ayahs,  Surah? selectedSurah,  String? error,  List<SearchResult> searchResults,  LastReadPosition? lastReadPosition,  List<Bookmark> bookmarks)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _QuranState() when $default != null:
-return $default(_that.isLoading,_that.surahs,_that.ayahs,_that.selectedSurah,_that.error,_that.searchResults,_that.lastReadPosition);case _:
+return $default(_that.isLoading,_that.surahs,_that.ayahs,_that.selectedSurah,_that.error,_that.searchResults,_that.lastReadPosition,_that.bookmarks);case _:
   return orElse();
 
 }
@@ -585,10 +702,10 @@ return $default(_that.isLoading,_that.surahs,_that.ayahs,_that.selectedSurah,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isLoading,  List<Surah> surahs,  List<Ayah> ayahs,  Surah? selectedSurah,  String? error,  List<SearchResult> searchResults,  LastReadPosition? lastReadPosition)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isLoading,  List<Surah> surahs,  List<Ayah> ayahs,  Surah? selectedSurah,  String? error,  List<SearchResult> searchResults,  LastReadPosition? lastReadPosition,  List<Bookmark> bookmarks)  $default,) {final _that = this;
 switch (_that) {
 case _QuranState():
-return $default(_that.isLoading,_that.surahs,_that.ayahs,_that.selectedSurah,_that.error,_that.searchResults,_that.lastReadPosition);case _:
+return $default(_that.isLoading,_that.surahs,_that.ayahs,_that.selectedSurah,_that.error,_that.searchResults,_that.lastReadPosition,_that.bookmarks);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -605,10 +722,10 @@ return $default(_that.isLoading,_that.surahs,_that.ayahs,_that.selectedSurah,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isLoading,  List<Surah> surahs,  List<Ayah> ayahs,  Surah? selectedSurah,  String? error,  List<SearchResult> searchResults,  LastReadPosition? lastReadPosition)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isLoading,  List<Surah> surahs,  List<Ayah> ayahs,  Surah? selectedSurah,  String? error,  List<SearchResult> searchResults,  LastReadPosition? lastReadPosition,  List<Bookmark> bookmarks)?  $default,) {final _that = this;
 switch (_that) {
 case _QuranState() when $default != null:
-return $default(_that.isLoading,_that.surahs,_that.ayahs,_that.selectedSurah,_that.error,_that.searchResults,_that.lastReadPosition);case _:
+return $default(_that.isLoading,_that.surahs,_that.ayahs,_that.selectedSurah,_that.error,_that.searchResults,_that.lastReadPosition,_that.bookmarks);case _:
   return null;
 
 }
@@ -620,7 +737,7 @@ return $default(_that.isLoading,_that.surahs,_that.ayahs,_that.selectedSurah,_th
 
 
 class _QuranState implements QuranState {
-  const _QuranState({this.isLoading = false, final  List<Surah> surahs = const [], final  List<Ayah> ayahs = const [], this.selectedSurah, this.error, final  List<SearchResult> searchResults = const [], this.lastReadPosition}): _surahs = surahs,_ayahs = ayahs,_searchResults = searchResults;
+  const _QuranState({this.isLoading = false, final  List<Surah> surahs = const [], final  List<Ayah> ayahs = const [], this.selectedSurah, this.error, final  List<SearchResult> searchResults = const [], this.lastReadPosition, final  List<Bookmark> bookmarks = const []}): _surahs = surahs,_ayahs = ayahs,_searchResults = searchResults,_bookmarks = bookmarks;
   
 
 @override@JsonKey() final  bool isLoading;
@@ -648,6 +765,13 @@ class _QuranState implements QuranState {
 }
 
 @override final  LastReadPosition? lastReadPosition;
+ final  List<Bookmark> _bookmarks;
+@override@JsonKey() List<Bookmark> get bookmarks {
+  if (_bookmarks is EqualUnmodifiableListView) return _bookmarks;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_bookmarks);
+}
+
 
 /// Create a copy of QuranState
 /// with the given fields replaced by the non-null parameter values.
@@ -659,16 +783,16 @@ _$QuranStateCopyWith<_QuranState> get copyWith => __$QuranStateCopyWithImpl<_Qur
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuranState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other._surahs, _surahs)&&const DeepCollectionEquality().equals(other._ayahs, _ayahs)&&(identical(other.selectedSurah, selectedSurah) || other.selectedSurah == selectedSurah)&&(identical(other.error, error) || other.error == error)&&const DeepCollectionEquality().equals(other._searchResults, _searchResults)&&(identical(other.lastReadPosition, lastReadPosition) || other.lastReadPosition == lastReadPosition));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuranState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other._surahs, _surahs)&&const DeepCollectionEquality().equals(other._ayahs, _ayahs)&&(identical(other.selectedSurah, selectedSurah) || other.selectedSurah == selectedSurah)&&(identical(other.error, error) || other.error == error)&&const DeepCollectionEquality().equals(other._searchResults, _searchResults)&&(identical(other.lastReadPosition, lastReadPosition) || other.lastReadPosition == lastReadPosition)&&const DeepCollectionEquality().equals(other._bookmarks, _bookmarks));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(_surahs),const DeepCollectionEquality().hash(_ayahs),selectedSurah,error,const DeepCollectionEquality().hash(_searchResults),lastReadPosition);
+int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(_surahs),const DeepCollectionEquality().hash(_ayahs),selectedSurah,error,const DeepCollectionEquality().hash(_searchResults),lastReadPosition,const DeepCollectionEquality().hash(_bookmarks));
 
 @override
 String toString() {
-  return 'QuranState(isLoading: $isLoading, surahs: $surahs, ayahs: $ayahs, selectedSurah: $selectedSurah, error: $error, searchResults: $searchResults, lastReadPosition: $lastReadPosition)';
+  return 'QuranState(isLoading: $isLoading, surahs: $surahs, ayahs: $ayahs, selectedSurah: $selectedSurah, error: $error, searchResults: $searchResults, lastReadPosition: $lastReadPosition, bookmarks: $bookmarks)';
 }
 
 
@@ -679,7 +803,7 @@ abstract mixin class _$QuranStateCopyWith<$Res> implements $QuranStateCopyWith<$
   factory _$QuranStateCopyWith(_QuranState value, $Res Function(_QuranState) _then) = __$QuranStateCopyWithImpl;
 @override @useResult
 $Res call({
- bool isLoading, List<Surah> surahs, List<Ayah> ayahs, Surah? selectedSurah, String? error, List<SearchResult> searchResults, LastReadPosition? lastReadPosition
+ bool isLoading, List<Surah> surahs, List<Ayah> ayahs, Surah? selectedSurah, String? error, List<SearchResult> searchResults, LastReadPosition? lastReadPosition, List<Bookmark> bookmarks
 });
 
 
@@ -696,7 +820,7 @@ class __$QuranStateCopyWithImpl<$Res>
 
 /// Create a copy of QuranState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? isLoading = null,Object? surahs = null,Object? ayahs = null,Object? selectedSurah = freezed,Object? error = freezed,Object? searchResults = null,Object? lastReadPosition = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? isLoading = null,Object? surahs = null,Object? ayahs = null,Object? selectedSurah = freezed,Object? error = freezed,Object? searchResults = null,Object? lastReadPosition = freezed,Object? bookmarks = null,}) {
   return _then(_QuranState(
 isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,surahs: null == surahs ? _self._surahs : surahs // ignore: cast_nullable_to_non_nullable
@@ -705,7 +829,8 @@ as List<Ayah>,selectedSurah: freezed == selectedSurah ? _self.selectedSurah : se
 as Surah?,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,searchResults: null == searchResults ? _self._searchResults : searchResults // ignore: cast_nullable_to_non_nullable
 as List<SearchResult>,lastReadPosition: freezed == lastReadPosition ? _self.lastReadPosition : lastReadPosition // ignore: cast_nullable_to_non_nullable
-as LastReadPosition?,
+as LastReadPosition?,bookmarks: null == bookmarks ? _self._bookmarks : bookmarks // ignore: cast_nullable_to_non_nullable
+as List<Bookmark>,
   ));
 }
 

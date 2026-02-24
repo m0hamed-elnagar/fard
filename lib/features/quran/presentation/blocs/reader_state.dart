@@ -9,6 +9,8 @@ class ReaderState with _$ReaderState {
     Ayah? highlightedAyah,
     Ayah? lastReadAyah,
     @Default(1.0) double textScale,
+    @Default(false) bool isBookmarked,
+    @Default(16) int selectedTafsirId,
   }) = _Loaded;
   const factory ReaderState.error(String message) = _Error;
 }

@@ -34,7 +34,16 @@ class CompletionDuaCard extends StatelessWidget {
                 ),
                 if (!state.duaRemembered)
                   TextButton.icon(
-                    onPressed: () => context.read<TasbihBloc>().add(const TasbihEvent.rememberCompletionDua()),
+                    onPressed: () {
+                      context.read<TasbihBloc>().add(const TasbihEvent.rememberCompletionDua());
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(l10n.duaSaved),
+                          duration: const Duration(seconds: 2),
+                          backgroundColor: AppTheme.saved,
+                        ),
+                      );
+                    },
                     icon: const Icon(Icons.bookmark_add_outlined, size: 16),
                     label: Text(l10n.rememberDua, style: GoogleFonts.outfit(fontSize: 12)),
                     style: TextButton.styleFrom(foregroundColor: AppTheme.accent),

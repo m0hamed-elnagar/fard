@@ -77,45 +77,52 @@ class DhikrDisplayCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Padding(
+      child: Container(
+        constraints: const BoxConstraints(maxHeight: 220),
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              arabic,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.amiri(
-                fontSize: 28, // Reduced slightly for better fit
-                fontWeight: FontWeight.bold,
-                color: AppTheme.accent,
-                height: 1.5,
-              ),
+        child: ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  arabic,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.amiri(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.accent,
+                    height: 1.5,
+                  ),
+                ),
+                if (showTransliteration) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    transliteration,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.outfit(
+                      fontSize: 16,
+                      fontStyle: FontStyle.italic,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                ],
+                if (showTranslation) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    translation,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.outfit(
+                      fontSize: 14,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                ],
+              ],
             ),
-            if (showTransliteration) ...[
-              const SizedBox(height: 8),
-              Text(
-                transliteration,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
-                  fontSize: 16,
-                  fontStyle: FontStyle.italic,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-            ],
-            if (showTranslation) ...[
-              const SizedBox(height: 4),
-              Text(
-                translation,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
-                  fontSize: 14,
-                  color: AppTheme.textSecondary,
-                ),
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );

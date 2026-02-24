@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+      import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/di/injection.dart';
@@ -6,7 +6,12 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/quran/domain/entities/surah.dart';
 import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'quran_reader_page.dart';
+import '../widgets/juz_list.dart';
+import '../widgets/bookmark_list.dart';
+import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 // import 'surah_detail_page.dart';
+
+import 'scanned_mushaf_reader_page.dart';
 
 class QuranPage extends StatefulWidget {
   const QuranPage({super.key});
@@ -39,207 +44,238 @@ class _QuranPageState extends State<QuranPage> {
     
     return BlocProvider(
       create: (context) => getIt<QuranBloc>()..add(const QuranEvent.loadSurahs()),
-      child: Scaffold(
-        appBar: AppBar(
-          leading: _isSearching
-              ? IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    setState(() {
-                      _isSearching = false;
+      child: DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          appBar: AppBar(
+            leading: _isSearching
+                ? IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      setState(() {
+                        _isSearching = false;
+                        _searchController.clear();
+                        _searchQuery = '';
+                      });
+                    },
+                  )
+                : null,
+            title: _isSearching
+                ? TextField(
+                    controller: _searchController,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      hintText: l10n.searchSurah,
+                      border: InputBorder.none,
+                      hintStyle: const TextStyle(color: Colors.white70),
+                    ),
+                    style: const TextStyle(color: Colors.white, fontSize: 18),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value.toLowerCase();
+                      });
+                    },
+                  )
+                : Text(
+                    l10n.quran,
+                    style: GoogleFonts.amiri(fontWeight: FontWeight.bold, fontSize: 24),
+                  ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.photo_library_outlined),
+                tooltip: 'المصحف المصور',
+                onPressed: () => Navigator.push(
+                  context,
+                  ScannedMushafReaderPage.route(),
+                ),
+              ),
+              IconButton(
+                icon: Icon(_isSearching ? Icons.close : Icons.search),
+                onPressed: () {
+                  setState(() {
+                    if (_isSearching) {
                       _searchController.clear();
                       _searchQuery = '';
-                    });
-                  },
-                )
-              : null,
-          title: _isSearching
-              ? TextField(
-                  controller: _searchController,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    hintText: l10n.searchSurah,
-                    border: InputBorder.none,
-                    hintStyle: const TextStyle(color: Colors.white70),
-                  ),
-                  style: const TextStyle(color: Colors.white, fontSize: 18),
-                  onChanged: (value) {
-                    setState(() {
-                      _searchQuery = value.toLowerCase();
-                    });
-                  },
-                )
-              : Text(
-                  l10n.quran,
-                  style: GoogleFonts.amiri(fontWeight: FontWeight.bold, fontSize: 24),
-                ),
-          actions: [
-            IconButton(
-              icon: Icon(_isSearching ? Icons.close : Icons.search),
-              onPressed: () {
-                setState(() {
-                  if (_isSearching) {
-                    _searchController.clear();
-                    _searchQuery = '';
-                    _isSearching = false;
-                  } else {
-                    _isSearching = true;
-                  }
-                });
-              },
+                      _isSearching = false;
+                    } else {
+                      _isSearching = true;
+                    }
+                  });
+                },
+              ),
+            ],
+            bottom: TabBar(
+              indicatorSize: TabBarIndicatorSize.tab,
+              indicatorWeight: 3,
+              labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14),
+              tabs: const [
+                Tab(text: 'السور'),
+                Tab(text: 'الأجزاء'),
+                Tab(text: 'الإشارات'),
+              ],
             ),
-          ],
-        ),
-        body: BlocBuilder<QuranBloc, QuranState>(
-          builder: (context, state) {
-            if (state.isLoading && state.surahs.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const CircularProgressIndicator(),
-                    const SizedBox(height: 16),
-                    Text(l10n.loadingQuran, style: GoogleFonts.amiri()),
-                  ],
-                ),
-              );
-            }
-
-            if (state.error != null && state.surahs.isEmpty) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
+          ),
+          body: BlocBuilder<QuranBloc, QuranState>(
+            builder: (context, state) {
+              if (state.isLoading && state.surahs.isEmpty) {
+                return Center(
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.error_outline, color: Colors.red, size: 64),
+                      const CircularProgressIndicator(),
                       const SizedBox(height: 16),
-                      Text(
-                        l10n.errorLoadingQuran,
-                        style: GoogleFonts.amiri(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        state.error!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton.icon(
-                        onPressed: () => context
-                            .read<QuranBloc>()
-                            .add(const QuranEvent.loadSurahs()),
-                        icon: const Icon(Icons.refresh),
-                        label: Text(l10n.retry),
-                      ),
+                      Text(l10n.loadingQuran, style: GoogleFonts.amiri()),
                     ],
                   ),
-                ),
-              );
-            }
-
-            final filteredSurahs = state.surahs.where((surah) {
-              return surah.name.contains(_searchQuery) ||
-                  surah.number.value.toString().contains(_searchQuery);
-            }).toList();
-
-            if (filteredSurahs.isEmpty && !state.isLoading) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.menu_book, size: 64, color: Colors.grey),
-                    const SizedBox(height: 16),
-                    Text(
-                      l10n.noSearchResults,
-                      style: GoogleFonts.amiri(fontSize: 20),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            final lastRead = state.lastReadPosition;
-            final hasLastRead = lastRead != null && state.surahs.isNotEmpty;
-            Surah? lastReadSurah;
-            if (hasLastRead) {
-              try {
-                lastReadSurah = state.surahs.firstWhere(
-                  (s) => s.number.value == lastRead.ayahNumber.surahNumber
                 );
-              } catch (_) {}
-            }
+              }
 
-            return ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: filteredSurahs.length + (hasLastRead && _searchQuery.isEmpty ? 1 : 0),
-              separatorBuilder: (context, index) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                if (hasLastRead && _searchQuery.isEmpty && index == 0) {
-                  return _ContinueReadingCard(
-                    surah: lastReadSurah!,
-                    ayahNumber: lastRead.ayahNumber.ayahNumberInSurah,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => QuranReaderPage(
-                            surahNumber: lastReadSurah!.number.value,
-                            initialAyahNumber: lastRead.ayahNumber.ayahNumberInSurah,
+              if (state.error != null && state.surahs.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.error_outline, color: Colors.red, size: 64),
+                        const SizedBox(height: 16),
+                        Text(
+                          l10n.errorLoadingQuran,
+                          style: GoogleFonts.amiri(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
                           ),
                         ),
-                      );
-                    },
-                  );
-                }
-
-                final surahIndex = hasLastRead && _searchQuery.isEmpty ? index - 1 : index;
-                final surah = filteredSurahs[surahIndex];
-                return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  leading: CircleAvatar(
-                    backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                    child: Text(
-                      surah.number.value.toString(),
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        const SizedBox(height: 8),
+                        Text(
+                          state.error!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton.icon(
+                          onPressed: () => context
+                              .read<QuranBloc>()
+                              .add(const QuranEvent.loadSurahs()),
+                          icon: const Icon(Icons.refresh),
+                          label: Text(l10n.retry),
+                        ),
+                      ],
                     ),
                   ),
-                  title: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      surah.name,
-                      style: GoogleFonts.amiri(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.right,
-                    ),
-                  ),
-                  subtitle: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      '${surah.numberOfAyahs} ${l10n.ayah}',
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                      textAlign: TextAlign.right,
-                    ),
-                  ),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => QuranReaderPage(surahNumber: surah.number.value),
-                      ),
-                    );
-                  },
                 );
-              },
-            );
-          },
+              }
+
+              final filteredSurahs = state.surahs.where((surah) {
+                return surah.name.contains(_searchQuery) ||
+                    surah.number.value.toString().contains(_searchQuery);
+              }).toList();
+
+              final lastRead = state.lastReadPosition;
+              final hasLastRead = lastRead != null && state.surahs.isNotEmpty;
+              Surah? lastReadSurah;
+              if (hasLastRead) {
+                try {
+                  lastReadSurah = state.surahs.firstWhere(
+                    (s) => s.number.value == lastRead.ayahNumber.surahNumber
+                  );
+                } catch (_) {}
+              }
+
+              return TabBarView(
+                children: [
+                  // Surah Tab
+                  filteredSurahs.isEmpty && !state.isLoading
+                      ? Center(child: Text(l10n.noSearchResults))
+                      : ListView.separated(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: filteredSurahs.length + (hasLastRead && _searchQuery.isEmpty ? 1 : 0),
+                          separatorBuilder: (context, index) => const Divider(height: 1),
+                          itemBuilder: (context, index) {
+                            if (hasLastRead && _searchQuery.isEmpty && index == 0) {
+                              return _ContinueReadingCard(
+                                surah: lastReadSurah!,
+                                ayahNumber: lastRead.ayahNumber.ayahNumberInSurah,
+                                                                                                onTap: () {
+                                                                                                  Navigator.push(
+                                                                                                    context,
+                                                                                                    QuranReaderPage.route(
+                                                                                                      surahNumber: lastReadSurah!.number.value,
+                                                                                                      ayahNumber: lastRead.ayahNumber.ayahNumberInSurah,
+                                                                                                    ),
+                                                                                                  );
+                                                                                                },
+                                                                                                    );
+                            }
+
+                            final surahIndex = hasLastRead && _searchQuery.isEmpty ? index - 1 : index;
+                            final surah = filteredSurahs[surahIndex];
+                            return ListTile(
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              leading: CircleAvatar(
+                                backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                                child: Text(
+                                  surah.number.value.toString(),
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              title: Align(
+                                alignment: Alignment.centerRight,
+                                child: Text(
+                                  surah.name,
+                                  style: GoogleFonts.amiri(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    height: 1.4,
+                                    wordSpacing: 2,
+                                  ),
+                                  textAlign: TextAlign.right,
+                                ),
+                              ),
+                              subtitle: Align(
+                                alignment: Alignment.centerRight,
+                                child: Text(
+                                  '${surah.numberOfAyahs} ${l10n.ayah}',
+                                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                  textAlign: TextAlign.right,
+                                ),
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.play_circle_outline, color: Theme.of(context).primaryColor),
+                                    onPressed: () {
+                                      context.read<AudioBloc>().add(
+                                        AudioEvent.playSurah(surahNumber: surah.number.value),
+                                      );
+                                    },
+                                  ),
+                                  const Icon(Icons.arrow_forward_ios, size: 14),
+                                ],
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  QuranReaderPage.route(
+                                    surahNumber: surah.number.value,
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                  
+                  // Juz Tab
+                  JuzList(searchQuery: _searchQuery),
+                  
+                  // Bookmarks Tab
+                  BookmarkList(searchQuery: _searchQuery),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -303,6 +339,8 @@ class _ContinueReadingCard extends StatelessWidget {
                       color: Colors.white,
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
+                      height: 1.4,
+                      wordSpacing: 2,
                     ),
                   ),
                   Text(

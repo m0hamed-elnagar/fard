@@ -133,18 +133,21 @@ class TasbihSettingsSheet extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               _buildSettingToggle(
+                context,
                 icon: Icons.vibration_rounded,
                 title: l10n.hapticFeedback,
                 value: state.data.settings.hapticFeedback,
                 onChanged: (_) => context.read<TasbihBloc>().add(const TasbihEvent.toggleVibration()),
               ),
               _buildSettingToggle(
+                context,
                 icon: Icons.translate_rounded,
                 title: l10n.showTranslation,
                 value: state.data.settings.showTranslation,
                 onChanged: (_) => context.read<TasbihBloc>().add(const TasbihEvent.toggleTranslation()),
               ),
               _buildSettingToggle(
+                context,
                 icon: Icons.text_fields_rounded,
                 title: l10n.showTransliteration,
                 value: state.data.settings.showTransliteration,
@@ -157,7 +160,8 @@ class TasbihSettingsSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingToggle({
+  Widget _buildSettingToggle(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required bool value,
@@ -180,6 +184,7 @@ class TasbihSettingsSheet extends StatelessWidget {
     );
   }
 }
+
 
 class DuaSelectionSheet extends StatelessWidget {
   final TasbihState state;

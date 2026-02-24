@@ -79,6 +79,7 @@ sealed class TasbihSettings with _$TasbihSettings {
     @JsonKey(name: 'dark_mode') @Default(false) bool darkMode,
     @JsonKey(name: 'keep_screen_on') @Default(true) bool keepScreenOn,
     @JsonKey(name: 'stats_tracking') @Default(true) bool statsTracking,
+    @JsonKey(name: 'custom_tasbih_target') int? customTasbihTarget,
   }) = _TasbihSettings;
 
   factory TasbihSettings.fromJson(Map<String, dynamic> json) => _$TasbihSettingsFromJson(json);
