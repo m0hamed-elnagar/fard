@@ -56,6 +56,8 @@ class QuranBloc extends Bloc<QuranEvent, QuranState> {
     });
 
     on<_LoadSurahs>((event, emit) async {
+      if (state.surahs.isNotEmpty) return;
+      
       emit(state.copyWith(isLoading: true, error: null));
       final result = await _repository.getSurahs();
       result.fold(

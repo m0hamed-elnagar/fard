@@ -4,7 +4,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter/foundation.dart';
 
 class MushafDownloadService {
-  static const String baseUrl = 'https://github.com/m0hamed-elnagar/quran-pages/raw/main/png/';
+  // Using everyayah.com as it is more reliable for individual PNGs
+  static const String baseUrl = 'https://everyayah.com/data/images_png/';
 
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
@@ -23,6 +24,7 @@ class MushafDownloadService {
 
   Future<String?> downloadPage(int pageNumber) async {
     try {
+      // everyayah.com uses 1.png, 2.png etc.
       final url = '$baseUrl$pageNumber.png';
       final response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 30));
 

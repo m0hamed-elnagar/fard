@@ -42,12 +42,10 @@ class _QuranPageState extends State<QuranPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     
-    return BlocProvider(
-      create: (context) => getIt<QuranBloc>()..add(const QuranEvent.loadSurahs()),
-      child: DefaultTabController(
-        length: 3,
-        child: Scaffold(
-          appBar: AppBar(
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
             leading: _isSearching
                 ? IconButton(
                     icon: const Icon(Icons.arrow_back),
