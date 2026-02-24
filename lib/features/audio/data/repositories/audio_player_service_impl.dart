@@ -4,6 +4,8 @@ import 'package:just_audio_background/just_audio_background.dart';
 import 'package:fard/core/errors/failure.dart';
 import 'package:fard/features/audio/domain/repositories/audio_player_service.dart';
 import 'dart:async';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class AudioPlayerServiceImpl implements AudioPlayerService {
   final AudioPlayer _player = AudioPlayer();
@@ -13,6 +15,10 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
   AudioStatus _lastStatus = AudioStatus.idle;
 
   AudioPlayerServiceImpl() {
+    _init();
+  }
+
+  void _init() {
     _player.playerStateStream.listen((state) {
       AudioStatus newStatus;
       if (state.processingState == ProcessingState.loading ||
@@ -60,6 +66,27 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
     });
   }
 
+  Future<String> _getCachePath(String url) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final cacheDir = Directory('${directory.path}/audio_cache');
+    if (!await cacheDir.exists()) {
+      await cacheDir.create(recursive: true);
+    }
+    
+    // Create a safe filename from URL
+    final fileName = url.split('/').last.replaceAll(RegExp(r'[^\w\.]'), '_');
+    // Ensure the filename is unique to the reciter if possible, but the URL usually contains it
+    // For everyayah.com: .../ar.alafasy/001001.mp3
+    final uri = Uri.parse(url);
+    final segments = uri.pathSegments;
+    String finalFileName = fileName;
+    if (segments.length >= 2) {
+      finalFileName = '${segments[segments.length - 2]}_$fileName';
+    }
+
+    return '${cacheDir.path}/$finalFileName';
+  }
+
   @override
   AudioStatus get currentStatus => _lastStatus;
 
@@ -83,8 +110,10 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
       
       await _player.stop();
       
-      final source = AudioSource.uri(
+      final cachePath = await _getCachePath(url);
+      final source = LockCachingAudioSource(
         Uri.parse(url),
+        cacheFile: File(cachePath),
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
         },
@@ -101,7 +130,7 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
         preload: false,
       );
       _player.play();
-      debugPrint('AudioPlayerService: play() called successfully');
+      debugPrint('AudioPlayerService: play() called successfully with caching');
       return Result.success(null);
     } catch (e) {
       debugPrint('AudioPlayerService: Error in playStreaming: $e');
@@ -153,22 +182,26 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
       // Stop and clear the current source completely
       await _player.stop();
       
-      final sources = urls.asMap().entries.map((entry) {
-        final index = entry.key;
-        final url = entry.value;
-        return AudioSource.uri(
-          Uri.parse(url),
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
-          },
-          tag: MediaItem(
-            id: url,
-            album: "Al-Quran",
-            title: "Ayah ${index + 1}",
-            artist: "Quran Reciter",
-          ),
+      final sources = <AudioSource>[];
+      for (var i = 0; i < urls.length; i++) {
+        final url = urls[i];
+        final cachePath = await _getCachePath(url);
+        sources.add(
+          LockCachingAudioSource(
+            Uri.parse(url),
+            cacheFile: File(cachePath),
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+            },
+            tag: MediaItem(
+              id: url,
+              album: "Al-Quran",
+              title: "Ayah ${i + 1}",
+              artist: "Quran Reciter",
+            ),
+          )
         );
-      }).toList();
+      }
       
       await _player.setAudioSources(
         sources,
@@ -176,7 +209,7 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
         preload: true,
       );
       _player.play();
-      debugPrint('AudioPlayerService: playlist play() called successfully');
+      debugPrint('AudioPlayerService: playlist play() called successfully with caching');
       return Result.success(null);
     } catch (e) {
       debugPrint('AudioPlayerService: Error in playPlaylist: $e');
