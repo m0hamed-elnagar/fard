@@ -2,9 +2,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:fard/features/quran/domain/entities/surah.dart';
 import 'package:fard/features/quran/domain/entities/ayah.dart';
+import 'package:fard/features/quran/domain/entities/bookmark.dart';
 import 'package:fard/features/quran/domain/usecases/get_surah.dart';
 import 'package:fard/features/quran/domain/usecases/get_page.dart';
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
+import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
+import 'package:fard/features/quran/domain/repositories/bookmark_repository.dart';
+import 'package:uuid/uuid.dart';
 
 import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
 import 'package:fard/features/quran/domain/usecases/update_last_read.dart';
@@ -19,12 +23,14 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
   final GetPage getPage;
   final UpdateLastRead updateLastRead;
   final WatchLastRead watchLastRead;
+  final BookmarkRepository bookmarkRepository;
   
   ReaderBloc({
     required this.getSurah,
     required this.getPage,
     required this.updateLastRead,
     required this.watchLastRead,
+    required this.bookmarkRepository,
   }) : super(const ReaderState.initial()) {
     on<ReaderEvent>((event, emit) async {
       await event.when(
@@ -33,8 +39,19 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
         selectAyah: (ayah) async => _onSelectAyah(_SelectAyah(ayah), emit),
         saveLastRead: (ayah) async => _onSaveLastRead(_SaveLastRead(ayah), emit),
         updateScale: (scale) async => _onUpdateScale(_UpdateScale(scale), emit),
+        toggleBookmark: (ayah) async => _onToggleBookmark(_ToggleBookmark(ayah), emit),
+        checkBookmarkStatus: (ayahNumber) async => _onCheckBookmarkStatus(_CheckBookmarkStatus(ayahNumber), emit),
+        updateTafsir: (tafsirId) async => _onUpdateTafsir(tafsirId, emit),
       );
     });
+  }
+
+  void _onUpdateTafsir(int tafsirId, Emitter<ReaderState> emit) {
+    state.mapOrNull(
+      loaded: (s) {
+        emit(s.copyWith(selectedTafsirId: tafsirId));
+      },
+    );
   }
   
   Future<void> _onLoadSurah(
@@ -68,6 +85,12 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
           surah: surah,
           lastReadAyah: lastReadInThisSurah,
         ));
+
+        if (lastReadInThisSurah != null) {
+          add(ReaderEvent.checkBookmarkStatus(lastReadInThisSurah.number));
+        } else if (surah.ayahs.isNotEmpty) {
+           add(ReaderEvent.checkBookmarkStatus(surah.ayahs.first.number));
+        }
       },
     );
   }
@@ -101,27 +124,33 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
     
     result.fold(
       (failure) => emit(ReaderState.error(failure.message)),
-      (page) => emit(ReaderState.loaded(
-        surah: Surah(
-          number: SurahNumber.create(0).data!,
-          name: page.surahName,
-          numberOfAyahs: page.ayahs.length,
-          revelationType: '',
-          ayahs: page.ayahs,
-        ),
-      )),
+      (page) {
+        emit(ReaderState.loaded(
+          surah: Surah(
+            number: SurahNumber.create(0).data!,
+            name: page.surahName,
+            numberOfAyahs: page.ayahs.length,
+            revelationType: '',
+            ayahs: page.ayahs,
+          ),
+        ));
+        if (page.ayahs.isNotEmpty) {
+          add(ReaderEvent.checkBookmarkStatus(page.ayahs.first.number));
+        }
+      },
     );
   }
 
-  void _onSelectAyah(
+  Future<void> _onSelectAyah(
     _SelectAyah event,
     Emitter<ReaderState> emit,
-  ) {
+  ) async {
     state.mapOrNull(
       loaded: (s) {
         emit(s.copyWith(highlightedAyah: event.ayah));
       },
     );
+    add(ReaderEvent.checkBookmarkStatus(event.ayah.number));
   }
 
   void _onUpdateScale(
@@ -131,6 +160,50 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
     state.mapOrNull(
       loaded: (s) {
         emit(s.copyWith(textScale: event.scale.clamp(0.8, 3.0)));
+      },
+    );
+  }
+
+  Future<void> _onToggleBookmark(
+    _ToggleBookmark event,
+    Emitter<ReaderState> emit,
+  ) async {
+    final isBookmarkedResult = await bookmarkRepository.isBookmarked(event.ayah.number);
+    final isCurrentlyBookmarked = isBookmarkedResult.fold((_) => false, (val) => val);
+
+    if (isCurrentlyBookmarked) {
+      final bookmarksRes = await bookmarkRepository.getBookmarks();
+      bookmarksRes.fold((_) => null, (bookmarks) async {
+        final bookmark = bookmarks.firstWhere(
+          (b) => b.ayahNumber == event.ayah.number
+        );
+        await bookmarkRepository.removeBookmark(bookmark.id);
+      });
+    } else {
+      final bookmark = Bookmark(
+        id: const Uuid().v4(),
+        ayahNumber: event.ayah.number,
+        createdAt: DateTime.now(),
+      );
+      await bookmarkRepository.addBookmark(bookmark);
+    }
+
+    add(ReaderEvent.checkBookmarkStatus(event.ayah.number));
+  }
+
+  Future<void> _onCheckBookmarkStatus(
+    _CheckBookmarkStatus event,
+    Emitter<ReaderState> emit,
+  ) async {
+    final result = await bookmarkRepository.isBookmarked(event.ayahNumber);
+    result.fold(
+      (_) => null,
+      (isBookmarked) {
+        state.mapOrNull(
+          loaded: (s) {
+            emit(s.copyWith(isBookmarked: isBookmarked));
+          },
+        );
       },
     );
   }

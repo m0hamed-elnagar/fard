@@ -5,11 +5,13 @@
 import 'package:hive_ce/hive_ce.dart';
 import 'package:fard/features/prayer_tracking/data/daily_record_entity.dart';
 import 'package:fard/features/quran/data/datasources/local/entities/ayah_entity.dart';
+import 'package:fard/features/quran/data/datasources/local/entities/bookmark_entity.dart';
 import 'package:fard/features/quran/data/datasources/local/entities/surah_entity.dart';
 
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
     registerAdapter(AyahEntityAdapter());
+    registerAdapter(BookmarkEntityAdapter());
     registerAdapter(DailyRecordEntityAdapter());
     registerAdapter(SurahEntityAdapter());
   }
@@ -18,6 +20,7 @@ extension HiveRegistrar on HiveInterface {
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
     registerAdapter(AyahEntityAdapter());
+    registerAdapter(BookmarkEntityAdapter());
     registerAdapter(DailyRecordEntityAdapter());
     registerAdapter(SurahEntityAdapter());
   }

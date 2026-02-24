@@ -8,15 +8,19 @@ import 'package:fard/features/quran/domain/usecases/update_last_read.dart';
 import 'package:fard/features/quran/domain/usecases/watch_last_read.dart';
 import 'package:fard/features/quran/domain/entities/surah.dart';
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
+import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
+import 'package:fard/features/quran/domain/repositories/bookmark_repository.dart';
 import 'package:fard/core/errors/failure.dart';
 
 class MockGetSurah extends Mock implements GetSurah {}
 class MockGetPage extends Mock implements GetPage {}
 class MockUpdateLastRead extends Mock implements UpdateLastRead {}
 class MockWatchLastRead extends Mock implements WatchLastRead {}
+class MockBookmarkRepository extends Mock implements BookmarkRepository {}
 
 // Helper to create valid SurahNumber
 class FakeGetSurahParams extends Fake implements GetSurahParams {}
+class FakeAyahNumber extends Fake implements AyahNumber {}
 
 void main() {
   late ReaderBloc readerBloc;
@@ -24,9 +28,11 @@ void main() {
   late MockGetPage mockGetPage;
   late MockUpdateLastRead mockUpdateLastRead;
   late MockWatchLastRead mockWatchLastRead;
+  late MockBookmarkRepository mockBookmarkRepository;
 
   setUpAll(() {
     registerFallbackValue(FakeGetSurahParams());
+    registerFallbackValue(FakeAyahNumber());
   });
 
   setUp(() {
@@ -34,12 +40,18 @@ void main() {
     mockGetPage = MockGetPage();
     mockUpdateLastRead = MockUpdateLastRead();
     mockWatchLastRead = MockWatchLastRead();
+    mockBookmarkRepository = MockBookmarkRepository();
     
+    // Default mock for checkBookmarkStatus
+    when(() => mockBookmarkRepository.isBookmarked(any()))
+        .thenAnswer((_) async => Result.success(false));
+
     readerBloc = ReaderBloc(
       getSurah: mockGetSurah,
       getPage: mockGetPage,
       updateLastRead: mockUpdateLastRead,
       watchLastRead: mockWatchLastRead,
+      bookmarkRepository: mockBookmarkRepository,
     );
   });
 
@@ -77,7 +89,7 @@ void main() {
       act: (bloc) => bloc.add(ReaderEvent.loadSurah(surahNumber: tSurahNumber)),
       expect: () => [
         const ReaderState.loading(),
-        ReaderState.loaded(surah: tSurah, lastReadAyah: null),
+        ReaderState.loaded(surah: tSurah, lastReadAyah: null, isBookmarked: false),
       ],
     );
 

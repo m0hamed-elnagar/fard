@@ -21,8 +21,21 @@ class TasbihPage extends StatelessWidget {
   }
 }
 
-class TasbihView extends StatelessWidget {
+class TasbihView extends StatefulWidget {
   const TasbihView({super.key});
+
+  @override
+  State<TasbihView> createState() => _TasbihViewState();
+}
+
+class _TasbihViewState extends State<TasbihView> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +76,8 @@ class TasbihView extends StatelessWidget {
               final buttonSize = (maxHeight * 0.12).clamp(80.0, 120.0);
               
               return SingleChildScrollView(
-                physics: const ClampingScrollPhysics(),
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(minHeight: maxHeight),
                   child: Padding(
@@ -85,22 +99,48 @@ class TasbihView extends StatelessWidget {
                             if (state.showCompletionDua && state.currentCompletionDua != null)
                               CompletionDuaCard(state: state)
                             else if (currentDhikr != null)
-                              DhikrDisplayCard(
-                                arabic: currentDhikr.arabic,
-                                transliteration: currentDhikr.transliteration,
-                                translation: currentDhikr.translation,
-                                showTransliteration: state.data.settings.showTransliteration,
-                                showTranslation: state.data.settings.showTranslation,
+                              GestureDetector(
+                                onVerticalDragUpdate: (details) {
+                                  _scrollController.position.jumpTo(
+                                    (_scrollController.position.pixels - details.delta.dy)
+                                        .clamp(0.0, _scrollController.position.maxScrollExtent),
+                                  );
+                                },
+                                child: DhikrDisplayCard(
+                                  arabic: currentDhikr.arabic,
+                                  transliteration: currentDhikr.transliteration,
+                                  translation: currentDhikr.translation,
+                                  showTransliteration: state.data.settings.showTransliteration,
+                                  showTranslation: state.data.settings.showTranslation,
+                                ),
                               ),
                           ],
                         ),
                         
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 24.0),
-                          child: CounterCircle(
-                            count: state.currentCycleCount,
-                            targetCount: state.currentCategory.countsPerCycle,
-                            size: counterSize,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              CounterCircle(
+                                count: state.currentCycleCount,
+                                targetCount: state.customTasbihTarget ?? state.currentCategory.countsPerCycle,
+                                size: counterSize,
+                              ),
+                              Positioned(
+                                right: 0,
+                                top: 0,
+                                child: Material(
+                                  color: AppTheme.surfaceLight,
+                                  shape: const CircleBorder(),
+                                  child: IconButton(
+                                    icon: const Icon(Icons.edit_note_rounded, color: AppTheme.accent),
+                                    onPressed: () => _showCustomTargetDialog(context, state),
+                                    tooltip: l10n.customTasbihTarget,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         
@@ -253,6 +293,52 @@ class TasbihView extends StatelessWidget {
             const Icon(Icons.unfold_more_rounded, color: AppTheme.textSecondary, size: 18),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showCustomTargetDialog(BuildContext context, TasbihState state) {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = TextEditingController(
+      text: state.customTasbihTarget?.toString() ?? '',
+    );
+    final tasbihBloc = context.read<TasbihBloc>();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.customTasbihTarget),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: l10n.customTasbihTargetHint(state.currentCategory.countsPerCycle),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              tasbihBloc.add(const TasbihEvent.updateCustomTarget(null));
+              Navigator.pop(context);
+            },
+            child: Text(l10n.resetItem, style: const TextStyle(color: AppTheme.missed)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              final target = int.tryParse(controller.text);
+              if (target != null && target > 0) {
+                tasbihBloc.add(TasbihEvent.updateCustomTarget(target));
+              }
+              Navigator.pop(context);
+            },
+            child: Text(l10n.update),
+          ),
+        ],
       ),
     );
   }

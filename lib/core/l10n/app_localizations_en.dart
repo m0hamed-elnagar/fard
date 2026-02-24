@@ -334,6 +334,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tasbihSettings => 'Tasbih Settings';
 
   @override
+  String get customTasbihTarget => 'Custom Target';
+
+  @override
+  String customTasbihTargetHint(int count) {
+    return 'Default: $count';
+  }
+
+  @override
   String get hapticFeedback => 'Haptic Feedback';
 
   @override

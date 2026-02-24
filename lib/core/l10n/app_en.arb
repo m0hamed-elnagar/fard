@@ -131,6 +131,15 @@
   "tasbih": "Tasbih",
   "selectDhikrCategory": "Select Dhikr Category",
   "tasbihSettings": "Tasbih Settings",
+  "customTasbihTarget": "Custom Target",
+  "customTasbihTargetHint": "Default: {count}",
+  "@customTasbihTargetHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "hapticFeedback": "Haptic Feedback",
   "showTranslation": "Show Translation",
   "showTransliteration": "Show Transliteration",

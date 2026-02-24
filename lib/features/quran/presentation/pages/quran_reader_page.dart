@@ -11,6 +11,8 @@ import 'package:fard/features/quran/presentation/widgets/reader_settings_sheet.d
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
 import 'package:fard/features/quran/domain/entities/ayah.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:quran/quran.dart' as quran;
+import 'scanned_mushaf_reader_page.dart';
 
 class QuranReaderPage extends StatefulWidget {
   final int surahNumber;
@@ -22,6 +24,18 @@ class QuranReaderPage extends StatefulWidget {
     this.initialAyahNumber,
   });
 
+  static MaterialPageRoute route({
+    required int surahNumber,
+    int? ayahNumber,
+  }) {
+    return MaterialPageRoute(
+      builder: (_) => QuranReaderPage(
+        surahNumber: surahNumber,
+        initialAyahNumber: ayahNumber,
+      ),
+    );
+  }
+
   @override
   State<QuranReaderPage> createState() => _QuranReaderPageState();
 }
@@ -29,6 +43,27 @@ class QuranReaderPage extends StatefulWidget {
 class _QuranReaderPageState extends State<QuranReaderPage> {
   double _baseScale = 1.0;
   bool _hasHandledInitialAyah = false;
+  final ScrollController _scrollController = ScrollController();
+  final Map<int, GlobalKey> _ayahKeys = {};
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToAyah(int ayahNumber) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final key = _ayahKeys[ayahNumber];
+      if (key != null && key.currentContext != null) {
+        Scrollable.ensureVisible(
+          key.currentContext!,
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +90,33 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                 },
               ),
               actions: [
+                BlocBuilder<ReaderBloc, ReaderState>(
+                  builder: (context, state) {
+                    return IconButton(
+                      icon: const Icon(Icons.photo_library_outlined),
+                      tooltip: 'المصحف المصور',
+                      onPressed: () {
+                        int page = 1;
+                        state.maybeMap(
+                          loaded: (s) {
+                            final targetAyah = s.highlightedAyah ?? s.lastReadAyah ?? s.surah.ayahs.firstOrNull;
+                            if (targetAyah != null) {
+                              page = quran.getPageNumber(
+                                s.surah.number.value,
+                                targetAyah.number.ayahNumberInSurah,
+                              );
+                            }
+                          },
+                          orElse: () {},
+                        );
+                        Navigator.push(
+                          context,
+                          ScannedMushafReaderPage.route(pageNumber: page),
+                        );
+                      },
+                    );
+                  },
+                ),
                 BlocBuilder<ReaderBloc, ReaderState>(
                   builder: (context, state) {
                     final readerBloc = context.read<ReaderBloc>();
@@ -85,6 +147,13 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                     listener: (context, state) {
                       state.mapOrNull(
                         loaded: (s) {
+                          // Generate keys for all ayahs if not already done
+                          if (_ayahKeys.isEmpty) {
+                            for (final ayah in s.surah.ayahs) {
+                              _ayahKeys[ayah.number.ayahNumberInSurah] = GlobalKey();
+                            }
+                          }
+
                           if (!_hasHandledInitialAyah && widget.initialAyahNumber != null) {
                             _hasHandledInitialAyah = true;
                             try {
@@ -92,6 +161,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                                 (a) => a.number.ayahNumberInSurah == widget.initialAyahNumber
                               );
                               context.read<ReaderBloc>().add(ReaderEvent.selectAyah(ayah));
+                              _scrollToAyah(widget.initialAyahNumber!);
                             } catch (_) {}
                           }
                         },
@@ -143,6 +213,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                                     );
                               },
                               child: SingleChildScrollView(
+                                controller: _scrollController,
                                 padding: const EdgeInsets.all(20.0),
                                 child: Column(
                                   children: [
@@ -159,6 +230,8 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                                           style: GoogleFonts.amiri(
                                             fontSize: 32 * s.textScale,
                                             fontWeight: FontWeight.bold,
+                                            height: 2.2,
+                                            wordSpacing: 4,
                                           ),
                                           textAlign: TextAlign.center,
                                         ),
@@ -178,6 +251,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                                           ayahs: s.surah.ayahs,
                                           highlightedAyah: playingAyah ?? s.highlightedAyah ?? s.lastReadAyah,
                                           textScale: s.textScale,
+                                          ayahKeys: _ayahKeys,
                                           onAyahTap: (ayah) {
                                             context.read<ReaderBloc>().add(ReaderEvent.selectAyah(ayah));
                                           },

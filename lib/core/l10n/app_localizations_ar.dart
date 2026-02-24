@@ -333,6 +333,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tasbihSettings => 'إعدادات المسبحة';
 
   @override
+  String get customTasbihTarget => 'هدف مخصص';
+
+  @override
+  String customTasbihTargetHint(int count) {
+    return 'الافتراضي: $count';
+  }
+
+  @override
   String get hapticFeedback => 'الاهتزاز عند اللمس';
 
   @override

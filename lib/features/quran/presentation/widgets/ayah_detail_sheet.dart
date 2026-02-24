@@ -9,6 +9,7 @@ import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
 import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/features/quran/domain/entities/tafsir_info.dart';
 
 class AyahDetailSheet extends StatelessWidget {
   final Ayah ayah;
@@ -33,115 +34,156 @@ class AyahDetailSheet extends StatelessWidget {
               color: Theme.of(context).scaffoldBackgroundColor,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             ),
-            child: Column(
-              children: [
-                const SizedBox(height: 12),
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.outline,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              '${l10n.ayah} ${ayah.number.ayahNumberInSurah}',
-                              style: GoogleFonts.outfit(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onPrimaryContainer,
-                              ),
-                            ),
+            child: NestedScrollView(
+              controller: scrollController,
+              headerSliverBuilder: (context, innerBoxIsScrolled) {
+                return [
+                  SliverToBoxAdapter(
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 12),
+                        Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.outline,
+                            borderRadius: BorderRadius.circular(2),
                           ),
-                          const Spacer(),
-                          BlocBuilder<ReaderBloc, ReaderState>(
-                            builder: (context, state) {
-                              final isLastRead = state.maybeMap(
-                                loaded: (s) => s.lastReadAyah?.number == ayah.number,
-                                orElse: () => false,
-                              );
-
-                              return IconButton(
-                                icon: Icon(
-                                  isLastRead ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-                                  color: isLastRead ? Theme.of(context).colorScheme.primary : null,
-                                ),
-                                tooltip: 'Mark as last read',
-                                onPressed: () {
-                                  context.read<ReaderBloc>().add(ReaderEvent.saveLastRead(ayah));
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Marked as last read'),
-                                      duration: Duration(seconds: 1),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.primaryContainer,
+                                      borderRadius: BorderRadius.circular(20),
                                     ),
-                                  );
-                                },
-                              );
-                            },
+                                    child: Text(
+                                      '${l10n.ayah} ${ayah.number.ayahNumberInSurah}',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                      ),
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  BlocBuilder<ReaderBloc, ReaderState>(
+                                    builder: (context, state) {
+                                      final isLastRead = state.maybeMap(
+                                        loaded: (s) => s.lastReadAyah?.number == ayah.number,
+                                        orElse: () => false,
+                                      );
+                                      
+                                      final isBookmarked = state.maybeMap(
+                                        loaded: (s) => s.isBookmarked,
+                                        orElse: () => false,
+                                      );
+
+                                      return Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(
+                                              isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                                              color: isBookmarked ? Colors.amber : null,
+                                            ),
+                                            tooltip: isBookmarked ? 'إزالة من الإشارات' : 'إضافة إلى الإشارات',
+                                            onPressed: () {
+                                              context.read<ReaderBloc>().add(ReaderEvent.toggleBookmark(ayah));
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(isBookmarked ? 'تمت الإزالة من الإشارات' : 'تمت الإضافة إلى الإشارات'),
+                                                  duration: const Duration(seconds: 1),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                          IconButton(
+                                            icon: Icon(
+                                              isLastRead ? Icons.menu_book_rounded : Icons.menu_book_outlined,
+                                              color: isLastRead ? Theme.of(context).colorScheme.primary : null,
+                                            ),
+                                            tooltip: 'تحديد كآخر قراءة',
+                                            onPressed: () {
+                                              context.read<ReaderBloc>().add(ReaderEvent.saveLastRead(ayah));
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text('تم التحديد كآخر قراءة'),
+                                                  duration: Duration(seconds: 1),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.close),
+                                    onPressed: () => Navigator.pop(context),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                                  ),
+                                ),
+                                child: Text(
+                                  ayah.uthmaniText,
+                                  style: GoogleFonts.amiri(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    height: 2.2,
+                                    wordSpacing: 4,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  textDirection: TextDirection.rtl,
+                                ),
+                              ),
+                            ],
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.close),
-                            onPressed: () => Navigator.pop(context),
-                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _SliverAppBarDelegate(
+                      TabBar(
+                        labelColor: Theme.of(context).colorScheme.primary,
+                        unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                        indicatorColor: Theme.of(context).colorScheme.primary,
+                        labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                        tabs: const [
+                          Tab(text: 'التفسير'),
+                          Tab(text: 'صوتيات'),
                         ],
                       ),
-                      const SizedBox(height: 16),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
-                          ),
-                        ),
-                        child: Text(
-                          ayah.uthmaniText,
-                          style: GoogleFonts.amiri(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            height: 1.6,
-                          ),
-                          textAlign: TextAlign.center,
-                          textDirection: TextDirection.rtl,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                TabBar(
-                  labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-                  tabs: [
-                    const Tab(text: 'التفسير'), // Tafsir in Arabic
-                    const Tab(text: 'صوتيات'), // Audio in Arabic
-                  ],
-                ),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      _TafsirTab(ayah: ayah, controller: scrollController),
-                      _AudioTab(
-                        ayah: ayah, 
-                        controller: scrollController,
-                        surahAyahCount: surahAyahCount,
-                      ),
-                    ],
+                ];
+              },
+              body: TabBarView(
+                children: [
+                  _TafsirTab(ayah: ayah),
+                  _AudioTab(
+                    ayah: ayah, 
+                    surahAyahCount: surahAyahCount,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
@@ -150,11 +192,34 @@ class AyahDetailSheet extends StatelessWidget {
   }
 }
 
+class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  _SliverAppBarDelegate(this._tabBar);
+
+  final TabBar _tabBar;
+
+  @override
+  double get minExtent => _tabBar.preferredSize.height;
+  @override
+  double get maxExtent => _tabBar.preferredSize.height;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: _tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
+    return false;
+  }
+}
+
 class _TafsirTab extends StatelessWidget {
   final Ayah ayah;
-  final ScrollController controller;
 
-  const _TafsirTab({required this.ayah, required this.controller});
+  const _TafsirTab({required this.ayah});
 
   String _cleanHtml(String html) {
     return html
@@ -167,34 +232,129 @@ class _TafsirTab extends StatelessWidget {
         .trim();
   }
 
+  void _showTafsirSelector(BuildContext context, int currentId) {
+    final readerBloc = context.read<ReaderBloc>();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (modalContext) {
+        return BlocProvider.value(
+          value: readerBloc,
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.outline,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'اختر التفسير',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: TafsirInfo.availableTafsirs.length,
+                  itemBuilder: (context, index) {
+                    final tafsir = TafsirInfo.availableTafsirs[index];
+                    final isArabic = tafsir.languageName == 'arabic';
+                    return ListTile(
+                      title: Text(
+                        tafsir.name,
+                        style: isArabic ? GoogleFonts.amiri(fontWeight: FontWeight.bold) : null,
+                        textAlign: isArabic ? TextAlign.right : TextAlign.left,
+                      ),
+                      subtitle: Text(
+                        tafsir.authorName,
+                        style: isArabic ? GoogleFonts.amiri(fontSize: 14) : null,
+                        textAlign: isArabic ? TextAlign.right : TextAlign.left,
+                      ),
+                      leading: !isArabic && tafsir.id == currentId ? const Icon(Icons.check, color: Colors.green) : null,
+                      trailing: isArabic && tafsir.id == currentId ? const Icon(Icons.check, color: Colors.green) : null,
+                      onTap: () {
+                        readerBloc.add(ReaderEvent.updateTafsir(tafsir.id));
+                        Navigator.pop(modalContext);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-      future: getIt<GetTafsir>().call(GetTafsirParams(
-        surahNumber: ayah.number.surahNumber,
-        ayahNumber: ayah.number.ayahNumberInSurah,
-        tafsirId: 16, // Tafsir Al-Jalalayn (Arabic)
-      )).then((res) => res.fold((f) => 'خطأ في تحميل التفسير: ${f.message}', (d) => d)),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    return BlocBuilder<ReaderBloc, ReaderState>(
+      builder: (context, state) {
+        final tafsirId = state.maybeMap(
+          loaded: (s) => s.selectedTafsirId,
+          orElse: () => 16,
+        );
         
-        final tafsir = snapshot.data ?? 'لا يوجد تفسير متاح';
-        
-        return ListView(
-          controller: controller,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        final selectedTafsir = TafsirInfo.availableTafsirs.firstWhere(
+          (t) => t.id == tafsirId,
+          orElse: () => TafsirInfo.availableTafsirs.first,
+        );
+
+        return Column(
           children: [
-            Text(
-              _cleanHtml(tafsir),
-              style: GoogleFonts.amiri(
-                fontSize: 20,
-                height: 1.8,
-                color: Theme.of(context).textTheme.bodyLarge?.color,
+            ListTile(
+              dense: true,
+              leading: const Icon(Icons.translate, size: 20),
+              title: Text(
+                'التفسير: ${selectedTafsir.name}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              textDirection: TextDirection.rtl,
-              textAlign: TextAlign.justify,
+              trailing: const Icon(Icons.edit_outlined, size: 20),
+              onTap: () => _showTafsirSelector(context, tafsirId),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: FutureBuilder<String>(
+                key: ValueKey(tafsirId), // Re-fetch when tafsirId changes
+                future: getIt<GetTafsir>().call(GetTafsirParams(
+                  surahNumber: ayah.number.surahNumber,
+                  ayahNumber: ayah.number.ayahNumberInSurah,
+                  tafsirId: tafsirId,
+                )).then((res) => res.fold((f) => 'خطأ في تحميل التفسير: ${f.message}', (d) => d)),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  
+                  final tafsir = snapshot.data ?? 'لا يوجد تفسير متاح';
+                  
+                  return ListView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    children: [
+                      Text(
+                        _cleanHtml(tafsir),
+                        style: GoogleFonts.amiri(
+                          fontSize: 20,
+                          height: 2.2,
+                          wordSpacing: 2,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                        ),
+                        textDirection: TextDirection.rtl,
+                        textAlign: TextAlign.justify,
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ],
         );
@@ -205,12 +365,10 @@ class _TafsirTab extends StatelessWidget {
 
 class _AudioTab extends StatelessWidget {
   final Ayah ayah;
-  final ScrollController controller;
   final int? surahAyahCount;
 
   const _AudioTab({
     required this.ayah, 
-    required this.controller,
     this.surahAyahCount,
   });
 
@@ -224,7 +382,6 @@ class _AudioTab extends StatelessWidget {
         final isError = state.hasError;
 
         return ListView(
-          controller: controller,
           padding: const EdgeInsets.all(20),
           children: [
             Center(

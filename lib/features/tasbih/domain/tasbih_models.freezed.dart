@@ -1163,7 +1163,7 @@ $TasbihSettingsCopyWith<$Res> get settings {
 /// @nodoc
 mixin _$TasbihSettings {
 
-@JsonKey(name: 'default_category') String get defaultCategory;@JsonKey(name: 'haptic_feedback') bool get hapticFeedback;@JsonKey(name: 'sound_effect') bool get soundEffect;@JsonKey(name: 'auto_reset') bool get autoReset;@JsonKey(name: 'show_transliteration') bool get showTransliteration;@JsonKey(name: 'show_translation') bool get showTranslation;@JsonKey(name: 'dark_mode') bool get darkMode;@JsonKey(name: 'keep_screen_on') bool get keepScreenOn;@JsonKey(name: 'stats_tracking') bool get statsTracking;
+@JsonKey(name: 'default_category') String get defaultCategory;@JsonKey(name: 'haptic_feedback') bool get hapticFeedback;@JsonKey(name: 'sound_effect') bool get soundEffect;@JsonKey(name: 'auto_reset') bool get autoReset;@JsonKey(name: 'show_transliteration') bool get showTransliteration;@JsonKey(name: 'show_translation') bool get showTranslation;@JsonKey(name: 'dark_mode') bool get darkMode;@JsonKey(name: 'keep_screen_on') bool get keepScreenOn;@JsonKey(name: 'stats_tracking') bool get statsTracking;@JsonKey(name: 'custom_tasbih_target') int? get customTasbihTarget;
 /// Create a copy of TasbihSettings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1176,16 +1176,16 @@ $TasbihSettingsCopyWith<TasbihSettings> get copyWith => _$TasbihSettingsCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TasbihSettings&&(identical(other.defaultCategory, defaultCategory) || other.defaultCategory == defaultCategory)&&(identical(other.hapticFeedback, hapticFeedback) || other.hapticFeedback == hapticFeedback)&&(identical(other.soundEffect, soundEffect) || other.soundEffect == soundEffect)&&(identical(other.autoReset, autoReset) || other.autoReset == autoReset)&&(identical(other.showTransliteration, showTransliteration) || other.showTransliteration == showTransliteration)&&(identical(other.showTranslation, showTranslation) || other.showTranslation == showTranslation)&&(identical(other.darkMode, darkMode) || other.darkMode == darkMode)&&(identical(other.keepScreenOn, keepScreenOn) || other.keepScreenOn == keepScreenOn)&&(identical(other.statsTracking, statsTracking) || other.statsTracking == statsTracking));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TasbihSettings&&(identical(other.defaultCategory, defaultCategory) || other.defaultCategory == defaultCategory)&&(identical(other.hapticFeedback, hapticFeedback) || other.hapticFeedback == hapticFeedback)&&(identical(other.soundEffect, soundEffect) || other.soundEffect == soundEffect)&&(identical(other.autoReset, autoReset) || other.autoReset == autoReset)&&(identical(other.showTransliteration, showTransliteration) || other.showTransliteration == showTransliteration)&&(identical(other.showTranslation, showTranslation) || other.showTranslation == showTranslation)&&(identical(other.darkMode, darkMode) || other.darkMode == darkMode)&&(identical(other.keepScreenOn, keepScreenOn) || other.keepScreenOn == keepScreenOn)&&(identical(other.statsTracking, statsTracking) || other.statsTracking == statsTracking)&&(identical(other.customTasbihTarget, customTasbihTarget) || other.customTasbihTarget == customTasbihTarget));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,defaultCategory,hapticFeedback,soundEffect,autoReset,showTransliteration,showTranslation,darkMode,keepScreenOn,statsTracking);
+int get hashCode => Object.hash(runtimeType,defaultCategory,hapticFeedback,soundEffect,autoReset,showTransliteration,showTranslation,darkMode,keepScreenOn,statsTracking,customTasbihTarget);
 
 @override
 String toString() {
-  return 'TasbihSettings(defaultCategory: $defaultCategory, hapticFeedback: $hapticFeedback, soundEffect: $soundEffect, autoReset: $autoReset, showTransliteration: $showTransliteration, showTranslation: $showTranslation, darkMode: $darkMode, keepScreenOn: $keepScreenOn, statsTracking: $statsTracking)';
+  return 'TasbihSettings(defaultCategory: $defaultCategory, hapticFeedback: $hapticFeedback, soundEffect: $soundEffect, autoReset: $autoReset, showTransliteration: $showTransliteration, showTranslation: $showTranslation, darkMode: $darkMode, keepScreenOn: $keepScreenOn, statsTracking: $statsTracking, customTasbihTarget: $customTasbihTarget)';
 }
 
 
@@ -1196,7 +1196,7 @@ abstract mixin class $TasbihSettingsCopyWith<$Res>  {
   factory $TasbihSettingsCopyWith(TasbihSettings value, $Res Function(TasbihSettings) _then) = _$TasbihSettingsCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'default_category') String defaultCategory,@JsonKey(name: 'haptic_feedback') bool hapticFeedback,@JsonKey(name: 'sound_effect') bool soundEffect,@JsonKey(name: 'auto_reset') bool autoReset,@JsonKey(name: 'show_transliteration') bool showTransliteration,@JsonKey(name: 'show_translation') bool showTranslation,@JsonKey(name: 'dark_mode') bool darkMode,@JsonKey(name: 'keep_screen_on') bool keepScreenOn,@JsonKey(name: 'stats_tracking') bool statsTracking
+@JsonKey(name: 'default_category') String defaultCategory,@JsonKey(name: 'haptic_feedback') bool hapticFeedback,@JsonKey(name: 'sound_effect') bool soundEffect,@JsonKey(name: 'auto_reset') bool autoReset,@JsonKey(name: 'show_transliteration') bool showTransliteration,@JsonKey(name: 'show_translation') bool showTranslation,@JsonKey(name: 'dark_mode') bool darkMode,@JsonKey(name: 'keep_screen_on') bool keepScreenOn,@JsonKey(name: 'stats_tracking') bool statsTracking,@JsonKey(name: 'custom_tasbih_target') int? customTasbihTarget
 });
 
 
@@ -1213,7 +1213,7 @@ class _$TasbihSettingsCopyWithImpl<$Res>
 
 /// Create a copy of TasbihSettings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? defaultCategory = null,Object? hapticFeedback = null,Object? soundEffect = null,Object? autoReset = null,Object? showTransliteration = null,Object? showTranslation = null,Object? darkMode = null,Object? keepScreenOn = null,Object? statsTracking = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? defaultCategory = null,Object? hapticFeedback = null,Object? soundEffect = null,Object? autoReset = null,Object? showTransliteration = null,Object? showTranslation = null,Object? darkMode = null,Object? keepScreenOn = null,Object? statsTracking = null,Object? customTasbihTarget = freezed,}) {
   return _then(_self.copyWith(
 defaultCategory: null == defaultCategory ? _self.defaultCategory : defaultCategory // ignore: cast_nullable_to_non_nullable
 as String,hapticFeedback: null == hapticFeedback ? _self.hapticFeedback : hapticFeedback // ignore: cast_nullable_to_non_nullable
@@ -1224,7 +1224,8 @@ as bool,showTranslation: null == showTranslation ? _self.showTranslation : showT
 as bool,darkMode: null == darkMode ? _self.darkMode : darkMode // ignore: cast_nullable_to_non_nullable
 as bool,keepScreenOn: null == keepScreenOn ? _self.keepScreenOn : keepScreenOn // ignore: cast_nullable_to_non_nullable
 as bool,statsTracking: null == statsTracking ? _self.statsTracking : statsTracking // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,customTasbihTarget: freezed == customTasbihTarget ? _self.customTasbihTarget : customTasbihTarget // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -1306,10 +1307,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'default_category')  String defaultCategory, @JsonKey(name: 'haptic_feedback')  bool hapticFeedback, @JsonKey(name: 'sound_effect')  bool soundEffect, @JsonKey(name: 'auto_reset')  bool autoReset, @JsonKey(name: 'show_transliteration')  bool showTransliteration, @JsonKey(name: 'show_translation')  bool showTranslation, @JsonKey(name: 'dark_mode')  bool darkMode, @JsonKey(name: 'keep_screen_on')  bool keepScreenOn, @JsonKey(name: 'stats_tracking')  bool statsTracking)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'default_category')  String defaultCategory, @JsonKey(name: 'haptic_feedback')  bool hapticFeedback, @JsonKey(name: 'sound_effect')  bool soundEffect, @JsonKey(name: 'auto_reset')  bool autoReset, @JsonKey(name: 'show_transliteration')  bool showTransliteration, @JsonKey(name: 'show_translation')  bool showTranslation, @JsonKey(name: 'dark_mode')  bool darkMode, @JsonKey(name: 'keep_screen_on')  bool keepScreenOn, @JsonKey(name: 'stats_tracking')  bool statsTracking, @JsonKey(name: 'custom_tasbih_target')  int? customTasbihTarget)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TasbihSettings() when $default != null:
-return $default(_that.defaultCategory,_that.hapticFeedback,_that.soundEffect,_that.autoReset,_that.showTransliteration,_that.showTranslation,_that.darkMode,_that.keepScreenOn,_that.statsTracking);case _:
+return $default(_that.defaultCategory,_that.hapticFeedback,_that.soundEffect,_that.autoReset,_that.showTransliteration,_that.showTranslation,_that.darkMode,_that.keepScreenOn,_that.statsTracking,_that.customTasbihTarget);case _:
   return orElse();
 
 }
@@ -1327,10 +1328,10 @@ return $default(_that.defaultCategory,_that.hapticFeedback,_that.soundEffect,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'default_category')  String defaultCategory, @JsonKey(name: 'haptic_feedback')  bool hapticFeedback, @JsonKey(name: 'sound_effect')  bool soundEffect, @JsonKey(name: 'auto_reset')  bool autoReset, @JsonKey(name: 'show_transliteration')  bool showTransliteration, @JsonKey(name: 'show_translation')  bool showTranslation, @JsonKey(name: 'dark_mode')  bool darkMode, @JsonKey(name: 'keep_screen_on')  bool keepScreenOn, @JsonKey(name: 'stats_tracking')  bool statsTracking)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'default_category')  String defaultCategory, @JsonKey(name: 'haptic_feedback')  bool hapticFeedback, @JsonKey(name: 'sound_effect')  bool soundEffect, @JsonKey(name: 'auto_reset')  bool autoReset, @JsonKey(name: 'show_transliteration')  bool showTransliteration, @JsonKey(name: 'show_translation')  bool showTranslation, @JsonKey(name: 'dark_mode')  bool darkMode, @JsonKey(name: 'keep_screen_on')  bool keepScreenOn, @JsonKey(name: 'stats_tracking')  bool statsTracking, @JsonKey(name: 'custom_tasbih_target')  int? customTasbihTarget)  $default,) {final _that = this;
 switch (_that) {
 case _TasbihSettings():
-return $default(_that.defaultCategory,_that.hapticFeedback,_that.soundEffect,_that.autoReset,_that.showTransliteration,_that.showTranslation,_that.darkMode,_that.keepScreenOn,_that.statsTracking);}
+return $default(_that.defaultCategory,_that.hapticFeedback,_that.soundEffect,_that.autoReset,_that.showTransliteration,_that.showTranslation,_that.darkMode,_that.keepScreenOn,_that.statsTracking,_that.customTasbihTarget);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -1344,10 +1345,10 @@ return $default(_that.defaultCategory,_that.hapticFeedback,_that.soundEffect,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'default_category')  String defaultCategory, @JsonKey(name: 'haptic_feedback')  bool hapticFeedback, @JsonKey(name: 'sound_effect')  bool soundEffect, @JsonKey(name: 'auto_reset')  bool autoReset, @JsonKey(name: 'show_transliteration')  bool showTransliteration, @JsonKey(name: 'show_translation')  bool showTranslation, @JsonKey(name: 'dark_mode')  bool darkMode, @JsonKey(name: 'keep_screen_on')  bool keepScreenOn, @JsonKey(name: 'stats_tracking')  bool statsTracking)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'default_category')  String defaultCategory, @JsonKey(name: 'haptic_feedback')  bool hapticFeedback, @JsonKey(name: 'sound_effect')  bool soundEffect, @JsonKey(name: 'auto_reset')  bool autoReset, @JsonKey(name: 'show_transliteration')  bool showTransliteration, @JsonKey(name: 'show_translation')  bool showTranslation, @JsonKey(name: 'dark_mode')  bool darkMode, @JsonKey(name: 'keep_screen_on')  bool keepScreenOn, @JsonKey(name: 'stats_tracking')  bool statsTracking, @JsonKey(name: 'custom_tasbih_target')  int? customTasbihTarget)?  $default,) {final _that = this;
 switch (_that) {
 case _TasbihSettings() when $default != null:
-return $default(_that.defaultCategory,_that.hapticFeedback,_that.soundEffect,_that.autoReset,_that.showTransliteration,_that.showTranslation,_that.darkMode,_that.keepScreenOn,_that.statsTracking);case _:
+return $default(_that.defaultCategory,_that.hapticFeedback,_that.soundEffect,_that.autoReset,_that.showTransliteration,_that.showTranslation,_that.darkMode,_that.keepScreenOn,_that.statsTracking,_that.customTasbihTarget);case _:
   return null;
 
 }
@@ -1359,7 +1360,7 @@ return $default(_that.defaultCategory,_that.hapticFeedback,_that.soundEffect,_th
 @JsonSerializable()
 
 class _TasbihSettings implements TasbihSettings {
-  const _TasbihSettings({@JsonKey(name: 'default_category') required this.defaultCategory, @JsonKey(name: 'haptic_feedback') this.hapticFeedback = true, @JsonKey(name: 'sound_effect') this.soundEffect = false, @JsonKey(name: 'auto_reset') this.autoReset = true, @JsonKey(name: 'show_transliteration') this.showTransliteration = true, @JsonKey(name: 'show_translation') this.showTranslation = true, @JsonKey(name: 'dark_mode') this.darkMode = false, @JsonKey(name: 'keep_screen_on') this.keepScreenOn = true, @JsonKey(name: 'stats_tracking') this.statsTracking = true});
+  const _TasbihSettings({@JsonKey(name: 'default_category') required this.defaultCategory, @JsonKey(name: 'haptic_feedback') this.hapticFeedback = true, @JsonKey(name: 'sound_effect') this.soundEffect = false, @JsonKey(name: 'auto_reset') this.autoReset = true, @JsonKey(name: 'show_transliteration') this.showTransliteration = true, @JsonKey(name: 'show_translation') this.showTranslation = true, @JsonKey(name: 'dark_mode') this.darkMode = false, @JsonKey(name: 'keep_screen_on') this.keepScreenOn = true, @JsonKey(name: 'stats_tracking') this.statsTracking = true, @JsonKey(name: 'custom_tasbih_target') this.customTasbihTarget});
   factory _TasbihSettings.fromJson(Map<String, dynamic> json) => _$TasbihSettingsFromJson(json);
 
 @override@JsonKey(name: 'default_category') final  String defaultCategory;
@@ -1371,6 +1372,7 @@ class _TasbihSettings implements TasbihSettings {
 @override@JsonKey(name: 'dark_mode') final  bool darkMode;
 @override@JsonKey(name: 'keep_screen_on') final  bool keepScreenOn;
 @override@JsonKey(name: 'stats_tracking') final  bool statsTracking;
+@override@JsonKey(name: 'custom_tasbih_target') final  int? customTasbihTarget;
 
 /// Create a copy of TasbihSettings
 /// with the given fields replaced by the non-null parameter values.
@@ -1385,16 +1387,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TasbihSettings&&(identical(other.defaultCategory, defaultCategory) || other.defaultCategory == defaultCategory)&&(identical(other.hapticFeedback, hapticFeedback) || other.hapticFeedback == hapticFeedback)&&(identical(other.soundEffect, soundEffect) || other.soundEffect == soundEffect)&&(identical(other.autoReset, autoReset) || other.autoReset == autoReset)&&(identical(other.showTransliteration, showTransliteration) || other.showTransliteration == showTransliteration)&&(identical(other.showTranslation, showTranslation) || other.showTranslation == showTranslation)&&(identical(other.darkMode, darkMode) || other.darkMode == darkMode)&&(identical(other.keepScreenOn, keepScreenOn) || other.keepScreenOn == keepScreenOn)&&(identical(other.statsTracking, statsTracking) || other.statsTracking == statsTracking));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TasbihSettings&&(identical(other.defaultCategory, defaultCategory) || other.defaultCategory == defaultCategory)&&(identical(other.hapticFeedback, hapticFeedback) || other.hapticFeedback == hapticFeedback)&&(identical(other.soundEffect, soundEffect) || other.soundEffect == soundEffect)&&(identical(other.autoReset, autoReset) || other.autoReset == autoReset)&&(identical(other.showTransliteration, showTransliteration) || other.showTransliteration == showTransliteration)&&(identical(other.showTranslation, showTranslation) || other.showTranslation == showTranslation)&&(identical(other.darkMode, darkMode) || other.darkMode == darkMode)&&(identical(other.keepScreenOn, keepScreenOn) || other.keepScreenOn == keepScreenOn)&&(identical(other.statsTracking, statsTracking) || other.statsTracking == statsTracking)&&(identical(other.customTasbihTarget, customTasbihTarget) || other.customTasbihTarget == customTasbihTarget));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,defaultCategory,hapticFeedback,soundEffect,autoReset,showTransliteration,showTranslation,darkMode,keepScreenOn,statsTracking);
+int get hashCode => Object.hash(runtimeType,defaultCategory,hapticFeedback,soundEffect,autoReset,showTransliteration,showTranslation,darkMode,keepScreenOn,statsTracking,customTasbihTarget);
 
 @override
 String toString() {
-  return 'TasbihSettings(defaultCategory: $defaultCategory, hapticFeedback: $hapticFeedback, soundEffect: $soundEffect, autoReset: $autoReset, showTransliteration: $showTransliteration, showTranslation: $showTranslation, darkMode: $darkMode, keepScreenOn: $keepScreenOn, statsTracking: $statsTracking)';
+  return 'TasbihSettings(defaultCategory: $defaultCategory, hapticFeedback: $hapticFeedback, soundEffect: $soundEffect, autoReset: $autoReset, showTransliteration: $showTransliteration, showTranslation: $showTranslation, darkMode: $darkMode, keepScreenOn: $keepScreenOn, statsTracking: $statsTracking, customTasbihTarget: $customTasbihTarget)';
 }
 
 
@@ -1405,7 +1407,7 @@ abstract mixin class _$TasbihSettingsCopyWith<$Res> implements $TasbihSettingsCo
   factory _$TasbihSettingsCopyWith(_TasbihSettings value, $Res Function(_TasbihSettings) _then) = __$TasbihSettingsCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'default_category') String defaultCategory,@JsonKey(name: 'haptic_feedback') bool hapticFeedback,@JsonKey(name: 'sound_effect') bool soundEffect,@JsonKey(name: 'auto_reset') bool autoReset,@JsonKey(name: 'show_transliteration') bool showTransliteration,@JsonKey(name: 'show_translation') bool showTranslation,@JsonKey(name: 'dark_mode') bool darkMode,@JsonKey(name: 'keep_screen_on') bool keepScreenOn,@JsonKey(name: 'stats_tracking') bool statsTracking
+@JsonKey(name: 'default_category') String defaultCategory,@JsonKey(name: 'haptic_feedback') bool hapticFeedback,@JsonKey(name: 'sound_effect') bool soundEffect,@JsonKey(name: 'auto_reset') bool autoReset,@JsonKey(name: 'show_transliteration') bool showTransliteration,@JsonKey(name: 'show_translation') bool showTranslation,@JsonKey(name: 'dark_mode') bool darkMode,@JsonKey(name: 'keep_screen_on') bool keepScreenOn,@JsonKey(name: 'stats_tracking') bool statsTracking,@JsonKey(name: 'custom_tasbih_target') int? customTasbihTarget
 });
 
 
@@ -1422,7 +1424,7 @@ class __$TasbihSettingsCopyWithImpl<$Res>
 
 /// Create a copy of TasbihSettings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? defaultCategory = null,Object? hapticFeedback = null,Object? soundEffect = null,Object? autoReset = null,Object? showTransliteration = null,Object? showTranslation = null,Object? darkMode = null,Object? keepScreenOn = null,Object? statsTracking = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? defaultCategory = null,Object? hapticFeedback = null,Object? soundEffect = null,Object? autoReset = null,Object? showTransliteration = null,Object? showTranslation = null,Object? darkMode = null,Object? keepScreenOn = null,Object? statsTracking = null,Object? customTasbihTarget = freezed,}) {
   return _then(_TasbihSettings(
 defaultCategory: null == defaultCategory ? _self.defaultCategory : defaultCategory // ignore: cast_nullable_to_non_nullable
 as String,hapticFeedback: null == hapticFeedback ? _self.hapticFeedback : hapticFeedback // ignore: cast_nullable_to_non_nullable
@@ -1433,7 +1435,8 @@ as bool,showTranslation: null == showTranslation ? _self.showTranslation : showT
 as bool,darkMode: null == darkMode ? _self.darkMode : darkMode // ignore: cast_nullable_to_non_nullable
 as bool,keepScreenOn: null == keepScreenOn ? _self.keepScreenOn : keepScreenOn // ignore: cast_nullable_to_non_nullable
 as bool,statsTracking: null == statsTracking ? _self.statsTracking : statsTracking // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,customTasbihTarget: freezed == customTasbihTarget ? _self.customTasbihTarget : customTasbihTarget // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
