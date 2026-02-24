@@ -2,6 +2,7 @@ import 'package:fard/core/services/location_service.dart';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/core/services/voice_download_service.dart';
+import 'package:fard/core/services/mushaf_download_service.dart';
 import 'package:fard/features/azkar/data/azkar_repository.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/prayer_tracking/data/daily_record_entity.dart';
@@ -66,6 +67,7 @@ Future<void> configureDependencies({String? hivePath}) async {
   getIt.registerSingleton<NotificationService>(NotificationService());
   getIt.registerSingleton<PrayerTimeService>(PrayerTimeService());
   getIt.registerSingleton<VoiceDownloadService>(VoiceDownloadService());
+  getIt.registerSingleton<MushafDownloadService>(MushafDownloadService());
   getIt.registerSingleton<AzkarRepository>(AzkarRepository(azkarBox));
   getIt.registerSingleton<PrayerRepo>(PrayerRepoImpl(box));
   getIt.registerSingleton<TasbihRepository>(TasbihRepositoryImpl(
