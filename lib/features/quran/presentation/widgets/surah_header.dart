@@ -9,15 +9,21 @@ import 'package:fard/core/extensions/number_extension.dart';
 
 class SurahHeader extends StatelessWidget {
   final Surah surah;
+  final VoidCallback? onNext;
+  final VoidCallback? onPrevious;
 
-  const SurahHeader({super.key, required this.surah});
+  const SurahHeader({
+    super.key, 
+    required this.surah,
+    this.onNext,
+    this.onPrevious,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-      margin: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
@@ -27,15 +33,40 @@ class SurahHeader extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(
-            surah.name,
-            style: GoogleFonts.amiri(
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primary,
-            ),
+          Row(
+            children: [
+              if (onPrevious != null && surah.number.value > 1)
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
+                  onPressed: onPrevious,
+                  tooltip: 'السورة السابقة',
+                )
+              else
+                const SizedBox(width: 48),
+              
+              Expanded(
+                child: Text(
+                  surah.name,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.amiri(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ),
+              
+              if (onNext != null && surah.number.value < 114)
+                IconButton(
+                  icon: const Icon(Icons.arrow_forward_ios_rounded, size: 20),
+                  onPressed: onNext,
+                  tooltip: 'السورة التالية',
+                )
+              else
+                const SizedBox(width: 48),
+            ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -57,8 +88,11 @@ class SurahHeader extends StatelessWidget {
               final isLoading = state.isLoading;
               final isThisSurah = state.currentSurah == surah.number.value;
 
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              return Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 12,
+                runSpacing: 12,
                 children: [
                   ElevatedButton.icon(
                     onPressed: () {
@@ -83,7 +117,6 @@ class SurahHeader extends StatelessWidget {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                     ),
                   ),
-                  const SizedBox(width: 12),
                   ActionChip(
                     avatar: const Icon(Icons.person_outline, size: 18),
                     label: Text(

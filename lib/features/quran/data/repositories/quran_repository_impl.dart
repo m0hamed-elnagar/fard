@@ -76,6 +76,9 @@ class QuranRepositoryImpl implements QuranRepository {
       debugPrint('Repository: ServerFailure in getSurahs: ${e.message}');
       return Result.failure(e);
     } catch (e, stack) {
+      if (e.toString().contains('SocketException') || e.toString().contains('Failed host lookup')) {
+        return Result.failure(const NoInternetFailure('لا يوجد اتصال بالإنترنت. يرجى التحميل للعمل بدون اتصال.'));
+      }
       debugPrint('Repository: Unknown error in getSurahs: $e');
       debugPrint(stack.toString());
       return Result.failure(const UnknownFailure());
@@ -97,9 +100,8 @@ class QuranRepositoryImpl implements QuranRepository {
       final cached = await localSource.getCachedSurahDetail(number.value);
       if (cached != null && 
           cached.ayahs.isNotEmpty && 
-          cached.ayahs.length == cached.numberOfAyahs &&
-          cached.ayahs.first.audioUrl != null) {
-        debugPrint('Found complete cached surah with audio: ${number.value}');
+          cached.ayahs.length == cached.numberOfAyahs) {
+        debugPrint('Found complete cached surah: ${number.value}');
         return Result.success(cached);
       }
 
@@ -124,6 +126,9 @@ class QuranRepositoryImpl implements QuranRepository {
       debugPrint('ServerFailure in getSurah: ${e.message}');
       return Result.failure(e);
     } catch (e, stack) {
+      if (e.toString().contains('SocketException') || e.toString().contains('Failed host lookup')) {
+        return Result.failure(const NoInternetFailure('لا يوجد اتصال بالإنترنت. يرجى تحميل السورة أولاً للعمل بدون اتصال.'));
+      }
       debugPrint('Unknown error in getSurah: $e');
       debugPrint(stack.toString());
       return Result.failure(const UnknownFailure());
@@ -189,6 +194,61 @@ class QuranRepositoryImpl implements QuranRepository {
       return Result.failure(e);
     } catch (e) {
       return Result.failure(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Stream<double> downloadAllSurahs() async* {
+    try {
+      // 1. Ensure we have the surah list
+      final surahsResult = await getSurahs();
+      if (surahsResult.isFailure) {
+        yield 0.0;
+        return;
+      }
+      
+      final surahs = surahsResult.data!;
+      int totalSurahs = surahs.length;
+      int downloaded = 0;
+
+      // 2. Check which ones are already cached
+      for (final surah in surahs) {
+        final cached = await localSource.getCachedSurahDetail(surah.number.value);
+        if (cached != null && cached.ayahs.length == cached.numberOfAyahs) {
+          downloaded++;
+        }
+      }
+      
+      yield downloaded / totalSurahs;
+
+      // 3. Download missing ones in parallel chunks
+      const int chunkSize = 3;
+      for (int i = 0; i < totalSurahs; i += chunkSize) {
+        final List<Future<Result<Surah>>> chunkFutures = [];
+        for (int j = 0; j < chunkSize && (i + j) < totalSurahs; j++) {
+          final surah = surahs[i + j];
+          final cached = await localSource.getCachedSurahDetail(surah.number.value);
+          if (cached == null || cached.ayahs.length != cached.numberOfAyahs) {
+            chunkFutures.add(getSurah(surah.number));
+          }
+        }
+
+        if (chunkFutures.isNotEmpty) {
+          await Future.wait(chunkFutures);
+          // Recalculate downloaded count
+          int currentCount = 0;
+          for (final s in surahs) {
+            final c = await localSource.getCachedSurahDetail(s.number.value);
+            if (c != null && c.ayahs.length == c.numberOfAyahs) currentCount++;
+          }
+          downloaded = currentCount;
+          yield downloaded / totalSurahs;
+        }
+      }
+      yield 1.0;
+    } catch (e) {
+      debugPrint('Error in downloadAllSurahs: $e');
+      yield 0.0;
     }
   }
 }

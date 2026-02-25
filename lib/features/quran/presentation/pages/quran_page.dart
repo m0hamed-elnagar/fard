@@ -8,6 +8,7 @@ import 'package:fard/core/extensions/number_extension.dart';
 import 'quran_reader_page.dart';
 import '../widgets/juz_list.dart';
 import '../widgets/bookmark_list.dart';
+import '../widgets/download_center_sheet.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 // import 'surah_detail_page.dart';
 
@@ -79,6 +80,18 @@ class _QuranPageState extends State<QuranPage> {
                   style: GoogleFonts.amiri(fontWeight: FontWeight.bold, fontSize: 24),
                 ),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.download_for_offline_outlined),
+              tooltip: 'مركز التحميل',
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => const DownloadCenterSheet(),
+                );
+              },
+            ),
             IconButton(
               icon: const Icon(Icons.photo_library_outlined),
               tooltip: 'المصحف المصور',

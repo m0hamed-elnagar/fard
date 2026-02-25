@@ -23,13 +23,14 @@ class AyahEntityAdapter extends TypeAdapter<AyahEntity> {
       translation: fields[3] as String?,
       page: (fields[4] as num).toInt(),
       juz: (fields[5] as num).toInt(),
+      audioUrl: fields[6] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, AyahEntity obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.surahNumber)
       ..writeByte(1)
@@ -41,7 +42,9 @@ class AyahEntityAdapter extends TypeAdapter<AyahEntity> {
       ..writeByte(4)
       ..write(obj.page)
       ..writeByte(5)
-      ..write(obj.juz);
+      ..write(obj.juz)
+      ..writeByte(6)
+      ..write(obj.audioUrl);
   }
 
   @override

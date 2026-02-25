@@ -16,6 +16,8 @@ class AyahEntity {
   final int page;
   @HiveField(5)
   final int juz;
+  @HiveField(6)
+  final String? audioUrl;
 
   const AyahEntity({
     required this.surahNumber,
@@ -24,5 +26,6 @@ class AyahEntity {
     this.translation,
     required this.page,
     required this.juz,
+    this.audioUrl,
   });
 }

@@ -60,6 +60,7 @@ class QuranLocalSourceImpl implements QuranLocalSource {
         translation: a.translation,
         page: a.page,
         juz: a.juz,
+        audioUrl: a.audioUrl,
       )).toList(),
     );
   }
@@ -81,6 +82,7 @@ class QuranLocalSourceImpl implements QuranLocalSource {
         translation: ae.translation,
         page: ae.page,
         juz: ae.juz,
+        audioUrl: ae.audioUrl,
       )).toList(),
     );
   }

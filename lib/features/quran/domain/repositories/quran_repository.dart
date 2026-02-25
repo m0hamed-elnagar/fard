@@ -16,6 +16,7 @@ abstract interface class QuranRepository {
   Stream<Result<LastReadPosition>> watchLastReadPosition();
   Future<Result<void>> updateLastReadPosition(LastReadPosition position);
   Future<Result<String>> getTafsir(int surahNumber, int ayahNumber, {int? tafsirId});
+  Stream<double> downloadAllSurahs();
 }
 
 class SearchResult extends Equatable {
