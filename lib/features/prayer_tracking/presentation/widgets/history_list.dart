@@ -117,7 +117,14 @@ class HistoryList extends StatelessWidget {
     final settings = context.read<SettingsCubit>().state;
     
     // Get prayer times for this specific record date to accurately determine if passed
-    final prayerTimes = (settings.latitude != null && settings.longitude != null)
+    var totalQada = record.qada.values.fold(0, (sum, c) => sum + c.value);
+    final today = DateTime.now();
+    final isToday = record.date.year == today.year &&
+        record.date.month == today.month &&
+        record.date.day == today.day;
+    
+    // Get prayer times for this specific record date to accurately determine if passed
+    final prayerTimes = (isToday && settings.latitude != null && settings.longitude != null)
         ? prayerTimeService.getPrayerTimes(
             latitude: settings.latitude!,
             longitude: settings.longitude!,
@@ -138,12 +145,6 @@ class HistoryList extends StatelessWidget {
     final actualMissedCount = passedPrayers.where((s) => !record.completedToday.contains(s)).length;
     final performedToday = record.completedToday.where((s) => passedPrayers.contains(s)).length;
     final qadaCompletedToday = record.completedQada.values.fold(0, (sum, val) => sum + val);
-
-    var totalQada = record.qada.values.fold(0, (sum, c) => sum + c.value);
-    final today = DateTime.now();
-    final isToday = record.date.year == today.year &&
-        record.date.month == today.month &&
-        record.date.day == today.day;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),

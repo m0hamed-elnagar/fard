@@ -46,10 +46,6 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
   Future<void> _checkTextProgress() async {
     final result = await _quranRepository.getSurahs();
     if (result.isSuccess) {
-      final surahs = result.data!;
-      int total = surahs.length;
-      int cachedCount = 0;
-      
       // We don't want to block the UI too long, but let's check basic cache
       // Actually, since we have the repo, we can check just a few or use a stream
       // Let's just set initial based on what we can find quickly

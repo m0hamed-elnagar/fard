@@ -32,12 +32,13 @@ class PrayerRepoImpl implements PrayerRepo {
   @override
   Future<Map<DateTime, DailyRecord>> loadMonth(int year, int month) async {
     final results = <DateTime, DailyRecord>{};
-    for (final entry in _box.toMap().entries) {
-      final date =
-          DateTime.fromMillisecondsSinceEpoch(entry.value.dateMillis);
-      if (date.year == year && date.month == month) {
-        results[DateTime(date.year, date.month, date.day)] =
-            DailyRecordMapper.toDomain(entry.value);
+    final daysInMonth = DateTime(year, month + 1, 0).day;
+    for (int day = 1; day <= daysInMonth; day++) {
+      final date = DateTime(year, month, day);
+      final key = _dateKey(date);
+      final entity = _box.get(key);
+      if (entity != null) {
+        results[date] = DailyRecordMapper.toDomain(entity);
       }
     }
     return results;

@@ -60,13 +60,11 @@ void main() {
     test('loadMonth filters records correctly', () async {
       final jan1 = DailyRecordEntity(id: '1', dateMillis: DateTime(2024, 1, 1).millisecondsSinceEpoch, missedIndices: [], qadaValues: {}, completedIndices: []);
       final jan2 = DailyRecordEntity(id: '2', dateMillis: DateTime(2024, 1, 2).millisecondsSinceEpoch, missedIndices: [], qadaValues: {}, completedIndices: []);
-      final feb1 = DailyRecordEntity(id: '3', dateMillis: DateTime(2024, 2, 1).millisecondsSinceEpoch, missedIndices: [], qadaValues: {}, completedIndices: []);
+      // We don't verify Feb record because loadMonth only queries Jan keys now.
 
-      when(() => mockBox.toMap()).thenReturn({
-        '1': jan1,
-        '2': jan2,
-        '3': feb1,
-      });
+      when(() => mockBox.get(any())).thenReturn(null);
+      when(() => mockBox.get('2024-01-01')).thenReturn(jan1);
+      when(() => mockBox.get('2024-01-02')).thenReturn(jan2);
 
       final result = await repo.loadMonth(2024, 1);
 
