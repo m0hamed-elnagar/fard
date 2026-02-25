@@ -88,157 +88,156 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
       juzNumber = quran.getJuzNumber(surahNum, pageData.first['start'] as int);
     }
 
-        return Scaffold(
-          backgroundColor: const Color(0xFFFBF9F1),
-          // Softer, more premium paper color
-          appBar: AppBar(
-            backgroundColor: const Color(0xFF2D5D40),
-            // Deep Islamic green
-            elevation: 4,
-            foregroundColor: Colors.white,
-            centerTitle: true,
-            title: Column(
-              children: [
-                Text(
-                  surahName.isNotEmpty ? 'سورة $surahName' : 'المصحف المصور',
-                  style: GoogleFonts.amiri(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                Text(
-                  'الجزء $juzNumber - صفحة $_currentPage',
-                  style: GoogleFonts.amiri(
-                    fontSize: 14,
-                    color: Colors.white.withValues(alpha: 0.9),
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-    
-              IconButton(
-                icon: const Icon(Icons.text_format_rounded, color: Colors.white),
-                tooltip: 'مصحف نصي',
-                onPressed: () {
-                  if (pageData.isNotEmpty) {
-                    final surahNum = pageData.first['surah'] as int;
-                    final ayahNum = pageData.first['start'] as int;
-    
-                    Navigator.pushReplacement(
-                      context,
-                      QuranReaderPage.route(
-                        surahNumber: surahNum,
-                        ayahNumber: ayahNum,
+            return Scaffold(
+              backgroundColor: const Color(0xFFFBF9F1),
+              // Softer, more premium paper color
+              appBar: AppBar(
+                backgroundColor: const Color(0xFF2D5D40),
+                // Deep Islamic green
+                elevation: 4,
+                foregroundColor: Colors.white,
+                centerTitle: true,
+                title: Column(
+                  children: [
+                    Text(
+                      surahName.isNotEmpty ? 'سورة $surahName' : 'المصحف المصور',
+                      style: GoogleFonts.amiri(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                    );
-                  }
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.download_rounded, color: Colors.white),
-                tooltip: 'تحميل الكل',
-                onPressed: _showDownloadAllDialog,
-              ),
-            ],
-          ),
-          body: BlocListener<AudioBloc, AudioState>(
-            listenWhen: (previous, current) =>
-                current.isActive &&
-                (previous.currentSurah != current.currentSurah ||
-                    previous.currentAyah != current.currentAyah),
-            listener: (context, state) {
-              if (state.currentSurah != null && state.currentAyah != null) {
-                final targetPage = quran.getPageNumber(state.currentSurah!, state.currentAyah!);
-                if (targetPage != _currentPage) {
-                  _pageController.animateToPage(
-                    targetPage - 1,
-                    duration: const Duration(milliseconds: 600),
-                    curve: Curves.easeInOut,
-                  );
-                }
-              }
-            },
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: PageView.builder(
-                      controller: _pageController,
-                      itemCount: 604,
-                      reverse: false,
-                      // Standard RTL: Index 0 is on the Right
-                      onPageChanged: (page) {
-                        setState(() {
-                          _currentPage = page + 1;
-                        });
-                        _updateAudioPosition();
-                        // Prefetch next pages when user navigates
-                        _downloadService.prefetchPages(_currentPage);
-                      },
-                      itemBuilder: (context, index) {
-                        return _MushafPageItem(
-                          pageNumber: index + 1,
-                          downloadService: _downloadService,
-                        );
-                      },
                     ),
-                  ),
-                  // Navigation Bar
-                  Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFBF9F1),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 4,
-                          offset: const Offset(0, -2),
-                        ),
-                      ],
+                    Text(
+                      'الجزء $juzNumber - صفحة $_currentPage',
+                      style: GoogleFonts.amiri(
+                        fontSize: 14,
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _PageNavButton(
-                          icon: Icons.chevron_left, // Go to Previous Page
-                          onPressed: _currentPage > 1
-                              ? () => _pageController.previousPage(
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut,
-                                )
-                              : null,
-                        ),
-                        Text(
-                          'صفحة $_currentPage',
-                          style: GoogleFonts.amiri(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF2D5D40),
+                  ],
+                ),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.text_format_rounded, color: Colors.white),
+                    tooltip: 'مصحف نصي',
+                    onPressed: () {
+                      if (pageData.isNotEmpty) {
+                        final surahNum = pageData.first['surah'] as int;
+                        final ayahNum = pageData.first['start'] as int;
+        
+                        Navigator.pushReplacement(
+                          context,
+                          QuranReaderPage.route(
+                            surahNumber: surahNum,
+                            ayahNumber: ayahNum,
                           ),
-                        ),
-                        _PageNavButton(
-                          icon: Icons.chevron_right, // Go to Next Page
-                          onPressed: _currentPage < 604
-                              ? () => _pageController.nextPage(
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut,
-                                )
-                              : null,
-                        ),
-                      ],
-                    ),
+                        );
+                      }
+                    },
                   ),
-                  const AudioPlayerBar(),
+                  IconButton(
+                    icon: const Icon(Icons.download_rounded, color: Colors.white),
+                    tooltip: 'تحميل الكل',
+                    onPressed: _showDownloadAllDialog,
+                  ),
                 ],
               ),
-            ),
-          ),
-        );
-    
-  }
+              body: BlocListener<AudioBloc, AudioState>(
+                listenWhen: (previous, current) =>
+                    current.isActive &&
+                    (previous.currentSurah != current.currentSurah ||
+                        previous.currentAyah != current.currentAyah),
+                listener: (context, state) {
+                  if (state.currentSurah != null && state.currentAyah != null) {
+                    final targetPage =
+                        quran.getPageNumber(state.currentSurah!, state.currentAyah!);
+                    if (targetPage != _currentPage) {
+                      _pageController.animateToPage(
+                        targetPage - 1,
+                        duration: const Duration(milliseconds: 600),
+                        curve: Curves.easeInOut,
+                      );
+                    }
+                  }
+                },
+                child: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: PageView.builder(
+                          controller: _pageController,
+                          itemCount: 604,
+                          reverse: false,
+                          // Standard RTL: Index 0 is on the Right
+                          onPageChanged: (page) {
+                            setState(() {
+                              _currentPage = page + 1;
+                            });
+                            _updateAudioPosition();
+                            // Prefetch next pages when user navigates
+                            _downloadService.prefetchPages(_currentPage);
+                          },
+                          itemBuilder: (context, index) {
+                            return _MushafPageItem(
+                              pageNumber: index + 1,
+                              downloadService: _downloadService,
+                            );
+                          },
+                        ),
+                      ),
+                      // Navigation Bar
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFBF9F1),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 4,
+                              offset: const Offset(0, -2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _PageNavButton(
+                              icon: Icons.chevron_right, // Go to Previous Page
+                              onPressed: _currentPage > 1
+                                  ? () => _pageController.previousPage(
+                                        duration: const Duration(milliseconds: 300),
+                                        curve: Curves.easeInOut,
+                                      )
+                                  : null,
+                            ),
+                            Text(
+                              'صفحة $_currentPage',
+                              style: GoogleFonts.amiri(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF2D5D40),
+                              ),
+                            ),
+                            _PageNavButton(
+                              icon: Icons.chevron_left, // Go to Next Page
+                              onPressed: _currentPage < 604
+                                  ? () => _pageController.nextPage(
+                                        duration: const Duration(milliseconds: 300),
+                                        curve: Curves.easeInOut,
+                                      )
+                                  : null,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const AudioPlayerBar(),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
 }
 
 class _MushafPageItem extends StatefulWidget {
