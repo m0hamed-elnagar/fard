@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fard/core/extensions/number_extension.dart';
 
 class AyahNumberMarker extends StatelessWidget {
   final int number;
@@ -28,7 +29,7 @@ class AyahNumberMarker extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          _toArabicIndic(number),
+          number.toArabicIndic(),
           style: GoogleFonts.amiri(
             fontSize: size * 0.45,
             fontWeight: FontWeight.bold,
@@ -37,14 +38,5 @@ class AyahNumberMarker extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _toArabicIndic(int number) {
-    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-    return number
-        .toString()
-        .split('')
-        .map((d) => arabicDigits[int.parse(d)])
-        .join();
   }
 }

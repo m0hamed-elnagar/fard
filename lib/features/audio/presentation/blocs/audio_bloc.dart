@@ -43,6 +43,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
         changePlaybackMode: (e) => _onChangePlaybackMode(e.mode, emit),
         changeQuality: (e) => _onChangeQuality(e.quality, emit),
         hideBanner: (e) => _onHideBanner(emit),
+        showBanner: (e) => _onShowBanner(emit),
         statusChanged: (e) async => _onStatusChanged(e.status, emit),
         lastErrorChanged: (e) async => _onLastErrorChanged(e.error, emit),
         positionChanged: (e) async => _onPositionChanged(e.position, emit),
@@ -338,6 +339,10 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
 
   Future<void> _onHideBanner(Emitter<AudioState> emit) async {
     emit(state.copyWith(isBannerVisible: false, error: null, lastErrorMessage: null));
+  }
+
+  Future<void> _onShowBanner(Emitter<AudioState> emit) async {
+    emit(state.copyWith(isBannerVisible: true));
   }
 
   Future<void> _onChangeSpeed(double speed, Emitter<AudioState> emit) async {

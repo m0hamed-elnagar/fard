@@ -6,6 +6,8 @@ import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
 import 'package:intl/intl.dart';
 
+import 'package:fard/core/extensions/number_extension.dart';
+
 class BookmarkList extends StatelessWidget {
   final String searchQuery;
 
@@ -79,7 +81,7 @@ class BookmarkList extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      'الآية ${bookmark.ayahNumber.ayahNumberInSurah} | صفحة $page',
+                      'الآية ${bookmark.ayahNumber.ayahNumberInSurah.toArabicIndic()} | صفحة ${page.toArabicIndic()}',
                       style: GoogleFonts.amiri(
                         fontSize: 14, 
                         color: Colors.grey[600],

@@ -5,6 +5,7 @@ import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/audio/domain/repositories/audio_player_service.dart';
 import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fard/core/extensions/number_extension.dart';
 
 class SurahHeader extends StatelessWidget {
   final Surah surah;
@@ -45,7 +46,7 @@ class SurahHeader extends StatelessWidget {
               const SizedBox(width: 12),
               _InfoChip(
                 icon: Icons.format_list_numbered,
-                label: '${surah.numberOfAyahs} آية',
+                label: '${surah.numberOfAyahs.toArabicIndic()} آية',
               ),
             ],
           ),

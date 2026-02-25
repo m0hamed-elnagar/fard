@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/audio/presentation/widgets/audio_player_bar.dart';
 import 'package:fard/core/services/mushaf_download_service.dart';
 import 'package:fard/core/di/injection.dart';
@@ -11,10 +13,7 @@ import 'quran_reader_page.dart';
 class ScannedMushafReaderPage extends StatefulWidget {
   final int initialPage;
 
-  const ScannedMushafReaderPage({
-    super.key,
-    required this.initialPage,
-  });
+  const ScannedMushafReaderPage({super.key, required this.initialPage});
 
   static MaterialPageRoute route({int? pageNumber}) {
     return MaterialPageRoute(
@@ -23,7 +22,8 @@ class ScannedMushafReaderPage extends StatefulWidget {
   }
 
   @override
-  State<ScannedMushafReaderPage> createState() => _ScannedMushafReaderPageState();
+  State<ScannedMushafReaderPage> createState() =>
+      _ScannedMushafReaderPageState();
 }
 
 class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
@@ -36,6 +36,29 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
     super.initState();
     _currentPage = widget.initialPage;
     _pageController = PageController(initialPage: _currentPage - 1);
+
+    // Initial prefetch
+    _downloadService.prefetchPages(_currentPage);
+
+    // Update audio position and ensure banner is shown if playing
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateAudioPosition();
+      context.read<AudioBloc>().add(AudioEvent.showBanner());
+    });
+  }
+
+  void _updateAudioPosition() {
+    final pageData = quran.getPageData(_currentPage);
+    if (pageData.isNotEmpty) {
+      final surahNum = pageData.first['surah'] as int;
+      final ayahNum = pageData.first['start'] as int;
+      context.read<AudioBloc>().add(
+        AudioEvent.updateCurrentPosition(
+          surahNumber: surahNum,
+          ayahNumber: ayahNum,
+        ),
+      );
+    }
   }
 
   @override
@@ -47,7 +70,10 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
   void _showDownloadAllDialog() {
     showDialog(
       context: context,
-      builder: (context) => _DownloadAllDialog(downloadService: _downloadService),
+      builder: (context) => _DownloadAllDialog(
+        downloadService: _downloadService,
+        currentPage: _currentPage,
+      ),
     );
   }
 
@@ -62,113 +88,156 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
       juzNumber = quran.getJuzNumber(surahNum, pageData.first['start'] as int);
     }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFFBF9F1), // Softer, more premium paper color
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF2D5D40), // Deep Islamic green
-        elevation: 4,
-        foregroundColor: Colors.white,
-        centerTitle: true,
-        title: Column(
-          children: [
-            Text(
-              surahName.isNotEmpty ? 'سورة $surahName' : 'المصحف المصور',
-              style: GoogleFonts.amiri(
-                fontSize: 20, 
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              'الجزء $juzNumber - صفحة $_currentPage',
-              style: GoogleFonts.amiri(
-                fontSize: 14, 
-                color: Colors.white.withValues(alpha: 0.9),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.download_rounded, color: Colors.white),
-            tooltip: 'تحميل الكل',
-            onPressed: _showDownloadAllDialog,
-          ),
-          IconButton(
-            icon: const Icon(Icons.text_format_rounded, color: Colors.white),
-            tooltip: 'مصحف نصي',
-            onPressed: () {
-              if (pageData.isNotEmpty) {
-                final surahNum = pageData.first['surah'] as int;
-                final ayahNum = pageData.first['start'] as int;
-                
-                Navigator.pushReplacement(
-                  context,
-                  QuranReaderPage.route(
-                    surahNumber: surahNum,
-                    ayahNumber: ayahNum,
+        return Scaffold(
+          backgroundColor: const Color(0xFFFBF9F1),
+          // Softer, more premium paper color
+          appBar: AppBar(
+            backgroundColor: const Color(0xFF2D5D40),
+            // Deep Islamic green
+            elevation: 4,
+            foregroundColor: Colors.white,
+            centerTitle: true,
+            title: Column(
+              children: [
+                Text(
+                  surahName.isNotEmpty ? 'سورة $surahName' : 'المصحف المصور',
+                  style: GoogleFonts.amiri(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
-                );
-              }
-            },
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              Expanded(
-                child: PageView.builder(
-                  controller: _pageController,
-                  itemCount: 604,
-                  reverse: true, // Mushaf is RTL
-                  onPageChanged: (page) {
-                    setState(() {
-                      _currentPage = page + 1;
-                    });
-                  },
-                  itemBuilder: (context, index) {
-                    return _MushafPageItem(
-                      pageNumber: index + 1,
-                      downloadService: _downloadService,
-                    );
-                  },
                 ),
+                Text(
+                  'الجزء $juzNumber - صفحة $_currentPage',
+                  style: GoogleFonts.amiri(
+                    fontSize: 14,
+                    color: Colors.white.withValues(alpha: 0.9),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+    
+              IconButton(
+                icon: const Icon(Icons.text_format_rounded, color: Colors.white),
+                tooltip: 'مصحف نصي',
+                onPressed: () {
+                  if (pageData.isNotEmpty) {
+                    final surahNum = pageData.first['surah'] as int;
+                    final ayahNum = pageData.first['start'] as int;
+    
+                    Navigator.pushReplacement(
+                      context,
+                      QuranReaderPage.route(
+                        surahNumber: surahNum,
+                        ayahNumber: ayahNum,
+                      ),
+                    );
+                  }
+                },
               ),
-              const AudioPlayerBar(),
+              IconButton(
+                icon: const Icon(Icons.download_rounded, color: Colors.white),
+                tooltip: 'تحميل الكل',
+                onPressed: _showDownloadAllDialog,
+              ),
             ],
           ),
-          // Navigation Buttons
-          Positioned(
-            left: 10,
-            top: MediaQuery.of(context).size.height / 2 - 100,
-            child: _PageNavButton(
-              icon: Icons.chevron_right,
-              onPressed: _currentPage < 604 
-                  ? () => _pageController.nextPage(
-                      duration: const Duration(milliseconds: 300), 
-                      curve: Curves.easeInOut
-                    )
-                  : null,
+          body: BlocListener<AudioBloc, AudioState>(
+            listenWhen: (previous, current) =>
+                current.isActive &&
+                (previous.currentSurah != current.currentSurah ||
+                    previous.currentAyah != current.currentAyah),
+            listener: (context, state) {
+              if (state.currentSurah != null && state.currentAyah != null) {
+                final targetPage = quran.getPageNumber(state.currentSurah!, state.currentAyah!);
+                if (targetPage != _currentPage) {
+                  _pageController.animateToPage(
+                    targetPage - 1,
+                    duration: const Duration(milliseconds: 600),
+                    curve: Curves.easeInOut,
+                  );
+                }
+              }
+            },
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: PageView.builder(
+                      controller: _pageController,
+                      itemCount: 604,
+                      reverse: false,
+                      // Standard RTL: Index 0 is on the Right
+                      onPageChanged: (page) {
+                        setState(() {
+                          _currentPage = page + 1;
+                        });
+                        _updateAudioPosition();
+                        // Prefetch next pages when user navigates
+                        _downloadService.prefetchPages(_currentPage);
+                      },
+                      itemBuilder: (context, index) {
+                        return _MushafPageItem(
+                          pageNumber: index + 1,
+                          downloadService: _downloadService,
+                        );
+                      },
+                    ),
+                  ),
+                  // Navigation Bar
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFBF9F1),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 4,
+                          offset: const Offset(0, -2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _PageNavButton(
+                          icon: Icons.chevron_left, // Go to Previous Page
+                          onPressed: _currentPage > 1
+                              ? () => _pageController.previousPage(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                )
+                              : null,
+                        ),
+                        Text(
+                          'صفحة $_currentPage',
+                          style: GoogleFonts.amiri(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF2D5D40),
+                          ),
+                        ),
+                        _PageNavButton(
+                          icon: Icons.chevron_right, // Go to Next Page
+                          onPressed: _currentPage < 604
+                              ? () => _pageController.nextPage(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                )
+                              : null,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const AudioPlayerBar(),
+                ],
+              ),
             ),
           ),
-          Positioned(
-            right: 10,
-            top: MediaQuery.of(context).size.height / 2 - 100,
-            child: _PageNavButton(
-              icon: Icons.chevron_left,
-              onPressed: _currentPage > 1 
-                  ? () => _pageController.previousPage(
-                      duration: const Duration(milliseconds: 300), 
-                      curve: Curves.easeInOut
-                    )
-                  : null,
-            ),
-          ),
-        ],
-      ),
-    );
+        );
+    
   }
 }
 
@@ -213,7 +282,7 @@ class _MushafPageItemState extends State<_MushafPageItem> {
     if (await file.exists()) {
       return file;
     }
-    
+
     final path = await widget.downloadService.downloadPage(widget.pageNumber);
     if (path != null) {
       return File(path);
@@ -233,7 +302,10 @@ class _MushafPageItemState extends State<_MushafPageItem> {
               children: [
                 CircularProgressIndicator(color: Color(0xFF2D5D40)),
                 SizedBox(height: 16),
-                Text('جاري تحميل الصفحة...', style: TextStyle(color: Color(0xFF2D5D40))),
+                Text(
+                  'جاري تحميل الصفحة...',
+                  style: TextStyle(color: Color(0xFF2D5D40)),
+                ),
               ],
             ),
           );
@@ -249,8 +321,13 @@ class _MushafPageItemState extends State<_MushafPageItem> {
                 Text('الصفحة ${widget.pageNumber} غير متوفرة'),
                 ElevatedButton(
                   onPressed: _checkAndDownload,
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2D5D40)),
-                  child: const Text('إعادة المحاولة', style: TextStyle(color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2D5D40),
+                  ),
+                  child: const Text(
+                    'إعادة المحاولة',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             ),
@@ -263,10 +340,7 @@ class _MushafPageItemState extends State<_MushafPageItem> {
           child: Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Image.file(
-                snapshot.data!,
-                fit: BoxFit.contain,
-              ),
+              child: Image.file(snapshot.data!, fit: BoxFit.contain),
             ),
           ),
         );
@@ -277,8 +351,12 @@ class _MushafPageItemState extends State<_MushafPageItem> {
 
 class _DownloadAllDialog extends StatefulWidget {
   final MushafDownloadService downloadService;
+  final int currentPage;
 
-  const _DownloadAllDialog({required this.downloadService});
+  const _DownloadAllDialog({
+    required this.downloadService,
+    required this.currentPage,
+  });
 
   @override
   State<_DownloadAllDialog> createState() => _DownloadAllDialogState();
@@ -328,6 +406,36 @@ class _DownloadAllDialogState extends State<_DownloadAllDialog> {
             const SizedBox(height: 10),
             Text('${(_progress * 100).toStringAsFixed(1)}%'),
           ],
+          if (!_isDownloading) ...[
+            const SizedBox(height: 10),
+            TextButton.icon(
+              onPressed: () async {
+                await widget.downloadService.clearCache();
+                if (!context.mounted) return;
+
+                // Refresh the whole page to trigger re-downloads
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  ScannedMushafReaderPage.route(
+                    pageNumber: widget.currentPage,
+                  ),
+                );
+                
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('تم مسح التخزين المؤقت وجاري إعادة التحميل'),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.delete_sweep_rounded, color: Colors.red),
+              label: const Text(
+                'مسح التخزين المؤقت',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
         ],
       ),
       actions: [
@@ -339,8 +447,13 @@ class _DownloadAllDialogState extends State<_DownloadAllDialog> {
         if (!_isDownloading)
           ElevatedButton(
             onPressed: _startDownload,
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2D5D40)),
-            child: const Text('بدء التحميل', style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2D5D40),
+            ),
+            child: const Text(
+              'بدء التحميل',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
       ],
     );
@@ -357,14 +470,14 @@ class _PageNavButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.1),
+        color: Colors.black.withValues(alpha: 0.05),
         shape: BoxShape.circle,
+        border: Border.all(color: const Color(0xFF2D5D40).withValues(alpha: 0.2)),
       ),
       child: IconButton(
-        icon: Icon(icon, color: const Color(0xFF2D5D40), size: 30),
+        icon: Icon(icon, color: const Color(0xFF2D5D40).withValues(alpha: 0.7), size: 30),
         onPressed: onPressed,
       ),
     );
   }
 }
-

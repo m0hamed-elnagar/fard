@@ -109,7 +109,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                           },
                           orElse: () {},
                         );
-                        Navigator.push(
+                        Navigator.pushReplacement(
                           context,
                           ScannedMushafReaderPage.route(pageNumber: page),
                         );
@@ -258,10 +258,55 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                                           onAyahLongPress: (ayah) {
                                             _showAyahDetail(context, ayah);
                                           },
+                                          onAyahDoubleTap: (ayah) {
+                                            _showAyahDetail(context, ayah);
+                                          },
                                         );
                                       },
                                     ),
-                                    const SizedBox(height: 100),
+                                    
+                                    const SizedBox(height: 48),
+                                    
+                                    // Surah Navigation Buttons
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        if (widget.surahNumber > 1)
+                                          Expanded(
+                                            child: _SurahNavButton(
+                                              label: 'السورة السابقة',
+                                              surahName: quran.getSurahNameArabic(widget.surahNumber - 1),
+                                              icon: Icons.arrow_forward_ios_rounded,
+                                              onTap: () => Navigator.pushReplacement(
+                                                context,
+                                                QuranReaderPage.route(surahNumber: widget.surahNumber - 1),
+                                              ),
+                                            ),
+                                          )
+                                        else
+                                          const Spacer(),
+                                          
+                                        const SizedBox(width: 16),
+                                        
+                                        if (widget.surahNumber < 114)
+                                          Expanded(
+                                            child: _SurahNavButton(
+                                              label: 'السورة التالية',
+                                              surahName: quran.getSurahNameArabic(widget.surahNumber + 1),
+                                              icon: Icons.arrow_back_ios_rounded,
+                                              isNext: true,
+                                              onTap: () => Navigator.pushReplacement(
+                                                context,
+                                                QuranReaderPage.route(surahNumber: widget.surahNumber + 1),
+                                              ),
+                                            ),
+                                          )
+                                        else
+                                          const Spacer(),
+                                      ],
+                                    ),
+                                    
+                                    const SizedBox(height: 120),
                                   ],
                                 ),
                               ),
@@ -302,6 +347,77 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
       builder: (_) => BlocProvider.value(
         value: readerBloc,
         child: AyahDetailSheet(ayah: ayah, surahAyahCount: count),
+      ),
+    );
+  }
+}
+
+class _SurahNavButton extends StatelessWidget {
+  final String label;
+  final String surahName;
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool isNext;
+
+  const _SurahNavButton({
+    required this.label,
+    required this.surahName,
+    required this.icon,
+    required this.onTap,
+    this.isNext = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: colorScheme.primary.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: colorScheme.primary.withValues(alpha: 0.1),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: isNext ? MainAxisAlignment.start : MainAxisAlignment.end,
+          children: [
+            if (!isNext) ...[
+              Icon(icon, size: 14, color: colorScheme.primary),
+              const SizedBox(width: 12),
+            ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: isNext ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    'سورة $surahName',
+                    style: GoogleFonts.amiri(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isNext) ...[
+              const SizedBox(width: 12),
+              Icon(icon, size: 14, color: colorScheme.primary),
+            ],
+          ],
+        ),
       ),
     );
   }

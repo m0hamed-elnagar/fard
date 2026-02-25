@@ -109,8 +109,11 @@ class QuranRepositoryImpl implements QuranRepository {
       final verses = await remoteSource.getSurahVerses(number.value);
       
       // Combine them
+      final sortedAyahs = verses.map((v) => v.toDomain(number.value)).toList()
+        ..sort((a, b) => a.number.ayahNumberInSurah.compareTo(b.number.ayahNumberInSurah));
+
       final surah = surahModel.toDomain().copyWith(
-        ayahs: verses.map((v) => v.toDomain(number.value)).toList(),
+        ayahs: sortedAyahs,
       );
       
       // Cache

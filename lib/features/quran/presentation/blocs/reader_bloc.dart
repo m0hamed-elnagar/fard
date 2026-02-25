@@ -125,13 +125,16 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
     result.fold(
       (failure) => emit(ReaderState.error(failure.message)),
       (page) {
+        final sortedAyahs = List<Ayah>.from(page.ayahs)
+          ..sort((a, b) => a.number.ayahNumberInSurah.compareTo(b.number.ayahNumberInSurah));
+          
         emit(ReaderState.loaded(
           surah: Surah(
             number: SurahNumber.create(0).data!,
             name: page.surahName,
-            numberOfAyahs: page.ayahs.length,
+            numberOfAyahs: sortedAyahs.length,
             revelationType: '',
-            ayahs: page.ayahs,
+            ayahs: sortedAyahs,
           ),
         ));
         if (page.ayahs.isNotEmpty) {

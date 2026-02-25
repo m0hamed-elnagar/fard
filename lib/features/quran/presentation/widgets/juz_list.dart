@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quran/quran.dart' as quran;
 import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
+import 'package:fard/core/extensions/number_extension.dart';
 
 class JuzList extends StatelessWidget {
   final String searchQuery;
@@ -86,7 +87,7 @@ class JuzList extends StatelessWidget {
                         ),
                         alignment: Alignment.center,
                         child: Text(
-                          '$juzNum',
+                          juzNum.toArabicIndic(),
                           style: GoogleFonts.outfit(
                             fontSize: isWide ? 24 : 20,
                             fontWeight: FontWeight.bold,
@@ -100,7 +101,7 @@ class JuzList extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'الجزء $juzNum',
+                              'الجزء ${juzNum.toArabicIndic()}',
                               style: GoogleFonts.amiri(
                                 fontSize: isWide ? 22 : 18,
                                 fontWeight: FontWeight.bold,
@@ -109,7 +110,7 @@ class JuzList extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              'يبدأ من سورة $surahName (صفحة $pageNum)',
+                              'يبدأ من سورة $surahName (صفحة ${pageNum.toArabicIndic()})',
                               style: GoogleFonts.amiri(
                                 fontSize: isWide ? 16 : 14,
                                 color: Colors.grey[600],

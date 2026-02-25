@@ -11,6 +11,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/quran/domain/entities/tafsir_info.dart';
 
+import 'package:fard/core/extensions/number_extension.dart';
+
 class AyahDetailSheet extends StatelessWidget {
   final Ayah ayah;
   final int? surahAyahCount;
@@ -63,7 +65,7 @@ class AyahDetailSheet extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(
-                                      '${l10n.ayah} ${ayah.number.ayahNumberInSurah}',
+                                      '${l10n.ayah} ${ayah.number.ayahNumberInSurah.toArabicIndic()}',
                                       style: GoogleFonts.outfit(
                                         fontSize: 14,
                                         fontWeight: FontWeight.bold,
