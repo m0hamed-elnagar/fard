@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 import 'package:adhan/adhan.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
@@ -20,6 +21,40 @@ class _QiblaScreenState extends State<QiblaScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
+    if (Platform.isWindows) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            l10n.qibla,
+            style: GoogleFonts.amiri(fontWeight: FontWeight.bold),
+          ),
+          centerTitle: true,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.compass_calibration_rounded, size: 64, color: AppTheme.missed),
+              const SizedBox(height: 16),
+              Text(
+                l10n.localeName == 'ar'
+                    ? 'البوصلة غير مدعومة على هذا النظام'
+                    : 'Compass is not supported on this platform',
+                style: GoogleFonts.amiri(fontSize: 20),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.localeName == 'ar'
+                    ? 'يرجى استخدام تطبيق الهاتف للحصول على القبلة'
+                    : 'Please use the mobile app for Qibla direction',
+                style: TextStyle(color: AppTheme.textSecondary),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(

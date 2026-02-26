@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -177,7 +178,7 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
                   context.read<AzkarBloc>().add(AzkarEvent.incrementCount(index));
 
                   // Tactile feedback
-                  if (await Vibration.hasVibrator()) {
+                  if (!Platform.isWindows && await Vibration.hasVibrator() == true) {
                     if (item.currentCount + 1 >= item.count) {
                       Vibration.vibrate(duration: 100, amplitude: 255);
                       // Auto-advance to next page if completed
@@ -193,6 +194,18 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
                       }
                     } else {
                       Vibration.vibrate(duration: 30);
+                    }
+                  } else if (item.currentCount + 1 >= item.count) {
+                    // Still auto-advance on platforms without vibration
+                    if (index < azkar.length - 1) {
+                      Future.delayed(const Duration(milliseconds: 500), () {
+                        if (mounted) {
+                          _pageController.nextPage(
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeInOut,
+                          );
+                        }
+                      });
                     }
                   }
                 },

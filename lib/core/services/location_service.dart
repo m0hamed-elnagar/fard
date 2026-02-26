@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
@@ -27,6 +28,10 @@ class LocationService {
   }
 
   Future<Map<String, String?>?> getLocationDataFromCoordinates(double latitude, double longitude) async {
+    if (Platform.isWindows) {
+      return null; // Geocoding not supported on Windows
+    }
+    
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
       if (placemarks.isNotEmpty) {

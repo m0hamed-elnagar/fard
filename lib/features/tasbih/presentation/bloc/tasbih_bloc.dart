@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:fard/features/tasbih/domain/tasbih_models.dart';
 import 'package:fard/features/tasbih/domain/tasbih_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -136,7 +137,7 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
       await _repository.incrementHistory(state.currentCategory.items[itemIndex].id);
     }
 
-    if (state.data.settings.hapticFeedback) {
+    if (state.data.settings.hapticFeedback && !Platform.isWindows) {
       Vibration.vibrate(duration: 50);
     }
   }

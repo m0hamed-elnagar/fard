@@ -25,8 +25,24 @@ class NotificationService {
     debugPrint('NotificationService: init starting');
     try {
       debugPrint('NotificationService: getting local timezone...');
-      final timeZoneName = await FlutterTimezone.getLocalTimezone().timeout(const Duration(seconds: 5));
-      tz.setLocalLocation(tz.getLocation(timeZoneName.toString()));
+      final rawTimeZone = await FlutterTimezone.getLocalTimezone().timeout(const Duration(seconds: 5));
+      String timeZoneName = rawTimeZone.toString();
+      
+      // On some platforms (like Windows), flutter_timezone might return "TimezoneInfo(Name, ...)"
+      if (timeZoneName.contains('(') && timeZoneName.contains(')')) {
+        final startIndex = timeZoneName.indexOf('(') + 1;
+        final endIndex = timeZoneName.indexOf(',');
+        if (endIndex != -1 && endIndex > startIndex) {
+          timeZoneName = timeZoneName.substring(startIndex, endIndex).trim();
+        } else {
+          final closeIndex = timeZoneName.indexOf(')');
+          if (closeIndex > startIndex) {
+            timeZoneName = timeZoneName.substring(startIndex, closeIndex).trim();
+          }
+        }
+      }
+      
+      tz.setLocalLocation(tz.getLocation(timeZoneName));
       debugPrint('Local timezone set to: $timeZoneName');
     } catch (e) {
       debugPrint('Could not get local timezone, defaulting to UTC: $e');
