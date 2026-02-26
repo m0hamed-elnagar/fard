@@ -76,12 +76,10 @@ class _SalaahTileState extends State<SalaahTile> {
 
 
 
-  @override
-
-  Widget build(BuildContext context) {
-
-    final l10n = AppLocalizations.of(context)!;
-
+      @override
+      Widget build(BuildContext context) {
+        final l10n = AppLocalizations.of(context)!;
+    
     final timeFormat = DateFormat.jm(Localizations.localeOf(context).languageCode);
 
     
@@ -127,7 +125,14 @@ class _SalaahTileState extends State<SalaahTile> {
 
           borderRadius: BorderRadius.circular(20.0),
 
-          onTap: widget.isUpcoming ? null : widget.onToggleMissed,
+          onTap: widget.isUpcoming ? null : () {
+            if (widget.isCompletedToday && _removedInSession > 0) {
+              setState(() {
+                _removedInSession--;
+              });
+            }
+            widget.onToggleMissed();
+          },
 
           child: Opacity(
 
@@ -146,7 +151,14 @@ class _SalaahTileState extends State<SalaahTile> {
                     isMissed: !widget.isUpcoming && !widget.isCompletedToday,
                     isCompleted: widget.isCompletedToday,
                     isUpcoming: widget.isUpcoming,
-                    onTap: widget.isUpcoming ? () {} : widget.onToggleMissed,
+                    onTap: widget.isUpcoming ? () {} : () {
+                      if (widget.isCompletedToday && _removedInSession > 0) {
+                        setState(() {
+                          _removedInSession--;
+                        });
+                      }
+                      widget.onToggleMissed();
+                    },
                   ),
 
                   const SizedBox(width: 12.0),

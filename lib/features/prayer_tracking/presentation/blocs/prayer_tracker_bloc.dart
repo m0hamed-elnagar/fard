@@ -37,14 +37,16 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
 
   Future<void> _onUpdateQada(
       _UpdateQada e, Emitter<PrayerTrackerState> em) async {
-    final s = state as _Loaded;
-    final qada = <Salaah, MissedCounter>{};
-    for (final entry in e.counts.entries) {
-      qada[entry.key] = MissedCounter(entry.value);
+    if (state is _Loaded) {
+      final s = state as _Loaded;
+      final qada = <Salaah, MissedCounter>{};
+      for (final entry in e.counts.entries) {
+        qada[entry.key] = MissedCounter(entry.value);
+      }
+      final newState = s.copyWith(qadaStatus: qada);
+      em(newState);
+      await _saveInternal(newState, em);
     }
-    final newState = s.copyWith(qadaStatus: qada);
-    em(newState);
-    await _saveInternal(newState, em);
   }
 
   Future<void> _onDeleteRecord(
@@ -260,14 +262,15 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
         }
       }
 
+      final currentState = state;
       final loadedState = PrayerTrackerState.loaded(
         selectedDate: e.date,
         missedToday: missedToday,
         completedToday: completedToday,
         qadaStatus: qada,
         completedQadaToday: record?.completedQada ?? {},
-        monthRecords: (state is _Loaded) ? (state as _Loaded).monthRecords : {},
-        history: (state is _Loaded) ? (state as _Loaded).history : [], 
+        monthRecords: (currentState is _Loaded) ? currentState.monthRecords : {},
+        history: (currentState is _Loaded) ? currentState.history : [], 
       );
 
       // Initial state without month records first to show UI quickly
@@ -279,9 +282,9 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
 
       // Load month data
       final month = await _repo.loadMonth(e.date.year, e.date.month);
-      final currentState = state;
-      if (currentState is _Loaded) {
-        em(currentState.copyWith(
+      if (state is _Loaded) {
+        final current = state as _Loaded;
+        em(current.copyWith(
           monthRecords: month,
           history: month.values.toList()
             ..sort((a, b) => b.date.compareTo(a.date)),
@@ -293,146 +296,168 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
   }
 
   Future<void> _onTogglePrayer(_TogglePrayer e, Emitter<PrayerTrackerState> em) async {
-    final s = state as _Loaded;
-    final missed = Set<Salaah>.from(s.missedToday);
-    final completed = Set<Salaah>.from(s.completedToday);
-    final qada = Map<Salaah, MissedCounter>.from(s.qadaStatus);
-    
-    final now = DateTime.now();
-    final isToday = s.selectedDate.year == now.year &&
-                    s.selectedDate.month == now.month &&
-                    s.selectedDate.day == now.day;
+    if (state is _Loaded) {
+      final s = state as _Loaded;
+      final missed = Set<Salaah>.from(s.missedToday);
+      final completed = Set<Salaah>.from(s.completedToday);
+      final qada = Map<Salaah, MissedCounter>.from(s.qadaStatus);
+      
+      final now = DateTime.now();
+      final isToday = s.selectedDate.year == now.year &&
+                      s.selectedDate.month == now.month &&
+                      s.selectedDate.day == now.day;
 
-    // Optional: Sync any prayers that might have passed since last load
-    if (isToday) {
-      final lat = _prefs.getDouble('latitude');
-      final lon = _prefs.getDouble('longitude');
-      PrayerTimes? prayerTimes;
-      if (lat != null && lon != null) {
-        final method = _prefs.getString('calculation_method') ?? 'muslim_league';
-        final madhab = _prefs.getString('madhab') ?? 'shafi';
-        prayerTimes = _prayerTimeService.getPrayerTimes(
-          latitude: lat,
-          longitude: lon,
-          method: method,
-          madhab: madhab,
-          date: s.selectedDate,
-        );
-      }
+      // Optional: Sync any prayers that might have passed since last load
+      if (isToday) {
+        final lat = _prefs.getDouble('latitude');
+        final lon = _prefs.getDouble('longitude');
+        PrayerTimes? prayerTimes;
+        if (lat != null && lon != null) {
+          final method = _prefs.getString('calculation_method') ?? 'muslim_league';
+          final madhab = _prefs.getString('madhab') ?? 'shafi';
+          prayerTimes = _prayerTimeService.getPrayerTimes(
+            latitude: lat,
+            longitude: lon,
+            method: method,
+            madhab: madhab,
+            date: s.selectedDate,
+          );
+        }
 
-      for (final slh in Salaah.values) {
-        if (_prayerTimeService.isPassed(slh, prayerTimes: prayerTimes, date: s.selectedDate)) {
-          if (!completed.contains(slh) && !missed.contains(slh)) {
-            missed.add(slh);
-            qada[slh] = (qada[slh] ?? const MissedCounter(0)).addMissed();
-          }
-        } else {
-          // If NOT passed, it cannot be missed
-          if (missed.contains(slh)) {
-            missed.remove(slh);
-            qada[slh] = (qada[slh] ?? const MissedCounter(0)).removeMissed();
+        for (final slh in Salaah.values) {
+          if (_prayerTimeService.isPassed(slh, prayerTimes: prayerTimes, date: s.selectedDate)) {
+            if (!completed.contains(slh) && !missed.contains(slh)) {
+              missed.add(slh);
+              qada[slh] = (qada[slh] ?? const MissedCounter(0)).addMissed();
+            }
+          } else {
+            // If NOT passed, it cannot be missed
+            if (missed.contains(slh)) {
+              missed.remove(slh);
+              qada[slh] = (qada[slh] ?? const MissedCounter(0)).removeMissed();
+            }
           }
         }
       }
-    }
 
-    if (missed.contains(e.prayer)) {
-      // It was missed, now it's prayed
-      missed.remove(e.prayer);
-      completed.add(e.prayer);
-      if (isToday) {
-        qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).removeMissed();
-      }
-    } else if (completed.contains(e.prayer)) {
-      // It was prayed, now it's missed
-      completed.remove(e.prayer);
-      missed.add(e.prayer);
-      if (isToday) {
-        qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).addMissed();
-      }
-    } else {
-      // It was neither (e.g. time hadn't passed yet, or first load after time pass)
-      // Toggle should probably mark it as COMPLETED if it wasn't already.
-      completed.add(e.prayer);
+          final completedQada = Map<Salaah, int>.from(s.completedQadaToday);
+          if (missed.contains(e.prayer)) {
+            // It was missed, now it's prayed
+            missed.remove(e.prayer);
+            completed.add(e.prayer);
+            if (isToday) {
+              qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).removeMissed();
+              completedQada[e.prayer] = (completedQada[e.prayer] ?? 0) + 1;
+            }
+          } else if (completed.contains(e.prayer)) {
+            // It was prayed, now it's missed
+            completed.remove(e.prayer);
+            missed.add(e.prayer);
+            if (isToday) {
+              qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).addMissed();
+              // If they had previously removed qada for this prayer today, 
+              // toggling it back to missed should consume one of those "undos"
+              if ((completedQada[e.prayer] ?? 0) > 0) {
+                completedQada[e.prayer] = completedQada[e.prayer]! - 1;
+              }
+            }
+          } else {
+            // It was neither (e.g. time hadn't passed yet, or first load after time pass)
+            // Toggle should probably mark it as COMPLETED if it wasn't already.
+            completed.add(e.prayer);
+          }
+          final newState = s.copyWith(
+            missedToday: missed, 
+            completedToday: completed, 
+            qadaStatus: qada,
+            completedQadaToday: completedQada,
+          );
+      
+      em(newState);
+      await _saveInternal(newState, em);
     }
-    final newState = s.copyWith(missedToday: missed, completedToday: completed, qadaStatus: qada);
-    em(newState);
-    await _saveInternal(newState, em);
   }
 
   Future<void> _onAddQada(_AddQada e, Emitter<PrayerTrackerState> em) async {
-    final s = state as _Loaded;
-    final qada = Map<Salaah, MissedCounter>.from(s.qadaStatus);
-    final missed = Set<Salaah>.from(s.missedToday);
-    final completed = Set<Salaah>.from(s.completedToday);
-    
-    final now = DateTime.now();
-    final isToday = s.selectedDate.year == now.year &&
-                    s.selectedDate.month == now.month &&
-                    s.selectedDate.day == now.day;
+    if (state is _Loaded) {
+      final s = state as _Loaded;
+      final qada = Map<Salaah, MissedCounter>.from(s.qadaStatus);
+      final missed = Set<Salaah>.from(s.missedToday);
+      final completed = Set<Salaah>.from(s.completedToday);
+      
+      final now = DateTime.now();
+      final isToday = s.selectedDate.year == now.year &&
+                      s.selectedDate.month == now.month &&
+                      s.selectedDate.day == now.day;
 
-    bool isUndoingTodayRecovery = false;
-    if (isToday && completed.contains(e.prayer)) {
-       // It was completed today, now it's missed again
-       completed.remove(e.prayer);
-       missed.add(e.prayer);
-       isUndoingTodayRecovery = true;
-    }
+      bool isUndoingTodayRecovery = false;
+      if (isToday && completed.contains(e.prayer)) {
+         // It was completed today, now it's missed again
+         completed.remove(e.prayer);
+         missed.add(e.prayer);
+         isUndoingTodayRecovery = true;
+      }
 
-    qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).addMissed();
-    
-    // Decrement completed today ONLY if we weren't just undoing today's missed recovery
-    final completedQada = Map<Salaah, int>.from(s.completedQadaToday);
-    if (!isUndoingTodayRecovery && (completedQada[e.prayer] ?? 0) > 0) {
-      completedQada[e.prayer] = (completedQada[e.prayer] ?? 0) - 1;
+      final completedQada = Map<Salaah, int>.from(s.completedQadaToday);
+      final currentBudget = completedQada[e.prayer] ?? 0;
+
+      // Safety check: Only proceed if we are undoing a today-recovery OR we have budget
+      if (isUndoingTodayRecovery || currentBudget > 0) {
+        qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).addMissed();
+        
+        // Decrement completed today if we have budget
+        if (currentBudget > 0) {
+          completedQada[e.prayer] = currentBudget - 1;
+        }
+      }
+      
+      final newState = s.copyWith(
+        qadaStatus: qada, 
+        completedQadaToday: completedQada,
+        missedToday: missed,
+        completedToday: completed,
+      );
+      em(newState);
+      await _saveInternal(newState, em);
     }
-    
-    final newState = s.copyWith(
-      qadaStatus: qada, 
-      completedQadaToday: completedQada,
-      missedToday: missed,
-      completedToday: completed,
-    );
-    em(newState);
-    await _saveInternal(newState, em);
   }
 
   Future<void> _onRemoveQada(_RemoveQada e, Emitter<PrayerTrackerState> em) async {
-    final s = state as _Loaded;
-    final missed = Set<Salaah>.from(s.missedToday);
-    final completed = Set<Salaah>.from(s.completedToday);
-    final qada = Map<Salaah, MissedCounter>.from(s.qadaStatus);
-    
-    final now = DateTime.now();
-    final isToday = s.selectedDate.year == now.year &&
-                    s.selectedDate.month == now.month &&
-                    s.selectedDate.day == now.day;
+    if (state is _Loaded) {
+      final s = state as _Loaded;
+      final missed = Set<Salaah>.from(s.missedToday);
+      final completed = Set<Salaah>.from(s.completedToday);
+      final qada = Map<Salaah, MissedCounter>.from(s.qadaStatus);
+      
+      final now = DateTime.now();
+      final isToday = s.selectedDate.year == now.year &&
+                      s.selectedDate.month == now.month &&
+                      s.selectedDate.day == now.day;
 
-    bool isRecoveringToday = false;
-    if (isToday && missed.contains(e.prayer)) {
-      // If user is removing qada for today's prayer that was missed, 
-      // it means they prayed it now.
-      missed.remove(e.prayer);
-      completed.add(e.prayer);
-      isRecoveringToday = true;
-    }
-    
-    qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).removeMissed();
-    
-    // Increment completed today ONLY if we weren't just recovering today's missed prayer
-    final completedQada = Map<Salaah, int>.from(s.completedQadaToday);
-    if (!isRecoveringToday) {
+      bool isRecoveringToday = false;
+      if (isToday && missed.contains(e.prayer)) {
+        // If user is removing qada for today's prayer that was missed, 
+        // it means they prayed it now.
+        missed.remove(e.prayer);
+        completed.add(e.prayer);
+        isRecoveringToday = true;
+      }
+      
+      qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).removeMissed();
+      
+      // Increment completed today budget/limit
+      final completedQada = Map<Salaah, int>.from(s.completedQadaToday);
       completedQada[e.prayer] = (completedQada[e.prayer] ?? 0) + 1;
+      
+      final newState = s.copyWith(
+        missedToday: missed, 
+        completedToday: completed, 
+        qadaStatus: qada,
+        completedQadaToday: completedQada,
+      );
+      em(newState);
+      await _saveInternal(newState, em);
     }
-    
-    final newState = s.copyWith(
-      missedToday: missed, 
-      completedToday: completed, 
-      qadaStatus: qada,
-      completedQadaToday: completedQada,
-    );
-    em(newState);
-    await _saveInternal(newState, em);
   }
 
   // Deprecated manual save, but we can keep handler just in case
@@ -547,14 +572,16 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
 
   Future<void> _onBulkAddQada(
       _BulkAddQada e, Emitter<PrayerTrackerState> em) async {
-    final s = state as _Loaded;
-    final qada = Map<Salaah, MissedCounter>.from(s.qadaStatus);
-    for (final entry in e.counts.entries) {
-      final current = qada[entry.key] ?? const MissedCounter(0);
-      qada[entry.key] = MissedCounter(current.value + entry.value);
+    if (state is _Loaded) {
+      final s = state as _Loaded;
+      final qada = Map<Salaah, MissedCounter>.from(s.qadaStatus);
+      for (final entry in e.counts.entries) {
+        final current = qada[entry.key] ?? const MissedCounter(0);
+        qada[entry.key] = MissedCounter(current.value + entry.value);
+      }
+      final newState = s.copyWith(qadaStatus: qada);
+      em(newState);
+      await _saveInternal(newState, em);
     }
-    final newState = s.copyWith(qadaStatus: qada);
-    em(newState);
-    await _saveInternal(newState, em);
   }
 }
