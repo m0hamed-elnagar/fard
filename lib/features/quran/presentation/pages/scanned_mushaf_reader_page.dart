@@ -229,8 +229,8 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
                         // The user considers Right-pointing as 'Next'. DO NOT SWAP ICONS.
                         icon: Icons.chevron_left,
                         isDarkMode: _isDarkMode,
-                        onPressed: _currentPage < 604
-                            ? () => _pageController.nextPage(
+                        onPressed: _currentPage > 1
+                            ? () => _pageController.previousPage(
                                   duration: const Duration(milliseconds: 300),
                                   curve: Curves.easeInOut,
                                 )
@@ -245,12 +245,12 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
                         ),
                       ),
                       _PageNavButton(
-                        // Arabic RTL: Previous Page (Left side). 
+                        // Arabic RTL: Previous Page (Left side).
                         // The user considers Left-pointing as 'Previous'. DO NOT SWAP ICONS.
                         icon: Icons.chevron_right,
                         isDarkMode: _isDarkMode,
-                        onPressed: _currentPage > 1
-                            ? () => _pageController.previousPage(
+                        onPressed: _currentPage < 604
+                            ? () => _pageController.nextPage(
                                   duration: const Duration(milliseconds: 300),
                                   curve: Curves.easeInOut,
                                 )
