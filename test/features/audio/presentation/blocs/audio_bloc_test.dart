@@ -35,6 +35,7 @@ void main() {
         .thenAnswer((_) async => Result.success([tReciter]));
     when(() => mockRepository.getAvailableReciters())
         .thenAnswer((_) async => Result.success([tReciter]));
+    when(() => mockRepository.shouldPrependBismillah(any(), any())).thenReturn(false);
     
     when(() => mockPlayerService.watchStatus()).thenAnswer((_) => const Stream.empty());
     when(() => mockPlayerService.watchError()).thenAnswer((_) => const Stream.empty());
@@ -42,6 +43,11 @@ void main() {
     when(() => mockPlayerService.watchDuration()).thenAnswer((_) => const Stream.empty());
     when(() => mockPlayerService.watchCurrentIndex()).thenAnswer((_) => const Stream.empty());
     when(() => mockPlayerService.currentStatus).thenReturn(AudioStatus.idle);
+    when(() => mockPlayerService.currentMode).thenReturn(AudioPlayMode.ayah);
+    when(() => mockPlayerService.currentPosition).thenReturn(Duration.zero);
+    when(() => mockPlayerService.currentDuration).thenReturn(null);
+    when(() => mockPlayerService.currentIndex).thenReturn(null);
+    when(() => mockPlayerService.stop()).thenAnswer((_) async => Result.success(null));
 
     audioBloc = AudioBloc(
       audioRepository: mockRepository,

@@ -35,6 +35,8 @@ class AudioRepositoryImpl implements AudioRepository {
     'ar.minshawimujawwad': {64: 'Minshawy_Mujawwad_64kbps', 128: 'Minshawy_Mujawwad_192kbps', 192: 'Minshawy_Mujawwad_192kbps'},
     'ar.husarymuallim': {128: 'Husary_Muallim_128kbps'},
     'ar.aymanswayd': {64: 'Ayman_Sowaid_64kbps'},
+    'ar.alijaber': {64: 'Ali_Jaber_64kbps'},
+    'ar.yasseraldossari': {128: 'Yasser_Ad-Dussary_128kbps'},
   };
 
   @override
@@ -57,6 +59,27 @@ class AudioRepositoryImpl implements AudioRepository {
           language: e['language'],
           style: e['format'] == 'audio' ? null : e['format'],
         )).toList();
+
+        // Ensure popular reciters are at the top and present
+        final topReciters = [
+          const Reciter(
+            identifier: 'ar.alijaber',
+            name: 'علي جابر',
+            englishName: 'Ali Jaber',
+            language: 'ar',
+          ),
+          const Reciter(
+            identifier: 'ar.yasseraldossari',
+            name: 'ياسر الدوسري',
+            englishName: 'Yasser Al-Dosari',
+            language: 'ar',
+          ),
+        ];
+
+        for (final top in topReciters.reversed) {
+          reciters.removeWhere((r) => r.identifier == top.identifier);
+          reciters.insert(0, top);
+        }
         
         await cacheReciters(reciters);
         return Result.success(reciters);
@@ -287,25 +310,48 @@ class AudioRepositoryImpl implements AudioRepository {
     try {
       final prefs = await SharedPreferences.getInstance();
       final cachedJson = prefs.getString(_recitersCacheKey);
+      List<Reciter> reciters = [];
       if (cachedJson != null) {
         final List<dynamic> decoded = json.decode(cachedJson);
-        final reciters = decoded.map((e) => Reciter(
+        reciters = decoded.map((e) => Reciter(
           identifier: e['identifier'],
           name: e['name'],
           englishName: e['englishName'],
           language: e['language'],
           style: e['style'],
         )).toList();
-        return Result.success(reciters);
       }
-      return Result.success([]);
+
+      // Ensure popular reciters that might be missing from cache are added
+      final requiredIdentifiers = {
+        'ar.alijaber': const Reciter(
+          identifier: 'ar.alijaber',
+          name: 'علي جابر',
+          englishName: 'Ali Jaber',
+          language: 'ar',
+        ),
+        'ar.yasseraldossari': const Reciter(
+          identifier: 'ar.yasseraldossari',
+          name: 'ياسر الدوسري',
+          englishName: 'Yasser Al-Dosari',
+          language: 'ar',
+        ),
+      };
+
+      for (final entry in requiredIdentifiers.entries) {
+        if (!reciters.any((r) => r.identifier == entry.key)) {
+          reciters.add(entry.value);
+        }
+      }
+
+      return Result.success(reciters);
     } catch (e) {
       return Result.failure(UnknownFailure(e.toString()));
     }
   }
 
   Future<String> _getLocalPath(String reciterId, String surah, String ayah) async {
-    final directory = await getApplicationDocumentsDirectory();
+    final directory = await getApplicationSupportDirectory();
     return '${directory.path}/audio/$reciterId/$surah$ayah.mp3';
   }
 }

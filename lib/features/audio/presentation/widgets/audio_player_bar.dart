@@ -112,16 +112,19 @@ class AudioPlayerBar extends StatelessWidget {
                       ),
                     ),
                     
-                    // Grouped Controls
+                    // Audio Controls - DO NOT CHANGE TO LTR.
+                    // The user prefers Arabic RTL style: Next (Forward) is on the Left, Previous is on the Right.
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        // Next Button (Visually Left in RTL)
                         IconButton(
                           iconSize: 22,
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
-                          icon: const Icon(Icons.skip_previous_rounded),
-                          onPressed: () => context.read<AudioBloc>().add(AudioEvent.skipToPrevious()),
+                          // In Arabic RTL, Next is to the Left. skip_previous icon points Left.
+                          icon: const Icon(Icons.skip_next_rounded),
+                          onPressed: () => context.read<AudioBloc>().add(AudioEvent.skipToNext()),
                         ),
                         const SizedBox(width: 4),
                         // Play/Pause
@@ -146,12 +149,14 @@ class AudioPlayerBar extends StatelessWidget {
                               ),
                         ),
                         const SizedBox(width: 4),
+                        // Previous Button (Visually Right in RTL)
                         IconButton(
                           iconSize: 22,
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
-                          icon: const Icon(Icons.skip_next_rounded),
-                          onPressed: () => context.read<AudioBloc>().add(AudioEvent.skipToNext()),
+                          // In Arabic RTL, Previous is to the Right. skip_next icon points Right.
+                          icon: const Icon(Icons.skip_previous_rounded),
+                          onPressed: () => context.read<AudioBloc>().add(AudioEvent.skipToPrevious()),
                         ),
                       ],
                     ),

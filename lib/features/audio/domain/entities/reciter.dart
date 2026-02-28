@@ -22,11 +22,15 @@ class Reciter extends Equatable {
 
   // Popular reciters to show first
   static const List<String> popularReciters = [
+    'ar.alijaber',           // Ali Jaber
+    'ar.yasseraldossari',   // Yasser Al-Dosari
     'ar.alafasy',           // Mishary Rashid Alafasy
     'ar.husary',            // Mahmoud Khalil Al-Husary
     'ar.minshawi',          // Mohamed Siddiq Al-Minshawy
     'ar.abdulbasitmurattal',// Abdul Basit Abdul Samad
     'ar.ahmedajamy',        // Ahmed Ibn Ali Al-Ajamy
     'ar.abdurrahmaansudais',// Abdurrahmaan As-Sudais
+    'ar.mahermuaiqly',      // Maher Al Muaiqly
+    'ar.saoodshuraym',      // Saood bin Ibraaheem Ash-Shuraym
   ];
 }

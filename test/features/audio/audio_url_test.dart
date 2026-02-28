@@ -19,6 +19,8 @@ void main() {
     'ar.minshawimujawwad': {64: 'Minshawy_Mujawwad_64kbps', 128: 'Minshawy_Mujawwad_192kbps'},
     'ar.husarymuallim': {128: 'Husary_Muallim_128kbps'},
     'ar.aymanswayd': {64: 'Ayman_Sowaid_64kbps'},
+    'ar.alijaber': {64: 'Ali_Jaber_64kbps'},
+    'ar.yasseraldossari': {128: 'Yasser_Ad-Dussary_128kbps'},
   };
 
   group('EveryAyah URL Validation', () {
