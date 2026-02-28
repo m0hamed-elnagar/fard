@@ -35,9 +35,9 @@ class AudioState extends Equatable {
 
   AudioState copyWith({
     AudioStatus? status,
-    Reciter? currentReciter,
-    int? currentSurah,
-    int? currentAyah,
+    Object? currentReciter = _sentinel,
+    Object? currentSurah = _sentinel,
+    Object? currentAyah = _sentinel,
     List<Reciter>? availableReciters,
     AudioPlayMode? mode,
     AudioQuality? quality,
@@ -46,14 +46,14 @@ class AudioState extends Equatable {
     double? speed,
     bool? isRepeating,
     bool? isBannerVisible,
-    String? error,
-    String? lastErrorMessage,
+    Object? error = _sentinel,
+    Object? lastErrorMessage = _sentinel,
   }) {
     return AudioState(
       status: status ?? this.status,
-      currentReciter: currentReciter ?? this.currentReciter,
-      currentSurah: currentSurah ?? this.currentSurah,
-      currentAyah: currentAyah ?? this.currentAyah,
+      currentReciter: currentReciter == _sentinel ? this.currentReciter : currentReciter as Reciter?,
+      currentSurah: currentSurah == _sentinel ? this.currentSurah : currentSurah as int?,
+      currentAyah: currentAyah == _sentinel ? this.currentAyah : currentAyah as int?,
       availableReciters: availableReciters ?? this.availableReciters,
       mode: mode ?? this.mode,
       quality: quality ?? this.quality,
@@ -62,10 +62,12 @@ class AudioState extends Equatable {
       speed: speed ?? this.speed,
       isRepeating: isRepeating ?? this.isRepeating,
       isBannerVisible: isBannerVisible ?? this.isBannerVisible,
-      error: error ?? this.error,
-      lastErrorMessage: lastErrorMessage ?? this.lastErrorMessage,
+      error: error == _sentinel ? this.error : error as String?,
+      lastErrorMessage: lastErrorMessage == _sentinel ? this.lastErrorMessage : lastErrorMessage as String?,
     );
   }
+
+  static const _sentinel = Object();
 
   @override
   List<Object?> get props => [

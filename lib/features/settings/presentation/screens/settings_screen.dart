@@ -548,7 +548,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         '${settings.isAzanEnabled ? "${l10n.azan}$voiceDisplayName" : ""} ${settings.isAzanEnabled && settings.isReminderEnabled ? "&" : ""} ${settings.isReminderEnabled ? "${l10n.reminder} (${l10n.minutesBefore(settings.reminderMinutesBefore)})" : ""}',
         style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
       ),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+      // Arabic RTL: Disclosure arrow points Left. DO NOT CHANGE.
+      trailing: const Icon(Icons.arrow_back_ios, size: 14),
       onTap: () => _showSalaahSettingsDialog(context, settings, l10n),
     );
   }

@@ -67,7 +67,7 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
   }
 
   Future<String> _getCachePath(String url) async {
-    final directory = await getApplicationDocumentsDirectory();
+    final directory = await getTemporaryDirectory();
     final cacheDir = Directory('${directory.path}/audio_cache');
     if (!await cacheDir.exists()) {
       await cacheDir.create(recursive: true);

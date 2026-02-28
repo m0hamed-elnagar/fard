@@ -221,7 +221,8 @@ class SuggestedAzkarSection extends StatelessWidget {
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
-                              Icons.arrow_forward_ios_rounded,
+                              // Arabic RTL: Disclosure arrow points Left. DO NOT CHANGE.
+                              Icons.arrow_back_ios_rounded,
                               color: mainColor,
                               size: 16,
                             ),

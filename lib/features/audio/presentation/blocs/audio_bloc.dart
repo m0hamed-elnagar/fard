@@ -161,7 +161,8 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
       currentReciter: activeReciter,
       mode: AudioPlayMode.ayah,
       isBannerVisible: true,
-      error: null, // Clear previous error
+      error: null,
+      lastErrorMessage: null, // Clear previous error message
     ));
 
     final url = audioRepository.getAyahAudioUrl(
@@ -227,7 +228,8 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
       currentReciter: activeReciter,
       mode: AudioPlayMode.surah,
       isBannerVisible: true,
-      error: null, // Clear previous error
+      error: null,
+      lastErrorMessage: null, // Clear previous error message
     ));
 
     final urlsResult = await audioRepository.getSurahAudioUrls(
