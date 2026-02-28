@@ -263,7 +263,8 @@ class _QuranPageState extends State<QuranPage> {
                                     );
                                   },
                                 ),
-                                const Icon(Icons.arrow_forward_ios, size: 14),
+                                // Arabic RTL: Disclosure arrow points Left. DO NOT CHANGE.
+                                const Icon(Icons.arrow_back_ios, size: 14),
                               ],
                             ),
                             onTap: () {

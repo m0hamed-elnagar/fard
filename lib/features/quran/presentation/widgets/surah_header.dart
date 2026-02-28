@@ -35,8 +35,9 @@ class SurahHeader extends StatelessWidget {
         children: [
           Row(
             children: [
-              if (onPrevious != null && surah.number.value > 1)
+              if (onNext != null && surah.number.value < 114)
                 IconButton(
+                  // Arabic RTL: Next is Right. DO NOT CHANGE.
                   icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
                   onPressed: onPrevious,
                   tooltip: 'السورة السابقة',
@@ -56,8 +57,9 @@ class SurahHeader extends StatelessWidget {
                 ),
               ),
               
-              if (onNext != null && surah.number.value < 114)
+              if (onPrevious != null && surah.number.value > 1)
                 IconButton(
+                  // Arabic RTL: Previous is Left. DO NOT CHANGE.
                   icon: const Icon(Icons.arrow_forward_ios_rounded, size: 20),
                   onPressed: onNext,
                   tooltip: 'السورة التالية',

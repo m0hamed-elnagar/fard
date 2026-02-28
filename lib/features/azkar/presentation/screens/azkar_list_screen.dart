@@ -225,7 +225,8 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_rounded, color: AppTheme.accent, size: 20),
+                  // Arabic RTL: Previous is Right. DO NOT CHANGE to arrow_back.
+                  icon: const Icon(Icons.arrow_forward_ios_rounded, color: AppTheme.accent, size: 20),
                   onPressed: () {
                     _pageController.previousPage(
                       duration: const Duration(milliseconds: 300),
@@ -248,7 +249,8 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_forward_ios_rounded, color: AppTheme.accent, size: 20),
+                  // Arabic RTL: Next is Left. DO NOT CHANGE to arrow_forward.
+                  icon: const Icon(Icons.arrow_back_ios_rounded, color: AppTheme.accent, size: 20),
                   onPressed: () {
                     _pageController.nextPage(
                       duration: const Duration(milliseconds: 300),
