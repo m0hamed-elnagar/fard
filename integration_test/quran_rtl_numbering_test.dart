@@ -6,6 +6,7 @@ import 'package:fard/core/di/injection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
+import 'package:fard/features/quran/presentation/widgets/ayah_text.dart';
 import 'dart:ui' as ui;
 import 'dart:io';
 
@@ -45,7 +46,6 @@ void main() {
 
       // 4. Find and tap Al-Imran (Surah 3)
       debugPrint('Navigating to Al-Imran...');
-      // Use the Surah number in Arabic to find it reliably
       final alImranNumberFinder = find.text('٣'); 
       final listView = find.byType(ListView).first;
       
@@ -59,32 +59,26 @@ void main() {
 
       // 5. Verify the first 3 markers positions using TextSpan geometry
       debugPrint('Verifying marker positions via TextSpan geometry...');
-      final richTextFinder = find.byType(RichText);
-      expect(richTextFinder, findsWidgets); // Might find multiple, usually the main one is large
+      
+      // Find the RichText widget inside AyahText
+      final Finder surahTextFinder = find.descendant(
+        of: find.byType(AyahText),
+        matching: find.byType(RichText),
+      ).first;
 
-      // Find the one that contains the Surah text (we look for a specific ayah text or marker)
-      // Marker 1 in Arabic-Indic is '١' prefixed with '۝'
+      expect(surahTextFinder, findsOneWidget, reason: 'AyahText should contain at least one RichText');
+      
+      final RenderParagraph renderParagraph = tester.renderObject(surahTextFinder);
+      final String plainText = renderParagraph.text.toPlainText();
+      debugPrint('Found text with length: ${plainText.length}');
+      
+      // Target markers (Arabic-Indic digits prefixed with ۝)
       final targetMarker1 = '۝١';
       final targetMarker2 = '۝٢';
       final targetMarker3 = '۝٣';
 
-      final Finder surahTextFinder = find.byWidgetPredicate((widget) {
-        if (widget is RichText && widget.text.toPlainText().contains(targetMarker1)) {
-          return true;
-        }
-        return false;
-      });
-
-      expect(surahTextFinder, findsOneWidget);
-      
-      final RenderObject renderObject = tester.renderObject(surahTextFinder);
-      expect(renderObject, isA<RenderParagraph>());
-      final RenderParagraph renderParagraph = renderObject as RenderParagraph;
-
-      final String plainText = renderParagraph.text.toPlainText();
-      
-      // Helper to get center Dx of a text substring
-      double getMarkerDx(String marker) {
+      // Helper to get global center Dx of a text substring
+      double getMarkerGlobalDx(String marker) {
         final int startIndex = plainText.indexOf(marker);
         if (startIndex == -1) fail('Marker $marker not found in text');
         final int endIndex = startIndex + marker.length;
@@ -95,24 +89,24 @@ void main() {
         
         if (boxes.isEmpty) fail('No boxes found for marker $marker');
         
-        // Return the center of the first box (usually specific enough)
-        // Convert local coordinates to global
+        // Use the center of the first box
         final Offset localCenter = boxes.first.toRect().center;
         final Offset globalCenter = renderParagraph.localToGlobal(localCenter);
         return globalCenter.dx;
       }
       
-      final dx1 = getMarkerDx(targetMarker1);
-      final dx2 = getMarkerDx(targetMarker2);
-      final dx3 = getMarkerDx(targetMarker3);
+      final dx1 = getMarkerGlobalDx(targetMarker1);
+      final dx2 = getMarkerGlobalDx(targetMarker2);
+      final dx3 = getMarkerGlobalDx(targetMarker3);
 
       debugPrint('Marker 1 ($targetMarker1) global dx: $dx1');
       debugPrint('Marker 2 ($targetMarker2) global dx: $dx2');
       debugPrint('Marker 3 ($targetMarker3) global dx: $dx3');
 
-      // In RTL, the first Ayah (Rightmost) should have largest Dx
-      // Line: [Ayah 3] ... [Ayah 2] ... [Ayah 1] ->
-      // Dx:   Small        Medium       Large
+      // In RTL, logically first items (Rightmost) have largest DX
+      // [Ayah 3] ... [Ayah 2] ... [Ayah 1]  <- (Screen Edge Right)
+      // Visual order should be 3, 2, 1 from left to right.
+      // So X1 > X2 > X3
       
       expect(dx1, greaterThan(dx2), reason: 'Marker 1 should be to the right of Marker 2');
       expect(dx2, greaterThan(dx3), reason: 'Marker 2 should be to the right of Marker 3');

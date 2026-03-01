@@ -44,44 +44,34 @@ class _AyahTextState extends State<AyahText> {
 
     _ayahRanges.clear();
     final List<InlineSpan> spans = [];
-    int currentOffset = 1; // Account for the initial '\u202B'
+    int currentOffset = 0;
 
     for (final ayah in sortedAyahs) {
       final isHighlighted = ayah == widget.highlightedAyah;
-      final key = widget.ayahKeys?[ayah.number.ayahNumberInSurah];
+      
+      // We use TextSpans for markers instead of WidgetSpans to ensure perfect RTL flow.
+      // The symbol ۝ (U+06DD) is used as the Ayah marker.
+      final String markerText = ' ۝${ayah.number.ayahNumberInSurah.toArabicIndic()} ';
+      final String ayahText = ayah.uthmaniText.trim();
+      
+      // Sajdah indicator still needs to be a WidgetSpan
+      const int sajdahPlaceholderLen = 2; // Space + WidgetSpan placeholder
 
-      // Calculate the text for this ayah to track its range
-      String ayahFullText = '\u2068'; // FSI
-      ayahFullText += ayah.uthmaniText.trim();
-      ayahFullText += '\u2009'; // Thin space
-      ayahFullText += ' '; // WidgetSpan (AyahNumberMarker placeholder)
-      
-      if (ayah.isSajdah && ayah.sajdahType != null) {
-        ayahFullText += '\u2009'; // Thin space
-        ayahFullText += ' '; // WidgetSpan (SajdahIndicator placeholder)
-      }
-      
-      ayahFullText += '\u2069'; // PDI
-      ayahFullText += '\u2003'; // Em space
-      
       _ayahRanges.add(_AyahRange(
         ayah: ayah,
         start: currentOffset,
-        end: currentOffset + ayahFullText.length,
+        end: currentOffset + ayahText.length + markerText.length + (ayah.isSajdah ? sajdahPlaceholderLen : 0) + 1, // +1 for the extra space between ayahs
       ));
       
-      currentOffset += ayahFullText.length;
+      currentOffset += ayahText.length + markerText.length + (ayah.isSajdah ? sajdahPlaceholderLen : 0) + 1;
 
-      // 2. Build each Ayah Unit as an atomic span
+      // Build Ayah Unit
       spans.add(
         TextSpan(
           children: [
-            // Start of isolated unit (FSI - First Strong Isolate)
-            const TextSpan(text: '\u2068'), 
-            
-            // Ayah text
+            // Ayah Text
             TextSpan(
-              text: ayah.uthmaniText.trim(),
+              text: ayahText,
               style: GoogleFonts.amiri(
                 fontSize: 28 * widget.textScale,
                 height: 2.2,
@@ -96,25 +86,22 @@ class _AyahTextState extends State<AyahText> {
               ),
             ),
             
-            const TextSpan(text: '\u2009'), // Thin space
-            
-            // Number marker unit
-            WidgetSpan(
-              alignment: PlaceholderAlignment.middle,
-              child: Container(
-                key: key,
-                child: Text(
-                  '۝${ayah.number.ayahNumberInSurah.toArabicIndic()}',
-                  style: GoogleFonts.amiri(
-                    fontSize: 24 * widget.textScale,
-                    color: isHighlighted ? colorScheme.primary : textTheme.bodyLarge?.color?.withValues(alpha: 0.7),
-                  ),
-                ),
+            // Ayah Marker (TextSpan instead of WidgetSpan fixes RTL sequencing)
+            TextSpan(
+              text: markerText,
+              style: GoogleFonts.amiri(
+                fontSize: 24 * widget.textScale,
+                color: isHighlighted 
+                    ? colorScheme.primary 
+                    : textTheme.bodyLarge?.color?.withValues(alpha: 0.7),
+                backgroundColor: isHighlighted 
+                    ? colorScheme.primary.withValues(alpha: 0.1)
+                    : null,
               ),
             ),
             
             if (ayah.isSajdah && ayah.sajdahType != null) ...[
-              const TextSpan(text: '\u2009'),
+              const TextSpan(text: ' '),
               WidgetSpan(
                 alignment: PlaceholderAlignment.middle,
                 child: SajdahIndicator(
@@ -124,11 +111,8 @@ class _AyahTextState extends State<AyahText> {
               ),
             ],
             
-            // End of isolated unit (PDI - Pop Directional Isolate)
-            const TextSpan(text: '\u2069'),
-            
-            // Fixed spacing between units (Em space)
-            const TextSpan(text: '\u2003'), 
+            // Space between Ayahs
+            const TextSpan(text: ' '), 
           ],
         ),
       );
@@ -143,11 +127,7 @@ class _AyahTextState extends State<AyahText> {
         onDoubleTapDown: (details) => _handleGesture(details.localPosition, 'doubleTap'),
         child: Text.rich(
           key: _textKey,
-          TextSpan(
-            // Anchor the paragraph with RLE (Right-to-Left Embedding)
-            text: '\u202B', 
-            children: spans,
-          ),
+          TextSpan(children: spans),
           textDirection: TextDirection.rtl,
           textAlign: TextAlign.justify,
           softWrap: true,
@@ -177,7 +157,6 @@ class _AyahTextState extends State<AyahText> {
             if (widget.onAyahDoubleTap != null) {
               widget.onAyahDoubleTap!(range.ayah);
             } else {
-              // Fallback to long press if double tap is not provided
               widget.onAyahLongPress?.call(range.ayah);
             }
             break;
@@ -195,4 +174,3 @@ class _AyahRange {
 
   _AyahRange({required this.ayah, required this.start, required this.end});
 }
-
