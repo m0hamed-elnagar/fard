@@ -244,6 +244,14 @@
           "transliteration": "Astaghfirullah al-'Adheem",
           "translation": "I seek forgiveness from Allah the Magnificent",
           "target_count": 100
+        },
+        {
+          "id": "salat_ala_nabi",
+          "name": "Salat upon the Prophet",
+          "arabic": "اللَّهُمَّ صَلِّ وَسَلِّمْ وَبَارِكْ على نَبِيِّنَا مُحمَّد",
+          "transliteration": "Allahumma salli wa sallim wa barik 'ala nabiyyina Muhammad",
+          "translation": "O Allah, send prayers, peace, and blessings upon our Prophet Muhammad",
+          "target_count": 100
         }
       ]
     }

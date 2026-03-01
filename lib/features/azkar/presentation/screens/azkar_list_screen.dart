@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:vibration/vibration.dart';
+import '../../../../core/utils/quran_text_utils.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../blocs/azkar_bloc.dart';
 import '../../domain/azkar_item.dart';
@@ -310,7 +311,9 @@ class _ZekrCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              item.zekr,
+              QuranTextUtils.isQuranicText(item.reference) 
+                ? QuranTextUtils.formatWithQuranSymbols(item.zekr)
+                : item.zekr,
               style: GoogleFonts.amiri(
                 fontSize: 24,
                 height: 1.8,
