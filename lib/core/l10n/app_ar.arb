@@ -209,7 +209,7 @@
   "lowBitrate": "جودة منخفضة (64k)",
   "medBitrate": "جودة متوسطة (128k)",
   "highBitrate": "جودة عالية (192k)",
-  "defaultVal": "تلقائي",
+  "defaultVal": "تنبيه الهاتف",
   "pagesDownloadedSuccess": "تم تحميل جميع الصفحات بنجاح",
   "downloadMushafPages": "تحميل صفحات المصحف",
   "cacheClearedReloading": "تم مسح التخزين المؤقت وجاري إعادة التحميل",

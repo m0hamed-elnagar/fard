@@ -259,11 +259,12 @@ class _AzanSelectionPage extends StatelessWidget {
     final isAzanEnabled = state.salaahSettings.any((s) => s.isAzanEnabled);
     final currentSound = state.salaahSettings.first.azanSound;
 
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(40.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          const SizedBox(height: 60.0), // Padding for Top icons
           Container(
             padding: const EdgeInsets.all(32.0),
             decoration: BoxDecoration(

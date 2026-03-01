@@ -209,7 +209,7 @@
   "lowBitrate": "Low (64k)",
   "medBitrate": "Med (128k)",
   "highBitrate": "High (192k)",
-  "defaultVal": "Default",
+  "defaultVal": "Phone Notification",
   "pagesDownloadedSuccess": "All pages downloaded successfully",
   "downloadMushafPages": "Download Mushaf Pages",
   "cacheClearedReloading": "Cache cleared and reloading",
