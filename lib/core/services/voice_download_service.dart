@@ -5,27 +5,38 @@ import 'package:flutter/foundation.dart';
 
 class VoiceDownloadService {
   static const Map<String, String> azanVoices = {
-    'Abdul Basit (Egypt) - عبد الباسط (مصر)': 'https://www.ayouby.com/multimedia/Call_of_Prayer/Athan_AB.mp3',
-    'Mishary Alafasy - مشاري العفاسي': 'https://www.islamcan.com/audio/adhan/azan7.mp3',
+    'Abdul Basit - عبد الباسط': 'https://www.ayouby.com/multimedia/Call_of_Prayer/Athan_AB.mp3',
+    'Mishary Rashid Alafasy - مشاري العفاسي': 'https://www.islamcan.com/audio/adhan/azan7.mp3',
     'Ali Ahmed Mala (Madinah) - علي أحمد ملا': 'https://www.islamcan.com/audio/adhan/azan20.mp3',
-    'Al-Minshawi (Egypt) - المنشاوي (مصر)': 'https://www.islamcan.com/audio/adhan/azan1.mp3',
-    'Al-Aqsa Mosque - المسجد الأقصى': 'https://www.islamcan.com/audio/adhan/azan2.mp3',
-    'Turkey Azan - أذان تركيا': 'https://www.islamcan.com/audio/adhan/azan3.mp3',
-    'Makkah Beautiful - مكة المكرمة': 'https://www.islamcan.com/audio/adhan/azan10.mp3',
-    'Bosnia Azan - أذان البوسنة': 'https://www.islamcan.com/audio/adhan/azan5.mp3',
+    'Muhammad Siddiq Al-Minshawi - محمد صديق المنشاوي': 'https://www.islamcan.com/audio/adhan/azan1.mp3',
+    'Al-Aqsa Mosque (Palestine) - المسجد الأقصى': 'https://www.islamcan.com/audio/adhan/azan2.mp3',
+    'Turkish Style Adhan - أذان تركي': 'https://www.islamcan.com/audio/adhan/azan3.mp3',
+    'Makkah Haram (Beautiful) - مكة المكرمة': 'https://www.islamcan.com/audio/adhan/azan10.mp3',
+    'Bosnian Style Adhan - أذان البوسنة': 'https://www.islamcan.com/audio/adhan/azan5.mp3',
     'Nasser Al-Qatami - ناصر القطامي': 'https://www.islamcan.com/audio/adhan/azan15.mp3',
     'Muhammad Al-Luhaidan - محمد اللحيدان': 'https://www.islamcan.com/audio/adhan/azan14.mp3',
-    'Makkah Fajr - مكة المكرمة (فجر)': 'https://www.islamcan.com/audio/adhan/azan16.mp3',
-    'Madinah Fajr - المدينة المنورة (فجر)': 'https://www.islamcan.com/audio/adhan/azan17.mp3',
+    'Makkah Haram (Fajr) - أذان الفجر من مكة': 'https://www.islamcan.com/audio/adhan/azan16.mp3',
+    'Madinah Haram (Fajr) - أذان الفجر من المدينة': 'https://www.islamcan.com/audio/adhan/azan17.mp3',
     'Saad Al-Ghamdi - سعد الغامدي': 'https://www.islamcan.com/audio/adhan/azan21.mp3',
-    'Azan 4 (Egypt) - أذان 4 (مصر)': 'https://www.islamcan.com/audio/adhan/azan4.mp3',
-    'Azan 6 (Yusuf Islam) - أذان 6 (يوسف إسلام)': 'https://www.islamcan.com/audio/adhan/azan6.mp3',
-    'Azan 8 (Makkah) - أذان 8 (مكة)': 'https://www.islamcan.com/audio/adhan/azan8.mp3',
+    'Egyptian Style Adhan - أذان مصري': 'https://www.islamcan.com/audio/adhan/azan4.mp3',
+    'Yusuf Islam - يوسف إسلام': 'https://www.islamcan.com/audio/adhan/azan6.mp3',
+    'Makkah Haram (Old Style) - الحرم المكي': 'https://www.islamcan.com/audio/adhan/azan8.mp3',
+    'Mahmoud Khalil Al-Husary - محمود خليل الحصري': 'https://download.islamway.net/quran3/10/adhan.mp3',
+    'Mansour Al-Salimi - منصور السالمي': 'https://download.tvquran.com/download/Adhan/Mansour-Al-Salimi.mp3',
+    'Wadii Al-Yamani - وديع اليمني': 'https://media.sd.ma/assabile/adhan_3435370/091fa01b11f4.mp3',
   };
 
   String _getFileName(String voiceName) {
+    // Extract a stable identifier from the URL to avoid re-downloading when renaming display names
+    final url = azanVoices[voiceName];
+    if (url != null) {
+      final uri = Uri.parse(url);
+      final fileName = uri.pathSegments.last;
+      return 'voice_$fileName';
+    }
     return '${voiceName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_')}_azan.mp3';
   }
+
 
   Future<String?> downloadAzan(String voiceName) async {
     final url = azanVoices[voiceName];

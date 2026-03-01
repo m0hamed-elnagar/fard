@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +9,10 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/core/widgets/custom_toggle.dart';
 import 'package:fard/features/azkar/presentation/screens/main_navigation_screen.dart';
+import 'package:fard/core/services/voice_download_service.dart';
+import 'package:fard/core/services/notification_service.dart';
+import 'package:fard/core/di/injection.dart';
+import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -19,6 +25,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   bool _isQadaEnabled = true;
+  bool _isDownloading = false;
+  final int _totalPages = 5;
 
   Future<void> _completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
@@ -44,25 +52,35 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          PageView(
-            controller: _pageController,
-            onPageChanged: (index) => setState(() => _currentPage = index),
-            children: [
-              _OnboardingPage(
-                title: l10n.onboardingTitle1,
-                description: l10n.onboardingDesc1,
-                icon: Icons.auto_graph_rounded,
-              ),
-              _OnboardingPage(
-                title: l10n.onboardingTitle2,
-                description: l10n.onboardingDesc2,
-                icon: Icons.history_rounded,
-              ),
-              _QadaSelectionPage(
-                isEnabled: _isQadaEnabled,
-                onChanged: (val) => setState(() => _isQadaEnabled = val),
-              ),
-            ],
+          BlocBuilder<SettingsCubit, SettingsState>(
+            builder: (context, state) {
+              return PageView(
+                controller: _pageController,
+                onPageChanged: (index) => setState(() => _currentPage = index),
+                children: [
+                  _OnboardingPage(
+                    title: l10n.onboardingTitle1,
+                    description: l10n.onboardingDesc1,
+                    icon: Icons.auto_graph_rounded,
+                  ),
+                  _OnboardingPage(
+                    title: l10n.onboardingTitle2,
+                    description: l10n.onboardingDesc2,
+                    icon: Icons.history_rounded,
+                  ),
+                  _LocationPrayerPage(state: state),
+                  _AzanSelectionPage(
+                    state: state, 
+                    isDownloading: _isDownloading,
+                    onDownloadingChanged: (val) => setState(() => _isDownloading = val),
+                  ),
+                  _QadaSelectionPage(
+                    isEnabled: _isQadaEnabled,
+                    onChanged: (val) => setState(() => _isQadaEnabled = val),
+                  ),
+                ],
+              );
+            },
           ),
           Positioned(
             top: MediaQuery.of(context).padding.top + 16.0,
@@ -82,7 +100,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
-                    3,
+                    _totalPages,
                     (index) => AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       margin: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -102,12 +120,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   width: double.infinity,
                   height: 56.0,
                   child: ElevatedButton(
-                    onPressed: _currentPage == 2
+                    onPressed: _isDownloading ? null : (_currentPage == _totalPages - 1
                         ? _completeOnboarding
                         : () => _pageController.nextPage(
                               duration: const Duration(milliseconds: 300),
                               curve: Curves.easeInOut,
-                            ),
+                            )),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primaryLight,
                       foregroundColor: AppTheme.onPrimary,
@@ -115,16 +133,331 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         borderRadius: BorderRadius.circular(16.0),
                       ),
                     ),
-                    child: Text(
-                      _currentPage == 2 ? l10n.getStarted : l10n.next,
-                      style: GoogleFonts.outfit(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    child: _isDownloading 
+                      ? const SizedBox(
+                          height: 24, 
+                          width: 24, 
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : Text(
+                          _currentPage == _totalPages - 1 ? l10n.getStarted : l10n.next,
+                          style: GoogleFonts.outfit(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LocationPrayerPage extends StatelessWidget {
+  final SettingsState state;
+
+  const _LocationPrayerPage({required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final cubit = context.read<SettingsCubit>();
+
+    return Padding(
+      padding: const EdgeInsets.all(40.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(32.0),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryLight.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.location_on_rounded, size: 80.0, color: AppTheme.primaryLight),
+          ),
+          const SizedBox(height: 32.0),
+          Text(
+            l10n.prayerSettings,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.amiri(
+              color: AppTheme.textPrimary,
+              fontSize: 32.0,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 16.0),
+          Text(
+            l10n.locationDesc,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.outfit(
+              color: AppTheme.textSecondary,
+              fontSize: 16.0,
+            ),
+          ),
+          const SizedBox(height: 32.0),
+          _SettingsDropdown(
+            label: l10n.currentLocation,
+            value: state.cityName ?? l10n.locationNotSet,
+            icon: Icons.my_location_rounded,
+            onTap: () => cubit.refreshLocation(),
+          ),
+          const SizedBox(height: 16.0),
+          _SettingsDropdownSelector(
+            label: l10n.calculationMethod,
+            value: state.calculationMethod,
+            options: const {
+              'muslim_league': 'Muslim World League',
+              'egyptian': 'Egyptian General Authority',
+              'karachi': 'University of Islamic Sciences, Karachi',
+              'umm_al_qura': 'Umm al-Qura University, Makkah',
+              'dubai': 'Dubai',
+              'qatar': 'Qatar',
+              'kuwait': 'Kuwait',
+              'singapore': 'Singapore',
+              'turkey': 'Turkey',
+              'tehran': 'Institute of Geophysics, University of Tehran',
+              'north_america': 'ISNA (North America)',
+            },
+            onChanged: (val) => cubit.updateCalculationMethod(val!),
+          ),
+          const SizedBox(height: 16.0),
+          _SettingsDropdownSelector(
+            label: l10n.madhab,
+            value: state.madhab,
+            options: {
+              'shafi': l10n.shafiMadhab,
+              'hanafi': l10n.hanafiMadhab,
+            },
+            onChanged: (val) => cubit.updateMadhab(val!),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AzanSelectionPage extends StatelessWidget {
+  final SettingsState state;
+  final bool isDownloading;
+  final ValueChanged<bool> onDownloadingChanged;
+
+  const _AzanSelectionPage({
+    required this.state, 
+    required this.isDownloading,
+    required this.onDownloadingChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final cubit = context.read<SettingsCubit>();
+    final isAzanEnabled = state.salaahSettings.any((s) => s.isAzanEnabled);
+    final currentSound = state.salaahSettings.first.azanSound;
+
+    return Padding(
+      padding: const EdgeInsets.all(40.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(32.0),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryLight.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.notifications_active_rounded, size: 80.0, color: AppTheme.primaryLight),
+          ),
+          const SizedBox(height: 32.0),
+          Text(
+            l10n.azanSettings,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.amiri(
+              color: AppTheme.textPrimary,
+              fontSize: 32.0,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 40.0),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceLight,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppTheme.cardBorder),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  l10n.enableAzan,
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.w600,
+                    color: isAzanEnabled ? AppTheme.accent : AppTheme.textSecondary,
+                  ),
+                ),
+                CustomToggle(
+                  value: isAzanEnabled,
+                  onChanged: (val) => cubit.updateAllAzanEnabled(val),
+                ),
+              ],
+            ),
+          ),
+          if (isAzanEnabled) ...[
+            const SizedBox(height: 24.0),
+            _SettingsDropdownSelector(
+              label: l10n.azanVoice,
+              value: _getDisplayName(currentSound) ?? l10n.defaultVal,
+              options: {
+                l10n.defaultVal: l10n.defaultVal,
+                ...VoiceDownloadService.azanVoices.map((k, v) => MapEntry(k, k)),
+              },
+              onChanged: (val) async {
+                if (val == null || val == l10n.defaultVal) {
+                  cubit.updateAllAzanSound(null);
+                  return;
+                }
+                onDownloadingChanged(true);
+                final downloader = getIt<VoiceDownloadService>();
+                final path = await downloader.downloadAzan(val);
+                if (path != null) {
+                  cubit.updateAllAzanSound(path);
+                }
+                onDownloadingChanged(false);
+              },
+            ),
+            const SizedBox(height: 16.0),
+            TextButton.icon(
+              onPressed: isDownloading ? null : () => getIt<NotificationService>().testAzan(Salaah.fajr, currentSound, settings: state),
+              icon: const Icon(Icons.play_circle_filled_rounded),
+              label: Text(l10n.testAzan),
+              style: TextButton.styleFrom(foregroundColor: AppTheme.accent),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  String? _getDisplayName(String? path) {
+    if (path == null || path == 'default') return null;
+    final fileName = path.split(Platform.isWindows ? '\\' : '/').last;
+    // Find key in azanVoices that produces this fileName
+    for (var entry in VoiceDownloadService.azanVoices.entries) {
+      final uri = Uri.parse(entry.value);
+      if (fileName == 'voice_${uri.pathSegments.last}') {
+        return entry.key;
+      }
+    }
+    return null;
+  }
+}
+
+class _SettingsDropdown extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _SettingsDropdown({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceLight,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.cardBorder),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: AppTheme.accent),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: GoogleFonts.outfit(fontSize: 12, color: AppTheme.textSecondary),
+                  ),
+                  Text(
+                    value,
+                    style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.refresh_rounded, size: 20, color: AppTheme.textSecondary),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsDropdownSelector extends StatelessWidget {
+  final String label;
+  final String value;
+  final Map<String, String> options;
+  final ValueChanged<String?> onChanged;
+
+  const _SettingsDropdownSelector({
+    required this.label,
+    required this.value,
+    required this.options,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceLight,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.cardBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              label,
+              style: GoogleFonts.outfit(fontSize: 12, color: AppTheme.textSecondary),
+            ),
+          ),
+          DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: options.containsKey(value) ? value : options.keys.first,
+              isExpanded: true,
+              icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.accent),
+              items: options.entries.map((e) {
+                return DropdownMenuItem(
+                  value: e.key,
+                  child: Text(
+                    e.value,
+                    style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w600),
+                  ),
+                );
+              }).toList(),
+              onChanged: onChanged,
             ),
           ),
         ],

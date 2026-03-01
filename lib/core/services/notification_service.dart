@@ -6,6 +6,7 @@ import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:timezone/timezone.dart' as tz;
 import '../../features/settings/presentation/blocs/settings_state.dart';
@@ -15,15 +16,20 @@ import '../di/injection.dart';
 
 class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin;
+  PackageInfo? _packageInfo;
 
   NotificationService([FlutterLocalNotificationsPlugin? notificationsPlugin])
       : _notificationsPlugin = notificationsPlugin ?? FlutterLocalNotificationsPlugin();
 
   static const String reminderChannelId = 'prayer_reminders_v1';
+  static const String testAzanChannelId = 'azan_test_channel';
 
   Future<void> init() async {
     debugPrint('NotificationService: init starting');
     try {
+      _packageInfo = await PackageInfo.fromPlatform();
+      debugPrint('NotificationService: PackageInfo loaded: ${_packageInfo?.packageName}');
+      
       debugPrint('NotificationService: getting local timezone...');
       final rawTimeZone = await FlutterTimezone.getLocalTimezone().timeout(const Duration(seconds: 5));
       String timeZoneName = rawTimeZone.toString();
@@ -177,10 +183,10 @@ class NotificationService {
             }
             
             // The authority MUST match ${applicationId}.fileprovider in AndroidManifest.xml
-            final String authority = 'com.qada.fard.fileprovider';
+            final String authority = '${_packageInfo?.packageName ?? 'com.qada.fard'}.fileprovider';
             final String contentUri = 'content://$authority/external_azan/$fileName';
             
-            debugPrint('Using content URI for Azan: $contentUri');
+            debugPrint('Using content URI for Azan: $contentUri (Authority: $authority)');
             return contentUri;
           }
         }
@@ -197,23 +203,27 @@ class NotificationService {
     required String channelId,
     required String salaahId,
     required String sound,
+    bool isTest = false,
   }) async {
     final androidPlugin = _notificationsPlugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
     if (androidPlugin == null) return;
 
     final channels = await androidPlugin.getNotificationChannels();
+    
+    // If it's a test channel, we might want to delete it if the sound changed, 
+    // but Android doesn't allow changing sound of existing channel.
+    // For tests, we use a unique ID each time in the calling method to ensure the sound is updated.
     final bool exists = channels?.any((c) => c.id == channelId) ?? false;
-
-    if (exists) return;
+    if (exists && !isTest) return;
 
     // Create new channel with proper sound
     final String? soundUri = await _getSoundUriForChannel(sound);
     
     final androidChannel = AndroidNotificationChannel(
       channelId,
-      'Azan ${salaahId.toUpperCase()}',
-      description: 'Azan notifications for ${salaahId.toUpperCase()}',
+      isTest ? 'Azan Test' : 'Azan ${salaahId.toUpperCase()}',
+      description: isTest ? 'Temporary channel for Azan testing' : 'Azan notifications for ${salaahId.toUpperCase()}',
       importance: Importance.max,
       playSound: true,
       audioAttributesUsage: AudioAttributesUsage.alarm,
@@ -474,27 +484,28 @@ class NotificationService {
   Future<void> testAzan(Salaah salaah, String? sound, {SettingsState? settings}) async {
     final String salaahName = _getSalaahName(salaah);
     final String soundPath = sound ?? 'default';
-    final String channelId = '${_getChannelId(salaah.name, soundPath)}_test_${DateTime.now().millisecondsSinceEpoch}';
     
+    // Use a more stable but still unique-ish channel ID for testing to allow sound updates
+    // but avoid creating thousands of channels. We include a hash of the sound path.
+    final String soundHash = soundPath.hashCode.abs().toString().substring(0, 4);
+    final String channelId = 'azan_test_channel_$soundHash';
+    
+    debugPrint('Testing Azan with channel: $channelId, sound: $soundPath');
+
     await _ensureChannelExists(
       channelId: channelId,
       salaahId: salaah.name,
       sound: soundPath,
+      isTest: true,
     );
 
-    await Future.delayed(const Duration(milliseconds: 500));
+    // Small delay to ensure channel is ready
+    await Future.delayed(const Duration(milliseconds: 600));
     final String? soundUri = await _getSoundUriForChannel(soundPath);
     
     String diagnosticInfo = '';
-    if (soundUri != null && soundUri.startsWith('file:')) {
-      try {
-        final actualPath = Uri.parse(soundUri).toFilePath();
-        final file = File(actualPath);
-        if (await file.exists()) {
-          final bytes = await file.length();
-          diagnosticInfo = '\nحجم الملف: ${(bytes / 1024).toStringAsFixed(1)} KB';
-        }
-      } catch (_) {}
+    if (soundUri != null && soundUri.startsWith('content:')) {
+      diagnosticInfo = '\nتم استخدام FileProvider بنجاح';
     }
 
     AndroidNotificationSound? notificationSound;
@@ -508,7 +519,7 @@ class NotificationService {
 
     AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
       channelId,
-      'Azan Test ${salaah.name.toUpperCase()}',
+      'Azan Test',
       channelDescription: 'Temporary channel for Azan testing',
       importance: Importance.max,
       priority: Priority.high,
@@ -523,7 +534,14 @@ class NotificationService {
       id: 999,
       title: 'تجربة الأذان: $salaahName',
       body: 'هذا تنبيه تجريبي لصوت الأذان$diagnosticInfo',
-      notificationDetails: NotificationDetails(android: androidPlatformChannelSpecifics),
+      notificationDetails: NotificationDetails(
+        android: androidPlatformChannelSpecifics,
+        iOS: DarwinNotificationDetails(
+          sound: sound,
+          presentAlert: true,
+          presentSound: true,
+        ),
+      ),
     );
   }
 

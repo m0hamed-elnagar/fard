@@ -469,10 +469,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                               initialValue: () {
                                 if (selectedVoice == null) return null;
-                                for (var key in VoiceDownloadService.azanVoices.keys) {
-                                  if (selectedVoice == key) return key;
-                                  final sanitized = key.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
-                                  if (selectedVoice!.contains('${sanitized}_azan.mp3')) return key;
+                                for (var entry in VoiceDownloadService.azanVoices.entries) {
+                                  if (selectedVoice == entry.key) return entry.key;
+                                  final uri = Uri.parse(entry.value);
+                                  if (selectedVoice!.contains('voice_${uri.pathSegments.last}')) return entry.key;
+                                  
+                                  // Fallback for old naming
+                                  final sanitized = entry.key.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
+                                  if (selectedVoice!.contains('${sanitized}_azan.mp3')) return entry.key;
                                 }
                                 return null;
                               }(),
@@ -658,6 +662,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       } else {
         // Try to find the voice name from the path
         for (var entry in VoiceDownloadService.azanVoices.entries) {
+          final uri = Uri.parse(entry.value);
+          if (settings.azanSound!.contains('voice_${uri.pathSegments.last}')) {
+            voiceDisplayName = ' (${entry.key.split(' - ').first})';
+            break;
+          }
+          
+          // Fallback for old naming
           final sanitized = entry.key.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
           if (settings.azanSound!.contains('${sanitized}_azan.mp3')) {
             voiceDisplayName = ' (${entry.key.split(' - ').first})';
@@ -738,10 +749,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                               initialValue: () {
                                 if (selectedVoice == null) return null;
-                                for (var key in VoiceDownloadService.azanVoices.keys) {
-                                  if (selectedVoice == key) return key;
-                                  final sanitized = key.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
-                                  if (selectedVoice!.contains('${sanitized}_azan.mp3')) return key;
+                                for (var entry in VoiceDownloadService.azanVoices.entries) {
+                                  if (selectedVoice == entry.key) return entry.key;
+                                  final uri = Uri.parse(entry.value);
+                                  if (selectedVoice!.contains('voice_${uri.pathSegments.last}')) return entry.key;
+                                  
+                                  // Fallback for old naming
+                                  final sanitized = entry.key.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
+                                  if (selectedVoice!.contains('${sanitized}_azan.mp3')) return entry.key;
                                 }
                                 return null;
                               }(),
