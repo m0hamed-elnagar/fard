@@ -1,4 +1,4 @@
-      import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
@@ -10,7 +10,6 @@ import '../widgets/juz_list.dart';
 import '../widgets/bookmark_list.dart';
 import '../widgets/download_center_sheet.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
-// import 'surah_detail_page.dart';
 
 import 'scanned_mushaf_reader_page.dart';
 
@@ -25,13 +24,6 @@ class _QuranPageState extends State<QuranPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   bool _isSearching = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // Use the bloc from DI if available, or create it here.
-    // In MainNavigationScreen we will provide it if needed, but here it's fine.
-  }
 
   @override
   void dispose() {
@@ -82,7 +74,7 @@ class _QuranPageState extends State<QuranPage> {
           actions: [
             IconButton(
               icon: const Icon(Icons.download_for_offline_outlined),
-              tooltip: 'مركز التحميل',
+              tooltip: l10n.downloadCenterBtn,
               onPressed: () {
                 showModalBottomSheet(
                   context: context,
@@ -94,7 +86,7 @@ class _QuranPageState extends State<QuranPage> {
             ),
             IconButton(
               icon: const Icon(Icons.photo_library_outlined),
-              tooltip: 'المصحف المصور',
+              tooltip: l10n.scannedMushaf,
               onPressed: () => Navigator.push(
                 context,
                 ScannedMushafReaderPage.route(),
@@ -119,10 +111,10 @@ class _QuranPageState extends State<QuranPage> {
             indicatorSize: TabBarIndicatorSize.tab,
             indicatorWeight: 3,
             labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14),
-            tabs: const [
-              Tab(text: 'السور'),
-              Tab(text: 'الأجزاء'),
-              Tab(text: 'الإشارات'),
+            tabs: [
+              Tab(text: l10n.surahsTab),
+              Tab(text: l10n.juzTab),
+              Tab(text: l10n.bookmarksTab),
             ],
           ),
         ),
@@ -306,6 +298,7 @@ class _ContinueReadingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -335,7 +328,7 @@ class _ContinueReadingCard extends StatelessWidget {
                       const Icon(Icons.menu_book, color: Colors.white, size: 18),
                       const SizedBox(width: 8),
                       Text(
-                        'متابعة القراءة',
+                        l10n.continueReading,
                         style: GoogleFonts.amiri(
                           color: Colors.white.withValues(alpha: 0.9),
                           fontWeight: FontWeight.w500,
@@ -355,7 +348,7 @@ class _ContinueReadingCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'الآية رقم: ${ayahNumber.toArabicIndic()}',
+                    l10n.ayahNumberWithVal(ayahNumber.toArabicIndic()),
                     style: GoogleFonts.amiri(
                       color: Colors.white.withValues(alpha: 0.8),
                     ),

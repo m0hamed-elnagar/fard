@@ -301,9 +301,16 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   Future<void> _updateReminders() async {
-    final azkar = await _azkarRepository.getAllAzkar();
-    await _notificationService.scheduleAzkarReminders(settings: state, allAzkar: azkar);
-    await _notificationService.schedulePrayerNotifications(settings: state);
+    // Run after a very short delay and in background to avoid blocking the main thread during UI transition
+    Future.delayed(const Duration(milliseconds: 50), () async {
+      try {
+        final azkar = await _azkarRepository.getAllAzkar();
+        await _notificationService.scheduleAzkarReminders(settings: state, allAzkar: azkar);
+        await _notificationService.schedulePrayerNotifications(settings: state);
+      } catch (e) {
+        debugPrint('Error updating reminders in background: $e');
+      }
+    });
   }
 
   Future<void> initReminders() async {

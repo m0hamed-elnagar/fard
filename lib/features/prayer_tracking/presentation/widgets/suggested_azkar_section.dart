@@ -174,11 +174,7 @@ class SuggestedAzkarSection extends StatelessWidget {
                                 context: context,
                                 builder: (context) => AlertDialog(
                                   title: Text(l10n.resetItem, style: GoogleFonts.amiri()),
-                                  content: Text(
-                                    l10n.localeName == 'ar'
-                                        ? 'هل تريد إعادة تعيين هذا القسم؟'
-                                        : 'Do you want to reset this section?',
-                                  ),
+                                  content: Text(l10n.resetSectionConfirm),
                                   actions: [
                                     TextButton(
                                       onPressed: () => Navigator.pop(context),
@@ -190,11 +186,7 @@ class SuggestedAzkarSection extends StatelessWidget {
                                         Navigator.pop(context);
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
-                                            content: Text(
-                                              l10n.localeName == 'ar'
-                                                  ? 'تم إعادة التعيين بنجاح'
-                                                  : 'Reset successful',
-                                            ),
+                                            content: Text(l10n.resetSuccessful),
                                             backgroundColor: AppTheme.primaryLight,
                                             behavior: SnackBarBehavior.floating,
                                           ),

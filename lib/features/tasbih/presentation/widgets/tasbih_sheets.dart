@@ -1,5 +1,6 @@
 import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/core/widgets/custom_toggle.dart';
 import 'package:fard/features/tasbih/presentation/bloc/tasbih_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -169,17 +170,27 @@ class TasbihSettingsSheet extends StatelessWidget {
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: AppTheme.surfaceLight,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.cardBorder),
       ),
-      child: SwitchListTile(
-        secondary: Icon(icon, color: value ? AppTheme.accent : AppTheme.textSecondary),
-        title: Text(title, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w500)),
-        value: value,
-        onChanged: onChanged,
-        activeTrackColor: AppTheme.accent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Row(
+        children: [
+          Icon(icon, color: value ? AppTheme.accent : AppTheme.textSecondary, size: 22),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              title,
+              style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+          ),
+          CustomToggle(
+            value: value,
+            onChanged: onChanged,
+          ),
+        ],
       ),
     );
   }

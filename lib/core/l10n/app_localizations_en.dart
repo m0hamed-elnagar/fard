@@ -492,4 +492,320 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get generalSettings => 'General App Settings';
+
+  @override
+  String get exactAlarmWarningTitle => 'Warning: Azan may not work accurately';
+
+  @override
+  String get exactAlarmWarningDesc =>
+      'Please enable \"Exact Alarms\" from system settings to ensure Azan works on time.';
+
+  @override
+  String get editEachPrayer => 'Edit each prayer';
+
+  @override
+  String get noRemindersSet => 'No reminders set';
+
+  @override
+  String get azanDownloadError =>
+      'Failed to download Azan voice. Ensure the site is accessible or try another voice.';
+
+  @override
+  String get testAzan => 'Test Sound';
+
+  @override
+  String get testReminder => 'Test Reminder';
+
+  @override
+  String get addReminder => 'Add Reminder';
+
+  @override
+  String get editReminder => 'Edit Reminder';
+
+  @override
+  String get category => 'Category';
+
+  @override
+  String get customTitleOptional => 'Custom Title (Optional)';
+
+  @override
+  String get time => 'Time';
+
+  @override
+  String get lowBitrate => 'Low (64k)';
+
+  @override
+  String get medBitrate => 'Med (128k)';
+
+  @override
+  String get highBitrate => 'High (192k)';
+
+  @override
+  String get defaultVal => 'Default';
+
+  @override
+  String get pagesDownloadedSuccess => 'All pages downloaded successfully';
+
+  @override
+  String get downloadMushafPages => 'Download Mushaf Pages';
+
+  @override
+  String get cacheClearedReloading => 'Cache cleared and reloading';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get textSize => 'Text Size';
+
+  @override
+  String get quranReader => 'Quran Reader';
+
+  @override
+  String get markAsLastReadSuccess => 'Marked as last read';
+
+  @override
+  String get reciter => 'Reciter';
+
+  @override
+  String errorReadingCompass(Object error) {
+    return 'Error reading compass: $error';
+  }
+
+  @override
+  String get deviceNoSensors => 'Device does not have sensors!';
+
+  @override
+  String get audioSettings => 'Audio Settings';
+
+  @override
+  String get audioQuality => 'Audio Quality';
+
+  @override
+  String get selectReciter => 'Select Reciter';
+
+  @override
+  String get scannedMushaf => 'Scanned Mushaf';
+
+  @override
+  String surahWithVal(Object name) {
+    return 'Surah $name';
+  }
+
+  @override
+  String juzWithVal(Object number) {
+    return 'Juz $number';
+  }
+
+  @override
+  String pageWithVal(Object number) {
+    return 'Page $number';
+  }
+
+  @override
+  String get lightMode => 'Light Mode';
+
+  @override
+  String get darkMode => 'Dark Mode';
+
+  @override
+  String get textMushaf => 'Text Mushaf';
+
+  @override
+  String get downloadAll => 'Download All';
+
+  @override
+  String get loadingPage => 'Loading page...';
+
+  @override
+  String pageNotAvailable(int number) {
+    return 'Page $number not available';
+  }
+
+  @override
+  String get clearCache => 'Clear Cache';
+
+  @override
+  String get startDownload => 'Start Download';
+
+  @override
+  String get downloadMushafDesc =>
+      '604 high-quality pages will be downloaded. Please ensure you are connected to the internet.';
+
+  @override
+  String get downloadCenter => 'Download Center (Offline Mode)';
+
+  @override
+  String get downloadCenterDesc =>
+      'Download Mushaf content to read and listen without an internet connection.';
+
+  @override
+  String get mushafImagesPNG => 'Scanned Mushaf (PNG)';
+
+  @override
+  String get mushafImagesDesc => '604 high-quality pages (~80 MB)';
+
+  @override
+  String get quranText => 'Quran Text';
+
+  @override
+  String get quranTextDesc => 'All Surahs and Ayahs with basic info';
+
+  @override
+  String get readerSettings => 'Reader Settings';
+
+  @override
+  String get removeFromBookmarks => 'Remove from Bookmarks';
+
+  @override
+  String get addToBookmarks => 'Add to Bookmarks';
+
+  @override
+  String get removedFromBookmarks => 'Removed from Bookmarks';
+
+  @override
+  String get addedToBookmarks => 'Added to Bookmarks';
+
+  @override
+  String get markAsLastRead => 'Mark as Last Read';
+
+  @override
+  String get tafsir => 'Tafsir';
+
+  @override
+  String get audio => 'Audio';
+
+  @override
+  String get selectTafsir => 'Select Tafsir';
+
+  @override
+  String tafsirWithVal(Object name) {
+    return 'Tafsir: $name';
+  }
+
+  @override
+  String errorLoadingTafsir(Object error) {
+    return 'Error loading Tafsir: $error';
+  }
+
+  @override
+  String get noTafsirAvailable => 'No tafsir available';
+
+  @override
+  String errorPlayingAudio(Object error) {
+    return 'Error playing audio: $error';
+  }
+
+  @override
+  String get quranRecitation => 'Quran Recitation';
+
+  @override
+  String get ayahBtn => 'Ayah';
+
+  @override
+  String get pause => 'Pause';
+
+  @override
+  String get playSurah => 'Play Surah';
+
+  @override
+  String get stop => 'Stop';
+
+  @override
+  String get compassNotSupported => 'Compass is not supported on this platform';
+
+  @override
+  String get useMobileForQibla =>
+      'Please use the mobile app for Qibla direction';
+
+  @override
+  String qiblaDirectionWithVal(Object direction) {
+    return 'Qibla Direction: $direction°';
+  }
+
+  @override
+  String get rotatePhoneForQibla => 'Rotate phone until the arrow points up';
+
+  @override
+  String get previousSurah => 'Previous Surah';
+
+  @override
+  String get nextSurah => 'Next Surah';
+
+  @override
+  String get downloadCenterBtn => 'Download Center';
+
+  @override
+  String get switchLanguage => 'Switch Language';
+
+  @override
+  String get meccan => 'Meccan';
+
+  @override
+  String get medinan => 'Medinan';
+
+  @override
+  String ayahsCount(String count) {
+    return '$count Ayahs';
+  }
+
+  @override
+  String get play => 'Play';
+
+  @override
+  String get pauseSurah => 'Pause';
+
+  @override
+  String get playSurahBtn => 'Play Surah';
+
+  @override
+  String get surahsTab => 'Surahs';
+
+  @override
+  String get juzTab => 'Juzs';
+
+  @override
+  String get bookmarksTab => 'Bookmarks';
+
+  @override
+  String get continueReading => 'Continue Reading';
+
+  @override
+  String ayahNumberWithVal(Object number) {
+    return 'Ayah Number: $number';
+  }
+
+  @override
+  String get useAddQadaToNewPrayers =>
+      'Use \"Add Qada\" at the top to add new missed prayers';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get resetSectionConfirm => 'Do you want to reset this section?';
+
+  @override
+  String get resetSuccessful => 'Reset successful';
+
+  @override
+  String get resetAzkarProgressConfirm =>
+      'Are you sure you want to reset all azkar progress?';
+
+  @override
+  String get addAlarm => 'Add Alarm';
+
+  @override
+  String get title => 'Title';
+
+  @override
+  String get alarmAdded => 'Alarm added';
+
+  @override
+  String get readyToPlay => 'Ready to play';
+
+  @override
+  String surahWithAyah(Object ayah, Object surah) {
+    return 'Surah $surah, Ayah $ayah';
+  }
 }

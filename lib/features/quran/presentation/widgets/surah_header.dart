@@ -6,6 +6,7 @@ import 'package:fard/features/audio/domain/repositories/audio_player_service.dar
 import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/extensions/number_extension.dart';
+import 'package:fard/core/l10n/app_localizations.dart';
 
 class SurahHeader extends StatelessWidget {
   final Surah surah;
@@ -21,6 +22,7 @@ class SurahHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
@@ -40,7 +42,7 @@ class SurahHeader extends StatelessWidget {
                   // Arabic RTL: Next is Right. DO NOT CHANGE.
                   icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
                   onPressed: onPrevious,
-                  tooltip: 'السورة السابقة',
+                  tooltip: l10n.previousSurah,
                 )
               else
                 const SizedBox(width: 48),
@@ -62,7 +64,7 @@ class SurahHeader extends StatelessWidget {
                   // Arabic RTL: Previous is Left. DO NOT CHANGE.
                   icon: const Icon(Icons.arrow_forward_ios_rounded, size: 20),
                   onPressed: onNext,
-                  tooltip: 'السورة التالية',
+                  tooltip: l10n.nextSurah,
                 )
               else
                 const SizedBox(width: 48),
@@ -74,12 +76,12 @@ class SurahHeader extends StatelessWidget {
             children: [
               _InfoChip(
                 icon: Icons.place_outlined,
-                label: surah.revelationType == 'Meccan' ? 'مكية' : 'مدنية',
+                label: surah.revelationType == 'Meccan' ? l10n.meccan : l10n.medinan,
               ),
               const SizedBox(width: 12),
               _InfoChip(
                 icon: Icons.format_list_numbered,
-                label: '${surah.numberOfAyahs.toArabicIndic()} آية',
+                label: l10n.ayahsCount(surah.numberOfAyahs.toArabicIndic()),
               ),
             ],
           ),
@@ -113,7 +115,7 @@ class SurahHeader extends StatelessWidget {
                     icon: isLoading && isThisSurah
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                       : Icon(isPlaying && isThisSurah ? Icons.pause_rounded : Icons.play_arrow_rounded),
-                    label: Text(isPlaying && isThisSurah ? 'إيقاف' : 'تشغيل السورة'),
+                    label: Text(isPlaying && isThisSurah ? l10n.pauseSurah : l10n.playSurahBtn),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
@@ -122,7 +124,7 @@ class SurahHeader extends StatelessWidget {
                   ActionChip(
                     avatar: const Icon(Icons.person_outline, size: 18),
                     label: Text(
-                      state.currentReciter?.name.split(' ').first ?? 'القاريء'
+                      state.currentReciter?.name.split(' ').first ?? l10n.reciter
                     ),
                     onPressed: () => _showReciterSelector(context),
                   ),

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/widgets/custom_toggle.dart';
 import 'package:fard/features/azkar/presentation/screens/main_navigation_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -69,7 +70,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             child: IconButton(
               onPressed: () => context.read<SettingsCubit>().toggleLocale(),
               icon: const Icon(Icons.language_rounded, color: AppTheme.accent),
-              tooltip: 'Switch Language / تغيير اللغة',
+              tooltip: l10n.switchLanguage,
             ),
           ),
           Positioned(
@@ -183,22 +184,27 @@ class _QadaSelectionPage extends StatelessWidget {
           ),
           const SizedBox(height: 40.0),
           Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               color: AppTheme.surfaceLight,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppTheme.cardBorder),
             ),
-            child: SwitchListTile(
-              title: Text(
-                isEnabled ? l10n.enableQada : l10n.disableQada,
-                style: GoogleFonts.outfit(
-                  fontWeight: FontWeight.w600,
-                  color: isEnabled ? AppTheme.accent : AppTheme.textSecondary,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  isEnabled ? l10n.enableQada : l10n.disableQada,
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.w600,
+                    color: isEnabled ? AppTheme.accent : AppTheme.textSecondary,
+                  ),
                 ),
-              ),
-              value: isEnabled,
-              onChanged: onChanged,
-              activeThumbColor: AppTheme.accent,
+                CustomToggle(
+                  value: isEnabled,
+                  onChanged: onChanged,
+                ),
+              ],
             ),
           ),
         ],

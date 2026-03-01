@@ -98,11 +98,7 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                   context: context,
                   builder: (context) => AlertDialog(
                     title: Text(l10n.resetAllProgress, style: GoogleFonts.amiri()),
-                    content: Text(
-                      l10n.localeName == 'ar' 
-                        ? 'هل أنت متأكد من إعادة تعيين جميع تقدم الأذكار؟'
-                        : 'Are you sure you want to reset all azkar progress?',
-                    ),
+                    content: Text(l10n.resetAzkarProgressConfirm),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context, false),
@@ -284,21 +280,21 @@ void _showAddReminderDialog(BuildContext context, String category) {
         builder: (context, setDialogState) {
           return AlertDialog(
             title: Text(
-              l10n.localeName == 'ar' ? 'إضافة تنبيه' : 'Add Alarm',
+              l10n.addAlarm,
               style: GoogleFonts.amiri(),
             ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
-                  title: Text(l10n.localeName == 'ar' ? 'الفئة' : 'Category'),
+                  title: Text(l10n.category),
                   subtitle: Text(category, style: const TextStyle(fontWeight: FontWeight.bold)),
                   contentPadding: EdgeInsets.zero,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   decoration: InputDecoration(
-                    labelText: l10n.localeName == 'ar' ? 'العنوان' : 'Title',
+                    labelText: l10n.title,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   initialValue: customTitle,
@@ -307,7 +303,7 @@ void _showAddReminderDialog(BuildContext context, String category) {
                 const SizedBox(height: 16),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: Text(l10n.localeName == 'ar' ? 'الوقت' : 'Time'),
+                  title: Text(l10n.time),
                   trailing: InkWell(
                     onTap: () async {
                       final time = await _selectTime(context, selectedTime);
@@ -349,7 +345,7 @@ void _showAddReminderDialog(BuildContext context, String category) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(l10n.localeName == 'ar' ? 'تمت إضافة التنبيه' : 'Alarm added'),
+                      content: Text(l10n.alarmAdded),
                       backgroundColor: AppTheme.accent,
                     ),
                   );
@@ -428,14 +424,14 @@ class _CategoryCard extends StatelessWidget {
                   onPressed: () => _showAddReminderDialog(context, category),
                   icon: const Icon(Icons.alarm_add_rounded, size: 16, color: AppTheme.accent),
                   label: Text(
-                    l10n.localeName == 'ar' ? 'إضافة تنبيه' : 'Add Alarm',
+                    l10n.addAlarm,
                     style: const TextStyle(fontSize: 12, color: AppTheme.accent),
                   ),
                 ),
               ],
             ),
             trailing: Icon(
-              Icons.arrow_forward_ios, 
+              Icons.arrow_forward_ios,
               size: 16,
               color: isRecommended ? AppTheme.accent : null,
             ),

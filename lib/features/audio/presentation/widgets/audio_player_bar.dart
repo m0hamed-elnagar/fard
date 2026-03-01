@@ -2,12 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
+import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/core/extensions/number_extension.dart';
+import 'package:quran/quran.dart' as quran;
 
 class AudioPlayerBar extends StatelessWidget {
   const AudioPlayerBar({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isArabic = l10n.localeName == 'ar';
+
     return BlocBuilder<AudioBloc, AudioState>(
       builder: (context, state) {
         if (!state.isBannerVisible) {
@@ -88,7 +94,9 @@ class AudioPlayerBar extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              state.currentReciter?.name ?? 'Select Reciter',
+                              state.currentReciter != null
+                                  ? (isArabic ? state.currentReciter!.name : state.currentReciter!.englishName)
+                                  : l10n.selectReciter,
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 11,
@@ -98,8 +106,11 @@ class AudioPlayerBar extends StatelessWidget {
                             ),
                             Text(
                               state.currentSurah != null && state.currentAyah != null
-                                  ? 'Surah ${state.currentSurah}, Ayah ${state.currentAyah}'
-                                  : 'Ready to play',
+                                  ? l10n.surahWithAyah(
+                                      isArabic ? quran.getSurahNameArabic(state.currentSurah!) : quran.getSurahName(state.currentSurah!),
+                                      isArabic ? state.currentAyah!.toArabicIndic() : state.currentAyah!.toString()
+                                    )
+                                  : l10n.readyToPlay,
                               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 fontSize: 9,
@@ -124,7 +135,7 @@ class AudioPlayerBar extends StatelessWidget {
                           constraints: const BoxConstraints(),
                           // In Arabic RTL, Next is to the Left. skip_previous icon points Left.
                           icon: const Icon(Icons.skip_next_rounded),
-                          onPressed: () => context.read<AudioBloc>().add(AudioEvent.skipToNext()),
+                          onPressed: () => context.read<AudioBloc>().add(AudioEvent.skipToPrevious()),
                         ),
                         const SizedBox(width: 4),
                         // Play/Pause
@@ -156,7 +167,7 @@ class AudioPlayerBar extends StatelessWidget {
                           constraints: const BoxConstraints(),
                           // In Arabic RTL, Previous is to the Right. skip_next icon points Right.
                           icon: const Icon(Icons.skip_previous_rounded),
-                          onPressed: () => context.read<AudioBloc>().add(AudioEvent.skipToPrevious()),
+                          onPressed: () => context.read<AudioBloc>().add(AudioEvent.skipToNext()),
                         ),
                       ],
                     ),
@@ -201,7 +212,7 @@ class AudioPlayerBar extends StatelessWidget {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          state.lastErrorMessage ?? state.error ?? "Error",
+                          state.lastErrorMessage ?? state.error ?? l10n.errorOccurred,
                           style: const TextStyle(color: Colors.red, fontSize: 9),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

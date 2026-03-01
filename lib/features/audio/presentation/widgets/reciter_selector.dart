@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
 
@@ -10,6 +11,7 @@ class ReciterSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return BlocBuilder<AudioBloc, AudioState>(
       builder: (context, state) {
         return Container(
@@ -37,7 +39,7 @@ class ReciterSelector extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Audio Settings',
+                      l10n.audioSettings,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     IconButton(
@@ -55,23 +57,23 @@ class ReciterSelector extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Audio Quality',
+                      l10n.audioQuality,
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
                     const SizedBox(height: 8),
                     SegmentedButton<AudioQuality>(
-                      segments: const [
+                      segments: [
                         ButtonSegment(
                           value: AudioQuality.low64,
-                          label: Text('Low (64k)'),
+                          label: Text(l10n.lowBitrate),
                         ),
                         ButtonSegment(
                           value: AudioQuality.medium128,
-                          label: Text('Med (128k)'),
+                          label: Text(l10n.medBitrate),
                         ),
                         ButtonSegment(
                           value: AudioQuality.high192,
-                          label: Text('High (192k)'),
+                          label: Text(l10n.highBitrate),
                         ),
                       ],
                       selected: {state.quality},
@@ -91,7 +93,7 @@ class ReciterSelector extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Text(
-                  'Select Reciter',
+                  l10n.selectReciter,
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
               ),
@@ -134,6 +136,8 @@ class ReciterSelector extends StatelessWidget {
                     final isSelected = state.currentReciter?.identifier == 
                                        reciter.identifier;
                     
+                    final isArabic = l10n.localeName == 'ar';
+                    
                     return ListTile(
                       leading: CircleAvatar(
                         backgroundColor: isSelected 
@@ -148,8 +152,8 @@ class ReciterSelector extends StatelessWidget {
                           ),
                         ),
                       ),
-                      title: Text(reciter.name),
-                      subtitle: Text(reciter.englishName),
+                      title: Text(isArabic ? reciter.name : reciter.englishName),
+                      subtitle: Text(isArabic ? reciter.englishName : reciter.name),
                       trailing: isSelected 
                           ? Icon(Icons.check_circle, 
                                 color: Theme.of(context).colorScheme.primary)
@@ -182,6 +186,9 @@ class _PopularReciterCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isArabic = l10n.localeName == 'ar';
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -204,7 +211,9 @@ class _PopularReciterCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              reciter.englishName.split(' ').last,
+              isArabic 
+                ? reciter.name.split(' ').last 
+                : reciter.englishName.split(' ').last,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,

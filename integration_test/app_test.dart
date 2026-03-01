@@ -59,7 +59,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // Toggle language switch (Arabic -> English)
-      await tester.tap(find.byType(Switch).first, warnIfMissed: false);
+      // Open dropdown
+      await tester.tap(find.byType(DropdownButton<String>).first);
+      await tester.pumpAndSettle();
+      
+      // Select English
+      await tester.tap(find.text('English').last);
       await tester.pumpAndSettle();
       await tester.pump(const Duration(seconds: 1));
 

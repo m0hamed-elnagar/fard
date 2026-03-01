@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/mushaf_download_service.dart';
+import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -46,9 +47,6 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
   Future<void> _checkTextProgress() async {
     final result = await _quranRepository.getSurahs();
     if (result.isSuccess) {
-      // We don't want to block the UI too long, but let's check basic cache
-      // Actually, since we have the repo, we can check just a few or use a stream
-      // Let's just set initial based on what we can find quickly
       if (mounted) {
         setState(() {
           _errorMessage = null;
@@ -97,6 +95,7 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
@@ -119,7 +118,7 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
           ),
           const SizedBox(height: 24),
           Text(
-            'مركز التحميل (للعمل بدون إنترنت)',
+            l10n.downloadCenter,
             style: GoogleFonts.amiri(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -128,10 +127,10 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
-          const Text(
-            'حمل محتوى المصحف لتتمكن من القراءة والاستماع دون الحاجة للاتصال بالإنترنت.',
+          Text(
+            l10n.downloadCenterDesc,
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey),
           ),
           if (_errorMessage != null) ...[
             const SizedBox(height: 16),
@@ -151,8 +150,8 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
           const SizedBox(height: 32),
           
           _DownloadItem(
-            title: 'المصحف المصور (PNG)',
-            subtitle: '604 صفحة عالية الجودة (حوالي 80 ميجابايت)',
+            title: l10n.mushafImagesPNG,
+            subtitle: l10n.mushafImagesDesc,
             progress: _mushafProgress,
             isDownloading: _isMushafDownloading,
             onDownload: _startMushafDownload,
@@ -161,8 +160,8 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
           const Divider(height: 48),
           
           _DownloadItem(
-            title: 'نصوص القرآن الكريم',
-            subtitle: 'جميع السور والآيات مع المعلومات الأساسية',
+            title: l10n.quranText,
+            subtitle: l10n.quranTextDesc,
             progress: _textProgress,
             isDownloading: _isTextDownloading,
             onDownload: _startTextDownload,
@@ -176,7 +175,7 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('إغلاق', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+            child: Text(l10n.close, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
           ),
           const SizedBox(height: 16),
         ],

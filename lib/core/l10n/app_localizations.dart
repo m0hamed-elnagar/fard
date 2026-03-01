@@ -1009,6 +1009,576 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'General App Settings'**
   String get generalSettings;
+
+  /// No description provided for @exactAlarmWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning: Azan may not work accurately'**
+  String get exactAlarmWarningTitle;
+
+  /// No description provided for @exactAlarmWarningDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enable \"Exact Alarms\" from system settings to ensure Azan works on time.'**
+  String get exactAlarmWarningDesc;
+
+  /// No description provided for @editEachPrayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit each prayer'**
+  String get editEachPrayer;
+
+  /// No description provided for @noRemindersSet.
+  ///
+  /// In en, this message translates to:
+  /// **'No reminders set'**
+  String get noRemindersSet;
+
+  /// No description provided for @azanDownloadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to download Azan voice. Ensure the site is accessible or try another voice.'**
+  String get azanDownloadError;
+
+  /// No description provided for @testAzan.
+  ///
+  /// In en, this message translates to:
+  /// **'Test Sound'**
+  String get testAzan;
+
+  /// No description provided for @testReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Test Reminder'**
+  String get testReminder;
+
+  /// No description provided for @addReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Reminder'**
+  String get addReminder;
+
+  /// No description provided for @editReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Reminder'**
+  String get editReminder;
+
+  /// No description provided for @category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get category;
+
+  /// No description provided for @customTitleOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Title (Optional)'**
+  String get customTitleOptional;
+
+  /// No description provided for @time.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get time;
+
+  /// No description provided for @lowBitrate.
+  ///
+  /// In en, this message translates to:
+  /// **'Low (64k)'**
+  String get lowBitrate;
+
+  /// No description provided for @medBitrate.
+  ///
+  /// In en, this message translates to:
+  /// **'Med (128k)'**
+  String get medBitrate;
+
+  /// No description provided for @highBitrate.
+  ///
+  /// In en, this message translates to:
+  /// **'High (192k)'**
+  String get highBitrate;
+
+  /// No description provided for @defaultVal.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get defaultVal;
+
+  /// No description provided for @pagesDownloadedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'All pages downloaded successfully'**
+  String get pagesDownloadedSuccess;
+
+  /// No description provided for @downloadMushafPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Mushaf Pages'**
+  String get downloadMushafPages;
+
+  /// No description provided for @cacheClearedReloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Cache cleared and reloading'**
+  String get cacheClearedReloading;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @textSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Text Size'**
+  String get textSize;
+
+  /// No description provided for @quranReader.
+  ///
+  /// In en, this message translates to:
+  /// **'Quran Reader'**
+  String get quranReader;
+
+  /// No description provided for @markAsLastReadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked as last read'**
+  String get markAsLastReadSuccess;
+
+  /// No description provided for @reciter.
+  ///
+  /// In en, this message translates to:
+  /// **'Reciter'**
+  String get reciter;
+
+  /// No description provided for @errorReadingCompass.
+  ///
+  /// In en, this message translates to:
+  /// **'Error reading compass: {error}'**
+  String errorReadingCompass(Object error);
+
+  /// No description provided for @deviceNoSensors.
+  ///
+  /// In en, this message translates to:
+  /// **'Device does not have sensors!'**
+  String get deviceNoSensors;
+
+  /// No description provided for @audioSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio Settings'**
+  String get audioSettings;
+
+  /// No description provided for @audioQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio Quality'**
+  String get audioQuality;
+
+  /// No description provided for @selectReciter.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Reciter'**
+  String get selectReciter;
+
+  /// No description provided for @scannedMushaf.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanned Mushaf'**
+  String get scannedMushaf;
+
+  /// No description provided for @surahWithVal.
+  ///
+  /// In en, this message translates to:
+  /// **'Surah {name}'**
+  String surahWithVal(Object name);
+
+  /// No description provided for @juzWithVal.
+  ///
+  /// In en, this message translates to:
+  /// **'Juz {number}'**
+  String juzWithVal(Object number);
+
+  /// No description provided for @pageWithVal.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {number}'**
+  String pageWithVal(Object number);
+
+  /// No description provided for @lightMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Light Mode'**
+  String get lightMode;
+
+  /// No description provided for @darkMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark Mode'**
+  String get darkMode;
+
+  /// No description provided for @textMushaf.
+  ///
+  /// In en, this message translates to:
+  /// **'Text Mushaf'**
+  String get textMushaf;
+
+  /// No description provided for @downloadAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Download All'**
+  String get downloadAll;
+
+  /// No description provided for @loadingPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading page...'**
+  String get loadingPage;
+
+  /// No description provided for @pageNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {number} not available'**
+  String pageNotAvailable(int number);
+
+  /// No description provided for @clearCache.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Cache'**
+  String get clearCache;
+
+  /// No description provided for @startDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Download'**
+  String get startDownload;
+
+  /// No description provided for @downloadMushafDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'604 high-quality pages will be downloaded. Please ensure you are connected to the internet.'**
+  String get downloadMushafDesc;
+
+  /// No description provided for @downloadCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Center (Offline Mode)'**
+  String get downloadCenter;
+
+  /// No description provided for @downloadCenterDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Mushaf content to read and listen without an internet connection.'**
+  String get downloadCenterDesc;
+
+  /// No description provided for @mushafImagesPNG.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanned Mushaf (PNG)'**
+  String get mushafImagesPNG;
+
+  /// No description provided for @mushafImagesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'604 high-quality pages (~80 MB)'**
+  String get mushafImagesDesc;
+
+  /// No description provided for @quranText.
+  ///
+  /// In en, this message translates to:
+  /// **'Quran Text'**
+  String get quranText;
+
+  /// No description provided for @quranTextDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'All Surahs and Ayahs with basic info'**
+  String get quranTextDesc;
+
+  /// No description provided for @readerSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Reader Settings'**
+  String get readerSettings;
+
+  /// No description provided for @removeFromBookmarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from Bookmarks'**
+  String get removeFromBookmarks;
+
+  /// No description provided for @addToBookmarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Bookmarks'**
+  String get addToBookmarks;
+
+  /// No description provided for @removedFromBookmarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from Bookmarks'**
+  String get removedFromBookmarks;
+
+  /// No description provided for @addedToBookmarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to Bookmarks'**
+  String get addedToBookmarks;
+
+  /// No description provided for @markAsLastRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Last Read'**
+  String get markAsLastRead;
+
+  /// No description provided for @tafsir.
+  ///
+  /// In en, this message translates to:
+  /// **'Tafsir'**
+  String get tafsir;
+
+  /// No description provided for @audio.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio'**
+  String get audio;
+
+  /// No description provided for @selectTafsir.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Tafsir'**
+  String get selectTafsir;
+
+  /// No description provided for @tafsirWithVal.
+  ///
+  /// In en, this message translates to:
+  /// **'Tafsir: {name}'**
+  String tafsirWithVal(Object name);
+
+  /// No description provided for @errorLoadingTafsir.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading Tafsir: {error}'**
+  String errorLoadingTafsir(Object error);
+
+  /// No description provided for @noTafsirAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No tafsir available'**
+  String get noTafsirAvailable;
+
+  /// No description provided for @errorPlayingAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Error playing audio: {error}'**
+  String errorPlayingAudio(Object error);
+
+  /// No description provided for @quranRecitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Quran Recitation'**
+  String get quranRecitation;
+
+  /// No description provided for @ayahBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah'**
+  String get ayahBtn;
+
+  /// No description provided for @pause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get pause;
+
+  /// No description provided for @playSurah.
+  ///
+  /// In en, this message translates to:
+  /// **'Play Surah'**
+  String get playSurah;
+
+  /// No description provided for @stop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get stop;
+
+  /// No description provided for @compassNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Compass is not supported on this platform'**
+  String get compassNotSupported;
+
+  /// No description provided for @useMobileForQibla.
+  ///
+  /// In en, this message translates to:
+  /// **'Please use the mobile app for Qibla direction'**
+  String get useMobileForQibla;
+
+  /// No description provided for @qiblaDirectionWithVal.
+  ///
+  /// In en, this message translates to:
+  /// **'Qibla Direction: {direction}°'**
+  String qiblaDirectionWithVal(Object direction);
+
+  /// No description provided for @rotatePhoneForQibla.
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate phone until the arrow points up'**
+  String get rotatePhoneForQibla;
+
+  /// No description provided for @previousSurah.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Surah'**
+  String get previousSurah;
+
+  /// No description provided for @nextSurah.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Surah'**
+  String get nextSurah;
+
+  /// No description provided for @downloadCenterBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Center'**
+  String get downloadCenterBtn;
+
+  /// No description provided for @switchLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch Language'**
+  String get switchLanguage;
+
+  /// No description provided for @meccan.
+  ///
+  /// In en, this message translates to:
+  /// **'Meccan'**
+  String get meccan;
+
+  /// No description provided for @medinan.
+  ///
+  /// In en, this message translates to:
+  /// **'Medinan'**
+  String get medinan;
+
+  /// No description provided for @ayahsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Ayahs'**
+  String ayahsCount(String count);
+
+  /// No description provided for @play.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get play;
+
+  /// No description provided for @pauseSurah.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get pauseSurah;
+
+  /// No description provided for @playSurahBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Play Surah'**
+  String get playSurahBtn;
+
+  /// No description provided for @surahsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Surahs'**
+  String get surahsTab;
+
+  /// No description provided for @juzTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Juzs'**
+  String get juzTab;
+
+  /// No description provided for @bookmarksTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmarks'**
+  String get bookmarksTab;
+
+  /// No description provided for @continueReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Reading'**
+  String get continueReading;
+
+  /// No description provided for @ayahNumberWithVal.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah Number: {number}'**
+  String ayahNumberWithVal(Object number);
+
+  /// No description provided for @useAddQadaToNewPrayers.
+  ///
+  /// In en, this message translates to:
+  /// **'Use \"Add Qada\" at the top to add new missed prayers'**
+  String get useAddQadaToNewPrayers;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @resetSectionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to reset this section?'**
+  String get resetSectionConfirm;
+
+  /// No description provided for @resetSuccessful.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset successful'**
+  String get resetSuccessful;
+
+  /// No description provided for @resetAzkarProgressConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to reset all azkar progress?'**
+  String get resetAzkarProgressConfirm;
+
+  /// No description provided for @addAlarm.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Alarm'**
+  String get addAlarm;
+
+  /// No description provided for @title.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get title;
+
+  /// No description provided for @alarmAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Alarm added'**
+  String get alarmAdded;
+
+  /// No description provided for @readyToPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to play'**
+  String get readyToPlay;
+
+  /// No description provided for @surahWithAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Surah {surah}, Ayah {ayah}'**
+  String surahWithAyah(Object ayah, Object surah);
 }
 
 class _AppLocalizationsDelegate

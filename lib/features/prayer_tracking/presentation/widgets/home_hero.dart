@@ -1,5 +1,7 @@
+import 'dart:math' as math;
 import 'package:fard/core/extensions/hijri_extension.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
@@ -41,15 +43,15 @@ class HomeHero extends StatelessWidget {
       color: AppTheme.background,
       child: Stack(
         children: [
-          // 1. Authentic Islamic Background with Dome & Minarets - Now fills the stack
+          // 1. Authentic Islamic Background with Dome & Minarets
           Positioned.fill(
             child: ClipPath(
               clipper: IslamicMosqueClipper(),
               child: Container(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                     colors: [
                       Color(0xFF064E3B), // Emerald Green Dark
                       Color(0xFF065F46), // Emerald Green Medium
@@ -58,16 +60,16 @@ class HomeHero extends StatelessWidget {
                   ),
                 ),
                 child: Opacity(
-                  opacity: 0.05,
+                  opacity: 0.08,
                   child: CustomPaint(
-                    painter: GeometricPatternPainter(),
+                    painter: IslamicGeometricPatternPainter(),
                   ),
                 ),
               ),
             ),
           ),
           
-          // 2. Content Column - Determines the height of the stack
+          // 2. Content Column
           ConstrainedBox(
             constraints: BoxConstraints(
               minHeight: isQadaEnabled ? 460 : 360,
@@ -88,11 +90,21 @@ class HomeHero extends StatelessWidget {
                           color: Colors.white,
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black.withValues(alpha: 0.3),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
                       ),
                       _LocationChip(
                         cityName: cityName,
-                        onTap: onLocationTap,
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          onLocationTap();
+                        },
                         l10n: l10n,
                       ),
                     ],
@@ -120,9 +132,15 @@ class HomeHero extends StatelessWidget {
                     ),
                     style: GoogleFonts.outfit(
                       color: Colors.white,
-                      fontSize: 64, // Slightly reduced to help with responsiveness
+                      fontSize: 64,
                       fontWeight: FontWeight.w900,
                       letterSpacing: -2,
+                      shadows: [
+                        Shadow(
+                          color: AppTheme.accent.withValues(alpha: 0.5),
+                          blurRadius: 20,
+                        ),
+                      ],
                     ),
                   ),
                   Text(
@@ -133,7 +151,7 @@ class HomeHero extends StatelessWidget {
                       fontWeight: FontWeight.w400,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   // Actions
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -141,13 +159,19 @@ class HomeHero extends StatelessWidget {
                       _ModernActionButton(
                         icon: Icons.add_circle_outline_rounded,
                         label: l10n.add,
-                        onPressed: onAddPressed,
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          onAddPressed();
+                        },
                       ),
                       const SizedBox(width: 16),
                       _ModernActionButton(
                         icon: Icons.edit_note_rounded,
                         label: l10n.edit,
-                        onPressed: onEditPressed,
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          onEditPressed();
+                        },
                       ),
                     ],
                   ),
@@ -164,17 +188,23 @@ class HomeHero extends StatelessWidget {
                   const SizedBox(height: 10),
                 ],
 
-                // Use a flexible gap instead of Spacer to avoid forcing height
                 const SizedBox(height: 40),
                 
-                // Date & Hijri - Positioned carefully above the cards
+                // Date & Hijri
                 Container(
                   margin: EdgeInsets.only(bottom: isQadaEnabled ? 12 : 32),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white10),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -183,28 +213,28 @@ class HomeHero extends StatelessWidget {
                         DateFormat.yMMMMEEEEd(locale).format(selectedDate),
                         style: GoogleFonts.outfit(
                           color: Colors.white.withValues(alpha: 0.9),
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
+                      const SizedBox(height: 4),
                       Text(
                         hijriDate,
                         style: GoogleFonts.amiri(
                           color: AppTheme.accent,
-                          fontSize: 17,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
                 ),
-                // Bottom padding to clear the prayer cards
                 SizedBox(height: isQadaEnabled ? 90 : 20),
               ],
             ),
           ),
           
-          // 3. Prayer Cards - Floating perfectly at the bottom
+          // 3. Prayer Cards
           if (isQadaEnabled)
             Positioned(
               left: 16,
@@ -243,27 +273,28 @@ class _LocationChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: hasLocation ? Colors.white24 : AppTheme.missed.withValues(alpha: 0.4),
+            color: hasLocation ? Colors.white.withValues(alpha: 0.2) : AppTheme.missed.withValues(alpha: 0.4),
           ),
         ),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               hasLocation ? Icons.location_on_rounded : Icons.location_off_rounded,
-              size: 12,
+              size: 14,
               color: hasLocation ? AppTheme.accent : AppTheme.missed,
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 6),
             Text(
               cityName ?? l10n.locationNotSet,
               style: TextStyle(
                 color: hasLocation ? Colors.white : AppTheme.missed,
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -287,29 +318,39 @@ class _ModernActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white24),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 18, color: Colors.white),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: GoogleFonts.outfit(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
-            ),
-          ],
+            ],
+          ),
+          child: Row(
+            children: [
+              Icon(icon, size: 18, color: Colors.white),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -330,15 +371,15 @@ class _TraditionalPrayerCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return Container(
       width: (MediaQuery.of(context).size.width - 64) / 5.2,
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 14),
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppTheme.cardBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.5),
-            blurRadius: 10,
+            color: Colors.black.withValues(alpha: 0.4),
+            blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
@@ -348,7 +389,7 @@ class _TraditionalPrayerCard extends StatelessWidget {
           Text(
             salaah.localizedName(l10n),
             style: GoogleFonts.amiri(
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: FontWeight.bold,
               color: AppTheme.accent,
             ),
@@ -357,7 +398,7 @@ class _TraditionalPrayerCard extends StatelessWidget {
           Text(
             count.toString(),
             style: GoogleFonts.outfit(
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: FontWeight.w800,
               color: AppTheme.textPrimary,
             ),
@@ -375,32 +416,32 @@ class IslamicMosqueClipper extends CustomClipper<Path> {
     final w = size.width;
     final h = size.height;
     
-    // Fill from the top
     path.lineTo(w, 0);
-    
-    // Base line for the mosque silhouette at the bottom
     final baseH = h * 0.9; 
     path.lineTo(w, baseH);
 
-    // Mosque silhouette from right to left (pointing UP as notches)
     // Right Minaret
-    path.lineTo(w * 0.95, baseH);
-    path.lineTo(w * 0.95, baseH - 80);
-    path.lineTo(w * 0.92, baseH - 90); // Tip
-    path.lineTo(w * 0.89, baseH - 80);
-    path.lineTo(w * 0.89, baseH);
+    path.lineTo(w * 0.96, baseH);
+    path.quadraticBezierTo(w * 0.96, baseH - 80, w * 0.93, baseH - 95); // Pointy top
+    path.quadraticBezierTo(w * 0.90, baseH - 80, w * 0.90, baseH);
     
     // Shoulder to Dome
-    path.lineTo(w * 0.8, baseH);
-    path.quadraticBezierTo(w * 0.8, baseH - 60, w * 0.5, baseH - 100); // Dome peak
-    path.quadraticBezierTo(w * 0.2, baseH - 60, w * 0.2, baseH);
+    path.lineTo(w * 0.85, baseH);
+    path.cubicTo(
+      w * 0.80, baseH - 10, 
+      w * 0.75, baseH - 100, 
+      w * 0.5, baseH - 110
+    ); // Dome peak
+    path.cubicTo(
+      w * 0.25, baseH - 100, 
+      w * 0.20, baseH - 10, 
+      w * 0.15, baseH
+    );
 
     // Left Minaret
-    path.lineTo(w * 0.11, baseH);
-    path.lineTo(w * 0.11, baseH - 80);
-    path.lineTo(w * 0.08, baseH - 90); // Tip
-    path.lineTo(w * 0.05, baseH - 80);
-    path.lineTo(w * 0.05, baseH);
+    path.lineTo(w * 0.10, baseH);
+    path.quadraticBezierTo(w * 0.10, baseH - 80, w * 0.07, baseH - 95);
+    path.quadraticBezierTo(w * 0.04, baseH - 80, w * 0.04, baseH);
     
     path.lineTo(0, baseH);
     path.close();
@@ -411,21 +452,47 @@ class IslamicMosqueClipper extends CustomClipper<Path> {
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
 
-class GeometricPatternPainter extends CustomPainter {
+class IslamicGeometricPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white
+      ..color = Colors.white.withValues(alpha: 0.6)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.5;
 
-    const spacing = 40.0;
-    for (double x = 0; x < size.width; x += spacing) {
-      for (double y = 0; y < size.height; y += spacing) {
-        canvas.drawCircle(Offset(x, y), 5, paint);
-        canvas.drawRect(Rect.fromCenter(center: Offset(x, y), width: 10, height: 10), paint);
+    const spacing = 60.0;
+    for (double x = 0; x <= size.width + spacing; x += spacing) {
+      for (double y = 0; y <= size.height + spacing; y += spacing) {
+        _drawEightPointStar(canvas, Offset(x, y), 20, paint);
       }
     }
+  }
+
+  void _drawEightPointStar(Canvas canvas, Offset center, double radius, Paint paint) {
+    final path = Path();
+    for (int i = 0; i < 8; i++) {
+      double angle = i * math.pi / 4;
+      
+      double x = center.dx + radius * math.cos(angle);
+      double y = center.dy + radius * math.sin(angle);
+      
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+
+      // Inner point for star effect
+      double innerAngle = angle + math.pi / 8;
+      double ix = center.dx + (radius * 0.7) * math.cos(innerAngle);
+      double iy = center.dy + (radius * 0.7) * math.sin(innerAngle);
+      path.lineTo(ix, iy);
+    }
+    path.close();
+    canvas.drawPath(path, paint);
+    
+    // Draw a small circle in center
+    canvas.drawCircle(center, 2, paint);
   }
 
   @override

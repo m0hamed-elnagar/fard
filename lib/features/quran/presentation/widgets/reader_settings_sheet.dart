@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -8,6 +9,7 @@ class ReaderSettingsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return BlocBuilder<ReaderBloc, ReaderState>(
       builder: (context, state) {
         return state.maybeMap(
@@ -33,7 +35,7 @@ class ReaderSettingsSheet extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Reader Settings',
+                  l10n.readerSettings,
                   style: GoogleFonts.outfit(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -44,7 +46,7 @@ class ReaderSettingsSheet extends StatelessWidget {
                   children: [
                     const Icon(Icons.format_size, size: 20),
                     const SizedBox(width: 12),
-                    const Text('Text Size', style: TextStyle(fontWeight: FontWeight.w500)),
+                    Text(l10n.textSize, style: const TextStyle(fontWeight: FontWeight.w500)),
                     const Spacer(),
                     Text('${(s.textScale * 100).toInt()}%'),
                   ],

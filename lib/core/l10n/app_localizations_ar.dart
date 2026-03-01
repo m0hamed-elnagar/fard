@@ -490,4 +490,320 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get generalSettings => 'إعدادات التطبيق العامة';
+
+  @override
+  String get exactAlarmWarningTitle => 'تنبيه: الأذان قد لا يعمل بدقة';
+
+  @override
+  String get exactAlarmWarningDesc =>
+      'يرجى تفعيل \"تنبيهات دقيقة\" من إعدادات النظام لضمان عمل الأذان في وقته.';
+
+  @override
+  String get editEachPrayer => 'تعديل كل صلاة';
+
+  @override
+  String get noRemindersSet => 'لا توجد تذكيرات';
+
+  @override
+  String get azanDownloadError =>
+      'فشل تحميل صوت الأذان. تأكد من أن الموقع متاح أو حاول اختيار صوت آخر.';
+
+  @override
+  String get testAzan => 'تجربة الصوت';
+
+  @override
+  String get testReminder => 'تجربة التنبيه';
+
+  @override
+  String get addReminder => 'إضافة تذكير';
+
+  @override
+  String get editReminder => 'تعديل التذكير';
+
+  @override
+  String get category => 'الفئة';
+
+  @override
+  String get customTitleOptional => 'عنوان مخصص (اختياري)';
+
+  @override
+  String get time => 'الوقت';
+
+  @override
+  String get lowBitrate => 'جودة منخفضة (64k)';
+
+  @override
+  String get medBitrate => 'جودة متوسطة (128k)';
+
+  @override
+  String get highBitrate => 'جودة عالية (192k)';
+
+  @override
+  String get defaultVal => 'تلقائي';
+
+  @override
+  String get pagesDownloadedSuccess => 'تم تحميل جميع الصفحات بنجاح';
+
+  @override
+  String get downloadMushafPages => 'تحميل صفحات المصحف';
+
+  @override
+  String get cacheClearedReloading =>
+      'تم مسح التخزين المؤقت وجاري إعادة التحميل';
+
+  @override
+  String get close => 'إغلاق';
+
+  @override
+  String get textSize => 'حجم الخط';
+
+  @override
+  String get quranReader => 'قارئ القرآن';
+
+  @override
+  String get markAsLastReadSuccess => 'تم التحديد كآخر قراءة';
+
+  @override
+  String get reciter => 'القاريء';
+
+  @override
+  String errorReadingCompass(Object error) {
+    return 'خطأ في قراءة البوصلة: $error';
+  }
+
+  @override
+  String get deviceNoSensors => 'الجهاز لا يحتوي على مستشعرات!';
+
+  @override
+  String get audioSettings => 'إعدادات الصوت';
+
+  @override
+  String get audioQuality => 'جودة الصوت';
+
+  @override
+  String get selectReciter => 'اختر القارئ';
+
+  @override
+  String get scannedMushaf => 'المصحف المصور';
+
+  @override
+  String surahWithVal(Object name) {
+    return 'سورة $name';
+  }
+
+  @override
+  String juzWithVal(Object number) {
+    return 'الجزء $number';
+  }
+
+  @override
+  String pageWithVal(Object number) {
+    return 'صفحة $number';
+  }
+
+  @override
+  String get lightMode => 'الوضع الفاتح';
+
+  @override
+  String get darkMode => 'الوضع المظلم';
+
+  @override
+  String get textMushaf => 'مصحف نصي';
+
+  @override
+  String get downloadAll => 'تحميل الكل';
+
+  @override
+  String get loadingPage => 'جاري تحميل الصفحة...';
+
+  @override
+  String pageNotAvailable(int number) {
+    return 'الصفحة $number غير متوفرة';
+  }
+
+  @override
+  String get clearCache => 'مسح التخزين المؤقت';
+
+  @override
+  String get startDownload => 'بدء التحميل';
+
+  @override
+  String get downloadMushafDesc =>
+      'سيتم تحميل 604 صفحة عالية الجودة. يرجى التأكد من الاتصال بالإنترنت.';
+
+  @override
+  String get downloadCenter => 'مركز التحميل (للعمل بدون إنترنت)';
+
+  @override
+  String get downloadCenterDesc =>
+      'حمل محتوى المصحف لتتمكن من القراءة والاستماع دون الحاجة للاتصال بالإنترنت.';
+
+  @override
+  String get mushafImagesPNG => 'المصحف المصور (PNG)';
+
+  @override
+  String get mushafImagesDesc => '604 صفحة عالية الجودة (حوالي 80 ميجابايت)';
+
+  @override
+  String get quranText => 'نصوص القرآن الكريم';
+
+  @override
+  String get quranTextDesc => 'جميع السور والآيات مع المعلومات الأساسية';
+
+  @override
+  String get readerSettings => 'إعدادات القارئ';
+
+  @override
+  String get removeFromBookmarks => 'إزالة من الإشارات';
+
+  @override
+  String get addToBookmarks => 'إضافة إلى الإشارات';
+
+  @override
+  String get removedFromBookmarks => 'تمت الإزالة من الإشارات';
+
+  @override
+  String get addedToBookmarks => 'تمت الإضافة إلى الإشارات';
+
+  @override
+  String get markAsLastRead => 'تحديد كآخر قراءة';
+
+  @override
+  String get tafsir => 'التفسير';
+
+  @override
+  String get audio => 'صوتيات';
+
+  @override
+  String get selectTafsir => 'اختر التفسير';
+
+  @override
+  String tafsirWithVal(Object name) {
+    return 'التفسير: $name';
+  }
+
+  @override
+  String errorLoadingTafsir(Object error) {
+    return 'خطأ في تحميل التفسير: $error';
+  }
+
+  @override
+  String get noTafsirAvailable => 'لا يوجد تفسير متاح';
+
+  @override
+  String errorPlayingAudio(Object error) {
+    return 'خطأ في تشغيل الصوت: $error';
+  }
+
+  @override
+  String get quranRecitation => 'تلاوة القرآن الكريم';
+
+  @override
+  String get ayahBtn => 'الآية';
+
+  @override
+  String get pause => 'إيقاف مؤقت';
+
+  @override
+  String get playSurah => 'تشغيل السورة';
+
+  @override
+  String get stop => 'إيقاف';
+
+  @override
+  String get compassNotSupported => 'البوصلة غير مدعومة على هذا النظام';
+
+  @override
+  String get useMobileForQibla => 'يرجى استخدام تطبيق الهاتف للحصول على القبلة';
+
+  @override
+  String qiblaDirectionWithVal(Object direction) {
+    return 'اتجاه القبلة: $direction°';
+  }
+
+  @override
+  String get rotatePhoneForQibla => 'قم بتدوير الهاتف حتى يشير السهم للأعلى';
+
+  @override
+  String get previousSurah => 'السورة السابقة';
+
+  @override
+  String get nextSurah => 'السورة التالية';
+
+  @override
+  String get downloadCenterBtn => 'مركز التحميل';
+
+  @override
+  String get switchLanguage => 'تغيير اللغة';
+
+  @override
+  String get meccan => 'مكية';
+
+  @override
+  String get medinan => 'مدنية';
+
+  @override
+  String ayahsCount(String count) {
+    return '$count آية';
+  }
+
+  @override
+  String get play => 'تشغيل';
+
+  @override
+  String get pauseSurah => 'إيقاف';
+
+  @override
+  String get playSurahBtn => 'تشغيل السورة';
+
+  @override
+  String get surahsTab => 'السور';
+
+  @override
+  String get juzTab => 'الأجزاء';
+
+  @override
+  String get bookmarksTab => 'الإشارات';
+
+  @override
+  String get continueReading => 'متابعة القراءة';
+
+  @override
+  String ayahNumberWithVal(Object number) {
+    return 'الآية رقم: $number';
+  }
+
+  @override
+  String get useAddQadaToNewPrayers =>
+      'استخدم \"إضافة قضاء\" في أعلى الصفحة لإضافة صلوات جديدة';
+
+  @override
+  String get done => 'تم';
+
+  @override
+  String get resetSectionConfirm => 'هل تريد إعادة تعيين هذا القسم؟';
+
+  @override
+  String get resetSuccessful => 'تم إعادة التعيين بنجاح';
+
+  @override
+  String get resetAzkarProgressConfirm =>
+      'هل أنت متأكد من إعادة تعيين جميع تقدم الأذكار؟';
+
+  @override
+  String get addAlarm => 'إضافة تنبيه';
+
+  @override
+  String get title => 'العنوان';
+
+  @override
+  String get alarmAdded => 'تمت إضافة التنبيه';
+
+  @override
+  String get readyToPlay => 'جاهز للتشغيل';
+
+  @override
+  String surahWithAyah(Object ayah, Object surah) {
+    return 'سورة $surah، آية $ayah';
+  }
 }

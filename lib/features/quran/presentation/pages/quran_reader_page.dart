@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/core/di/injection.dart';
+import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/audio/presentation/widgets/audio_player_bar.dart';
@@ -67,6 +68,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -85,7 +87,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                 builder: (context, state) {
                   return state.maybeMap(
                     loaded: (s) => Text(s.surah.name, style: GoogleFonts.amiri()),
-                    orElse: () => const Text('Quran Reader'),
+                    orElse: () => Text(l10n.quranReader),
                   );
                 },
               ),
@@ -94,7 +96,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                   builder: (context, state) {
                     return IconButton(
                       icon: const Icon(Icons.photo_library_outlined),
-                      tooltip: 'المصحف المصور',
+                      tooltip: l10n.scannedMushaf,
                       onPressed: () {
                         int page = 1;
                         state.maybeMap(
@@ -187,7 +189,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                                        final surahNumResult = SurahNumber.create(widget.surahNumber);
                                        context.read<ReaderBloc>().add(ReaderEvent.loadSurah(surahNumber: surahNumResult.data!));
                                     },
-                                    child: const Text('Retry'),
+                                    child: Text(l10n.retry),
                                   ),
                                 ],
                               ),

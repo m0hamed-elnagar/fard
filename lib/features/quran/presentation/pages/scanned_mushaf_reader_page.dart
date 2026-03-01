@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/audio/presentation/widgets/audio_player_bar.dart';
 import 'package:fard/core/services/mushaf_download_service.dart';
@@ -81,6 +82,7 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final pageData = quran.getPageData(_currentPage);
     String surahName = '';
     int juzNumber = 0;
@@ -109,7 +111,7 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
           title: Column(
             children: [
               Text(
-                surahName.isNotEmpty ? 'سورة $surahName' : 'المصحف المصور',
+                surahName.isNotEmpty ? l10n.surahWithVal(surahName) : l10n.scannedMushaf,
                 style: GoogleFonts.amiri(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -117,7 +119,7 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
                 ),
               ),
               Text(
-                'الجزء $juzNumber - صفحة $_currentPage',
+                '${l10n.juzWithVal(juzNumber.toString())} - ${l10n.pageWithVal(_currentPage.toString())}',
                 style: GoogleFonts.amiri(
                   fontSize: 14,
                   color: Colors.white.withValues(alpha: 0.9),
@@ -131,7 +133,7 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
                 _isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
                 color: Colors.white,
               ),
-              tooltip: _isDarkMode ? 'الوضع الفاتح' : 'الوضع المظلم',
+              tooltip: _isDarkMode ? l10n.lightMode : l10n.darkMode,
               onPressed: () {
                 setState(() {
                   _isDarkMode = !_isDarkMode;
@@ -140,7 +142,7 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
             ),
             IconButton(
               icon: const Icon(Icons.text_format_rounded, color: Colors.white),
-              tooltip: 'مصحف نصي',
+              tooltip: l10n.textMushaf,
               onPressed: () {
                 if (pageData.isNotEmpty) {
                   final surahNum = pageData.first['surah'] as int;
@@ -158,7 +160,7 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
             ),
             IconButton(
               icon: const Icon(Icons.download_rounded, color: Colors.white),
-              tooltip: 'تحميل الكل',
+              tooltip: l10n.downloadAll,
               onPressed: _showDownloadAllDialog,
             ),
           ],
@@ -237,7 +239,7 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
                             : null,
                       ),
                       Text(
-                        'صفحة $_currentPage',
+                        l10n.pageWithVal(_currentPage.toString()),
                         style: GoogleFonts.amiri(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -322,6 +324,7 @@ class _MushafPageItemState extends State<_MushafPageItem> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final primaryColor = widget.isDarkMode ? AppTheme.textPrimary : const Color(0xFF2D5D40);
 
     return FutureBuilder<File?>(
@@ -335,7 +338,7 @@ class _MushafPageItemState extends State<_MushafPageItem> {
                 CircularProgressIndicator(color: primaryColor),
                 const SizedBox(height: 16),
                 Text(
-                  'جاري تحميل الصفحة...',
+                  l10n.loadingPage,
                   style: TextStyle(color: primaryColor),
                 ),
               ],
@@ -351,7 +354,7 @@ class _MushafPageItemState extends State<_MushafPageItem> {
                 const Icon(Icons.error_outline, size: 64, color: Colors.red),
                 const SizedBox(height: 16),
                 Text(
-                  'الصفحة ${widget.pageNumber} غير متوفرة',
+                  l10n.pageNotAvailable(widget.pageNumber),
                   style: TextStyle(color: primaryColor),
                 ),
                 ElevatedButton(
@@ -360,7 +363,7 @@ class _MushafPageItemState extends State<_MushafPageItem> {
                     backgroundColor: primaryColor,
                   ),
                   child: Text(
-                    'إعادة المحاولة',
+                    l10n.retry,
                     style: TextStyle(color: widget.isDarkMode ? Colors.black : Colors.white),
                   ),
                 ),
@@ -376,7 +379,7 @@ class _MushafPageItemState extends State<_MushafPageItem> {
             colorFilter: const ColorFilter.matrix([
               -0.85, 0, 0, 0, 235,
               0, -0.85, 0, 0, 235,
-              0, 0, -0.85, 0, 235,
+              0, -0.85, 0, 0, 235,
               0, 0, 0, 1, 0,
             ]),
             child: image,
@@ -415,7 +418,7 @@ class _DownloadAllDialogState extends State<_DownloadAllDialog> {
   double _progress = 0;
   bool _isDownloading = false;
 
-  void _startDownload() {
+  void _startDownload(AppLocalizations l10n) {
     setState(() {
       _isDownloading = true;
     });
@@ -427,7 +430,7 @@ class _DownloadAllDialogState extends State<_DownloadAllDialog> {
         if (progress >= 1.0) {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('تم تحميل جميع الصفحات بنجاح')),
+            SnackBar(content: Text(l10n.pagesDownloadedSuccess)),
           );
         }
       }
@@ -436,13 +439,14 @@ class _DownloadAllDialogState extends State<_DownloadAllDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('تحميل صفحات المصحف', textAlign: TextAlign.center),
+      title: Text(l10n.downloadMushafPages, textAlign: TextAlign.center),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            'سيتم تحميل 604 صفحة عالية الجودة. يرجى التأكد من الاتصال بالإنترنت.',
+          Text(
+            l10n.downloadMushafDesc,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
@@ -473,15 +477,15 @@ class _DownloadAllDialogState extends State<_DownloadAllDialog> {
                 
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('تم مسح التخزين المؤقت وجاري إعادة التحميل'),
+                  SnackBar(
+                    content: Text(l10n.cacheClearedReloading),
                   ),
                 );
               },
               icon: const Icon(Icons.delete_sweep_rounded, color: Colors.red),
-              label: const Text(
-                'مسح التخزين المؤقت',
-                style: TextStyle(color: Colors.red),
+              label: Text(
+                l10n.clearCache,
+                style: const TextStyle(color: Colors.red),
               ),
             ),
           ],
@@ -491,17 +495,17 @@ class _DownloadAllDialogState extends State<_DownloadAllDialog> {
         if (!_isDownloading)
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('إلغاء'),
+            child: Text(l10n.cancel),
           ),
         if (!_isDownloading)
           ElevatedButton(
-            onPressed: _startDownload,
+            onPressed: () => _startDownload(l10n),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF2D5D40),
             ),
-            child: const Text(
-              'بدء التحميل',
-              style: TextStyle(color: Colors.white),
+            child: Text(
+              l10n.startDownload,
+              style: const TextStyle(color: Colors.white),
             ),
           ),
       ],

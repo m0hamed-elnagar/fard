@@ -5,6 +5,7 @@ import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/features/onboarding/presentation/screens/splash_screen.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:flutter/material.dart';
@@ -72,14 +73,23 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
         BlocProvider(create: (_) => getIt<AzkarBloc>()..add(const AzkarEvent.loadCategories())),
         BlocProvider(create: (_) => getIt<AudioBloc>()),
         BlocProvider(create: (_) => getIt<QuranBloc>()..add(const QuranEvent.loadSurahs())),
+        BlocProvider(
+          create: (_) {
+            final bloc = getIt<PrayerTrackerBloc>();
+            bloc.add(const PrayerTrackerEvent.checkMissedDays());
+            bloc.add(PrayerTrackerEvent.load(DateTime.now()));
+            return bloc;
+          },
+        ),
       ],
-      child: BlocBuilder<SettingsCubit, SettingsState>(
-        builder: (context, state) {
-          return ScreenUtilInit(
-            designSize: const Size(360, 690),
-            minTextAdapt: true,
-            splitScreenMode: true,
-            builder: (context, child) {
+      child: ScreenUtilInit(
+        designSize: const Size(360, 690),
+        minTextAdapt: true,
+        splitScreenMode: true,
+        builder: (context, child) {
+          return BlocBuilder<SettingsCubit, SettingsState>(
+            buildWhen: (previous, current) => previous.locale != current.locale,
+            builder: (context, state) {
               return MaterialApp(
                 navigatorKey: getIt<GlobalKey<NavigatorState>>(),
                 locale: state.locale,
@@ -95,7 +105,14 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
                   GlobalCupertinoLocalizations.delegate,
                 ],
                 builder: (context, child) {
-                  return child!;
+                  return Localizations.override(
+                    context: context,
+                    locale: state.locale,
+                    child: Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: child!,
+                    ),
+                  );
                 },
               );
             },

@@ -38,17 +38,13 @@ class _QiblaScreenState extends State<QiblaScreen> {
               const Icon(Icons.compass_calibration_rounded, size: 64, color: AppTheme.missed),
               const SizedBox(height: 16),
               Text(
-                l10n.localeName == 'ar'
-                    ? 'البوصلة غير مدعومة على هذا النظام'
-                    : 'Compass is not supported on this platform',
+                l10n.compassNotSupported,
                 style: GoogleFonts.amiri(fontSize: 20),
               ),
               const SizedBox(height: 8),
               Text(
-                l10n.localeName == 'ar'
-                    ? 'يرجى استخدام تطبيق الهاتف للحصول على القبلة'
-                    : 'Please use the mobile app for Qibla direction',
-                style: TextStyle(color: AppTheme.textSecondary),
+                l10n.useMobileForQibla,
+                style: const TextStyle(color: AppTheme.textSecondary),
               ),
             ],
           ),
@@ -94,7 +90,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
             stream: FlutterCompass.events,
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return Center(child: Text('Error reading compass: ${snapshot.error}'));
+                return Center(child: Text(l10n.errorReadingCompass(snapshot.error.toString())));
               }
 
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -104,7 +100,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
               double? direction = snapshot.data?.heading;
 
               if (direction == null) {
-                return const Center(child: Text('Device does not have sensors!'));
+                return Center(child: Text(l10n.deviceNoSensors));
               }
 
               // Calculate the angle to rotate the compass needle
@@ -173,17 +169,13 @@ class _QiblaScreenState extends State<QiblaScreen> {
                     ),
                     const SizedBox(height: 48),
                     Text(
-                      l10n.localeName == 'ar'
-                          ? 'اتجاه القبلة: ${qiblaDirection.toStringAsFixed(1)}°'
-                          : 'Qibla Direction: ${qiblaDirection.toStringAsFixed(1)}°',
+                      l10n.qiblaDirectionWithVal(qiblaDirection.toStringAsFixed(1)),
                       style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      l10n.localeName == 'ar'
-                          ? 'قم بتدوير الهاتف حتى يشير السهم للأعلى'
-                          : 'Rotate phone until the arrow points up',
-                      style: TextStyle(color: AppTheme.textSecondary),
+                      l10n.rotatePhoneForQibla,
+                      style: const TextStyle(color: AppTheme.textSecondary),
                     ),
                   ],
                 ),

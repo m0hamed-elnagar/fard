@@ -110,7 +110,7 @@ void main() {
           .thenAnswer((_) async => http.Response('Not Found', 404));
 
       // First call fails, returns failure (or tries cache)
-      final result = await repository.getAvailableReciters();
+      await repository.getAvailableReciters();
       
       // Since cache is empty in this setup, it might return failure or empty list depending on impl
       // But getCachedReciters should ALWAYS have them
