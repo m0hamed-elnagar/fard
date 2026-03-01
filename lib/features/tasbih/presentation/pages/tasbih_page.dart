@@ -72,8 +72,12 @@ class _TasbihViewState extends State<TasbihView> {
           body: LayoutBuilder(
             builder: (context, constraints) {
               final maxHeight = constraints.maxHeight;
-              final counterSize = (maxHeight * 0.3).clamp(160.0, 280.0);
-              final buttonSize = (maxHeight * 0.12).clamp(80.0, 120.0);
+              
+              // Responsive sizes
+              final screenHeight = MediaQuery.of(context).size.height;
+              final isSmallScreen = screenHeight < 700;
+              final counterSize = isSmallScreen ? 180.0 : 240.0;
+              final buttonSize = isSmallScreen ? 80.0 : 100.0;
               
               return SingleChildScrollView(
                 controller: _scrollController,
@@ -85,6 +89,7 @@ class _TasbihViewState extends State<TasbihView> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        // Top Section: Category & Text
                         Column(
                           children: [
                             _buildCategorySelector(context, state, l10n),
@@ -99,52 +104,52 @@ class _TasbihViewState extends State<TasbihView> {
                             if (state.showCompletionDua && state.currentCompletionDua != null)
                               CompletionDuaCard(state: state)
                             else if (currentDhikr != null)
-                              GestureDetector(
-                                onVerticalDragUpdate: (details) {
-                                  _scrollController.position.jumpTo(
-                                    (_scrollController.position.pixels - details.delta.dy)
-                                        .clamp(0.0, _scrollController.position.maxScrollExtent),
-                                  );
-                                },
-                                child: DhikrDisplayCard(
-                                  arabic: currentDhikr.arabic,
-                                  transliteration: currentDhikr.transliteration,
-                                  translation: currentDhikr.translation,
-                                  showTransliteration: state.data.settings.showTransliteration,
-                                  showTranslation: state.data.settings.showTranslation,
-                                ),
+                              DhikrDisplayCard(
+                                arabic: currentDhikr.arabic,
+                                transliteration: currentDhikr.transliteration,
+                                translation: currentDhikr.translation,
+                                showTransliteration: state.data.settings.showTransliteration,
+                                showTranslation: state.data.settings.showTranslation,
                               ),
                           ],
                         ),
                         
+                        // Bottom Section: Counter & Button
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 24.0),
-                          child: Stack(
-                            alignment: Alignment.center,
+                          padding: const EdgeInsets.symmetric(vertical: 32.0),
+                          child: Column(
                             children: [
-                              CounterCircle(
-                                count: state.currentCycleCount,
-                                targetCount: state.customTasbihTarget ?? state.currentCategory.countsPerCycle,
-                                size: counterSize,
-                              ),
-                              Positioned(
-                                right: 0,
-                                top: 0,
-                                child: Material(
-                                  color: AppTheme.surfaceLight,
-                                  shape: const CircleBorder(),
-                                  child: IconButton(
-                                    icon: const Icon(Icons.edit_note_rounded, color: AppTheme.accent),
-                                    onPressed: () => _showCustomTargetDialog(context, state),
-                                    tooltip: l10n.customTasbihTarget,
+                              Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  CounterCircle(
+                                    count: state.currentCycleCount,
+                                    targetCount: state.customTasbihTarget ?? 
+                                      (state.currentCategory.sequenceMode == 'rotating' 
+                                        ? state.currentCategory.countsPerCycle 
+                                        : (currentDhikr?.targetCount ?? state.currentCategory.countsPerCycle)),
+                                    size: counterSize,
                                   ),
-                                ),
+                                  Positioned(
+                                    right: 0,
+                                    top: 0,
+                                    child: Material(
+                                      color: AppTheme.surfaceLight,
+                                      shape: const CircleBorder(),
+                                      child: IconButton(
+                                        icon: const Icon(Icons.edit_note_rounded, color: AppTheme.accent),
+                                        onPressed: () => _showCustomTargetDialog(context, state),
+                                        tooltip: l10n.customTasbihTarget,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
+                              const SizedBox(height: 32),
+                              _buildControlBar(context, state, buttonSize),
                             ],
                           ),
                         ),
-                        
-                        _buildControlBar(context, state, buttonSize),
                       ],
                     ),
                   ),
@@ -185,32 +190,29 @@ class _TasbihViewState extends State<TasbihView> {
   }
 
   Widget _buildControlBar(BuildContext context, TasbihState state, double buttonSize) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded, size: 36),
-            onPressed: () => _confirmReset(context),
-            color: AppTheme.textSecondary,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.refresh_rounded, size: 36),
+          onPressed: () => _confirmReset(context),
+          color: AppTheme.textSecondary,
+        ),
+        TasbihButton(
+          size: buttonSize,
+          onTap: () => context.read<TasbihBloc>().add(const TasbihEvent.increment()),
+        ),
+        IconButton(
+          icon: Icon(
+            state.data.settings.hapticFeedback 
+                ? Icons.vibration_rounded 
+                : Icons.phonelink_ring_rounded, 
+            size: 32,
           ),
-          TasbihButton(
-            size: buttonSize,
-            onTap: () => context.read<TasbihBloc>().add(const TasbihEvent.increment()),
-          ),
-          IconButton(
-            icon: Icon(
-              state.data.settings.hapticFeedback 
-                  ? Icons.vibration_rounded 
-                  : Icons.phonelink_ring_rounded, 
-              size: 32,
-            ),
-            onPressed: () => context.read<TasbihBloc>().add(const TasbihEvent.toggleVibration()),
-            color: state.data.settings.hapticFeedback ? AppTheme.accent : AppTheme.textSecondary,
-          ),
-        ],
-      ),
+          onPressed: () => context.read<TasbihBloc>().add(const TasbihEvent.toggleVibration()),
+          color: state.data.settings.hapticFeedback ? AppTheme.accent : AppTheme.textSecondary,
+        ),
+      ],
     );
   }
 
@@ -222,6 +224,7 @@ class _TasbihViewState extends State<TasbihView> {
       case 'yunus_dhikr': return l10n.yunus_dhikr_name;
       case 'morning_evening': return l10n.morning_evening_name;
       case 'istighfar': return l10n.istighfar_name;
+      case 'salat_ala_nabi': return 'الصلاة على النبي';
       default: return null;
     }
   }
@@ -234,6 +237,7 @@ class _TasbihViewState extends State<TasbihView> {
       case 'yunus_dhikr': return l10n.yunus_dhikr_desc;
       case 'morning_evening': return l10n.morning_evening_desc;
       case 'istighfar': return l10n.istighfar_desc;
+      case 'salat_ala_nabi': return 'الصلاة والسلام على نبينا محمد صلى الله عليه وسلم';
       default: return null;
     }
   }

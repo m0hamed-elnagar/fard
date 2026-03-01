@@ -109,17 +109,32 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
         }
       }
     } else {
+      // Individual mode - each item can have its own target count
+      final currentDhikr = state.currentCategory.items.isNotEmpty 
+          ? state.currentCategory.items[state.currentCycleIndex.clamp(0, state.currentCategory.items.length - 1)]
+          : null;
+      
       final targetCount = state.customTasbihTarget ?? 
-                           (state.currentCategory.items.isNotEmpty 
-                           ? state.currentCategory.items.first.targetCount 
-                           : 33);
+                           (currentDhikr != null ? currentDhikr.targetCount : 33);
           
       if (nextTotalCount >= targetCount) {
-        emit(state.copyWith(
-          totalCount: nextTotalCount,
-          currentCycleCount: nextTotalCount,
-          showCompletionDua: state.currentCategory.allowCompletionDua || state.currentCompletionDua != null,
-        ));
+        // Current item completed
+        final isLastItem = state.currentCycleIndex >= state.currentCategory.items.length - 1;
+        
+        if (isLastItem) {
+          emit(state.copyWith(
+            totalCount: nextTotalCount,
+            currentCycleCount: nextTotalCount,
+            showCompletionDua: state.currentCategory.allowCompletionDua || state.currentCompletionDua != null,
+          ));
+        } else {
+          // Auto-advance to next item in individual mode?
+          // For now, let's just keep the count and let user finish
+          emit(state.copyWith(
+            totalCount: nextTotalCount,
+            currentCycleCount: nextTotalCount,
+          ));
+        }
       } else {
         emit(state.copyWith(
           totalCount: nextTotalCount,

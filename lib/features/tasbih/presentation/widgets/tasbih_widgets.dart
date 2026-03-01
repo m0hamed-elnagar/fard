@@ -77,52 +77,50 @@ class DhikrDisplayCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Container(
-        constraints: const BoxConstraints(maxHeight: 220),
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        child: ScrollConfiguration(
-          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-          child: SingleChildScrollView(
-            physics: const ClampingScrollPhysics(),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  arabic,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.amiri(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.accent,
-                    height: 1.5,
-                  ),
-                ),
-                if (showTransliteration) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    transliteration,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.outfit(
-                      fontSize: 16,
-                      fontStyle: FontStyle.italic,
-                      color: AppTheme.textPrimary,
-                    ),
-                  ),
-                ],
-                if (showTranslation) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    translation,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.outfit(
-                      fontSize: 14,
-                      color: AppTheme.textSecondary,
-                    ),
-                  ),
-                ],
-              ],
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              arabic,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.amiri(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.accent,
+                height: 1.6,
+              ),
             ),
-          ),
+            if (showTransliteration) ...[
+              const SizedBox(height: 16),
+              Text(
+                transliteration,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.outfit(
+                  fontSize: 16,
+                  fontStyle: FontStyle.italic,
+                  color: AppTheme.textPrimary,
+                  height: 1.4,
+                ),
+              ),
+            ],
+            if (showTranslation) ...[
+              const SizedBox(height: 12),
+              Text(
+                translation,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.outfit(
+                  fontSize: 15,
+                  color: AppTheme.textSecondary,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

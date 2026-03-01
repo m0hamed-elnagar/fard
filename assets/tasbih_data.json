@@ -170,6 +170,8 @@
       "name": "Dhikr of Prophet Yunus",
       "description": "Supplication for relief from distress",
       "sequence_mode": "individual",
+      "counts_per_cycle": 100,
+      "completion_trigger": 100,
       "items": [
         {
           "id": "yunus_dua",
@@ -227,6 +229,8 @@
       "name": "Istighfar (Seeking Forgiveness)",
       "description": "Various forms of seeking Allah's forgiveness",
       "sequence_mode": "individual",
+      "counts_per_cycle": 100,
+      "completion_trigger": 100,
       "items": [
         {
           "id": "astaghfirullah",
@@ -244,10 +248,20 @@
           "transliteration": "Astaghfirullah al-'Adheem",
           "translation": "I seek forgiveness from Allah the Magnificent",
           "target_count": 100
-        },
+        }
+      ]
+    },
+    {
+      "id": "salat_ala_nabi",
+      "name": "الصلاة على النبي",
+      "description": "الصلاة والسلام على نبينا محمد صلى الله عليه وسلم",
+      "sequence_mode": "individual",
+      "counts_per_cycle": 100,
+      "completion_trigger": 100,
+      "items": [
         {
-          "id": "salat_ala_nabi",
-          "name": "Salat upon the Prophet",
+          "id": "salat_ala_nabi_item",
+          "name": "الصلاة على النبي",
           "arabic": "اللَّهُمَّ صَلِّ وَسَلِّمْ وَبَارِكْ على نَبِيِّنَا مُحمَّد",
           "transliteration": "Allahumma salli wa sallim wa barik 'ala nabiyyina Muhammad",
           "translation": "O Allah, send prayers, peace, and blessings upon our Prophet Muhammad",
