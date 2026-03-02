@@ -323,26 +323,12 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
           missed.remove(e.prayer);
           completed.add(e.prayer);
           qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).removeMissed();
-          // Toggle increment logic (legacy: only for real today)
-          final now = DateTime.now();
-          if (s.selectedDate.year == now.year &&
-              s.selectedDate.month == now.month &&
-              s.selectedDate.day == now.day) {
-            completedQada[e.prayer] = (completedQada[e.prayer] ?? 0) + 1;
-          }
         } else if (completed.contains(e.prayer)) {
           completed.remove(e.prayer);
           missed.add(e.prayer);
           qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).addMissed();
-          final now = DateTime.now();
-          if (s.selectedDate.year == now.year &&
-              s.selectedDate.month == now.month &&
-              s.selectedDate.day == now.day) {
-            if ((completedQada[e.prayer] ?? 0) > 0) {
-              completedQada[e.prayer] = completedQada[e.prayer]! - 1;
-            }
-          }
         } else {
+          // Case where prayer time hasn't passed yet but user wants to mark it done early
           completed.add(e.prayer);
         }
 
@@ -385,21 +371,19 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
       final completed = Set<Salaah>.from(s.completedToday);
       final completedQada = Map<Salaah, int>.from(s.completedQadaToday);
 
-      bool isUndoingDayRecovery = completed.contains(e.prayer);
-
-      if (isUndoingDayRecovery) {
-         completed.remove(e.prayer);
-         missed.add(e.prayer);
-      }
-
       final currentBudget = completedQada[e.prayer] ?? 0;
 
-      if (!isUndoingDayRecovery && currentBudget > 0) {
-        // Undo a Qada completion
+      if (currentBudget > 0) {
+        // 1. First priority: Undo an extra Qada session (e.g., Qada 2 -> Qada 1)
         qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).addMissed();
         completedQada[e.prayer] = currentBudget - 1;
+      } else if (completed.contains(e.prayer)) {
+        // 2. Second priority: Mark today's daily prayer as missed (Done -> Missed)
+        completed.remove(e.prayer);
+        missed.add(e.prayer);
+        qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).addMissed();
       } else {
-        // Manual increment
+        // 3. Last priority: Just add general manual debt
         qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).addMissed();
       }
       

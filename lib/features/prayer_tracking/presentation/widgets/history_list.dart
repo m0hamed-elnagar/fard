@@ -247,7 +247,7 @@ class HistoryList extends StatelessWidget {
                     const Spacer(),
                     if (settings.isQadaEnabled)
                     Text(
-                      '${l10n.remaining}: ${totalQada - actualMissedCount}',
+                      '${l10n.remaining}: $totalQada',
                       style: GoogleFonts.outfit(
                         color: AppTheme.textSecondary,
                         fontSize: 12.0,
