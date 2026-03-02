@@ -13,6 +13,7 @@ import 'package:fard/features/prayer_tracking/presentation/widgets/home_hero.dar
 import 'package:fard/features/prayer_tracking/presentation/widgets/salaah_tile.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/suggested_azkar_section.dart';
 import 'package:fard/features/settings/presentation/screens/settings_screen.dart';
+import 'package:fard/features/quran/presentation/widgets/werd_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -111,6 +112,10 @@ class HomeContent extends StatelessWidget {
                       );
                     },
                   ),
+                ),
+                
+                const SliverToBoxAdapter(
+                  child: WerdProgressBar(),
                 ),
                 
                 // Calendar section with subtle top padding

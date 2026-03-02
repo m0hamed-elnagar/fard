@@ -3,6 +3,7 @@ import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/features/onboarding/presentation/screens/splash_screen.dart';
+import 'package:fard/features/quran/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
@@ -73,6 +74,7 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
         BlocProvider(create: (_) => getIt<AzkarBloc>()..add(const AzkarEvent.loadCategories())),
         BlocProvider(create: (_) => getIt<AudioBloc>()),
         BlocProvider(create: (_) => getIt<QuranBloc>()..add(const QuranEvent.loadSurahs())),
+        BlocProvider(create: (_) => getIt<WerdBloc>()..add(const WerdEvent.load())),
         BlocProvider(
           create: (_) {
             final bloc = getIt<PrayerTrackerBloc>();

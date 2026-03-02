@@ -7,6 +7,7 @@ import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/core/extensions/number_extension.dart';
 import 'quran_reader_page.dart';
 import '../widgets/juz_list.dart';
+import '../widgets/hizb_list.dart';
 import '../widgets/bookmark_list.dart';
 import '../widgets/download_center_sheet.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
@@ -36,7 +37,7 @@ class _QuranPageState extends State<QuranPage> {
     final l10n = AppLocalizations.of(context)!;
     
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           leading: _isSearching
@@ -111,9 +112,11 @@ class _QuranPageState extends State<QuranPage> {
             indicatorSize: TabBarIndicatorSize.tab,
             indicatorWeight: 3,
             labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14),
+            isScrollable: true,
             tabs: [
               Tab(text: l10n.surahsTab),
               Tab(text: l10n.juzTab),
+              Tab(text: l10n.hizbTab),
               Tab(text: l10n.bookmarksTab),
             ],
           ),
@@ -273,11 +276,15 @@ class _QuranPageState extends State<QuranPage> {
                 
                 // Juz Tab
                 JuzList(searchQuery: _searchQuery),
+
+                // Hizb Tab
+                HizbList(searchQuery: _searchQuery),
                 
                 // Bookmarks Tab
                 BookmarkList(searchQuery: _searchQuery),
               ],
             );
+
           },
         ),
       ),

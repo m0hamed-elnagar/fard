@@ -37,9 +37,10 @@ class SurahHeader extends StatelessWidget {
         children: [
           Row(
             children: [
-              if (onNext != null && surah.number.value < 114)
+              // Previous Surah Button
+              if (onPrevious != null)
                 IconButton(
-                  // Arabic RTL: Next is Right. DO NOT CHANGE.
+                  // In RTL (Arabic), 'Back' points Right.
                   icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
                   onPressed: onPrevious,
                   tooltip: l10n.previousSurah,
@@ -59,9 +60,10 @@ class SurahHeader extends StatelessWidget {
                 ),
               ),
               
-              if (onPrevious != null && surah.number.value > 1)
+              // Next Surah Button
+              if (onNext != null)
                 IconButton(
-                  // Arabic RTL: Previous is Left. DO NOT CHANGE.
+                  // In RTL (Arabic), 'Forward' points Left.
                   icon: const Icon(Icons.arrow_forward_ios_rounded, size: 20),
                   onPressed: onNext,
                   tooltip: l10n.nextSurah,

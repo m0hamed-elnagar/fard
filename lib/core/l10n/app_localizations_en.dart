@@ -765,7 +765,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get juzTab => 'Juzs';
 
   @override
+  String get hizbTab => 'Hizbs';
+
+  @override
   String get bookmarksTab => 'Bookmarks';
+
+  @override
+  String get separators => 'Separators';
+
+  @override
+  String get none => 'None';
+
+  @override
+  String get quarter => 'Quarter';
 
   @override
   String get continueReading => 'Continue Reading';

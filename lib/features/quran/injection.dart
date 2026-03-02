@@ -12,6 +12,9 @@ import 'package:fard/features/quran/domain/usecases/watch_last_read.dart';
 import 'package:fard/features/quran/data/datasources/remote/quran_remote_source.dart';
 import 'package:fard/features/quran/data/repositories/quran_repository_impl.dart';
 import 'package:fard/features/quran/data/repositories/bookmark_repository_impl.dart';
+import 'package:fard/features/quran/domain/repositories/werd_repository.dart';
+import 'package:fard/features/quran/data/repositories/werd_repository_impl.dart';
+import 'package:fard/features/quran/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
 import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/features/quran/data/datasources/local/entities/surah_entity.dart';
@@ -41,16 +44,19 @@ Future<void> initQuranFeature() async {
     updateLastRead: getIt(),
     watchLastRead: getIt(),
     bookmarkRepository: getIt(),
+    quranRepository: getIt(),
   ));
 
   getIt.registerFactory(() => QuranBloc(getIt(), getIt(), getIt()));
+  
+  getIt.registerLazySingleton(() => WerdBloc(getIt()));
 
   // Use cases
   getIt.registerLazySingleton(() => GetAllSurahs(getIt()));
   getIt.registerLazySingleton(() => GetSurah(getIt()));
   getIt.registerLazySingleton(() => GetPage(getIt()));
   getIt.registerLazySingleton(() => GetTafsir(getIt()));
-  getIt.registerLazySingleton(() => UpdateLastRead(getIt()));
+  getIt.registerLazySingleton(() => UpdateLastRead(getIt(), getIt()));
   getIt.registerLazySingleton(() => WatchLastRead(getIt()));
 
   // Repository
@@ -61,6 +67,8 @@ Future<void> initQuranFeature() async {
   ));
 
   getIt.registerLazySingleton<BookmarkRepository>(() => BookmarkRepositoryImpl(bookmarkBox));
+
+  getIt.registerLazySingleton<WerdRepository>(() => WerdRepositoryImpl(getIt()));
 
   // Data sources
   getIt.registerLazySingleton<QuranLocalSource>(() => QuranLocalSourceImpl(surahBox));

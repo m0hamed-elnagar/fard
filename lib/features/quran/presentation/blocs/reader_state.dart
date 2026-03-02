@@ -9,6 +9,7 @@ class ReaderState with _$ReaderState {
     Ayah? highlightedAyah,
     Ayah? lastReadAyah,
     @Default(1.0) double textScale,
+    @Default(ReaderSeparator.none) ReaderSeparator separator,
     @Default(false) bool isBookmarked,
     @Default(16) int selectedTafsirId,
   }) = _Loaded;

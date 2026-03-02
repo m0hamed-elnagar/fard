@@ -15,6 +15,8 @@ abstract interface class QuranRepository {
   Future<Result<List<Translation>>> getAvailableTranslations();
   Stream<Result<LastReadPosition>> watchLastReadPosition();
   Future<Result<void>> updateLastReadPosition(LastReadPosition position);
+  Future<int> getReaderSeparator();
+  Future<void> updateReaderSeparator(int separatorIndex);
   Future<Result<String>> getTafsir(int surahNumber, int ayahNumber, {int? tafsirId});
   Stream<double> downloadAllSurahs();
 }

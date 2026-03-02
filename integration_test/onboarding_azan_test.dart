@@ -1,20 +1,19 @@
 import 'dart:io';
+
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/voice_download_service.dart';
 import 'package:fard/core/widgets/custom_toggle.dart';
 import 'package:fard/features/onboarding/presentation/screens/onboarding_screen.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
+import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/main.dart' as app;
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 
 class MockVoiceDownloadService extends Mock implements VoiceDownloadService {}
 class MockNotificationService extends Mock implements NotificationService {}
@@ -88,9 +87,6 @@ void main() {
       expect(find.text(l10n.azanSettings), findsOneWidget);
       expect(find.text(l10n.enableAzan), findsOneWidget);
       
-      final state = context.read<SettingsCubit>().state;
-      final isAzanEnabled = state.salaahSettings.any((s) => s.isAzanEnabled);
-      
       // Default should be enabled and show "Phone Notification"
       expect(find.text(l10n.defaultVal), findsAtLeast(1));
 
@@ -144,7 +140,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should be on Main Screen
-      expect(find.text(l10n.appName), findsAtLeast(1));
+      // Re-read localizations if needed, though in tests usually we can keep using l10n
+      // But for the sake of removing the warning if it's there
+      final finalL10n = AppLocalizations.of(tester.element(find.byType(app.QadaTrackerApp)))!;
+      expect(find.text(finalL10n.appName), findsAtLeast(1));
     });
   });
 }

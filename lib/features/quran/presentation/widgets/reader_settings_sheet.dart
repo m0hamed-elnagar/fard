@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
+import 'package:fard/features/quran/domain/entities/reader_settings.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ReaderSettingsSheet extends StatelessWidget {
@@ -60,9 +61,34 @@ class ReaderSettingsSheet extends StatelessWidget {
                     context.read<ReaderBloc>().add(ReaderEvent.updateScale(value));
                   },
                 ),
-                const SizedBox(height: 16),
-                // Add more settings here like theme, font, etc.
                 const SizedBox(height: 24),
+                Row(
+                  children: [
+                    const Icon(Icons.view_day_outlined, size: 20),
+                    const SizedBox(width: 12),
+                    Text(l10n.separators, style: const TextStyle(fontWeight: FontWeight.w500)),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: SegmentedButton<ReaderSeparator>(
+                      segments: [
+                        ButtonSegment(value: ReaderSeparator.none, label: Text(l10n.none)),
+                        ButtonSegment(value: ReaderSeparator.juz, label: Text(l10n.juzTab)),
+                        ButtonSegment(value: ReaderSeparator.hizb, label: Text(l10n.hizbTab)),
+                        ButtonSegment(value: ReaderSeparator.quarter, label: Text(l10n.quarter)),
+                      ],
+                      selected: {s.separator},
+                      onSelectionChanged: (value) {
+                        context.read<ReaderBloc>().add(ReaderEvent.updateSeparator(value.first));
+                      },
+                      showSelectedIcon: false,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
               ],
             ),
           ),

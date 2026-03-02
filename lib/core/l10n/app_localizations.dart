@@ -1502,11 +1502,35 @@ abstract class AppLocalizations {
   /// **'Juzs'**
   String get juzTab;
 
+  /// No description provided for @hizbTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Hizbs'**
+  String get hizbTab;
+
   /// No description provided for @bookmarksTab.
   ///
   /// In en, this message translates to:
   /// **'Bookmarks'**
   String get bookmarksTab;
+
+  /// No description provided for @separators.
+  ///
+  /// In en, this message translates to:
+  /// **'Separators'**
+  String get separators;
+
+  /// No description provided for @none.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get none;
+
+  /// No description provided for @quarter.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarter'**
+  String get quarter;
 
   /// No description provided for @continueReading.
   ///

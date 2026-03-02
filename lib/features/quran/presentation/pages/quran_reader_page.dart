@@ -53,15 +53,19 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
     super.dispose();
   }
 
-  void _scrollToAyah(int ayahNumber) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  void _scrollToAyah(int ayahNumber, {int retryCount = 0}) {
+    Future.delayed(Duration(milliseconds: retryCount == 0 ? 300 : 200), () {
+      if (!mounted) return;
       final key = _ayahKeys[ayahNumber];
       if (key != null && key.currentContext != null) {
         Scrollable.ensureVisible(
           key.currentContext!,
           duration: const Duration(milliseconds: 600),
           curve: Curves.easeInOut,
+          alignment: 0.1, // Show near top of screen
         );
+      } else if (retryCount < 5) {
+        _scrollToAyah(ayahNumber, retryCount: retryCount + 1);
       }
     });
   }
@@ -146,6 +150,15 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
               children: [
                 Positioned.fill(
                   child: BlocListener<ReaderBloc, ReaderState>(
+                    listenWhen: (prev, curr) {
+                      final prevAyah = prev.maybeMap(loaded: (s) => s.highlightedAyah, orElse: () => null);
+                      final currAyah = curr.maybeMap(loaded: (s) => s.highlightedAyah, orElse: () => null);
+                      
+                      // Trigger when transitioning to loaded or when highlight changes
+                      return (prev.maybeMap(loaded: (_) => false, orElse: () => true) && 
+                              curr.maybeMap(loaded: (_) => true, orElse: () => false)) ||
+                             (prevAyah != currAyah);
+                    },
                     listener: (context, state) {
                       state.mapOrNull(
                         loaded: (s) {
@@ -165,6 +178,9 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                               context.read<ReaderBloc>().add(ReaderEvent.selectAyah(ayah));
                               _scrollToAyah(widget.initialAyahNumber!);
                             } catch (_) {}
+                          } else if (s.highlightedAyah != null) {
+                            // If highlight changed (e.g. from navigation elsewhere), scroll to it
+                            _scrollToAyah(s.highlightedAyah!.number.ayahNumberInSurah);
                           }
                         },
                       );
@@ -288,6 +304,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                                               highlightedAyah: playingAyah ?? s.highlightedAyah ?? s.lastReadAyah,
                                               textScale: s.textScale,
                                               ayahKeys: _ayahKeys,
+                                              separator: s.separator,
                                               onAyahTap: (ayah) {
                                                 context.read<ReaderBloc>().add(ReaderEvent.selectAyah(ayah));
                                               },

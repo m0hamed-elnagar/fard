@@ -763,7 +763,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get juzTab => 'الأجزاء';
 
   @override
+  String get hizbTab => 'الأحزاب';
+
+  @override
   String get bookmarksTab => 'الإشارات';
+
+  @override
+  String get separators => 'الفواصل';
+
+  @override
+  String get none => 'بدون';
+
+  @override
+  String get quarter => 'ربع';
 
   @override
   String get continueReading => 'متابعة القراءة';
