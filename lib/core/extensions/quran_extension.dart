@@ -1,14 +1,15 @@
 // ignore_for_file: unused_import
 import 'package:quran/quran.dart' as quran;
+import 'package:fard/features/werd/domain/entities/werd_goal.dart';
 
 class QuranHizbProvider {
   static const List<List<int>> _hizbStarts = [
-    [1, 1], [2, 142], [2, 253], [3, 93], [4, 24], [4, 148], [5, 82], [6, 36], [6, 111], [7, 88], 
-    [8, 1], [9, 34], [10, 26], [11, 6], [12, 1], [13, 5], [14, 53], [16, 51], [17, 1], [18, 75], 
-    [19, 59], [21, 1], [22, 38], [23, 75], [25, 21], [27, 1], [28, 51], [29, 46], [30, 31], [33, 1], 
-    [34, 24], [36, 28], [37, 145], [39, 32], [41, 1], [43, 24], [46, 1], [48, 18], [50, 27], [53, 26], 
-    [57, 1], [58, 14], [61, 1], [64, 1], [67, 1], [70, 1], [73, 1], [76, 1], [79, 1], [82, 1], 
-    [85, 1], [88, 1], [91, 1], [94, 1], [97, 1], [100, 1], [103, 1], [106, 1], [109, 1], [112, 1]
+    [1, 1], [2, 75], [2, 142], [2, 203], [2, 253], [3, 15], [3, 93], [3, 171], [4, 24], [4, 88], 
+    [4, 148], [5, 27], [5, 82], [6, 36], [6, 111], [7, 1], [7, 88], [7, 171], [8, 41], [9, 34], 
+    [9, 111], [10, 71], [11, 41], [12, 1], [12, 101], [14, 1], [16, 1], [16, 90], [17, 50], [18, 32], 
+    [19, 22], [20, 55], [21, 29], [22, 19], [23, 36], [24, 35], [25, 53], [26, 160], [27, 82], [28, 76], 
+    [30, 1], [32, 11], [33, 51], [34, 46], [36, 60], [38, 21], [39, 53], [40, 66], [42, 13], [43, 57], 
+    [46, 21], [48, 18], [51, 31], [55, 1], [57, 16], [60, 1], [65, 1], [69, 1], [74, 1], [81, 1]
   ];
 
   // Mapping for all 240 Rub el Hizbs (Quarters)
@@ -85,8 +86,8 @@ class QuranHizbProvider {
   static Map<int, List<int>> getSurahAndVersesFromRub(int rubNumber) {
     if (rubNumber < 1 || rubNumber > 240) return {};
     final index = rubNumber - 1;
-    final actualIndex = index < _rubStarts.length ? index : (rubNumber / 4).floor() * 4;
-    final start = _rubStarts[actualIndex < _rubStarts.length ? actualIndex : 0];
+    if (index >= _rubStarts.length) return {};
+    final start = _rubStarts[index];
     return {start[0]: [start[1]]};
   }
 
@@ -118,5 +119,91 @@ class QuranHizbProvider {
       remaining -= count;
     }
     return [114, quran.getVerseCount(114)];
+  }
+
+  static int getGoalRequiredAyahs(int startAbs, WerdUnit unit, int value) {
+    if (unit == WerdUnit.ayah) return value;
+    
+    final endAbs = getGoalEndAbsolute(startAbs, unit, value);
+    return endAbs - startAbs + 1;
+  }
+
+  static int getGoalEndAbsolute(int startAbs, WerdUnit unit, int value) {
+    if (unit == WerdUnit.ayah) {
+      return (startAbs + value - 1).clamp(1, 6236);
+    }
+
+    final startPos = getSurahAndAyahFromAbsolute(startAbs);
+    
+    if (unit == WerdUnit.page) {
+      final startPage = quran.getPageNumber(startPos[0], startPos[1]);
+      final targetPage = (startPage + value - 1).clamp(1, 604);
+      // Find the last ayah of targetPage
+      return _getLastAyahOfPage(targetPage);
+    }
+
+    if (unit == WerdUnit.juz) {
+      final startJuz = quran.getJuzNumber(startPos[0], startPos[1]);
+      final targetJuz = (startJuz + value - 1).clamp(1, 30);
+      return _getLastAyahOfJuz(targetJuz);
+    }
+
+    if (unit == WerdUnit.hizb) {
+      final startHizb = getHizbNumber(startPos[0], startPos[1]);
+      final targetHizb = (startHizb + value - 1).clamp(1, 60);
+      return _getLastAyahOfHizb(targetHizb);
+    }
+
+    if (unit == WerdUnit.quarter) {
+      final startRub = getRubNumber(startPos[0], startPos[1]);
+      final targetRub = (startRub + value - 1).clamp(1, 240);
+      return _getLastAyahOfRub(targetRub);
+    }
+
+    return (startAbs + value - 1).clamp(1, 6236);
+  }
+
+  static int getRubNumber(int surah, int ayah) {
+    for (int i = _rubStarts.length - 1; i >= 0; i--) {
+      if (surah > _rubStarts[i][0] || 
+         (surah == _rubStarts[i][0] && ayah >= _rubStarts[i][1])) {
+        return i + 1;
+      }
+    }
+    return 1;
+  }
+
+  static int _getLastAyahOfPage(int page) {
+    if (page >= 604) return 6236;
+    // Find first ayah of next page and subtract 1
+    // We can iterate surahs to find where page changes
+    for (int s = 1; s <= 114; s++) {
+      for (int v = 1; v <= quran.getVerseCount(s); v++) {
+        if (quran.getPageNumber(s, v) > page) {
+          return getAbsoluteAyahNumber(s, v) - 1;
+        }
+      }
+    }
+    return 6236;
+  }
+
+  static int _getLastAyahOfJuz(int juz) {
+    if (juz >= 30) return 6236;
+    final nextJuzData = quran.getSurahAndVersesFromJuz(juz + 1);
+    final s = nextJuzData.keys.first;
+    final v = nextJuzData[s]![0];
+    return getAbsoluteAyahNumber(s, v) - 1;
+  }
+
+  static int _getLastAyahOfHizb(int hizb) {
+    if (hizb >= 60) return 6236;
+    final start = _hizbStarts[hizb]; // Index hizb is start of hizb+1
+    return getAbsoluteAyahNumber(start[0], start[1]) - 1;
+  }
+
+  static int _getLastAyahOfRub(int rub) {
+    if (rub >= 240) return 6236;
+    final start = _rubStarts[rub]; // Index rub is start of rub+1
+    return getAbsoluteAyahNumber(start[0], start[1]) - 1;
   }
 }

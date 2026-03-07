@@ -12,6 +12,7 @@ class ReaderState with _$ReaderState {
     @Default(ReaderSeparator.none) ReaderSeparator separator,
     @Default(false) bool isBookmarked,
     @Default(16) int selectedTafsirId,
+    Bookmark? bookmark,
   }) = _Loaded;
   const factory ReaderState.error(String message) = _Error;
 }

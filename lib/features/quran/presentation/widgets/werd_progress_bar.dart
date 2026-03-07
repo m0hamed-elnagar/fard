@@ -1,11 +1,16 @@
+import 'package:fard/features/werd/presentation/widgets/set_werd_goal_dialog.dart';
+import 'package:fard/features/werd/presentation/pages/werd_history_page.dart';
+import 'package:fard/features/werd/domain/entities/werd_goal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:fard/features/quran/presentation/blocs/werd_bloc.dart';
-import 'package:fard/features/quran/domain/entities/werd_goal.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
 import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
 import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/core/extensions/number_extension.dart';
+import 'package:fard/core/extensions/quran_extension.dart';
+import 'package:quran/quran.dart' as quran;
 
 class WerdProgressBar extends StatelessWidget {
   const WerdProgressBar({super.key});
@@ -15,13 +20,75 @@ class WerdProgressBar extends StatelessWidget {
       context: context,
       builder: (_) => BlocProvider.value(
         value: context.read<WerdBloc>(),
-        child: const _SetWerdGoalDialog(),
+        child: const SetWerdGoalDialog(),
       ),
     );
   }
 
+  String _getAyahInfo(int abs, bool isAr) {
+    if (abs <= 0) return isAr ? 'الفاتحة، ١' : 'Al-Fatihah, 1';
+    final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(abs);
+    final surahName = isAr ? quran.getSurahNameArabic(pos[0]) : quran.getSurahName(pos[0]);
+    return isAr 
+      ? '$surahName، ${pos[1].toArabicIndic()}'
+      : '$surahName, ${pos[1]}';
+  }
+
+  String _getProgressText(int current, int total, dynamic goal, bool isAr) {
+    if (goal.category != WerdCategory.quran) {
+      return isAr 
+        ? 'تم إكمال ${current.toArabicIndic()} من ${total.toArabicIndic()}'
+        : 'Completed ${current.toString()} of ${total.toString()}';
+    }
+
+    if (goal.type == WerdGoalType.finishInDays) {
+      return isAr 
+        ? 'تم إكمال ${current.toArabicIndic()} من ${total.toArabicIndic()} آية لختم المصحف'
+        : 'Completed ${current.toString()} of ${total.toString()} ayahs to finish';
+    }
+
+    // Fixed amount with specific unit
+    String unitName = '';
+    double currentInUnit = current.toDouble();
+    double totalInUnit = goal.value.toDouble();
+
+    switch (goal.unit) {
+      case WerdUnit.ayah:
+        unitName = isAr ? 'آية' : 'ayah';
+        currentInUnit = current.toDouble();
+        break;
+      case WerdUnit.page:
+        unitName = isAr ? 'صفحة' : 'page';
+        // Rough estimate for the progress text if not exact
+        currentInUnit = current / (total / goal.value);
+        break;
+      case WerdUnit.juz:
+        unitName = isAr ? 'جزء' : 'juz';
+        currentInUnit = current / (total / goal.value);
+        break;
+      case WerdUnit.hizb:
+        unitName = isAr ? 'حزب' : 'hizb';
+        currentInUnit = current / (total / goal.value);
+        break;
+      case WerdUnit.quarter:
+        unitName = isAr ? 'ربع' : 'quarter';
+        currentInUnit = current / (total / goal.value);
+        break;
+      default:
+        unitName = isAr ? 'آية' : 'ayah';
+        currentInUnit = current.toDouble();
+    }
+
+    if (isAr) {
+      return 'تم إكمال ${currentInUnit.toStringAsFixed(1).toArabicIndic()} من ${totalInUnit.toInt().toArabicIndic()} $unitName';
+    } else {
+      return 'Completed ${currentInUnit.toStringAsFixed(1)} of ${totalInUnit.toInt()} $unitName';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
     return BlocBuilder<WerdBloc, WerdState>(
       builder: (context, state) {
         if (state.goal == null) {
@@ -76,7 +143,7 @@ class WerdProgressBar extends StatelessWidget {
         final progress = state.progress;
         final goal = state.goal!;
         
-        int current = progress?.totalAyahsReadToday ?? 0;
+        int current = progress?.totalAmountReadToday ?? 0;
         int total = goal.valueInAyahs;
         
         final percent = total > 0 ? (current / total).clamp(0.0, 1.0) : 0.0;
@@ -109,29 +176,64 @@ class WerdProgressBar extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'ورد اليوم',
+                            (progress?.totalAmountReadToday ?? 0) == 0 ? (isAr ? 'بداية الورد' : 'Werd Start') : (isAr ? 'ورد اليوم' : 'Daily Werd'),
                             style: GoogleFonts.amiri(fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
-                      if (progress?.lastReadAyah != null)
-                        TextButton.icon(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              QuranReaderPage.route(
-                                surahNumber: progress!.lastReadAyah!.surahNumber,
-                                ayahNumber: progress.lastReadAyah!.ayahNumberInSurah,
+                      Row(
+                        children: [
+                          if ((progress?.totalAmountReadToday ?? 0) == 0)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: Text(
+                                _getAyahInfo(progress?.sessionStartAbsolute ?? 1, isAr),
+                                style: GoogleFonts.amiri(fontSize: 12, color: Colors.grey),
                               ),
-                            );
-                          },
-                          icon: const Icon(Icons.play_arrow_rounded, size: 18),
-                          label: const Text('متابعة'),
-                          style: TextButton.styleFrom(
-                            visualDensity: VisualDensity.compact,
-                            foregroundColor: AppTheme.primaryLight,
+                            ),
+                          IconButton(
+                            onPressed: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => const WerdHistoryPage()));
+                            },
+                            icon: const Icon(Icons.history_rounded, size: 20, color: Colors.grey),
+                            tooltip: 'السجل',
+                            constraints: const BoxConstraints(),
+                            padding: const EdgeInsets.all(8),
                           ),
-                        ),
+                          IconButton(
+                            onPressed: () => _showSetGoalDialog(context),
+                            icon: const Icon(Icons.edit_rounded, size: 20, color: Colors.grey),
+                            tooltip: 'تعديل الهدف',
+                            constraints: const BoxConstraints(),
+                            padding: const EdgeInsets.all(8),
+                          ),
+                          if (progress?.lastReadAbsolute != null || progress?.sessionStartAbsolute != null)
+                            const SizedBox(width: 4),
+                          if (progress?.lastReadAbsolute != null || progress?.sessionStartAbsolute != null)
+                            TextButton.icon(
+                              onPressed: () {
+                                final targetAbs = (progress?.totalAmountReadToday ?? 0) == 0
+                                    ? (progress?.sessionStartAbsolute ?? 1)
+                                    : (progress?.lastReadAbsolute ?? progress?.sessionStartAbsolute ?? 1);
+                                final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(targetAbs);
+
+                                Navigator.push(
+                                  context,
+                                  QuranReaderPage.route(
+                                    surahNumber: pos[0],
+                                    ayahNumber: pos[1],
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.play_arrow_rounded, size: 18),
+                              label: const Text('متابعة'),
+                              style: TextButton.styleFrom(
+                                visualDensity: VisualDensity.compact,
+                                foregroundColor: AppTheme.primaryLight,
+                              ),
+                            ),
+                        ],
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -151,7 +253,7 @@ class WerdProgressBar extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'تم إكمال ${current.toArabicIndic()} من ${total.toArabicIndic()} آية',
+                        _getProgressText(current, total, goal, isAr),
                         style: GoogleFonts.amiri(fontSize: 14, color: Colors.grey[600]),
                       ),
                       if ((progress?.streak ?? 0) > 0)
@@ -173,177 +275,6 @@ class WerdProgressBar extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _SetWerdGoalDialog extends StatefulWidget {
-  const _SetWerdGoalDialog();
-
-  @override
-  State<_SetWerdGoalDialog> createState() => _SetWerdGoalDialogState();
-}
-
-class _SetWerdGoalDialogState extends State<_SetWerdGoalDialog> {
-  WerdGoalType _type = WerdGoalType.fixedAmount;
-  WerdUnit _unit = WerdUnit.ayah;
-  late TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    final currentGoal = context.read<WerdBloc>().state.goal;
-    int initialValue = 10;
-    if (currentGoal != null) {
-      _type = currentGoal.type;
-      _unit = currentGoal.unit;
-      initialValue = currentGoal.value;
-    }
-    _controller = TextEditingController(text: initialValue.toString());
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _updateValue(int newValue) {
-    final clamped = newValue.clamp(1, 1000);
-    setState(() {
-      _controller.text = clamped.toString();
-    });
-  }
-
-  void _onUnitChanged(WerdUnit unit) {
-    setState(() {
-      _unit = unit;
-      // Default for ayah is 10, for others is 1
-      _controller.text = (unit == WerdUnit.ayah ? 10 : 1).toString();
-    });
-  }
-
-  void _onTypeChanged(WerdGoalType type) {
-    setState(() {
-      _type = type;
-      if (_type == WerdGoalType.finishInDays) {
-        _controller.text = '30';
-      } else {
-        // Reset to unit defaults
-        _controller.text = (_unit == WerdUnit.ayah ? 10 : 1).toString();
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(
-        'تحديد هدف الورد',
-        style: GoogleFonts.amiri(fontWeight: FontWeight.bold),
-        textAlign: TextAlign.center,
-      ),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SegmentedButton<WerdGoalType>(
-              segments: const [
-                ButtonSegment(value: WerdGoalType.fixedAmount, label: Text('كمية'), icon: Icon(Icons.straighten)),
-                ButtonSegment(value: WerdGoalType.finishInDays, label: Text('ختم'), icon: Icon(Icons.event_available)),
-              ],
-              selected: {_type},
-              onSelectionChanged: (v) => _onTypeChanged(v.first),
-            ),
-            const SizedBox(height: 20),
-            if (_type == WerdGoalType.fixedAmount) ...[
-              Wrap(
-                spacing: 8,
-                children: WerdUnit.values.map((u) {
-                  final label = {
-                    WerdUnit.ayah: 'آية',
-                    WerdUnit.page: 'صفحة',
-                    WerdUnit.quarter: 'ربع',
-                    WerdUnit.hizb: 'حزب',
-                    WerdUnit.juz: 'جزء',
-                  }[u]!;
-                  return ChoiceChip(
-                    label: Text(label),
-                    selected: _unit == u,
-                    onSelected: (selected) {
-                      if (selected) _onUnitChanged(u);
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 16),
-            ],
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    final val = int.tryParse(_controller.text) ?? 0;
-                    _updateValue(val - 1);
-                  },
-                  icon: const Icon(Icons.remove_circle_outline),
-                ),
-                SizedBox(
-                  width: 100,
-                  child: TextField(
-                    controller: _controller,
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
-                      ),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    final val = int.tryParse(_controller.text) ?? 0;
-                    _updateValue(val + 1);
-                  },
-                  icon: const Icon(Icons.add_circle_outline),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _type == WerdGoalType.finishInDays ? 'يوماً للختم' : 'يومياً',
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('إلغاء'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            final val = int.tryParse(_controller.text) ?? 10;
-            context.read<WerdBloc>().add(WerdEvent.setGoal(WerdGoal(
-              type: _type,
-              value: val,
-              unit: _unit,
-              startDate: DateTime.now(),
-            )));
-            Navigator.pop(context);
-          },
-          child: const Text('حفظ'),
-        ),
-      ],
     );
   }
 }

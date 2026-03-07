@@ -8,18 +8,29 @@ void main() {
       final date = DateTime(2026, 2, 14);
       final hijri = date.toHijriDate('en');
       expect(hijri, contains('1447'));
-      expect(hijri.toLowerCase(), anyOf(contains('sha\'ban'), contains('sha\'aban')));
+      expect(hijri.toLowerCase(), anyOf(contains('shaban'), contains('sha\'ban'), contains('sha\'aban')));
       expect(hijri, contains('26'));
+      expect(hijri, contains('AH'));
     });
 
     test('converts Gregorian date to Hijri string (AR)', () {
       final date = DateTime(2026, 2, 14);
       final hijri = date.toHijriDate('ar');
-      // The package seems to use Western numerals and sometimes English month names even in AR 
-      // depends on how getLongMonthName is implemented in the version.
-      // But it should have the Hijri suffix.
       expect(hijri, anyOf(contains('1447'), contains('١٤٤٧')));
+      expect(hijri, contains('شعبان'));
+      expect(hijri, anyOf(contains('26'), contains('٢٦')));
       expect(hijri, contains('هـ'));
+    });
+
+    test('applies hijri adjustment', () {
+      final date = DateTime(2026, 3, 3); // Default is 14 Ramadan 1447
+      final hijriNoAdj = date.toHijriDate('en');
+      final hijriMinus1 = date.toHijriDate('en', adjustment: -1);
+      final hijriPlus1 = date.toHijriDate('en', adjustment: 1);
+      
+      expect(hijriNoAdj, contains('14 Ramadan'));
+      expect(hijriMinus1, contains('13 Ramadan'));
+      expect(hijriPlus1, contains('15 Ramadan'));
     });
   });
 }

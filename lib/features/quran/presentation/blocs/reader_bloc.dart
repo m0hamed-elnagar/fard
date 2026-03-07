@@ -43,7 +43,14 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
       await result.fold(
         (failure) async => emit(ReaderState.error(failure.message)),
         (surah) async {
-          emit(ReaderState.loaded(surah: surah, separator: separator));
+          final bookmarkRes = await bookmarkRepository.getBookmark();
+          final bookmark = bookmarkRes.fold((_) => null, (v) => v);
+          
+          emit(ReaderState.loaded(
+            surah: surah, 
+            separator: separator,
+            bookmark: bookmark,
+          ));
           
           _lastReadSubscription?.cancel();
           _lastReadSubscription = watchLastRead().listen((result) {
@@ -57,7 +64,11 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
                         (a) => a.number.ayahNumberInSurah == position.ayahNumber.ayahNumberInSurah,
                         orElse: () => s.surah.ayahs.first,
                       );
-                      add(ReaderEvent.saveLastRead(ayah));
+                      
+                      // Avoid infinite loop by checking if it's actually a new position
+                      if (s.lastReadAyah?.number != ayah.number) {
+                        add(ReaderEvent.saveLastRead(ayah));
+                      }
                     }
                   },
                 );
@@ -77,11 +88,21 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
     });
 
     on<_SaveLastRead>((event, emit) async {
-      state.mapOrNull(
-        loaded: (s) {
-          emit(s.copyWith(lastReadAyah: event.ayah));
-        },
-      );
+      final s = state.mapOrNull(loaded: (s) => s);
+      if (s != null) {
+        final newBookmark = Bookmark(
+          id: 'active_bookmark',
+          ayahNumber: event.ayah.number,
+          createdAt: DateTime.now(),
+        );
+        await bookmarkRepository.setBookmark(newBookmark);
+        emit(s.copyWith(
+          lastReadAyah: event.ayah,
+          bookmark: newBookmark,
+          isBookmarked: true,
+          highlightedAyah: event.ayah, // Highlight it
+        ));
+      }
       
       await updateLastRead(LastReadPosition(
         ayahNumber: event.ayah.number,
@@ -122,16 +143,23 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
       final isBookmarked = isBookmarkedRes.fold((_) => false, (v) => v);
 
       if (isBookmarked) {
-        final id = '${event.ayah.number.surahNumber}_${event.ayah.number.ayahNumberInSurah}';
-        await bookmarkRepository.removeBookmark(id);
-        emit(s.copyWith(isBookmarked: false));
+        // If clicking the ALREADY bookmarked ayah, remove it
+        await bookmarkRepository.clearBookmark();
+        emit(s.copyWith(isBookmarked: false, bookmark: null));
       } else {
-        await bookmarkRepository.addBookmark(Bookmark(
-          id: '${event.ayah.number.surahNumber}_${event.ayah.number.ayahNumberInSurah}',
+        // If clicking ANY OTHER ayah, it becomes the new single bookmark (replacing the old one)
+        final newBookmark = Bookmark(
+          id: 'active_bookmark',
           ayahNumber: event.ayah.number,
           createdAt: DateTime.now(),
+        );
+        await bookmarkRepository.setBookmark(newBookmark);
+        emit(s.copyWith(
+          isBookmarked: true, 
+          bookmark: newBookmark, 
+          lastReadAyah: event.ayah,
+          highlightedAyah: event.ayah, // Highlight it
         ));
-        emit(s.copyWith(isBookmarked: true));
       }
     });
 

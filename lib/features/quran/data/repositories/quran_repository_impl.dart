@@ -159,7 +159,66 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   Stream<double> downloadAllSurahs() async* {
-    // simplified for brevity
-    yield 1.0;
+    try {
+      // Step 1: Ensure we have the basic list of surahs
+      final surahsResult = await getSurahs();
+      if (!surahsResult.isSuccess) {
+        yield 0.0;
+        return;
+      }
+      
+      final surahs = surahsResult.data!;
+      int totalSurahs = surahs.length;
+      
+      // Step 2: Calculate initial progress and track what's downloaded
+      int downloaded = 0;
+      List<bool> isDownloaded = List.filled(totalSurahs + 1, false);
+      for (int i = 1; i <= totalSurahs; i++) {
+        final cached = await localSource.getCachedSurahDetail(i);
+        if (cached != null && cached.ayahs.isNotEmpty && cached.ayahs.length == cached.numberOfAyahs) {
+          downloaded++;
+          isDownloaded[i] = true;
+        }
+      }
+      yield downloaded / totalSurahs;
+
+      if (downloaded == totalSurahs) {
+        yield 1.0;
+        return;
+      }
+
+      // Step 3: Download missing surahs
+      for (int i = 1; i <= totalSurahs; i++) {
+        if (isDownloaded[i]) continue;
+        
+        final surahNum = SurahNumber.create(i).data!;
+        final result = await getSurah(surahNum);
+        if (result.isSuccess) {
+          downloaded++;
+          yield downloaded / totalSurahs;
+        }
+      }
+      
+      yield 1.0;
+    } catch (_) {
+      yield 0.0;
+    }
+  }
+
+  @override
+  Future<double> getTextDownloadProgress() async {
+    try {
+      int totalSurahs = 114;
+      int downloaded = 0;
+      for (int i = 1; i <= totalSurahs; i++) {
+        final cached = await localSource.getCachedSurahDetail(i);
+        if (cached != null && cached.ayahs.isNotEmpty && cached.ayahs.length == cached.numberOfAyahs) {
+          downloaded++;
+        }
+      }
+      return downloaded / totalSurahs;
+    } catch (_) {
+      return 0.0;
+    }
   }
 }

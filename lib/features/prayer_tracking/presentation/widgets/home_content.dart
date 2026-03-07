@@ -3,17 +3,18 @@ import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
 import 'package:fard/features/prayer_tracking/domain/missed_counter.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/add_qada_dialog.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/calendar_widget.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/history_list.dart';
-import 'package:fard/features/prayer_tracking/presentation/widgets/home_hero.dart';
+import 'package:fard/features/werd/presentation/widgets/set_werd_goal_dialog.dart';
+import 'package:fard/features/prayer_tracking/presentation/widgets/dashboard_carousel.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/salaah_tile.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/suggested_azkar_section.dart';
 import 'package:fard/features/settings/presentation/screens/settings_screen.dart';
-import 'package:fard/features/quran/presentation/widgets/werd_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -40,6 +41,16 @@ class HomeContent extends StatelessWidget {
     required this.history,
   });
 
+  void _showWerdGoalDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => BlocProvider.value(
+        value: context.read<WerdBloc>(),
+        child: const SetWerdGoalDialog(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bloc = context.read<PrayerTrackerBloc>();
@@ -53,10 +64,9 @@ class HomeContent extends StatelessWidget {
           previous.madhab != current.madhab ||
           previous.locale != current.locale ||
           previous.cityName != current.cityName ||
-          previous.isQadaEnabled != current.isQadaEnabled,
+          previous.isQadaEnabled != current.isQadaEnabled ||
+          previous.hijriAdjustment != current.hijriAdjustment,
       builder: (context, settings) {
-        final locale = settings.locale.languageCode;
-        
         final prayerTimes = (settings.latitude != null && settings.longitude != null)
             ? getIt<PrayerTimeService>().getPrayerTimes(
                 latitude: settings.latitude!,
@@ -69,53 +79,69 @@ class HomeContent extends StatelessWidget {
 
         return Scaffold(
           backgroundColor: AppTheme.background,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            centerTitle: true,
+            title: Text(
+              l10n.appName,
+              style: GoogleFonts.amiri(
+                color: AppTheme.textPrimary,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.settings_outlined, color: AppTheme.textPrimary),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                  );
+                },
+              ),
+            ],
+          ),
           body: SafeArea(
             child: CustomScrollView(
               physics: const BouncingScrollPhysics(),
               slivers: [
-                // Consolidated Header (Dome + Branding + Location + Qada)
-                SliverToBoxAdapter(
-                  child: HomeHero(
-                    qadaStatus: qadaStatus,
-                    selectedDate: selectedDate,
-                    locale: locale,
-                    cityName: settings.cityName,
-                    isQadaEnabled: settings.isQadaEnabled,
-                    onAddPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (_) => AddQadaDialog(
-                          onConfirm: (counts) =>
-                              bloc.add(PrayerTrackerEvent.bulkAddQada(counts)),
-                        ),
-                      );
-                    },
-                    onEditPressed: () {
-                      final currentCounts = {
-                        for (final s in Salaah.values)
-                          s: qadaStatus[s]?.value ?? 0
-                      };
-                      showDialog(
-                        context: context,
-                        builder: (_) => AddQadaDialog(
-                          title: l10n.editQada,
-                          initialCounts: currentCounts,
-                          onConfirm: (counts) =>
-                              bloc.add(PrayerTrackerEvent.updateQada(counts)),
-                        ),
-                      );
-                    },
-                    onLocationTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const SettingsScreen()),
-                      );
-                    },
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  sliver: SliverToBoxAdapter(
+                    child: DashboardCarousel(
+                      prayerTimes: prayerTimes,
+                      selectedDate: selectedDate,
+                      cityName: settings.cityName,
+                      qadaStatus: qadaStatus,
+                      onAddQadaPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => AddQadaDialog(
+                            onConfirm: (counts) =>
+                                bloc.add(PrayerTrackerEvent.bulkAddQada(counts)),
+                          ),
+                        );
+                      },
+                      onEditQadaPressed: () {
+                        final currentCounts = {
+                          for (final s in Salaah.values)
+                            s: qadaStatus[s]?.value ?? 0
+                        };
+                        showDialog(
+                          context: context,
+                          builder: (_) => AddQadaDialog(
+                            title: l10n.editQada,
+                            initialCounts: currentCounts,
+                            onConfirm: (counts) =>
+                                bloc.add(PrayerTrackerEvent.updateQada(counts)),
+                          ),
+                        );
+                      },
+                      onSetWerdGoalPressed: () => _showWerdGoalDialog(context),
+                    ),
                   ),
-                ),
-                
-                const SliverToBoxAdapter(
-                  child: WerdProgressBar(),
                 ),
                 
                 // Calendar section with subtle top padding
@@ -125,6 +151,7 @@ class HomeContent extends StatelessWidget {
                     child: CalendarWidget(
                       selectedDate: selectedDate,
                       monthRecords: monthRecords,
+                      hijriAdjustment: settings.hijriAdjustment,
                       onDaySelected: (date) =>
                           bloc.add(PrayerTrackerEvent.load(date)),
                       onMonthChanged: (year, month) =>

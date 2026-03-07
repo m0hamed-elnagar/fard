@@ -6,6 +6,10 @@ import 'package:fard/features/quran/domain/usecases/get_tafsir.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
 import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
+import 'package:fard/core/extensions/quran_extension.dart';
+import 'package:quran/quran.dart' as quran;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/quran/domain/entities/tafsir_info.dart';
@@ -19,6 +23,14 @@ class AyahDetailSheet extends StatelessWidget {
   final int? surahAyahCount;
 
   const AyahDetailSheet({super.key, required this.ayah, this.surahAyahCount});
+
+  String _formatAyah(int absoluteAyah, String locale) {
+    final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(absoluteAyah);
+    final surahName = locale == 'ar' 
+        ? quran.getSurahNameArabic(pos[0]) 
+        : quran.getSurahName(pos[0]);
+    return "$surahName ${pos[1]}";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +95,8 @@ class AyahDetailSheet extends StatelessWidget {
                                       );
                                       
                                       final isBookmarked = state.maybeMap(
-                                        loaded: (s) => s.isBookmarked,
+                                        loaded: (s) => s.bookmark?.ayahNumber.surahNumber == ayah.number.surahNumber &&
+                                                       s.bookmark?.ayahNumber.ayahNumberInSurah == ayah.number.ayahNumberInSurah,
                                         orElse: () => false,
                                       );
 
@@ -96,14 +109,51 @@ class AyahDetailSheet extends StatelessWidget {
                                               color: isBookmarked ? Colors.amber : null,
                                             ),
                                             tooltip: isBookmarked ? l10n.removeFromBookmarks : l10n.addToBookmarks,
-                                            onPressed: () {
-                                              context.read<ReaderBloc>().add(ReaderEvent.toggleBookmark(ayah));
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(
-                                                  content: Text(isBookmarked ? l10n.removedFromBookmarks : l10n.addedToBookmarks),
-                                                  duration: const Duration(seconds: 1),
-                                                ),
-                                              );
+                                            onPressed: () async {
+                                              bool shouldProceed = true;
+                                              if (!isBookmarked) {
+                                                final werdState = context.read<WerdBloc>().state;
+                                                final sessionStartAbs = werdState.progress?.sessionStartAbsolute;
+                                                final targetAbs = QuranHizbProvider.getAbsoluteAyahNumber(
+                                                  ayah.number.surahNumber,
+                                                  ayah.number.ayahNumberInSurah,
+                                                );
+
+                                                if (sessionStartAbs != null && (targetAbs - sessionStartAbs).abs() > 50) {
+                                                  final confirmed = await showDialog<bool>(
+                                                    context: context,
+                                                    builder: (dialogContext) => AlertDialog(
+                                                      title: Text(l10n.jumpConfirmTitle),
+                                                      content: Text(l10n.jumpConfirmMessage(
+                                                        _formatAyah(sessionStartAbs, l10n.localeName),
+                                                        _formatAyah(targetAbs, l10n.localeName),
+                                                        ((targetAbs - sessionStartAbs).abs() / 10).toStringAsFixed(1),
+                                                      )),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () => Navigator.pop(dialogContext, false),
+                                                          child: Text(l10n.no),
+                                                        ),
+                                                        TextButton(
+                                                          onPressed: () => Navigator.pop(dialogContext, true),
+                                                          child: Text(l10n.yes),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                  shouldProceed = confirmed ?? false;
+                                                }
+                                              }
+
+                                              if (shouldProceed && context.mounted) {
+                                                context.read<ReaderBloc>().add(ReaderEvent.toggleBookmark(ayah));
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(isBookmarked ? l10n.removedFromBookmarks : l10n.addedToBookmarks),
+                                                    duration: const Duration(seconds: 1),
+                                                  ),
+                                                );
+                                              }
                                             },
                                           ),
                                           IconButton(

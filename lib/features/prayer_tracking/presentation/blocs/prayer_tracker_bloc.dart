@@ -522,40 +522,86 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
 
   Future<void> _onAcknowledgeMissedDays(
       _AcknowledgeMissedDays e, Emitter<PrayerTrackerState> em) async {
-    if (e.selectedDates.isEmpty) {
-      final s = state;
-      if (s is _Loaded) {
-        add(PrayerTrackerEvent.load(s.selectedDate));
-      } else {
-        add(PrayerTrackerEvent.load(DateTime.now()));
-      }
+    final lastRecord = await _repo.loadLastSavedRecord();
+    if (lastRecord == null) {
+      add(PrayerTrackerEvent.load(DateTime.now()));
       return;
     }
 
-    final lastRecord = await _repo.loadLastSavedRecord();
-    var currentQada = lastRecord?.qada ??
-        {for (final s in Salaah.values) s: const MissedCounter(0)};
+    final today = DateTime.now();
+    final normalizedToday = DateTime(today.year, today.month, today.day);
+    final lastDate = DateTime(
+        lastRecord.date.year, lastRecord.date.month, lastRecord.date.day);
+    final diff = normalizedToday.difference(lastDate).inDays;
 
-    final updatedQada = <Salaah, MissedCounter>{};
-    for (final s in Salaah.values) {
-      final additional = e.selectedDates.length;
-      final current = currentQada[s]?.value ?? 0;
-      updatedQada[s] = MissedCounter(current + additional);
+    if (diff <= 1) {
+      add(PrayerTrackerEvent.load(normalizedToday));
+      return;
     }
 
-    final latestDate = e.selectedDates.reduce((a, b) => a.isAfter(b) ? a : b);
-    final normalizedLatest = DateTime(latestDate.year, latestDate.month, latestDate.day);
-    final record = DailyRecord(
-      id: '${normalizedLatest.year}-${normalizedLatest.month.toString().padLeft(2, '0')}-${normalizedLatest.day.toString().padLeft(2, '0')}',
-      date: normalizedLatest,
-      missedToday: Set<Salaah>.from(Salaah.values),
-      completedToday: const {},
-      qada: updatedQada,
-    );
-    await _repo.saveToday(record);
-    await _cascadeUpdateFrom(record);
+    final gapDates = <DateTime>[];
+    for (int i = 1; i < diff; i++) {
+      gapDates.add(lastDate.add(Duration(days: i)));
+    }
 
-    add(PrayerTrackerEvent.load(normalizedLatest));
+    final selectedSet = Set<DateTime>.from(
+        e.selectedDates.map((d) => DateTime(d.year, d.month, d.day)));
+
+    var runningQada = Map<Salaah, MissedCounter>.from(lastRecord.qada);
+
+    // Part A: Check if lastRecord's remaining prayers should be added to qada
+    final lat = _prefs.getDouble('latitude');
+    final lon = _prefs.getDouble('longitude');
+    if (lat != null && lon != null) {
+      final method = _prefs.getString('calculation_method') ?? 'muslim_league';
+      final madhab = _prefs.getString('madhab') ?? 'shafi';
+      final lastTimes = _prayerTimeService.getPrayerTimes(
+        latitude: lat,
+        longitude: lon,
+        method: method,
+        madhab: madhab,
+        date: lastDate,
+      );
+      for (final s in Salaah.values) {
+        if (_prayerTimeService.isPassed(s, prayerTimes: lastTimes, date: lastDate)) {
+          if (!lastRecord.completedToday.contains(s) &&
+              !lastRecord.missedToday.contains(s)) {
+            runningQada[s] =
+                (runningQada[s] ?? const MissedCounter(0)).addMissed();
+          }
+        }
+      }
+    }
+
+    DailyRecord? lastSavedInGap;
+    for (final date in gapDates) {
+      final normalizedDate = DateTime(date.year, date.month, date.day);
+      final isMissed = selectedSet.contains(normalizedDate);
+
+      if (isMissed) {
+        for (final s in Salaah.values) {
+          runningQada[s] =
+              (runningQada[s] ?? const MissedCounter(0)).addMissed();
+        }
+      }
+
+      final record = DailyRecord(
+        id:
+            '${normalizedDate.year}-${normalizedDate.month.toString().padLeft(2, '0')}-${normalizedDate.day.toString().padLeft(2, '0')}',
+        date: normalizedDate,
+        missedToday: isMissed ? Set<Salaah>.from(Salaah.values) : {},
+        completedToday: isMissed ? {} : Set<Salaah>.from(Salaah.values),
+        qada: Map.from(runningQada),
+      );
+      await _repo.saveToday(record);
+      lastSavedInGap = record;
+    }
+
+    if (lastSavedInGap != null) {
+      await _cascadeUpdateFrom(lastSavedInGap);
+    }
+
+    add(PrayerTrackerEvent.load(normalizedToday));
   }
 
   Future<void> _onBulkAddQada(

@@ -294,6 +294,7 @@
   "bookmarksTab": "Bookmarks",
   "separators": "Separators",
   "none": "None",
+  "page": "Page",
   "quarter": "Quarter",
   "continueReading": "Continue Reading",
   "ayahNumberWithVal": "Ayah Number: {number}",
@@ -306,5 +307,38 @@
   "title": "Title",
   "alarmAdded": "Alarm added",
   "readyToPlay": "Ready to play",
-  "surahWithAyah": "Surah {surah}, Ayah {ayah}"
+  "surahWithAyah": "Surah {surah}, Ayah {ayah}",
+  "hijriAdjustment": "Hijri Adjustment",
+  "hijriAdjustmentDesc": "Adjust the Hijri date if it differs from your local sighting (e.g., -1 or +1 day).",
+  "nextPrayer": "Next Prayer",
+  "remainingTime": "Remaining Time",
+  "hijriCalendar": "Hijri",
+  "gregorianCalendar": "Gregorian",
+  "muslimWorldLeague": "Muslim World League",
+  "egyptianGeneralAuthority": "Egyptian General Authority",
+  "universityOfIslamicSciencesKarachi": "University of Islamic Sciences, Karachi",
+  "ummAlQuraUniversityMakkah": "Umm al-Qura University, Makkah",
+  "dubai": "Dubai",
+  "moonsightingCommittee": "Moonsighting Committee",
+  "qatar": "Qatar",
+  "kuwait": "Kuwait",
+  "singapore": "Singapore",
+  "turkey": "Turkey",
+  "instituteOfGeophysicsTehran": "Institute of Geophysics, University of Tehran",
+  "isnaNorthAmerica": "ISNA (North America)",
+  "jumpConfirmTitle": "Significant Jump",
+  "jumpConfirmMessage": "Did you really finish from {start} to {end} ({pages} pages)?",
+  "@jumpConfirmMessage": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      },
+      "pages": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -45,19 +45,12 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
   }
 
   Future<void> _checkTextProgress() async {
-    final result = await _quranRepository.getSurahs();
-    if (result.isSuccess) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = null;
-        });
-      }
-    } else {
-      if (mounted) {
-        setState(() {
-          _errorMessage = result.failure?.message;
-        });
-      }
+    final progress = await _quranRepository.getTextDownloadProgress();
+    if (mounted) {
+      setState(() {
+        _textProgress = progress;
+        _errorMessage = null;
+      });
     }
   }
 

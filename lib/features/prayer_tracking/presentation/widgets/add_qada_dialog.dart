@@ -52,16 +52,29 @@ class _AddQadaDialogState extends State<AddQadaDialog>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
+
     return Dialog(
       elevation: 0.0,
       backgroundColor: Colors.transparent,
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 400.0, maxHeight: 500.0),
+        constraints: BoxConstraints(
+          maxWidth: 400.0, 
+          maxHeight: (screenHeight * 0.8).clamp(300.0, 600.0),
+        ),
         padding: const EdgeInsets.all(20.0),
         decoration: BoxDecoration(
           color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(20.0),
-          border: Border.all(color: AppTheme.cardBorder),
+          borderRadius: BorderRadius.circular(24.0),
+          border: Border.all(color: AppTheme.cardBorder, width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -81,28 +94,25 @@ class _AddQadaDialogState extends State<AddQadaDialog>
               Container(
                 decoration: BoxDecoration(
                   color: AppTheme.surfaceLight,
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(14.0),
+                  border: Border.all(color: AppTheme.cardBorder.withValues(alpha: 0.5)),
                 ),
                 child: TabBar(
                   controller: _tabController,
                   indicator: BoxDecoration(
-                    color: AppTheme.primaryLight.withValues(alpha: 0.20),
+                    color: AppTheme.accent.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12.0),
-                    border: Border.all(color: AppTheme.primaryLight, width: 1.0),
+                    border: Border.all(color: AppTheme.accent.withValues(alpha: 0.3), width: 1.0),
                   ),
                   indicatorSize: TabBarIndicatorSize.tab,
                   dividerColor: Colors.transparent,
                   labelColor: AppTheme.accent,
                   unselectedLabelColor: AppTheme.textSecondary,
+                  labelStyle: GoogleFonts.amiri(fontWeight: FontWeight.bold, fontSize: 14.0),
+                  unselectedLabelStyle: GoogleFonts.amiri(fontSize: 14.0),
                   tabs: [
-                    Tab(
-                      child: Text(l10n.byCount,
-                          style: GoogleFonts.amiri(fontSize: 14.0)),
-                    ),
-                    Tab(
-                      child: Text(l10n.byTime,
-                          style: GoogleFonts.amiri(fontSize: 14.0)),
-                    ),
+                    Tab(text: l10n.byCount),
+                    Tab(text: l10n.byTime),
                   ],
                 ),
               ),
@@ -115,18 +125,21 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                     ? null
                     : const NeverScrollableScrollPhysics(),
                 children: [
-                  _buildCountTab(),
+                  _buildCountTab(screenWidth < 360),
                   if (widget.initialCounts == null) _buildTimeTab(),
                 ],
               ),
             ),
-            const SizedBox(height: 12.0),
+            const SizedBox(height: 16.0),
             // Actions
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  ),
                   child: Text(l10n.cancel,
                       style: GoogleFonts.amiri(
                           color: AppTheme.textSecondary, fontSize: 15.0)),
@@ -135,8 +148,11 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                 ElevatedButton(
                   onPressed: _onConfirm,
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.accent,
+                    foregroundColor: AppTheme.onAccent,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 20.0, vertical: 10.0),
+                        horizontal: 24.0, vertical: 10.0),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: Text(
                       widget.initialCounts == null ? l10n.add : l10n.update,
@@ -151,9 +167,10 @@ class _AddQadaDialogState extends State<AddQadaDialog>
     );
   }
 
-  Widget _buildCountTab() {
+  Widget _buildCountTab(bool isNarrow) {
     final l10n = AppLocalizations.of(context)!;
     return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
       child: Column(
         children: Salaah.values.map((salaah) {
           return Padding(
@@ -161,26 +178,28 @@ class _AddQadaDialogState extends State<AddQadaDialog>
             child: Row(
               children: [
                 SizedBox(
-                  width: 60.0,
+                  width: isNarrow ? 50.0 : 60.0,
                   child: Text(
                     salaah.localizedName(l10n),
                     style: GoogleFonts.amiri(
                       color: AppTheme.textPrimary,
-                      fontSize: 16.0,
+                      fontSize: isNarrow ? 14.0 : 16.0,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                const SizedBox(width: 12.0),
+                const SizedBox(width: 8.0),
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
                       color: AppTheme.surfaceLight,
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(12.0),
                       border: Border.all(color: AppTheme.cardBorder),
                     ),
                     child: Row(
                       children: [
-                        IconButton(
+                        _AdjustButton(
+                          icon: Icons.remove_rounded,
                           onPressed: () {
                             final val =
                                 int.tryParse(_controllers[salaah]!.text) ?? 0;
@@ -189,8 +208,6 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                               setState(() {});
                             }
                           },
-                          icon: const Icon(Icons.remove_rounded, size: 18.0),
-                          color: AppTheme.textSecondary,
                         ),
                         Expanded(
                           child: TextField(
@@ -199,25 +216,25 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                             keyboardType: TextInputType.number,
                             style: GoogleFonts.outfit(
                               color: AppTheme.accent,
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.w600,
+                              fontSize: isNarrow ? 16.0 : 18.0,
+                              fontWeight: FontWeight.w700,
                             ),
                             decoration: const InputDecoration(
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.zero,
+                              isDense: true,
                             ),
                             onChanged: (_) => setState(() {}),
                           ),
                         ),
-                        IconButton(
+                        _AdjustButton(
+                          icon: Icons.add_rounded,
                           onPressed: () {
                             final val =
                                 int.tryParse(_controllers[salaah]!.text) ?? 0;
                             _controllers[salaah]!.text = '${val + 1}';
                             setState(() {});
                           },
-                          icon: const Icon(Icons.add_rounded, size: 18.0),
-                          color: AppTheme.textSecondary,
                         ),
                       ],
                     ),
@@ -351,6 +368,25 @@ class _AddQadaDialogState extends State<AddQadaDialog>
 
     widget.onConfirm(counts);
     Navigator.pop(context);
+  }
+}
+
+class _AdjustButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  const _AdjustButton({required this.icon, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 20.0),
+      color: AppTheme.textSecondary,
+      splashRadius: 20,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+    );
   }
 }
 

@@ -76,6 +76,7 @@ class ReaderSettingsSheet extends StatelessWidget {
                     child: SegmentedButton<ReaderSeparator>(
                       segments: [
                         ButtonSegment(value: ReaderSeparator.none, label: Text(l10n.none)),
+                        ButtonSegment(value: ReaderSeparator.page, label: Text(l10n.page)),
                         ButtonSegment(value: ReaderSeparator.juz, label: Text(l10n.juzTab)),
                         ButtonSegment(value: ReaderSeparator.hizb, label: Text(l10n.hizbTab)),
                         ButtonSegment(value: ReaderSeparator.quarter, label: Text(l10n.quarter)),

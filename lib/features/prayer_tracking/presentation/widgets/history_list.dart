@@ -190,7 +190,10 @@ class HistoryList extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                Wrap(
+                  spacing: 6.0,
+                  runSpacing: 8.0,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     // Performed Count (Finished)
                     Container(
@@ -208,8 +211,7 @@ class HistoryList extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (settings.isQadaEnabled && qadaCompletedToday > 0) ...[
-                      const SizedBox(width: 6.0),
+                    if (settings.isQadaEnabled && qadaCompletedToday > 0)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
                         decoration: BoxDecoration(
@@ -225,9 +227,7 @@ class HistoryList extends StatelessWidget {
                           ),
                         ),
                       ),
-                    ],
-                    const SizedBox(width: 6.0),
-                    if (actualMissedCount > 0) ...[
+                    if (actualMissedCount > 0)
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6.0, vertical: 2.0),
@@ -243,19 +243,22 @@ class HistoryList extends StatelessWidget {
                           ),
                         ),
                       ),
-                    ],
-                    const Spacer(),
+                    
                     if (settings.isQadaEnabled)
-                    Text(
-                      '${l10n.remaining}: $totalQada',
-                      style: GoogleFonts.outfit(
-                        color: AppTheme.textSecondary,
-                        fontSize: 12.0,
+                      Padding(
+                        padding: const EdgeInsets.only(left: 4.0),
+                        child: Text(
+                          '${l10n.remaining}: $totalQada',
+                          style: GoogleFonts.outfit(
+                            color: AppTheme.textSecondary,
+                            fontSize: 12.0,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
-                    ),
                   ],
                 ),
-                const SizedBox(height: 8.0),
+                const SizedBox(height: 12.0),
                 // Per-salaah mini row
                 Wrap(
                   spacing: 6.0,

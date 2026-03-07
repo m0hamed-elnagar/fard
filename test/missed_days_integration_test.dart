@@ -14,12 +14,69 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class MockPrayerRepo extends Mock implements PrayerRepo {}
+class FakePrayerRepo implements PrayerRepo {
+  final Map<String, DailyRecord> _records = {};
+
+  @override
+  Future<void> saveToday(DailyRecord record) async {
+    final key = '${record.date.year}-${record.date.month}-${record.date.day}';
+    _records[key] = record;
+  }
+
+  @override
+  Future<void> deleteRecord(DateTime date) async {
+    final key = '${date.year}-${date.month}-${date.day}';
+    _records.remove(key);
+  }
+
+  @override
+  Future<DailyRecord?> loadRecord(DateTime date) async {
+    final key = '${date.year}-${date.month}-${date.day}';
+    return _records[key];
+  }
+
+  @override
+  Future<Map<DateTime, DailyRecord>> loadMonth(int year, int month) async {
+    final Map<DateTime, DailyRecord> monthRecords = {};
+    for (final r in _records.values) {
+      if (r.date.year == year && r.date.month == month) {
+        monthRecords[r.date] = r;
+      }
+    }
+    return monthRecords;
+  }
+
+  @override
+  Future<Map<Salaah, int>> calculateRemaining(DateTime from, DateTime to) async {
+    return {for (var s in Salaah.values) s: 0};
+  }
+
+  @override
+  Future<DailyRecord?> loadLastSavedRecord() async {
+    if (_records.isEmpty) return null;
+    final sorted = _records.values.toList()..sort((a, b) => a.date.compareTo(b.date));
+    return sorted.last;
+  }
+
+  @override
+  Future<DailyRecord?> loadLastRecordBefore(DateTime date) async {
+    final before = _records.values.where((r) => r.date.isBefore(date)).toList();
+    if (before.isEmpty) return null;
+    before.sort((a, b) => a.date.compareTo(b.date));
+    return before.last;
+  }
+
+  @override
+  Future<List<DailyRecord>> loadAllRecords() async {
+    return _records.values.toList();
+  }
+}
+
 class MockSharedPreferences extends Mock implements SharedPreferences {}
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
 void main() {
-  late MockPrayerRepo repo;
+  late FakePrayerRepo repo;
   late MockSharedPreferences prefs;
   late MockPrayerTimeService prayerTimeService;
 
@@ -48,17 +105,13 @@ void main() {
 
   setUp(() {
     getIt.reset();
-    repo = MockPrayerRepo();
+    repo = FakePrayerRepo();
     prefs = MockSharedPreferences();
     prayerTimeService = MockPrayerTimeService();
 
     getIt.registerSingleton<SharedPreferences>(prefs);
     getIt.registerSingleton<PrayerTimeService>(prayerTimeService);
 
-    when(() => repo.loadRecord(any())).thenAnswer((_) async => null);
-    when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {});
-    when(() => repo.saveToday(any())).thenAnswer((_) async {});
-    
     // Default: all prayers passed
     when(() => prayerTimeService.isPassed(any(), 
         prayerTimes: any(named: 'prayerTimes'), 
@@ -70,6 +123,9 @@ void main() {
       madhab: any(named: 'madhab'),
       date: any(named: 'date'),
     )).thenReturn(dummyPrayerTimes);
+
+    when(() => prefs.getDouble('latitude')).thenReturn(30.0);
+    when(() => prefs.getDouble('longitude')).thenReturn(31.0);
   });
 
   group('PrayerTrackerBloc Missed Days Integration', () {
@@ -78,10 +134,10 @@ void main() {
         id: 'old',
         date: threeDaysAgo,
         missedToday: {},
-        completedToday: {},
+        completedToday: {for (var s in Salaah.values) s},
         qada: {for (var s in Salaah.values) s: const MissedCounter(10)},
       );
-      when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => lastRecord);
+      await repo.saveToday(lastRecord);
 
       final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService);
 
@@ -116,7 +172,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(MissedDaysDialog), findsOneWidget);
-      // Key: "I was praying" is the skip text
       expect(find.text('I was praying'), findsOneWidget);
 
       await tester.tap(find.text('I was praying'));
@@ -124,13 +179,14 @@ void main() {
 
       expect(find.byType(MissedDaysDialog), findsNothing);
       
-      await Future.delayed(const Duration(milliseconds: 200));
+      // Wait for BLoC processing (acknowledgeMissedDays -> load)
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
       
       bloc.state.maybeMap(
         loaded: (l) {
           // It was Skip. 10 (base) + 1 (today's fajr) = 11.
-          // Note: Step A in _onLoad might add another +1 if lastRecord's day had missed prayers.
-          expect(l.qadaStatus[Salaah.fajr]?.value, greaterThanOrEqualTo(11));
+          expect(l.qadaStatus[Salaah.fajr]?.value, 11);
         },
         orElse: () => fail('Should be loaded'),
       );
@@ -141,10 +197,10 @@ void main() {
         id: 'old',
         date: threeDaysAgo,
         missedToday: {},
-        completedToday: {},
+        completedToday: {for (var s in Salaah.values) s},
         qada: {for (var s in Salaah.values) s: const MissedCounter(10)},
       );
-      when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => lastRecord);
+      await repo.saveToday(lastRecord);
 
       final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService);
 
@@ -178,17 +234,154 @@ void main() {
       bloc.add(const PrayerTrackerEvent.checkMissedDays());
       await tester.pumpAndSettle();
 
-      // Key: "Add to remaining" is the addAll text
       expect(find.text('Add to remaining'), findsOneWidget);
       await tester.tap(find.text('Add to remaining'));
       await tester.pumpAndSettle();
 
-      await Future.delayed(const Duration(milliseconds: 200));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
       
       bloc.state.maybeMap(
         loaded: (l) {
           // Base 10 + 2 missed days + 1 today = 13
-          expect(l.qadaStatus[Salaah.fajr]?.value, greaterThan(11));
+          expect(l.qadaStatus[Salaah.fajr]?.value, 13);
+        },
+        orElse: () => fail('Should be loaded'),
+      );
+    });
+
+    testWidgets('Can toggle specific days and correctly update Qada', (tester) async {
+      final normalizedToday = DateTime(today.year, today.month, today.day);
+      final sixDaysAgo = normalizedToday.subtract(const Duration(days: 6));
+
+      final lastRecord = DailyRecord(
+        id: 'old',
+        date: sixDaysAgo,
+        missedToday: {},
+        completedToday: {for (var s in Salaah.values) s},
+        qada: {for (var s in Salaah.values) s: const MissedCounter(10)},
+      );
+      await repo.saveToday(lastRecord);
+
+      final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: BlocListener<PrayerTrackerBloc, PrayerTrackerState>(
+              bloc: bloc,
+              listener: (context, state) {
+                state.maybeWhen(
+                  missedDaysPrompt: (dates) {
+                    showDialog(
+                      context: context,
+                      builder: (_) => MissedDaysDialog(
+                        missedDates: dates,
+                        onResponse: (selected) => bloc.add(PrayerTrackerEvent.acknowledgeMissedDays(selectedDates: selected)),
+                      ),
+                    );
+                  },
+                  orElse: () {},
+                );
+              },
+              child: const SizedBox(),
+            ),
+          ),
+        ),
+      );
+
+      bloc.add(const PrayerTrackerEvent.checkMissedDays());
+      await tester.pumpAndSettle();
+
+      final gapDates = List.generate(5, (i) => sixDaysAgo.add(Duration(days: i + 1)));
+      
+      // Tap on 1st, 2nd, and 3rd gap day to unselect them
+      for (int i = 0; i < 3; i++) {
+        await tester.tap(find.text('${gapDates[i].day}'));
+        await tester.pump();
+      }
+
+      await tester.tap(find.text('Add to remaining'));
+      await tester.pumpAndSettle();
+
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
+
+      bloc.state.maybeMap(
+        loaded: (l) {
+          // Base 10 + 2 selected missed days + 1 today = 13.
+          expect(l.qadaStatus[Salaah.fajr]?.value, 13);
+        },
+        orElse: () => fail('Should be loaded'),
+      );
+    });
+
+    testWidgets('Can drag to toggle multiple days', (tester) async {
+      final normalizedToday = DateTime(today.year, today.month, today.day);
+      final sixDaysAgo = normalizedToday.subtract(const Duration(days: 6));
+
+      final lastRecord = DailyRecord(
+        id: 'old',
+        date: sixDaysAgo,
+        missedToday: {},
+        completedToday: {for (var s in Salaah.values) s},
+        qada: {for (var s in Salaah.values) s: const MissedCounter(10)},
+      );
+      await repo.saveToday(lastRecord);
+
+      final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: BlocListener<PrayerTrackerBloc, PrayerTrackerState>(
+              bloc: bloc,
+              listener: (context, state) {
+                state.maybeWhen(
+                  missedDaysPrompt: (dates) {
+                    showDialog(
+                      context: context,
+                      builder: (_) => MissedDaysDialog(
+                        missedDates: dates,
+                        onResponse: (selected) => bloc.add(PrayerTrackerEvent.acknowledgeMissedDays(selectedDates: selected)),
+                      ),
+                    );
+                  },
+                  orElse: () {},
+                );
+              },
+              child: const SizedBox(),
+            ),
+          ),
+        ),
+      );
+
+      bloc.add(const PrayerTrackerEvent.checkMissedDays());
+      await tester.pumpAndSettle();
+
+      final gridFinder = find.byType(GridView);
+      final Offset topLeft = tester.getTopLeft(gridFinder);
+      
+      await tester.dragFrom(
+        topLeft + const Offset(10, 30),
+        const Offset(150, 0),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Add to remaining'));
+      await tester.pumpAndSettle();
+
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
+
+      bloc.state.maybeMap(
+        loaded: (l) {
+          // Some days toggled off. Expect less than "all 5 added" (10+5+1=16).
+          expect(l.qadaStatus[Salaah.fajr]!.value, lessThan(16)); 
         },
         orElse: () => fail('Should be loaded'),
       );

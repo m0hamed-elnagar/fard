@@ -294,6 +294,7 @@
   "bookmarksTab": "الإشارات",
   "separators": "الفواصل",
   "none": "بدون",
+  "page": "صفحة",
   "quarter": "ربع",
   "continueReading": "متابعة القراءة",
   "ayahNumberWithVal": "الآية رقم: {number}",
@@ -306,5 +307,38 @@
   "title": "العنوان",
   "alarmAdded": "تمت إضافة التنبيه",
   "readyToPlay": "جاهز للتشغيل",
-  "surahWithAyah": "سورة {surah}، آية {ayah}"
+  "surahWithAyah": "سورة {surah}، آية {ayah}",
+  "hijriAdjustment": "تعديل التاريخ الهجري",
+  "hijriAdjustmentDesc": "تعديل التاريخ الهجري إذا كان يختلف عن الرؤية المحلية (مثلاً: -١ أو +١ يوم).",
+  "nextPrayer": "الصلاة القادمة",
+  "remainingTime": "الوقت المتبقي",
+  "hijriCalendar": "هجري",
+  "gregorianCalendar": "ميلادي",
+  "muslimWorldLeague": "رابطة العالم الإسلامي",
+  "egyptianGeneralAuthority": "الهيئة المصرية العامة للمساحة",
+  "universityOfIslamicSciencesKarachi": "جامعة العلوم الإسلامية بكراتشي",
+  "ummAlQuraUniversityMakkah": "جامعة أم القرى بمكة المكرمة",
+  "dubai": "دبي",
+  "qatar": "قطر",
+  "kuwait": "الكويت",
+  "singapore": "سنغافورة",
+  "turkey": "تركيا",
+  "instituteOfGeophysicsTehran": "معهد الجيوفيزياء بجامعة طهران",
+  "isnaNorthAmerica": "إسنا (أمريكا الشمالية)",
+  "moonsightingCommittee": "لجنة رؤية الأهلة",
+  "jumpConfirmTitle": "قفزة كبيرة",
+  "jumpConfirmMessage": "هل أتممت فعلاً من {start} إلى {end} ({pages} صفحات)؟",
+  "@jumpConfirmMessage": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      },
+      "pages": {
+        "type": "String"
+      }
+    }
+  }
 }

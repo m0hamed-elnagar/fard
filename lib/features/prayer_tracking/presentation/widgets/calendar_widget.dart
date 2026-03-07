@@ -6,12 +6,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_theme.dart';
 import 'package:hijri/hijri_calendar.dart';
+import 'package:intl/intl.dart';
 
 class CalendarWidget extends StatefulWidget {
   final DateTime selectedDate;
   final Map<DateTime, DailyRecord> monthRecords;
   final ValueChanged<DateTime> onDaySelected;
   final void Function(int year, int month) onMonthChanged;
+  final int hijriAdjustment;
 
   const CalendarWidget({
     super.key,
@@ -19,6 +21,7 @@ class CalendarWidget extends StatefulWidget {
     required this.monthRecords,
     required this.onDaySelected,
     required this.onMonthChanged,
+    this.hijriAdjustment = 0,
   });
 
   @override
@@ -27,6 +30,7 @@ class CalendarWidget extends StatefulWidget {
 
 class _CalendarWidgetState extends State<CalendarWidget> {
   bool _isExpanded = false;
+  bool _hijriFocused = false;
   late DateTime _focusedDay;
   final Map<DateTime, HijriCalendar> _hijriCache = {};
 
@@ -36,15 +40,60 @@ class _CalendarWidgetState extends State<CalendarWidget> {
     _focusedDay = widget.selectedDate;
   }
 
+  @override
+  void didUpdateWidget(CalendarWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.hijriAdjustment != widget.hijriAdjustment) {
+      _hijriCache.clear();
+    }
+  }
+
   DateTime _normalize(DateTime d) => DateTime(d.year, d.month, d.day);
 
   HijriCalendar _getHijriDate(DateTime date) {
     final normalized = _normalize(date);
-    return _hijriCache.putIfAbsent(normalized, () => HijriCalendar.fromDate(date));
+    return _hijriCache.putIfAbsent(normalized, () {
+      final adjustedDate = date.add(Duration(days: widget.hijriAdjustment));
+      return HijriCalendar.fromDate(adjustedDate);
+    });
   }
 
   Widget _buildCell(DateTime day, bool isSelected, {bool isToday = false}) {
     final hijri = _getHijriDate(day);
+    
+    final primaryValue = _hijriFocused ? '${hijri.hDay}' : '${day.day}';
+    final secondaryValue = _hijriFocused ? '${day.day}' : '${hijri.hDay}';
+    
+    final primaryStyle = _hijriFocused 
+        ? GoogleFonts.amiri(
+            color: isSelected ? Colors.black87 : AppTheme.textPrimary,
+            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
+            fontSize: 16.0,
+          )
+        : GoogleFonts.outfit(
+            color: isSelected ? Colors.black87 : AppTheme.textPrimary,
+            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+            fontSize: 14.0,
+          );
+          
+    final secondaryStyle = _hijriFocused
+        ? GoogleFonts.outfit(
+            color: isSelected
+                ? Colors.black54
+                : AppTheme.textSecondary.withValues(alpha: 0.5),
+            fontWeight: FontWeight.bold,
+            fontSize: 9.0,
+            height: 1.0,
+          )
+        : GoogleFonts.amiri(
+            color: isSelected
+                ? Colors.black54
+                : AppTheme.textSecondary.withValues(alpha: 0.5),
+            fontWeight: FontWeight.bold,
+            fontSize: 10.0,
+            height: 1.0,
+          );
+
     return Container(
       margin: const EdgeInsets.all(4.0),
       decoration: BoxDecoration(
@@ -70,23 +119,12 @@ class _CalendarWidgetState extends State<CalendarWidget> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              '${day.day}',
-              style: GoogleFonts.outfit(
-                color: isSelected ? Colors.black87 : AppTheme.textPrimary,
-                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                fontSize: 14.0,
-              ),
+              primaryValue,
+              style: primaryStyle,
             ),
             Text(
-              '${hijri.hDay}',
-              style: GoogleFonts.amiri(
-                color: isSelected
-                    ? Colors.black54
-                    : AppTheme.textSecondary.withValues(alpha: 0.5),
-                fontWeight: FontWeight.bold,
-                fontSize: 9.0,
-                height: 1.0,
-              ),
+              secondaryValue,
+              style: secondaryStyle,
             ),
           ],
         ),
@@ -96,6 +134,21 @@ class _CalendarWidgetState extends State<CalendarWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    final hijri = _getHijriDate(_focusedDay);
+    
+    // Calculate display strings for the header
+    final gregMonth = DateFormat.MMMM(locale).format(_focusedDay);
+    final gregYear = DateFormat.y(locale).format(_focusedDay);
+    
+    HijriCalendar.setLocal(locale);
+    final hijriMonth = hijri.getLongMonthName();
+    final hijriYear = hijri.hYear;
+    
+    final focusedMonthText = _hijriFocused 
+        ? '$hijriMonth $hijriYear هـ' 
+        : '$gregMonth $gregYear';
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
@@ -122,27 +175,83 @@ class _CalendarWidgetState extends State<CalendarWidget> {
               setState(() => _isExpanded = !_isExpanded);
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               child: Row(
                 children: [
-                  Container(
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: AppTheme.accent.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.calendar_month_rounded, color: AppTheme.accent, size: 20.0),
-                  ),
-                  const SizedBox(width: 12.0),
-                  Text(
-                    AppLocalizations.of(context)!.calendar,
-                    style: GoogleFonts.amiri(
-                      color: AppTheme.textPrimary,
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
+                    child: Icon(
+                      _hijriFocused ? Icons.nightlight_round : Icons.calendar_month_rounded, 
+                      color: AppTheme.accent, 
+                      size: 18.0
                     ),
                   ),
-                  const Spacer(),
+                  const SizedBox(width: 12.0),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _isExpanded ? AppLocalizations.of(context)!.calendar : focusedMonthText,
+                          style: GoogleFonts.amiri(
+                            color: AppTheme.textPrimary,
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (_isExpanded)
+                          Text(
+                            focusedMonthText,
+                            style: GoogleFonts.outfit(
+                              color: AppTheme.textSecondary,
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  // Focus Switcher - Always visible in header for discoverability
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        HapticFeedback.mediumImpact();
+                        setState(() => _hijriFocused = !_hijriFocused);
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppTheme.accent.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppTheme.accent.withValues(alpha: 0.1)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.swap_horiz_rounded, size: 16, color: AppTheme.accent),
+                            const SizedBox(width: 4),
+                            Text(
+                              _hijriFocused ? AppLocalizations.of(context)!.hijriCalendar : AppLocalizations.of(context)!.gregorianCalendar,
+                              style: GoogleFonts.outfit(
+                                color: AppTheme.accent,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   AnimatedRotation(
                     turns: _isExpanded ? 0.5 : 0.0,
                     duration: const Duration(milliseconds: 200),
@@ -206,6 +315,64 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                     color: AppTheme.textSecondary.withValues(alpha: 0.8), fontSize: 12.0, fontWeight: FontWeight.w600),
               ),
               calendarBuilders: CalendarBuilders(
+                headerTitleBuilder: (context, day) {
+                  final h = _getHijriDate(day);
+                  final loc = Localizations.localeOf(context).languageCode;
+                  
+                  // Localize Gregorian Month
+                  final gM = DateFormat.MMMM(loc).format(day);
+                  final gY = DateFormat.y(loc).format(day);
+                  
+                  // Localize Hijri Month
+                  HijriCalendar.setLocal(loc);
+                  final hM = h.getLongMonthName();
+                  final hY = h.hYear;
+                  
+                  final primaryMonth = _hijriFocused ? hM : gM;
+                  final primaryYear = _hijriFocused ? '$hY هـ' : gY;
+                  final secondaryMonth = _hijriFocused ? gM : hM;
+                  final secondaryYear = _hijriFocused ? gY : '$hY هـ';
+
+                  final primaryStyle = _hijriFocused 
+                      ? GoogleFonts.amiri(
+                          color: AppTheme.textPrimary,
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
+                        )
+                      : GoogleFonts.outfit(
+                          color: AppTheme.textPrimary,
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w700,
+                        );
+
+                  final secondaryStyle = _hijriFocused
+                      ? GoogleFonts.outfit(
+                          color: AppTheme.textSecondary,
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.w500,
+                        )
+                      : GoogleFonts.amiri(
+                          color: AppTheme.textSecondary,
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w500,
+                        );
+
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '$primaryMonth $primaryYear',
+                        style: primaryStyle,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        '$secondaryMonth $secondaryYear',
+                        style: secondaryStyle,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  );
+                },
                 defaultBuilder: (context, day, focusedDay) => _buildCell(day, false),
                 selectedBuilder: (context, day, focusedDay) => _buildCell(day, true),
                 todayBuilder: (context, day, focusedDay) => _buildCell(day, false, isToday: true),

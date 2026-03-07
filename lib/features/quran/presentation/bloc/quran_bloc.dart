@@ -18,7 +18,7 @@ abstract class QuranEvent with _$QuranEvent {
   const factory QuranEvent.search(String query) = _Search;
   const factory QuranEvent.lastReadUpdated(LastReadPosition position) = _LastReadUpdated;
   const factory QuranEvent.loadBookmarks() = _LoadBookmarks;
-  const factory QuranEvent.bookmarksUpdated(List<Bookmark> bookmarks) = _BookmarksUpdated;
+  const factory QuranEvent.bookmarkUpdated(Bookmark? bookmark) = _BookmarkUpdated;
 }
 
 @freezed
@@ -31,7 +31,7 @@ abstract class QuranState with _$QuranState {
     String? error,
     @Default([]) List<SearchResult> searchResults,
     LastReadPosition? lastReadPosition,
-    @Default([]) List<Bookmark> bookmarks,
+    Bookmark? bookmark,
   }) = _QuranState;
 
   factory QuranState.initial() => const QuranState();
@@ -67,15 +67,15 @@ class QuranBloc extends Bloc<QuranEvent, QuranState> {
     });
 
     on<_LoadBookmarks>((event, emit) async {
-      final result = await _bookmarkRepository.getBookmarks();
+      final result = await _bookmarkRepository.getBookmark();
       result.fold(
         (_) => null,
-        (bookmarks) => emit(state.copyWith(bookmarks: bookmarks)),
+        (bookmark) => emit(state.copyWith(bookmark: bookmark)),
       );
     });
 
-    on<_BookmarksUpdated>((event, emit) {
-      emit(state.copyWith(bookmarks: event.bookmarks));
+    on<_BookmarkUpdated>((event, emit) {
+      emit(state.copyWith(bookmark: event.bookmark));
     });
 
     on<_LoadSurahDetails>((event, emit) async {
