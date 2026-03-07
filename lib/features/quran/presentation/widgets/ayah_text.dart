@@ -14,7 +14,7 @@ class AyahText extends StatefulWidget {
   final Ayah? highlightedAyah;
   final Ayah? dayStartAyah;
   final Ayah? lastReadAyah;
-  final Bookmark? bookmark;
+  final List<Bookmark> bookmarks;
   final ValueChanged<Ayah> onAyahTap;
   final ValueChanged<Ayah>? onAyahLongPress;
   final ValueChanged<Ayah>? onAyahDoubleTap;
@@ -28,7 +28,7 @@ class AyahText extends StatefulWidget {
     this.highlightedAyah,
     this.dayStartAyah,
     this.lastReadAyah,
-    this.bookmark,
+    this.bookmarks = const [],
     required this.onAyahTap,
     this.onAyahLongPress,
     this.onAyahDoubleTap,
@@ -157,7 +157,7 @@ class _AyahTextState extends State<AyahText> {
       final isHighlighted = widget.highlightedAyah?.number == ayah.number;
       final isDayStart = widget.dayStartAyah?.number == ayah.number;
       final isLastRead = widget.lastReadAyah?.number == ayah.number;
-      final isBookmarked = widget.bookmark?.ayahNumber == ayah.number;
+      final isBookmarked = widget.bookmarks.any((b) => b.ayahNumber == ayah.number);
       
       final String markerText = quran.getVerseEndSymbol(ayah.number.ayahNumberInSurah, arabicNumeral: true);
       final String ayahText = ayah.uthmaniText.trim();
@@ -171,14 +171,16 @@ class _AyahTextState extends State<AyahText> {
       final int textLen = ayahText.length;
       // 4. MARKER (TextSpan) = thin space (1) + markerText.length
       final int markerLen = 1 + markerText.length;
-      // 5. PROGRESS BOOKMARK / MANUAL BOOKMARK (TextSpan space + ➤) = 2 (if exists)
-      final int bookmarkLen = (isLastRead || isBookmarked) ? 2 : 0;
-      // 6. SAJDAH (TextSpan space + WidgetSpan) = 2 (if exists)
+      // 5. PROGRESS MARKER (TextSpan space + ➤) = 2 (if exists)
+      final int lastReadLen = isLastRead ? 2 : 0;
+      // 6. BOOKMARK (TextSpan space + 🔖) = 3 (if exists, surrogate pair)
+      final int bookmarkLen = isBookmarked ? 3 : 0;
+      // 7. SAJDAH (TextSpan space + WidgetSpan) = 2 (if exists)
       final int sajdahLen = (ayah.isSajdah && ayah.sajdahType != null) ? 2 : 0;
-      // 7. TRAILING SPACE (TextSpan) = 1
+      // 8. TRAILING SPACE (TextSpan) = 1
       const int trailingSpaceLen = 1;
 
-      final int totalLen = anchorLen + dayStartLen + textLen + markerLen + bookmarkLen + sajdahLen + trailingSpaceLen;
+      final int totalLen = anchorLen + dayStartLen + textLen + markerLen + lastReadLen + bookmarkLen + sajdahLen + trailingSpaceLen;
 
       ranges.add(_AyahRange(
         ayah: ayah,
@@ -237,13 +239,22 @@ class _AyahTextState extends State<AyahText> {
               ),
             ),
 
-            // 5. PROGRESS MARKER / BOOKMARK
-            if (isLastRead || isBookmarked)
+            // 5. PROGRESS MARKER
+            if (isLastRead)
               const TextSpan(
                 text: ' \u27A4', // Arrow
                 style: TextStyle(
                   color: Colors.green,
                   fontWeight: FontWeight.bold,
+                ),
+              ),
+            
+            // 6. BOOKMARK
+            if (isBookmarked)
+              const TextSpan(
+                text: ' \u{1F516}', // Bookmark emoji
+                style: TextStyle(
+                  color: Colors.green,
                 ),
               ),
             

@@ -5,6 +5,7 @@ import 'package:fard/features/quran/domain/repositories/bookmark_repository.dart
 import 'package:fard/features/quran/domain/entities/surah.dart';
 import 'package:fard/features/quran/domain/entities/ayah.dart';
 import 'package:fard/features/quran/domain/entities/bookmark.dart';
+import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
 
 import 'package:fard/features/quran/domain/usecases/watch_last_read.dart';
 import 'dart:async';
@@ -18,7 +19,9 @@ abstract class QuranEvent with _$QuranEvent {
   const factory QuranEvent.search(String query) = _Search;
   const factory QuranEvent.lastReadUpdated(LastReadPosition position) = _LastReadUpdated;
   const factory QuranEvent.loadBookmarks() = _LoadBookmarks;
-  const factory QuranEvent.bookmarkUpdated(Bookmark? bookmark) = _BookmarkUpdated;
+  const factory QuranEvent.bookmarksUpdated(List<Bookmark> bookmarks) = _BookmarksUpdated;
+  const factory QuranEvent.removeBookmark(AyahNumber ayahNumber) = _RemoveBookmark;
+  const factory QuranEvent.removeMultipleBookmarks(List<AyahNumber> ayahNumbers) = _RemoveMultipleBookmarks;
 }
 
 @freezed
@@ -31,7 +34,7 @@ abstract class QuranState with _$QuranState {
     String? error,
     @Default([]) List<SearchResult> searchResults,
     LastReadPosition? lastReadPosition,
-    Bookmark? bookmark,
+    @Default([]) List<Bookmark> bookmarks,
   }) = _QuranState;
 
   factory QuranState.initial() => const QuranState();
@@ -42,12 +45,20 @@ class QuranBloc extends Bloc<QuranEvent, QuranState> {
   final WatchLastRead _watchLastRead;
   final BookmarkRepository _bookmarkRepository;
   StreamSubscription? _lastReadSubscription;
+  StreamSubscription? _bookmarksSubscription;
 
   QuranBloc(this._repository, this._watchLastRead, this._bookmarkRepository) : super(QuranState.initial()) {
     _lastReadSubscription = _watchLastRead().listen((result) {
       result.fold(
         (_) => null,
         (pos) => add(QuranEvent.lastReadUpdated(pos)),
+      );
+    });
+
+    _bookmarksSubscription = _bookmarkRepository.watchBookmarks().listen((result) {
+      result.fold(
+        (_) => null,
+        (bookmarks) => add(QuranEvent.bookmarksUpdated(bookmarks)),
       );
     });
 
@@ -67,15 +78,25 @@ class QuranBloc extends Bloc<QuranEvent, QuranState> {
     });
 
     on<_LoadBookmarks>((event, emit) async {
-      final result = await _bookmarkRepository.getBookmark();
+      final result = await _bookmarkRepository.getBookmarks();
       result.fold(
         (_) => null,
-        (bookmark) => emit(state.copyWith(bookmark: bookmark)),
+        (bookmarks) => emit(state.copyWith(bookmarks: bookmarks)),
       );
     });
 
-    on<_BookmarkUpdated>((event, emit) {
-      emit(state.copyWith(bookmark: event.bookmark));
+    on<_BookmarksUpdated>((event, emit) {
+      emit(state.copyWith(bookmarks: event.bookmarks));
+    });
+
+    on<_RemoveBookmark>((event, emit) async {
+      await _bookmarkRepository.removeBookmark(event.ayahNumber);
+    });
+
+    on<_RemoveMultipleBookmarks>((event, emit) async {
+      for (final ayahNumber in event.ayahNumbers) {
+        await _bookmarkRepository.removeBookmark(ayahNumber);
+      }
     });
 
     on<_LoadSurahDetails>((event, emit) async {
@@ -99,6 +120,7 @@ class QuranBloc extends Bloc<QuranEvent, QuranState> {
   @override
   Future<void> close() {
     _lastReadSubscription?.cancel();
+    _bookmarksSubscription?.cancel();
     return super.close();
   }
 }

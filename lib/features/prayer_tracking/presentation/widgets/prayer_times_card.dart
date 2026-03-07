@@ -278,8 +278,8 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                                         salaah.localizedName(l10n),
                                         style: GoogleFonts.amiri(
                                           color: isNext ? AppTheme.accent : AppTheme.textSecondary,
-                                          fontSize: isVeryNarrow ? 9 : 10,
-                                          fontWeight: isNext ? FontWeight.bold : FontWeight.normal,
+                                          fontSize: isVeryNarrow ? 11 : 13,
+                                          fontWeight: isNext ? FontWeight.bold : FontWeight.w600,
                                           height: 1.1,
                                         ),
                                       ),
@@ -290,7 +290,7 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                                         timeStr != null ? (isAr ? timeStr.toArabicIndic() : timeStr) : '--:--',
                                         style: GoogleFonts.outfit(
                                           color: isNext ? AppTheme.textPrimary : AppTheme.textPrimary.withValues(alpha: 0.9),
-                                          fontSize: isVeryNarrow ? 10 : 12,
+                                          fontSize: isVeryNarrow ? 12 : 14,
                                           fontWeight: isNext ? FontWeight.bold : FontWeight.w600,
                                         ),
                                       ),

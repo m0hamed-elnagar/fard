@@ -7,7 +7,6 @@ import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
 import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
-import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
 import 'package:fard/core/extensions/quran_extension.dart';
 import 'package:quran/quran.dart' as quran;
 import 'package:google_fonts/google_fonts.dart';
@@ -95,8 +94,7 @@ class AyahDetailSheet extends StatelessWidget {
                                       );
                                       
                                       final isBookmarked = state.maybeMap(
-                                        loaded: (s) => s.bookmark?.ayahNumber.surahNumber == ayah.number.surahNumber &&
-                                                       s.bookmark?.ayahNumber.ayahNumberInSurah == ayah.number.ayahNumberInSurah,
+                                        loaded: (s) => s.bookmarks.any((b) => b.ayahNumber == ayah.number),
                                         orElse: () => false,
                                       );
 
@@ -110,8 +108,56 @@ class AyahDetailSheet extends StatelessWidget {
                                             ),
                                             tooltip: isBookmarked ? l10n.removeFromBookmarks : l10n.addToBookmarks,
                                             onPressed: () async {
+                                              bool shouldToggle = true;
+                                              if (isBookmarked) {
+                                                final confirmed = await showDialog<bool>(
+                                                  context: context,
+                                                  builder: (dialogContext) => AlertDialog(
+                                                    title: Text(
+                                                      l10n.removeFromBookmarks,
+                                                      style: GoogleFonts.amiri(fontWeight: FontWeight.bold),
+                                                      textAlign: TextAlign.right,
+                                                    ),
+                                                    content: Text(
+                                                      'هل أنت متأكد من حذف هذه الإشارة المرجعية؟', // Using Arabic since it's most common in this app's Quran feature
+                                                      style: GoogleFonts.amiri(),
+                                                      textAlign: TextAlign.right,
+                                                    ),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () => Navigator.pop(dialogContext, false),
+                                                        child: Text('إلغاء', style: GoogleFonts.amiri(color: Colors.grey)),
+                                                      ),
+                                                      TextButton(
+                                                        onPressed: () => Navigator.pop(dialogContext, true),
+                                                        child: Text('حذف', style: GoogleFonts.amiri(color: Colors.red)),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                                shouldToggle = confirmed ?? false;
+                                              }
+
+                                              if (shouldToggle && context.mounted) {
+                                                context.read<ReaderBloc>().add(ReaderEvent.toggleBookmark(ayah));
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(isBookmarked ? l10n.removedFromBookmarks : l10n.addedToBookmarks),
+                                                    duration: const Duration(seconds: 1),
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                          ),
+                                          IconButton(
+                                            icon: Icon(
+                                              isLastRead ? Icons.menu_book_rounded : Icons.menu_book_outlined,
+                                              color: isLastRead ? Theme.of(context).colorScheme.primary : null,
+                                            ),
+                                            tooltip: l10n.markAsLastRead,
+                                            onPressed: () async {
                                               bool shouldProceed = true;
-                                              if (!isBookmarked) {
+                                              if (!isLastRead) {
                                                 final werdState = context.read<WerdBloc>().state;
                                                 final sessionStartAbs = werdState.progress?.sessionStartAbsolute;
                                                 final targetAbs = QuranHizbProvider.getAbsoluteAyahNumber(
@@ -146,30 +192,14 @@ class AyahDetailSheet extends StatelessWidget {
                                               }
 
                                               if (shouldProceed && context.mounted) {
-                                                context.read<ReaderBloc>().add(ReaderEvent.toggleBookmark(ayah));
+                                                context.read<ReaderBloc>().add(ReaderEvent.saveLastRead(ayah));
                                                 ScaffoldMessenger.of(context).showSnackBar(
                                                   SnackBar(
-                                                    content: Text(isBookmarked ? l10n.removedFromBookmarks : l10n.addedToBookmarks),
+                                                    content: Text(l10n.markAsLastReadSuccess),
                                                     duration: const Duration(seconds: 1),
                                                   ),
                                                 );
                                               }
-                                            },
-                                          ),
-                                          IconButton(
-                                            icon: Icon(
-                                              isLastRead ? Icons.menu_book_rounded : Icons.menu_book_outlined,
-                                              color: isLastRead ? Theme.of(context).colorScheme.primary : null,
-                                            ),
-                                            tooltip: l10n.markAsLastRead,
-                                            onPressed: () {
-                                              context.read<ReaderBloc>().add(ReaderEvent.saveLastRead(ayah));
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(
-                                                  content: Text(l10n.markAsLastReadSuccess),
-                                                  duration: const Duration(seconds: 1),
-                                                ),
-                                              );
                                             },
                                           ),
                                         ],

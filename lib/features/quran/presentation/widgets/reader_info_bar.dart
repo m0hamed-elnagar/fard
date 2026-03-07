@@ -11,14 +11,18 @@ class ReaderInfoBar extends StatelessWidget {
   final int surahNumber;
   final int ayahNumber;
   final VoidCallback? onJumpToStart;
+  final VoidCallback? onJumpToLastRead;
   final VoidCallback? onJumpToBookmark;
+  final List<int>? bookmarkAbsolutes;
 
   const ReaderInfoBar({
     super.key,
     required this.surahNumber,
     required this.ayahNumber,
     this.onJumpToStart,
+    this.onJumpToLastRead,
     this.onJumpToBookmark,
+    this.bookmarkAbsolutes,
   });
 
   @override
@@ -26,6 +30,7 @@ class ReaderInfoBar extends StatelessWidget {
     final juz = quran.getJuzNumber(surahNumber, ayahNumber);
     final hizb = QuranHizbProvider.getHizbNumber(surahNumber, ayahNumber);
     final page = quran.getPageNumber(surahNumber, ayahNumber);
+    final hasBookmarks = bookmarkAbsolutes != null && bookmarkAbsolutes!.isNotEmpty;
 
     return BlocBuilder<WerdBloc, WerdState>(
       builder: (context, state) {
@@ -84,18 +89,18 @@ class ReaderInfoBar extends StatelessWidget {
                 if (onJumpToStart != null && state.progress?.sessionStartAbsolute != null)
                   const _VerticalDivider(),
 
-                if (onJumpToBookmark != null && state.progress?.lastReadAbsolute != null)
+                if (onJumpToLastRead != null && state.progress?.lastReadAbsolute != null)
                   Padding(
                     padding: const EdgeInsets.only(right: 4.0),
                     child: InkWell(
-                      onTap: onJumpToBookmark,
+                      onTap: onJumpToLastRead,
                       borderRadius: BorderRadius.circular(12),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.bookmark_rounded, 
+                            Icon(Icons.arrow_forward_rounded, 
                               color: Theme.of(context).colorScheme.primary,
                               size: 18,
                             ),
@@ -119,7 +124,51 @@ class ReaderInfoBar extends StatelessWidget {
                     ),
                   ),
                 
-                if (onJumpToBookmark != null && state.progress?.lastReadAbsolute != null)
+                if (onJumpToLastRead != null && state.progress?.lastReadAbsolute != null)
+                  const _VerticalDivider(),
+
+                if (onJumpToBookmark != null && hasBookmarks)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 4.0),
+                    child: InkWell(
+                      onTap: onJumpToBookmark,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.bookmark_rounded, 
+                              color: Colors.orange,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 4),
+                            Builder(
+                              builder: (context) {
+                                // Logic: Find the first bookmark that is after current ayah, or wrap to first
+                                final currentAbs = QuranHizbProvider.getAbsoluteAyahNumber(surahNumber, ayahNumber);
+                                final nextBookmarkAbs = bookmarkAbsolutes!.firstWhere(
+                                  (abs) => abs > currentAbs,
+                                  orElse: () => bookmarkAbsolutes!.first,
+                                );
+                                final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(nextBookmarkAbs);
+                                return Text(
+                                  pos[1].toArabicIndic(),
+                                  style: GoogleFonts.amiri(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.orange,
+                                  ),
+                                );
+                              }
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                if (onJumpToBookmark != null && hasBookmarks)
                   const _VerticalDivider(),
 
                 GestureDetector(
