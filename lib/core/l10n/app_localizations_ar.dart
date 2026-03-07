@@ -775,6 +775,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get none => 'بدون';
 
   @override
+  String get page => 'صفحة';
+
+  @override
   String get quarter => 'ربع';
 
   @override
@@ -817,5 +820,69 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String surahWithAyah(Object ayah, Object surah) {
     return 'سورة $surah، آية $ayah';
+  }
+
+  @override
+  String get hijriAdjustment => 'تعديل التاريخ الهجري';
+
+  @override
+  String get hijriAdjustmentDesc =>
+      'تعديل التاريخ الهجري إذا كان يختلف عن الرؤية المحلية (مثلاً: -١ أو +١ يوم).';
+
+  @override
+  String get nextPrayer => 'الصلاة القادمة';
+
+  @override
+  String get remainingTime => 'الوقت المتبقي';
+
+  @override
+  String get hijriCalendar => 'هجري';
+
+  @override
+  String get gregorianCalendar => 'ميلادي';
+
+  @override
+  String get muslimWorldLeague => 'رابطة العالم الإسلامي';
+
+  @override
+  String get egyptianGeneralAuthority => 'الهيئة المصرية العامة للمساحة';
+
+  @override
+  String get universityOfIslamicSciencesKarachi =>
+      'جامعة العلوم الإسلامية بكراتشي';
+
+  @override
+  String get ummAlQuraUniversityMakkah => 'جامعة أم القرى بمكة المكرمة';
+
+  @override
+  String get dubai => 'دبي';
+
+  @override
+  String get moonsightingCommittee => 'لجنة رؤية الأهلة';
+
+  @override
+  String get qatar => 'قطر';
+
+  @override
+  String get kuwait => 'الكويت';
+
+  @override
+  String get singapore => 'سنغافورة';
+
+  @override
+  String get turkey => 'تركيا';
+
+  @override
+  String get instituteOfGeophysicsTehran => 'معهد الجيوفيزياء بجامعة طهران';
+
+  @override
+  String get isnaNorthAmerica => 'إسنا (أمريكا الشمالية)';
+
+  @override
+  String get jumpConfirmTitle => 'قفزة كبيرة';
+
+  @override
+  String jumpConfirmMessage(String start, String end, String pages) {
+    return 'هل أتممت فعلاً من $start إلى $end ($pages صفحات)؟';
   }
 }

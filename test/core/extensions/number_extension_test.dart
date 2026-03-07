@@ -15,5 +15,11 @@ void main() {
       // 12 should be "one" then "two", which is ١٢
       expect(12.toArabicIndic(), '١٢');
     });
+
+    test('String toArabicIndic converts digits correctly', () {
+      expect('0'.toArabicIndic(), '٠');
+      expect('123'.toArabicIndic(), '١٢٣');
+      expect('10:30:45'.toArabicIndic(), '١٠:٣٠:٤٥');
+    });
   });
 }

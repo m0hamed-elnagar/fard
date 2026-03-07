@@ -10,7 +10,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 
 import 'package:fard/core/theme/app_theme.dart';
-import 'quran_reader_page.dart';
+import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
+import 'package:fard/core/extensions/quran_extension.dart';
 
 class ScannedMushafReaderPage extends StatefulWidget {
   final int initialPage;
@@ -61,6 +64,20 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
           ayahNumber: ayahNum,
         ),
       );
+    }
+  }
+
+  void _trackWerdProgress() {
+    final pageData = quran.getPageData(_currentPage);
+    for (final data in pageData) {
+      final surahNum = data['surah'] as int;
+      final startAyah = data['start'] as int;
+      final endAyah = data['end'] as int;
+      
+      final startAbs = QuranHizbProvider.getAbsoluteAyahNumber(surahNum, startAyah);
+      final endAbs = QuranHizbProvider.getAbsoluteAyahNumber(surahNum, endAyah);
+      
+      context.read<WerdBloc>().add(WerdEvent.trackRangeRead(startAbs, endAbs));
     }
   }
 
@@ -198,6 +215,8 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
                         _currentPage = page + 1;
                       });
                       _updateAudioPosition();
+                      // Track Werd progress
+                      _trackWerdProgress();
                       // Prefetch next pages when user navigates
                       _downloadService.prefetchPages(_currentPage);
                     },

@@ -1,12 +1,18 @@
 extension NumberExtension on int {
   String toArabicIndic() {
-    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-    return toString()
-        .split('')
-        .map((d) {
-          final val = int.tryParse(d);
-          return val != null ? arabicDigits[val] : d;
-        })
-        .join();
+    return toString().toArabicIndic();
+  }
+}
+
+extension StringNumberExtension on String {
+  String toArabicIndic() {
+    const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    const arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    
+    String result = this;
+    for (int i = 0; i < english.length; i++) {
+      result = result.replaceAll(english[i], arabic[i]);
+    }
+    return result;
   }
 }

@@ -48,110 +48,119 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final bottomPadding = MediaQuery.of(context).padding.bottom + 120;
 
     return Scaffold(
-      body: Stack(
-        children: [
-          BlocBuilder<SettingsCubit, SettingsState>(
-            builder: (context, state) {
-              return PageView(
-                controller: _pageController,
-                onPageChanged: (index) => setState(() => _currentPage = index),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            BlocBuilder<SettingsCubit, SettingsState>(
+              builder: (context, state) {
+                return PageView(
+                  controller: _pageController,
+                  onPageChanged: (index) => setState(() => _currentPage = index),
+                  children: [
+                    _OnboardingPage(
+                      title: l10n.onboardingTitle1,
+                      description: l10n.onboardingDesc1,
+                      icon: Icons.auto_graph_rounded,
+                      bottomPadding: bottomPadding,
+                    ),
+                    _OnboardingPage(
+                      title: l10n.onboardingTitle2,
+                      description: l10n.onboardingDesc2,
+                      icon: Icons.history_rounded,
+                      bottomPadding: bottomPadding,
+                    ),
+                    _LocationPrayerPage(state: state, bottomPadding: bottomPadding),
+                    _AzanSelectionPage(
+                      state: state, 
+                      isDownloading: _isDownloading,
+                      onDownloadingChanged: (val) => setState(() => _isDownloading = val),
+                      bottomPadding: bottomPadding,
+                    ),
+                    _QadaSelectionPage(
+                      isEnabled: _isQadaEnabled,
+                      onChanged: (val) => setState(() => _isQadaEnabled = val),
+                      bottomPadding: bottomPadding,
+                    ),
+                  ],
+                );
+              },
+            ),
+            Positioned(
+              top: 16.0,
+              right: 16.0,
+              child: IconButton(
+                onPressed: () => context.read<SettingsCubit>().toggleLocale(),
+                icon: const Icon(Icons.language_rounded, color: AppTheme.accent),
+                tooltip: l10n.switchLanguage,
+              ),
+            ),
+            Positioned(
+              bottom: 24.0,
+              left: 24.0,
+              right: 24.0,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  _OnboardingPage(
-                    title: l10n.onboardingTitle1,
-                    description: l10n.onboardingDesc1,
-                    icon: Icons.auto_graph_rounded,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      _totalPages,
+                      (index) => AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                        height: 8.0,
+                        width: _currentPage == index ? 24.0 : 8.0,
+                        decoration: BoxDecoration(
+                          color: _currentPage == index
+                              ? AppTheme.accent
+                              : AppTheme.textSecondary.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
+                      ),
+                    ),
                   ),
-                  _OnboardingPage(
-                    title: l10n.onboardingTitle2,
-                    description: l10n.onboardingDesc2,
-                    icon: Icons.history_rounded,
-                  ),
-                  _LocationPrayerPage(state: state),
-                  _AzanSelectionPage(
-                    state: state, 
-                    isDownloading: _isDownloading,
-                    onDownloadingChanged: (val) => setState(() => _isDownloading = val),
-                  ),
-                  _QadaSelectionPage(
-                    isEnabled: _isQadaEnabled,
-                    onChanged: (val) => setState(() => _isQadaEnabled = val),
+                  const SizedBox(height: 24.0),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56.0,
+                    child: ElevatedButton(
+                      onPressed: _isDownloading ? null : (_currentPage == _totalPages - 1
+                          ? _completeOnboarding
+                          : () => _pageController.nextPage(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              )),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryLight,
+                        foregroundColor: AppTheme.onPrimary,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.0),
+                        ),
+                      ),
+                      child: _isDownloading 
+                        ? const SizedBox(
+                            height: 24, 
+                            width: 24, 
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          )
+                        : Text(
+                            _currentPage == _totalPages - 1 ? l10n.getStarted : l10n.next,
+                            style: GoogleFonts.outfit(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                    ),
                   ),
                 ],
-              );
-            },
-          ),
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 16.0,
-            right: 16.0,
-            child: IconButton(
-              onPressed: () => context.read<SettingsCubit>().toggleLocale(),
-              icon: const Icon(Icons.language_rounded, color: AppTheme.accent),
-              tooltip: l10n.switchLanguage,
+              ),
             ),
-          ),
-          Positioned(
-            bottom: 48.0,
-            left: 24.0,
-            right: 24.0,
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    _totalPages,
-                    (index) => AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                      height: 8.0,
-                      width: _currentPage == index ? 24.0 : 8.0,
-                      decoration: BoxDecoration(
-                        color: _currentPage == index
-                            ? AppTheme.accent
-                            : AppTheme.textSecondary.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(4.0),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32.0),
-                SizedBox(
-                  width: double.infinity,
-                  height: 56.0,
-                  child: ElevatedButton(
-                    onPressed: _isDownloading ? null : (_currentPage == _totalPages - 1
-                        ? _completeOnboarding
-                        : () => _pageController.nextPage(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            )),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryLight,
-                      foregroundColor: AppTheme.onPrimary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16.0),
-                      ),
-                    ),
-                    child: _isDownloading 
-                      ? const SizedBox(
-                          height: 24, 
-                          width: 24, 
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                        )
-                      : Text(
-                          _currentPage == _totalPages - 1 ? l10n.getStarted : l10n.next,
-                          style: GoogleFonts.outfit(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -159,18 +168,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
 class _LocationPrayerPage extends StatelessWidget {
   final SettingsState state;
+  final double bottomPadding;
 
-  const _LocationPrayerPage({required this.state});
+  const _LocationPrayerPage({required this.state, required this.bottomPadding});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<SettingsCubit>();
 
-    return Padding(
-      padding: const EdgeInsets.all(40.0),
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(24.0, 40.0, 24.0, bottomPadding),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
             padding: const EdgeInsets.all(32.0),
@@ -178,7 +187,7 @@ class _LocationPrayerPage extends StatelessWidget {
               color: AppTheme.primaryLight.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.location_on_rounded, size: 80.0, color: AppTheme.primaryLight),
+            child: Icon(Icons.location_on_rounded, size: 64.0, color: AppTheme.primaryLight),
           ),
           const SizedBox(height: 32.0),
           Text(
@@ -186,7 +195,7 @@ class _LocationPrayerPage extends StatelessWidget {
             textAlign: TextAlign.center,
             style: GoogleFonts.amiri(
               color: AppTheme.textPrimary,
-              fontSize: 32.0,
+              fontSize: 28.0,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -210,18 +219,18 @@ class _LocationPrayerPage extends StatelessWidget {
           _SettingsDropdownSelector(
             label: l10n.calculationMethod,
             value: state.calculationMethod,
-            options: const {
-              'muslim_league': 'Muslim World League',
-              'egyptian': 'Egyptian General Authority',
-              'karachi': 'University of Islamic Sciences, Karachi',
-              'umm_al_qura': 'Umm al-Qura University, Makkah',
-              'dubai': 'Dubai',
-              'qatar': 'Qatar',
-              'kuwait': 'Kuwait',
-              'singapore': 'Singapore',
-              'turkey': 'Turkey',
-              'tehran': 'Institute of Geophysics, University of Tehran',
-              'north_america': 'ISNA (North America)',
+            options: {
+              'muslim_league': l10n.muslimWorldLeague,
+              'egyptian': l10n.egyptianGeneralAuthority,
+              'karachi': l10n.universityOfIslamicSciencesKarachi,
+              'umm_al_qura': l10n.ummAlQuraUniversityMakkah,
+              'dubai': l10n.dubai,
+              'qatar': l10n.qatar,
+              'kuwait': l10n.kuwait,
+              'singapore': l10n.singapore,
+              'turkey': l10n.turkey,
+              'tehran': l10n.instituteOfGeophysicsTehran,
+              'north_america': l10n.isnaNorthAmerica,
             },
             onChanged: (val) => cubit.updateCalculationMethod(val!),
           ),
@@ -245,11 +254,13 @@ class _AzanSelectionPage extends StatelessWidget {
   final SettingsState state;
   final bool isDownloading;
   final ValueChanged<bool> onDownloadingChanged;
+  final double bottomPadding;
 
   const _AzanSelectionPage({
     required this.state, 
     required this.isDownloading,
     required this.onDownloadingChanged,
+    required this.bottomPadding,
   });
 
   @override
@@ -260,18 +271,16 @@ class _AzanSelectionPage extends StatelessWidget {
     final currentSound = state.salaahSettings.first.azanSound;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(40.0),
+      padding: EdgeInsets.fromLTRB(24.0, 40.0, 24.0, bottomPadding),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 60.0), // Padding for Top icons
           Container(
             padding: const EdgeInsets.all(32.0),
             decoration: BoxDecoration(
               color: AppTheme.primaryLight.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.notifications_active_rounded, size: 80.0, color: AppTheme.primaryLight),
+            child: Icon(Icons.notifications_active_rounded, size: 64.0, color: AppTheme.primaryLight),
           ),
           const SizedBox(height: 32.0),
           Text(
@@ -279,11 +288,11 @@ class _AzanSelectionPage extends StatelessWidget {
             textAlign: TextAlign.center,
             style: GoogleFonts.amiri(
               color: AppTheme.textPrimary,
-              fontSize: 32.0,
+              fontSize: 28.0,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 40.0),
+          const SizedBox(height: 32.0),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
@@ -309,7 +318,7 @@ class _AzanSelectionPage extends StatelessWidget {
             ),
           ),
           if (isAzanEnabled) ...[
-            const SizedBox(height: 24.0),
+            const SizedBox(height: 16.0),
             _SettingsDropdownSelector(
               label: l10n.azanVoice,
               value: _getDisplayName(currentSound) ?? l10n.defaultVal,
@@ -347,7 +356,6 @@ class _AzanSelectionPage extends StatelessWidget {
   String? _getDisplayName(String? path) {
     if (path == null || path == 'default') return null;
     final fileName = path.split(Platform.isWindows ? '\\' : '/').last;
-    // Find key in azanVoices that produces this fileName
     for (var entry in VoiceDownloadService.azanVoices.entries) {
       final uri = Uri.parse(entry.value);
       if (fileName == 'voice_${uri.pathSegments.last}') {
@@ -470,19 +478,20 @@ class _SettingsDropdownSelector extends StatelessWidget {
 class _QadaSelectionPage extends StatelessWidget {
   final bool isEnabled;
   final ValueChanged<bool> onChanged;
+  final double bottomPadding;
 
   const _QadaSelectionPage({
     required this.isEnabled,
     required this.onChanged,
+    required this.bottomPadding,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Padding(
-      padding: const EdgeInsets.all(40.0),
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(24.0, 40.0, 24.0, bottomPadding),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
             padding: const EdgeInsets.all(32.0),
@@ -492,17 +501,17 @@ class _QadaSelectionPage extends StatelessWidget {
             ),
             child: Icon(
               Icons.check_circle_outline_rounded,
-              size: 80.0,
+              size: 64.0,
               color: AppTheme.primaryLight,
             ),
           ),
-          const SizedBox(height: 48.0),
+          const SizedBox(height: 32.0),
           Text(
             l10n.qadaOnboardingTitle,
             textAlign: TextAlign.center,
             style: GoogleFonts.amiri(
               color: AppTheme.textPrimary,
-              fontSize: 32.0,
+              fontSize: 28.0,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -512,11 +521,11 @@ class _QadaSelectionPage extends StatelessWidget {
             textAlign: TextAlign.center,
             style: GoogleFonts.outfit(
               color: AppTheme.textSecondary,
-              fontSize: 18.0,
+              fontSize: 16.0,
               height: 1.5,
             ),
           ),
-          const SizedBox(height: 40.0),
+          const SizedBox(height: 32.0),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
@@ -551,19 +560,20 @@ class _OnboardingPage extends StatelessWidget {
   final String title;
   final String description;
   final IconData icon;
+  final double bottomPadding;
 
   const _OnboardingPage({
     required this.title,
     required this.description,
     required this.icon,
+    required this.bottomPadding,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(40.0),
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(24.0, 40.0, 24.0, bottomPadding),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
             padding: const EdgeInsets.all(32.0),
@@ -571,15 +581,15 @@ class _OnboardingPage extends StatelessWidget {
               color: AppTheme.primaryLight.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 80.0, color: AppTheme.primaryLight),
+            child: Icon(icon, size: 64.0, color: AppTheme.primaryLight),
           ),
-          const SizedBox(height: 48.0),
+          const SizedBox(height: 32.0),
           Text(
             title,
             textAlign: TextAlign.center,
             style: GoogleFonts.amiri(
               color: AppTheme.textPrimary,
-              fontSize: 32.0,
+              fontSize: 28.0,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -589,7 +599,7 @@ class _OnboardingPage extends StatelessWidget {
             textAlign: TextAlign.center,
             style: GoogleFonts.outfit(
               color: AppTheme.textSecondary,
-              fontSize: 18.0,
+              fontSize: 16.0,
               height: 1.5,
             ),
           ),

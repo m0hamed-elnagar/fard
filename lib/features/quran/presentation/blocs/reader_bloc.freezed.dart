@@ -858,12 +858,12 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( Surah surah,  Ayah? highlightedAyah,  Ayah? lastReadAyah,  double textScale,  ReaderSeparator separator,  bool isBookmarked,  int selectedTafsirId)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( Surah surah,  Ayah? highlightedAyah,  Ayah? lastReadAyah,  double textScale,  ReaderSeparator separator,  bool isBookmarked,  int selectedTafsirId,  Bookmark? bookmark)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Loaded() when loaded != null:
-return loaded(_that.surah,_that.highlightedAyah,_that.lastReadAyah,_that.textScale,_that.separator,_that.isBookmarked,_that.selectedTafsirId);case _Error() when error != null:
+return loaded(_that.surah,_that.highlightedAyah,_that.lastReadAyah,_that.textScale,_that.separator,_that.isBookmarked,_that.selectedTafsirId,_that.bookmark);case _Error() when error != null:
 return error(_that.message);case _:
   return orElse();
 
@@ -882,12 +882,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( Surah surah,  Ayah? highlightedAyah,  Ayah? lastReadAyah,  double textScale,  ReaderSeparator separator,  bool isBookmarked,  int selectedTafsirId)  loaded,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( Surah surah,  Ayah? highlightedAyah,  Ayah? lastReadAyah,  double textScale,  ReaderSeparator separator,  bool isBookmarked,  int selectedTafsirId,  Bookmark? bookmark)  loaded,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _Loaded():
-return loaded(_that.surah,_that.highlightedAyah,_that.lastReadAyah,_that.textScale,_that.separator,_that.isBookmarked,_that.selectedTafsirId);case _Error():
+return loaded(_that.surah,_that.highlightedAyah,_that.lastReadAyah,_that.textScale,_that.separator,_that.isBookmarked,_that.selectedTafsirId,_that.bookmark);case _Error():
 return error(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -905,12 +905,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( Surah surah,  Ayah? highlightedAyah,  Ayah? lastReadAyah,  double textScale,  ReaderSeparator separator,  bool isBookmarked,  int selectedTafsirId)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( Surah surah,  Ayah? highlightedAyah,  Ayah? lastReadAyah,  double textScale,  ReaderSeparator separator,  bool isBookmarked,  int selectedTafsirId,  Bookmark? bookmark)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Loaded() when loaded != null:
-return loaded(_that.surah,_that.highlightedAyah,_that.lastReadAyah,_that.textScale,_that.separator,_that.isBookmarked,_that.selectedTafsirId);case _Error() when error != null:
+return loaded(_that.surah,_that.highlightedAyah,_that.lastReadAyah,_that.textScale,_that.separator,_that.isBookmarked,_that.selectedTafsirId,_that.bookmark);case _Error() when error != null:
 return error(_that.message);case _:
   return null;
 
@@ -987,7 +987,7 @@ String toString() {
 
 
 class _Loaded implements ReaderState {
-  const _Loaded({required this.surah, this.highlightedAyah, this.lastReadAyah, this.textScale = 1.0, this.separator = ReaderSeparator.none, this.isBookmarked = false, this.selectedTafsirId = 16});
+  const _Loaded({required this.surah, this.highlightedAyah, this.lastReadAyah, this.textScale = 1.0, this.separator = ReaderSeparator.none, this.isBookmarked = false, this.selectedTafsirId = 16, this.bookmark});
   
 
  final  Surah surah;
@@ -997,6 +997,7 @@ class _Loaded implements ReaderState {
 @JsonKey() final  ReaderSeparator separator;
 @JsonKey() final  bool isBookmarked;
 @JsonKey() final  int selectedTafsirId;
+ final  Bookmark? bookmark;
 
 /// Create a copy of ReaderState
 /// with the given fields replaced by the non-null parameter values.
@@ -1008,16 +1009,16 @@ _$LoadedCopyWith<_Loaded> get copyWith => __$LoadedCopyWithImpl<_Loaded>(this, _
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loaded&&(identical(other.surah, surah) || other.surah == surah)&&(identical(other.highlightedAyah, highlightedAyah) || other.highlightedAyah == highlightedAyah)&&(identical(other.lastReadAyah, lastReadAyah) || other.lastReadAyah == lastReadAyah)&&(identical(other.textScale, textScale) || other.textScale == textScale)&&(identical(other.separator, separator) || other.separator == separator)&&(identical(other.isBookmarked, isBookmarked) || other.isBookmarked == isBookmarked)&&(identical(other.selectedTafsirId, selectedTafsirId) || other.selectedTafsirId == selectedTafsirId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loaded&&(identical(other.surah, surah) || other.surah == surah)&&(identical(other.highlightedAyah, highlightedAyah) || other.highlightedAyah == highlightedAyah)&&(identical(other.lastReadAyah, lastReadAyah) || other.lastReadAyah == lastReadAyah)&&(identical(other.textScale, textScale) || other.textScale == textScale)&&(identical(other.separator, separator) || other.separator == separator)&&(identical(other.isBookmarked, isBookmarked) || other.isBookmarked == isBookmarked)&&(identical(other.selectedTafsirId, selectedTafsirId) || other.selectedTafsirId == selectedTafsirId)&&(identical(other.bookmark, bookmark) || other.bookmark == bookmark));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,surah,highlightedAyah,lastReadAyah,textScale,separator,isBookmarked,selectedTafsirId);
+int get hashCode => Object.hash(runtimeType,surah,highlightedAyah,lastReadAyah,textScale,separator,isBookmarked,selectedTafsirId,bookmark);
 
 @override
 String toString() {
-  return 'ReaderState.loaded(surah: $surah, highlightedAyah: $highlightedAyah, lastReadAyah: $lastReadAyah, textScale: $textScale, separator: $separator, isBookmarked: $isBookmarked, selectedTafsirId: $selectedTafsirId)';
+  return 'ReaderState.loaded(surah: $surah, highlightedAyah: $highlightedAyah, lastReadAyah: $lastReadAyah, textScale: $textScale, separator: $separator, isBookmarked: $isBookmarked, selectedTafsirId: $selectedTafsirId, bookmark: $bookmark)';
 }
 
 
@@ -1028,7 +1029,7 @@ abstract mixin class _$LoadedCopyWith<$Res> implements $ReaderStateCopyWith<$Res
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
 @useResult
 $Res call({
- Surah surah, Ayah? highlightedAyah, Ayah? lastReadAyah, double textScale, ReaderSeparator separator, bool isBookmarked, int selectedTafsirId
+ Surah surah, Ayah? highlightedAyah, Ayah? lastReadAyah, double textScale, ReaderSeparator separator, bool isBookmarked, int selectedTafsirId, Bookmark? bookmark
 });
 
 
@@ -1045,7 +1046,7 @@ class __$LoadedCopyWithImpl<$Res>
 
 /// Create a copy of ReaderState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? surah = null,Object? highlightedAyah = freezed,Object? lastReadAyah = freezed,Object? textScale = null,Object? separator = null,Object? isBookmarked = null,Object? selectedTafsirId = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? surah = null,Object? highlightedAyah = freezed,Object? lastReadAyah = freezed,Object? textScale = null,Object? separator = null,Object? isBookmarked = null,Object? selectedTafsirId = null,Object? bookmark = freezed,}) {
   return _then(_Loaded(
 surah: null == surah ? _self.surah : surah // ignore: cast_nullable_to_non_nullable
 as Surah,highlightedAyah: freezed == highlightedAyah ? _self.highlightedAyah : highlightedAyah // ignore: cast_nullable_to_non_nullable
@@ -1054,7 +1055,8 @@ as Ayah?,textScale: null == textScale ? _self.textScale : textScale // ignore: c
 as double,separator: null == separator ? _self.separator : separator // ignore: cast_nullable_to_non_nullable
 as ReaderSeparator,isBookmarked: null == isBookmarked ? _self.isBookmarked : isBookmarked // ignore: cast_nullable_to_non_nullable
 as bool,selectedTafsirId: null == selectedTafsirId ? _self.selectedTafsirId : selectedTafsirId // ignore: cast_nullable_to_non_nullable
-as int,
+as int,bookmark: freezed == bookmark ? _self.bookmark : bookmark // ignore: cast_nullable_to_non_nullable
+as Bookmark?,
   ));
 }
 

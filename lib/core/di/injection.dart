@@ -10,6 +10,7 @@ import 'package:fard/features/prayer_tracking/data/prayer_repo_impl.dart';
 import 'package:fard/features/prayer_tracking/domain/prayer_repo.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/quran/injection.dart';
+import 'package:fard/features/werd/injection.dart';
 import 'package:fard/features/audio/injection.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/tasbih/data/tasbih_repository_impl.dart';
@@ -85,6 +86,10 @@ Future<void> configureDependencies({String? hivePath}) async {
   // Initialize Quran Feature (DDD)
   await initQuranFeature();
   debugPrint('configureDependencies: Quran Feature initialized');
+
+  debugPrint('configureDependencies: Initializing Werd Feature...');
+  await initWerdFeature();
+  debugPrint('configureDependencies: Werd Feature initialized');
   
   getIt.registerFactory<PrayerTrackerBloc>(() => PrayerTrackerBloc(
         getIt<PrayerRepo>(),

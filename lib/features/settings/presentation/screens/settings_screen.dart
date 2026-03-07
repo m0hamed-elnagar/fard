@@ -176,11 +176,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         'tehran',
                         'turkey',
                       ].map((method) {
-                        final displayName = method
-                            .replaceAll('_', ' ')
-                            .split(' ')
-                            .map((str) => str[0].toUpperCase() + str.substring(1))
-                            .join(' ');
+                        String displayName;
+                        switch (method) {
+                          case 'muslim_league': displayName = l10n.muslimWorldLeague; break;
+                          case 'egyptian': displayName = l10n.egyptianGeneralAuthority; break;
+                          case 'karachi': displayName = l10n.universityOfIslamicSciencesKarachi; break;
+                          case 'umm_al_qura': displayName = l10n.ummAlQuraUniversityMakkah; break;
+                          case 'dubai': displayName = l10n.dubai; break;
+                          case 'moonsighting_committee': displayName = l10n.moonsightingCommittee; break;
+                          case 'north_america': displayName = l10n.isnaNorthAmerica; break;
+                          case 'kuwait': displayName = l10n.kuwait; break;
+                          case 'qatar': displayName = l10n.qatar; break;
+                          case 'singapore': displayName = l10n.singapore; break;
+                          case 'tehran': displayName = l10n.instituteOfGeophysicsTehran; break;
+                          case 'turkey': displayName = l10n.turkey; break;
+                          default:
+                            displayName = method
+                              .replaceAll('_', ' ')
+                              .split(' ')
+                              .map((str) => str[0].toUpperCase() + str.substring(1))
+                              .join(' ');
+                        }
                         return DropdownMenuItem(
                           value: method,
                           child: Text(
@@ -346,6 +362,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       value: state.isQadaEnabled,
                       onChanged: (val) {
                         context.read<SettingsCubit>().toggleQadaEnabled();
+                      },
+                    ),
+                  ),
+                  const Divider(height: 32),
+                  _buildSettingItem(
+                    title: l10n.hijriAdjustment,
+                    description: l10n.hijriAdjustmentDesc,
+                    trailing: _buildDropdown<int>(
+                      value: state.hijriAdjustment,
+                      items: [-2, -1, 0, 1, 2].map((adj) {
+                        return DropdownMenuItem(
+                          value: adj,
+                          child: Text(
+                            adj == 0 ? '0' : (adj > 0 ? '+$adj' : '$adj'),
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          context.read<SettingsCubit>().updateHijriAdjustment(value);
+                        }
                       },
                     ),
                   ),

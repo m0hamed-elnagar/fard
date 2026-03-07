@@ -1526,6 +1526,12 @@ abstract class AppLocalizations {
   /// **'None'**
   String get none;
 
+  /// No description provided for @page.
+  ///
+  /// In en, this message translates to:
+  /// **'Page'**
+  String get page;
+
   /// No description provided for @quarter.
   ///
   /// In en, this message translates to:
@@ -1603,6 +1609,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Surah {surah}, Ayah {ayah}'**
   String surahWithAyah(Object ayah, Object surah);
+
+  /// No description provided for @hijriAdjustment.
+  ///
+  /// In en, this message translates to:
+  /// **'Hijri Adjustment'**
+  String get hijriAdjustment;
+
+  /// No description provided for @hijriAdjustmentDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust the Hijri date if it differs from your local sighting (e.g., -1 or +1 day).'**
+  String get hijriAdjustmentDesc;
+
+  /// No description provided for @nextPrayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Prayer'**
+  String get nextPrayer;
+
+  /// No description provided for @remainingTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining Time'**
+  String get remainingTime;
+
+  /// No description provided for @hijriCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Hijri'**
+  String get hijriCalendar;
+
+  /// No description provided for @gregorianCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Gregorian'**
+  String get gregorianCalendar;
+
+  /// No description provided for @muslimWorldLeague.
+  ///
+  /// In en, this message translates to:
+  /// **'Muslim World League'**
+  String get muslimWorldLeague;
+
+  /// No description provided for @egyptianGeneralAuthority.
+  ///
+  /// In en, this message translates to:
+  /// **'Egyptian General Authority'**
+  String get egyptianGeneralAuthority;
+
+  /// No description provided for @universityOfIslamicSciencesKarachi.
+  ///
+  /// In en, this message translates to:
+  /// **'University of Islamic Sciences, Karachi'**
+  String get universityOfIslamicSciencesKarachi;
+
+  /// No description provided for @ummAlQuraUniversityMakkah.
+  ///
+  /// In en, this message translates to:
+  /// **'Umm al-Qura University, Makkah'**
+  String get ummAlQuraUniversityMakkah;
+
+  /// No description provided for @dubai.
+  ///
+  /// In en, this message translates to:
+  /// **'Dubai'**
+  String get dubai;
+
+  /// No description provided for @moonsightingCommittee.
+  ///
+  /// In en, this message translates to:
+  /// **'Moonsighting Committee'**
+  String get moonsightingCommittee;
+
+  /// No description provided for @qatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Qatar'**
+  String get qatar;
+
+  /// No description provided for @kuwait.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuwait'**
+  String get kuwait;
+
+  /// No description provided for @singapore.
+  ///
+  /// In en, this message translates to:
+  /// **'Singapore'**
+  String get singapore;
+
+  /// No description provided for @turkey.
+  ///
+  /// In en, this message translates to:
+  /// **'Turkey'**
+  String get turkey;
+
+  /// No description provided for @instituteOfGeophysicsTehran.
+  ///
+  /// In en, this message translates to:
+  /// **'Institute of Geophysics, University of Tehran'**
+  String get instituteOfGeophysicsTehran;
+
+  /// No description provided for @isnaNorthAmerica.
+  ///
+  /// In en, this message translates to:
+  /// **'ISNA (North America)'**
+  String get isnaNorthAmerica;
+
+  /// No description provided for @jumpConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Significant Jump'**
+  String get jumpConfirmTitle;
+
+  /// No description provided for @jumpConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Did you really finish from {start} to {end} ({pages} pages)?'**
+  String jumpConfirmMessage(String start, String end, String pages);
 }
 
 class _AppLocalizationsDelegate

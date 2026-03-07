@@ -28,6 +28,7 @@ class SettingsCubit extends Cubit<SettingsState> {
   static const String _remindersKey = 'azkar_reminders';
   static const String _salaahSettingsKey = 'salaah_settings';
   static const String _qadaKey = 'is_qada_enabled';
+  static const String _hijriAdjustmentKey = 'hijri_adjustment';
 
   SettingsCubit(
     this._prefs, 
@@ -45,6 +46,7 @@ class SettingsCubit extends Cubit<SettingsState> {
           eveningAzkarTime: _prefs.getString(_eveningAzkarKey) ?? '18:00',
           isAfterSalahAzkarEnabled: _prefs.getBool(_afterSalahAzkarKey) ?? false,
           isQadaEnabled: _prefs.getBool(_qadaKey) ?? true,
+          hijriAdjustment: _prefs.getInt(_hijriAdjustmentKey) ?? 0,
           reminders: _loadReminders(_prefs, _prefs.getString(_morningAzkarKey) ?? '05:00', _prefs.getString(_eveningAzkarKey) ?? '18:00'),
           salaahSettings: _loadSalaahSettings(_prefs),
         ));
@@ -172,6 +174,11 @@ class SettingsCubit extends Cubit<SettingsState> {
         if (countryCode != null) {
           method = _mapCountryToMethod(countryCode);
           await _prefs.setString(_methodKey, method);
+          
+          // Apply Egypt default hijri adjustment if country is Egypt
+          if (countryCode.toUpperCase() == 'EG') {
+            updateHijriAdjustment(-1);
+          }
         }
       }
 
@@ -219,6 +226,12 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   void updateCalculationMethod(String method) {
     _prefs.setString(_methodKey, method);
+    
+    // Default Hijri adjustment for Egypt this year (Ramadan 1447) is -1
+    if (method == 'egyptian') {
+      updateHijriAdjustment(-1);
+    }
+    
     emit(state.copyWith(calculationMethod: method));
     _updateReminders();
   }
@@ -298,6 +311,11 @@ class SettingsCubit extends Cubit<SettingsState> {
     final newValue = !state.isQadaEnabled;
     _prefs.setBool(_qadaKey, newValue);
     emit(state.copyWith(isQadaEnabled: newValue));
+  }
+
+  void updateHijriAdjustment(int adjustment) {
+    _prefs.setInt(_hijriAdjustmentKey, adjustment);
+    emit(state.copyWith(hijriAdjustment: adjustment));
   }
 
   Future<void> _updateReminders() async {

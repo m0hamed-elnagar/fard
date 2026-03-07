@@ -19,14 +19,16 @@ class BookmarkList extends StatelessWidget {
 
     return BlocBuilder<QuranBloc, QuranState>(
       builder: (context, state) {
-        final bookmarks = state.bookmarks.where((b) {
-          if (searchQuery.isEmpty) return true;
-          final surahName = quran.getSurahNameArabic(b.ayahNumber.surahNumber);
-          return surahName.contains(searchQuery) || 
-                 b.ayahNumber.ayahNumberInSurah.toString().contains(searchQuery);
-        }).toList();
+        final bookmark = state.bookmark;
+        
+        bool matchesSearch = true;
+        if (bookmark != null && searchQuery.isNotEmpty) {
+          final surahName = quran.getSurahNameArabic(bookmark.ayahNumber.surahNumber);
+          matchesSearch = surahName.contains(searchQuery) || 
+                          bookmark.ayahNumber.ayahNumberInSurah.toString().contains(searchQuery);
+        }
 
-        if (bookmarks.isEmpty) {
+        if (bookmark == null || !matchesSearch) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -42,19 +44,16 @@ class BookmarkList extends StatelessWidget {
           );
         }
 
-        return ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: bookmarks.length,
-          separatorBuilder: (context, index) => const Divider(),
-          itemBuilder: (context, index) {
-            final bookmark = bookmarks[index];
-            final surahName = quran.getSurahNameArabic(bookmark.ayahNumber.surahNumber);
-            final page = quran.getPageNumber(
-              bookmark.ayahNumber.surahNumber, 
-              bookmark.ayahNumber.ayahNumberInSurah
-            );
+        final surahName = quran.getSurahNameArabic(bookmark.ayahNumber.surahNumber);
+        final page = quran.getPageNumber(
+          bookmark.ayahNumber.surahNumber, 
+          bookmark.ayahNumber.ayahNumberInSurah
+        );
 
-            return ListTile(
+        return ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            ListTile(
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
@@ -105,8 +104,8 @@ class BookmarkList extends StatelessWidget {
                   ),
                 );
               },
-            );
-          },
+            ),
+          ],
         );
       },
     );
