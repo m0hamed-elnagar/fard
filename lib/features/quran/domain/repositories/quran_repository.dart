@@ -19,6 +19,7 @@ abstract interface class QuranRepository {
   Future<void> updateReaderSeparator(int separatorIndex);
   Future<Result<String>> getTafsir(int surahNumber, int ayahNumber, {int? tafsirId});
   Stream<double> downloadAllSurahs();
+  Future<double> getTextDownloadProgress();
 }
 
 class SearchResult extends Equatable {
