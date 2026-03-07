@@ -3,9 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fard/features/quran/presentation/widgets/ayah_text.dart';
 import 'package:fard/features/quran/domain/entities/ayah.dart';
 import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
-import 'package:fard/features/quran/domain/entities/reader_settings.dart';
-
-import 'package:fard/core/errors/failure.dart';
 
 void main() {
   final testAyah = Ayah(
@@ -71,25 +68,28 @@ void main() {
     
     // leafSpans should be:
     // 0: Anchor (WidgetSpan)
-    // 1: Flag (WidgetSpan)
+    // 1: Flag (TextSpan)
     // 2: Ayah Text (TextSpan)
-    // 3: Bookmark (WidgetSpan)
-    // 4: Marker (TextSpan)
+    // 3: Marker (TextSpan)
+    // 4: Last Read Arrow (TextSpan)
     // 5: Trailing space (TextSpan)
     
     expect(leafSpans.length, 6);
     expect(leafSpans[0], isA<WidgetSpan>()); // Anchor
-    expect(leafSpans[1], isA<WidgetSpan>()); // Flag
-    expect(leafSpans[2], isA<TextSpan>());
+    expect(leafSpans[1], isA<TextSpan>()); // Flag
+    expect((leafSpans[1] as TextSpan).text, contains('\u2691'));
+    expect(leafSpans[2], isA<TextSpan>()); // Text
     expect((leafSpans[2] as TextSpan).text, testAyah.uthmaniText);
-    expect(leafSpans[3], isA<WidgetSpan>()); // Bookmark
-    expect(leafSpans[4], isA<TextSpan>());
-    expect((leafSpans[4] as TextSpan).text, contains('۝'));
+    expect(leafSpans[3], isA<TextSpan>()); // Marker
+    expect((leafSpans[3] as TextSpan).text, contains('\u2009')); // Marker starts with thin space
+    expect(leafSpans[4], isA<TextSpan>()); // Last Read ➤
+    expect((leafSpans[4] as TextSpan).text, contains('\u27A4'));
     expect(leafSpans[5], isA<TextSpan>());
     expect((leafSpans[5] as TextSpan).text, ' ');
     
     // Verify RTL
-    expect(richText.textDirection, TextDirection.rtl);
+    final directionality = tester.widget<Directionality>(find.byType(Directionality).last);
+    expect(directionality.textDirection, TextDirection.rtl);
     expect(richText.textAlign, TextAlign.justify);
   });
 }

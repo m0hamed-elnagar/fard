@@ -2,18 +2,14 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/features/werd/domain/entities/werd_progress.dart';
 import 'package:fard/features/werd/domain/repositories/werd_repository.dart';
-import 'package:fard/features/quran/domain/usecases/watch_bookmark.dart';
-import 'package:fard/core/extensions/quran_extension.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
 
 class WerdBloc extends Bloc<WerdEvent, WerdState> {
   final WerdRepository _repository;
-  final WatchBookmark _watchBookmark;
   StreamSubscription? _progressSubscription;
-  StreamSubscription? _bookmarkSubscription;
 
-  WerdBloc(this._repository, this._watchBookmark) : super(WerdState.initial()) {
+  WerdBloc(this._repository) : super(WerdState.initial()) {
     on<WerdEvent>((event, emit) async {
       await event.map(
         load: (e) async {
@@ -23,22 +19,6 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
             result.fold(
               (_) => null,
               (progress) => add(WerdEvent.progressUpdated(progress)),
-            );
-          });
-
-          _bookmarkSubscription?.cancel();
-          _bookmarkSubscription = _watchBookmark().listen((result) {
-            result.fold(
-              (_) => null,
-              (bookmark) {
-                if (bookmark != null) {
-                  final abs = QuranHizbProvider.getAbsoluteAyahNumber(
-                    bookmark.ayahNumber.surahNumber, 
-                    bookmark.ayahNumber.ayahNumberInSurah
-                  );
-                  add(WerdEvent.updateBookmark(abs));
-                }
-              },
             );
           });
 
@@ -80,7 +60,7 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           emit(state.copyWith(progress: e.progress));
         },
         updateBookmark: (e) async {
-           await _handleBookmarkUpdate(e.absoluteIndex);
+           // No longer used to update progress
         },
         trackItemRead: (e) async {
           // If we track a single item (e.g. from Mushaf tap), 

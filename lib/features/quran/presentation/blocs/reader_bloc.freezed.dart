@@ -55,7 +55,7 @@ extension ReaderEventPatterns on ReaderEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _LoadSurah value)?  loadSurah,TResult Function( _SelectAyah value)?  selectAyah,TResult Function( _SaveLastRead value)?  saveLastRead,TResult Function( _UpdateScale value)?  updateScale,TResult Function( _UpdateSeparator value)?  updateSeparator,TResult Function( _ToggleBookmark value)?  toggleBookmark,TResult Function( _CheckBookmark value)?  checkBookmark,TResult Function( _UpdateTafsir value)?  updateTafsir,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _LoadSurah value)?  loadSurah,TResult Function( _SelectAyah value)?  selectAyah,TResult Function( _SaveLastRead value)?  saveLastRead,TResult Function( _UpdateScale value)?  updateScale,TResult Function( _UpdateSeparator value)?  updateSeparator,TResult Function( _ToggleBookmark value)?  toggleBookmark,TResult Function( _CheckBookmark value)?  checkBookmark,TResult Function( _BookmarksUpdated value)?  bookmarksUpdated,TResult Function( _UpdateTafsir value)?  updateTafsir,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _LoadSurah() when loadSurah != null:
@@ -65,7 +65,8 @@ return saveLastRead(_that);case _UpdateScale() when updateScale != null:
 return updateScale(_that);case _UpdateSeparator() when updateSeparator != null:
 return updateSeparator(_that);case _ToggleBookmark() when toggleBookmark != null:
 return toggleBookmark(_that);case _CheckBookmark() when checkBookmark != null:
-return checkBookmark(_that);case _UpdateTafsir() when updateTafsir != null:
+return checkBookmark(_that);case _BookmarksUpdated() when bookmarksUpdated != null:
+return bookmarksUpdated(_that);case _UpdateTafsir() when updateTafsir != null:
 return updateTafsir(_that);case _:
   return orElse();
 
@@ -84,7 +85,7 @@ return updateTafsir(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _LoadSurah value)  loadSurah,required TResult Function( _SelectAyah value)  selectAyah,required TResult Function( _SaveLastRead value)  saveLastRead,required TResult Function( _UpdateScale value)  updateScale,required TResult Function( _UpdateSeparator value)  updateSeparator,required TResult Function( _ToggleBookmark value)  toggleBookmark,required TResult Function( _CheckBookmark value)  checkBookmark,required TResult Function( _UpdateTafsir value)  updateTafsir,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _LoadSurah value)  loadSurah,required TResult Function( _SelectAyah value)  selectAyah,required TResult Function( _SaveLastRead value)  saveLastRead,required TResult Function( _UpdateScale value)  updateScale,required TResult Function( _UpdateSeparator value)  updateSeparator,required TResult Function( _ToggleBookmark value)  toggleBookmark,required TResult Function( _CheckBookmark value)  checkBookmark,required TResult Function( _BookmarksUpdated value)  bookmarksUpdated,required TResult Function( _UpdateTafsir value)  updateTafsir,}){
 final _that = this;
 switch (_that) {
 case _LoadSurah():
@@ -94,7 +95,8 @@ return saveLastRead(_that);case _UpdateScale():
 return updateScale(_that);case _UpdateSeparator():
 return updateSeparator(_that);case _ToggleBookmark():
 return toggleBookmark(_that);case _CheckBookmark():
-return checkBookmark(_that);case _UpdateTafsir():
+return checkBookmark(_that);case _BookmarksUpdated():
+return bookmarksUpdated(_that);case _UpdateTafsir():
 return updateTafsir(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -112,7 +114,7 @@ return updateTafsir(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _LoadSurah value)?  loadSurah,TResult? Function( _SelectAyah value)?  selectAyah,TResult? Function( _SaveLastRead value)?  saveLastRead,TResult? Function( _UpdateScale value)?  updateScale,TResult? Function( _UpdateSeparator value)?  updateSeparator,TResult? Function( _ToggleBookmark value)?  toggleBookmark,TResult? Function( _CheckBookmark value)?  checkBookmark,TResult? Function( _UpdateTafsir value)?  updateTafsir,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _LoadSurah value)?  loadSurah,TResult? Function( _SelectAyah value)?  selectAyah,TResult? Function( _SaveLastRead value)?  saveLastRead,TResult? Function( _UpdateScale value)?  updateScale,TResult? Function( _UpdateSeparator value)?  updateSeparator,TResult? Function( _ToggleBookmark value)?  toggleBookmark,TResult? Function( _CheckBookmark value)?  checkBookmark,TResult? Function( _BookmarksUpdated value)?  bookmarksUpdated,TResult? Function( _UpdateTafsir value)?  updateTafsir,}){
 final _that = this;
 switch (_that) {
 case _LoadSurah() when loadSurah != null:
@@ -122,7 +124,8 @@ return saveLastRead(_that);case _UpdateScale() when updateScale != null:
 return updateScale(_that);case _UpdateSeparator() when updateSeparator != null:
 return updateSeparator(_that);case _ToggleBookmark() when toggleBookmark != null:
 return toggleBookmark(_that);case _CheckBookmark() when checkBookmark != null:
-return checkBookmark(_that);case _UpdateTafsir() when updateTafsir != null:
+return checkBookmark(_that);case _BookmarksUpdated() when bookmarksUpdated != null:
+return bookmarksUpdated(_that);case _UpdateTafsir() when updateTafsir != null:
 return updateTafsir(_that);case _:
   return null;
 
@@ -140,7 +143,7 @@ return updateTafsir(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( SurahNumber surahNumber)?  loadSurah,TResult Function( Ayah ayah)?  selectAyah,TResult Function( Ayah ayah)?  saveLastRead,TResult Function( double scale)?  updateScale,TResult Function( ReaderSeparator separator)?  updateSeparator,TResult Function( Ayah ayah)?  toggleBookmark,TResult Function( Ayah ayah)?  checkBookmark,TResult Function( int tafsirId)?  updateTafsir,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( SurahNumber surahNumber)?  loadSurah,TResult Function( Ayah ayah)?  selectAyah,TResult Function( Ayah ayah)?  saveLastRead,TResult Function( double scale)?  updateScale,TResult Function( ReaderSeparator separator)?  updateSeparator,TResult Function( Ayah ayah)?  toggleBookmark,TResult Function( Ayah ayah)?  checkBookmark,TResult Function( List<Bookmark> bookmarks)?  bookmarksUpdated,TResult Function( int tafsirId)?  updateTafsir,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _LoadSurah() when loadSurah != null:
 return loadSurah(_that.surahNumber);case _SelectAyah() when selectAyah != null:
@@ -149,7 +152,8 @@ return saveLastRead(_that.ayah);case _UpdateScale() when updateScale != null:
 return updateScale(_that.scale);case _UpdateSeparator() when updateSeparator != null:
 return updateSeparator(_that.separator);case _ToggleBookmark() when toggleBookmark != null:
 return toggleBookmark(_that.ayah);case _CheckBookmark() when checkBookmark != null:
-return checkBookmark(_that.ayah);case _UpdateTafsir() when updateTafsir != null:
+return checkBookmark(_that.ayah);case _BookmarksUpdated() when bookmarksUpdated != null:
+return bookmarksUpdated(_that.bookmarks);case _UpdateTafsir() when updateTafsir != null:
 return updateTafsir(_that.tafsirId);case _:
   return orElse();
 
@@ -168,7 +172,7 @@ return updateTafsir(_that.tafsirId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( SurahNumber surahNumber)  loadSurah,required TResult Function( Ayah ayah)  selectAyah,required TResult Function( Ayah ayah)  saveLastRead,required TResult Function( double scale)  updateScale,required TResult Function( ReaderSeparator separator)  updateSeparator,required TResult Function( Ayah ayah)  toggleBookmark,required TResult Function( Ayah ayah)  checkBookmark,required TResult Function( int tafsirId)  updateTafsir,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( SurahNumber surahNumber)  loadSurah,required TResult Function( Ayah ayah)  selectAyah,required TResult Function( Ayah ayah)  saveLastRead,required TResult Function( double scale)  updateScale,required TResult Function( ReaderSeparator separator)  updateSeparator,required TResult Function( Ayah ayah)  toggleBookmark,required TResult Function( Ayah ayah)  checkBookmark,required TResult Function( List<Bookmark> bookmarks)  bookmarksUpdated,required TResult Function( int tafsirId)  updateTafsir,}) {final _that = this;
 switch (_that) {
 case _LoadSurah():
 return loadSurah(_that.surahNumber);case _SelectAyah():
@@ -177,7 +181,8 @@ return saveLastRead(_that.ayah);case _UpdateScale():
 return updateScale(_that.scale);case _UpdateSeparator():
 return updateSeparator(_that.separator);case _ToggleBookmark():
 return toggleBookmark(_that.ayah);case _CheckBookmark():
-return checkBookmark(_that.ayah);case _UpdateTafsir():
+return checkBookmark(_that.ayah);case _BookmarksUpdated():
+return bookmarksUpdated(_that.bookmarks);case _UpdateTafsir():
 return updateTafsir(_that.tafsirId);case _:
   throw StateError('Unexpected subclass');
 
@@ -195,7 +200,7 @@ return updateTafsir(_that.tafsirId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( SurahNumber surahNumber)?  loadSurah,TResult? Function( Ayah ayah)?  selectAyah,TResult? Function( Ayah ayah)?  saveLastRead,TResult? Function( double scale)?  updateScale,TResult? Function( ReaderSeparator separator)?  updateSeparator,TResult? Function( Ayah ayah)?  toggleBookmark,TResult? Function( Ayah ayah)?  checkBookmark,TResult? Function( int tafsirId)?  updateTafsir,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( SurahNumber surahNumber)?  loadSurah,TResult? Function( Ayah ayah)?  selectAyah,TResult? Function( Ayah ayah)?  saveLastRead,TResult? Function( double scale)?  updateScale,TResult? Function( ReaderSeparator separator)?  updateSeparator,TResult? Function( Ayah ayah)?  toggleBookmark,TResult? Function( Ayah ayah)?  checkBookmark,TResult? Function( List<Bookmark> bookmarks)?  bookmarksUpdated,TResult? Function( int tafsirId)?  updateTafsir,}) {final _that = this;
 switch (_that) {
 case _LoadSurah() when loadSurah != null:
 return loadSurah(_that.surahNumber);case _SelectAyah() when selectAyah != null:
@@ -204,7 +209,8 @@ return saveLastRead(_that.ayah);case _UpdateScale() when updateScale != null:
 return updateScale(_that.scale);case _UpdateSeparator() when updateSeparator != null:
 return updateSeparator(_that.separator);case _ToggleBookmark() when toggleBookmark != null:
 return toggleBookmark(_that.ayah);case _CheckBookmark() when checkBookmark != null:
-return checkBookmark(_that.ayah);case _UpdateTafsir() when updateTafsir != null:
+return checkBookmark(_that.ayah);case _BookmarksUpdated() when bookmarksUpdated != null:
+return bookmarksUpdated(_that.bookmarks);case _UpdateTafsir() when updateTafsir != null:
 return updateTafsir(_that.tafsirId);case _:
   return null;
 
@@ -678,6 +684,78 @@ as Ayah,
 /// @nodoc
 
 
+class _BookmarksUpdated implements ReaderEvent {
+  const _BookmarksUpdated(final  List<Bookmark> bookmarks): _bookmarks = bookmarks;
+  
+
+ final  List<Bookmark> _bookmarks;
+ List<Bookmark> get bookmarks {
+  if (_bookmarks is EqualUnmodifiableListView) return _bookmarks;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_bookmarks);
+}
+
+
+/// Create a copy of ReaderEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$BookmarksUpdatedCopyWith<_BookmarksUpdated> get copyWith => __$BookmarksUpdatedCopyWithImpl<_BookmarksUpdated>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BookmarksUpdated&&const DeepCollectionEquality().equals(other._bookmarks, _bookmarks));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_bookmarks));
+
+@override
+String toString() {
+  return 'ReaderEvent.bookmarksUpdated(bookmarks: $bookmarks)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$BookmarksUpdatedCopyWith<$Res> implements $ReaderEventCopyWith<$Res> {
+  factory _$BookmarksUpdatedCopyWith(_BookmarksUpdated value, $Res Function(_BookmarksUpdated) _then) = __$BookmarksUpdatedCopyWithImpl;
+@useResult
+$Res call({
+ List<Bookmark> bookmarks
+});
+
+
+
+
+}
+/// @nodoc
+class __$BookmarksUpdatedCopyWithImpl<$Res>
+    implements _$BookmarksUpdatedCopyWith<$Res> {
+  __$BookmarksUpdatedCopyWithImpl(this._self, this._then);
+
+  final _BookmarksUpdated _self;
+  final $Res Function(_BookmarksUpdated) _then;
+
+/// Create a copy of ReaderEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? bookmarks = null,}) {
+  return _then(_BookmarksUpdated(
+null == bookmarks ? _self._bookmarks : bookmarks // ignore: cast_nullable_to_non_nullable
+as List<Bookmark>,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
 class _UpdateTafsir implements ReaderEvent {
   const _UpdateTafsir(this.tafsirId);
   
@@ -858,12 +936,12 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( Surah surah,  Ayah? highlightedAyah,  Ayah? lastReadAyah,  double textScale,  ReaderSeparator separator,  bool isBookmarked,  int selectedTafsirId,  Bookmark? bookmark)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( Surah surah,  Ayah? highlightedAyah,  Ayah? lastReadAyah,  double textScale,  ReaderSeparator separator,  int selectedTafsirId,  List<Bookmark> bookmarks)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Loaded() when loaded != null:
-return loaded(_that.surah,_that.highlightedAyah,_that.lastReadAyah,_that.textScale,_that.separator,_that.isBookmarked,_that.selectedTafsirId,_that.bookmark);case _Error() when error != null:
+return loaded(_that.surah,_that.highlightedAyah,_that.lastReadAyah,_that.textScale,_that.separator,_that.selectedTafsirId,_that.bookmarks);case _Error() when error != null:
 return error(_that.message);case _:
   return orElse();
 
@@ -882,12 +960,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( Surah surah,  Ayah? highlightedAyah,  Ayah? lastReadAyah,  double textScale,  ReaderSeparator separator,  bool isBookmarked,  int selectedTafsirId,  Bookmark? bookmark)  loaded,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( Surah surah,  Ayah? highlightedAyah,  Ayah? lastReadAyah,  double textScale,  ReaderSeparator separator,  int selectedTafsirId,  List<Bookmark> bookmarks)  loaded,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _Loaded():
-return loaded(_that.surah,_that.highlightedAyah,_that.lastReadAyah,_that.textScale,_that.separator,_that.isBookmarked,_that.selectedTafsirId,_that.bookmark);case _Error():
+return loaded(_that.surah,_that.highlightedAyah,_that.lastReadAyah,_that.textScale,_that.separator,_that.selectedTafsirId,_that.bookmarks);case _Error():
 return error(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -905,12 +983,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( Surah surah,  Ayah? highlightedAyah,  Ayah? lastReadAyah,  double textScale,  ReaderSeparator separator,  bool isBookmarked,  int selectedTafsirId,  Bookmark? bookmark)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( Surah surah,  Ayah? highlightedAyah,  Ayah? lastReadAyah,  double textScale,  ReaderSeparator separator,  int selectedTafsirId,  List<Bookmark> bookmarks)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Loaded() when loaded != null:
-return loaded(_that.surah,_that.highlightedAyah,_that.lastReadAyah,_that.textScale,_that.separator,_that.isBookmarked,_that.selectedTafsirId,_that.bookmark);case _Error() when error != null:
+return loaded(_that.surah,_that.highlightedAyah,_that.lastReadAyah,_that.textScale,_that.separator,_that.selectedTafsirId,_that.bookmarks);case _Error() when error != null:
 return error(_that.message);case _:
   return null;
 
@@ -987,7 +1065,7 @@ String toString() {
 
 
 class _Loaded implements ReaderState {
-  const _Loaded({required this.surah, this.highlightedAyah, this.lastReadAyah, this.textScale = 1.0, this.separator = ReaderSeparator.none, this.isBookmarked = false, this.selectedTafsirId = 16, this.bookmark});
+  const _Loaded({required this.surah, this.highlightedAyah, this.lastReadAyah, this.textScale = 1.0, this.separator = ReaderSeparator.none, this.selectedTafsirId = 16, final  List<Bookmark> bookmarks = const []}): _bookmarks = bookmarks;
   
 
  final  Surah surah;
@@ -995,9 +1073,14 @@ class _Loaded implements ReaderState {
  final  Ayah? lastReadAyah;
 @JsonKey() final  double textScale;
 @JsonKey() final  ReaderSeparator separator;
-@JsonKey() final  bool isBookmarked;
 @JsonKey() final  int selectedTafsirId;
- final  Bookmark? bookmark;
+ final  List<Bookmark> _bookmarks;
+@JsonKey() List<Bookmark> get bookmarks {
+  if (_bookmarks is EqualUnmodifiableListView) return _bookmarks;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_bookmarks);
+}
+
 
 /// Create a copy of ReaderState
 /// with the given fields replaced by the non-null parameter values.
@@ -1009,16 +1092,16 @@ _$LoadedCopyWith<_Loaded> get copyWith => __$LoadedCopyWithImpl<_Loaded>(this, _
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loaded&&(identical(other.surah, surah) || other.surah == surah)&&(identical(other.highlightedAyah, highlightedAyah) || other.highlightedAyah == highlightedAyah)&&(identical(other.lastReadAyah, lastReadAyah) || other.lastReadAyah == lastReadAyah)&&(identical(other.textScale, textScale) || other.textScale == textScale)&&(identical(other.separator, separator) || other.separator == separator)&&(identical(other.isBookmarked, isBookmarked) || other.isBookmarked == isBookmarked)&&(identical(other.selectedTafsirId, selectedTafsirId) || other.selectedTafsirId == selectedTafsirId)&&(identical(other.bookmark, bookmark) || other.bookmark == bookmark));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loaded&&(identical(other.surah, surah) || other.surah == surah)&&(identical(other.highlightedAyah, highlightedAyah) || other.highlightedAyah == highlightedAyah)&&(identical(other.lastReadAyah, lastReadAyah) || other.lastReadAyah == lastReadAyah)&&(identical(other.textScale, textScale) || other.textScale == textScale)&&(identical(other.separator, separator) || other.separator == separator)&&(identical(other.selectedTafsirId, selectedTafsirId) || other.selectedTafsirId == selectedTafsirId)&&const DeepCollectionEquality().equals(other._bookmarks, _bookmarks));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,surah,highlightedAyah,lastReadAyah,textScale,separator,isBookmarked,selectedTafsirId,bookmark);
+int get hashCode => Object.hash(runtimeType,surah,highlightedAyah,lastReadAyah,textScale,separator,selectedTafsirId,const DeepCollectionEquality().hash(_bookmarks));
 
 @override
 String toString() {
-  return 'ReaderState.loaded(surah: $surah, highlightedAyah: $highlightedAyah, lastReadAyah: $lastReadAyah, textScale: $textScale, separator: $separator, isBookmarked: $isBookmarked, selectedTafsirId: $selectedTafsirId, bookmark: $bookmark)';
+  return 'ReaderState.loaded(surah: $surah, highlightedAyah: $highlightedAyah, lastReadAyah: $lastReadAyah, textScale: $textScale, separator: $separator, selectedTafsirId: $selectedTafsirId, bookmarks: $bookmarks)';
 }
 
 
@@ -1029,7 +1112,7 @@ abstract mixin class _$LoadedCopyWith<$Res> implements $ReaderStateCopyWith<$Res
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
 @useResult
 $Res call({
- Surah surah, Ayah? highlightedAyah, Ayah? lastReadAyah, double textScale, ReaderSeparator separator, bool isBookmarked, int selectedTafsirId, Bookmark? bookmark
+ Surah surah, Ayah? highlightedAyah, Ayah? lastReadAyah, double textScale, ReaderSeparator separator, int selectedTafsirId, List<Bookmark> bookmarks
 });
 
 
@@ -1046,17 +1129,16 @@ class __$LoadedCopyWithImpl<$Res>
 
 /// Create a copy of ReaderState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? surah = null,Object? highlightedAyah = freezed,Object? lastReadAyah = freezed,Object? textScale = null,Object? separator = null,Object? isBookmarked = null,Object? selectedTafsirId = null,Object? bookmark = freezed,}) {
+@pragma('vm:prefer-inline') $Res call({Object? surah = null,Object? highlightedAyah = freezed,Object? lastReadAyah = freezed,Object? textScale = null,Object? separator = null,Object? selectedTafsirId = null,Object? bookmarks = null,}) {
   return _then(_Loaded(
 surah: null == surah ? _self.surah : surah // ignore: cast_nullable_to_non_nullable
 as Surah,highlightedAyah: freezed == highlightedAyah ? _self.highlightedAyah : highlightedAyah // ignore: cast_nullable_to_non_nullable
 as Ayah?,lastReadAyah: freezed == lastReadAyah ? _self.lastReadAyah : lastReadAyah // ignore: cast_nullable_to_non_nullable
 as Ayah?,textScale: null == textScale ? _self.textScale : textScale // ignore: cast_nullable_to_non_nullable
 as double,separator: null == separator ? _self.separator : separator // ignore: cast_nullable_to_non_nullable
-as ReaderSeparator,isBookmarked: null == isBookmarked ? _self.isBookmarked : isBookmarked // ignore: cast_nullable_to_non_nullable
-as bool,selectedTafsirId: null == selectedTafsirId ? _self.selectedTafsirId : selectedTafsirId // ignore: cast_nullable_to_non_nullable
-as int,bookmark: freezed == bookmark ? _self.bookmark : bookmark // ignore: cast_nullable_to_non_nullable
-as Bookmark?,
+as ReaderSeparator,selectedTafsirId: null == selectedTafsirId ? _self.selectedTafsirId : selectedTafsirId // ignore: cast_nullable_to_non_nullable
+as int,bookmarks: null == bookmarks ? _self._bookmarks : bookmarks // ignore: cast_nullable_to_non_nullable
+as List<Bookmark>,
   ));
 }
 

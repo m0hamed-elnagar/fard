@@ -3,7 +3,6 @@ import 'package:fard/core/errors/failure.dart';
 import 'package:fard/features/werd/domain/entities/werd_goal.dart';
 import 'package:fard/features/werd/domain/entities/werd_progress.dart';
 import 'package:fard/features/werd/domain/repositories/werd_repository.dart';
-import 'package:fard/features/quran/domain/usecases/watch_bookmark.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
@@ -11,17 +10,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockWerdRepository extends Mock implements WerdRepository {}
-class MockWatchBookmark extends Mock implements WatchBookmark {}
 
 void main() {
   late MockWerdRepository mockRepository;
-  late MockWatchBookmark mockWatchBookmark;
   late WerdGoal testGoal;
   late WerdProgress initialProgress;
 
   setUp(() {
     mockRepository = MockWerdRepository();
-    mockWatchBookmark = MockWatchBookmark();
     testGoal = WerdGoal(
       id: 'default',
       type: WerdGoalType.fixedAmount,
@@ -49,14 +45,12 @@ void main() {
         .thenAnswer((_) async => Result.success(null));
     when(() => mockRepository.updateProgress(any()))
         .thenAnswer((_) async => Result.success(null));
-    when(() => mockWatchBookmark())
-        .thenAnswer((_) => const Stream.empty());
   });
 
   group('WerdBloc Counting Logic', () {
     blocTest<WerdBloc, WerdState>(
       'tracks single item read',
-      build: () => WerdBloc(mockRepository, mockWatchBookmark),
+      build: () => WerdBloc(mockRepository),
       seed: () => WerdState(goal: testGoal, progress: initialProgress),
       act: (bloc) => bloc.add(const WerdEvent.trackItemRead(10)),
       verify: (_) {
@@ -68,7 +62,7 @@ void main() {
 
     blocTest<WerdBloc, WerdState>(
       'tracks range read',
-      build: () => WerdBloc(mockRepository, mockWatchBookmark),
+      build: () => WerdBloc(mockRepository),
       seed: () => WerdState(goal: testGoal, progress: initialProgress),
       act: (bloc) => bloc.add(const WerdEvent.trackRangeRead(1, 5)),
       verify: (_) {
@@ -80,7 +74,7 @@ void main() {
 
     blocTest<WerdBloc, WerdState>(
       'fills small gaps (<= 50)',
-      build: () => WerdBloc(mockRepository, mockWatchBookmark),
+      build: () => WerdBloc(mockRepository),
       seed: () => WerdState(
         goal: testGoal, 
         progress: initialProgress.copyWith(
@@ -100,7 +94,7 @@ void main() {
 
     blocTest<WerdBloc, WerdState>(
       'does NOT fill large gaps (> 50)',
-      build: () => WerdBloc(mockRepository, mockWatchBookmark),
+      build: () => WerdBloc(mockRepository),
       seed: () => WerdState(
         goal: testGoal, 
         progress: initialProgress.copyWith(

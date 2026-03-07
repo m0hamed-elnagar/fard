@@ -9,5 +9,6 @@ class ReaderEvent with _$ReaderEvent {
   const factory ReaderEvent.updateSeparator(ReaderSeparator separator) = _UpdateSeparator;
   const factory ReaderEvent.toggleBookmark(Ayah ayah) = _ToggleBookmark;
   const factory ReaderEvent.checkBookmark(Ayah ayah) = _CheckBookmark;
+  const factory ReaderEvent.bookmarksUpdated(List<Bookmark> bookmarks) = _BookmarksUpdated;
   const factory ReaderEvent.updateTafsir(int tafsirId) = _UpdateTafsir;
 }

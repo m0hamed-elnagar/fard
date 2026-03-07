@@ -419,7 +419,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                                                   highlightedAyah: playingAyah ?? s.highlightedAyah,
                                                   dayStartAyah: dayStartAyah,
                                                   lastReadAyah: (werdState.progress?.totalAmountReadToday ?? 0) > 0 ? lastReadAyah : null,
-                                                  bookmark: s.bookmark,
+                                                  bookmarks: s.bookmarks,
                                                   textScale: s.textScale,
                                                   ayahKeys: _ayahKeys,
                                                   separator: s.separator,
@@ -492,7 +492,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                                         );
                                       }
                                     },
-                                    onJumpToBookmark: () {
+                                    onJumpToLastRead: () {
                                       final werdState = context.read<WerdBloc>().state;
                                       final lastAbs = werdState.progress?.lastReadAbsolute;
                                       if (lastAbs == null) return;
@@ -512,6 +512,39 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                                           QuranReaderPage.route(surahNumber: pos[0], ayahNumber: pos[1]),
                                         );
                                       }
+                                    },
+                                    bookmarkAbsolutes: s.bookmarks
+                                      .where((b) => b.ayahNumber.surahNumber == widget.surahNumber)
+                                      .map((b) => 
+                                        QuranHizbProvider.getAbsoluteAyahNumber(
+                                          b.ayahNumber.surahNumber, 
+                                          b.ayahNumber.ayahNumberInSurah
+                                        )
+                                      ).toList()
+                                      ..sort(),
+                                    onJumpToBookmark: () {
+                                      final surahBookmarks = s.bookmarks
+                                          .where((b) => b.ayahNumber.surahNumber == widget.surahNumber)
+                                          .toList()
+                                          ..sort((a, b) => a.ayahNumber.ayahNumberInSurah.compareTo(b.ayahNumber.ayahNumberInSurah));
+                                      
+                                      if (surahBookmarks.isEmpty) return;
+
+                                      // Logic: find first bookmark AFTER currentAyahNum, or wrap to first
+                                      final nextBookmark = surahBookmarks.firstWhere(
+                                        (b) => b.ayahNumber.ayahNumberInSurah > currentAyahNum,
+                                        orElse: () => surahBookmarks.first,
+                                      );
+
+                                      final pos = [nextBookmark.ayahNumber.surahNumber, nextBookmark.ayahNumber.ayahNumberInSurah];
+                                      
+                                      try {
+                                        final ayah = s.surah.ayahs.firstWhere(
+                                          (a) => a.number.ayahNumberInSurah == pos[1],
+                                        );
+                                        context.read<ReaderBloc>().add(ReaderEvent.selectAyah(ayah));
+                                      } catch (_) {}
+                                      _scrollToAyah(pos[1]);
                                     },
                                   ),
                                   const AudioPlayerBar(),

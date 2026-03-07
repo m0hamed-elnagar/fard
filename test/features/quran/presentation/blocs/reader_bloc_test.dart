@@ -48,6 +48,9 @@ void main() {
     when(() => mockBookmarkRepository.isBookmarked(any()))
         .thenAnswer((_) async => Result.success(false));
     
+    when(() => mockBookmarkRepository.getBookmarks())
+        .thenAnswer((_) async => Result.success([]));
+    
     when(() => mockQuranRepository.getReaderSeparator())
         .thenAnswer((_) async => 0);
 
@@ -87,7 +90,7 @@ void main() {
       act: (bloc) => bloc.add(ReaderEvent.loadSurah(surahNumber: tSurahNumber)),
       expect: () => [
         const ReaderState.loading(),
-        ReaderState.loaded(surah: tSurah, lastReadAyah: null, isBookmarked: false),
+        ReaderState.loaded(surah: tSurah, lastReadAyah: null, bookmarks: []),
       ],
     );
   });

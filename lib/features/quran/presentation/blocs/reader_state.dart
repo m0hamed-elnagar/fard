@@ -10,9 +10,8 @@ class ReaderState with _$ReaderState {
     Ayah? lastReadAyah,
     @Default(1.0) double textScale,
     @Default(ReaderSeparator.none) ReaderSeparator separator,
-    @Default(false) bool isBookmarked,
     @Default(16) int selectedTafsirId,
-    Bookmark? bookmark,
+    @Default([]) List<Bookmark> bookmarks,
   }) = _Loaded;
   const factory ReaderState.error(String message) = _Error;
 }

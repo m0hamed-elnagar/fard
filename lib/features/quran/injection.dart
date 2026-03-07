@@ -9,6 +9,7 @@ import 'package:fard/features/quran/domain/usecases/get_page.dart';
 import 'package:fard/features/quran/domain/usecases/get_tafsir.dart';
 import 'package:fard/features/quran/domain/usecases/update_last_read.dart';
 import 'package:fard/features/quran/domain/usecases/watch_last_read.dart';
+import 'package:fard/features/quran/domain/usecases/watch_bookmark.dart';
 import 'package:fard/features/quran/data/datasources/remote/quran_remote_source.dart';
 import 'package:fard/features/quran/data/repositories/quran_repository_impl.dart';
 import 'package:fard/features/quran/data/repositories/bookmark_repository_impl.dart';
@@ -53,8 +54,9 @@ Future<void> initQuranFeature() async {
   getIt.registerLazySingleton(() => GetTafsir(getIt()));
   getIt.registerLazySingleton(() => UpdateLastRead(getIt(), getIt()));
   getIt.registerLazySingleton(() => WatchLastRead(getIt()));
+  getIt.registerLazySingleton(() => WatchBookmarks(getIt()));
 
-  // Repository
+  // Repositories
   getIt.registerLazySingleton<QuranRepository>(() => QuranRepositoryImpl(
     remoteSource: getIt(),
     localSource: getIt(),

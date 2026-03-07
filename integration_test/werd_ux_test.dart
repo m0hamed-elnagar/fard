@@ -4,9 +4,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:fard/main.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/features/quran/presentation/widgets/ayah_text.dart';
-import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fard/features/quran/presentation/widgets/reader_info_bar.dart';
 import 'dart:io';
 
 void main() {
@@ -17,6 +15,7 @@ void main() {
 
     setUp(() async {
       tempDir = Directory.systemTemp.createTempSync('fard_werd_test_');
+      await getIt.reset();
       await configureDependencies(hivePath: tempDir.path);
       final prefs = getIt<SharedPreferences>();
       await prefs.setBool('onboarding_complete', true);
@@ -80,9 +79,9 @@ void main() {
       await tester.tap(find.byIcon(Icons.close).first);
       await tester.pumpAndSettle();
 
-      // Now verify bookmark icon (Icons.bookmark_rounded) is present on that ayah
-      final bookmarkIcon = find.byIcon(Icons.bookmark_rounded);
-      expect(bookmarkIcon, findsOneWidget);
+      // Now verify last read icon (Icons.arrow_forward_rounded) is present in the info bar
+      final lastReadIcon = find.byIcon(Icons.arrow_forward_rounded);
+      expect(lastReadIcon, findsOneWidget);
     });
 
     testWidgets('Jump to Werd navigates to first ayah if nothing read', (tester) async {
