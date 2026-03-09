@@ -166,6 +166,11 @@ class AyahDetailSheet extends StatelessWidget {
                                                 );
 
                                                 if (sessionStartAbs != null && (targetAbs - sessionStartAbs).abs() > 50) {
+                                                  final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(sessionStartAbs);
+                                                  final startPage = quran.getPageNumber(startPos[0], startPos[1]);
+                                                  final endPage = quran.getPageNumber(ayah.number.surahNumber, ayah.number.ayahNumberInSurah);
+                                                  final pagesCount = (endPage - startPage).abs();
+
                                                   final confirmed = await showDialog<bool>(
                                                     context: context,
                                                     builder: (dialogContext) => AlertDialog(
@@ -173,7 +178,7 @@ class AyahDetailSheet extends StatelessWidget {
                                                       content: Text(l10n.jumpConfirmMessage(
                                                         _formatAyah(sessionStartAbs, l10n.localeName),
                                                         _formatAyah(targetAbs, l10n.localeName),
-                                                        ((targetAbs - sessionStartAbs).abs() / 10).toStringAsFixed(1),
+                                                        l10n.localeName == 'ar' ? pagesCount.toArabicIndic() : pagesCount.toString(),
                                                       )),
                                                       actions: [
                                                         TextButton(

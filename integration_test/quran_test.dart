@@ -5,13 +5,16 @@ import 'package:fard/main.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'dart:io';
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Quran Feature Integration Test', () {
     testWidgets('Navigate to Quran tab and check for crash', (tester) async {
-      // Initialize dependencies manually
-      await configureDependencies();
+      // Initialize dependencies manually with a temp directory for Hive
+      final tempDir = Directory.systemTemp.createTempSync('fard_quran_test_');
+      await configureDependencies(hivePath: tempDir.path);
       
       final prefs = getIt<SharedPreferences>();
       await prefs.setBool('onboarding_complete', true);

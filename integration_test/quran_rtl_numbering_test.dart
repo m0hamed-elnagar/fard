@@ -60,17 +60,19 @@ void main() {
       // 5. Verify the first 3 markers positions using TextSpan geometry
       debugPrint('Verifying marker positions via TextSpan geometry...');
       
-      // Find the RichText widget inside AyahText
+      // Find the RichText widget inside AyahText that contains the markers
       final Finder surahTextFinder = find.descendant(
         of: find.byType(AyahText),
         matching: find.byType(RichText),
-      ).first;
+      ).evaluate().map((e) => e.widget as RichText).where((w) => w.text.toPlainText().contains('۝')).map((w) => find.byWidget(w)).first;
 
-      expect(surahTextFinder, findsOneWidget, reason: 'AyahText should contain at least one RichText');
+      expect(surahTextFinder, findsOneWidget, reason: 'AyahText should contain a RichText with markers');
       
       final RenderParagraph renderParagraph = tester.renderObject(surahTextFinder);
       final String plainText = renderParagraph.text.toPlainText();
       debugPrint('Found text with length: ${plainText.length}');
+      debugPrint('Full text: "$plainText"');
+      debugPrint('Text code units: ${plainText.codeUnits}');
       
       // Target markers (Arabic-Indic digits prefixed with ۝)
       final targetMarker1 = '۝١';

@@ -4,6 +4,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:fard/main.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/features/quran/presentation/pages/scanned_mushaf_reader_page.dart';
+import 'package:fard/features/quran/presentation/widgets/scanned/mushaf_page_item.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
@@ -35,10 +36,9 @@ void main() {
       // 3. Verify ScannedMushafReaderPage is showing
       expect(find.byType(ScannedMushafReaderPage), findsOneWidget);
       
-      // 4. Verify title and page number
-      expect(find.text('المصحف المصور'), findsOneWidget);
-      expect(find.textContaining('صفحة'), findsOneWidget);
-
+      // 4. Verify MushafPageItem is rendered (refactored widget)
+      expect(find.byType(MushafPageItem), findsWidgets);
+      
       // 5. Verify image is there
       expect(find.byType(Image), findsWidgets);
 

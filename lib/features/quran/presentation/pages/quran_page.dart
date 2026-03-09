@@ -195,6 +195,7 @@ class _QuranPageState extends State<QuranPage> {
                 filteredSurahs.isEmpty && !state.isLoading
                     ? Center(child: Text(l10n.noSearchResults))
                     : ListView.separated(
+                        key: const Key('surah_list_view'),
                         padding: const EdgeInsets.all(16),
                         itemCount: filteredSurahs.length + (hasLastRead && _searchQuery.isEmpty ? 1 : 0),
                         separatorBuilder: (context, index) => const Divider(height: 1),

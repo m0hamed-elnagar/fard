@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:quran/quran.dart' as quran;
 
 void main() {
-  String bookmark = '🔖';
-  debugPrint('Bookmark: $bookmark');
-  debugPrint('Code points: ${bookmark.runes.map((r) => '0x${r.toRadixString(16).toUpperCase()}').toList()}');
+  debugPrint('arabicNumeral: true -> ${quran.getVerseEndSymbol(1, arabicNumeral: true)}');
+  debugPrint('arabicNumeral: false -> ${quran.getVerseEndSymbol(1, arabicNumeral: false)}');
 }
