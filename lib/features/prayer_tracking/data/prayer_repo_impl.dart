@@ -4,10 +4,12 @@ import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/prayer_tracking/domain/prayer_repo.dart';
 import 'package:fard/features/prayer_tracking/data/daily_record_entity.dart';
 import 'package:fard/features/prayer_tracking/data/daily_record_mapper.dart';
+import 'package:injectable/injectable.dart';
 
+@LazySingleton(as: PrayerRepo)
 class PrayerRepoImpl implements PrayerRepo {
   final Box<DailyRecordEntity> _box;
-  PrayerRepoImpl(this._box);
+  PrayerRepoImpl(@Named('dailyRecordsBox') this._box);
 
   String _dateKey(DateTime date) =>
       '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';

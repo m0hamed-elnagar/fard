@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:injectable/injectable.dart';
 
+@singleton
 class LocationService {
   Future<Position?> getCurrentPosition() async {
     bool serviceEnabled;

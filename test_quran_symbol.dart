@@ -1,7 +1,7 @@
-import 'package:quran/quran.dart' as quran;
+import 'package:flutter/foundation.dart';
 
 void main() {
   String bookmark = '🔖';
-  print('Bookmark: $bookmark');
-  print('Code points: ${bookmark.runes.map((r) => '0x${r.toRadixString(16).toUpperCase()}').toList()}');
+  debugPrint('Bookmark: $bookmark');
+  debugPrint('Code points: ${bookmark.runes.map((r) => '0x${r.toRadixString(16).toUpperCase()}').toList()}');
 }

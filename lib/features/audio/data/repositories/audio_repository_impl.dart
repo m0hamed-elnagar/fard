@@ -8,7 +8,9 @@ import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
 import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:injectable/injectable.dart';
 
+@LazySingleton(as: AudioRepository)
 class AudioRepositoryImpl implements AudioRepository {
   final http.Client client;
 

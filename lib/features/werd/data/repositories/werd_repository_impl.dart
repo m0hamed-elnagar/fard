@@ -5,7 +5,9 @@ import 'package:fard/features/werd/domain/entities/werd_goal.dart';
 import 'package:fard/features/werd/domain/entities/werd_progress.dart';
 import 'package:fard/features/werd/domain/repositories/werd_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:injectable/injectable.dart';
 
+@LazySingleton(as: WerdRepository)
 class WerdRepositoryImpl implements WerdRepository {
   final SharedPreferences sharedPreferences;
   final _progressControllers = <String, StreamController<Result<WerdProgress>>>{};

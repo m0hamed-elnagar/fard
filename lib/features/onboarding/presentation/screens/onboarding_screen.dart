@@ -463,7 +463,9 @@ class _SettingsDropdownSelector extends StatelessWidget {
                   child: Text(
                     e.value,
                     style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w600),
-                  ),
+                  )
+
+                        ,
                 );
               }).toList(),
               onChanged: onChanged,

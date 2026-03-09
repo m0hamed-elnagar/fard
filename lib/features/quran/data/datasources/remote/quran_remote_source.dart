@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:fard/features/quran/data/models/surah_model.dart';
 import 'package:fard/features/quran/data/models/ayah_model.dart';
 import 'package:fard/core/errors/failure.dart';
+import 'package:injectable/injectable.dart';
 
 abstract interface class QuranRemoteSource {
   Future<List<SurahModel>> getAllSurahs();
@@ -11,6 +12,7 @@ abstract interface class QuranRemoteSource {
   Future<String> getTafsir(int surahNumber, int ayahNumber, {int? tafsirId});
 }
 
+@LazySingleton(as: QuranRemoteSource)
 class QuranRemoteSourceImpl implements QuranRemoteSource {
   final http.Client client;
   static const String baseUrl = 'https://api.quran.com/api/v4';

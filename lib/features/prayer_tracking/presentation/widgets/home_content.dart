@@ -21,7 +21,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_theme.dart';
 
-class HomeContent extends StatelessWidget {
+class HomeContent extends StatefulWidget {
   final DateTime selectedDate;
   final Set<Salaah> missedToday;
   final Set<Salaah> completedToday;
@@ -40,6 +40,39 @@ class HomeContent extends StatelessWidget {
     required this.monthRecords,
     required this.history,
   });
+
+  @override
+  State<HomeContent> createState() => _HomeContentState();
+}
+
+class _HomeContentState extends State<HomeContent> {
+  final ScrollController _scrollController = ScrollController();
+  final PageController _pageController = PageController(viewportFraction: 0.9);
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToAddQada() {
+    // Scroll to top to make DashboardCarousel visible
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOutQuart,
+    );
+    
+    // Change PageView to index 1 (PrayerTrackingCard)
+    if (_pageController.hasClients) {
+      _pageController.animateToPage(
+        1,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeOutQuart,
+      );
+    }
+  }
 
   void _showWerdGoalDialog(BuildContext context) {
     showDialog(
@@ -73,7 +106,7 @@ class HomeContent extends StatelessWidget {
                 longitude: settings.longitude!,
                 method: settings.calculationMethod,
                 madhab: settings.madhab,
-                date: selectedDate,
+                date: widget.selectedDate,
               )
             : null;
 
@@ -105,6 +138,7 @@ class HomeContent extends StatelessWidget {
           ),
           body: SafeArea(
             child: CustomScrollView(
+              controller: _scrollController,
               physics: const BouncingScrollPhysics(),
               slivers: [
                 SliverPadding(
@@ -112,9 +146,11 @@ class HomeContent extends StatelessWidget {
                   sliver: SliverToBoxAdapter(
                     child: DashboardCarousel(
                       prayerTimes: prayerTimes,
-                      selectedDate: selectedDate,
+                      selectedDate: widget.selectedDate,
                       cityName: settings.cityName,
-                      qadaStatus: qadaStatus,
+                      qadaStatus: widget.qadaStatus,
+                      pageController: _pageController,
+                      isQadaEnabled: settings.isQadaEnabled,
                       onAddQadaPressed: () {
                         showDialog(
                           context: context,
@@ -127,7 +163,7 @@ class HomeContent extends StatelessWidget {
                       onEditQadaPressed: () {
                         final currentCounts = {
                           for (final s in Salaah.values)
-                            s: qadaStatus[s]?.value ?? 0
+                            s: widget.qadaStatus[s]?.value ?? 0
                         };
                         showDialog(
                           context: context,
@@ -149,8 +185,8 @@ class HomeContent extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 8.0),
                   sliver: SliverToBoxAdapter(
                     child: CalendarWidget(
-                      selectedDate: selectedDate,
-                      monthRecords: monthRecords,
+                      selectedDate: widget.selectedDate,
+                      monthRecords: widget.monthRecords,
                       hijriAdjustment: settings.hijriAdjustment,
                       onDaySelected: (date) =>
                           bloc.add(PrayerTrackerEvent.load(date)),
@@ -246,15 +282,15 @@ class HomeContent extends StatelessWidget {
                         final isUpcoming = getIt<PrayerTimeService>().isUpcoming(
                           salaah, 
                           prayerTimes: prayerTimes, 
-                          date: selectedDate,
+                          date: widget.selectedDate,
                         );
                         
                         return SalaahTile(
                           salaah: salaah,
-                          qadaCount: qadaStatus[salaah]?.value ?? 0,
-                          completedQadaCount: completedQadaToday[salaah] ?? 0,
-                          isMissedToday: missedToday.contains(salaah),
-                          isCompletedToday: completedToday.contains(salaah),
+                          qadaCount: widget.qadaStatus[salaah]?.value ?? 0,
+                          completedQadaCount: widget.completedQadaToday[salaah] ?? 0,
+                          isMissedToday: widget.missedToday.contains(salaah),
+                          isCompletedToday: widget.completedToday.contains(salaah),
                           isUpcoming: isUpcoming,
                           time: time,
                           isQadaEnabled: settings.isQadaEnabled,
@@ -264,6 +300,7 @@ class HomeContent extends StatelessWidget {
                               bloc.add(PrayerTrackerEvent.removeQada(salaah)),
                           onToggleMissed: () =>
                               bloc.add(PrayerTrackerEvent.togglePrayer(salaah)),
+                          onLimitExceeded: _scrollToAddQada,
                         );
                       },
                       childCount: Salaah.values.length,
@@ -276,7 +313,7 @@ class HomeContent extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 40.0),
                   sliver: SliverToBoxAdapter(
                     child: HistoryList(
-                      records: history,
+                      records: widget.history,
                       onDelete: (date) =>
                           bloc.add(PrayerTrackerEvent.deleteRecord(date)),
                     ),

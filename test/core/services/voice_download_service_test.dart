@@ -10,6 +10,8 @@ class FakePathProviderPlatform extends Fake with MockPlatformInterfaceMixin impl
   @override
   Future<String?> getApplicationDocumentsPath() async => '/tmp/docs';
   @override
+  Future<String?> getApplicationSupportPath() async => '/tmp/support';
+  @override
   Future<String?> getExternalStoragePath() async => '/tmp/external';
 }
 

@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 
+@singleton
 class VoiceDownloadService {
   static const Map<String, String> azanVoices = {
     'Abdul Basit - عبد الباسط': 'https://www.ayouby.com/multimedia/Call_of_Prayer/Athan_AB.mp3',

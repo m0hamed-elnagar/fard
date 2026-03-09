@@ -128,8 +128,8 @@ class AudioPlayerBar extends StatelessWidget {
                             ),
                           ),
                         ),
-                        
-                        // Audio Controls
+
+                        // Audio Controls don't change them,  not the direction or the functionality
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

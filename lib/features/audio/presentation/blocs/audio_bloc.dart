@@ -5,10 +5,12 @@ import 'package:equatable/equatable.dart';
 import 'package:fard/features/audio/domain/repositories/audio_player_service.dart';
 import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
+import 'package:injectable/injectable.dart';
 
 part 'audio_event.dart';
 part 'audio_state.dart';
 
+@injectable
 class AudioBloc extends Bloc<AudioEvent, AudioState> {
   final AudioRepository audioRepository;
   final AudioPlayerService playerService;

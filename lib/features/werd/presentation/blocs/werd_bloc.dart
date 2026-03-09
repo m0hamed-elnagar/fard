@@ -4,7 +4,9 @@ import 'package:fard/features/werd/domain/entities/werd_progress.dart';
 import 'package:fard/features/werd/domain/repositories/werd_repository.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
+import 'package:injectable/injectable.dart';
 
+@injectable
 class WerdBloc extends Bloc<WerdEvent, WerdState> {
   final WerdRepository _repository;
   StreamSubscription? _progressSubscription;

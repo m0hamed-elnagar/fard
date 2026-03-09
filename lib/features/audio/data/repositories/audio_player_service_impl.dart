@@ -6,7 +6,9 @@ import 'package:fard/features/audio/domain/repositories/audio_player_service.dar
 import 'dart:async';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:injectable/injectable.dart';
 
+@LazySingleton(as: AudioPlayerService)
 class AudioPlayerServiceImpl implements AudioPlayerService {
   final AudioPlayer _player = AudioPlayer();
   final _statusController = StreamController<AudioStatus>.broadcast();
@@ -110,27 +112,45 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
       
       await _player.stop();
       
-      final cachePath = await _getCachePath(url);
-      final source = LockCachingAudioSource(
-        Uri.parse(url),
-        cacheFile: File(cachePath),
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
-        },
-        tag: MediaItem(
-          id: url,
-          album: "Al-Quran",
-          title: mode == AudioPlayMode.ayah ? "Quran Ayah" : "Quran Surah",
-          artist: "Quran Reciter",
-        ),
-      );
+      final AudioSource source;
+      if (Platform.isWindows) {
+        // Windows has file locking issues with LockCachingAudioSource during tests/rapid playback
+        source = AudioSource.uri(
+          Uri.parse(url),
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+          },
+          tag: MediaItem(
+            id: url,
+            album: "Al-Quran",
+            title: mode == AudioPlayMode.ayah ? "Quran Ayah" : "Quran Surah",
+            artist: "Quran Reciter",
+          ),
+        );
+      } else {
+        final cachePath = await _getCachePath(url);
+        // ignore: experimental_member_use
+        source = LockCachingAudioSource(
+          Uri.parse(url),
+          cacheFile: File(cachePath),
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+          },
+          tag: MediaItem(
+            id: url,
+            album: "Al-Quran",
+            title: mode == AudioPlayMode.ayah ? "Quran Ayah" : "Quran Surah",
+            artist: "Quran Reciter",
+          ),
+        );
+      }
       
       await _player.setAudioSource(
         source, 
         preload: false,
       );
       _player.play();
-      debugPrint('AudioPlayerService: play() called successfully with caching');
+      debugPrint('AudioPlayerService: play() called successfully ${Platform.isWindows ? "without" : "with"} caching');
       return Result.success(null);
     } catch (e) {
       debugPrint('AudioPlayerService: Error in playStreaming: $e');
@@ -185,22 +205,41 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
       final sources = <AudioSource>[];
       for (var i = 0; i < urls.length; i++) {
         final url = urls[i];
-        final cachePath = await _getCachePath(url);
-        sources.add(
-          LockCachingAudioSource(
-            Uri.parse(url),
-            cacheFile: File(cachePath),
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
-            },
-            tag: MediaItem(
-              id: url,
-              album: "Al-Quran",
-              title: "Ayah ${i + 1}",
-              artist: "Quran Reciter",
-            ),
-          )
-        );
+        
+        if (Platform.isWindows) {
+          sources.add(
+            AudioSource.uri(
+              Uri.parse(url),
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+              },
+              tag: MediaItem(
+                id: url,
+                album: "Al-Quran",
+                title: "Ayah ${i + 1}",
+                artist: "Quran Reciter",
+              ),
+            )
+          );
+        } else {
+          final cachePath = await _getCachePath(url);
+          sources.add(
+            // ignore: experimental_member_use
+            LockCachingAudioSource(
+              Uri.parse(url),
+              cacheFile: File(cachePath),
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+              },
+              tag: MediaItem(
+                id: url,
+                album: "Al-Quran",
+                title: "Ayah ${i + 1}",
+                artist: "Quran Reciter",
+              ),
+            )
+          );
+        }
       }
       
       await _player.setAudioSources(
@@ -209,7 +248,7 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
         preload: true,
       );
       _player.play();
-      debugPrint('AudioPlayerService: playlist play() called successfully with caching');
+      debugPrint('AudioPlayerService: playlist play() called successfully ${Platform.isWindows ? "without" : "with"} caching');
       return Result.success(null);
     } catch (e) {
       debugPrint('AudioPlayerService: Error in playPlaylist: $e');

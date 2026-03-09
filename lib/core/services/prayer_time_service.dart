@@ -1,6 +1,8 @@
 import 'package:adhan/adhan.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
+import 'package:injectable/injectable.dart';
 
+@singleton
 class PrayerTimeService {
   PrayerTimes getPrayerTimes({
     required double latitude,

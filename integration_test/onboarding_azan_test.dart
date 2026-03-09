@@ -64,8 +64,7 @@ void main() {
       await tester.pumpWidget(app.QadaTrackerApp(hivePath: tempDir.path));
       await tester.pumpAndSettle();
 
-      final BuildContext context = tester.element(find.byType(OnboardingScreen));
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = AppLocalizations.of(tester.element(find.byType(OnboardingScreen)))!;
 
       // 1. First Page (Track Your Prayers)
       expect(find.text(l10n.onboardingTitle1), findsOneWidget);

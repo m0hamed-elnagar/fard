@@ -1,47 +1,42 @@
-import 'dart:io';
 import 'package:fard/core/services/notification_service.dart';
-import 'package:fard/core/services/prayer_time_service.dart';
-import 'package:fard/core/services/voice_download_service.dart';
+import 'package:fard/core/services/notification/channel_manager.dart';
+import 'package:fard/core/services/notification/prayer_scheduler.dart';
+import 'package:fard/core/services/notification/sound_manager.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:get_it/get_it.dart';
 
 class MockFlutterLocalNotificationsPlugin extends Mock implements FlutterLocalNotificationsPlugin {}
 class MockAndroidFlutterLocalNotificationsPlugin extends Mock implements AndroidFlutterLocalNotificationsPlugin {}
-class MockPrayerTimeService extends Mock implements PrayerTimeService {}
-class MockVoiceDownloadService extends Mock implements VoiceDownloadService {}
+class MockSoundManager extends Mock implements SoundManager {}
+class MockChannelManager extends Mock implements ChannelManager {}
+class MockPrayerNotificationScheduler extends Mock implements PrayerNotificationScheduler {}
 
 void main() {
   late NotificationService notificationService;
   late MockFlutterLocalNotificationsPlugin mockNotificationsPlugin;
   late MockAndroidFlutterLocalNotificationsPlugin mockAndroidPlugin;
-  late MockVoiceDownloadService mockVoiceDownloadService;
+  late MockSoundManager mockSoundManager;
+  late MockChannelManager mockChannelManager;
+  late MockPrayerNotificationScheduler mockPrayerScheduler;
 
   setUpAll(() {
     registerFallbackValue(const NotificationDetails());
     registerFallbackValue(const AndroidNotificationChannel('id', 'name'));
     registerFallbackValue(Salaah.fajr);
+    registerFallbackValue(MockFlutterLocalNotificationsPlugin());
   });
 
-  setUp(() async {
+  setUp(() {
     mockNotificationsPlugin = MockFlutterLocalNotificationsPlugin();
     mockAndroidPlugin = MockAndroidFlutterLocalNotificationsPlugin();
-    mockVoiceDownloadService = MockVoiceDownloadService();
-    
-    final getIt = GetIt.instance;
-    await getIt.reset();
-    getIt.registerSingleton<PrayerTimeService>(MockPrayerTimeService());
-    getIt.registerSingleton<VoiceDownloadService>(mockVoiceDownloadService);
-    getIt.registerSingleton<GlobalKey<NavigatorState>>(GlobalKey<NavigatorState>());
-
-    notificationService = NotificationService(mockNotificationsPlugin);
+    mockSoundManager = MockSoundManager();
+    mockChannelManager = MockChannelManager();
+    mockPrayerScheduler = MockPrayerNotificationScheduler();
 
     when(() => mockNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>())
         .thenReturn(mockAndroidPlugin);
-    when(() => mockAndroidPlugin.canScheduleExactNotifications()).thenAnswer((_) async => true);
     when(() => mockAndroidPlugin.createNotificationChannel(any())).thenAnswer((_) async {});
     when(() => mockAndroidPlugin.getNotificationChannels()).thenAnswer((_) async => []);
     when(() => mockNotificationsPlugin.show(
@@ -50,50 +45,35 @@ void main() {
       body: any(named: 'body'),
       notificationDetails: any(named: 'notificationDetails'),
     )).thenAnswer((_) async {});
+    
+    when(() => mockChannelManager.ensureChannelExists(
+      any(), 
+      channelId: any(named: 'channelId'), 
+      salaahId: any(named: 'salaahId'), 
+      sound: any(named: 'sound'),
+      isTest: any(named: 'isTest'),
+    )).thenAnswer((_) async {});
+
+    notificationService = NotificationService(
+      mockSoundManager,
+      mockChannelManager,
+      mockPrayerScheduler,
+      mockNotificationsPlugin,
+    );
   });
 
   group('NotificationService Sound Testing', () {
-    test('testAzan uses UriAndroidNotificationSound for local files', () async {
-      // Create a real temporary file to trigger the isLocalFile and exists logic
-      final tempDir = await Directory.systemTemp.createTemp();
-      final tempFile = File('${tempDir.path}/azan.mp3');
-      await tempFile.writeAsBytes([0, 1, 2, 3]);
+    test('testAzan uses UriAndroidNotificationSound when SoundManager returns URI', () async {
+      const customPath = '/path/to/azan.mp3';
+      const expectedUri = 'file:///path/to/azan.mp3';
       
-      final String customPath = tempFile.path;
+      when(() => mockSoundManager.getSoundUriForChannel(customPath))
+          .thenAnswer((_) async => expectedUri);
       
       await notificationService.testAzan(Salaah.fajr, customPath);
 
-      final capturedDetails = verify(() => mockNotificationsPlugin.show(
-        id: 999,
-        title: any(named: 'title'),
-        body: captureAny(named: 'body'),
-        notificationDetails: captureAny(named: 'notificationDetails'),
-      )).captured;
+      verify(() => mockSoundManager.getSoundUriForChannel(customPath)).called(1);
       
-      final body = capturedDetails[0] as String;
-      final capturedNotificationDetails = capturedDetails[1] as NotificationDetails;
-
-      expect(body, contains('حجم الملف: 0.0 KB')); // 4 bytes is 0.0 KB
-
-      final androidDetails = capturedNotificationDetails.android;
-      expect(androidDetails, isNotNull);
-      expect(androidDetails!.sound, isA<UriAndroidNotificationSound>());
-      
-      final sound = androidDetails.sound as UriAndroidNotificationSound;
-      expect(sound.sound, contains('azan.mp3'));
-      
-      await tempDir.delete(recursive: true);
-    });
-
-    test('testAzan handles paths with spaces correctly', () async {
-      final tempDir = await Directory.systemTemp.createTemp();
-      final tempFile = File('${tempDir.path}/azan voice.mp3');
-      await tempFile.writeAsBytes([0, 1, 2, 3]);
-      
-      final String pathWithSpaces = tempFile.path;
-      
-      await notificationService.testAzan(Salaah.fajr, pathWithSpaces);
-
       final capturedDetails = verify(() => mockNotificationsPlugin.show(
         id: 999,
         title: any(named: 'title'),
@@ -102,11 +82,29 @@ void main() {
       )).captured.first as NotificationDetails;
 
       final androidDetails = capturedDetails.android;
-      final sound = androidDetails!.sound as UriAndroidNotificationSound;
+      expect(androidDetails, isNotNull);
+      expect(androidDetails!.sound, isA<UriAndroidNotificationSound>());
       
-      expect(sound.sound, contains('azan%20voice.mp3'));
+      final sound = androidDetails.sound as UriAndroidNotificationSound;
+      expect(sound.sound, equals(expectedUri));
+    });
+
+    test('testAzan handles default', () async {
+      when(() => mockSoundManager.getSoundUriForChannel('default'))
+          .thenAnswer((_) async => null);
       
-      await tempDir.delete(recursive: true);
+      await notificationService.testAzan(Salaah.fajr, 'default');
+      
+      final capturedDetails = verify(() => mockNotificationsPlugin.show(
+        id: 999,
+        title: any(named: 'title'),
+        body: any(named: 'body'),
+        notificationDetails: captureAny(named: 'notificationDetails'),
+      )).captured.first as NotificationDetails;
+      
+      // Default sound logic in testAzan might result in no sound object or specific default
+      // In current impl: if soundPath == 'default', notificationSound is null.
+      expect(capturedDetails.android?.sound, isNull);
     });
   });
 }

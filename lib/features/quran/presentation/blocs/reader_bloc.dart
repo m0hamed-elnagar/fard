@@ -12,11 +12,13 @@ import 'package:fard/features/quran/domain/repositories/bookmark_repository.dart
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
 import 'package:fard/features/quran/domain/entities/reader_settings.dart';
 import 'dart:async';
+import 'package:injectable/injectable.dart';
 
 part 'reader_bloc.freezed.dart';
 part 'reader_event.dart';
 part 'reader_state.dart';
 
+@injectable
 class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
   final GetSurah getSurah;
   final GetPage getPage;

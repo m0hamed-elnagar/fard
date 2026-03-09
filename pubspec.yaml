@@ -43,6 +43,7 @@ dependencies:
   just_audio_windows: ^0.2.2
   just_audio_background: ^0.0.1-beta.15
   package_info_plus: ^9.0.0
+  injectable: ^2.7.1+4
 
 dev_dependencies:
   flutter_test:
@@ -58,6 +59,7 @@ dev_dependencies:
   mocktail: ^1.0.4
   path_provider_platform_interface: ^2.1.2
   plugin_platform_interface: ^2.1.8
+  injectable_generator: ^2.12.1
 
 flutter:
   uses-material-design: true

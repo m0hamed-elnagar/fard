@@ -156,10 +156,8 @@ void main() {
         // Expected = 11.
         
         final fajrQada = s.qadaStatus[Salaah.fajr]?.value ?? 0;
-        print('Fajr Qada: $fajrQada');
-        
-        expect(fajrQada, 11, reason: 'Should only have today\'s missed prayers added, not the skipped ones');
-      },
+
+        expect(fajrQada, 11, reason: 'Should only have today\'s missed prayers added, not the skipped ones');      },
       orElse: () => fail('Should be in loaded state, but was ${bloc.state}'),
     );
   });
@@ -193,7 +191,6 @@ void main() {
       loaded: (s) {
         // Base 10 + 2 gap days + 1 today = 13.
         final fajrQada = s.qadaStatus[Salaah.fajr]?.value ?? 0;
-        print('Fajr Qada (Add All): $fajrQada');
         
         expect(fajrQada, 13, reason: 'Should have today\'s AND gap days added to qada');
       },
