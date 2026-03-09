@@ -121,7 +121,7 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<int>(
-                value: _startPointType,
+                initialValue: _startPointType,
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -140,7 +140,7 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
                     Expanded(
                       flex: 2,
                       child: DropdownButtonFormField<int>(
-                        value: _selectedSurah,
+                        initialValue: _selectedSurah,
                         decoration: InputDecoration(
                           labelText: isAr ? 'السورة' : 'Surah',
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -163,7 +163,7 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: DropdownButtonFormField<int>(
-                        value: _selectedAyah,
+                        initialValue: _selectedAyah,
                         decoration: InputDecoration(
                           labelText: isAr ? 'الآية' : 'Ayah',
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),

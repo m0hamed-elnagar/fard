@@ -108,11 +108,14 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
                   GlobalCupertinoLocalizations.delegate,
                 ],
                 builder: (context, child) {
+                  final textDirection = state.locale.languageCode == 'ar' 
+                      ? TextDirection.rtl 
+                      : TextDirection.ltr;
                   return Localizations.override(
                     context: context,
                     locale: state.locale,
                     child: Directionality(
-                      textDirection: TextDirection.rtl,
+                      textDirection: textDirection,
                       child: child!,
                     ),
                   );

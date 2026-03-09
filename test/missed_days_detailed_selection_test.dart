@@ -214,7 +214,7 @@ void main() {
       for (int i = 0; i < 5; i++) {
         final date = gapDates[i];
         final record = await repo.loadRecord(date);
-        expect(record, isNotNull, reason: 'Record for ${date} should exist');
+        expect(record, isNotNull, reason: 'Record for $date should exist');
         if (i < 3) {
           expect(record!.missedToday, isEmpty, reason: 'Day $i should be marked as prayed');
         } else {

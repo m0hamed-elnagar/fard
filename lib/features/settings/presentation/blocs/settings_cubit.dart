@@ -8,8 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fard/core/services/location_service.dart';
+import 'package:injectable/injectable.dart';
 import 'settings_state.dart';
 
+@injectable
 class SettingsCubit extends Cubit<SettingsState> {
   final SharedPreferences _prefs;
   final LocationService _locationService;

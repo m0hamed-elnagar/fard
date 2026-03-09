@@ -15,6 +15,8 @@ class DashboardCarousel extends StatefulWidget {
   final VoidCallback onAddQadaPressed;
   final VoidCallback onEditQadaPressed;
   final VoidCallback onSetWerdGoalPressed;
+  final PageController? pageController;
+  final bool isQadaEnabled;
 
   const DashboardCarousel({
     super.key,
@@ -25,6 +27,8 @@ class DashboardCarousel extends StatefulWidget {
     required this.onAddQadaPressed,
     required this.onEditQadaPressed,
     required this.onSetWerdGoalPressed,
+    this.pageController,
+    this.isQadaEnabled = true,
   });
 
   @override
@@ -32,19 +36,27 @@ class DashboardCarousel extends StatefulWidget {
 }
 
 class _DashboardCarouselState extends State<DashboardCarousel> {
-  final PageController _pageController = PageController(viewportFraction: 0.9);
+  late final PageController _pageController;
   int _currentPage = 0;
 
   @override
+  void initState() {
+    super.initState();
+    _pageController = widget.pageController ?? PageController(viewportFraction: 0.9);
+    _currentPage = _pageController.hasClients ? _pageController.page?.round() ?? 0 : 0;
+  }
+
+  @override
   void dispose() {
-    _pageController.dispose();
+    if (widget.pageController == null) {
+      _pageController.dispose();
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
-    final double screenWidth = MediaQuery.of(context).size.width;
     
     // Calculate a responsive height for the cards
     double cardHeight;
@@ -57,12 +69,22 @@ class _DashboardCarouselState extends State<DashboardCarousel> {
       cardHeight = 310;
     }
 
-    // On tablets or landscape, we might want to adjust viewportFraction
-    final double viewportFraction = screenWidth > 600 ? 0.7 : 0.9;
-    if (_pageController.viewportFraction != viewportFraction) {
-       // We can't easily change viewportFraction on existing controller without recreation
-       // but for now let's keep it simple or just use the initial one.
-    }
+    final pages = <Widget>[
+      PrayerTimesCard(
+        prayerTimes: widget.prayerTimes,
+        selectedDate: widget.selectedDate,
+        cityName: widget.cityName,
+      ),
+      if (widget.isQadaEnabled)
+        PrayerTrackingCard(
+          qadaStatus: widget.qadaStatus,
+          onAddPressed: widget.onAddQadaPressed,
+          onEditPressed: widget.onEditQadaPressed,
+        ),
+      WerdProgressCard(
+        onSetGoalPressed: widget.onSetWerdGoalPressed,
+      ),
+    ];
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -77,36 +99,15 @@ class _DashboardCarouselState extends State<DashboardCarousel> {
                 _currentPage = index;
               });
             },
-            children: [
-              _buildPageItem(
-                PrayerTimesCard(
-                  prayerTimes: widget.prayerTimes,
-                  selectedDate: widget.selectedDate,
-                  cityName: widget.cityName,
-                ),
-                0,
-              ),
-              _buildPageItem(
-                PrayerTrackingCard(
-                  qadaStatus: widget.qadaStatus,
-                  onAddPressed: widget.onAddQadaPressed,
-                  onEditPressed: widget.onEditQadaPressed,
-                ),
-                1,
-              ),
-              _buildPageItem(
-                WerdProgressCard(
-                  onSetGoalPressed: widget.onSetWerdGoalPressed,
-                ),
-                2,
-              ),
-            ],
+            children: List.generate(pages.length, (index) {
+              return _buildPageItem(pages[index], index);
+            }),
           ),
         ),
         const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(3, (index) {
+          children: List.generate(pages.length, (index) {
             final isSelected = _currentPage == index;
             return AnimatedContainer(
               duration: const Duration(milliseconds: 300),

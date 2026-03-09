@@ -15,11 +15,13 @@ import 'dart:ui' as ui;
 class HistoryList extends StatelessWidget {
   final List<DailyRecord> records;
   final Function(DateTime) onDelete;
+  final Function(DateTime)? onTap;
 
   const HistoryList({
     super.key,
     required this.records,
     required this.onDelete,
+    this.onTap,
   });
 
   @override
@@ -94,6 +96,7 @@ class HistoryList extends StatelessWidget {
                     Material(
                       color: Colors.transparent,
                       child: InkWell(
+                        onTap: () => onTap?.call(monthRecords[i].date),
                         onLongPress: () => _confirmDelete(context, monthRecords[i]),
                         child: _buildRecordItem(context, monthRecords[i]),
                       ),

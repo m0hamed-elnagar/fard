@@ -350,6 +350,18 @@ abstract class AppLocalizations {
   /// **'Fajr'**
   String get fajr;
 
+  /// No description provided for @sunrise.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunrise'**
+  String get sunrise;
+
+  /// No description provided for @duha.
+  ///
+  /// In en, this message translates to:
+  /// **'Duha'**
+  String get duha;
+
   /// No description provided for @dhuhr.
   ///
   /// In en, this message translates to:

@@ -270,7 +270,7 @@ class _AddQadaDialogState extends State<AddQadaDialog>
               final picked = await showDatePicker(
                 context: context,
                 initialDate: _fromDate ?? DateTime.now(),
-                firstDate: DateTime(2000),
+                firstDate: DateTime(1900),
                 lastDate: DateTime.now(),
                 builder: (context, child) => Theme(
                   data: Theme.of(context).copyWith(
@@ -294,7 +294,7 @@ class _AddQadaDialogState extends State<AddQadaDialog>
               final picked = await showDatePicker(
                 context: context,
                 initialDate: _toDate ?? DateTime.now(),
-                firstDate: DateTime(2000),
+                firstDate: DateTime(1900),
                 lastDate: DateTime.now(),
                 builder: (context, child) => Theme(
                   data: Theme.of(context).copyWith(

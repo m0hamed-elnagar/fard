@@ -2,7 +2,9 @@ import 'package:fard/core/errors/failure.dart';
 import 'package:fard/core/usecases/usecase.dart';
 import 'package:fard/features/quran/domain/entities/page.dart';
 import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
+import 'package:injectable/injectable.dart';
 
+@injectable
 class GetPage implements UseCase<MushafPage, GetPageParams> {
   final QuranRepository repository;
   

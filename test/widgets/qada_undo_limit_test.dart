@@ -113,6 +113,7 @@ void main() {
                 isMissedToday: !toggled,
                 isCompletedToday: toggled,
                 isUpcoming: false,
+                time: DateTime.now(),
                 isQadaEnabled: true,
                 onToggleMissed: () {
                   setState(() => toggled = !toggled);

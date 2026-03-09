@@ -3,7 +3,9 @@ import 'package:fard/core/usecases/usecase.dart';
 import 'package:fard/features/quran/domain/entities/surah.dart';
 import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
+import 'package:injectable/injectable.dart';
 
+@injectable
 class GetSurah implements UseCase<Surah, GetSurahParams> {
   final QuranRepository repository;
   

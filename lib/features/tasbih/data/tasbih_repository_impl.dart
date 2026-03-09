@@ -4,7 +4,9 @@ import 'package:fard/features/tasbih/domain/tasbih_repository.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:injectable/injectable.dart';
 
+@LazySingleton(as: TasbihRepository)
 class TasbihRepositoryImpl implements TasbihRepository {
   final Box<int> _progressBox;
   final Box<int> _historyBox;
@@ -12,9 +14,9 @@ class TasbihRepositoryImpl implements TasbihRepository {
   final SharedPreferences _prefs;
 
   TasbihRepositoryImpl(
-    this._progressBox, 
-    this._historyBox, 
-    this._preferredDuaBox,
+    @Named('tasbihProgressBox') this._progressBox, 
+    @Named('tasbihHistoryBox') this._historyBox, 
+    @Named('tasbihPreferredDuaBox') this._preferredDuaBox,
     this._prefs
   );
 

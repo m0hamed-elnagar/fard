@@ -266,8 +266,8 @@ class _CalendarWidgetState extends State<CalendarWidget> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
             child: TableCalendar(
-              firstDay: DateTime(2020, 1, 1),
-              lastDay: DateTime(2030, 12, 31),
+              firstDay: DateTime(1900, 1, 1),
+              lastDay: DateTime.now(),
               focusedDay: _focusedDay,
               calendarFormat: _isExpanded ? CalendarFormat.month : CalendarFormat.week,
               rowHeight: 54.0,

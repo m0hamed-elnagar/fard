@@ -4,11 +4,13 @@ import 'package:fard/features/tasbih/domain/tasbih_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:vibration/vibration.dart';
+import 'package:injectable/injectable.dart';
 
 part 'tasbih_bloc.freezed.dart';
 part 'tasbih_event.dart';
 part 'tasbih_state.dart';
 
+@injectable
 class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
   final TasbihRepository _repository;
 

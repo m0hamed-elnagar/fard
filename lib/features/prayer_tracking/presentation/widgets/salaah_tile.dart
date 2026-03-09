@@ -19,6 +19,7 @@ class SalaahTile extends StatefulWidget {
   final VoidCallback onAdd;
   final VoidCallback onRemove;
   final VoidCallback onToggleMissed;
+  final VoidCallback? onLimitExceeded;
 
   const SalaahTile({
     super.key,
@@ -27,12 +28,13 @@ class SalaahTile extends StatefulWidget {
     required this.completedQadaCount,
     required this.isMissedToday,
     required this.isCompletedToday,
-    this.isUpcoming = false,
-    this.time,
-    this.isQadaEnabled = true,
+    required this.isUpcoming,
+    required this.time,
+    required this.isQadaEnabled,
     required this.onAdd,
     required this.onRemove,
     required this.onToggleMissed,
+    this.onLimitExceeded,
   });
 
   @override
@@ -169,18 +171,31 @@ class _SalaahTileState extends State<SalaahTile> {
                                       });
                                     }
                                   } else {
+                                    widget.onLimitExceeded?.call();
                                     ScaffoldMessenger.of(context).clearSnackBars();
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text(
-                                          l10n.useAddQadaToNewPrayers,
-                                          style: GoogleFonts.outfit(color: Colors.white),
+                                        content: Row(
+                                          children: [
+                                            const Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 20),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Text(
+                                                l10n.useAddQadaToNewPrayers,
+                                                style: GoogleFonts.outfit(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        backgroundColor: AppTheme.surfaceLight,
+                                        backgroundColor: AppTheme.accent,
                                         behavior: SnackBarBehavior.floating,
                                         margin: const EdgeInsets.all(16),
+                                        elevation: 4,
                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                        duration: const Duration(seconds: 2),
+                                        duration: const Duration(seconds: 3),
                                       ),
                                     );
                                   }

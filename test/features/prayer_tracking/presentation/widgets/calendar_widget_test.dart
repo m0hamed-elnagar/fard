@@ -31,8 +31,7 @@ void main() {
           selectedDate: selectedDate,
           monthRecords: const {}, // Simplified for this test
           onDaySelected: (_) {},
-          onMonthChanged: (_, __) {},
-          hijriAdjustment: hijriAdjustment,
+          onMonthChanged: (_, _) {},          hijriAdjustment: hijriAdjustment,
         ),
       ),
     );

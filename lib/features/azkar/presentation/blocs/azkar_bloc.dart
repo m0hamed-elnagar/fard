@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:injectable/injectable.dart';
 import '../../data/azkar_repository.dart';
 import '../../domain/azkar_item.dart';
 
@@ -29,6 +30,7 @@ sealed class AzkarState with _$AzkarState {
   factory AzkarState.initial() => const AzkarState();
 }
 
+@injectable
 class AzkarBloc extends Bloc<AzkarEvent, AzkarState> {
   final AzkarRepository _repository;
 

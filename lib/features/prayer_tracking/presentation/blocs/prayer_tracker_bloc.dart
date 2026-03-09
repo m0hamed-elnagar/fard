@@ -8,11 +8,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:injectable/injectable.dart';
 
 part 'prayer_tracker_bloc.freezed.dart';
 part 'prayer_tracker_event.dart';
 part 'prayer_tracker_state.dart';
 
+@injectable
 class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
   final PrayerRepo _repo;
   final SharedPreferences _prefs;

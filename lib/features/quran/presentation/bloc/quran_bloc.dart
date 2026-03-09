@@ -6,6 +6,7 @@ import 'package:fard/features/quran/domain/entities/surah.dart';
 import 'package:fard/features/quran/domain/entities/ayah.dart';
 import 'package:fard/features/quran/domain/entities/bookmark.dart';
 import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
+import 'package:injectable/injectable.dart';
 
 import 'package:fard/features/quran/domain/usecases/watch_last_read.dart';
 import 'dart:async';
@@ -40,6 +41,7 @@ abstract class QuranState with _$QuranState {
   factory QuranState.initial() => const QuranState();
 }
 
+@injectable
 class QuranBloc extends Bloc<QuranEvent, QuranState> {
   final QuranRepository _repository;
   final WatchLastRead _watchLastRead;

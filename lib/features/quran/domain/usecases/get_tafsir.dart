@@ -1,7 +1,9 @@
 import 'package:fard/core/errors/failure.dart';
 import 'package:fard/core/usecases/usecase.dart';
 import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
+import 'package:injectable/injectable.dart';
 
+@injectable
 class GetTafsir implements UseCase<String, GetTafsirParams> {
   final QuranRepository repository;
 

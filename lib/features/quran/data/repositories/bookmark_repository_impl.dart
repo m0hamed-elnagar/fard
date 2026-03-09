@@ -5,12 +5,14 @@ import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
 import 'package:fard/features/quran/data/datasources/local/entities/bookmark_entity.dart';
 import 'package:hive_ce/hive_ce.dart';
 import 'dart:async';
+import 'package:injectable/injectable.dart';
 
+@LazySingleton(as: BookmarkRepository)
 class BookmarkRepositoryImpl implements BookmarkRepository {
   final Box<BookmarkEntity> _bookmarkBox;
   static const String boxName = 'quran_bookmarks';
 
-  BookmarkRepositoryImpl(this._bookmarkBox);
+  BookmarkRepositoryImpl(@Named('bookmarkBox') this._bookmarkBox);
 
   String _getKey(AyahNumber ayahNumber) => 
       '${ayahNumber.surahNumber}_${ayahNumber.ayahNumberInSurah}';

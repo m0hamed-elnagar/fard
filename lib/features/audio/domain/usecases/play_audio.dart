@@ -3,7 +3,9 @@ import 'package:fard/core/usecases/usecase.dart';
 import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
 import 'package:fard/features/audio/domain/repositories/audio_player_service.dart';
 import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
+import 'package:injectable/injectable.dart';
 
+@injectable
 class PlayAudio implements UseCase<void, PlayAudioParams> {
   final AudioRepository audioRepository;
   final AudioPlayerService playerService;

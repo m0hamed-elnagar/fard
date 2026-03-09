@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 
+@singleton
 class MushafDownloadService {
   // Reliable GitHub Raw Source
   static const String baseUrl = 'https://raw.githubusercontent.com/BetimShala/quran-images-api/master/quran-images/';

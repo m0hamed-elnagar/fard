@@ -237,26 +237,29 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                           final bool useSingleRow = gridConstraints.maxWidth > 400;
                           final bool isVeryNarrow = gridConstraints.maxWidth < 320;
                           
+                          final List<MapEntry<String, DateTime?>> displayPrayers = [
+                            MapEntry(l10n.fajr, widget.prayerTimes?.fajr),
+                            MapEntry(l10n.sunrise, widget.prayerTimes?.sunrise),
+                            MapEntry(l10n.dhuhr, widget.prayerTimes?.dhuhr),
+                            MapEntry(l10n.asr, widget.prayerTimes?.asr),
+                            MapEntry(l10n.maghrib, widget.prayerTimes?.maghrib),
+                            MapEntry(l10n.isha, widget.prayerTimes?.isha),
+                          ];
+
                           final itemWidth = useSingleRow 
-                              ? (gridConstraints.maxWidth - 32) / 5
+                              ? (gridConstraints.maxWidth - 40) / 6
                               : (gridConstraints.maxWidth - 16) / 3;
                           
                           return Wrap(
                             spacing: 8,
                             runSpacing: 8,
                             alignment: WrapAlignment.center,
-                            children: Salaah.values.map((salaah) {
-                              DateTime? time;
-                              switch (salaah) {
-                                case Salaah.fajr: time = widget.prayerTimes?.fajr; break;
-                                case Salaah.dhuhr: time = widget.prayerTimes?.dhuhr; break;
-                                case Salaah.asr: time = widget.prayerTimes?.asr; break;
-                                case Salaah.maghrib: time = widget.prayerTimes?.maghrib; break;
-                                case Salaah.isha: time = widget.prayerTimes?.isha; break;
-                              }
+                            children: displayPrayers.map((entry) {
+                              final name = entry.key;
+                              final time = entry.value;
                               
                               final timeStr = time != null ? timeFormat.format(time) : null;
-                              final isNext = salaah == _nextSalaah;
+                              final isNext = _nextSalaah != null && name == _nextSalaah!.localizedName(l10n);
                               
                               return Container(
                                 width: itemWidth,
@@ -275,10 +278,10 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                                     FittedBox(
                                       fit: BoxFit.scaleDown,
                                       child: Text(
-                                        salaah.localizedName(l10n),
+                                        name,
                                         style: GoogleFonts.amiri(
                                           color: isNext ? AppTheme.accent : AppTheme.textSecondary,
-                                          fontSize: isVeryNarrow ? 11 : 13,
+                                          fontSize: isVeryNarrow ? 10 : 12,
                                           fontWeight: isNext ? FontWeight.bold : FontWeight.w600,
                                           height: 1.1,
                                         ),
@@ -290,7 +293,7 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                                         timeStr != null ? (isAr ? timeStr.toArabicIndic() : timeStr) : '--:--',
                                         style: GoogleFonts.outfit(
                                           color: isNext ? AppTheme.textPrimary : AppTheme.textPrimary.withValues(alpha: 0.9),
-                                          fontSize: isVeryNarrow ? 12 : 14,
+                                          fontSize: isVeryNarrow ? 11 : 13,
                                           fontWeight: isNext ? FontWeight.bold : FontWeight.w600,
                                         ),
                                       ),

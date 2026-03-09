@@ -5,6 +5,7 @@ import 'package:fard/features/quran/domain/entities/ayah.dart';
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
 import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
 import 'package:hive_ce/hive_ce.dart';
+import 'package:injectable/injectable.dart';
 
 abstract interface class QuranLocalSource {
   Future<void> cacheSurahs(List<Surah> surahs);
@@ -13,11 +14,12 @@ abstract interface class QuranLocalSource {
   Future<Surah?> getCachedSurahDetail(int surahNumber);
 }
 
+@LazySingleton(as: QuranLocalSource)
 class QuranLocalSourceImpl implements QuranLocalSource {
   final Box<SurahEntity> _surahBox;
   static const String boxName = 'quran_surahs';
 
-  QuranLocalSourceImpl(this._surahBox);
+  QuranLocalSourceImpl(@Named('surahBox') this._surahBox);
 
   @override
   Future<void> cacheSurahs(List<Surah> surahs) async {

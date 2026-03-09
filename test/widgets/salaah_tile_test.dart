@@ -30,6 +30,9 @@ void main() {
             onRemove: onRemove ?? () {},
             onToggleMissed: onToggleMissed ?? () {},
             completedQadaCount: 0,
+            isQadaEnabled: true,
+            isUpcoming: false,
+            time: DateTime.now(),
           ),
         ),
       );
@@ -55,7 +58,7 @@ void main() {
       // Verify labels
       expect(find.text(Salaah.fajr.localizedName(l10n)), findsOneWidget);
       expect(find.text('5'), findsOneWidget);
-      expect(find.text('${l10n.remaining}: 5'), findsOneWidget);
+      expect(find.text('rem.'), findsOneWidget); // Localized text for remaining in narrow view
 
       // Test interactions
       // In the new logic, add button is only active if we just removed one in the same session
@@ -90,6 +93,8 @@ void main() {
             onRemove: () {},
             onToggleMissed: () {},
             completedQadaCount: 0,
+            isQadaEnabled: true,
+            isUpcoming: false,
           ),
         ),
       ));

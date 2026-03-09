@@ -33,6 +33,19 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Android
+.gradle/
+.kotlin/
+**/build/
+/android/build/
+/android/app/build/
+/android/local.properties
+/android/generated/
+/android/.gradle/
+/android/.kotlin/
+/android/app/build.gradle.kts.old
+/android/settings.gradle.kts.old
+
 # Symbolication related
 app.*.symbols
 

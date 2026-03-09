@@ -10,7 +10,9 @@ import 'package:fard/features/quran/data/datasources/local/quran_local_source.da
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'package:injectable/injectable.dart';
 
+@LazySingleton(as: QuranRepository)
 class QuranRepositoryImpl implements QuranRepository {
   final QuranRemoteSource remoteSource;
   final QuranLocalSource localSource;

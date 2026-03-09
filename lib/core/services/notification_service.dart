@@ -1,35 +1,44 @@
-import 'dart:math';
 import 'dart:io';
-import 'package:fard/core/services/prayer_time_service.dart';
-import 'package:fard/features/azkar/data/azkar_repository.dart';
+import 'package:fard/features/azkar/domain/azkar_item.dart';
+import 'package:fard/features/azkar/presentation/screens/azkar_list_screen.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
+import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:timezone/timezone.dart' as tz;
-import '../../features/settings/presentation/blocs/settings_state.dart';
-import '../../features/azkar/domain/azkar_item.dart';
-import '../../features/azkar/presentation/screens/azkar_list_screen.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:injectable/injectable.dart';
 import '../di/injection.dart';
+import 'notification/channel_manager.dart';
+import 'notification/prayer_scheduler.dart';
+import 'notification/sound_manager.dart';
 
+@singleton
 class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin;
-  PackageInfo? _packageInfo;
+  final SoundManager _soundManager;
+  final ChannelManager _channelManager;
+  final PrayerNotificationScheduler _prayerScheduler;
 
-  NotificationService([FlutterLocalNotificationsPlugin? notificationsPlugin])
-      : _notificationsPlugin = notificationsPlugin ?? FlutterLocalNotificationsPlugin();
+  NotificationService(
+    this._soundManager,
+    this._channelManager,
+    this._prayerScheduler,
+    this._notificationsPlugin,
+  );
 
-  static const String reminderChannelId = 'prayer_reminders_v1';
+  static const String reminderChannelId = ChannelManager.reminderChannelId;
   static const String testAzanChannelId = 'azan_test_channel';
 
   Future<void> init() async {
     debugPrint('NotificationService: init starting');
+    
+    // Initialize delegates
+    await _soundManager.init();
+
     try {
-      _packageInfo = await PackageInfo.fromPlatform();
-      debugPrint('NotificationService: PackageInfo loaded: ${_packageInfo?.packageName}');
-      
+      tz.initializeTimeZones();
       debugPrint('NotificationService: getting local timezone...');
       final rawTimeZone = await FlutterTimezone.getLocalTimezone().timeout(const Duration(seconds: 5));
       String timeZoneName = rawTimeZone.toString();
@@ -109,8 +118,10 @@ class NotificationService {
           .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
           ?.requestExactAlarmsPermission();
 
-      // Create notification channels for Android
-      await _createNotificationChannels();
+      // Create notification channels for Android (using default/empty settings initially if needed, 
+      // but usually we wait for schedulePrayerNotifications to create specific channels)
+      // We can just create the static ones here.
+      await _channelManager.createNotificationChannels(_notificationsPlugin);
 
       // Check exact alarm permission state
       final canSchedule = await _notificationsPlugin
@@ -151,133 +162,6 @@ class NotificationService {
     debugPrint('NotificationService: handleInitialNotification complete');
   }
 
-  String _getChannelId(String salaahId, String sound) {
-    if (sound == 'default') return 'azan_channel_$salaahId';
-    
-    // Use the filename as a key to make it deterministic but unique to the sound
-    final String fileName = sound.split(Platform.isWindows ? '\\' : '/').last.replaceAll('.mp3', '');
-    return 'azan_${salaahId}_$fileName';
-  }
-
-  Future<String?> _getSoundUriForChannel(String sound) async {
-    if (sound == 'default') return null;
-    
-    // Check if it's a local file path
-    final bool isLocalFile = sound.startsWith('/') || (sound.length > 1 && sound[1] == ':');
-    if (isLocalFile) {
-      final file = File(sound);
-      if (!await file.exists()) return null;
-      
-      try {
-        if (Platform.isAndroid) {
-          final externalDir = await getExternalStorageDirectory();
-          if (externalDir != null) {
-            // Path relative to external storage
-            final String fileName = sound.split(Platform.isWindows ? '\\' : '/').last;
-            final azanDir = Directory('${externalDir.path}/azan_sounds');
-            if (!await azanDir.exists()) await azanDir.create(recursive: true);
-            
-            final destFile = File('${azanDir.path}/$fileName');
-            if (!await destFile.exists() || (await destFile.length() != await file.length())) {
-              await file.copy(destFile.path);
-            }
-            
-            // The authority MUST match ${applicationId}.fileprovider in AndroidManifest.xml
-            final String authority = '${_packageInfo?.packageName ?? 'com.qada.fard'}.fileprovider';
-            final String contentUri = 'content://$authority/external_azan/$fileName';
-            
-            debugPrint('Using content URI for Azan: $contentUri (Authority: $authority)');
-            return contentUri;
-          }
-        }
-      } catch (e) {
-        debugPrint('Error preparing sound URI: $e');
-      }
-      return Uri.file(sound).toString();
-    }
-    
-    return null; // For raw resources
-  }
-
-  Future<void> _ensureChannelExists({
-    required String channelId,
-    required String salaahId,
-    required String sound,
-    bool isTest = false,
-  }) async {
-    final androidPlugin = _notificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-    if (androidPlugin == null) return;
-
-    final channels = await androidPlugin.getNotificationChannels();
-    
-    // If it's a test channel, we might want to delete it if the sound changed, 
-    // but Android doesn't allow changing sound of existing channel.
-    // For tests, we use a unique ID each time in the calling method to ensure the sound is updated.
-    final bool exists = channels?.any((c) => c.id == channelId) ?? false;
-    if (exists && !isTest) return;
-
-    // Create new channel with proper sound
-    final String? soundUri = await _getSoundUriForChannel(sound);
-    
-    final androidChannel = AndroidNotificationChannel(
-      channelId,
-      isTest ? 'Azan Test' : 'Azan ${salaahId.toUpperCase()}',
-      description: isTest ? 'Temporary channel for Azan testing' : 'Azan notifications for ${salaahId.toUpperCase()}',
-      importance: Importance.max,
-      playSound: true,
-      audioAttributesUsage: AudioAttributesUsage.alarm,
-      sound: sound == 'default' 
-          ? null 
-          : (soundUri != null 
-              ? UriAndroidNotificationSound(soundUri) 
-              : RawResourceAndroidNotificationSound(sound.split('.').first)),
-    );
-
-    await androidPlugin.createNotificationChannel(androidChannel);
-  }
-
-  Future<void> _createNotificationChannels({SettingsState? settings}) async {
-    final androidPlugin = _notificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-    if (androidPlugin == null) return;
-
-    // Salah specific channels for Azan
-    if (settings != null) {
-      for (final salaahSetting in settings.salaahSettings) {
-        final String salaahId = salaahSetting.salaah.name;
-        final String sound = salaahSetting.azanSound ?? 'default';
-        final String channelId = _getChannelId(salaahId, sound);
-        
-        await _ensureChannelExists(
-          channelId: channelId,
-          salaahId: salaahId,
-          sound: sound,
-        );
-      }
-    }
-
-    const reminderChannel = AndroidNotificationChannel(
-      reminderChannelId,
-      'Prayer Reminders',
-      description: 'Notifications before prayer time',
-      importance: Importance.max,
-      playSound: true,
-      audioAttributesUsage: AudioAttributesUsage.alarm,
-    );
-    
-    await androidPlugin.createNotificationChannel(reminderChannel);
-
-    const azkarChannel = AndroidNotificationChannel(
-      'azkar_reminders',
-      'Azkar Reminders',
-      description: 'Daily Azkar notifications',
-      importance: Importance.max,
-      playSound: true,
-    );
-    
-    await androidPlugin.createNotificationChannel(azkarChannel);
-  }
-
   Future<bool> canScheduleExactNotifications() async {
     return await _notificationsPlugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
@@ -287,198 +171,7 @@ class NotificationService {
   Future<void> schedulePrayerNotifications({
     required SettingsState settings,
   }) async {
-    // Recreate channels to ensure sound changes are applied (Android limitation)
-    await _createNotificationChannels(settings: settings);
-
-    if (settings.latitude == null || settings.longitude == null) return;
-
-    // Cancel previous prayer notifications
-    // IDs: 200-299 for Azan, 300-399 for Reminders, 400-499 for After Salah Azkar
-    final List<Future<void>> cancelFutures = [];
-    for (int i = 0; i < 100; i++) {
-      cancelFutures.add(_notificationsPlugin.cancel(id: 200 + i));
-      cancelFutures.add(_notificationsPlugin.cancel(id: 300 + i));
-      cancelFutures.add(_notificationsPlugin.cancel(id: 400 + i));
-    }
-    await Future.wait(cancelFutures);
-
-    final prayerTimeService = getIt<PrayerTimeService>();
-    final now = tz.TZDateTime.now(tz.local);
-    final azkarRepository = getIt<AzkarRepository>();
-    final allAzkar = await azkarRepository.getAllAzkar();
-
-    final List<Future<void>> scheduleFutures = [];
-
-    // Schedule for the next 7 days
-    for (int day = 0; day < 7; day++) {
-      final date = DateTime.now().add(Duration(days: day));
-      final prayerTimes = prayerTimeService.getPrayerTimes(
-        latitude: settings.latitude!,
-        longitude: settings.longitude!,
-        method: settings.calculationMethod,
-        madhab: settings.madhab,
-        date: date,
-      );
-
-      for (final salaahSetting in settings.salaahSettings) {
-        final salaahTime = prayerTimeService.getTimeForSalaah(prayerTimes, salaahSetting.salaah);
-        if (salaahTime == null) continue;
-
-        final tzSalaahTime = tz.TZDateTime.from(salaahTime, tz.local);
-        final dayOffset = day * 5 + salaahSetting.salaah.index;
-
-        // Schedule Azan
-        if (salaahSetting.isAzanEnabled) {
-          if (tzSalaahTime.isAfter(now)) {
-            scheduleFutures.add(_scheduleAzan(
-              id: 200 + dayOffset,
-              salaah: salaahSetting.salaah,
-              scheduledDate: tzSalaahTime,
-              sound: salaahSetting.azanSound,
-            ));
-          }
-        }
-
-        // Schedule Reminder
-        if (salaahSetting.isReminderEnabled && salaahSetting.reminderMinutesBefore > 0) {
-          final reminderTime = tzSalaahTime.subtract(Duration(minutes: salaahSetting.reminderMinutesBefore));
-          
-          if (reminderTime.isAfter(now.subtract(const Duration(seconds: 10)))) {
-            scheduleFutures.add(_schedulePrayerReminder(
-              id: 300 + dayOffset,
-              salaah: salaahSetting.salaah,
-              scheduledDate: reminderTime.isBefore(now) ? now.add(const Duration(seconds: 1)) : reminderTime,
-              minutesBefore: salaahSetting.reminderMinutesBefore,
-            ));
-          }
-        }
-
-        // Schedule After Salah Azkar
-        if (settings.isAfterSalahAzkarEnabled && salaahSetting.isAfterSalahAzkarEnabled) {
-          final azkarTime = tzSalaahTime.add(const Duration(minutes: 15));
-          if (azkarTime.isAfter(now)) {
-            final category = 'الأذكار بعد السلام من الصلاة';
-            final zekrBody = _getRandomZekr(allAzkar, category);
-            
-            scheduleFutures.add(_notificationsPlugin.zonedSchedule(
-              id: 400 + dayOffset,
-              title: 'أذكار بعد الصلاة',
-              body: zekrBody,
-              scheduledDate: azkarTime,
-              notificationDetails: const NotificationDetails(
-                android: AndroidNotificationDetails(
-                  'azkar_reminders',
-                  'Azkar Reminders',
-                  importance: Importance.max,
-                  priority: Priority.high,
-                ),
-              ),
-              androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-              payload: 'category:$category',
-            ));
-          }
-        }
-      }
-    }
-    await Future.wait(scheduleFutures);
-  }
-
-  Future<void> _scheduleAzan({
-    required int id,
-    required Salaah salaah,
-    required tz.TZDateTime scheduledDate,
-    String? sound,
-  }) async {
-    final String salaahName = _getSalaahName(salaah);
-    final String soundPath = sound ?? 'default';
-    final String channelId = _getChannelId(salaah.name, soundPath);
-    
-    await _ensureChannelExists(
-      channelId: channelId,
-      salaahId: salaah.name,
-      sound: soundPath,
-    );
-
-    final String? soundUri = await _getSoundUriForChannel(soundPath);
-    AndroidNotificationSound? notificationSound;
-    
-    if (soundPath != 'default') {
-      if (soundUri != null) {
-        notificationSound = UriAndroidNotificationSound(soundUri);
-      } else {
-        notificationSound = RawResourceAndroidNotificationSound(soundPath.split('.').first);
-      }
-    }
-    
-    AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      channelId,
-      'Azan ${salaah.name.toUpperCase()}',
-      channelDescription: 'Azan notifications for ${salaah.name.toUpperCase()}',
-      importance: Importance.max,
-      priority: Priority.high,
-      fullScreenIntent: true,
-      category: AndroidNotificationCategory.alarm,
-      audioAttributesUsage: AudioAttributesUsage.alarm,
-      playSound: true,
-      sound: notificationSound,
-      visibility: NotificationVisibility.public,
-      autoCancel: true,
-    );
-
-    NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: DarwinNotificationDetails(
-        sound: sound,
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-      ),
-    );
-
-    await _notificationsPlugin.zonedSchedule(
-      id: id,
-      title: 'حان وقت صلاة $salaahName',
-      body: 'أقم الصلاة يرحمك الله',
-      scheduledDate: scheduledDate,
-      notificationDetails: platformChannelSpecifics,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    );
-  }
-
-  Future<void> _schedulePrayerReminder({
-    required int id,
-    required Salaah salaah,
-    required tz.TZDateTime scheduledDate,
-    required int minutesBefore,
-  }) async {
-    final String salaahName = _getSalaahName(salaah);
-
-    await _notificationsPlugin.zonedSchedule(
-      id: id,
-      title: 'تذكير بصلاة $salaahName',
-      body: 'باقي $minutesBefore دقيقة على الأذان',
-      scheduledDate: scheduledDate,
-      notificationDetails: const NotificationDetails(
-        android: AndroidNotificationDetails(
-          reminderChannelId,
-          'Prayer Reminders',
-          channelDescription: 'Notifications before prayer time',
-          importance: Importance.max,
-          priority: Priority.high,
-          fullScreenIntent: true,
-          category: AndroidNotificationCategory.alarm,
-          audioAttributesUsage: AudioAttributesUsage.alarm,
-          visibility: NotificationVisibility.public,
-        ),
-        iOS: DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        ),
-        windows: WindowsNotificationDetails(),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    );
+    await _prayerScheduler.schedulePrayerNotifications(_notificationsPlugin, settings: settings);
   }
 
   Future<void> testAzan(Salaah salaah, String? sound, {SettingsState? settings}) async {
@@ -486,13 +179,13 @@ class NotificationService {
     final String soundPath = sound ?? 'default';
     
     // Use a more stable but still unique-ish channel ID for testing to allow sound updates
-    // but avoid creating thousands of channels. We include a hash of the sound path.
     final String soundHash = soundPath.hashCode.abs().toString().substring(0, 4);
     final String channelId = 'azan_test_channel_$soundHash';
     
     debugPrint('Testing Azan with channel: $channelId, sound: $soundPath');
 
-    await _ensureChannelExists(
+    await _channelManager.ensureChannelExists(
+      _notificationsPlugin,
       channelId: channelId,
       salaahId: salaah.name,
       sound: soundPath,
@@ -501,7 +194,7 @@ class NotificationService {
 
     // Small delay to ensure channel is ready
     await Future.delayed(const Duration(milliseconds: 600));
-    final String? soundUri = await _getSoundUriForChannel(soundPath);
+    final String? soundUri = await _soundManager.getSoundUriForChannel(soundPath);
     
     String diagnosticInfo = '';
     if (soundUri != null && soundUri.startsWith('content:')) {
@@ -554,7 +247,7 @@ class NotificationService {
       body: 'هذا تنبيه تجريبي: باقي $minutesBefore دقيقة على الأذان',
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
-          reminderChannelId,
+          ChannelManager.reminderChannelId,
           'Prayer Reminders',
           channelDescription: 'Notifications before prayer time',
           importance: Importance.max,
@@ -623,82 +316,10 @@ ${(results['channels'] as List).map((c) => '    • ${c['id']} (${c['importance'
     required SettingsState settings, 
     required List<AzkarItem> allAzkar,
   }) async {
-    final List<Future<void>> cancelFutures = [];
-    for (int i = 0; i < 50; i++) {
-      cancelFutures.add(_notificationsPlugin.cancel(id: 100 + i));
-    }
-    await Future.wait(cancelFutures);
-
-    final now = DateTime.now();
-    final List<Future<void>> scheduleFutures = [];
-    for (int i = 0; i < settings.reminders.length; i++) {
-      if (i >= 50) break;
-      final reminder = settings.reminders[i];
-      if (!reminder.isEnabled) continue;
-
-      DateTime scheduledDateTime = _parseTime(reminder.time, now);
-      final matchedCategory = allAzkar.firstWhere(
-        (e) => e.category == reminder.category || e.category.contains(reminder.category),
-        orElse: () => AzkarItem(category: reminder.category, zekr: '', description: '', count: 1, reference: ''),
-      ).category;
-
-      final zekrBody = _getRandomZekr(allAzkar, reminder.category);
-
-      scheduleFutures.add(_scheduleDailyNotification(
-        id: 100 + i,
-        title: reminder.title.isNotEmpty ? reminder.title : matchedCategory,
-        body: zekrBody,
-        scheduledDate: scheduledDateTime,
-        payload: 'category:$matchedCategory',
-      ));
-    }
-    await Future.wait(scheduleFutures);
-  }
-
-  Future<void> _scheduleDailyNotification({
-    required int id,
-    required String title,
-    required String body,
-    required DateTime scheduledDate,
-    String? payload,
-  }) async {
-    var scheduledTzDate = tz.TZDateTime.from(scheduledDate, tz.local);
-    if (scheduledTzDate.isBefore(tz.TZDateTime.now(tz.local))) {
-      scheduledTzDate = scheduledTzDate.add(const Duration(days: 1));
-    }
-
-    await _notificationsPlugin.zonedSchedule(
-      id: id,
-      title: title,
-      body: body,
-      scheduledDate: scheduledTzDate,
-      notificationDetails: const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'azkar_reminders',
-          'Azkar Reminders',
-          importance: Importance.max,
-          priority: Priority.high,
-        ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time,
-      payload: payload,
+    await _prayerScheduler.scheduleAzkarReminders(
+      _notificationsPlugin, 
+      settings: settings, 
+      allAzkar: allAzkar,
     );
-  }
-
-  String _getRandomZekr(List<AzkarItem> azkar, String category) {
-    final filtered = azkar.where((e) => e.category == category || e.category.contains(category)).toList();
-    if (filtered.isEmpty) return 'حان وقت الأذكار';
-    final item = filtered[Random().nextInt(filtered.length)];
-    return item.zekr.length > 100 ? '${item.zekr.substring(0, 100)}...' : item.zekr;
-  }
-
-  DateTime _parseTime(String timeStr, DateTime now) {
-    try {
-      final parts = timeStr.split(':');
-      return DateTime(now.year, now.month, now.day, int.parse(parts[0]), int.parse(parts[1]));
-    } catch (_) {
-      return now;
-    }
   }
 }
