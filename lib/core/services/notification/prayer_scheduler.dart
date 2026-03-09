@@ -17,6 +17,18 @@ class PrayerNotificationScheduler {
   final ChannelManager _channelManager;
   final SoundManager _soundManager;
 
+  // Notification ID Ranges
+  static const int azkarReminderIdStart = 100;
+  static const int azanIdStart = 200;
+  static const int prayerReminderIdStart = 300;
+  static const int afterSalahAzkarIdStart = 400;
+
+  // Max counts for cancellation
+  static const int maxAzkarReminders = 50;
+  static const int maxScheduledDays = 7;
+  static const int prayersPerDay = 5;
+  static const int maxPrayerNotificationIds = maxScheduledDays * prayersPerDay;
+
   PrayerNotificationScheduler(
     this._prayerTimeService,
     this._azkarRepository,
@@ -28,26 +40,22 @@ class PrayerNotificationScheduler {
     FlutterLocalNotificationsPlugin notificationsPlugin, {
     required SettingsState settings,
   }) async {
-    // Recreate channels to ensure sound changes are applied
     await _channelManager.createNotificationChannels(notificationsPlugin, settings: settings);
 
     if (settings.latitude == null || settings.longitude == null) return;
 
-    // Cancel previous prayer notifications
-    final List<Future<void>> cancelFutures = [];
-    for (int i = 0; i < 100; i++) {
-      cancelFutures.add(notificationsPlugin.cancel(id: 200 + i));
-      cancelFutures.add(notificationsPlugin.cancel(id: 300 + i));
-      cancelFutures.add(notificationsPlugin.cancel(id: 400 + i));
-    }
-    await Future.wait(cancelFutures);
+    // Cancel previous prayer notifications in known ranges
+    await _cancelNotificationRanges(notificationsPlugin, [
+      azanIdStart,
+      prayerReminderIdStart,
+      afterSalahAzkarIdStart,
+    ], maxPrayerNotificationIds);
 
     final now = tz.TZDateTime.now(tz.local);
     final allAzkar = await _azkarRepository.getAllAzkar();
     final List<Future<void>> scheduleFutures = [];
 
-    // Schedule for the next 7 days
-    for (int day = 0; day < 7; day++) {
+    for (int day = 0; day < maxScheduledDays; day++) {
       final date = DateTime.now().add(Duration(days: day));
       final prayerTimes = _prayerTimeService.getPrayerTimes(
         latitude: settings.latitude!,
@@ -62,29 +70,26 @@ class PrayerNotificationScheduler {
         if (salaahTime == null) continue;
 
         final tzSalaahTime = tz.TZDateTime.from(salaahTime, tz.local);
-        final dayOffset = day * 5 + salaahSetting.salaah.index;
+        final dayOffset = day * prayersPerDay + salaahSetting.salaah.index;
 
-        // Schedule Azan
-        if (salaahSetting.isAzanEnabled) {
-          if (tzSalaahTime.isAfter(now)) {
-            scheduleFutures.add(_scheduleAzan(
-              notificationsPlugin,
-              id: 200 + dayOffset,
-              salaah: salaahSetting.salaah,
-              scheduledDate: tzSalaahTime,
-              sound: salaahSetting.azanSound,
-            ));
-          }
+        // 1. Schedule Azan
+        if (salaahSetting.isAzanEnabled && tzSalaahTime.isAfter(now)) {
+          scheduleFutures.add(_scheduleAzan(
+            notificationsPlugin,
+            id: azanIdStart + dayOffset,
+            salaah: salaahSetting.salaah,
+            scheduledDate: tzSalaahTime,
+            sound: salaahSetting.azanSound,
+          ));
         }
 
-        // Schedule Reminder
+        // 2. Schedule Reminder
         if (salaahSetting.isReminderEnabled && salaahSetting.reminderMinutesBefore > 0) {
           final reminderTime = tzSalaahTime.subtract(Duration(minutes: salaahSetting.reminderMinutesBefore));
-          
           if (reminderTime.isAfter(now.subtract(const Duration(seconds: 10)))) {
             scheduleFutures.add(_schedulePrayerReminder(
               notificationsPlugin,
-              id: 300 + dayOffset,
+              id: prayerReminderIdStart + dayOffset,
               salaah: salaahSetting.salaah,
               scheduledDate: reminderTime.isBefore(now) ? now.add(const Duration(seconds: 1)) : reminderTime,
               minutesBefore: salaahSetting.reminderMinutesBefore,
@@ -92,28 +97,15 @@ class PrayerNotificationScheduler {
           }
         }
 
-        // Schedule After Salah Azkar
+        // 3. Schedule After Salah Azkar
         if (settings.isAfterSalahAzkarEnabled && salaahSetting.isAfterSalahAzkarEnabled) {
           final azkarTime = tzSalaahTime.add(const Duration(minutes: 15));
           if (azkarTime.isAfter(now)) {
-            final category = 'الأذكار بعد السلام من الصلاة';
-            final zekrBody = _getRandomZekr(allAzkar, category);
-            
-            scheduleFutures.add(notificationsPlugin.zonedSchedule(
-              id: 400 + dayOffset,
-              title: 'أذكار بعد الصلاة',
-              body: zekrBody,
+            scheduleFutures.add(_scheduleAfterSalahAzkar(
+              notificationsPlugin,
+              id: afterSalahAzkarIdStart + dayOffset,
               scheduledDate: azkarTime,
-              notificationDetails: const NotificationDetails(
-                android: AndroidNotificationDetails(
-                  'azkar_reminders',
-                  'Azkar Reminders',
-                  importance: Importance.max,
-                  priority: Priority.high,
-                ),
-              ),
-              androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-              payload: 'category:$category',
+              allAzkar: allAzkar,
             ));
           }
         }
@@ -127,37 +119,42 @@ class PrayerNotificationScheduler {
     required SettingsState settings, 
     required List<AzkarItem> allAzkar,
   }) async {
-    final List<Future<void>> cancelFutures = [];
-    for (int i = 0; i < 50; i++) {
-      cancelFutures.add(notificationsPlugin.cancel(id: 100 + i));
-    }
-    await Future.wait(cancelFutures);
+    await _cancelNotificationRanges(notificationsPlugin, [azkarReminderIdStart], maxAzkarReminders);
 
     final now = DateTime.now();
     final List<Future<void>> scheduleFutures = [];
-    for (int i = 0; i < settings.reminders.length; i++) {
-      if (i >= 50) break;
+    
+    for (int i = 0; i < min(settings.reminders.length, maxAzkarReminders); i++) {
       final reminder = settings.reminders[i];
       if (!reminder.isEnabled) continue;
 
-      DateTime scheduledDateTime = _parseTime(reminder.time, now);
-      final matchedCategory = allAzkar.firstWhere(
-        (e) => e.category == reminder.category || e.category.contains(reminder.category),
-        orElse: () => AzkarItem(category: reminder.category, zekr: '', description: '', count: 1, reference: ''),
-      ).category;
-
+      final scheduledDateTime = _parseTime(reminder.time, now);
       final zekrBody = _getRandomZekr(allAzkar, reminder.category);
 
       scheduleFutures.add(_scheduleDailyNotification(
         notificationsPlugin,
-        id: 100 + i,
-        title: reminder.title.isNotEmpty ? reminder.title : matchedCategory,
+        id: azkarReminderIdStart + i,
+        title: reminder.title.isNotEmpty ? reminder.title : reminder.category,
         body: zekrBody,
         scheduledDate: scheduledDateTime,
-        payload: 'category:$matchedCategory',
+        payload: 'category:${reminder.category}',
       ));
     }
     await Future.wait(scheduleFutures);
+  }
+
+  Future<void> _cancelNotificationRanges(
+    FlutterLocalNotificationsPlugin notificationsPlugin,
+    List<int> starts,
+    int count,
+  ) async {
+    final List<Future<void>> cancelFutures = [];
+    for (final start in starts) {
+      for (int i = 0; i < count; i++) {
+        cancelFutures.add(notificationsPlugin.cancel(id: start + i));
+      }
+    }
+    await Future.wait(cancelFutures);
   }
 
   Future<void> _scheduleDailyNotification(
@@ -189,6 +186,33 @@ class PrayerNotificationScheduler {
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
       payload: payload,
+    );
+  }
+
+  Future<void> _scheduleAfterSalahAzkar(
+    FlutterLocalNotificationsPlugin notificationsPlugin, {
+    required int id,
+    required tz.TZDateTime scheduledDate,
+    required List<AzkarItem> allAzkar,
+  }) async {
+    const String category = 'الأذكار بعد السلام من الصلاة';
+    final String zekrBody = _getRandomZekr(allAzkar, category);
+    
+    await notificationsPlugin.zonedSchedule(
+      id: id,
+      title: 'أذكار بعد الصلاة',
+      body: zekrBody,
+      scheduledDate: scheduledDate,
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'azkar_reminders',
+          'Azkar Reminders',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      payload: 'category:$category',
     );
   }
 
