@@ -29,6 +29,7 @@ void main() async {
       androidNotificationChannelId: 'com.nagar.fard.channel.audio',
       androidNotificationChannelName: 'Quran Audio Playback',
       androidNotificationOngoing: true,
+      androidNotificationIcon: 'mipmap/ic_launcher',
     );
     debugPrint('JustAudioBackground initialized');
   }

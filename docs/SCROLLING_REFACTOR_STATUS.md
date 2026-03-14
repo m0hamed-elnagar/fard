@@ -3,7 +3,7 @@
 ## Current Session Status
 - **Branch:** `fix/scrolling-stable-base`
 - **Base Commit:** `ec38fd77c9992665d470ecb36e921184f3ecd38b`
-- **Status:** Stable base finalized with all safe features, UI enhancements, Media Player fixes, and "Continue Playing" logic ported.
+- **Status:** Stable base finalized with all safe features, UI enhancements, Media Player fixes (including icon), and "Continue Playing" logic ported.
 
 ## Features Implemented:
 - [x] **Foundation:** Restored reliable `GlobalKey` based scrolling (from commit `ec38fd7`).
@@ -20,6 +20,7 @@
     - [x] Added `MediaButtonReceiver` to `AndroidManifest.xml`.
     - [x] Enriched metadata (Surah Name, Reciter, Ayah Number) passed to `just_audio_background`.
     - [x] Switched `AudioServiceActivity` back to `.MainActivity` for correct notification behavior.
+    - [x] **FIXED:** Added explicit `androidNotificationIcon: 'mipmap/ic_launcher'` to `JustAudioBackground.init` to prevent missing icon error.
 - [x] **Continue Playing Logic:** 
     - [x] Added `playOnLoad` parameter to `QuranReaderPage`.
     - [x] Updated "Continue Reading" card and surah play buttons in `QuranPage` to trigger auto-playback.
@@ -42,3 +43,4 @@
 - `lib/features/audio/presentation/widgets/audio_player_bar.dart`
 - `lib/features/audio/data/repositories/audio_player_service_impl.dart`
 - `android/app/src/main/AndroidManifest.xml`
+- `lib/main.dart`
