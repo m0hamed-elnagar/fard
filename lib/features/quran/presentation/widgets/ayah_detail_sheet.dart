@@ -468,9 +468,13 @@ class _AudioTab extends StatelessWidget {
     return BlocBuilder<AudioBloc, AudioState>(
       builder: (context, state) {
         final status = state.status;
-        final isLoading = state.isLoading;
-        final isPlaying = state.isPlaying;
-        final isError = state.hasError;
+        
+        final isCurrentAyah = state.currentSurah == ayah.number.surahNumber && 
+                            state.currentAyah == ayah.number.ayahNumberInSurah;
+        
+        final isLoading = state.isLoading && isCurrentAyah;
+        final isPlaying = state.isPlaying && isCurrentAyah;
+        final isError = state.hasError && isCurrentAyah;
 
         return ListView(
           padding: const EdgeInsets.all(20),
@@ -544,7 +548,7 @@ class _AudioTab extends StatelessWidget {
                             onPressed: () {
                               if (isPlaying) {
                                 context.read<AudioBloc>().add(AudioEvent.pause());
-                              } else if (status == AudioStatus.paused) {
+                              } else if (status == AudioStatus.paused && isCurrentAyah) {
                                 context.read<AudioBloc>().add(AudioEvent.resume());
                               } else {
                                 context.read<AudioBloc>().add(AudioEvent.playSurah(
