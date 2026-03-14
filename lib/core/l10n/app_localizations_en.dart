@@ -206,6 +206,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get locationNotSet => 'Location not set';
 
   @override
+  String get locationDisabledTitle => 'Location Disabled';
+
+  @override
+  String get locationDisabledDesc =>
+      'Please enable location services (GPS) to calculate prayer times accurately.';
+
+  @override
+  String get enableGPS => 'Enable GPS';
+
+  @override
+  String get locationDeniedTitle => 'Location Permission Denied';
+
+  @override
+  String get locationDeniedDesc =>
+      'This app needs location permission to calculate prayer times based on your city. Please grant permission to continue.';
+
+  @override
+  String get locationDeniedForeverTitle => 'Location Permission Required';
+
+  @override
+  String get locationDeniedForeverDesc =>
+      'Location permission is permanently denied. Please enable it from app settings to use this feature.';
+
+  @override
+  String get openSettings => 'Open Settings';
+
+  @override
+  String get tryAgain => 'Try Again';
+
+  @override
+  String get later => 'Later';
+
+  @override
   String get azkarSettings => 'Azkar Settings';
 
   @override
@@ -894,4 +927,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String jumpConfirmMessage(String start, String end, String pages) {
     return 'Did you really finish from $start to $end ($pages pages)?';
   }
+
+  @override
+  String get goToPlayingAyah => 'Go to playing Ayah';
 }

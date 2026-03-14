@@ -288,7 +288,19 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
                     ],
                   ),
                 ),
-                const AudioPlayerBar(),
+                AudioPlayerBar(
+                  currentViewedSurah: quran.getPageData(_currentPage).firstOrNull?['surah'] as int?,
+                  onScrollRequest: (surah, ayah) {
+                    final targetPage = quran.getPageNumber(surah, ayah);
+                    if (targetPage != _currentPage) {
+                      _pageController.animateToPage(
+                        targetPage - 1,
+                        duration: const Duration(milliseconds: 600),
+                        curve: Curves.easeInOut,
+                      );
+                    }
+                  },
+                ),
               ],
             ),
           ),

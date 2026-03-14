@@ -138,6 +138,18 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                           );
                         },
                       ),
+                      BlocListener<AudioBloc, AudioState>(
+                        listenWhen: (prev, curr) {
+                          // Only trigger if ayah changed while active in the current surah
+                          return curr.currentSurah == widget.surahNumber &&
+                                 curr.currentAyah != null &&
+                                 curr.currentAyah != prev.currentAyah &&
+                                 curr.isActive;
+                        },
+                        listener: (context, state) {
+                          _scrollController.scrollToAyah(state.currentAyah!);
+                        },
+                      ),
                     ],
                     child: CustomScrollView(
                       controller: _scrollController.scrollController,

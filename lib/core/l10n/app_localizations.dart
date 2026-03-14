@@ -470,6 +470,66 @@ abstract class AppLocalizations {
   /// **'Location not set'**
   String get locationNotSet;
 
+  /// No description provided for @locationDisabledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Disabled'**
+  String get locationDisabledTitle;
+
+  /// No description provided for @locationDisabledDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enable location services (GPS) to calculate prayer times accurately.'**
+  String get locationDisabledDesc;
+
+  /// No description provided for @enableGPS.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable GPS'**
+  String get enableGPS;
+
+  /// No description provided for @locationDeniedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Permission Denied'**
+  String get locationDeniedTitle;
+
+  /// No description provided for @locationDeniedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'This app needs location permission to calculate prayer times based on your city. Please grant permission to continue.'**
+  String get locationDeniedDesc;
+
+  /// No description provided for @locationDeniedForeverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Permission Required'**
+  String get locationDeniedForeverTitle;
+
+  /// No description provided for @locationDeniedForeverDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is permanently denied. Please enable it from app settings to use this feature.'**
+  String get locationDeniedForeverDesc;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get openSettings;
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get tryAgain;
+
+  /// No description provided for @later.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get later;
+
   /// No description provided for @azkarSettings.
   ///
   /// In en, this message translates to:
@@ -1741,6 +1801,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Did you really finish from {start} to {end} ({pages} pages)?'**
   String jumpConfirmMessage(String start, String end, String pages);
+
+  /// No description provided for @goToPlayingAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to playing Ayah'**
+  String get goToPlayingAyah;
 }
 
 class _AppLocalizationsDelegate

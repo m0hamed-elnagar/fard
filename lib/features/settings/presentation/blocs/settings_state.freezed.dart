@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SettingsState {
 
- Locale get locale; double? get latitude; double? get longitude; String? get cityName; String get calculationMethod; String get madhab; String get morningAzkarTime; String get eveningAzkarTime; bool get isAfterSalahAzkarEnabled; List<AzkarReminder> get reminders; List<SalaahSettings> get salaahSettings; bool get isAzanVoiceDownloading; bool get isQadaEnabled; int get hijriAdjustment;
+ Locale get locale; double? get latitude; double? get longitude; String? get cityName; String get calculationMethod; String get madhab; String get morningAzkarTime; String get eveningAzkarTime; bool get isAfterSalahAzkarEnabled; List<AzkarReminder> get reminders; List<SalaahSettings> get salaahSettings; bool get isAzanVoiceDownloading; bool get isQadaEnabled; int get hijriAdjustment; LocationStatus? get lastLocationStatus;
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $SettingsStateCopyWith<SettingsState> get copyWith => _$SettingsStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SettingsState&&(identical(other.locale, locale) || other.locale == locale)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.cityName, cityName) || other.cityName == cityName)&&(identical(other.calculationMethod, calculationMethod) || other.calculationMethod == calculationMethod)&&(identical(other.madhab, madhab) || other.madhab == madhab)&&(identical(other.morningAzkarTime, morningAzkarTime) || other.morningAzkarTime == morningAzkarTime)&&(identical(other.eveningAzkarTime, eveningAzkarTime) || other.eveningAzkarTime == eveningAzkarTime)&&(identical(other.isAfterSalahAzkarEnabled, isAfterSalahAzkarEnabled) || other.isAfterSalahAzkarEnabled == isAfterSalahAzkarEnabled)&&const DeepCollectionEquality().equals(other.reminders, reminders)&&const DeepCollectionEquality().equals(other.salaahSettings, salaahSettings)&&(identical(other.isAzanVoiceDownloading, isAzanVoiceDownloading) || other.isAzanVoiceDownloading == isAzanVoiceDownloading)&&(identical(other.isQadaEnabled, isQadaEnabled) || other.isQadaEnabled == isQadaEnabled)&&(identical(other.hijriAdjustment, hijriAdjustment) || other.hijriAdjustment == hijriAdjustment));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SettingsState&&(identical(other.locale, locale) || other.locale == locale)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.cityName, cityName) || other.cityName == cityName)&&(identical(other.calculationMethod, calculationMethod) || other.calculationMethod == calculationMethod)&&(identical(other.madhab, madhab) || other.madhab == madhab)&&(identical(other.morningAzkarTime, morningAzkarTime) || other.morningAzkarTime == morningAzkarTime)&&(identical(other.eveningAzkarTime, eveningAzkarTime) || other.eveningAzkarTime == eveningAzkarTime)&&(identical(other.isAfterSalahAzkarEnabled, isAfterSalahAzkarEnabled) || other.isAfterSalahAzkarEnabled == isAfterSalahAzkarEnabled)&&const DeepCollectionEquality().equals(other.reminders, reminders)&&const DeepCollectionEquality().equals(other.salaahSettings, salaahSettings)&&(identical(other.isAzanVoiceDownloading, isAzanVoiceDownloading) || other.isAzanVoiceDownloading == isAzanVoiceDownloading)&&(identical(other.isQadaEnabled, isQadaEnabled) || other.isQadaEnabled == isQadaEnabled)&&(identical(other.hijriAdjustment, hijriAdjustment) || other.hijriAdjustment == hijriAdjustment)&&(identical(other.lastLocationStatus, lastLocationStatus) || other.lastLocationStatus == lastLocationStatus));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,locale,latitude,longitude,cityName,calculationMethod,madhab,morningAzkarTime,eveningAzkarTime,isAfterSalahAzkarEnabled,const DeepCollectionEquality().hash(reminders),const DeepCollectionEquality().hash(salaahSettings),isAzanVoiceDownloading,isQadaEnabled,hijriAdjustment);
+int get hashCode => Object.hash(runtimeType,locale,latitude,longitude,cityName,calculationMethod,madhab,morningAzkarTime,eveningAzkarTime,isAfterSalahAzkarEnabled,const DeepCollectionEquality().hash(reminders),const DeepCollectionEquality().hash(salaahSettings),isAzanVoiceDownloading,isQadaEnabled,hijriAdjustment,lastLocationStatus);
 
 @override
 String toString() {
-  return 'SettingsState(locale: $locale, latitude: $latitude, longitude: $longitude, cityName: $cityName, calculationMethod: $calculationMethod, madhab: $madhab, morningAzkarTime: $morningAzkarTime, eveningAzkarTime: $eveningAzkarTime, isAfterSalahAzkarEnabled: $isAfterSalahAzkarEnabled, reminders: $reminders, salaahSettings: $salaahSettings, isAzanVoiceDownloading: $isAzanVoiceDownloading, isQadaEnabled: $isQadaEnabled, hijriAdjustment: $hijriAdjustment)';
+  return 'SettingsState(locale: $locale, latitude: $latitude, longitude: $longitude, cityName: $cityName, calculationMethod: $calculationMethod, madhab: $madhab, morningAzkarTime: $morningAzkarTime, eveningAzkarTime: $eveningAzkarTime, isAfterSalahAzkarEnabled: $isAfterSalahAzkarEnabled, reminders: $reminders, salaahSettings: $salaahSettings, isAzanVoiceDownloading: $isAzanVoiceDownloading, isQadaEnabled: $isQadaEnabled, hijriAdjustment: $hijriAdjustment, lastLocationStatus: $lastLocationStatus)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $SettingsStateCopyWith<$Res>  {
   factory $SettingsStateCopyWith(SettingsState value, $Res Function(SettingsState) _then) = _$SettingsStateCopyWithImpl;
 @useResult
 $Res call({
- Locale locale, double? latitude, double? longitude, String? cityName, String calculationMethod, String madhab, String morningAzkarTime, String eveningAzkarTime, bool isAfterSalahAzkarEnabled, List<AzkarReminder> reminders, List<SalaahSettings> salaahSettings, bool isAzanVoiceDownloading, bool isQadaEnabled, int hijriAdjustment
+ Locale locale, double? latitude, double? longitude, String? cityName, String calculationMethod, String madhab, String morningAzkarTime, String eveningAzkarTime, bool isAfterSalahAzkarEnabled, List<AzkarReminder> reminders, List<SalaahSettings> salaahSettings, bool isAzanVoiceDownloading, bool isQadaEnabled, int hijriAdjustment, LocationStatus? lastLocationStatus
 });
 
 
@@ -62,7 +62,7 @@ class _$SettingsStateCopyWithImpl<$Res>
 
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? locale = null,Object? latitude = freezed,Object? longitude = freezed,Object? cityName = freezed,Object? calculationMethod = null,Object? madhab = null,Object? morningAzkarTime = null,Object? eveningAzkarTime = null,Object? isAfterSalahAzkarEnabled = null,Object? reminders = null,Object? salaahSettings = null,Object? isAzanVoiceDownloading = null,Object? isQadaEnabled = null,Object? hijriAdjustment = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? locale = null,Object? latitude = freezed,Object? longitude = freezed,Object? cityName = freezed,Object? calculationMethod = null,Object? madhab = null,Object? morningAzkarTime = null,Object? eveningAzkarTime = null,Object? isAfterSalahAzkarEnabled = null,Object? reminders = null,Object? salaahSettings = null,Object? isAzanVoiceDownloading = null,Object? isQadaEnabled = null,Object? hijriAdjustment = null,Object? lastLocationStatus = freezed,}) {
   return _then(_self.copyWith(
 locale: null == locale ? _self.locale : locale // ignore: cast_nullable_to_non_nullable
 as Locale,latitude: freezed == latitude ? _self.latitude : latitude // ignore: cast_nullable_to_non_nullable
@@ -78,7 +78,8 @@ as List<AzkarReminder>,salaahSettings: null == salaahSettings ? _self.salaahSett
 as List<SalaahSettings>,isAzanVoiceDownloading: null == isAzanVoiceDownloading ? _self.isAzanVoiceDownloading : isAzanVoiceDownloading // ignore: cast_nullable_to_non_nullable
 as bool,isQadaEnabled: null == isQadaEnabled ? _self.isQadaEnabled : isQadaEnabled // ignore: cast_nullable_to_non_nullable
 as bool,hijriAdjustment: null == hijriAdjustment ? _self.hijriAdjustment : hijriAdjustment // ignore: cast_nullable_to_non_nullable
-as int,
+as int,lastLocationStatus: freezed == lastLocationStatus ? _self.lastLocationStatus : lastLocationStatus // ignore: cast_nullable_to_non_nullable
+as LocationStatus?,
   ));
 }
 
@@ -160,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Locale locale,  double? latitude,  double? longitude,  String? cityName,  String calculationMethod,  String madhab,  String morningAzkarTime,  String eveningAzkarTime,  bool isAfterSalahAzkarEnabled,  List<AzkarReminder> reminders,  List<SalaahSettings> salaahSettings,  bool isAzanVoiceDownloading,  bool isQadaEnabled,  int hijriAdjustment)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Locale locale,  double? latitude,  double? longitude,  String? cityName,  String calculationMethod,  String madhab,  String morningAzkarTime,  String eveningAzkarTime,  bool isAfterSalahAzkarEnabled,  List<AzkarReminder> reminders,  List<SalaahSettings> salaahSettings,  bool isAzanVoiceDownloading,  bool isQadaEnabled,  int hijriAdjustment,  LocationStatus? lastLocationStatus)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SettingsState() when $default != null:
-return $default(_that.locale,_that.latitude,_that.longitude,_that.cityName,_that.calculationMethod,_that.madhab,_that.morningAzkarTime,_that.eveningAzkarTime,_that.isAfterSalahAzkarEnabled,_that.reminders,_that.salaahSettings,_that.isAzanVoiceDownloading,_that.isQadaEnabled,_that.hijriAdjustment);case _:
+return $default(_that.locale,_that.latitude,_that.longitude,_that.cityName,_that.calculationMethod,_that.madhab,_that.morningAzkarTime,_that.eveningAzkarTime,_that.isAfterSalahAzkarEnabled,_that.reminders,_that.salaahSettings,_that.isAzanVoiceDownloading,_that.isQadaEnabled,_that.hijriAdjustment,_that.lastLocationStatus);case _:
   return orElse();
 
 }
@@ -181,10 +182,10 @@ return $default(_that.locale,_that.latitude,_that.longitude,_that.cityName,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Locale locale,  double? latitude,  double? longitude,  String? cityName,  String calculationMethod,  String madhab,  String morningAzkarTime,  String eveningAzkarTime,  bool isAfterSalahAzkarEnabled,  List<AzkarReminder> reminders,  List<SalaahSettings> salaahSettings,  bool isAzanVoiceDownloading,  bool isQadaEnabled,  int hijriAdjustment)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Locale locale,  double? latitude,  double? longitude,  String? cityName,  String calculationMethod,  String madhab,  String morningAzkarTime,  String eveningAzkarTime,  bool isAfterSalahAzkarEnabled,  List<AzkarReminder> reminders,  List<SalaahSettings> salaahSettings,  bool isAzanVoiceDownloading,  bool isQadaEnabled,  int hijriAdjustment,  LocationStatus? lastLocationStatus)  $default,) {final _that = this;
 switch (_that) {
 case _SettingsState():
-return $default(_that.locale,_that.latitude,_that.longitude,_that.cityName,_that.calculationMethod,_that.madhab,_that.morningAzkarTime,_that.eveningAzkarTime,_that.isAfterSalahAzkarEnabled,_that.reminders,_that.salaahSettings,_that.isAzanVoiceDownloading,_that.isQadaEnabled,_that.hijriAdjustment);}
+return $default(_that.locale,_that.latitude,_that.longitude,_that.cityName,_that.calculationMethod,_that.madhab,_that.morningAzkarTime,_that.eveningAzkarTime,_that.isAfterSalahAzkarEnabled,_that.reminders,_that.salaahSettings,_that.isAzanVoiceDownloading,_that.isQadaEnabled,_that.hijriAdjustment,_that.lastLocationStatus);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -198,10 +199,10 @@ return $default(_that.locale,_that.latitude,_that.longitude,_that.cityName,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Locale locale,  double? latitude,  double? longitude,  String? cityName,  String calculationMethod,  String madhab,  String morningAzkarTime,  String eveningAzkarTime,  bool isAfterSalahAzkarEnabled,  List<AzkarReminder> reminders,  List<SalaahSettings> salaahSettings,  bool isAzanVoiceDownloading,  bool isQadaEnabled,  int hijriAdjustment)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Locale locale,  double? latitude,  double? longitude,  String? cityName,  String calculationMethod,  String madhab,  String morningAzkarTime,  String eveningAzkarTime,  bool isAfterSalahAzkarEnabled,  List<AzkarReminder> reminders,  List<SalaahSettings> salaahSettings,  bool isAzanVoiceDownloading,  bool isQadaEnabled,  int hijriAdjustment,  LocationStatus? lastLocationStatus)?  $default,) {final _that = this;
 switch (_that) {
 case _SettingsState() when $default != null:
-return $default(_that.locale,_that.latitude,_that.longitude,_that.cityName,_that.calculationMethod,_that.madhab,_that.morningAzkarTime,_that.eveningAzkarTime,_that.isAfterSalahAzkarEnabled,_that.reminders,_that.salaahSettings,_that.isAzanVoiceDownloading,_that.isQadaEnabled,_that.hijriAdjustment);case _:
+return $default(_that.locale,_that.latitude,_that.longitude,_that.cityName,_that.calculationMethod,_that.madhab,_that.morningAzkarTime,_that.eveningAzkarTime,_that.isAfterSalahAzkarEnabled,_that.reminders,_that.salaahSettings,_that.isAzanVoiceDownloading,_that.isQadaEnabled,_that.hijriAdjustment,_that.lastLocationStatus);case _:
   return null;
 
 }
@@ -213,7 +214,7 @@ return $default(_that.locale,_that.latitude,_that.longitude,_that.cityName,_that
 
 
 class _SettingsState implements SettingsState {
-  const _SettingsState({required this.locale, this.latitude, this.longitude, this.cityName, this.calculationMethod = 'muslim_league', this.madhab = 'shafi', this.morningAzkarTime = '05:00', this.eveningAzkarTime = '18:00', this.isAfterSalahAzkarEnabled = false, final  List<AzkarReminder> reminders = const [], final  List<SalaahSettings> salaahSettings = const [], this.isAzanVoiceDownloading = false, this.isQadaEnabled = true, this.hijriAdjustment = 0}): _reminders = reminders,_salaahSettings = salaahSettings;
+  const _SettingsState({required this.locale, this.latitude, this.longitude, this.cityName, this.calculationMethod = 'muslim_league', this.madhab = 'shafi', this.morningAzkarTime = '05:00', this.eveningAzkarTime = '18:00', this.isAfterSalahAzkarEnabled = false, final  List<AzkarReminder> reminders = const [], final  List<SalaahSettings> salaahSettings = const [], this.isAzanVoiceDownloading = false, this.isQadaEnabled = true, this.hijriAdjustment = 0, this.lastLocationStatus}): _reminders = reminders,_salaahSettings = salaahSettings;
   
 
 @override final  Locale locale;
@@ -242,6 +243,7 @@ class _SettingsState implements SettingsState {
 @override@JsonKey() final  bool isAzanVoiceDownloading;
 @override@JsonKey() final  bool isQadaEnabled;
 @override@JsonKey() final  int hijriAdjustment;
+@override final  LocationStatus? lastLocationStatus;
 
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
@@ -253,16 +255,16 @@ _$SettingsStateCopyWith<_SettingsState> get copyWith => __$SettingsStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SettingsState&&(identical(other.locale, locale) || other.locale == locale)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.cityName, cityName) || other.cityName == cityName)&&(identical(other.calculationMethod, calculationMethod) || other.calculationMethod == calculationMethod)&&(identical(other.madhab, madhab) || other.madhab == madhab)&&(identical(other.morningAzkarTime, morningAzkarTime) || other.morningAzkarTime == morningAzkarTime)&&(identical(other.eveningAzkarTime, eveningAzkarTime) || other.eveningAzkarTime == eveningAzkarTime)&&(identical(other.isAfterSalahAzkarEnabled, isAfterSalahAzkarEnabled) || other.isAfterSalahAzkarEnabled == isAfterSalahAzkarEnabled)&&const DeepCollectionEquality().equals(other._reminders, _reminders)&&const DeepCollectionEquality().equals(other._salaahSettings, _salaahSettings)&&(identical(other.isAzanVoiceDownloading, isAzanVoiceDownloading) || other.isAzanVoiceDownloading == isAzanVoiceDownloading)&&(identical(other.isQadaEnabled, isQadaEnabled) || other.isQadaEnabled == isQadaEnabled)&&(identical(other.hijriAdjustment, hijriAdjustment) || other.hijriAdjustment == hijriAdjustment));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SettingsState&&(identical(other.locale, locale) || other.locale == locale)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.cityName, cityName) || other.cityName == cityName)&&(identical(other.calculationMethod, calculationMethod) || other.calculationMethod == calculationMethod)&&(identical(other.madhab, madhab) || other.madhab == madhab)&&(identical(other.morningAzkarTime, morningAzkarTime) || other.morningAzkarTime == morningAzkarTime)&&(identical(other.eveningAzkarTime, eveningAzkarTime) || other.eveningAzkarTime == eveningAzkarTime)&&(identical(other.isAfterSalahAzkarEnabled, isAfterSalahAzkarEnabled) || other.isAfterSalahAzkarEnabled == isAfterSalahAzkarEnabled)&&const DeepCollectionEquality().equals(other._reminders, _reminders)&&const DeepCollectionEquality().equals(other._salaahSettings, _salaahSettings)&&(identical(other.isAzanVoiceDownloading, isAzanVoiceDownloading) || other.isAzanVoiceDownloading == isAzanVoiceDownloading)&&(identical(other.isQadaEnabled, isQadaEnabled) || other.isQadaEnabled == isQadaEnabled)&&(identical(other.hijriAdjustment, hijriAdjustment) || other.hijriAdjustment == hijriAdjustment)&&(identical(other.lastLocationStatus, lastLocationStatus) || other.lastLocationStatus == lastLocationStatus));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,locale,latitude,longitude,cityName,calculationMethod,madhab,morningAzkarTime,eveningAzkarTime,isAfterSalahAzkarEnabled,const DeepCollectionEquality().hash(_reminders),const DeepCollectionEquality().hash(_salaahSettings),isAzanVoiceDownloading,isQadaEnabled,hijriAdjustment);
+int get hashCode => Object.hash(runtimeType,locale,latitude,longitude,cityName,calculationMethod,madhab,morningAzkarTime,eveningAzkarTime,isAfterSalahAzkarEnabled,const DeepCollectionEquality().hash(_reminders),const DeepCollectionEquality().hash(_salaahSettings),isAzanVoiceDownloading,isQadaEnabled,hijriAdjustment,lastLocationStatus);
 
 @override
 String toString() {
-  return 'SettingsState(locale: $locale, latitude: $latitude, longitude: $longitude, cityName: $cityName, calculationMethod: $calculationMethod, madhab: $madhab, morningAzkarTime: $morningAzkarTime, eveningAzkarTime: $eveningAzkarTime, isAfterSalahAzkarEnabled: $isAfterSalahAzkarEnabled, reminders: $reminders, salaahSettings: $salaahSettings, isAzanVoiceDownloading: $isAzanVoiceDownloading, isQadaEnabled: $isQadaEnabled, hijriAdjustment: $hijriAdjustment)';
+  return 'SettingsState(locale: $locale, latitude: $latitude, longitude: $longitude, cityName: $cityName, calculationMethod: $calculationMethod, madhab: $madhab, morningAzkarTime: $morningAzkarTime, eveningAzkarTime: $eveningAzkarTime, isAfterSalahAzkarEnabled: $isAfterSalahAzkarEnabled, reminders: $reminders, salaahSettings: $salaahSettings, isAzanVoiceDownloading: $isAzanVoiceDownloading, isQadaEnabled: $isQadaEnabled, hijriAdjustment: $hijriAdjustment, lastLocationStatus: $lastLocationStatus)';
 }
 
 
@@ -273,7 +275,7 @@ abstract mixin class _$SettingsStateCopyWith<$Res> implements $SettingsStateCopy
   factory _$SettingsStateCopyWith(_SettingsState value, $Res Function(_SettingsState) _then) = __$SettingsStateCopyWithImpl;
 @override @useResult
 $Res call({
- Locale locale, double? latitude, double? longitude, String? cityName, String calculationMethod, String madhab, String morningAzkarTime, String eveningAzkarTime, bool isAfterSalahAzkarEnabled, List<AzkarReminder> reminders, List<SalaahSettings> salaahSettings, bool isAzanVoiceDownloading, bool isQadaEnabled, int hijriAdjustment
+ Locale locale, double? latitude, double? longitude, String? cityName, String calculationMethod, String madhab, String morningAzkarTime, String eveningAzkarTime, bool isAfterSalahAzkarEnabled, List<AzkarReminder> reminders, List<SalaahSettings> salaahSettings, bool isAzanVoiceDownloading, bool isQadaEnabled, int hijriAdjustment, LocationStatus? lastLocationStatus
 });
 
 
@@ -290,7 +292,7 @@ class __$SettingsStateCopyWithImpl<$Res>
 
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? locale = null,Object? latitude = freezed,Object? longitude = freezed,Object? cityName = freezed,Object? calculationMethod = null,Object? madhab = null,Object? morningAzkarTime = null,Object? eveningAzkarTime = null,Object? isAfterSalahAzkarEnabled = null,Object? reminders = null,Object? salaahSettings = null,Object? isAzanVoiceDownloading = null,Object? isQadaEnabled = null,Object? hijriAdjustment = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? locale = null,Object? latitude = freezed,Object? longitude = freezed,Object? cityName = freezed,Object? calculationMethod = null,Object? madhab = null,Object? morningAzkarTime = null,Object? eveningAzkarTime = null,Object? isAfterSalahAzkarEnabled = null,Object? reminders = null,Object? salaahSettings = null,Object? isAzanVoiceDownloading = null,Object? isQadaEnabled = null,Object? hijriAdjustment = null,Object? lastLocationStatus = freezed,}) {
   return _then(_SettingsState(
 locale: null == locale ? _self.locale : locale // ignore: cast_nullable_to_non_nullable
 as Locale,latitude: freezed == latitude ? _self.latitude : latitude // ignore: cast_nullable_to_non_nullable
@@ -306,7 +308,8 @@ as List<AzkarReminder>,salaahSettings: null == salaahSettings ? _self._salaahSet
 as List<SalaahSettings>,isAzanVoiceDownloading: null == isAzanVoiceDownloading ? _self.isAzanVoiceDownloading : isAzanVoiceDownloading // ignore: cast_nullable_to_non_nullable
 as bool,isQadaEnabled: null == isQadaEnabled ? _self.isQadaEnabled : isQadaEnabled // ignore: cast_nullable_to_non_nullable
 as bool,hijriAdjustment: null == hijriAdjustment ? _self.hijriAdjustment : hijriAdjustment // ignore: cast_nullable_to_non_nullable
-as int,
+as int,lastLocationStatus: freezed == lastLocationStatus ? _self.lastLocationStatus : lastLocationStatus // ignore: cast_nullable_to_non_nullable
+as LocationStatus?,
   ));
 }
 

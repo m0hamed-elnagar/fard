@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/services/location_service.dart';
 import '../../domain/azkar_reminder.dart';
 import '../../domain/salaah_settings.dart';
 
@@ -22,5 +23,6 @@ sealed class SettingsState with _$SettingsState {
     @Default(false) bool isAzanVoiceDownloading,
     @Default(true) bool isQadaEnabled,
     @Default(0) int hijriAdjustment,
+    LocationStatus? lastLocationStatus,
   }) = _SettingsState;
 }

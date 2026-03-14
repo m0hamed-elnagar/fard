@@ -2,12 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
+import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/extensions/number_extension.dart';
 import 'package:quran/quran.dart' as quran;
 
 class AudioPlayerBar extends StatelessWidget {
-  const AudioPlayerBar({super.key});
+  final int? currentViewedSurah;
+  final void Function(int surah, int ayah)? onScrollRequest;
+
+  const AudioPlayerBar({
+    super.key,
+    this.currentViewedSurah,
+    this.onScrollRequest,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -41,32 +49,8 @@ class AudioPlayerBar extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Progress Slider - very slim at the top
-                  if (state.duration > Duration.zero)
-                    SizedBox(
-                      height: 2,
-                      child: SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          trackHeight: 2,
-                          thumbShape: SliderComponentShape.noThumb,
-                          overlayShape: SliderComponentShape.noOverlay,
-                          activeTrackColor: Theme.of(context).colorScheme.primary,
-                          inactiveTrackColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-                        ),
-                        child: Slider(
-                          value: state.position.inMilliseconds.toDouble().clamp(0.0, state.duration.inMilliseconds.toDouble()),
-                          max: state.duration.inMilliseconds.toDouble(),
-                          onChanged: (value) {
-                            context.read<AudioBloc>().add(
-                              AudioEvent.seekTo(Duration(milliseconds: value.toInt())),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  
                   Padding(
-                    padding: EdgeInsets.fromLTRB(isNarrow ? 8 : 12, 8, 8, 12),
+                    padding: EdgeInsets.fromLTRB(isNarrow ? 8 : 12, 10, 8, 4),
                     child: Row(
                       children: [
                         // Reciter avatar - hidden on very narrow screens
@@ -129,10 +113,51 @@ class AudioPlayerBar extends StatelessWidget {
                           ),
                         ),
 
-                        // Audio Controls don't change them,  not the direction or the functionality
+                        // Audio Controls
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            // Go to currently playing Ayah button
+                            if (state.currentAyah != null && state.currentSurah != null) ...[
+                              IconButton(
+                                iconSize: isNarrow ? 20 : 22,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                tooltip: l10n.goToPlayingAyah,
+                                icon: const Icon(Icons.my_location_rounded),
+                                onPressed: () {
+                                  // 1. Check if we can just scroll (already on correct surah)
+                                  if (onScrollRequest != null && currentViewedSurah == state.currentSurah) {
+                                    onScrollRequest!(state.currentSurah!, state.currentAyah!);
+                                    return;
+                                  }
+
+                                  // 2. Otherwise navigate
+                                  final currentRoute = ModalRoute.of(context);
+                                  final bool isAlreadyOnReader = currentRoute?.settings.name == 'QuranReaderPage';
+
+                                  if (isAlreadyOnReader) {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      QuranReaderPage.route(
+                                        surahNumber: state.currentSurah!,
+                                        ayahNumber: state.currentAyah!,
+                                      ),
+                                    );
+                                  } else {
+                                    Navigator.push(
+                                      context,
+                                      QuranReaderPage.route(
+                                        surahNumber: state.currentSurah!,
+                                        ayahNumber: state.currentAyah!,
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                              SizedBox(width: isNarrow ? 4 : 8),
+                            ],
+
                             // Next Button
                             IconButton(
                               iconSize: isNarrow ? 20 : 22,
@@ -180,21 +205,6 @@ class AudioPlayerBar extends StatelessWidget {
 
                         if (!isNarrow) const SizedBox(width: 8),
 
-                        // Repeat Button - hidden on very narrow
-                        if (!isVeryNarrow)
-                          IconButton(
-                            iconSize: isNarrow ? 18 : 20,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            icon: Icon(
-                              state.isRepeating ? Icons.repeat_one_on_rounded : Icons.repeat_rounded,
-                              color: state.isRepeating ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                            onPressed: () => context.read<AudioBloc>().add(AudioEvent.toggleRepeat()),
-                          ),
-                        
-                        if (!isVeryNarrow) const SizedBox(width: 8),
-
                         // Close Button
                         IconButton(
                           iconSize: isNarrow ? 18 : 20,
@@ -206,6 +216,48 @@ class AudioPlayerBar extends StatelessWidget {
                       ],
                     ),
                   ),
+
+                  // Enhanced Progress Slider
+                  if (state.duration > Duration.zero)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Row(
+                        children: [
+                          Text(
+                            _formatDuration(state.position),
+                            style: TextStyle(fontSize: 8, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                          ),
+                          Expanded(
+                            child: SliderTheme(
+                              data: SliderTheme.of(context).copyWith(
+                                trackHeight: 4,
+                                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                                overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+                                activeTrackColor: Theme.of(context).colorScheme.primary,
+                                inactiveTrackColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                                thumbColor: Theme.of(context).colorScheme.primary,
+                                overlayColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                              ),
+                              child: Slider(
+                                value: state.position.inMilliseconds.toDouble().clamp(0.0, state.duration.inMilliseconds.toDouble()),
+                                max: state.duration.inMilliseconds.toDouble(),
+                                onChanged: (value) {
+                                  context.read<AudioBloc>().add(
+                                    AudioEvent.seekTo(Duration(milliseconds: value.toInt())),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                          Text(
+                            _formatDuration(state.duration),
+                            style: TextStyle(fontSize: 8, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  if (!state.hasError) const SizedBox(height: 8),
                   
                   // Error Display - very compact at the very bottom
                   if (state.hasError)
@@ -235,6 +287,13 @@ class AudioPlayerBar extends StatelessWidget {
         );
       },
     );
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$minutes:$seconds';
   }
   
   void _showReciterSelector(BuildContext context) {

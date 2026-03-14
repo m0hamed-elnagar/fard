@@ -205,6 +205,39 @@ class AppLocalizationsAr extends AppLocalizations {
   String get locationNotSet => 'الموقع غير محدد';
 
   @override
+  String get locationDisabledTitle => 'الموقع مغلق';
+
+  @override
+  String get locationDisabledDesc =>
+      'يرجى تفعيل خدمات الموقع (GPS) لحساب مواقيت الصلاة بدقة.';
+
+  @override
+  String get enableGPS => 'تفعيل GPS';
+
+  @override
+  String get locationDeniedTitle => 'تم رفض إذن الموقع';
+
+  @override
+  String get locationDeniedDesc =>
+      'يحتاج التطبيق إلى إذن الموقع لحساب مواقيت الصلاة بناءً على مدينتك. يرجى منح الإذن للمتابعة.';
+
+  @override
+  String get locationDeniedForeverTitle => 'إذن الموقع مطلوب';
+
+  @override
+  String get locationDeniedForeverDesc =>
+      'إذن الموقع مرفوض نهائياً. يرجى تفعيله من إعدادات التطبيق لاستخدام هذه الميزة.';
+
+  @override
+  String get openSettings => 'فتح الإعدادات';
+
+  @override
+  String get tryAgain => 'إعادة المحاولة';
+
+  @override
+  String get later => 'لاحقاً';
+
+  @override
   String get azkarSettings => 'إعدادات الأذكار';
 
   @override
@@ -891,4 +924,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String jumpConfirmMessage(String start, String end, String pages) {
     return 'هل أتممت فعلاً من $start إلى $end ($pages صفحات)؟';
   }
+
+  @override
+  String get goToPlayingAyah => 'الذهاب إلى الآية الحالية';
 }

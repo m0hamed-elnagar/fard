@@ -103,24 +103,28 @@ class QuranReaderBottomBar extends StatelessWidget {
                           orElse: () => surahBookmarks.first,
                         );
 
-                        final pos = [nextBookmark.ayahNumber.surahNumber, nextBookmark.ayahNumber.ayahNumberInSurah];
-                        
                         try {
                           final ayah = s.surah.ayahs.firstWhere(
-                            (a) => a.number.ayahNumberInSurah == pos[1],
+                            (a) => a.number.ayahNumberInSurah == nextBookmark.ayahNumber.ayahNumberInSurah,
                           );
                           context.read<ReaderBloc>().add(ReaderEvent.selectAyah(ayah));
                         } catch (_) {}
-                        scrollController.scrollToAyah(pos[1]);
+                        scrollController.scrollToAyah(nextBookmark.ayahNumber.ayahNumberInSurah);
                       },
                     ),
-                    const AudioPlayerBar(),
+                    AudioPlayerBar(
+                      currentViewedSurah: surahNumber,
+                      onScrollRequest: (s, a) => scrollController.scrollToAyah(a),
+                    ),
                   ],
                 );
               }
             );
           },
-          orElse: () => const AudioPlayerBar(),
+          orElse: () => AudioPlayerBar(
+            currentViewedSurah: surahNumber,
+            onScrollRequest: (s, a) => scrollController.scrollToAyah(a),
+          ),
         );
       },
     );

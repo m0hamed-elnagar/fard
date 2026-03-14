@@ -83,6 +83,16 @@
   "hanafiMadhab": "Hanafi",
   "refreshLocation": "Refresh Location",
   "locationNotSet": "Location not set",
+  "locationDisabledTitle": "Location Disabled",
+  "locationDisabledDesc": "Please enable location services (GPS) to calculate prayer times accurately.",
+  "enableGPS": "Enable GPS",
+  "locationDeniedTitle": "Location Permission Denied",
+  "locationDeniedDesc": "This app needs location permission to calculate prayer times based on your city. Please grant permission to continue.",
+  "locationDeniedForeverTitle": "Location Permission Required",
+  "locationDeniedForeverDesc": "Location permission is permanently denied. Please enable it from app settings to use this feature.",
+  "openSettings": "Open Settings",
+  "tryAgain": "Try Again",
+  "later": "Later",
   "azkarSettings": "Azkar Settings",
   "morningAzkar": "Morning Azkar",
   "eveningAzkar": "Evening Azkar",
@@ -342,5 +352,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "goToPlayingAyah": "Go to playing Ayah"
 }

@@ -152,6 +152,17 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   Future<void> refreshLocation() async {
+    final status = await _locationService.checkLocationStatus();
+    
+    if (status != LocationStatus.success) {
+      emit(state.copyWith(lastLocationStatus: status));
+      // Reset status after a short delay so UI can show/hide dialogs
+      Future.delayed(const Duration(seconds: 1), () {
+        if (!isClosed) emit(state.copyWith(lastLocationStatus: null));
+      });
+      return;
+    }
+
     final position = await _locationService.getCurrentPosition();
     if (position != null) {
       final locationData = await _locationService.getLocationDataFromCoordinates(
@@ -189,9 +200,24 @@ class SettingsCubit extends Cubit<SettingsState> {
         longitude: position.longitude,
         cityName: cityName,
         calculationMethod: method,
+        lastLocationStatus: LocationStatus.success,
       ));
+
+      // Reset status
+      Future.delayed(const Duration(seconds: 1), () {
+        if (!isClosed) emit(state.copyWith(lastLocationStatus: null));
+      });
+
       _updateReminders();
     }
+  }
+
+  Future<void> openLocationSettings() async {
+    await _locationService.openLocationSettings();
+  }
+
+  Future<void> openAppSettings() async {
+    await _locationService.openAppSettings();
   }
 
   String _mapCountryToMethod(String countryCode) {

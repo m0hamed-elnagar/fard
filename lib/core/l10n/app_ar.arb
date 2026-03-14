@@ -83,6 +83,16 @@
   "hanafiMadhab": "حنفي",
   "refreshLocation": "تحديث الموقع",
   "locationNotSet": "الموقع غير محدد",
+  "locationDisabledTitle": "الموقع مغلق",
+  "locationDisabledDesc": "يرجى تفعيل خدمات الموقع (GPS) لحساب مواقيت الصلاة بدقة.",
+  "enableGPS": "تفعيل GPS",
+  "locationDeniedTitle": "تم رفض إذن الموقع",
+  "locationDeniedDesc": "يحتاج التطبيق إلى إذن الموقع لحساب مواقيت الصلاة بناءً على مدينتك. يرجى منح الإذن للمتابعة.",
+  "locationDeniedForeverTitle": "إذن الموقع مطلوب",
+  "locationDeniedForeverDesc": "إذن الموقع مرفوض نهائياً. يرجى تفعيله من إعدادات التطبيق لاستخدام هذه الميزة.",
+  "openSettings": "فتح الإعدادات",
+  "tryAgain": "إعادة المحاولة",
+  "later": "لاحقاً",
   "azkarSettings": "إعدادات الأذكار",
   "morningAzkar": "أذكار الصباح",
   "eveningAzkar": "أذكار المساء",
@@ -342,5 +352,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "goToPlayingAyah": "الذهاب إلى الآية الحالية"
 }
