@@ -23,6 +23,7 @@
 - [x] **Continue Playing Logic:** 
     - [x] Added `playOnLoad` parameter to `QuranReaderPage`.
     - [x] Updated "Continue Reading" card and surah play buttons in `QuranPage` to trigger auto-playback.
+    - [x] Fixed `saveLastRead` logic by properly capturing `ReaderBloc` context in `QuranReaderPage`.
 - [x] **Settings UI:** Integrated new location status dialogs and settings shortcuts.
 
 ## Architectural Decision:

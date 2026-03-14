@@ -45,36 +45,62 @@ class QuranReaderPage extends StatefulWidget {
 }
 
 class _QuranReaderPageState extends State<QuranReaderPage> {
-  late final ReaderScrollController _scrollController;
+  late ReaderScrollController _scrollController;
   bool _hasHandledInitialAyah = false;
   bool _hasHandledPlayOnLoad = false;
+  ReaderBloc? _readerBloc;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ReaderScrollController();
+    
+    // Listen to scroll changes and update last read position
+    _scrollController.currentVisibleAyah.addListener(_onAyahVisibleChanged);
+  }
+
+  void _onAyahVisibleChanged() {
+    if (!mounted || _readerBloc == null) return;
+    
+    final currentAyah = _scrollController.currentVisibleAyah.value;
+    if (currentAyah == null) return;
+
+    try {
+      final state = _readerBloc!.state;
+      
+      state.mapOrNull(
+        loaded: (s) {
+          // Only update if it's different to avoid redundant events
+          if (s.lastReadAyah?.number.ayahNumberInSurah != currentAyah) {
+            try {
+              final ayah = s.surah.ayahs.firstWhere(
+                (a) => a.number.ayahNumberInSurah == currentAyah,
+              );
+              _readerBloc!.add(ReaderEvent.saveLastRead(ayah));
+            } catch (_) {}
+          }
+        },
+      );
+    } catch (_) {}
   }
 
   @override
   void dispose() {
+    _scrollController.currentVisibleAyah.removeListener(_onAyahVisibleChanged);
     _scrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) {
-            final surahNumResult = SurahNumber.create(widget.surahNumber);
-            return getIt<ReaderBloc>()
-              ..add(ReaderEvent.loadSurah(surahNumber: surahNumResult.data!));
-          },
-        ),
-      ],
+    final surahNumResult = SurahNumber.create(widget.surahNumber);
+    
+    return BlocProvider(
+      create: (context) => getIt<ReaderBloc>()
+        ..add(ReaderEvent.loadSurah(surahNumber: surahNumResult.data!)),
       child: Builder(
         builder: (context) {
+          _readerBloc = context.read<ReaderBloc>();
           return Scaffold(
             appBar: const QuranReaderAppBar(),
             body: Stack(
