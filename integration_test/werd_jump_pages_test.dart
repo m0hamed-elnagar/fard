@@ -51,7 +51,9 @@ void main() {
              await tester.pumpAndSettle();
              found = true;
              break;
-           } catch (e) {}
+           } catch (e) {
+             // Ignore if not found yet
+           }
         }
         await tester.drag(find.byType(ListView), const Offset(0, -700));
         await tester.pumpAndSettle();

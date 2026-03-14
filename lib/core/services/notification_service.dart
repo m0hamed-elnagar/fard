@@ -226,7 +226,7 @@ class NotificationService {
     await _notificationsPlugin.show(
       id: 999,
       title: 'تجربة الأذان: $salaahName',
-      body: 'هذا تنبيه تجريبي لصوت الأذان$diagnosticInfo',
+      body: 'تجربة صوت الأذان$diagnosticInfo',
       notificationDetails: NotificationDetails(
         android: androidPlatformChannelSpecifics,
         iOS: DarwinNotificationDetails(
@@ -236,16 +236,17 @@ class NotificationService {
         ),
       ),
     );
-  }
+    }
 
-  Future<void> testReminder(Salaah salaah, int minutesBefore) async {
+    Future<void> testReminder(Salaah salaah, int minutesBefore) async {
     final String salaahName = _getSalaahName(salaah);
-    
+
     await _notificationsPlugin.show(
       id: 998,
-      title: 'تجربة التنبيه: $salaahName',
-      body: 'هذا تنبيه تجريبي: باقي $minutesBefore دقيقة على الأذان',
+      title: 'تجربة التذكير: $salaahName',
+      body: 'تجربة تذكير: باقي $minutesBefore دقيقة على الأذان',
       notificationDetails: const NotificationDetails(
+
         android: AndroidNotificationDetails(
           ChannelManager.reminderChannelId,
           'Prayer Reminders',

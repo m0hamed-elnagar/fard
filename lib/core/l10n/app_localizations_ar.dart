@@ -306,13 +306,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get selectCategory => 'اختر الفئة';
 
   @override
-  String get azanSettings => 'إعدادات الأذان والتنبيهات';
+  String get azanSettings => 'إعدادات الأذان والتذكيرات';
 
   @override
   String get azan => 'الأذان';
 
   @override
-  String get reminder => 'التنبيه';
+  String get reminder => 'التذكير';
 
   @override
   String minutesBefore(int minutes) {
@@ -326,7 +326,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get enableAzan => 'تفعيل الأذان';
 
   @override
-  String get enableReminder => 'تفعيل التنبيه';
+  String get enableReminder => 'تفعيل التذكير';
 
   @override
   String get qibla => 'القبلة';
@@ -336,7 +336,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get afterSalahAzkarDesc =>
-      'تنبيه لقراءة الأذكار بعد 15 دقيقة من الأذان';
+      'تذكير لقراءة الأذكار بعد 15 دقيقة من الأذان';
 
   @override
   String get quran => 'القرآن الكريم';
@@ -515,7 +515,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get disableQada => 'تعطيل الآن';
 
   @override
-  String get globalSettings => 'إعدادات التنبيهات للكل';
+  String get globalSettings => 'إعدادات الأذان للكل';
 
   @override
   String get globalSettingsDesc =>
@@ -531,7 +531,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get generalSettings => 'إعدادات التطبيق العامة';
 
   @override
-  String get exactAlarmWarningTitle => 'تنبيه: الأذان قد لا يعمل بدقة';
+  String get exactAlarmWarningTitle => 'تحذير: الأذان قد لا يعمل بدقة';
 
   @override
   String get exactAlarmWarningDesc =>
@@ -551,7 +551,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get testAzan => 'تجربة الصوت';
 
   @override
-  String get testReminder => 'تجربة التنبيه';
+  String get testReminder => 'تجربة التذكير';
 
   @override
   String get addReminder => 'إضافة تذكير';
@@ -578,7 +578,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get highBitrate => 'جودة عالية (192k)';
 
   @override
-  String get defaultVal => 'تنبيه الهاتف';
+  String get defaultVal => 'أذان الهاتف';
 
   @override
   String get pagesDownloadedSuccess => 'تم تحميل جميع الصفحات بنجاح';

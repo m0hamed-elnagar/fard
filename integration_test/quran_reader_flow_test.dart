@@ -34,7 +34,7 @@ void main() {
           case 'load':
             // When load is called, we should also trigger an event on the event channel
             // to move processingState to 'ready' (3)
-            final ByteData? eventData = const StandardMethodCodec().encodeSuccessEnvelope({
+            final ByteData eventData = const StandardMethodCodec().encodeSuccessEnvelope({
               'processingState': 3, // ready
               'updateTime': DateTime.now().millisecondsSinceEpoch,
               'updatePosition': 0,
