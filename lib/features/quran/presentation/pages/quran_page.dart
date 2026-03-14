@@ -10,7 +10,6 @@ import '../widgets/juz_list.dart';
 import '../widgets/hizb_list.dart';
 import '../widgets/bookmark_list.dart';
 import '../widgets/download_center_sheet.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 
 import 'scanned_mushaf_reader_page.dart';
 
@@ -210,6 +209,7 @@ class _QuranPageState extends State<QuranPage> {
                                   QuranReaderPage.route(
                                     surahNumber: lastReadSurah!.number.value,
                                     ayahNumber: lastRead.ayahNumber.ayahNumberInSurah,
+                                    playOnLoad: true,
                                   ),
                                 );
                               },
@@ -254,8 +254,16 @@ class _QuranPageState extends State<QuranPage> {
                                 IconButton(
                                   icon: Icon(Icons.play_circle_outline, color: Theme.of(context).primaryColor),
                                   onPressed: () {
-                                    context.read<AudioBloc>().add(
-                                      AudioEvent.playSurah(surahNumber: surah.number.value),
+                                    final startAyah = (lastRead?.ayahNumber.surahNumber == surah.number.value)
+                                        ? lastRead?.ayahNumber.ayahNumberInSurah
+                                        : 1;
+                                    Navigator.push(
+                                      context,
+                                      QuranReaderPage.route(
+                                        surahNumber: surah.number.value,
+                                        ayahNumber: startAyah,
+                                        playOnLoad: true,
+                                      ),
                                     );
                                   },
                                 ),

@@ -105,7 +105,11 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
   int? get currentIndex => _player.currentIndex;
 
   @override
-  Future<Result<void>> playStreaming(String url, {AudioPlayMode mode = AudioPlayMode.surah}) async {
+  Future<Result<void>> playStreaming(
+    String url, {
+    AudioPlayMode mode = AudioPlayMode.surah,
+    Map<String, dynamic>? metadata,
+  }) async {
     try {
       debugPrint('AudioPlayerService: playStreaming called with url: $url');
       _currentMode = mode;
@@ -113,19 +117,20 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
       await _player.stop();
       
       final AudioSource source;
+      final mediaItem = MediaItem(
+        id: url,
+        album: metadata?['album'] ?? "Al-Quran",
+        title: metadata?['title'] ?? (mode == AudioPlayMode.ayah ? "Quran Ayah" : "Quran Surah"),
+        artist: metadata?['artist'] ?? "Quran Reciter",
+      );
+
       if (Platform.isWindows) {
-        // Windows has file locking issues with LockCachingAudioSource during tests/rapid playback
         source = AudioSource.uri(
           Uri.parse(url),
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
           },
-          tag: MediaItem(
-            id: url,
-            album: "Al-Quran",
-            title: mode == AudioPlayMode.ayah ? "Quran Ayah" : "Quran Surah",
-            artist: "Quran Reciter",
-          ),
+          tag: mediaItem,
         );
       } else {
         final cachePath = await _getCachePath(url);
@@ -136,12 +141,7 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
           },
-          tag: MediaItem(
-            id: url,
-            album: "Al-Quran",
-            title: mode == AudioPlayMode.ayah ? "Quran Ayah" : "Quran Surah",
-            artist: "Quran Reciter",
-          ),
+          tag: mediaItem,
         );
       }
       
@@ -163,8 +163,11 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
   }
 
   @override
-  Future<Result<void>>
-  playLocal(String path, {AudioPlayMode mode = AudioPlayMode.surah}) async {
+  Future<Result<void>> playLocal(
+    String path, {
+    AudioPlayMode mode = AudioPlayMode.surah,
+    Map<String, dynamic>? metadata,
+  }) async {
     try {
       debugPrint('AudioPlayerService: playLocal called with path: $path');
       _currentMode = mode;
@@ -173,9 +176,9 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
         path,
         tag: MediaItem(
           id: path,
-          album: "Al-Quran",
-          title: "Quran Recitation",
-          artist: "Quran Reciter",
+          album: metadata?['album'] ?? "Al-Quran",
+          title: metadata?['title'] ?? "Quran Recitation",
+          artist: metadata?['artist'] ?? "Quran Reciter",
         ),
       );
       await _player.setAudioSource(
@@ -194,7 +197,12 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
   }
 
   @override
-  Future<Result<void>> playPlaylist(List<String> urls, {int initialIndex = 0, AudioPlayMode mode = AudioPlayMode.surah}) async {
+  Future<Result<void>> playPlaylist(
+    List<String> urls, {
+    int initialIndex = 0,
+    AudioPlayMode mode = AudioPlayMode.surah,
+    List<Map<String, dynamic>>? metadataList,
+  }) async {
     try {
       debugPrint('AudioPlayerService: playPlaylist called with ${urls.length} urls, start index: $initialIndex');
       _currentMode = mode;
@@ -205,7 +213,15 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
       final sources = <AudioSource>[];
       for (var i = 0; i < urls.length; i++) {
         final url = urls[i];
+        final metadata = metadataList != null && i < metadataList.length ? metadataList[i] : null;
         
+        final mediaItem = MediaItem(
+          id: url,
+          album: metadata?['album'] ?? "Al-Quran",
+          title: metadata?['title'] ?? "Ayah ${i + 1}",
+          artist: metadata?['artist'] ?? "Quran Reciter",
+        );
+
         if (Platform.isWindows) {
           sources.add(
             AudioSource.uri(
@@ -213,12 +229,7 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
               headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
               },
-              tag: MediaItem(
-                id: url,
-                album: "Al-Quran",
-                title: "Ayah ${i + 1}",
-                artist: "Quran Reciter",
-              ),
+              tag: mediaItem,
             )
           );
         } else {
@@ -231,12 +242,7 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
               headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
               },
-              tag: MediaItem(
-                id: url,
-                album: "Al-Quran",
-                title: "Ayah ${i + 1}",
-                artist: "Quran Reciter",
-              ),
+              tag: mediaItem,
             )
           );
         }

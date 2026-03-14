@@ -6,10 +6,22 @@ enum AudioPlayMode {
 }
 
 abstract interface class AudioPlayerService {
-  Future<Result<void>> playStreaming(String url, {AudioPlayMode mode = AudioPlayMode.ayah});
-  Future<Result<void>>
-  playLocal(String path, {AudioPlayMode mode = AudioPlayMode.ayah});
-  Future<Result<void>> playPlaylist(List<String> urls, {int initialIndex = 0, AudioPlayMode mode = AudioPlayMode.ayah});
+  Future<Result<void>> playStreaming(
+    String url, {
+    AudioPlayMode mode = AudioPlayMode.ayah,
+    Map<String, dynamic>? metadata,
+  });
+  Future<Result<void>> playLocal(
+    String path, {
+    AudioPlayMode mode = AudioPlayMode.ayah,
+    Map<String, dynamic>? metadata,
+  });
+  Future<Result<void>> playPlaylist(
+    List<String> urls, {
+    int initialIndex = 0,
+    AudioPlayMode mode = AudioPlayMode.ayah,
+    List<Map<String, dynamic>>? metadataList,
+  });
   
   Future<Result<void>> pause();
   Future<Result<void>> resume();

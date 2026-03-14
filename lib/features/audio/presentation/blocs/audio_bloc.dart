@@ -6,6 +6,7 @@ import 'package:fard/features/audio/domain/repositories/audio_player_service.dar
 import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
 import 'package:injectable/injectable.dart';
+import 'package:quran/quran.dart' as quran;
 
 part 'audio_event.dart';
 part 'audio_state.dart';
@@ -176,6 +177,9 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
 
     final bool isPrependActive = ayahNumber == 1 && audioRepository.shouldPrependBismillah(surahNumber, activeReciter.identifier);
 
+    final surahName = quran.getSurahName(surahNumber);
+    final reciterName = activeReciter.englishName;
+
     final result = isPrependActive 
       ? await playerService.playPlaylist(
           [
@@ -188,8 +192,16 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
             url,
           ],
           mode: AudioPlayMode.ayah,
+          metadataList: [
+            {'title': 'Bismillah', 'artist': reciterName, 'album': surahName},
+            {'title': 'Ayah $ayahNumber', 'artist': reciterName, 'album': surahName},
+          ],
         )
-      : await playerService.playStreaming(url, mode: AudioPlayMode.ayah);
+      : await playerService.playStreaming(
+          url, 
+          mode: AudioPlayMode.ayah,
+          metadata: {'title': 'Ayah $ayahNumber', 'artist': reciterName, 'album': surahName},
+        );
       
     result.fold(
       (failure) async {
@@ -259,10 +271,25 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
           }
         }
 
+        final surahName = quran.getSurahName(surahNumber);
+        final reciterName = activeReciter.englishName;
+        
+        final metadataList = <Map<String, dynamic>>[];
+        for (var i = 0; i < urls.length; i++) {
+          if (isPrependActive && i == 0) {
+            metadataList.add({'title': 'Bismillah', 'artist': reciterName, 'album': surahName});
+          } else {
+            // If Bismillah was prepended, actual Ayah 1 is at index 1
+            final displayAyah = isPrependActive ? i : i + 1;
+            metadataList.add({'title': 'Ayah $displayAyah', 'artist': reciterName, 'album': surahName});
+          }
+        }
+
         final result = await playerService.playPlaylist(
           urls, 
           initialIndex: initialIndex,
           mode: AudioPlayMode.surah,
+          metadataList: metadataList,
         );
         result.fold(
           (failure) async {

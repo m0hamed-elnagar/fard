@@ -17,21 +17,25 @@ import 'package:fard/features/quran/presentation/controllers/reader_scroll_contr
 class QuranReaderPage extends StatefulWidget {
   final int surahNumber;
   final int? initialAyahNumber;
+  final bool playOnLoad;
 
   const QuranReaderPage({
     super.key,
     required this.surahNumber,
     this.initialAyahNumber,
+    this.playOnLoad = false,
   });
 
-  static MaterialPageRoute route({
+  static Route route({
     required int surahNumber,
     int? ayahNumber,
+    bool playOnLoad = false,
   }) {
     return MaterialPageRoute(
       builder: (_) => QuranReaderPage(
         surahNumber: surahNumber,
         initialAyahNumber: ayahNumber,
+        playOnLoad: playOnLoad,
       ),
     );
   }
@@ -43,6 +47,7 @@ class QuranReaderPage extends StatefulWidget {
 class _QuranReaderPageState extends State<QuranReaderPage> {
   late final ReaderScrollController _scrollController;
   bool _hasHandledInitialAyah = false;
+  bool _hasHandledPlayOnLoad = false;
 
   @override
   void initState() {
@@ -105,6 +110,17 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                               } else if (s.highlightedAyah != null) {
                                 // If highlight changed (e.g. from navigation elsewhere), scroll to it
                                 _scrollController.scrollToAyah(s.highlightedAyah!.number.ayahNumberInSurah);
+                              }
+
+                              // Play on load logic
+                              if (!_hasHandledPlayOnLoad && widget.playOnLoad) {
+                                _hasHandledPlayOnLoad = true;
+                                context.read<AudioBloc>().add(
+                                  AudioEvent.playSurah(
+                                    surahNumber: widget.surahNumber,
+                                    startAyah: widget.initialAyahNumber ?? 1,
+                                  ),
+                                );
                               }
 
                               // Update audio bloc with current surah and first ayah for the player bar
