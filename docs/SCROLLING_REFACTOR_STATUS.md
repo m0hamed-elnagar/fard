@@ -3,7 +3,7 @@
 ## Current Session Status
 - **Branch:** `fix/scrolling-stable-base`
 - **Base Commit:** `ec38fd77c9992665d470ecb36e921184f3ecd38b`
-- **Status:** Stable base finalized with all safe features and UI enhancements ported.
+- **Status:** Stable base finalized with all safe features, UI enhancements, and Media Player fixes ported.
 
 ## Features Implemented:
 - [x] **Foundation:** Restored reliable `GlobalKey` based scrolling (from commit `ec38fd7`).
@@ -15,6 +15,10 @@
     - [x] Enhanced progress slider with time labels and better thumb.
     - [x] "Go to playing Ayah" button integrated into controls.
     - [x] Support for direct scrolling via `onScrollRequest` in reader pages.
+- [x] **Media Player Notification Fix:**
+    - [x] Added `FOREGROUND_SERVICE_MEDIA_PLAYBACK` permission.
+    - [x] Added `MediaButtonReceiver` to `AndroidManifest.xml`.
+    - [x] Switched `AudioServiceActivity` back to `.MainActivity` for correct notification behavior.
 - [x] **Settings UI:** Integrated new location status dialogs and settings shortcuts.
 
 ## Architectural Decision:
@@ -22,12 +26,12 @@
 
 ## Checklist for Next Session:
 - [ ] **Verification:** Manually verify "Go to playing Ayah" button works across different scenarios.
+- [ ] **Notification Test:** Play audio and verify media controls in the Android notification drawer.
 - [ ] **Analyze:** Run a full `flutter analyze` on the entire project to ensure no regressions.
-- [ ] **Performance Check:** Open Al-Baqarah and verify scrolling smoothness.
 
 ## Critical Files:
 - `lib/features/quran/presentation/controllers/reader_scroll_controller.dart`
 - `lib/features/quran/presentation/widgets/ayah_text.dart`
 - `lib/features/quran/presentation/pages/quran_reader_page.dart`
 - `lib/features/audio/presentation/widgets/audio_player_bar.dart`
-- `lib/features/settings/presentation/blocs/settings_cubit.dart`
+- `android/app/src/main/AndroidManifest.xml`
