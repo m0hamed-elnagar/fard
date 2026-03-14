@@ -87,28 +87,29 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
 
     final startAbs = currentProgress.sessionStartAbsolute ?? 1;
     
-    // Progress is distance from session start to bookmark
+    // PROGRESS LOGIC: Reverted to Linear (Distance from start)
     int newTotal = 0;
-    Set<int> newItems = {};
+    Set<int> newItems = Set.from(currentProgress.readItemsToday);
+    
     if (bookmarkAbs >= startAbs) {
        newTotal = bookmarkAbs - startAbs + 1;
-       // Optimization: only generate if needed for UI, but here we use it for total
-       newItems = Set.from(List.generate(newTotal, (i) => startAbs + i));
+       // Still update items for granular UI checks (like fractional page progress)
+       for (int i = startAbs; i <= bookmarkAbs; i++) {
+         newItems.add(i);
+       }
     } else {
-       // If bookmark is BEFORE start, we don't count it as negative progress today
-       newTotal = 0;
-       newItems = {};
+       // If reading before start, we don't count it as today's "distance" progress
+       // but we can still track the item if it helps other UI parts.
+       newItems.add(bookmarkAbs);
+       newTotal = currentProgress.totalAmountReadToday; // No change in linear distance
     }
 
     int newStreak = currentProgress.streak;
     if (state.goal != null) {
       final dailyGoal = state.goal!.valueInAyahs;
-      // If was incomplete and now complete
       if (currentProgress.totalAmountReadToday < dailyGoal && newTotal >= dailyGoal) {
         newStreak++;
-      } 
-      // If was complete and now adjusted back to incomplete
-      else if (currentProgress.totalAmountReadToday >= dailyGoal && newTotal < dailyGoal) {
+      } else if (currentProgress.totalAmountReadToday >= dailyGoal && newTotal < dailyGoal) {
         newStreak = (newStreak > 0) ? newStreak - 1 : 0;
       }
     }

@@ -7,6 +7,7 @@ import 'package:fard/features/werd/domain/entities/werd_goal.dart';
 import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/core/extensions/quran_extension.dart';
 import 'package:fard/core/extensions/number_extension.dart';
+import 'package:fard/core/theme/app_theme.dart';
 import 'package:quran/quran.dart' as quran;
 
 class SetWerdGoalDialog extends StatefulWidget {
@@ -33,13 +34,12 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
       _type = currentGoal.type;
       _unit = currentGoal.unit;
       initialValue = currentGoal.value;
-      
-      // Restore start point if possible
+
       if (currentGoal.startAbsolute != null) {
         if (currentGoal.startAbsolute == 1) {
           _startPointType = 0;
         } else {
-          _startPointType = 2; // Default to specific if not 1
+          _startPointType = 2;
           final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(currentGoal.startAbsolute!);
           _selectedSurah = pos[0];
           _selectedAyah = pos[1];
@@ -84,215 +84,413 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
   @override
   Widget build(BuildContext context) {
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
-    
-    return AlertDialog(
-      title: Text(
-        isAr ? 'تحديد هدف الورد' : 'Set Werd Goal',
-        style: GoogleFonts.amiri(fontWeight: FontWeight.bold),
-        textAlign: TextAlign.center,
-      ),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SegmentedButton<WerdGoalType>(
-              segments: [
-                ButtonSegment(
-                  value: WerdGoalType.fixedAmount, 
-                  label: Text(isAr ? 'كمية يومية' : 'Daily Amount'), 
-                  icon: const Icon(Icons.straighten)
-                ),
-                ButtonSegment(
-                  value: WerdGoalType.finishInDays, 
-                  label: Text(isAr ? 'ختم القرآن' : 'Finish Quran'), 
-                  icon: const Icon(Icons.event_available)
-                ),
-              ],
-              selected: {_type},
-              onSelectionChanged: (v) => _onTypeChanged(v.first),
-            ),
-            const SizedBox(height: 20),
-            
-            if (_type == WerdGoalType.fixedAmount) ...[
-              Text(
-                isAr ? 'أين تريد البدء؟' : 'Where to start?',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<int>(
-                initialValue: _startPointType,
-                decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                items: [
-                  DropdownMenuItem(value: 0, child: Text(isAr ? 'من البداية' : 'From beginning')),
-                  DropdownMenuItem(value: 1, child: Text(isAr ? 'من حيث توقفت' : 'From last read')),
-                  DropdownMenuItem(value: 2, child: Text(isAr ? 'مكان محدد' : 'Specific place')),
-                ],
-                onChanged: (v) => setState(() => _startPointType = v ?? 0),
-              ),
-              if (_startPointType == 2) ...[
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: DropdownButtonFormField<int>(
-                        initialValue: _selectedSurah,
-                        decoration: InputDecoration(
-                          labelText: isAr ? 'السورة' : 'Surah',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                        items: List.generate(114, (i) => i + 1).map((s) {
-                          return DropdownMenuItem(
-                            value: s,
-                            child: Text(
-                              isAr ? quran.getSurahNameArabic(s) : quran.getSurahName(s),
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (v) => setState(() {
-                          _selectedSurah = v ?? 1;
-                          _selectedAyah = 1;
-                        }),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: DropdownButtonFormField<int>(
-                        initialValue: _selectedAyah,
-                        decoration: InputDecoration(
-                          labelText: isAr ? 'الآية' : 'Ayah',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                        items: List.generate(
-                          quran.getVerseCount(_selectedSurah), 
-                          (i) => i + 1
-                        ).map((a) {
-                          return DropdownMenuItem(
-                            value: a,
-                            child: Text(isAr ? a.toArabicIndic() : a.toString()),
-                          );
-                        }).toList(),
-                        onChanged: (v) => setState(() => _selectedAyah = v ?? 1),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-              const SizedBox(height: 20),
-              Text(
-                isAr ? 'حدد الكمية والوحدة:' : 'Set amount and unit:',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                children: [
-                  WerdUnit.ayah,
-                  WerdUnit.page,
-                  WerdUnit.juz,
-                ].map((u) {
-                  final label = {
-                    WerdUnit.ayah: isAr ? 'آية' : 'Ayah',
-                    WerdUnit.page: isAr ? 'صفحة' : 'Page',
-                    WerdUnit.juz: isAr ? 'جزء' : 'Juz',
-                  }[u]!;
-                  return ChoiceChip(
-                    label: Text(label),
-                    selected: _unit == u,
-                    onSelected: (selected) {
-                      if (selected) setState(() => _unit = u);
-                    },
-                  );
-                }).toList(),
-              ),
-            ] else ...[
-              Text(
-                isAr ? 'سيتم تقسيم المتبقي من المصحف على عدد الأيام:' : 'Remaining Quran will be divided over days:',
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
-                textAlign: TextAlign.center,
-              ),
-            ],
-            
-            const SizedBox(height: 20),
-            Text(
-              _type == WerdGoalType.finishInDays 
-                ? (isAr ? 'عدد الأيام للختم:' : 'Days to finish:')
-                : (isAr ? 'الكمية اليومية:' : 'Daily amount:'),
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                IconButton(
-                  onPressed: () {
-                    final val = int.tryParse(_valueController.text) ?? 1;
-                    if (val > 1) _valueController.text = (val - 1).toString();
-                  },
-                  icon: const Icon(Icons.remove_circle_outline),
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _valueController,
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.center,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    final val = int.tryParse(_valueController.text) ?? 1;
-                    _valueController.text = (val + 1).toString();
-                  },
-                  icon: const Icon(Icons.add_circle_outline),
-                ),
-              ],
+    final size = MediaQuery.of(context).size;
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      child: Container(
+        constraints: BoxConstraints(maxWidth: 500, maxHeight: size.height * 0.85),
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
             ),
           ],
         ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(isAr ? 'إلغاء' : 'Cancel'),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildHeader(isAr),
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildSectionTitle(isAr ? 'نوع الهدف' : 'Goal Type', Icons.track_changes_rounded),
+                    const SizedBox(height: 12),
+                    _buildGoalTypeToggle(isAr),
+                    const SizedBox(height: 24),
+
+                    _buildSectionTitle(isAr ? 'نقطة البداية' : 'Start Point', Icons.place_rounded),
+                    const SizedBox(height: 12),
+                    _buildStartPointSelector(isAr),
+                    if (_startPointType == 2) ...[
+                      const SizedBox(height: 12),
+                      _buildSpecificPlaceSelector(isAr),
+                    ],
+                    const SizedBox(height: 24),
+
+                    if (_type == WerdGoalType.fixedAmount) ...[
+                      _buildSectionTitle(isAr ? 'الوحدة' : 'Unit', Icons.straighten_rounded),
+                      const SizedBox(height: 12),
+                      _buildUnitSelector(isAr),
+                      const SizedBox(height: 24),
+                    ],
+
+                    _buildSectionTitle(
+                      _type == WerdGoalType.finishInDays
+                        ? (isAr ? 'المدة الزمنية' : 'Duration')
+                        : (isAr ? 'الكمية اليومية' : 'Daily Amount'),
+                      _type == WerdGoalType.finishInDays ? Icons.calendar_today_rounded : Icons.numbers_rounded,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildValueInput(isAr),
+
+                    if (_type == WerdGoalType.finishInDays) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        isAr
+                          ? 'سيتم تقسيم المتبقي من المصحف على عدد الأيام المختار.'
+                          : 'Remaining Quran will be divided over the selected days.',
+                        style: TextStyle(fontSize: 12, color: AppTheme.textSecondary.withValues(alpha: 0.7)),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            _buildActions(context, isAr),
+          ],
         ),
-        ElevatedButton(
-          onPressed: () {
-            final val = int.tryParse(_valueController.text) ?? 10;
-            final startAbs = _type == WerdGoalType.fixedAmount 
-                ? _calculateStartAbsolute() 
-                : _calculateDefaultFinishStart();
-            
-            context.read<WerdBloc>().add(WerdEvent.setGoal(WerdGoal(
-              id: 'default',
-              type: _type,
-              value: val,
-              unit: _unit,
-              startDate: DateTime.now(),
-              startAbsolute: startAbs,
-            )));
-            Navigator.pop(context);
-          },
-          child: Text(isAr ? 'حفظ' : 'Save'),
+      ),
+    );
+  }
+
+  Widget _buildHeader(bool isAr) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppTheme.accent.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.auto_awesome_rounded, color: AppTheme.accent),
+          ),
+          const SizedBox(width: 16),
+          Text(
+            isAr ? 'تحديد هدف الورد' : 'Set Werd Goal',
+            style: GoogleFonts.amiri(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          const Spacer(),
+          IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.close_rounded),
+            style: IconButton.styleFrom(
+              backgroundColor: AppTheme.cardBorder.withValues(alpha: 0.1),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: AppTheme.accent),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: GoogleFonts.amiri(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textPrimary,
+          ),
         ),
       ],
     );
   }
 
-  int _calculateDefaultFinishStart() {
-    final lastRead = context.read<QuranBloc>().state.lastReadPosition;
-    if (lastRead != null) {
-      return QuranHizbProvider.getAbsoluteAyahNumber(
-        lastRead.ayahNumber.surahNumber,
-        lastRead.ayahNumber.ayahNumberInSurah,
-      );
-    }
-    return 1;
+  Widget _buildGoalTypeToggle(bool isAr) {
+    return SegmentedButton<WerdGoalType>(
+      style: SegmentedButton.styleFrom(
+        backgroundColor: AppTheme.cardBorder.withValues(alpha: 0.1),
+        selectedBackgroundColor: AppTheme.accent,
+        selectedForegroundColor: AppTheme.onAccent,
+        side: BorderSide(color: AppTheme.cardBorder.withValues(alpha: 0.2)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      segments: [
+        ButtonSegment(
+          value: WerdGoalType.fixedAmount,
+          label: Text(isAr ? 'كمية يومية' : 'Daily'),
+          icon: const Icon(Icons.bolt_rounded, size: 18)
+        ),
+        ButtonSegment(
+          value: WerdGoalType.finishInDays,
+          label: Text(isAr ? 'ختم القرآن' : 'Finish'),
+          icon: const Icon(Icons.auto_stories_rounded, size: 18)
+        ),
+      ],
+      selected: {_type},
+      onSelectionChanged: (v) => _onTypeChanged(v.first),
+    );
+  }
+
+  Widget _buildStartPointSelector(bool isAr) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.cardBorder.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.cardBorder.withValues(alpha: 0.2)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<int>(
+          value: _startPointType,
+          isExpanded: true,
+          borderRadius: BorderRadius.circular(16),
+          items: [
+            DropdownMenuItem(value: 0, child: Text(isAr ? 'من البداية' : 'From beginning')),
+            DropdownMenuItem(value: 1, child: Text(isAr ? 'من حيث توقفت' : 'From last read')),
+            DropdownMenuItem(value: 2, child: Text(isAr ? 'مكان محدد' : 'Specific place')),
+          ],
+          onChanged: (v) => setState(() => _startPointType = v ?? 0),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSpecificPlaceSelector(bool isAr) {
+    return Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppTheme.cardBorder.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppTheme.cardBorder.withValues(alpha: 0.2)),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                value: _selectedSurah,
+                isExpanded: true,
+                borderRadius: BorderRadius.circular(16),
+                items: List.generate(114, (i) => i + 1).map((s) {
+                  return DropdownMenuItem(
+                    value: s,
+                    child: Text(
+                      isAr ? quran.getSurahNameArabic(s) : quran.getSurahName(s),
+                      style: GoogleFonts.amiri(fontSize: 14),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (v) => setState(() {
+                  _selectedSurah = v ?? 1;
+                  _selectedAyah = 1;
+                }),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppTheme.cardBorder.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppTheme.cardBorder.withValues(alpha: 0.2)),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                value: _selectedAyah,
+                isExpanded: true,
+                borderRadius: BorderRadius.circular(16),
+                items: List.generate(
+                  quran.getVerseCount(_selectedSurah),
+                  (i) => i + 1
+                ).map((a) {
+                  return DropdownMenuItem(
+                    value: a,
+                    child: Text(isAr ? a.toArabicIndic() : a.toString()),
+                  );
+                }).toList(),
+                onChanged: (v) => setState(() => _selectedAyah = v ?? 1),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUnitSelector(bool isAr) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        WerdUnit.ayah,
+        WerdUnit.page,
+        WerdUnit.juz,
+      ].map((u) {
+        final label = {
+          WerdUnit.ayah: isAr ? 'آية' : 'Ayah',
+          WerdUnit.page: isAr ? 'صفحة' : 'Page',
+          WerdUnit.juz: isAr ? 'جزء' : 'Juz',
+        }[u]!;
+        final isSelected = _unit == u;
+        return ChoiceChip(
+          label: Text(label),
+          selected: isSelected,
+          onSelected: (selected) {
+            if (selected) setState(() => _unit = u);
+          },
+          selectedColor: AppTheme.accent,
+          labelStyle: TextStyle(
+            color: isSelected ? AppTheme.onAccent : AppTheme.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildValueInput(bool isAr) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.cardBorder.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppTheme.cardBorder.withValues(alpha: 0.2)),
+      ),
+      padding: const EdgeInsets.all(8),
+      child: Row(
+        children: [
+          _buildStepButton(Icons.remove_rounded, () {
+            final val = int.tryParse(_valueController.text) ?? 1;
+            if (val > 1) {
+              _valueController.text = (val - 1).toString();
+              setState(() {});
+            }
+          }),
+          Expanded(
+            child: TextField(
+              controller: _valueController,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+              ),
+              onChanged: (v) {
+                final val = int.tryParse(v);
+                if (val != null) {
+                  int max = 10000;
+                  if (_type == WerdGoalType.finishInDays) {
+                    max = 10000; // Allow many days if they want
+                  } else {
+                    if (_unit == WerdUnit.juz) max = 30;
+                    if (_unit == WerdUnit.page) max = 604;
+                  }
+
+                  if (val > max) {
+                    _valueController.text = max.toString();
+                  } else if (val < 1) {
+                    _valueController.text = '1';
+                  }
+                }
+                setState(() {});
+              },
+            ),
+          ),
+          _buildStepButton(Icons.add_rounded, () {
+            final val = int.tryParse(_valueController.text) ?? 1;
+            int max = 10000;
+            if (_type == WerdGoalType.finishInDays) {
+               max = 10000;
+            } else {
+              if (_unit == WerdUnit.juz) max = 30;
+              if (_unit == WerdUnit.page) max = 604;
+            }
+
+            if (val < max) {
+              _valueController.text = (val + 1).toString();
+              setState(() {});
+            }
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepButton(IconData icon, VoidCallback onPressed) {
+    return Material(
+      color: AppTheme.accent.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Icon(icon, color: AppTheme.accent, size: 28),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActions(BuildContext context, bool isAr) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextButton(
+              onPressed: () => Navigator.pop(context),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              child: Text(isAr ? 'إلغاء' : 'Cancel', style: const TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            flex: 2,
+            child: ElevatedButton(
+              onPressed: () {
+                final val = int.tryParse(_valueController.text) ?? 10;
+                final startAbs = _calculateStartAbsolute();
+
+                context.read<WerdBloc>().add(WerdEvent.setGoal(WerdGoal(
+                  id: 'default',
+                  type: _type,
+                  value: val,
+                  unit: _unit,
+                  startDate: DateTime.now(),
+                  startAbsolute: startAbs,
+                )));
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.accent,
+                foregroundColor: AppTheme.onAccent,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 4,
+              ),
+              child: Text(isAr ? 'حفظ الهدف' : 'Save Goal', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),   
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
