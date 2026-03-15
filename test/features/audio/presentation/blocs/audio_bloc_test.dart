@@ -4,15 +4,20 @@ import 'package:fard/features/audio/domain/entities/reciter.dart';
 import 'package:fard/features/audio/domain/repositories/audio_player_service.dart';
 import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockAudioRepository extends Mock implements AudioRepository {}
 class MockAudioPlayerService extends Mock implements AudioPlayerService {}
+class MockSettingsCubit extends Mock implements SettingsCubit {}
 
 void main() {
   late MockAudioRepository mockRepository;
   late MockAudioPlayerService mockPlayerService;
+  late MockSettingsCubit mockSettingsCubit;
   late AudioBloc audioBloc;
 
   setUpAll(() {
@@ -30,6 +35,11 @@ void main() {
   setUp(() {
     mockRepository = MockAudioRepository();
     mockPlayerService = MockAudioPlayerService();
+    mockSettingsCubit = MockSettingsCubit();
+
+    when(() => mockSettingsCubit.state).thenReturn(const SettingsState(
+      locale: Locale('ar'),
+    ));
 
     when(() => mockRepository.getCachedReciters())
         .thenAnswer((_) async => Result.success([tReciter]));
@@ -52,6 +62,7 @@ void main() {
     audioBloc = AudioBloc(
       audioRepository: mockRepository,
       playerService: mockPlayerService,
+      settingsCubit: mockSettingsCubit,
     );
   });
 

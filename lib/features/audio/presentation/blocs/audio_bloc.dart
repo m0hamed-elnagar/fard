@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:fard/features/audio/domain/repositories/audio_player_service.dart';
 import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
+import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:injectable/injectable.dart';
 import 'package:quran/quran.dart' as quran;
 
@@ -15,6 +16,7 @@ part 'audio_state.dart';
 class AudioBloc extends Bloc<AudioEvent, AudioState> {
   final AudioRepository audioRepository;
   final AudioPlayerService playerService;
+  final SettingsCubit settingsCubit;
   
   StreamSubscription? _statusSubscription;
   StreamSubscription? _errorSubscription;
@@ -25,6 +27,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
   AudioBloc({
     required this.audioRepository,
     required this.playerService,
+    required this.settingsCubit,
   }) : super(const AudioState()) {
     
     on<AudioEvent>((event, emit) async {
@@ -177,8 +180,14 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
 
     final bool isPrependActive = ayahNumber == 1 && audioRepository.shouldPrependBismillah(surahNumber, activeReciter.identifier);
 
-    final surahName = quran.getSurahName(surahNumber);
-    final reciterName = activeReciter.englishName;
+    final currentLanguage = settingsCubit.state.locale.languageCode;
+    final isArabic = currentLanguage == 'ar';
+    
+    final surahName = isArabic ? quran.getSurahNameArabic(surahNumber) : quran.getSurahName(surahNumber);
+    final reciterName = isArabic ? activeReciter.name : activeReciter.englishName;
+    final ayahLabel = isArabic ? "الآية" : "Ayah";
+    final bismillahLabel = isArabic ? "بسم الله الرحمن الرحيم" : "Bismillah";
+    final surahLabel = isArabic ? "سورة" : "Surah";
 
     final result = isPrependActive 
       ? await playerService.playPlaylist(
@@ -193,14 +202,26 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
           ],
           mode: AudioPlayMode.ayah,
           metadataList: [
-            {'title': 'Bismillah', 'artist': reciterName, 'album': surahName},
-            {'title': 'Ayah $ayahNumber', 'artist': reciterName, 'album': surahName},
+            {
+              'title': '$surahLabel $surahName: $bismillahLabel', 
+              'artist': reciterName, 
+              'album': surahName
+            },
+            {
+              'title': '$surahLabel $surahName: $ayahLabel $ayahNumber', 
+              'artist': reciterName, 
+              'album': surahName
+            },
           ],
         )
       : await playerService.playStreaming(
           url, 
           mode: AudioPlayMode.ayah,
-          metadata: {'title': 'Ayah $ayahNumber', 'artist': reciterName, 'album': surahName},
+          metadata: {
+            'title': '$surahLabel $surahName: $ayahLabel $ayahNumber', 
+            'artist': reciterName, 
+            'album': surahName
+          },
         );
       
     result.fold(
@@ -271,17 +292,31 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
           }
         }
 
-        final surahName = quran.getSurahName(surahNumber);
-        final reciterName = activeReciter.englishName;
+        final currentLanguage = settingsCubit.state.locale.languageCode;
+        final isArabic = currentLanguage == 'ar';
+        
+        final surahName = isArabic ? quran.getSurahNameArabic(surahNumber) : quran.getSurahName(surahNumber);
+        final reciterName = isArabic ? activeReciter.name : activeReciter.englishName;
+        final ayahLabel = isArabic ? "الآية" : "Ayah";
+        final bismillahLabel = isArabic ? "بسم الله الرحمن الرحيم" : "Bismillah";
+        final surahLabel = isArabic ? "سورة" : "Surah";
         
         final metadataList = <Map<String, dynamic>>[];
         for (var i = 0; i < urls.length; i++) {
           if (isPrependActive && i == 0) {
-            metadataList.add({'title': 'Bismillah', 'artist': reciterName, 'album': surahName});
+            metadataList.add({
+              'title': '$surahLabel $surahName: $bismillahLabel', 
+              'artist': reciterName, 
+              'album': surahName
+            });
           } else {
             // If Bismillah was prepended, actual Ayah 1 is at index 1
             final displayAyah = isPrependActive ? i : i + 1;
-            metadataList.add({'title': 'Ayah $displayAyah', 'artist': reciterName, 'album': surahName});
+            metadataList.add({
+              'title': '$surahLabel $surahName: $ayahLabel $displayAyah', 
+              'artist': reciterName, 
+              'album': surahName
+            });
           }
         }
 

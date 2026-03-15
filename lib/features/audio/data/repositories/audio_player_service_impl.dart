@@ -122,6 +122,7 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
         album: metadata?['album'] ?? "Al-Quran",
         title: metadata?['title'] ?? (mode == AudioPlayMode.ayah ? "Quran Ayah" : "Quran Surah"),
         artist: metadata?['artist'] ?? "Quran Reciter",
+        artUri: Uri.parse(metadata?['artUri'] ?? 'resource://mipmap/ic_launcher'),
       );
 
       if (Platform.isWindows) {
@@ -179,6 +180,7 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
           album: metadata?['album'] ?? "Al-Quran",
           title: metadata?['title'] ?? "Quran Recitation",
           artist: metadata?['artist'] ?? "Quran Reciter",
+          artUri: Uri.parse(metadata?['artUri'] ?? 'resource://mipmap/ic_launcher'),
         ),
       );
       await _player.setAudioSource(
@@ -220,6 +222,7 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
           album: metadata?['album'] ?? "Al-Quran",
           title: metadata?['title'] ?? "Ayah ${i + 1}",
           artist: metadata?['artist'] ?? "Quran Reciter",
+          artUri: Uri.parse(metadata?['artUri'] ?? 'resource://mipmap/ic_launcher'),
         );
 
         if (Platform.isWindows) {

@@ -233,12 +233,6 @@ extension GetItInjectableX on _i174.GetIt {
         playerService: gh<_i720.AudioPlayerService>(),
       ),
     );
-    gh.factory<_i9.AudioBloc>(
-      () => _i9.AudioBloc(
-        audioRepository: gh<_i451.AudioRepository>(),
-        playerService: gh<_i720.AudioPlayerService>(),
-      ),
-    );
     gh.factory<_i588.UpdateLastRead>(
       () => _i588.UpdateLastRead(
         gh<_i498.QuranRepository>(),
@@ -280,6 +274,13 @@ extension GetItInjectableX on _i174.GetIt {
         watchLastRead: gh<_i358.WatchLastRead>(),
         bookmarkRepository: gh<_i33.BookmarkRepository>(),
         quranRepository: gh<_i498.QuranRepository>(),
+      ),
+    );
+    gh.factory<_i9.AudioBloc>(
+      () => _i9.AudioBloc(
+        audioRepository: gh<_i451.AudioRepository>(),
+        playerService: gh<_i720.AudioPlayerService>(),
+        settingsCubit: gh<_i573.SettingsCubit>(),
       ),
     );
     gh.factory<_i733.QuranBloc>(

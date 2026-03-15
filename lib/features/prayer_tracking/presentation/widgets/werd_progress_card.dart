@@ -1,15 +1,16 @@
+import 'package:fard/core/extensions/number_extension.dart';
+import 'package:fard/core/extensions/quran_extension.dart';
+import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
+import 'package:fard/features/werd/domain/entities/werd_goal.dart';
+import 'package:fard/features/werd/domain/entities/werd_progress.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
 import 'package:fard/features/werd/presentation/pages/werd_history_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:fard/core/theme/app_theme.dart';
-import 'package:fard/core/extensions/number_extension.dart';
-import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
-import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
-import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
-import 'package:fard/core/extensions/quran_extension.dart';
-import 'package:fard/features/werd/domain/entities/werd_goal.dart';
 import 'package:quran/quran.dart' as quran;
 
 class WerdProgressCard extends StatefulWidget {
@@ -27,7 +28,7 @@ class WerdProgressCard extends StatefulWidget {
 class _WerdProgressCardState extends State<WerdProgressCard> {
   WerdUnit _displayUnit = WerdUnit.ayah;
 
-  double _convertValue(int ayahCount, WerdUnit unit, WerdGoal goal, bool isCurrent, dynamic progress) {
+  double _convertValue(int ayahCount, WerdUnit unit, WerdGoal goal, bool isCurrent, WerdProgress? progress) {
     if (unit == WerdUnit.ayah) return ayahCount.toDouble();
 
     // If display unit matches goal unit and we are calculating the total part, use goal value exactly
@@ -36,7 +37,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
     }
 
     if (isCurrent) {
-      final readItems = progress?.readItemsToday as Set<int>? ?? {};
+      final readItems = progress?.readItemsToday ?? {};
       return QuranHizbProvider.calculateFractionalProgress(readItems, unit);
     } else {
       // For total value, we calculate how many fractional units are in the REQUIRED range
@@ -87,7 +88,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
         final currentMonthKey = "${now.year}-${now.month.toString().padLeft(2, '0')}";
         int monthTotalAyahs = progress?.history.entries
             .where((e) => e.key.startsWith(currentMonthKey))
-            .fold(0, (sum, e) => sum! + e.value) ?? 0;
+            .fold(0, (sum, e) => sum! + e.value.totalAyahsRead) ?? 0;
         monthTotalAyahs += currentAyahs;
 
         // Fractional Calculations
@@ -108,7 +109,9 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
         final last7Days = List.generate(7, (i) {
           final date = now.subtract(Duration(days: 6 - i));
           final key = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-          return MapEntry(date, progress?.history[key] ?? (i == 6 ? currentAyahs : 0));
+          final historyEntry = progress?.history[key];
+          final amount = historyEntry?.totalAyahsRead ?? (i == 6 ? currentAyahs : 0);
+          return MapEntry(date, amount);
         });
 
         // Calculate Target Location for today

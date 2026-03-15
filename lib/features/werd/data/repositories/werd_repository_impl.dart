@@ -3,7 +3,10 @@ import 'dart:convert';
 import 'package:fard/core/errors/failure.dart';
 import 'package:fard/features/werd/domain/entities/werd_goal.dart';
 import 'package:fard/features/werd/domain/entities/werd_progress.dart';
+import 'package:fard/features/werd/domain/entities/werd_history_entry.dart';
 import 'package:fard/features/werd/domain/repositories/werd_repository.dart';
+import 'package:fard/core/extensions/quran_extension.dart';
+import 'package:quran/quran.dart' as quran;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:injectable/injectable.dart';
 
@@ -62,8 +65,41 @@ class WerdRepositoryImpl implements WerdRepository {
           now.day != lastUpdated.day) {
         
         final dateKey = "${lastUpdated.year}-${lastUpdated.month.toString().padLeft(2, '0')}-${lastUpdated.day.toString().padLeft(2, '0')}";
-        final newHistory = Map<String, int>.from(progress.history);
-        newHistory[dateKey] = progress.totalAmountReadToday;
+        
+        // Calculate details for history entry
+        final startAbs = progress.sessionStartAbsolute ?? 1;
+        final endAbs = progress.lastReadAbsolute ?? (startAbs - 1).clamp(1, 6236);
+        final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(startAbs);
+        final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(endAbs);
+        
+        final pagesRead = QuranHizbProvider.calculateFractionalProgress(progress.readItemsToday, WerdUnit.page);
+        final juzRead = QuranHizbProvider.calculateFractionalProgress(progress.readItemsToday, WerdUnit.juz);
+        
+        final startSurahName = quran.getSurahName(startPos[0]);
+        final endSurahName = quran.getSurahName(endPos[0]);
+        
+        String summary;
+        if (progress.totalAmountReadToday > 0) {
+           summary = "Read ${progress.totalAmountReadToday} ayahs (${pagesRead.toStringAsFixed(1)} pages) from $startSurahName ${startPos[1]} to $endSurahName ${endPos[1]}";
+        } else {
+           summary = "No progress recorded today. Last position: $startSurahName ${startPos[1]}";
+        }
+
+        final entry = WerdHistoryEntry(
+          totalAyahsRead: progress.totalAmountReadToday,
+          startAbsolute: startAbs,
+          endAbsolute: endAbs,
+          pagesRead: pagesRead,
+          juzRead: juzRead,
+          startSurahName: startSurahName,
+          startAyahNumber: startPos[1],
+          endSurahName: endSurahName,
+          endAyahNumber: endPos[1],
+          summary: summary,
+        );
+
+        final newHistory = Map<String, WerdHistoryEntry>.from(progress.history);
+        newHistory[dateKey] = entry;
 
         bool wasYesterday = now.difference(DateTime(lastUpdated.year, lastUpdated.month, lastUpdated.day)).inDays == 1;
         

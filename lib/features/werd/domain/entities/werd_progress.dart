@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'werd_history_entry.dart';
 
 class WerdProgress extends Equatable {
   final String goalId;
@@ -8,7 +9,7 @@ class WerdProgress extends Equatable {
   final int? sessionStartAbsolute;
   final DateTime lastUpdated;
   final int streak;
-  final Map<String, int> history; // ISO date string -> amount read
+  final Map<String, WerdHistoryEntry> history; // ISO date string -> entry
 
   const WerdProgress({
     required this.goalId,
@@ -41,10 +42,31 @@ class WerdProgress extends Equatable {
     'sessionStartAbsolute': sessionStartAbsolute,
     'lastUpdated': lastUpdated.toIso8601String(),
     'streak': streak,
-    'history': history,
+    'history': history.map((key, value) => MapEntry(key, value.toJson())),
   };
 
   factory WerdProgress.fromJson(Map<String, dynamic> json) {
+    final rawHistory = json['history'] as Map<String, dynamic>? ?? {};
+    final history = rawHistory.map((key, value) {
+      if (value is int) {
+        // Backward compatibility for old simple amount history
+        return MapEntry(key, WerdHistoryEntry(
+          totalAyahsRead: value,
+          startAbsolute: 0,
+          endAbsolute: 0,
+          pagesRead: 0.0,
+          juzRead: 0.0,
+          startSurahName: '',
+          startAyahNumber: 0,
+          endSurahName: '',
+          endAyahNumber: 0,
+          summary: 'Read $value ayahs',
+        ));
+      } else {
+        return MapEntry(key, WerdHistoryEntry.fromJson(value as Map<String, dynamic>));
+      }
+    });
+
     return WerdProgress(
       goalId: json['goalId'] ?? 'default',
       totalAmountReadToday: json['totalAmountReadToday'] ?? 0,
@@ -53,7 +75,7 @@ class WerdProgress extends Equatable {
       sessionStartAbsolute: json['sessionStartAbsolute'],
       lastUpdated: DateTime.parse(json['lastUpdated']),
       streak: json['streak'] ?? 0,
-      history: Map<String, int>.from(json['history'] ?? {}),
+      history: history,
     );
   }
 
@@ -65,7 +87,7 @@ class WerdProgress extends Equatable {
     int? sessionStartAbsolute,
     DateTime? lastUpdated,
     int? streak,
-    Map<String, int>? history,
+    Map<String, WerdHistoryEntry>? history,
   }) {
     return WerdProgress(
       goalId: goalId ?? this.goalId,
