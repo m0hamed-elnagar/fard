@@ -47,6 +47,15 @@ class FakePrayerRepo implements PrayerRepo {
   }
 
   @override
+  Future<void> importAllRecords(List<DailyRecord> records) async {
+    db.clear();
+    for (final r in records) {
+      final normalizedDate = DateTime(r.date.year, r.date.month, r.date.day);
+      db[normalizedDate] = r;
+    }
+  }
+
+  @override
   Future<Map<DateTime, DailyRecord>> loadMonth(int year, int month) async {
     final Map<DateTime, DailyRecord> monthData = {};
     db.forEach((date, record) {

@@ -66,6 +66,15 @@ class FakePrayerRepo implements PrayerRepo {
   Future<List<DailyRecord>> loadAllRecords() async {
     return _records.values.toList();
   }
+
+  @override
+  Future<void> importAllRecords(List<DailyRecord> records) async {
+    _records.clear();
+    for (final r in records) {
+      final key = '${r.date.year}-${r.date.month}-${r.date.day}';
+      _records[key] = r;
+    }
+  }
 }
 
 class MockSharedPreferences extends Mock implements SharedPreferences {}

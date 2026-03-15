@@ -71,6 +71,7 @@ import '../../features/werd/data/repositories/werd_repository_impl.dart'
     as _i472;
 import '../../features/werd/domain/repositories/werd_repository.dart' as _i724;
 import '../../features/werd/presentation/blocs/werd_bloc.dart' as _i1037;
+import '../services/export_import_service.dart' as _i1068;
 import '../services/location_service.dart' as _i669;
 import '../services/mushaf_download_service.dart' as _i700;
 import '../services/notification/channel_manager.dart' as _i680;
@@ -191,6 +192,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1004.AzkarRepository>(),
         gh<_i680.ChannelManager>(),
         gh<_i1055.SoundManager>(),
+      ),
+    );
+    gh.lazySingleton<_i1068.ExportImportService>(
+      () => _i1068.ExportImportService(
+        gh<_i800.PrayerRepo>(),
+        gh<_i724.WerdRepository>(),
       ),
     );
     gh.lazySingleton<_i352.TasbihRepository>(

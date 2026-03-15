@@ -930,4 +930,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goToPlayingAyah => 'Go to playing Ayah';
+
+  @override
+  String get dataBackup => 'Data & Backup';
+
+  @override
+  String get exportBackup => 'Export Backup';
+
+  @override
+  String get exportBackupDesc =>
+      'Export your history and goals to a JSON file.';
+
+  @override
+  String get importBackup => 'Import Backup';
+
+  @override
+  String get importBackupDesc =>
+      'Restore your data from a previously exported JSON file.';
+
+  @override
+  String get backupExportSuccess => 'Backup exported successfully';
+
+  @override
+  String get backupImportSuccess => 'Backup imported successfully';
+
+  @override
+  String get backupError => 'Backup error';
+
+  @override
+  String get importWarning =>
+      'This will override your current data. Are you sure?';
+
+  @override
+  String get backupVersionError =>
+      'Backup version is newer than app version. Please update the app.';
 }

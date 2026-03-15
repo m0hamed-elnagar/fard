@@ -94,4 +94,12 @@ class PrayerRepoImpl implements PrayerRepo {
       ..sort((a, b) => b.dateMillis.compareTo(a.dateMillis));
     return sorted.map(DailyRecordMapper.toDomain).toList();
   }
+
+  @override
+  Future<void> importAllRecords(List<DailyRecord> records) async {
+    await _box.clear();
+    for (final record in records) {
+      await _box.put(record.id, DailyRecordMapper.toEntity(record));
+    }
+  }
 }

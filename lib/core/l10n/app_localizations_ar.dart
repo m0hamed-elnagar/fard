@@ -927,4 +927,36 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get goToPlayingAyah => 'الذهاب إلى الآية الحالية';
+
+  @override
+  String get dataBackup => 'البيانات والنسخ الاحتياطي';
+
+  @override
+  String get exportBackup => 'تصدير نسخة احتياطية';
+
+  @override
+  String get exportBackupDesc => 'تصدير سجلاتك وأهدافك إلى ملف خارجي.';
+
+  @override
+  String get importBackup => 'استيراد نسخة احتياطية';
+
+  @override
+  String get importBackupDesc => 'استعادة بياناتك من ملف نسخة احتياطية سابق.';
+
+  @override
+  String get backupExportSuccess => 'تم تصدير النسخة الاحتياطية بنجاح';
+
+  @override
+  String get backupImportSuccess => 'تم استيراد النسخة الاحتياطية بنجاح';
+
+  @override
+  String get backupError => 'خطأ في النسخ الاحتياطي';
+
+  @override
+  String get importWarning =>
+      'سيؤدي هذا إلى استبدال بياناتك الحالية. هل أنت متأكد؟';
+
+  @override
+  String get backupVersionError =>
+      'نسخة الاحتياط أحدث من نسخة التطبيق. يرجى تحديث التطبيق.';
 }

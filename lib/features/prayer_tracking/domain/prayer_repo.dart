@@ -10,4 +10,5 @@ abstract interface class PrayerRepo {
   Future<DailyRecord?> loadLastSavedRecord();
   Future<DailyRecord?> loadLastRecordBefore(DateTime date);
   Future<List<DailyRecord>> loadAllRecords();
+  Future<void> importAllRecords(List<DailyRecord> records);
 }

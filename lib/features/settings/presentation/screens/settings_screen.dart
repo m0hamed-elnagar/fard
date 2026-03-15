@@ -1,3 +1,7 @@
+import 'package:fard/core/services/export_import_service.dart';
+import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/core/di/injection.dart';
@@ -477,6 +481,81 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           }
                         },
                       ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _buildSection(
+                  context,
+                  title: l10n.dataBackup,
+                  icon: Icons.backup_rounded,
+                  children: [
+                    _buildSettingItem(
+                      title: l10n.exportBackup,
+                      description: l10n.exportBackupDesc,
+                      onTap: () async {
+                        try {
+                          await getIt<ExportImportService>().exportData();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(l10n.backupExportSuccess)),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('${l10n.backupError}: $e')),
+                            );
+                          }
+                        }
+                      },
+                      trailing: const Icon(Icons.share_rounded, size: 20, color: AppTheme.accent),
+                    ),
+                    const Divider(height: 32),
+                    _buildSettingItem(
+                      title: l10n.importBackup,
+                      description: l10n.importBackupDesc,
+                      onTap: () async {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text(l10n.importBackup),
+                            content: Text(l10n.importWarning),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: Text(l10n.cancel),
+                              ),
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                child: Text(l10n.yes),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (confirm == true && context.mounted) {
+                          try {
+                            final success = await getIt<ExportImportService>().importData();
+                            if (success && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(l10n.backupImportSuccess)),
+                              );
+                              // Reload blocs to reflect new data
+                              context.read<WerdBloc>().add(const WerdEvent.load());
+                              final prayerBloc = context.read<PrayerTrackerBloc>();
+                              prayerBloc.add(PrayerTrackerEvent.load(DateTime.now()));
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('${l10n.backupError}: $e')),
+                              );
+                            }
+                          }
+                        }
+                      },
+                      trailing: const Icon(Icons.file_upload_rounded, size: 20, color: AppTheme.accent),
                     ),
                   ],
                 ),
@@ -1360,36 +1439,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSettingItem({required String title, required String description, required Widget trailing}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-                    ),
-                  ],
+  Widget _buildSettingItem({required String title, required String description, required Widget trailing, VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        description,
+                        style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              trailing,
-            ],
-          ),
-        ],
+                const SizedBox(width: 16),
+                trailing,
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

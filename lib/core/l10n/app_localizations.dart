@@ -1807,6 +1807,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go to playing Ayah'**
   String get goToPlayingAyah;
+
+  /// No description provided for @dataBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Data & Backup'**
+  String get dataBackup;
+
+  /// No description provided for @exportBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Backup'**
+  String get exportBackup;
+
+  /// No description provided for @exportBackupDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Export your history and goals to a JSON file.'**
+  String get exportBackupDesc;
+
+  /// No description provided for @importBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Backup'**
+  String get importBackup;
+
+  /// No description provided for @importBackupDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore your data from a previously exported JSON file.'**
+  String get importBackupDesc;
+
+  /// No description provided for @backupExportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup exported successfully'**
+  String get backupExportSuccess;
+
+  /// No description provided for @backupImportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup imported successfully'**
+  String get backupImportSuccess;
+
+  /// No description provided for @backupError.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup error'**
+  String get backupError;
+
+  /// No description provided for @importWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This will override your current data. Are you sure?'**
+  String get importWarning;
+
+  /// No description provided for @backupVersionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup version is newer than app version. Please update the app.'**
+  String get backupVersionError;
 }
 
 class _AppLocalizationsDelegate

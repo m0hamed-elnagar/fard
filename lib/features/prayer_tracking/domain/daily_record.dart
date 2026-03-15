@@ -40,4 +40,24 @@ final class DailyRecord extends Equatable {
 
   @override
   List<Object> get props => [id, date, missedToday, completedToday, qada, completedQada];
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'date': date.toIso8601String(),
+    'missedToday': missedToday.map((s) => s.index).toList(),
+    'completedToday': completedToday.map((s) => s.index).toList(),
+    'qada': qada.map((k, v) => MapEntry(k.index.toString(), v.value)),
+    'completedQada': completedQada.map((k, v) => MapEntry(k.index.toString(), v)),
+  };
+
+  factory DailyRecord.fromJson(Map<String, dynamic> json) {
+    return DailyRecord(
+      id: json['id'],
+      date: DateTime.parse(json['date']),
+      missedToday: (json['missedToday'] as List).map((i) => Salaah.values[i as int]).toSet(),
+      completedToday: (json['completedToday'] as List).map((i) => Salaah.values[i as int]).toSet(),
+      qada: (json['qada'] as Map).map((k, v) => MapEntry(Salaah.values[int.parse(k as String)], MissedCounter(v as int))),
+      completedQada: (json['completedQada'] as Map).map((k, v) => MapEntry(Salaah.values[int.parse(k as String)], v as int)),
+    );
+  }
 }

@@ -22,8 +22,7 @@ class WerdHistoryPage extends StatefulWidget {
 }
 
 class _WerdHistoryPageState extends State<WerdHistoryPage> {
-  WerdUnit _displayUnit = WerdUnit.ayah;
-  final HistoryPeriod _selectedPeriod = HistoryPeriod.month;
+  WerdUnit _displayUnit = WerdUnit.page;
   DateTime _focusedDate = DateTime.now();
 
   @override
@@ -100,8 +99,6 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              _buildUnitSelector(isAr),
-              const SizedBox(height: 12),
               _buildMonthNavigator(isAr),
               const SizedBox(height: 16),
               _buildSummaryCard(context, isAr, periodTotalAyahs, periodTotalPages, periodTotalJuz, periodDays),
@@ -189,57 +186,13 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
     );
   }
 
-  Widget _buildUnitSelector(bool isAr) {
-    return Center(
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
-        ),
-        padding: const EdgeInsets.all(4),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildUnitChip(WerdUnit.ayah, isAr ? 'آية' : 'Ayah', isAr),
-            _buildUnitChip(WerdUnit.page, isAr ? 'صفحة' : 'Page', isAr),
-            _buildUnitChip(WerdUnit.juz, isAr ? 'جزء' : 'Juz', isAr),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUnitChip(WerdUnit unit, String label, bool isAr) {
-    final isSelected = _displayUnit == unit;
-    return GestureDetector(
-      onTap: () => setState(() => _displayUnit = unit),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppTheme.accent : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.amiri(
-            color: isSelected ? Colors.white : Colors.grey,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildMonthNavigator(bool isAr) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         IconButton(
-          onPressed: _canNavigateNext() ? () => _navigateMonth(1) : null,
-          icon: Icon(isAr ? Icons.chevron_right : Icons.chevron_left),
+          onPressed: () => _navigateMonth(-1),
+          icon: Icon(isAr ? Icons.chevron_left : Icons.chevron_right),
         ),
         const SizedBox(width: 16),
         Text(
@@ -248,8 +201,8 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
         ),
         const SizedBox(width: 16),
         IconButton(
-          onPressed: () => _navigateMonth(-1),
-          icon: Icon(isAr ? Icons.chevron_left : Icons.chevron_right),
+          onPressed: _canNavigateNext() ? () => _navigateMonth(1) : null,
+          icon: Icon(isAr ? Icons.chevron_right : Icons.chevron_left),
         ),
       ],
     );
@@ -342,28 +295,36 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
             ),
             const SizedBox(height: 20),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildStatItem(
-                  context,
-                  isAr ? 'الآيات' : 'Ayahs',
-                  totalAyahs.toArabicIndic(),
-                  Icons.auto_stories_rounded,
-                  isHighlighted: _displayUnit == WerdUnit.ayah,
+                Expanded(
+                  child: _buildStatItem(
+                    context,
+                    isAr ? 'الآيات' : 'Ayahs',
+                    totalAyahs.toArabicIndic(),
+                    Icons.auto_stories_rounded,
+                    isHighlighted: _displayUnit == WerdUnit.ayah,
+                    onTap: () => setState(() => _displayUnit = WerdUnit.ayah),
+                  ),
                 ),
-                _buildStatItem(
-                  context,
-                  isAr ? 'الصفحات' : 'Pages',
-                  _formatDecimal(totalPages, isAr, 1),
-                  Icons.pages_rounded,
-                  isHighlighted: _displayUnit == WerdUnit.page,
+                Expanded(
+                  child: _buildStatItem(
+                    context,
+                    isAr ? 'الصفحات' : 'Pages',
+                    _formatDecimal(totalPages, isAr, 1),
+                    Icons.pages_rounded,
+                    isHighlighted: _displayUnit == WerdUnit.page,
+                    onTap: () => setState(() => _displayUnit = WerdUnit.page),
+                  ),
                 ),
-                _buildStatItem(
-                  context,
-                  isAr ? 'الأجزاء' : 'Juz',
-                  _formatDecimal(totalJuz, isAr, 2),
-                  Icons.grid_view_rounded,
-                  isHighlighted: _displayUnit == WerdUnit.juz,
+                Expanded(
+                  child: _buildStatItem(
+                    context,
+                    isAr ? 'الأجزاء' : 'Juz',
+                    _formatDecimal(totalJuz, isAr, 2),
+                    Icons.grid_view_rounded,
+                    isHighlighted: _displayUnit == WerdUnit.juz,
+                    onTap: () => setState(() => _displayUnit = WerdUnit.juz),
+                  ),
                 ),
               ],
             ),
@@ -389,29 +350,36 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
     );
   }
 
-  Widget _buildStatItem(BuildContext context, String label, String value, IconData icon, {bool isHighlighted = false}) {
+  Widget _buildStatItem(BuildContext context, String label, String value, IconData icon, {bool isHighlighted = false, VoidCallback? onTap}) {
     final color = isHighlighted ? Theme.of(context).colorScheme.primary : Colors.grey[600];
-    return Column(
-      children: [
-        Icon(icon, color: color, size: isHighlighted ? 24 : 20),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: GoogleFonts.outfit(
-            fontSize: isHighlighted ? 26 : 22, 
-            fontWeight: isHighlighted ? FontWeight.w900 : FontWeight.bold,
-            color: isHighlighted ? Theme.of(context).colorScheme.primary : null,
-          ),
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: isHighlighted ? 24 : 20),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: GoogleFonts.outfit(
+                fontSize: isHighlighted ? 26 : 22, 
+                fontWeight: isHighlighted ? FontWeight.w900 : FontWeight.bold,
+                color: isHighlighted ? Theme.of(context).colorScheme.primary : null,
+              ),
+            ),
+            Text(
+              label,
+              style: GoogleFonts.amiri(
+                fontSize: 14, 
+                color: color,
+                fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ],
         ),
-        Text(
-          label,
-          style: GoogleFonts.amiri(
-            fontSize: 14, 
-            color: color,
-            fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-      ],
+      ),
     );
   }
 

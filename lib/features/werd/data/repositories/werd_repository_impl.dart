@@ -145,4 +145,75 @@ class WerdRepositoryImpl implements WerdRepository {
       return Result.failure(CacheFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Result<List<WerdGoal>>> getAllGoals() async {
+    try {
+      final keys = sharedPreferences.getKeys().where((k) => k.startsWith('werd_goal_'));
+      final goals = <WerdGoal>[];
+      for (final key in keys) {
+        final jsonStr = sharedPreferences.getString(key);
+        if (jsonStr != null) {
+          goals.add(WerdGoal.fromJson(json.decode(jsonStr)));
+        }
+      }
+      return Result.success(goals);
+    } catch (e) {
+      return Result.failure(CacheFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<List<WerdProgress>>> getAllProgress() async {
+    try {
+      final keys = sharedPreferences.getKeys().where((k) => k.startsWith('werd_progress_'));
+      final progressList = <WerdProgress>[];
+      for (final key in keys) {
+        final jsonStr = sharedPreferences.getString(key);
+        if (jsonStr != null) {
+          progressList.add(WerdProgress.fromJson(json.decode(jsonStr)));
+        }
+      }
+      return Result.success(progressList);
+    } catch (e) {
+      return Result.failure(CacheFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> importGoals(List<WerdGoal> goals) async {
+    try {
+      // Clear existing goals first
+      final existingKeys = sharedPreferences.getKeys().where((k) => k.startsWith('werd_goal_'));
+      for (final key in existingKeys) {
+        await sharedPreferences.remove(key);
+      }
+      
+      for (final goal in goals) {
+        await sharedPreferences.setString(_getGoalKey(goal.id), json.encode(goal.toJson()));
+      }
+      return Result.success(null);
+    } catch (e) {
+      return Result.failure(CacheFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> importProgress(List<WerdProgress> progressList) async {
+    try {
+      // Clear existing progress first
+      final existingKeys = sharedPreferences.getKeys().where((k) => k.startsWith('werd_progress_'));
+      for (final key in existingKeys) {
+        await sharedPreferences.remove(key);
+      }
+
+      for (final p in progressList) {
+        await sharedPreferences.setString(_getProgressKey(p.goalId), json.encode(p.toJson()));
+        _progressControllers[p.goalId]?.add(Result.success(p));
+      }
+      return Result.success(null);
+    } catch (e) {
+      return Result.failure(CacheFailure(e.toString()));
+    }
+  }
 }
