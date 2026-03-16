@@ -159,14 +159,17 @@ class AyahDetailSheet extends StatelessWidget {
                                               bool shouldProceed = true;
                                               if (!isLastRead) {
                                                 final werdState = context.read<WerdBloc>().state;
-                                                final sessionStartAbs = werdState.progress?.sessionStartAbsolute;
+                                                final progress = werdState.progress;
+                                                // Reference for jump check should be current position (lastRead)
+                                                // if not available, use start of today's werd.
+                                                final referenceAbs = progress?.lastReadAbsolute ?? progress?.sessionStartAbsolute;
                                                 final targetAbs = QuranHizbProvider.getAbsoluteAyahNumber(
                                                   ayah.number.surahNumber,
                                                   ayah.number.ayahNumberInSurah,
                                                 );
 
-                                                if (sessionStartAbs != null && (targetAbs - sessionStartAbs).abs() > 50) {
-                                                  final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(sessionStartAbs);
+                                                if (referenceAbs != null && (targetAbs - referenceAbs).abs() > 50) {
+                                                  final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(referenceAbs);
                                                   final startPage = quran.getPageNumber(startPos[0], startPos[1]);
                                                   final endPage = quran.getPageNumber(ayah.number.surahNumber, ayah.number.ayahNumberInSurah);
                                                   final pagesCount = (endPage - startPage).abs();
@@ -176,7 +179,7 @@ class AyahDetailSheet extends StatelessWidget {
                                                     builder: (dialogContext) => AlertDialog(
                                                       title: Text(l10n.jumpConfirmTitle),
                                                       content: Text(l10n.jumpConfirmMessage(
-                                                        _formatAyah(sessionStartAbs, l10n.localeName),
+                                                        _formatAyah(referenceAbs, l10n.localeName),
                                                         _formatAyah(targetAbs, l10n.localeName),
                                                         l10n.localeName == 'ar' ? pagesCount.toArabicIndic() : pagesCount.toString(),
                                                       )),

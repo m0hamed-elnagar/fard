@@ -1867,6 +1867,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Backup version is newer than app version. Please update the app.'**
   String get backupVersionError;
+
+  /// No description provided for @offlineAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline Audio'**
+  String get offlineAudio;
+
+  /// No description provided for @errorLoadingReciters.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading reciters: {error}'**
+  String errorLoadingReciters(Object error);
+
+  /// No description provided for @deleteAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete All'**
+  String get deleteAll;
+
+  /// No description provided for @deleteAllDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete All Downloads?'**
+  String get deleteAllDownloads;
+
+  /// No description provided for @deleteReciterConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete all downloaded audio for {name}?'**
+  String deleteReciterConfirm(Object name);
+
+  /// No description provided for @manageOfflineAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Offline Audio'**
+  String get manageOfflineAudio;
+
+  /// No description provided for @downloadSurahsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Surahs to listen without internet.'**
+  String get downloadSurahsDesc;
+
+  /// No description provided for @stopAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop All'**
+  String get stopAll;
+
+  /// No description provided for @approx.
+  ///
+  /// In en, this message translates to:
+  /// **'Approx'**
+  String get approx;
+
+  /// No description provided for @deleteSurahAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Surah Audio?'**
+  String get deleteSurahAudio;
+
+  /// No description provided for @deleteSurahConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the downloaded audio for {name}?'**
+  String deleteSurahConfirm(Object name);
+
+  /// No description provided for @quranAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Quran Audio'**
+  String get quranAudio;
+
+  /// No description provided for @manageRecitersDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage and download reciters for offline playback'**
+  String get manageRecitersDesc;
+
+  /// No description provided for @manageDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Downloads'**
+  String get manageDownloads;
+
+  /// No description provided for @downloadRecitersOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Download reciters for offline playback'**
+  String get downloadRecitersOffline;
+
+  /// No description provided for @downloadingSurah.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading Surah {number}'**
+  String downloadingSurah(Object number);
+
+  /// No description provided for @downloadingReciter.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading Reciter {id}'**
+  String downloadingReciter(Object id);
+
+  /// No description provided for @downloadComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Download complete'**
+  String get downloadComplete;
+
+  /// No description provided for @filesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{downloaded} / {total} files'**
+  String filesCount(Object downloaded, Object total);
+
+  /// No description provided for @downloadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Error'**
+  String get downloadError;
+
+  /// No description provided for @downloadsChannelName.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads'**
+  String get downloadsChannelName;
+
+  /// No description provided for @downloadsChannelDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing file downloads'**
+  String get downloadsChannelDesc;
+
+  /// No description provided for @starting.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting...'**
+  String get starting;
+
+  /// No description provided for @stopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopping...'**
+  String get stopping;
 }
 
 class _AppLocalizationsDelegate

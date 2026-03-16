@@ -86,15 +86,34 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
 
         final now = DateTime.now();
         final currentMonthKey = "${now.year}-${now.month.toString().padLeft(2, '0')}";
+        
+        // Accurate month totals by summing history and today's granular progress
+        double monthTotalPages = progress?.history.entries
+            .where((e) => e.key.startsWith(currentMonthKey))
+            .fold(0.0, (sum, e) => sum! + e.value.pagesRead) ?? 0.0;
+        monthTotalPages += QuranHizbProvider.calculateFractionalProgress(progress?.readItemsToday ?? {}, WerdUnit.page);
+
+        double monthTotalJuz = progress?.history.entries
+            .where((e) => e.key.startsWith(currentMonthKey))
+            .fold(0.0, (sum, e) => sum! + e.value.juzRead) ?? 0.0;
+        monthTotalJuz += QuranHizbProvider.calculateFractionalProgress(progress?.readItemsToday ?? {}, WerdUnit.juz);
+
         int monthTotalAyahs = progress?.history.entries
             .where((e) => e.key.startsWith(currentMonthKey))
             .fold(0, (sum, e) => sum! + e.value.totalAyahsRead) ?? 0;
         monthTotalAyahs += currentAyahs;
 
-        // Fractional Calculations
+        // Fractional Calculations for Daily
         final displayCurrentVal = _convertValue(currentAyahs, _displayUnit, goal, true, progress);
         final displayTotalVal = _convertValue(totalAyahs, _displayUnit, goal, false, progress);
-        final displayMonthTotalVal = _convertValue(monthTotalAyahs, _displayUnit, goal, false, progress);
+        
+        // Month total based on display unit
+        double displayMonthTotalVal;
+        switch (_displayUnit) {
+          case WerdUnit.page: displayMonthTotalVal = monthTotalPages; break;
+          case WerdUnit.juz: displayMonthTotalVal = monthTotalJuz; break;
+          case WerdUnit.ayah: default: displayMonthTotalVal = monthTotalAyahs.toDouble(); break;
+        }
 
         final displayCurrent = _formatValue(displayCurrentVal, _displayUnit, isAr);
         final displayTotal = _formatValue(displayTotalVal, _displayUnit, isAr);
@@ -165,21 +184,24 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildHeader(isAr, progress, remainingDaysText),
-                          const Spacer(flex: 2),
+                          const Flexible(flex: 2, child: SizedBox(height: 8)),
                           _buildMainProgress(displayCurrent, displayTotal, unitLabel, targetLocation, isAr, isShort),
-                          const Spacer(flex: 1),
+                          const Flexible(flex: 1, child: SizedBox(height: 4)),
                           _buildProgressBar(percent, isCompleted, isShort),
-                          const Spacer(flex: 2),
+                          const Flexible(flex: 2, child: SizedBox(height: 8)),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              _buildMonthStats(isAr, displayMonthTotal, unitLabel, isShort),
+                              Expanded(
+                                child: _buildMonthStats(isAr, displayMonthTotal, displayTotal, unitLabel, isShort),
+                              ),
+                              const SizedBox(width: 8),
                               _buildSmallChart(last7Days, totalAyahs, now, isAr, isShort),
                             ],
                           ),
-                          const Spacer(flex: 2),
+                          const Flexible(flex: 2, child: SizedBox(height: 8)),
                           const Divider(height: 1, color: AppTheme.cardBorder),
-                          const Spacer(flex: 1),
+                          const Flexible(flex: 1, child: SizedBox(height: 4)),
                           _buildFooter(context, progress, isAr, isShort),
                         ],
                       ),
@@ -328,29 +350,36 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
-                  current,
-                  style: GoogleFonts.outfit(
-                    color: AppTheme.textPrimary,
-                    fontSize: isShort ? 32 : 42,
-                    fontWeight: FontWeight.w900,
-                  ),
+            Expanded(
+              child: FittedBox(
+                alignment: isAr ? Alignment.centerRight : Alignment.centerLeft,
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      current,
+                      style: GoogleFonts.outfit(
+                        color: AppTheme.textPrimary,
+                        fontSize: isShort ? 32 : 42,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '/ $total $label',
+                      style: GoogleFonts.amiri(
+                        color: AppTheme.textSecondary.withValues(alpha: 0.6),
+                        fontSize: isShort ? 14 : 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  '/ $total $label',
-                  style: GoogleFonts.amiri(
-                    color: AppTheme.textSecondary.withValues(alpha: 0.6),
-                    fontSize: isShort ? 14 : 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+              ),
             ),
+            const SizedBox(width: 8),
             _buildUnitSelector(isAr, isShort),
           ],
         ),
@@ -362,6 +391,8 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
             fontSize: isShort ? 12 : 14,
             fontWeight: FontWeight.w500,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
@@ -393,7 +424,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
     );
   }
 
-  Widget _buildMonthStats(bool isAr, String total, String label, bool isShort) {
+  Widget _buildMonthStats(bool isAr, String total, String dailyTarget, String label, bool isShort) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -405,12 +436,30 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
             fontWeight: FontWeight.w500,
           ),
         ),
-        Text(
-          '$total $label',
-          style: GoogleFonts.outfit(
-            color: AppTheme.textPrimary,
-            fontSize: isShort ? 14 : 18,
-            fontWeight: FontWeight.bold,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: isAr ? Alignment.centerRight : Alignment.centerLeft,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '$total $label',
+                style: GoogleFonts.outfit(
+                  color: AppTheme.textPrimary,
+                  fontSize: isShort ? 14 : 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                isAr ? '(الهدف: $dailyTarget)' : '(Goal: $dailyTarget)',
+                style: GoogleFonts.amiri(
+                  color: AppTheme.textSecondary.withValues(alpha: 0.5),
+                  fontSize: isShort ? 10 : 12,
+                ),
+              ),
+            ],
           ),
         ),
       ],

@@ -3,6 +3,7 @@ import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/mushaf_download_service.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
+import 'package:fard/features/audio/presentation/screens/offline_audio_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class DownloadCenterSheet extends StatefulWidget {
@@ -18,7 +19,7 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
 
   double _mushafProgress = 0;
   bool _isMushafDownloading = false;
-  
+
   double _textProgress = 0;
   bool _isTextDownloading = false;
   String? _errorMessage;
@@ -35,7 +36,7 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
     for (int i = 1; i <= 604; i++) {
       if (await _mushafService.isPageDownloaded(i)) downloadedMushaf++;
     }
-    
+
     setState(() {
       _mushafProgress = downloadedMushaf / 604;
     });
@@ -141,7 +142,7 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
             ),
           ],
           const SizedBox(height: 32),
-          
+
           _DownloadItem(
             title: l10n.mushafImagesPNG,
             subtitle: l10n.mushafImagesDesc,
@@ -149,9 +150,9 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
             isDownloading: _isMushafDownloading,
             onDownload: _startMushafDownload,
           ),
-          
+
           const Divider(height: 48),
-          
+
           _DownloadItem(
             title: l10n.quranText,
             subtitle: l10n.quranTextDesc,
@@ -159,19 +160,91 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
             isDownloading: _isTextDownloading,
             onDownload: _startTextDownload,
           ),
-          
+
+          const Divider(height: 48),
+
+          _AudioDownloadItem(
+            title: l10n.quranAudio,
+            subtitle: l10n.manageRecitersDesc,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const OfflineAudioScreen()),
+              );
+            },
+          ),
+
           const SizedBox(height: 32),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF2D5D40),
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            child: Text(l10n.close, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+            child: Text(
+              l10n.close,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           const SizedBox(height: 16),
         ],
+      ),
+    );
+  }
+}
+
+class _AudioDownloadItem extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _AudioDownloadItem({
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: Color(0xFF2D5D40),
+              size: 20,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -206,7 +279,10 @@ class _DownloadItem extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                   Text(
                     subtitle,
@@ -217,7 +293,11 @@ class _DownloadItem extends StatelessWidget {
             ),
             if (progress < 1.0 && !isDownloading)
               IconButton(
-                icon: const Icon(Icons.download_for_offline_rounded, color: Color(0xFF2D5D40), size: 32),
+                icon: const Icon(
+                  Icons.download_for_offline_rounded,
+                  color: Color(0xFF2D5D40),
+                  size: 32,
+                ),
                 onPressed: onDownload,
               )
             else if (progress >= 1.0)
@@ -226,7 +306,10 @@ class _DownloadItem extends StatelessWidget {
               const SizedBox(
                 width: 24,
                 height: 24,
-                child: CircularProgressIndicator(strokeWidth: 3, color: Color(0xFF2D5D40)),
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  color: Color(0xFF2D5D40),
+                ),
               ),
           ],
         ),

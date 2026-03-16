@@ -3,6 +3,8 @@ import 'package:fard/features/azkar/domain/azkar_item.dart';
 import 'package:fard/features/azkar/presentation/screens/azkar_list_screen.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -15,7 +17,8 @@ import 'notification/prayer_scheduler.dart';
 import 'notification/sound_manager.dart';
 
 @singleton
-class NotificationService {
+class
+  NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin;
   final SoundManager _soundManager;
   final ChannelManager _channelManager;
@@ -30,19 +33,39 @@ class NotificationService {
 
   static const String reminderChannelId = ChannelManager.reminderChannelId;
   static const String testAzanChannelId = 'azan_test_channel';
+  static const String downloadChannelId = 'download_channel';
+  static const String groupKey = 'com.nagar.fard.NOTIFICATIONS';
+
+  String _applyRtl(String text) {
+    // Use Right-to-Left Mark (U+200F) + Right-to-Left Embedding (U+202B)
+    // to ensure the entire string is treated as RTL and aligned correctly on most devices.
+    try {
+      if (getIt.isRegistered<SettingsCubit>()) {
+        final locale = getIt<SettingsCubit>().state.locale;
+        if (locale.languageCode == 'ar') {
+          return '\u200F\u202B$text\u202C';
+        }
+      }
+    } catch (_) {
+      // Fallback to original text if anything goes wrong with DI
+    }
+    return text;
+  }
 
   Future<void> init() async {
     debugPrint('NotificationService: init starting');
-    
+
     // Initialize delegates
     await _soundManager.init();
 
     try {
       tz.initializeTimeZones();
       debugPrint('NotificationService: getting local timezone...');
-      final rawTimeZone = await FlutterTimezone.getLocalTimezone().timeout(const Duration(seconds: 5));
+      final rawTimeZone = await FlutterTimezone.getLocalTimezone().timeout(
+        const Duration(seconds: 5),
+      );
       String timeZoneName = rawTimeZone.toString();
-      
+
       // On some platforms (like Windows), flutter_timezone might return "TimezoneInfo(Name, ...)"
       if (timeZoneName.contains('(') && timeZoneName.contains(')')) {
         final startIndex = timeZoneName.indexOf('(') + 1;
@@ -52,40 +75,43 @@ class NotificationService {
         } else {
           final closeIndex = timeZoneName.indexOf(')');
           if (closeIndex > startIndex) {
-            timeZoneName = timeZoneName.substring(startIndex, closeIndex).trim();
+            timeZoneName = timeZoneName
+                .substring(startIndex, closeIndex)
+                .trim();
           }
         }
       }
-      
+
       tz.setLocalLocation(tz.getLocation(timeZoneName));
       debugPrint('Local timezone set to: $timeZoneName');
     } catch (e) {
       debugPrint('Could not get local timezone, defaulting to UTC: $e');
       tz.setLocalLocation(tz.getLocation('UTC'));
     }
-    
+
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
     const DarwinInitializationSettings initializationSettingsDarwin =
         DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+          requestAlertPermission: true,
+          requestBadgePermission: true,
+          requestSoundPermission: true,
+        );
 
     const WindowsInitializationSettings initializationSettingsWindows =
         WindowsInitializationSettings(
-      appName: 'Fard',
-      appUserModelId: 'com.nagar.fard',
-      guid: 'f0c0f0f0-0f0f-0f0f-0f0f-0f0f0f0f0f0f',
-    );
+          appName: 'Fard',
+          appUserModelId: 'com.nagar.fard',
+          guid: 'f0c0f0f0-0f0f-0f0f-0f0f-0f0f0f0f0f0f',
+        );
 
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsDarwin,
-      windows: initializationSettingsWindows,
-    );
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+          android: initializationSettingsAndroid,
+          iOS: initializationSettingsDarwin,
+          windows: initializationSettingsWindows,
+        );
 
     debugPrint('NotificationService: initializing plugin...');
     await _notificationsPlugin.initialize(
@@ -111,21 +137,27 @@ class NotificationService {
     if (Platform.isAndroid) {
       debugPrint('NotificationService: requesting Android permissions...');
       await _notificationsPlugin
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
           ?.requestNotificationsPermission();
-      
+
       await _notificationsPlugin
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
           ?.requestExactAlarmsPermission();
 
-      // Create notification channels for Android (using default/empty settings initially if needed, 
+      // Create notification channels for Android (using default/empty settings initially if needed,
       // but usually we wait for schedulePrayerNotifications to create specific channels)
       // We can just create the static ones here.
       await _channelManager.createNotificationChannels(_notificationsPlugin);
 
       // Check exact alarm permission state
       final canSchedule = await _notificationsPlugin
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
           ?.canScheduleExactNotifications();
       debugPrint('Can schedule exact notifications: $canSchedule');
     }
@@ -136,14 +168,17 @@ class NotificationService {
     debugPrint('NotificationService: handleInitialNotification starting');
     try {
       final NotificationAppLaunchDetails? notificationAppLaunchDetails =
-          await _notificationsPlugin.getNotificationAppLaunchDetails().timeout(const Duration(seconds: 5));
-      
+          await _notificationsPlugin.getNotificationAppLaunchDetails().timeout(
+            const Duration(seconds: 5),
+          );
+
       if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
-        final payload = notificationAppLaunchDetails?.notificationResponse?.payload;
+        final payload =
+            notificationAppLaunchDetails?.notificationResponse?.payload;
         if (payload != null && payload.startsWith('category:')) {
           final category = payload.replaceFirst('category:', '');
           final navigatorKey = getIt<GlobalKey<NavigatorState>>();
-          
+
           // Wait for the navigator to be ready if needed, though usually it is after splash
           Future.delayed(const Duration(seconds: 2), () {
             if (navigatorKey.currentState != null) {
@@ -164,24 +199,37 @@ class NotificationService {
 
   Future<bool> canScheduleExactNotifications() async {
     return await _notificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-        ?.canScheduleExactNotifications() ?? true;
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >()
+            ?.canScheduleExactNotifications() ??
+        true;
   }
 
   Future<void> schedulePrayerNotifications({
     required SettingsState settings,
   }) async {
-    await _prayerScheduler.schedulePrayerNotifications(_notificationsPlugin, settings: settings);
+    await _prayerScheduler.schedulePrayerNotifications(
+      _notificationsPlugin,
+      settings: settings,
+    );
   }
 
-  Future<void> testAzan(Salaah salaah, String? sound, {SettingsState? settings}) async {
+  Future<void> testAzan(
+    Salaah salaah,
+    String? sound, {
+    SettingsState? settings,
+  }) async {
     final String salaahName = _getSalaahName(salaah);
     final String soundPath = sound ?? 'default';
-    
+
     // Use a more stable but still unique-ish channel ID for testing to allow sound updates
-    final String soundHash = soundPath.hashCode.abs().toString().substring(0, 4);
+    final String soundHash = soundPath.hashCode.abs().toString().substring(
+      0,
+      4,
+    );
     final String channelId = 'azan_test_channel_$soundHash';
-    
+
     debugPrint('Testing Azan with channel: $channelId, sound: $soundPath');
 
     await _channelManager.ensureChannelExists(
@@ -194,8 +242,10 @@ class NotificationService {
 
     // Small delay to ensure channel is ready
     await Future.delayed(const Duration(milliseconds: 600));
-    final String? soundUri = await _soundManager.getSoundUriForChannel(soundPath);
-    
+    final String? soundUri = await _soundManager.getSoundUriForChannel(
+      soundPath,
+    );
+
     String diagnosticInfo = '';
     if (soundUri != null && soundUri.startsWith('content:')) {
       diagnosticInfo = '\nتم استخدام FileProvider بنجاح';
@@ -206,27 +256,31 @@ class NotificationService {
       if (soundUri != null) {
         notificationSound = UriAndroidNotificationSound(soundUri);
       } else {
-        notificationSound = RawResourceAndroidNotificationSound(soundPath.split('.').first);
+        notificationSound = RawResourceAndroidNotificationSound(
+          soundPath.split('.').first,
+        );
       }
     }
 
-    AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      channelId,
-      'Azan Test',
-      channelDescription: 'Temporary channel for Azan testing',
-      importance: Importance.max,
-      priority: Priority.high,
-      fullScreenIntent: true,
-      category: AndroidNotificationCategory.alarm,
-      audioAttributesUsage: AudioAttributesUsage.alarm,
-      playSound: true,
-      sound: notificationSound,
-    );
+    AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+          channelId,
+          _applyRtl('Azan Test'),
+          channelDescription: _applyRtl('Temporary channel for Azan testing'),
+          importance: Importance.max,
+          priority: Priority.high,
+          fullScreenIntent: true,
+          category: AndroidNotificationCategory.alarm,
+          audioAttributesUsage: AudioAttributesUsage.alarm,
+          playSound: true,
+          sound: notificationSound,
+          groupKey: groupKey,
+        );
 
     await _notificationsPlugin.show(
       id: 999,
-      title: 'تجربة الأذان: $salaahName',
-      body: 'تجربة صوت الأذان$diagnosticInfo',
+      title: _applyRtl('تجربة الأذان: $salaahName'),
+      body: _applyRtl('تجربة صوت الأذان$diagnosticInfo'),
       notificationDetails: NotificationDetails(
         android: androidPlatformChannelSpecifics,
         iOS: DarwinNotificationDetails(
@@ -236,27 +290,27 @@ class NotificationService {
         ),
       ),
     );
-    }
+  }
 
-    Future<void> testReminder(Salaah salaah, int minutesBefore) async {
+  Future<void> testReminder(Salaah salaah, int minutesBefore) async {
     final String salaahName = _getSalaahName(salaah);
 
     await _notificationsPlugin.show(
       id: 998,
-      title: 'تجربة التذكير: $salaahName',
-      body: 'تجربة تذكير: باقي $minutesBefore دقيقة على الأذان',
-      notificationDetails: const NotificationDetails(
-
+      title: _applyRtl('تجربة التذكير: $salaahName'),
+      body: _applyRtl('تجربة تذكير: باقي $minutesBefore دقيقة على الأذان'),
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           ChannelManager.reminderChannelId,
-          'Prayer Reminders',
-          channelDescription: 'Notifications before prayer time',
+          _applyRtl('Prayer Reminders'),
+          channelDescription: _applyRtl('Notifications before prayer time'),
           importance: Importance.max,
           priority: Priority.high,
           fullScreenIntent: true,
           category: AndroidNotificationCategory.alarm,
           audioAttributesUsage: AudioAttributesUsage.alarm,
           visibility: NotificationVisibility.public,
+          groupKey: groupKey,
         ),
         iOS: DarwinNotificationDetails(
           presentAlert: true,
@@ -269,31 +323,85 @@ class NotificationService {
 
   String _getSalaahName(Salaah salaah) {
     switch (salaah) {
-      case Salaah.fajr: return 'الفجر';
-      case Salaah.dhuhr: return 'الظهر';
-      case Salaah.asr: return 'العصر';
-      case Salaah.maghrib: return 'المغرب';
-      case Salaah.isha: return 'العشاء';
+      case Salaah.fajr:
+        return 'الفجر';
+      case Salaah.dhuhr:
+        return 'الظهر';
+      case Salaah.asr:
+        return 'العصر';
+      case Salaah.maghrib:
+        return 'المغرب';
+      case Salaah.isha:
+        return 'العشاء';
     }
+  }
+
+  Future<void> showDownloadProgress({
+    required int id,
+    required String title,
+    required String body,
+    required int progress,
+    required int maxProgress,
+    bool isCompleted = false,
+  }) async {
+    final l10n = lookupAppLocalizations(getIt<SettingsCubit>().state.locale);
+    final AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+          downloadChannelId,
+          _applyRtl(l10n.downloadsChannelName),
+          channelDescription: _applyRtl(l10n.downloadsChannelDesc),
+          importance: Importance.low,
+          priority: Priority.low,
+          onlyAlertOnce: true,
+          showProgress: !isCompleted,
+          maxProgress: maxProgress,
+          progress: progress,
+          ongoing: !isCompleted,
+          autoCancel: isCompleted,
+          groupKey: groupKey,
+          ticker: _applyRtl(title),
+          subText: _applyRtl(title),
+        );
+
+    await _notificationsPlugin.show(
+      id: id,
+      title: _applyRtl(title),
+      body: _applyRtl(body),
+      notificationDetails: NotificationDetails(
+        android: androidPlatformChannelSpecifics,
+      ),
+    );
+  }
+
+  Future<void> cancelNotification({required int id}) async {
+    await _notificationsPlugin.cancel(id: id);
   }
 
   Future<Map<String, dynamic>> runDiagnostics() async {
     final results = <String, dynamic>{};
     final androidPlugin = _notificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-    
-    results['notifications_enabled'] = await androidPlugin?.areNotificationsEnabled() ?? false;
-    results['exact_alarm_permission'] = await androidPlugin?.canScheduleExactNotifications() ?? false;
-    
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+
+    results['notifications_enabled'] =
+        await androidPlugin?.areNotificationsEnabled() ?? false;
+    results['exact_alarm_permission'] =
+        await androidPlugin?.canScheduleExactNotifications() ?? false;
+
     final channels = await androidPlugin?.getNotificationChannels() ?? [];
     results['channels_count'] = channels.length;
-    results['channels'] = channels.map((c) => {
-      'id': c.id,
-      'name': c.name,
-      'importance': c.importance.toString(),
-      'sound': c.sound?.toString(),
-    }).toList();
-    
+    results['channels'] = channels
+        .map(
+          (c) => {
+            'id': c.id,
+            'name': c.name,
+            'importance': c.importance.toString(),
+            'sound': c.sound?.toString(),
+          },
+        )
+        .toList();
+
     _printDiagnosticReport(results);
     return results;
   }
@@ -314,12 +422,12 @@ ${(results['channels'] as List).map((c) => '    • ${c['id']} (${c['importance'
   }
 
   Future<void> scheduleAzkarReminders({
-    required SettingsState settings, 
+    required SettingsState settings,
     required List<AzkarItem> allAzkar,
   }) async {
     await _prayerScheduler.scheduleAzkarReminders(
-      _notificationsPlugin, 
-      settings: settings, 
+      _notificationsPlugin,
+      settings: settings,
       allAzkar: allAzkar,
     );
   }

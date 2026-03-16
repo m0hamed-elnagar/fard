@@ -959,4 +959,90 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get backupVersionError =>
       'نسخة الاحتياط أحدث من نسخة التطبيق. يرجى تحديث التطبيق.';
+
+  @override
+  String get offlineAudio => 'صوتيات بدون إنترنت';
+
+  @override
+  String errorLoadingReciters(Object error) {
+    return 'خطأ في تحميل القراء: $error';
+  }
+
+  @override
+  String get deleteAll => 'حذف الكل';
+
+  @override
+  String get deleteAllDownloads => 'حذف جميع التحميلات؟';
+
+  @override
+  String deleteReciterConfirm(Object name) {
+    return 'هل أنت متأكد من حذف جميع الصوتيات المحملة للقارئ $name؟';
+  }
+
+  @override
+  String get manageOfflineAudio => 'إدارة الصوتيات';
+
+  @override
+  String get downloadSurahsDesc =>
+      'حمل السور للاستماع إليها بدون اتصال بالإنترنت.';
+
+  @override
+  String get stopAll => 'إيقاف الكل';
+
+  @override
+  String get approx => 'حوالي';
+
+  @override
+  String get deleteSurahAudio => 'حذف صوت السورة؟';
+
+  @override
+  String deleteSurahConfirm(Object name) {
+    return 'هل أنت متأكد من حذف الصوت المحمل لسورة $name؟';
+  }
+
+  @override
+  String get quranAudio => 'صوتيات القرآن';
+
+  @override
+  String get manageRecitersDesc => 'إدارة وتحميل القراء للاستماع بدون إنترنت';
+
+  @override
+  String get manageDownloads => 'إدارة التحميلات';
+
+  @override
+  String get downloadRecitersOffline =>
+      'تحميل القراء للاستماع بدون اتصال بالإنترنت';
+
+  @override
+  String downloadingSurah(Object number) {
+    return 'جاري تحميل سورة $number';
+  }
+
+  @override
+  String downloadingReciter(Object id) {
+    return 'جاري تحميل القارئ $id';
+  }
+
+  @override
+  String get downloadComplete => 'اكتمل التحميل';
+
+  @override
+  String filesCount(Object downloaded, Object total) {
+    return '$downloaded / $total ملف';
+  }
+
+  @override
+  String get downloadError => 'خطأ في التحميل';
+
+  @override
+  String get downloadsChannelName => 'التحميلات';
+
+  @override
+  String get downloadsChannelDesc => 'تحميلات الملفات الجارية';
+
+  @override
+  String get starting => 'جاري البدء...';
+
+  @override
+  String get stopping => 'جاري الإيقاف...';
 }

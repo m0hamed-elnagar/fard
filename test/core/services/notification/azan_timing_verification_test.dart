@@ -217,9 +217,10 @@ void main() {
     }
   });
 
-  test('Verification: After Salah Azkar is scheduled 15 minutes AFTER Azan', () async {
+  test('Verification: After Salah Azkar is scheduled configurable minutes AFTER Azan', () async {
     const lat = 30.0444;
     const lon = 31.2357;
+    const minutesAfter = 20;
     
     final settings = SettingsState(
       locale: const Locale('ar'),
@@ -232,6 +233,7 @@ void main() {
           salaah: Salaah.isha, 
           isAzanEnabled: false, 
           isAfterSalahAzkarEnabled: true,
+          afterSalaahAzkarMinutes: minutesAfter,
         ),
       ],
     );
@@ -247,7 +249,7 @@ void main() {
     );
 
     final expectedIsha = tz.TZDateTime.from(prayerTimes.isha, tz.local);
-    final expectedAzkar = expectedIsha.add(const Duration(minutes: 15));
+    final expectedAzkar = expectedIsha.add(const Duration(minutes: minutesAfter));
     
     if (expectedAzkar.isAfter(tz.TZDateTime.now(tz.local))) {
       verify(() => mockNotificationsPlugin.zonedSchedule(

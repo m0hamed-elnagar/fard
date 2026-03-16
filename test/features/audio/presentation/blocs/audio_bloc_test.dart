@@ -1,8 +1,10 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:fard/core/errors/failure.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
+import 'package:fard/features/audio/domain/entities/audio_track.dart';
 import 'package:fard/features/audio/domain/repositories/audio_player_service.dart';
 import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
+import 'package:fard/features/audio/domain/services/audio_download_service.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
@@ -12,20 +14,23 @@ import 'package:mocktail/mocktail.dart';
 
 class MockAudioRepository extends Mock implements AudioRepository {}
 class MockAudioPlayerService extends Mock implements AudioPlayerService {}
+class MockAudioDownloadService extends Mock implements AudioDownloadService {}
 class MockSettingsCubit extends Mock implements SettingsCubit {}
 
 void main() {
   late MockAudioRepository mockRepository;
   late MockAudioPlayerService mockPlayerService;
+  late MockAudioDownloadService mockDownloadService;
   late MockSettingsCubit mockSettingsCubit;
   late AudioBloc audioBloc;
 
   setUpAll(() {
     registerFallbackValue(AudioPlayMode.ayah);
     registerFallbackValue(AudioQuality.medium128);
+    registerFallbackValue(const AudioTrack(remoteUrl: '', localPath: '', isDownloaded: false));
   });
 
-  final tReciter = Reciter(
+  final tReciter = const Reciter(
     identifier: 'ar.alafasy',
     name: 'Alafasy',
     englishName: 'Alafasy',
@@ -35,6 +40,7 @@ void main() {
   setUp(() {
     mockRepository = MockAudioRepository();
     mockPlayerService = MockAudioPlayerService();
+    mockDownloadService = MockAudioDownloadService();
     mockSettingsCubit = MockSettingsCubit();
 
     when(() => mockSettingsCubit.state).thenReturn(const SettingsState(
@@ -47,6 +53,9 @@ void main() {
         .thenAnswer((_) async => Result.success([tReciter]));
     when(() => mockRepository.shouldPrependBismillah(any(), any())).thenReturn(false);
     
+    when(() => mockDownloadService.getReciterDownloadPercentage(any()))
+        .thenAnswer((_) async => 0.0);
+
     when(() => mockPlayerService.watchStatus()).thenAnswer((_) => const Stream.empty());
     when(() => mockPlayerService.watchError()).thenAnswer((_) => const Stream.empty());
     when(() => mockPlayerService.watchPosition()).thenAnswer((_) => const Stream.empty());
@@ -62,6 +71,7 @@ void main() {
     audioBloc = AudioBloc(
       audioRepository: mockRepository,
       playerService: mockPlayerService,
+      downloadService: mockDownloadService,
       settingsCubit: mockSettingsCubit,
     );
   });
@@ -78,24 +88,27 @@ void main() {
     blocTest<AudioBloc, AudioState>(
       'falls back to low64 when playStreaming fails for medium128',
       build: () {
-        when(() => mockRepository.getAyahAudioUrl(
+        const track128 = AudioTrack(remoteUrl: 'url_128', localPath: 'path_128', isDownloaded: false);
+        const track64 = AudioTrack(remoteUrl: 'url_64', localPath: 'path_64', isDownloaded: false);
+
+        when(() => mockRepository.getAyahAudioTrack(
               reciterId: any(named: 'reciterId'),
               surahNumber: any(named: 'surahNumber'),
               ayahNumber: any(named: 'ayahNumber'),
               quality: AudioQuality.medium128,
-            )).thenReturn('url_128');
+            )).thenAnswer((_) async => track128);
 
-        when(() => mockRepository.getAyahAudioUrl(
+        when(() => mockRepository.getAyahAudioTrack(
               reciterId: any(named: 'reciterId'),
               surahNumber: any(named: 'surahNumber'),
               ayahNumber: any(named: 'ayahNumber'),
               quality: AudioQuality.low64,
-            )).thenReturn('url_64');
+            )).thenAnswer((_) async => track64);
         
-        when(() => mockPlayerService.playStreaming('url_128', mode: any(named: 'mode')))
+        when(() => mockPlayerService.playStreaming(track128, mode: any(named: 'mode'), metadata: any(named: 'metadata')))
             .thenAnswer((_) async => Result.failure(const ServerFailure('Failed')));
             
-        when(() => mockPlayerService.playStreaming('url_64', mode: any(named: 'mode')))
+        when(() => mockPlayerService.playStreaming(track64, mode: any(named: 'mode'), metadata: any(named: 'metadata')))
             .thenAnswer((_) async => Result.success(null));
 
         return audioBloc;
@@ -105,8 +118,7 @@ void main() {
         ayahNumber: 1,
       )),
       verify: (_) {
-        // Should have called playAyah again with low64 (via changeQuality event)
-        verify(() => mockRepository.getAyahAudioUrl(
+        verify(() => mockRepository.getAyahAudioTrack(
               reciterId: any(named: 'reciterId'),
               surahNumber: 1,
               ayahNumber: 1,
@@ -118,14 +130,16 @@ void main() {
     blocTest<AudioBloc, AudioState>(
       'stops fallback loop when low64 fails',
       build: () {
-        when(() => mockRepository.getAyahAudioUrl(
+        const track64 = AudioTrack(remoteUrl: 'url_64', localPath: 'path_64', isDownloaded: false);
+
+        when(() => mockRepository.getAyahAudioTrack(
               reciterId: any(named: 'reciterId'),
               surahNumber: any(named: 'surahNumber'),
               ayahNumber: any(named: 'ayahNumber'),
               quality: AudioQuality.low64,
-            )).thenReturn('url_64');
+            )).thenAnswer((_) async => track64);
         
-        when(() => mockPlayerService.playStreaming('url_64', mode: any(named: 'mode')))
+        when(() => mockPlayerService.playStreaming(track64, mode: any(named: 'mode'), metadata: any(named: 'metadata')))
             .thenAnswer((_) async => Result.failure(const ServerFailure('Failed again')));
 
         return audioBloc;

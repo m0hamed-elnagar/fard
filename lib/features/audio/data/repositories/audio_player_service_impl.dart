@@ -3,9 +3,9 @@ import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:fard/core/errors/failure.dart';
 import 'package:fard/features/audio/domain/repositories/audio_player_service.dart';
+import 'package:fard/features/audio/domain/entities/audio_track.dart';
 import 'dart:async';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 import 'package:injectable/injectable.dart';
 
 @LazySingleton(as: AudioPlayerService)
@@ -68,27 +68,6 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
     });
   }
 
-  Future<String> _getCachePath(String url) async {
-    final directory = await getTemporaryDirectory();
-    final cacheDir = Directory('${directory.path}/audio_cache');
-    if (!await cacheDir.exists()) {
-      await cacheDir.create(recursive: true);
-    }
-    
-    // Create a safe filename from URL
-    final fileName = url.split('/').last.replaceAll(RegExp(r'[^\w\.]'), '_');
-    // Ensure the filename is unique to the reciter if possible, but the URL usually contains it
-    // For everyayah.com: .../ar.alafasy/001001.mp3
-    final uri = Uri.parse(url);
-    final segments = uri.pathSegments;
-    String finalFileName = fileName;
-    if (segments.length >= 2) {
-      finalFileName = '${segments[segments.length - 2]}_$fileName';
-    }
-
-    return '${cacheDir.path}/$finalFileName';
-  }
-
   @override
   AudioStatus get currentStatus => _lastStatus;
 
@@ -104,54 +83,65 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
   @override
   int? get currentIndex => _player.currentIndex;
 
-  @override
-  Future<Result<void>> playStreaming(
-    String url, {
-    AudioPlayMode mode = AudioPlayMode.surah,
-    Map<String, dynamic>? metadata,
-  }) async {
-    try {
-      debugPrint('AudioPlayerService: playStreaming called with url: $url');
-      _currentMode = mode;
-      
-      await _player.stop();
-      
-      final AudioSource source;
-      final mediaItem = MediaItem(
-        id: url,
-        album: metadata?['album'] ?? "Al-Quran",
-        title: metadata?['title'] ?? (mode == AudioPlayMode.ayah ? "Quran Ayah" : "Quran Surah"),
-        artist: metadata?['artist'] ?? "Quran Reciter",
-        artUri: Uri.parse(metadata?['artUri'] ?? 'resource://mipmap/ic_launcher'),
+  Future<AudioSource> _createAudioSource(AudioTrack track, MediaItem mediaItem) async {
+    if (track.isDownloaded) {
+      return AudioSource.file(
+        track.localPath,
+        tag: mediaItem,
       );
-
+    } else {
       if (Platform.isWindows) {
-        source = AudioSource.uri(
-          Uri.parse(url),
+        return AudioSource.uri(
+          Uri.parse(track.remoteUrl),
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
           },
           tag: mediaItem,
         );
       } else {
-        final cachePath = await _getCachePath(url);
+        // Ensure directory exists
+        await File(track.localPath).parent.create(recursive: true);
         // ignore: experimental_member_use
-        source = LockCachingAudioSource(
-          Uri.parse(url),
-          cacheFile: File(cachePath),
+        return LockCachingAudioSource(
+          Uri.parse(track.remoteUrl),
+          cacheFile: File(track.localPath),
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
           },
           tag: mediaItem,
         );
       }
+    }
+  }
+
+  @override
+  Future<Result<void>> playStreaming(
+    AudioTrack track, {
+    AudioPlayMode mode = AudioPlayMode.surah,
+    Map<String, dynamic>? metadata,
+  }) async {
+    try {
+      debugPrint('AudioPlayerService: playStreaming called with url: ${track.remoteUrl}');
+      _currentMode = mode;
+      
+      await _player.stop();
+      
+      final mediaItem = MediaItem(
+        id: track.remoteUrl,
+        album: metadata?['album'] ?? "Al-Quran",
+        title: metadata?['title'] ?? (mode == AudioPlayMode.ayah ? "Quran Ayah" : "Quran Surah"),
+        artist: metadata?['artist'] ?? "Quran Reciter",
+        artUri: Uri.parse(metadata?['artUri'] ?? 'resource://mipmap/ic_launcher'),
+      );
+
+      final source = await _createAudioSource(track, mediaItem);
       
       await _player.setAudioSource(
         source, 
         preload: false,
       );
       _player.play();
-      debugPrint('AudioPlayerService: play() called successfully ${Platform.isWindows ? "without" : "with"} caching');
+      debugPrint('AudioPlayerService: play() called successfully with caching check');
       return Result.success(null);
     } catch (e) {
       debugPrint('AudioPlayerService: Error in playStreaming: $e');
@@ -200,55 +190,32 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
 
   @override
   Future<Result<void>> playPlaylist(
-    List<String> urls, {
+    List<AudioTrack> tracks, {
     int initialIndex = 0,
     AudioPlayMode mode = AudioPlayMode.surah,
     List<Map<String, dynamic>>? metadataList,
   }) async {
     try {
-      debugPrint('AudioPlayerService: playPlaylist called with ${urls.length} urls, start index: $initialIndex');
+      debugPrint('AudioPlayerService: playPlaylist called with ${tracks.length} tracks, start index: $initialIndex');
       _currentMode = mode;
       
       // Stop and clear the current source completely
       await _player.stop();
       
       final sources = <AudioSource>[];
-      for (var i = 0; i < urls.length; i++) {
-        final url = urls[i];
+      for (var i = 0; i < tracks.length; i++) {
+        final track = tracks[i];
         final metadata = metadataList != null && i < metadataList.length ? metadataList[i] : null;
         
         final mediaItem = MediaItem(
-          id: url,
+          id: track.remoteUrl,
           album: metadata?['album'] ?? "Al-Quran",
           title: metadata?['title'] ?? "Ayah ${i + 1}",
           artist: metadata?['artist'] ?? "Quran Reciter",
           artUri: Uri.parse(metadata?['artUri'] ?? 'resource://mipmap/ic_launcher'),
         );
 
-        if (Platform.isWindows) {
-          sources.add(
-            AudioSource.uri(
-              Uri.parse(url),
-              headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
-              },
-              tag: mediaItem,
-            )
-          );
-        } else {
-          final cachePath = await _getCachePath(url);
-          sources.add(
-            // ignore: experimental_member_use
-            LockCachingAudioSource(
-              Uri.parse(url),
-              cacheFile: File(cachePath),
-              headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
-              },
-              tag: mediaItem,
-            )
-          );
-        }
+        sources.add(await _createAudioSource(track, mediaItem));
       }
       
       await _player.setAudioSources(
@@ -257,7 +224,7 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
         preload: true,
       );
       _player.play();
-      debugPrint('AudioPlayerService: playlist play() called successfully ${Platform.isWindows ? "without" : "with"} caching');
+      debugPrint('AudioPlayerService: playlist play() called successfully with caching check');
       return Result.success(null);
     } catch (e) {
       debugPrint('AudioPlayerService: Error in playPlaylist: $e');

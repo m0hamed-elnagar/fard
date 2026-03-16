@@ -1,4 +1,5 @@
 import 'package:fard/core/errors/failure.dart';
+import 'package:fard/features/audio/domain/entities/audio_track.dart';
 
 enum AudioPlayMode {
   ayah,
@@ -7,7 +8,7 @@ enum AudioPlayMode {
 
 abstract interface class AudioPlayerService {
   Future<Result<void>> playStreaming(
-    String url, {
+    AudioTrack track, {
     AudioPlayMode mode = AudioPlayMode.ayah,
     Map<String, dynamic>? metadata,
   });
@@ -17,7 +18,7 @@ abstract interface class AudioPlayerService {
     Map<String, dynamic>? metadata,
   });
   Future<Result<void>> playPlaylist(
-    List<String> urls, {
+    List<AudioTrack> tracks, {
     int initialIndex = 0,
     AudioPlayMode mode = AudioPlayMode.ayah,
     List<Map<String, dynamic>>? metadataList,

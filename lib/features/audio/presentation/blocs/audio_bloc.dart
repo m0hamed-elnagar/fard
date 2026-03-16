@@ -5,6 +5,8 @@ import 'package:equatable/equatable.dart';
 import 'package:fard/features/audio/domain/repositories/audio_player_service.dart';
 import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
+import 'package:fard/features/audio/domain/entities/audio_track.dart';
+import 'package:fard/features/audio/domain/services/audio_download_service.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:injectable/injectable.dart';
 import 'package:quran/quran.dart' as quran;
@@ -16,6 +18,7 @@ part 'audio_state.dart';
 class AudioBloc extends Bloc<AudioEvent, AudioState> {
   final AudioRepository audioRepository;
   final AudioPlayerService playerService;
+  final AudioDownloadService downloadService;
   final SettingsCubit settingsCubit;
   
   StreamSubscription? _statusSubscription;
@@ -27,6 +30,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
   AudioBloc({
     required this.audioRepository,
     required this.playerService,
+    required this.downloadService,
     required this.settingsCubit,
   }) : super(const AudioState()) {
     
@@ -54,8 +58,9 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
         lastErrorChanged: (e) async => _onLastErrorChanged(e.error, emit),
         positionChanged: (e) async => _onPositionChanged(e.position, emit),
         durationChanged: (e) async => _onDurationChanged(e.duration, emit),
-        indexChanged: (e) async => _onIndexChanged(e.index, emit),
+        indexChanged: (e) async => _onIndexChanged(index: e.index, emit: emit),
         updateCurrentPosition: (e) async => _onUpdateCurrentPosition(e.surahNumber, e.ayahNumber, emit),
+        refreshReciterStatuses: (e) => _onLoadReciters(emit),
       );
     });
 
@@ -99,36 +104,92 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
   }
 
   Future<void> _onLoadReciters(Emitter<AudioState> emit) async {
-    // Try cached first
-    final cachedResult = await audioRepository.getCachedReciters();
-    if (cachedResult.isSuccess && cachedResult.data!.isNotEmpty) {
+    // 1. Helper to sort and emit
+    void emitSorted(
+      List<Reciter> reciters,
+      Map<String, double> progress,
+      Map<String, int> sizes,
+    ) {
+      final sortedReciters = List<Reciter>.from(reciters);
+      sortedReciters.sort((a, b) {
+        final pA = progress[a.identifier] ?? 0.0;
+        final pB = progress[b.identifier] ?? 0.0;
+        if (pB != pA) return pB.compareTo(pA);
+        return a.englishName.compareTo(b.englishName);
+      });
+
       emit(state.copyWith(
-        availableReciters: cachedResult.data!,
-        currentReciter: cachedResult.data!.firstWhere(
-          (r) => r.identifier == 'ar.alafasy', 
-          orElse: () => cachedResult.data!.first,
-        ),
+        availableReciters: sortedReciters,
+        reciterDownloadProgress: progress,
+        reciterDownloadSizes: sizes,
+        currentReciter: state.currentReciter ?? sortedReciters.firstOrNull,
+        error: null,
       ));
     }
 
-    final result = await audioRepository.getAvailableReciters();
-    result.fold(
+    // 2. Load cached reciters AND data immediately
+    final cachedRecitersResult = await audioRepository.getCachedReciters();
+    final cachedData = await audioRepository.getCachedReciterData();
+    
+    List<Reciter> currentReciters = [];
+    
+    if (cachedRecitersResult.isSuccess && cachedRecitersResult.data!.isNotEmpty) {
+      currentReciters = cachedRecitersResult.data!;
+      emitSorted(currentReciters, cachedData.progress, cachedData.sizes);
+    }
+
+    // 3. Fetch fresh reciters list
+    final freshRecitersResult = await audioRepository.getAvailableReciters();
+    freshRecitersResult.fold(
       (failure) {
         if (state.availableReciters.isEmpty) {
           emit(state.copyWith(error: failure.message));
         }
       },
       (reciters) {
-        emit(state.copyWith(
-          availableReciters: reciters,
-          currentReciter: state.currentReciter ?? reciters.firstWhere(
-            (r) => r.identifier == 'ar.alafasy', 
-            orElse: () => reciters.first,
-          ),
-          error: null,
-        ));
+        currentReciters = reciters;
+        // Don't emit yet, wait for data check
       },
     );
+
+    if (currentReciters.isEmpty) return;
+
+    // 4. Calculate fresh data in background
+    final freshProgress = <String, double>{};
+    final freshSizes = <String, int>{};
+    
+    await Future.wait(currentReciters.map((r) async {
+      freshProgress[r.identifier] = await downloadService.getReciterDownloadPercentage(r.identifier);
+      freshSizes[r.identifier] = await downloadService.getReciterDownloadedSize(r.identifier);
+    }));
+
+    // 5. Check if data changed
+    bool hasChanged = false;
+    
+    // Check lengths
+    if (freshProgress.length != cachedData.progress.length || 
+        freshSizes.length != cachedData.sizes.length) {
+      hasChanged = true;
+    } else {
+      // Check values
+      for (final id in freshProgress.keys) {
+        if ((freshProgress[id] ?? 0) != (cachedData.progress[id] ?? 0) ||
+            (freshSizes[id] ?? 0) != (cachedData.sizes[id] ?? 0)) {
+          hasChanged = true;
+          break;
+        }
+      }
+    }
+
+    // 6. Only re-emit if data changed
+    if (hasChanged) {
+      await audioRepository.cacheReciterData(freshProgress, freshSizes);
+      emitSorted(currentReciters, freshProgress, freshSizes);
+    } else if (state.availableReciters.length != currentReciters.length) {
+       // Also re-emit if only the list of reciters changed (e.g. new ones added)
+       // but their download data is effectively 0 for the new ones
+       emitSorted(currentReciters, freshProgress, freshSizes);
+    }
   }
 
   Future<void> _onSelectReciter(Reciter reciter, Emitter<AudioState> emit) async {
@@ -168,10 +229,10 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
       mode: AudioPlayMode.ayah,
       isBannerVisible: true,
       error: null,
-      lastErrorMessage: null, // Clear previous error message
+      lastErrorMessage: null,
     ));
 
-    final url = audioRepository.getAyahAudioUrl(
+    final track = await audioRepository.getAyahAudioTrack(
       reciterId: activeReciter.identifier,
       surahNumber: surahNumber,
       ayahNumber: ayahNumber,
@@ -189,16 +250,21 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
     final bismillahLabel = isArabic ? "بسم الله الرحمن الرحيم" : "Bismillah";
     final surahLabel = isArabic ? "سورة" : "Surah";
 
-    final result = isPrependActive 
+    AudioTrack? bismillahTrack;
+    if (isPrependActive) {
+      bismillahTrack = await audioRepository.getAyahAudioTrack(
+        reciterId: activeReciter.identifier,
+        surahNumber: 1,
+        ayahNumber: 1,
+        quality: state.quality,
+      );
+    }
+
+    final result = isPrependActive && bismillahTrack != null
       ? await playerService.playPlaylist(
           [
-            audioRepository.getAyahAudioUrl(
-              reciterId: activeReciter.identifier,
-              surahNumber: 1,
-              ayahNumber: 1,
-              quality: state.quality,
-            ),
-            url,
+            bismillahTrack,
+            track,
           ],
           mode: AudioPlayMode.ayah,
           metadataList: [
@@ -215,7 +281,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
           ],
         )
       : await playerService.playStreaming(
-          url, 
+          track, 
           mode: AudioPlayMode.ayah,
           metadata: {
             'title': '$surahLabel $surahName: $ayahLabel $ayahNumber', 
@@ -231,7 +297,6 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
         
         add(AudioEvent.lastErrorChanged(errorMessage));
         
-        // Fallback logic: Try lower quality if possible, unless it's a plugin error
         if (!isPluginError && state.quality == AudioQuality.high192) {
            emit(state.copyWith(error: "192k not available for this reciter. Trying 128k..."));
            add(AudioEvent.changeQuality(AudioQuality.medium128));
@@ -253,7 +318,6 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
     final activeReciter = reciter ?? state.currentReciter;
     if (activeReciter == null) return;
 
-    // Stop existing playback first to ensure a clean state
     await playerService.stop();
 
     emit(state.copyWith(
@@ -264,19 +328,19 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
       mode: AudioPlayMode.surah,
       isBannerVisible: true,
       error: null,
-      lastErrorMessage: null, // Clear previous error message
+      lastErrorMessage: null,
     ));
 
-    final urlsResult = await audioRepository.getSurahAudioUrls(
+    final tracksResult = await audioRepository.getSurahAudioTracks(
       reciterId: activeReciter.identifier,
       surahNumber: surahNumber,
       ayahCount: ayahCount,
       quality: state.quality,
     );
 
-    await urlsResult.fold(
+    await tracksResult.fold(
       (failure) async => emit(state.copyWith(error: failure.message, status: AudioStatus.error)),
-      (urls) async {
+      (tracks) async {
         final bool isPrependActive = audioRepository.shouldPrependBismillah(
           surahNumber, 
           activeReciter.identifier,
@@ -284,11 +348,10 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
         
         int initialIndex = (startAyah ?? 1) - 1;
         if (isPrependActive) {
-          // If Bismillah was prepended, index 0 is Bismillah, index 1 is Ayah 1, etc.
           if (startAyah == null || startAyah == 1) {
-            initialIndex = 0; // Play Bismillah first
+            initialIndex = 0; 
           } else {
-            initialIndex = startAyah; // Offset by 1 (e.g. Ayah 2 is now at index 2)
+            initialIndex = startAyah; 
           }
         }
 
@@ -302,7 +365,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
         final surahLabel = isArabic ? "سورة" : "Surah";
         
         final metadataList = <Map<String, dynamic>>[];
-        for (var i = 0; i < urls.length; i++) {
+        for (var i = 0; i < tracks.length; i++) {
           if (isPrependActive && i == 0) {
             metadataList.add({
               'title': '$surahLabel $surahName: $bismillahLabel', 
@@ -310,7 +373,6 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
               'album': surahName
             });
           } else {
-            // If Bismillah was prepended, actual Ayah 1 is at index 1
             final displayAyah = isPrependActive ? i : i + 1;
             metadataList.add({
               'title': '$surahLabel $surahName: $ayahLabel $displayAyah', 
@@ -321,7 +383,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
         }
 
         final result = await playerService.playPlaylist(
-          urls, 
+          tracks, 
           initialIndex: initialIndex,
           mode: AudioPlayMode.surah,
           metadataList: metadataList,
@@ -333,7 +395,6 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
              
              add(AudioEvent.lastErrorChanged(errorMessage));
              
-             // Fallback logic, unless it's a plugin error
              if (!isPluginError && state.quality == AudioQuality.high192) {
                 emit(state.copyWith(error: "192k not available. Trying 128k..."));
                 add(AudioEvent.changeQuality(AudioQuality.medium128));
@@ -359,7 +420,6 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
     } else if (state.status == AudioStatus.paused) {
       await playerService.resume();
     } else {
-      // If idle, completed, or stopped, start fresh
       if (state.currentSurah != null) {
         if (state.mode == AudioPlayMode.surah) {
           add(AudioEvent.playSurah(
@@ -430,7 +490,6 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
   Future<void> _onChangeQuality(AudioQuality quality, Emitter<AudioState> emit) async {
     emit(state.copyWith(quality: quality));
     
-    // Restart if active to apply new quality
     if (state.isActive && state.currentSurah != null && state.currentAyah != null) {
       if (state.mode == AudioPlayMode.surah) {
         add(AudioEvent.playSurah(
@@ -449,7 +508,6 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
   }
 
   void _onStatusChanged(AudioStatus status, Emitter<AudioState> emit) {
-    // Only show banner automatically if status changed and it's not idle/stopped
     final shouldShowBanner = status != AudioStatus.idle && status != AudioStatus.stopped && status != state.status;
     
     emit(state.copyWith(
@@ -472,7 +530,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
     emit(state.copyWith(duration: duration));
   }
 
-  void _onIndexChanged(int? index, Emitter<AudioState> emit) {
+  void _onIndexChanged({int? index, required Emitter<AudioState> emit}) {
     if (index != null && state.mode == AudioPlayMode.surah && state.currentSurah != null && state.currentReciter != null) {
       final bool isPrependActive = audioRepository.shouldPrependBismillah(
         state.currentSurah!, 
@@ -480,11 +538,10 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
       );
       
       if (isPrependActive) {
-        // Index 0 is Bismillah, Index 1 is Ayah 1, etc.
         if (index == 0) {
-          emit(state.copyWith(currentAyah: 1)); // Highlight Ayah 1 for Bismillah
+          emit(state.copyWith(currentAyah: 1)); 
         } else {
-          emit(state.copyWith(currentAyah: index)); // (Index 1 -> Ayah 1, Index 2 -> Ayah 2)
+          emit(state.copyWith(currentAyah: index)); 
         }
       } else {
         emit(state.copyWith(currentAyah: index + 1));
@@ -493,8 +550,6 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
   }
 
   void _onUpdateCurrentPosition(int surahNumber, int? ayahNumber, Emitter<AudioState> emit) {
-    // Only update the "current" position in state if we're not actually playing something else.
-    // If the player is active, the state should reflect what's actually coming out of the speakers.
     if (state.isActive) {
       return;
     }
@@ -515,7 +570,6 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
     await _positionSubscription?.cancel();
     await _durationSubscription?.cancel();
     await _indexSubscription?.cancel();
-    // Do not dispose playerService here as it is a singleton injected via DI
     return super.close();
   }
 }

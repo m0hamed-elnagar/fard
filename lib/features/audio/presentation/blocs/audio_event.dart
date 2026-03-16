@@ -33,6 +33,7 @@ abstract class AudioEvent extends Equatable {
   static AudioEvent indexChanged(int? index) => IndexChanged(index);
   static AudioEvent updateCurrentPosition({required int surahNumber, int? ayahNumber}) =>
       UpdateCurrentPosition(surahNumber: surahNumber, ayahNumber: ayahNumber);
+  static AudioEvent refreshReciterStatuses() => const RefreshReciterStatuses();
 }
 
 class ShowBanner extends AudioEvent {
@@ -172,6 +173,10 @@ class IndexChanged extends AudioEvent {
   List<Object?> get props => [index];
 }
 
+class RefreshReciterStatuses extends AudioEvent {
+  const RefreshReciterStatuses();
+}
+
 extension AudioEventMapper on AudioEvent {
   R map<R>({
     required R Function(LoadReciters) loadReciters,
@@ -197,6 +202,7 @@ extension AudioEventMapper on AudioEvent {
     required R Function(DurationChanged) durationChanged,
     required R Function(IndexChanged) indexChanged,
     required R Function(UpdateCurrentPosition) updateCurrentPosition,
+    required R Function(RefreshReciterStatuses) refreshReciterStatuses,
   }) {
     final event = this;
     if (event is LoadReciters) return loadReciters(event);
@@ -222,6 +228,7 @@ extension AudioEventMapper on AudioEvent {
     if (event is DurationChanged) return durationChanged(event);
     if (event is IndexChanged) return indexChanged(event);
     if (event is UpdateCurrentPosition) return updateCurrentPosition(event);
+    if (event is RefreshReciterStatuses) return refreshReciterStatuses(event);
     throw Exception('Unknown AudioEvent: $this');
   }
 }

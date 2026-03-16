@@ -1,5 +1,6 @@
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/notification_service.dart';
+import 'package:fard/core/services/background_service.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/features/onboarding/presentation/screens/splash_screen.dart';
@@ -32,6 +33,10 @@ void main() async {
       androidNotificationIcon: 'mipmap/ic_launcher',
     );
     debugPrint('JustAudioBackground initialized');
+    
+    debugPrint('Initializing BackgroundService...');
+    await BackgroundService.initialize();
+    debugPrint('BackgroundService initialized');
   }
 
   debugPrint('Configuring dependencies...');

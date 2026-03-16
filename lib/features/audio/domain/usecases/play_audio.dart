@@ -17,34 +17,23 @@ class PlayAudio implements UseCase<void, PlayAudioParams> {
   
   @override
   Future<Result<void>> call(PlayAudioParams params) async {
-    // 1. Get audio URL/info
-    final audioResult = await audioRepository.getAudioUrl(
-      ayah: params.ayah,
+    // 1. Get audio track
+    final track = await audioRepository.getAyahAudioTrack(
       reciterId: params.reciterId,
+      surahNumber: params.ayah.surahNumber,
+      ayahNumber: params.ayah.ayahNumberInSurah,
       quality: params.quality,
-      audioUrl: params.audioUrl,
     );
     
-    if (audioResult.isFailure) {
-      return Result.failure(audioResult.failure!);
-    }
-    
-    final audioSource = audioResult.data!;
-    
-    // 2. Check if downloaded
-    final isDownloadedResult = await audioRepository.isAudioDownloaded(
-      ayah: params.ayah,
-      reciterId: params.reciterId,
+    // 2. Play using playerService (which handles remote/local switching automatically)
+    return playerService.playStreaming(
+      track, 
+      mode: params.mode,
+      metadata: {
+        'title': 'Ayah ${params.ayah.ayahNumberInSurah}',
+        'artist': params.reciterId,
+      },
     );
-    
-    final bool isDownloaded = isDownloadedResult.isSuccess && isDownloadedResult.data == true;
-    
-    // 3. Play from appropriate source
-    if (isDownloaded && audioSource.localPath != null) {
-      return playerService.playLocal(audioSource.localPath!, mode: params.mode);
-    } else {
-      return playerService.playStreaming(audioSource.url, mode: params.mode);
-    }
   }
 }
 

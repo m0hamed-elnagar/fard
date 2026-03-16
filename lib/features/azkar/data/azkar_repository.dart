@@ -4,16 +4,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_ce/hive_ce.dart';
 import 'package:injectable/injectable.dart';
+import 'azkar_source.dart';
 import '../domain/azkar_item.dart';
 
-@lazySingleton
-class AzkarRepository {
+@LazySingleton(as: IAzkarSource)
+class AzkarRepository implements IAzkarSource {
   final Box<int> _progressBox;
   List<AzkarItem>? _cachedAzkar;
   Completer<List<AzkarItem>>? _loadingCompleter;
 
   AzkarRepository(@Named('azkarBox') this._progressBox);
 
+  @override
   Future<List<AzkarItem>> getAllAzkar() async {
     // If cache is ready, return it immediately
     if (_cachedAzkar != null && _cachedAzkar!.isNotEmpty) {

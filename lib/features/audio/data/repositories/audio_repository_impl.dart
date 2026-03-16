@@ -6,6 +6,7 @@ import 'package:fard/core/errors/failure.dart';
 import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
+import 'package:fard/features/audio/domain/entities/audio_track.dart';
 import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:injectable/injectable.dart';
@@ -62,27 +63,6 @@ class AudioRepositoryImpl implements AudioRepository {
           style: e['format'] == 'audio' ? null : e['format'],
         )).toList();
 
-        // Ensure popular reciters are at the top and present
-        final topReciters = [
-          const Reciter(
-            identifier: 'ar.alijaber',
-            name: 'علي جابر',
-            englishName: 'Ali Jaber',
-            language: 'ar',
-          ),
-          const Reciter(
-            identifier: 'ar.yasseraldossari',
-            name: 'ياسر الدوسري',
-            englishName: 'Yasser Al-Dosari',
-            language: 'ar',
-          ),
-        ];
-
-        for (final top in topReciters.reversed) {
-          reciters.removeWhere((r) => r.identifier == top.identifier);
-          reciters.insert(0, top);
-        }
-        
         await cacheReciters(reciters);
         return Result.success(reciters);
       } else {
@@ -146,8 +126,7 @@ class AudioRepositoryImpl implements AudioRepository {
     return true;
   }
 
-  @override
-  String getAyahAudioUrl({
+  String _getRemoteAyahUrl({
     required String reciterId,
     required int surahNumber,
     required int ayahNumber,
@@ -170,7 +149,32 @@ class AudioRepositoryImpl implements AudioRepository {
   }
 
   @override
-  Future<Result<List<String>>> getSurahAudioUrls({
+  Future<AudioTrack> getAyahAudioTrack({
+    required String reciterId,
+    required int surahNumber,
+    required int ayahNumber,
+    AudioQuality quality = AudioQuality.medium128,
+  }) async {
+    final remoteUrl = _getRemoteAyahUrl(
+      reciterId: reciterId, 
+      surahNumber: surahNumber, 
+      ayahNumber: ayahNumber,
+      quality: quality,
+    );
+    
+    final localPath = await _getLocalPath(reciterId, surahNumber, ayahNumber);
+    
+    final isDownloaded = await File(localPath).exists();
+    
+    return AudioTrack(
+      remoteUrl: remoteUrl,
+      localPath: localPath,
+      isDownloaded: isDownloaded,
+    );
+  }
+
+  @override
+  Future<Result<List<AudioTrack>>> getSurahAudioTracks({
     required String reciterId,
     required int surahNumber,
     int? ayahCount,
@@ -192,11 +196,11 @@ class AudioRepositoryImpl implements AudioRepository {
       }
     }
 
-    final urls = <String>[];
+    final tracks = <Future<AudioTrack>>[];
     
     // Prepend Bismillah (1:1) if needed for this surah and reciter
     if (_needsBismillahPrepend(surahNumber, reciterId)) {
-      urls.add(getAyahAudioUrl(
+      tracks.add(getAyahAudioTrack(
         reciterId: reciterId, 
         surahNumber: 1, 
         ayahNumber: 1, 
@@ -204,16 +208,22 @@ class AudioRepositoryImpl implements AudioRepository {
       ));
     }
 
-    urls.addAll(List.generate(
+    tracks.addAll(List.generate(
       count, 
-      (i) => getAyahAudioUrl(
+      (i) => getAyahAudioTrack(
         reciterId: reciterId, 
         surahNumber: surahNumber, 
         ayahNumber: i + 1,
         quality: quality,
       )
     ));
-    return Result.success(urls);
+    
+    try {
+      final resolvedTracks = await Future.wait(tracks);
+      return Result.success(resolvedTracks);
+    } catch (e) {
+      return Result.failure(UnknownFailure(e.toString()));
+    }
   }
 
   @override
@@ -222,26 +232,24 @@ class AudioRepositoryImpl implements AudioRepository {
   }
 
   @override
-  Future<Result<AudioSource>> getAudioUrl({
+  Future<Result<AudioTrack>> getAudioUrl({
     required AyahNumber ayah,
     required String reciterId,
     required AudioQuality quality,
     String? audioUrl,
   }) async {
-    final url = audioUrl ?? getAyahAudioUrl(
-      reciterId: reciterId, 
-      surahNumber: ayah.surahNumber, 
-      ayahNumber: ayah.ayahNumberInSurah,
-      quality: quality,
-    );
-    
-    // Check local storage
-    final localPath = await _getLocalPath(reciterId, ayah.surahNumber.toString(), ayah.ayahNumberInSurah.toString());
-    if (await File(localPath).exists()) {
-      return Result.success(AudioSource(url: url, localPath: localPath));
+    // Legacy method mapped to new implementation
+    try {
+      final track = await getAyahAudioTrack(
+        reciterId: reciterId, 
+        surahNumber: ayah.surahNumber, 
+        ayahNumber: ayah.ayahNumberInSurah,
+        quality: quality,
+      );
+      return Result.success(track);
+    } catch (e) {
+      return Result.failure(UnknownFailure(e.toString()));
     }
-
-    return Result.success(AudioSource(url: url));
   }
 
   @override
@@ -261,19 +269,16 @@ class AudioRepositoryImpl implements AudioRepository {
     void Function(double progress)? onProgress,
   }) async {
     try {
-      final audioResult = await getAudioUrl(
-        ayah: ayah, 
+      final track = await getAyahAudioTrack(
         reciterId: reciterId, 
+        surahNumber: ayah.surahNumber, 
+        ayahNumber: ayah.ayahNumberInSurah,
         quality: AudioQuality.medium128,
       );
       
-      if (audioResult.isFailure) return Result.failure(audioResult.failure!);
-      final url = audioResult.data!.url;
-      
-      final response = await client.get(Uri.parse(url));
+      final response = await client.get(Uri.parse(track.remoteUrl));
       if (response.statusCode == 200) {
-        final localPath = await _getLocalPath(reciterId, ayah.surahNumber.toString(), ayah.ayahNumberInSurah.toString());
-        final file = File(localPath);
+        final file = File(track.localPath);
         await file.parent.create(recursive: true);
         await file.writeAsBytes(response.bodyBytes);
         return Result.success(null);
@@ -290,7 +295,7 @@ class AudioRepositoryImpl implements AudioRepository {
     required AyahNumber ayah,
     required String reciterId,
   }) async {
-    final localPath = await _getLocalPath(reciterId, ayah.surahNumber.toString(), ayah.ayahNumberInSurah.toString());
+    final localPath = await _getLocalPath(reciterId, ayah.surahNumber, ayah.ayahNumberInSurah);
     return Result.success(await File(localPath).exists());
   }
 
@@ -352,8 +357,46 @@ class AudioRepositoryImpl implements AudioRepository {
     }
   }
 
-  Future<String> _getLocalPath(String reciterId, String surah, String ayah) async {
+  static const String _reciterDataCacheKey = 'cached_reciter_data';
+
+  @override
+  Future<void> cacheReciterData(Map<String, double> progress, Map<String, int> sizes) async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = {
+      'progress': progress,
+      'sizes': sizes,
+    };
+    await prefs.setString(_reciterDataCacheKey, json.encode(data));
+  }
+
+  @override
+  Future<ReciterData> getCachedReciterData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonString = prefs.getString(_reciterDataCacheKey);
+      if (jsonString != null) {
+        final Map<String, dynamic> data = json.decode(jsonString);
+        return ReciterData(
+          progress: Map<String, double>.from(data['progress'] ?? {}),
+          sizes: Map<String, int>.from(data['sizes'] ?? {}),
+        );
+      }
+    } catch (e) {
+      // Ignore errors and return empty
+    }
+    return const ReciterData(progress: {}, sizes: {});
+  }
+
+  @override
+  int getAyahCount(int surahNumber) {
+    if (surahNumber < 1 || surahNumber > 114) return 0;
+    return _ayahCounts[surahNumber - 1];
+  }
+
+  Future<String> _getLocalPath(String reciterId, int surah, int ayah) async {
     final directory = await getApplicationSupportDirectory();
-    return '${directory.path}/audio/$reciterId/$surah$ayah.mp3';
+    final surahStr = surah.toString().padLeft(3, '0');
+    final ayahStr = ayah.toString().padLeft(3, '0');
+    return '${directory.path}/audio/$reciterId/$surahStr$ayahStr.mp3';
   }
 }

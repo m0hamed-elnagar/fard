@@ -49,7 +49,12 @@ class ExportImportService {
       final file = File('${directory.path}/fard_backup_$dateStr.json');
       await file.writeAsString(jsonString);
 
-      await Share.shareXFiles([XFile(file.path)], text: 'Fard App Backup - $dateStr');
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          text: 'Fard App Backup - $dateStr',
+        ),
+      );
     } catch (e) {
       debugPrint('Export error: $e');
       rethrow;

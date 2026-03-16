@@ -15,6 +15,7 @@ import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/audio/presentation/screens/offline_audio_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,7 +39,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _checkPermissions() async {
-    final canSchedule = await getIt<NotificationService>().canScheduleExactNotifications();
+    final canSchedule = await getIt<NotificationService>()
+        .canScheduleExactNotifications();
     if (mounted) {
       setState(() {
         _canScheduleExactAlarms = canSchedule;
@@ -136,21 +138,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: state.locale.languageCode,
-                      icon: const Icon(Icons.language_rounded, size: 20, color: AppTheme.accent),
+                      icon: const Icon(
+                        Icons.language_rounded,
+                        size: 20,
+                        color: AppTheme.accent,
+                      ),
                       onChanged: (String? newValue) {
                         if (newValue != null) {
                           HapticFeedback.selectionClick();
-                          context.read<SettingsCubit>().updateLocale(Locale(newValue));
+                          context.read<SettingsCubit>().updateLocale(
+                            Locale(newValue),
+                          );
                         }
                       },
                       items: [
                         const DropdownMenuItem(
                           value: 'ar',
-                          child: Text('العربية', style: TextStyle(fontSize: 14)),
+                          child: Text(
+                            'العربية',
+                            style: TextStyle(fontSize: 14),
+                          ),
                         ),
                         const DropdownMenuItem(
                           value: 'en',
-                          child: Text('English', style: TextStyle(fontSize: 14)),
+                          child: Text(
+                            'English',
+                            style: TextStyle(fontSize: 14),
+                          ),
                         ),
                       ],
                       dropdownColor: AppTheme.surfaceLight,
@@ -173,7 +187,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           builder: (context, state) {
             return ListView(
               physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 20.0,
+              ),
               children: [
                 if (!_canScheduleExactAlarms)
                   _buildWarningCard(
@@ -195,7 +212,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     Text(
                       l10n.locationDesc,
-                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                      style: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     ListTile(
@@ -204,7 +224,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       subtitle: Text(
                         state.cityName ?? l10n.locationNotSet,
                         style: TextStyle(
-                          color: state.cityName != null ? AppTheme.accent : AppTheme.missed,
+                          color: state.cityName != null
+                              ? AppTheme.accent
+                              : AppTheme.missed,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -216,7 +238,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         icon: const Icon(Icons.my_location, size: 18),
                         label: Text(l10n.refreshLocation),
                         style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                         ),
                       ),
                     ),
@@ -233,76 +258,85 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       description: l10n.calculationMethodDesc,
                       trailing: _buildDropdown<String>(
                         value: state.calculationMethod,
-                        items: [
-                          'muslim_league',
-                          'egyptian',
-                          'karachi',
-                          'umm_al_qura',
-                          'dubai',
-                          'moonsighting_committee',
-                          'north_america',
-                          'kuwait',
-                          'qatar',
-                          'singapore',
-                          'tehran',
-                          'turkey',
-                        ].map((method) {
-                          String displayName;
-                          switch (method) {
-                            case 'muslim_league':
-                              displayName = l10n.muslimWorldLeague;
-                              break;
-                            case 'egyptian':
-                              displayName = l10n.egyptianGeneralAuthority;
-                              break;
-                            case 'karachi':
-                              displayName = l10n.universityOfIslamicSciencesKarachi;
-                              break;
-                            case 'umm_al_qura':
-                              displayName = l10n.ummAlQuraUniversityMakkah;
-                              break;
-                            case 'dubai':
-                              displayName = l10n.dubai;
-                              break;
-                            case 'moonsighting_committee':
-                              displayName = l10n.moonsightingCommittee;
-                              break;
-                            case 'north_america':
-                              displayName = l10n.isnaNorthAmerica;
-                              break;
-                            case 'kuwait':
-                              displayName = l10n.kuwait;
-                              break;
-                            case 'qatar':
-                              displayName = l10n.qatar;
-                              break;
-                            case 'singapore':
-                              displayName = l10n.singapore;
-                              break;
-                            case 'tehran':
-                              displayName = l10n.instituteOfGeophysicsTehran;
-                              break;
-                            case 'turkey':
-                              displayName = l10n.turkey;
-                              break;
-                            default:
-                              displayName = method
-                                  .replaceAll('_', ' ')
-                                  .split(' ')
-                                  .map((str) => str[0].toUpperCase() + str.substring(1))
-                                  .join(' ');
-                          }
-                          return DropdownMenuItem(
-                            value: method,
-                            child: Text(
-                              displayName,
-                              style: const TextStyle(fontSize: 13),
-                            ),
-                          );
-                        }).toList(),
+                        items:
+                            [
+                              'muslim_league',
+                              'egyptian',
+                              'karachi',
+                              'umm_al_qura',
+                              'dubai',
+                              'moonsighting_committee',
+                              'north_america',
+                              'kuwait',
+                              'qatar',
+                              'singapore',
+                              'tehran',
+                              'turkey',
+                            ].map((method) {
+                              String displayName;
+                              switch (method) {
+                                case 'muslim_league':
+                                  displayName = l10n.muslimWorldLeague;
+                                  break;
+                                case 'egyptian':
+                                  displayName = l10n.egyptianGeneralAuthority;
+                                  break;
+                                case 'karachi':
+                                  displayName =
+                                      l10n.universityOfIslamicSciencesKarachi;
+                                  break;
+                                case 'umm_al_qura':
+                                  displayName = l10n.ummAlQuraUniversityMakkah;
+                                  break;
+                                case 'dubai':
+                                  displayName = l10n.dubai;
+                                  break;
+                                case 'moonsighting_committee':
+                                  displayName = l10n.moonsightingCommittee;
+                                  break;
+                                case 'north_america':
+                                  displayName = l10n.isnaNorthAmerica;
+                                  break;
+                                case 'kuwait':
+                                  displayName = l10n.kuwait;
+                                  break;
+                                case 'qatar':
+                                  displayName = l10n.qatar;
+                                  break;
+                                case 'singapore':
+                                  displayName = l10n.singapore;
+                                  break;
+                                case 'tehran':
+                                  displayName =
+                                      l10n.instituteOfGeophysicsTehran;
+                                  break;
+                                case 'turkey':
+                                  displayName = l10n.turkey;
+                                  break;
+                                default:
+                                  displayName = method
+                                      .replaceAll('_', ' ')
+                                      .split(' ')
+                                      .map(
+                                        (str) =>
+                                            str[0].toUpperCase() +
+                                            str.substring(1),
+                                      )
+                                      .join(' ');
+                              }
+                              return DropdownMenuItem(
+                                value: method,
+                                child: Text(
+                                  displayName,
+                                  style: const TextStyle(fontSize: 13),
+                                ),
+                              );
+                            }).toList(),
                         onChanged: (value) {
                           if (value != null) {
-                            context.read<SettingsCubit>().updateCalculationMethod(value);
+                            context
+                                .read<SettingsCubit>()
+                                .updateCalculationMethod(value);
                           }
                         },
                       ),
@@ -316,11 +350,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         items: [
                           DropdownMenuItem(
                             value: 'shafi',
-                            child: Text(l10n.shafiMadhab, style: const TextStyle(fontSize: 13)),
+                            child: Text(
+                              l10n.shafiMadhab,
+                              style: const TextStyle(fontSize: 13),
+                            ),
                           ),
                           DropdownMenuItem(
                             value: 'hanafi',
-                            child: Text(l10n.hanafiMadhab, style: const TextStyle(fontSize: 13)),
+                            child: Text(
+                              l10n.hanafiMadhab,
+                              style: const TextStyle(fontSize: 13),
+                            ),
                           ),
                         ],
                         onChanged: (value) {
@@ -340,7 +380,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     Text(
                       l10n.globalSettingsDesc,
-                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                      style: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     ListTile(
@@ -364,12 +407,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.notifications_active_rounded,
                   children: [
                     Theme(
-                      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                      data: Theme.of(
+                        context,
+                      ).copyWith(dividerColor: Colors.transparent),
                       child: ExpansionTile(
                         tilePadding: EdgeInsets.zero,
                         title: Text(
                           l10n.editEachPrayer,
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                         children: state.salaahSettings.map((salaahSetting) {
                           return _buildSalaahSettingItem(
@@ -394,7 +442,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Expanded(
                           child: Text(
                             l10n.azkarSettingsDesc,
-                            style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                            style: TextStyle(
+                              color: AppTheme.textSecondary,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                         TextButton.icon(
@@ -405,7 +456,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           },
                           icon: const Icon(Icons.add, size: 20),
                           label: Text(l10n.add),
-                          style: TextButton.styleFrom(foregroundColor: AppTheme.accent),
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppTheme.accent,
+                          ),
                         ),
                       ],
                     ),
@@ -416,12 +469,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         child: Center(
                           child: Column(
                             children: [
-                              Icon(Icons.notifications_none_rounded,
-                                  color: AppTheme.textSecondary.withValues(alpha: 0.3), size: 40),
+                              Icon(
+                                Icons.notifications_none_rounded,
+                                color: AppTheme.textSecondary.withValues(
+                                  alpha: 0.3,
+                                ),
+                                size: 40,
+                              ),
                               const SizedBox(height: 8),
                               Text(
                                 l10n.noRemindersSet,
-                                style: const TextStyle(color: AppTheme.textSecondary),
+                                style: const TextStyle(
+                                  color: AppTheme.textSecondary,
+                                ),
                               ),
                             ],
                           ),
@@ -438,10 +498,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               index: index,
                               reminder: reminder,
                             ),
-                            if (index < state.reminders.length - 1) const Divider(height: 1),
+                            if (index < state.reminders.length - 1)
+                              const Divider(height: 1),
                           ],
                         );
                       }),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                _buildSection(
+                  context,
+                  title: l10n.offlineAudio,
+                  icon: Icons.offline_pin_rounded,
+                  children: [
+                    _buildSettingItem(
+                      title: l10n.manageDownloads,
+                      description: l10n.downloadRecitersOffline,
+                      trailing: const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const OfflineAudioScreen(),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -477,7 +563,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         }).toList(),
                         onChanged: (value) {
                           if (value != null) {
-                            context.read<SettingsCubit>().updateHijriAdjustment(value);
+                            context.read<SettingsCubit>().updateHijriAdjustment(
+                              value,
+                            );
                           }
                         },
                       ),
@@ -504,12 +592,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         } catch (e) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('${l10n.backupError}: $e')),
+                              SnackBar(
+                                content: Text('${l10n.backupError}: $e'),
+                              ),
                             );
                           }
                         }
                       },
-                      trailing: const Icon(Icons.share_rounded, size: 20, color: AppTheme.accent),
+                      trailing: const Icon(
+                        Icons.share_rounded,
+                        size: 20,
+                        color: AppTheme.accent,
+                      ),
                     ),
                     const Divider(height: 32),
                     _buildSettingItem(
@@ -536,26 +630,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                         if (confirm == true && context.mounted) {
                           try {
-                            final success = await getIt<ExportImportService>().importData();
+                            final success = await getIt<ExportImportService>()
+                                .importData();
                             if (success && context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(l10n.backupImportSuccess)),
+                                SnackBar(
+                                  content: Text(l10n.backupImportSuccess),
+                                ),
                               );
                               // Reload blocs to reflect new data
-                              context.read<WerdBloc>().add(const WerdEvent.load());
-                              final prayerBloc = context.read<PrayerTrackerBloc>();
-                              prayerBloc.add(PrayerTrackerEvent.load(DateTime.now()));
+                              context.read<WerdBloc>().add(
+                                const WerdEvent.load(),
+                              );
+                              final prayerBloc = context
+                                  .read<PrayerTrackerBloc>();
+                              prayerBloc.add(
+                                PrayerTrackerEvent.load(DateTime.now()),
+                              );
                             }
                           } catch (e) {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('${l10n.backupError}: $e')),
+                                SnackBar(
+                                  content: Text('${l10n.backupError}: $e'),
+                                ),
                               );
                             }
                           }
                         }
                       },
-                      trailing: const Icon(Icons.file_upload_rounded, size: 20, color: AppTheme.accent),
+                      trailing: const Icon(
+                        Icons.file_upload_rounded,
+                        size: 20,
+                        color: AppTheme.accent,
+                      ),
                     ),
                   ],
                 ),
@@ -568,7 +676,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildWarningCard(String title, String desc, IconData icon, {bool isSmall = false}) {
+  Widget _buildWarningCard(
+    String title,
+    String desc,
+    IconData icon, {
+    bool isSmall = false,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
@@ -578,7 +691,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         border: Border.all(color: AppTheme.missed.withValues(alpha: 0.2)),
       ),
       child: Row(
-        crossAxisAlignment: isSmall ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+        crossAxisAlignment: isSmall
+            ? CrossAxisAlignment.center
+            : CrossAxisAlignment.start,
         children: [
           Icon(icon, color: AppTheme.missed, size: isSmall ? 20 : 24),
           const SizedBox(width: 12),
@@ -589,12 +704,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 if (title.isNotEmpty)
                   Text(
                     title,
-                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.missed),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.missed,
+                    ),
                   ),
-                Text(
-                  desc,
-                  style: TextStyle(fontSize: isSmall ? 12 : 13),
-                ),
+                Text(desc, style: TextStyle(fontSize: isSmall ? 12 : 13)),
               ],
             ),
           ),
@@ -630,9 +745,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showGlobalSettingsDialog(BuildContext context, SettingsState state, AppLocalizations l10n) {
+  void _showGlobalSettingsDialog(
+    BuildContext context,
+    SettingsState state,
+    AppLocalizations l10n,
+  ) {
     final cubit = context.read<SettingsCubit>();
-    
+
     // Initial values from first prayer as proxy
     final first = state.salaahSettings.first;
     bool isAzanEnabled = first.isAzanEnabled;
@@ -661,7 +780,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _buildToggleItem(
                       title: l10n.enableAzan,
                       value: isAzanEnabled,
-                      onChanged: (val) => setDialogState(() => isAzanEnabled = val),
+                      onChanged: (val) =>
+                          setDialogState(() => isAzanEnabled = val),
                     ),
                     if (isAzanEnabled)
                       Padding(
@@ -672,62 +792,118 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               isExpanded: true,
                               decoration: InputDecoration(
                                 labelText: l10n.azanVoice,
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                                 filled: true,
                                 fillColor: AppTheme.surfaceLight,
                               ),
                               initialValue: () {
-                                if (selectedVoice == null) return null;
-                                for (var entry in VoiceDownloadService.azanVoices.entries) {
-                                  if (selectedVoice == entry.key) return entry.key;
+                                if (selectedVoice == null) {
+                                  return null;
+                                }
+                                for (var entry
+                                    in VoiceDownloadService
+                                        .azanVoices
+                                        .entries) {
+                                  if (selectedVoice == entry.key) {
+                                    return entry.key;
+                                  }
                                   final uri = Uri.parse(entry.value);
-                                  if (selectedVoice!.contains('voice_${uri.pathSegments.last}')) return entry.key;
-                                  
+                                  if (selectedVoice!.contains(
+                                    'voice_${uri.pathSegments.last}',
+                                  )) {
+                                    return entry.key;
+                                  }
+
                                   // Fallback for old naming
-                                  final sanitized = entry.key.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
-                                  if (selectedVoice!.contains('${sanitized}_azan.mp3')) return entry.key;
+                                  final sanitized = entry.key
+                                      .toLowerCase()
+                                      .replaceAll(RegExp(r'[^a-z0-9]'), '_');
+                                  if (selectedVoice!.contains(
+                                    '${sanitized}_azan.mp3',
+                                  )) {
+                                    return entry.key;
+                                  }
                                 }
                                 return null;
                               }(),
                               items: [
-                                DropdownMenuItem(value: null, child: Text(l10n.defaultVal)),
-                                ...VoiceDownloadService.azanVoices.keys.map((v) {
+                                DropdownMenuItem(
+                                  value: null,
+                                  child: Text(l10n.defaultVal),
+                                ),
+                                ...VoiceDownloadService.azanVoices.keys.map((
+                                  v,
+                                ) {
                                   final parts = v.split(' - ');
-                                  final displayName = l10n.localeName == 'ar' ? (parts.length > 1 ? parts[1] : parts[0]) : parts[0];
-                                  return DropdownMenuItem(value: v, child: Text(displayName));
+                                  final displayName = l10n.localeName == 'ar'
+                                      ? (parts.length > 1 ? parts[1] : parts[0])
+                                      : parts[0];
+                                  return DropdownMenuItem(
+                                    value: v,
+                                    child: Text(displayName),
+                                  );
                                 }),
                               ],
                               onChanged: (val) async {
                                 HapticFeedback.selectionClick();
                                 if (val != null) {
-                                  final downloader = getIt<VoiceDownloadService>();
+                                  final downloader =
+                                      getIt<VoiceDownloadService>();
                                   if (!(await downloader.isDownloaded(val))) {
                                     setDialogState(() => isDownloading = true);
-                                    final path = await downloader.downloadAzan(val);
+                                    final path = await downloader.downloadAzan(
+                                      val,
+                                    );
                                     if (path != null) {
-                                      final accessiblePath = await downloader.getAccessiblePath(val);
+                                      final accessiblePath = await downloader
+                                          .getAccessiblePath(val);
                                       setDialogState(() {
                                         isDownloading = false;
-                                        if (accessiblePath != null) selectedVoice = accessiblePath;
+                                        if (accessiblePath != null) {
+                                          selectedVoice = accessiblePath;
+                                        }
                                       });
                                     } else {
-                                      setDialogState(() => isDownloading = false);
+                                      setDialogState(
+                                        () => isDownloading = false,
+                                      );
                                     }
                                   } else {
-                                    final accessiblePath = await downloader.getAccessiblePath(val);
-                                    setDialogState(() => selectedVoice = accessiblePath);
+                                    final accessiblePath = await downloader
+                                        .getAccessiblePath(val);
+                                    setDialogState(
+                                      () => selectedVoice = accessiblePath,
+                                    );
                                   }
                                 } else {
                                   setDialogState(() => selectedVoice = null);
                                 }
                               },
                             ),
-                            if (isDownloading) const Padding(padding: EdgeInsets.all(8.0), child: LinearProgressIndicator(color: AppTheme.accent)),
+                            if (isDownloading)
+                              const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: LinearProgressIndicator(
+                                  color: AppTheme.accent,
+                                ),
+                              ),
                             TextButton.icon(
-                              onPressed: isDownloading ? null : () => getIt<NotificationService>().testAzan(Salaah.fajr, selectedVoice, settings: context.read<SettingsCubit>().state),
+                              onPressed: isDownloading
+                                  ? null
+                                  : () => getIt<NotificationService>().testAzan(
+                                      Salaah.fajr,
+                                      selectedVoice,
+                                      settings: context
+                                          .read<SettingsCubit>()
+                                          .state,
+                                    ),
                               icon: const Icon(Icons.play_arrow_rounded),
                               label: Text(l10n.testAzan),
-                              style: TextButton.styleFrom(foregroundColor: AppTheme.accent),
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppTheme.accent,
+                              ),
                             ),
                           ],
                         ),
@@ -736,7 +912,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _buildToggleItem(
                       title: l10n.enableReminder,
                       value: isReminderEnabled,
-                      onChanged: (val) => setDialogState(() => isReminderEnabled = val),
+                      onChanged: (val) =>
+                          setDialogState(() => isReminderEnabled = val),
                     ),
                     if (isReminderEnabled)
                       Padding(
@@ -745,36 +922,67 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           children: [
                             Row(
                               children: [
-                                Expanded(child: Text(l10n.minutesBefore(reminderMinutes))),
+                                Expanded(
+                                  child: Text(
+                                    l10n.minutesBefore(reminderMinutes),
+                                  ),
+                                ),
                                 IconButton(
-                                  icon: const Icon(Icons.remove_circle_outline, color: AppTheme.missed),
-                                  onPressed: reminderMinutes > 1 ? () {
-                                    HapticFeedback.lightImpact();
-                                    setDialogState(() => reminderMinutes--);
-                                  } : null,
+                                  icon: const Icon(
+                                    Icons.remove_circle_outline,
+                                    color: AppTheme.missed,
+                                  ),
+                                  onPressed: reminderMinutes > 1
+                                      ? () {
+                                          HapticFeedback.lightImpact();
+                                          setDialogState(
+                                            () => reminderMinutes--,
+                                          );
+                                        }
+                                      : null,
                                 ),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 4,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: AppTheme.surfaceLight,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Text('$reminderMinutes', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  child: Text(
+                                    '$reminderMinutes',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.add_circle_outline, color: AppTheme.primaryLight),
-                                  onPressed: reminderMinutes < 60 ? () {
-                                    HapticFeedback.lightImpact();
-                                    setDialogState(() => reminderMinutes++);
-                                  } : null,
+                                  icon: const Icon(
+                                    Icons.add_circle_outline,
+                                    color: AppTheme.primaryLight,
+                                  ),
+                                  onPressed: reminderMinutes < 60
+                                      ? () {
+                                          HapticFeedback.lightImpact();
+                                          setDialogState(
+                                            () => reminderMinutes++,
+                                          );
+                                        }
+                                      : null,
                                 ),
                               ],
                             ),
                             TextButton.icon(
-                              onPressed: () => getIt<NotificationService>().testReminder(Salaah.fajr, reminderMinutes),
-                              icon: const Icon(Icons.notification_important_rounded),
+                              onPressed: () => getIt<NotificationService>()
+                                  .testReminder(Salaah.fajr, reminderMinutes),
+                              icon: const Icon(
+                                Icons.notification_important_rounded,
+                              ),
                               label: Text(l10n.testReminder),
-                              style: TextButton.styleFrom(foregroundColor: AppTheme.accent),
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppTheme.accent,
+                              ),
                             ),
                           ],
                         ),
@@ -783,35 +991,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _buildToggleItem(
                       title: l10n.afterSalaahAzkar,
                       value: isAfterSalahAzkarEnabled,
-                      onChanged: (val) => setDialogState(() => isAfterSalahAzkarEnabled = val),
+                      onChanged: (val) =>
+                          setDialogState(() => isAfterSalahAzkarEnabled = val),
                     ),
                     if (isAfterSalahAzkarEnabled)
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Row(
                           children: [
-                            Expanded(child: Text(l10n.minutesAfter(afterSalahMinutes))),
+                            Expanded(
+                              child: Text(l10n.minutesAfter(afterSalahMinutes)),
+                            ),
                             IconButton(
-                              icon: const Icon(Icons.remove_circle_outline, color: AppTheme.missed),
-                              onPressed: afterSalahMinutes > 0 ? () {
-                                HapticFeedback.lightImpact();
-                                setDialogState(() => afterSalahMinutes--);
-                              } : null,
+                              icon: const Icon(
+                                Icons.remove_circle_outline,
+                                color: AppTheme.missed,
+                              ),
+                              onPressed: afterSalahMinutes > 0
+                                  ? () {
+                                      HapticFeedback.lightImpact();
+                                      setDialogState(() => afterSalahMinutes--);
+                                    }
+                                  : null,
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppTheme.surfaceLight,
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: Text('$afterSalahMinutes', style: const TextStyle(fontWeight: FontWeight.bold)),
+                              child: Text(
+                                '$afterSalahMinutes',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.add_circle_outline, color: AppTheme.primaryLight),
-                              onPressed: afterSalahMinutes < 60 ? () {
-                                HapticFeedback.lightImpact();
-                                setDialogState(() => afterSalahMinutes++);
-                              } : null,
+                              icon: const Icon(
+                                Icons.add_circle_outline,
+                                color: AppTheme.primaryLight,
+                              ),
+                              onPressed: afterSalahMinutes < 60
+                                  ? () {
+                                      HapticFeedback.lightImpact();
+                                      setDialogState(() => afterSalahMinutes++);
+                                    }
+                                  : null,
                             ),
                           ],
                         ),
@@ -822,7 +1051,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
+                  child: Text(
+                    l10n.cancel,
+                    style: const TextStyle(color: AppTheme.textSecondary),
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -838,13 +1070,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ],
             );
-          }
+          },
         );
       },
     );
   }
 
-  Widget _buildToggleItem({required String title, required bool value, required ValueChanged<bool> onChanged}) {
+  Widget _buildToggleItem({
+    required String title,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -863,7 +1099,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required AppLocalizations l10n,
   }) {
     final String salaahName = _getLocalizedSalaahName(settings.salaah, l10n);
-    
+
     String voiceDisplayName = '';
     if (settings.isAzanEnabled) {
       if (settings.azanSound == null || settings.azanSound == 'default') {
@@ -876,9 +1112,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             voiceDisplayName = ' (${entry.key.split(' - ').first})';
             break;
           }
-          
+
           // Fallback for old naming
-          final sanitized = entry.key.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
+          final sanitized = entry.key.toLowerCase().replaceAll(
+            RegExp(r'[^a-z0-9]'),
+            '_',
+          );
           if (settings.azanSound!.contains('${sanitized}_azan.mp3')) {
             voiceDisplayName = ' (${entry.key.split(' - ').first})';
             break;
@@ -889,12 +1128,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-      title: Text(salaahName, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+      title: Text(
+        salaahName,
+        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+      ),
       subtitle: Text(
         '${settings.isAzanEnabled ? "${l10n.azan}$voiceDisplayName" : ""} ${settings.isAzanEnabled && settings.isReminderEnabled ? "&" : ""} ${settings.isReminderEnabled ? "${l10n.reminder} (${l10n.minutesBefore(settings.reminderMinutesBefore)})" : ""}',
         style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
       ),
-      trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppTheme.textSecondary),
+      trailing: const Icon(
+        Icons.arrow_forward_ios_rounded,
+        size: 14,
+        color: AppTheme.textSecondary,
+      ),
       onTap: () {
         HapticFeedback.lightImpact();
         _showSalaahSettingsDialog(context, settings, l10n);
@@ -904,17 +1150,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   String _getLocalizedSalaahName(Salaah salaah, AppLocalizations l10n) {
     switch (salaah) {
-      case Salaah.fajr: return l10n.fajr;
-      case Salaah.dhuhr: return l10n.dhuhr;
-      case Salaah.asr: return l10n.asr;
-      case Salaah.maghrib: return l10n.maghrib;
-      case Salaah.isha: return l10n.isha;
+      case Salaah.fajr:
+        return l10n.fajr;
+      case Salaah.dhuhr:
+        return l10n.dhuhr;
+      case Salaah.asr:
+        return l10n.asr;
+      case Salaah.maghrib:
+        return l10n.maghrib;
+      case Salaah.isha:
+        return l10n.isha;
     }
   }
 
-  void _showSalaahSettingsDialog(BuildContext context, SalaahSettings settings, AppLocalizations l10n) {
+  void _showSalaahSettingsDialog(
+    BuildContext context,
+    SalaahSettings settings,
+    AppLocalizations l10n,
+  ) {
     final cubit = context.read<SettingsCubit>();
-    
+
     bool isAzanEnabled = settings.isAzanEnabled;
     bool isReminderEnabled = settings.isReminderEnabled;
     bool isAfterSalahAzkarEnabled = settings.isAfterSalahAzkarEnabled;
@@ -941,7 +1196,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _buildToggleItem(
                       title: l10n.enableAzan,
                       value: isAzanEnabled,
-                      onChanged: (val) => setDialogState(() => isAzanEnabled = val),
+                      onChanged: (val) =>
+                          setDialogState(() => isAzanEnabled = val),
                     ),
                     if (isAzanEnabled)
                       Padding(
@@ -952,58 +1208,102 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               isExpanded: true,
                               decoration: InputDecoration(
                                 labelText: l10n.azanVoice,
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                                 filled: true,
                                 fillColor: AppTheme.surfaceLight,
                               ),
                               initialValue: () {
-                                if (selectedVoice == null) return null;
-                                for (var entry in VoiceDownloadService.azanVoices.entries) {
-                                  if (selectedVoice == entry.key) return entry.key;
+                                if (selectedVoice == null) {
+                                  return null;
+                                }
+                                for (var entry
+                                    in VoiceDownloadService
+                                        .azanVoices
+                                        .entries) {
+                                  if (selectedVoice == entry.key) {
+                                    return entry.key;
+                                  }
                                   final uri = Uri.parse(entry.value);
-                                  if (selectedVoice!.contains('voice_${uri.pathSegments.last}')) return entry.key;
-                                  
+                                  if (selectedVoice!.contains(
+                                    'voice_${uri.pathSegments.last}',
+                                  )) {
+                                    return entry.key;
+                                  }
+
                                   // Fallback for old naming
-                                  final sanitized = entry.key.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
-                                  if (selectedVoice!.contains('${sanitized}_azan.mp3')) return entry.key;
+                                  final sanitized = entry.key
+                                      .toLowerCase()
+                                      .replaceAll(RegExp(r'[^a-z0-9]'), '_');
+                                  if (selectedVoice!.contains(
+                                    '${sanitized}_azan.mp3',
+                                  )) {
+                                    return entry.key;
+                                  }
                                 }
                                 return null;
                               }(),
                               items: [
-                                DropdownMenuItem(value: null, child: Text(l10n.defaultVal)),
-                                ...VoiceDownloadService.azanVoices.keys.map((v) {
+                                DropdownMenuItem(
+                                  value: null,
+                                  child: Text(l10n.defaultVal),
+                                ),
+                                ...VoiceDownloadService.azanVoices.keys.map((
+                                  v,
+                                ) {
                                   final parts = v.split(' - ');
-                                  final displayName = l10n.localeName == 'ar' ? (parts.length > 1 ? parts[1] : parts[0]) : parts[0];
-                                  return DropdownMenuItem(value: v, child: Text(displayName));
+                                  final displayName = l10n.localeName == 'ar'
+                                      ? (parts.length > 1 ? parts[1] : parts[0])
+                                      : parts[0];
+                                  return DropdownMenuItem(
+                                    value: v,
+                                    child: Text(displayName),
+                                  );
                                 }),
                               ],
                               onChanged: (val) async {
                                 HapticFeedback.selectionClick();
                                 if (val != null) {
-                                  final downloader = getIt<VoiceDownloadService>();
+                                  final downloader =
+                                      getIt<VoiceDownloadService>();
                                   if (!(await downloader.isDownloaded(val))) {
                                     setDialogState(() => isDownloading = true);
-                                    final path = await downloader.downloadAzan(val);
+                                    final path = await downloader.downloadAzan(
+                                      val,
+                                    );
                                     if (path != null) {
-                                      final accessiblePath = await downloader.getAccessiblePath(val);
+                                      final accessiblePath = await downloader
+                                          .getAccessiblePath(val);
                                       setDialogState(() {
                                         isDownloading = false;
-                                        if (accessiblePath != null) selectedVoice = accessiblePath;
+                                        if (accessiblePath != null) {
+                                          selectedVoice = accessiblePath;
+                                        }
                                       });
                                     } else {
-                                      setDialogState(() => isDownloading = false);
+                                      setDialogState(
+                                        () => isDownloading = false,
+                                      );
                                       if (context.mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
                                           SnackBar(
-                                            content: Text(l10n.azanDownloadError),
+                                            content: Text(
+                                              l10n.azanDownloadError,
+                                            ),
                                             backgroundColor: AppTheme.missed,
                                           ),
                                         );
                                       }
                                     }
                                   } else {
-                                    final accessiblePath = await downloader.getAccessiblePath(val);
-                                    setDialogState(() => selectedVoice = accessiblePath);
+                                    final accessiblePath = await downloader
+                                        .getAccessiblePath(val);
+                                    setDialogState(
+                                      () => selectedVoice = accessiblePath,
+                                    );
                                   }
                                 } else {
                                   setDialogState(() => selectedVoice = null);
@@ -1013,13 +1313,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             if (isDownloading)
                               const Padding(
                                 padding: EdgeInsets.all(8.0),
-                                child: LinearProgressIndicator(color: AppTheme.accent),
+                                child: LinearProgressIndicator(
+                                  color: AppTheme.accent,
+                                ),
                               ),
                             TextButton.icon(
-                              onPressed: isDownloading ? null : () => getIt<NotificationService>().testAzan(settings.salaah, selectedVoice, settings: context.read<SettingsCubit>().state),
+                              onPressed: isDownloading
+                                  ? null
+                                  : () => getIt<NotificationService>().testAzan(
+                                      settings.salaah,
+                                      selectedVoice,
+                                      settings: context
+                                          .read<SettingsCubit>()
+                                          .state,
+                                    ),
                               icon: const Icon(Icons.play_arrow_rounded),
                               label: Text(l10n.testAzan),
-                              style: TextButton.styleFrom(foregroundColor: AppTheme.accent),
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppTheme.accent,
+                              ),
                             ),
                           ],
                         ),
@@ -1028,7 +1340,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _buildToggleItem(
                       title: l10n.enableReminder,
                       value: isReminderEnabled,
-                      onChanged: (val) => setDialogState(() => isReminderEnabled = val),
+                      onChanged: (val) =>
+                          setDialogState(() => isReminderEnabled = val),
                     ),
                     if (isReminderEnabled)
                       Padding(
@@ -1037,36 +1350,70 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           children: [
                             Row(
                               children: [
-                                Expanded(child: Text(l10n.minutesBefore(reminderMinutes))),
+                                Expanded(
+                                  child: Text(
+                                    l10n.minutesBefore(reminderMinutes),
+                                  ),
+                                ),
                                 IconButton(
-                                  icon: const Icon(Icons.remove_circle_outline, color: AppTheme.missed),
-                                  onPressed: reminderMinutes > 1 ? () {
-                                    HapticFeedback.lightImpact();
-                                    setDialogState(() => reminderMinutes--);
-                                  } : null,
+                                  icon: const Icon(
+                                    Icons.remove_circle_outline,
+                                    color: AppTheme.missed,
+                                  ),
+                                  onPressed: reminderMinutes > 1
+                                      ? () {
+                                          HapticFeedback.lightImpact();
+                                          setDialogState(
+                                            () => reminderMinutes--,
+                                          );
+                                        }
+                                      : null,
                                 ),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 4,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: AppTheme.surfaceLight,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Text('$reminderMinutes', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  child: Text(
+                                    '$reminderMinutes',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.add_circle_outline, color: AppTheme.primaryLight),
-                                  onPressed: reminderMinutes < 60 ? () {
-                                    HapticFeedback.lightImpact();
-                                    setDialogState(() => reminderMinutes++);
-                                  } : null,
+                                  icon: const Icon(
+                                    Icons.add_circle_outline,
+                                    color: AppTheme.primaryLight,
+                                  ),
+                                  onPressed: reminderMinutes < 60
+                                      ? () {
+                                          HapticFeedback.lightImpact();
+                                          setDialogState(
+                                            () => reminderMinutes++,
+                                          );
+                                        }
+                                      : null,
                                 ),
                               ],
                             ),
                             TextButton.icon(
-                              onPressed: () => getIt<NotificationService>().testReminder(settings.salaah, reminderMinutes),
-                              icon: const Icon(Icons.notification_important_rounded),
+                              onPressed: () =>
+                                  getIt<NotificationService>().testReminder(
+                                    settings.salaah,
+                                    reminderMinutes,
+                                  ),
+                              icon: const Icon(
+                                Icons.notification_important_rounded,
+                              ),
                               label: Text(l10n.testReminder),
-                              style: TextButton.styleFrom(foregroundColor: AppTheme.accent),
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppTheme.accent,
+                              ),
                             ),
                           ],
                         ),
@@ -1075,7 +1422,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _buildToggleItem(
                       title: l10n.afterSalaahAzkar,
                       value: isAfterSalahAzkarEnabled,
-                      onChanged: (val) => setDialogState(() => isAfterSalahAzkarEnabled = val),
+                      onChanged: (val) =>
+                          setDialogState(() => isAfterSalahAzkarEnabled = val),
                     ),
                     if (isAfterSalahAzkarEnabled)
                       Padding(
@@ -1084,28 +1432,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           children: [
                             Row(
                               children: [
-                                Expanded(child: Text(l10n.minutesAfter(afterSalahMinutes))),
+                                Expanded(
+                                  child: Text(
+                                    l10n.minutesAfter(afterSalahMinutes),
+                                  ),
+                                ),
                                 IconButton(
-                                  icon: const Icon(Icons.remove_circle_outline, color: AppTheme.missed),
-                                  onPressed: afterSalahMinutes > 0 ? () {
-                                    HapticFeedback.lightImpact();
-                                    setDialogState(() => afterSalahMinutes--);
-                                  } : null,
+                                  icon: const Icon(
+                                    Icons.remove_circle_outline,
+                                    color: AppTheme.missed,
+                                  ),
+                                  onPressed: afterSalahMinutes > 0
+                                      ? () {
+                                          HapticFeedback.lightImpact();
+                                          setDialogState(
+                                            () => afterSalahMinutes--,
+                                          );
+                                        }
+                                      : null,
                                 ),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 4,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: AppTheme.surfaceLight,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Text('$afterSalahMinutes', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  child: Text(
+                                    '$afterSalahMinutes',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.add_circle_outline, color: AppTheme.primaryLight),
-                                  onPressed: afterSalahMinutes < 60 ? () {
-                                    HapticFeedback.lightImpact();
-                                    setDialogState(() => afterSalahMinutes++);
-                                  } : null,
+                                  icon: const Icon(
+                                    Icons.add_circle_outline,
+                                    color: AppTheme.primaryLight,
+                                  ),
+                                  onPressed: afterSalahMinutes < 60
+                                      ? () {
+                                          HapticFeedback.lightImpact();
+                                          setDialogState(
+                                            () => afterSalahMinutes++,
+                                          );
+                                        }
+                                      : null,
                                 ),
                               ],
                             ),
@@ -1118,26 +1492,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
+                  child: Text(
+                    l10n.cancel,
+                    style: const TextStyle(color: AppTheme.textSecondary),
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: () {
                     HapticFeedback.mediumImpact();
-                    cubit.updateSalaahSettings(settings.copyWith(
-                      isAzanEnabled: isAzanEnabled,
-                      isReminderEnabled: isReminderEnabled,
-                      reminderMinutesBefore: reminderMinutes,
-                      isAfterSalahAzkarEnabled: isAfterSalahAzkarEnabled,
-                      afterSalaahAzkarMinutes: afterSalahMinutes,
-                      azanSound: selectedVoice,
-                    ));
+                    cubit.updateSalaahSettings(
+                      settings.copyWith(
+                        isAzanEnabled: isAzanEnabled,
+                        isReminderEnabled: isReminderEnabled,
+                        reminderMinutesBefore: reminderMinutes,
+                        isAfterSalahAzkarEnabled: isAfterSalahAzkarEnabled,
+                        afterSalaahAzkarMinutes: afterSalahMinutes,
+                        azanSound: selectedVoice,
+                      ),
+                    );
                     Navigator.pop(context);
                   },
                   child: Text(l10n.update),
                 ),
               ],
             );
-          }
+          },
         );
       },
     );
@@ -1155,12 +1534,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
         reminder.title.isNotEmpty ? reminder.title : reminder.category,
         style: TextStyle(
           fontWeight: FontWeight.w500,
-          color: reminder.isEnabled ? AppTheme.textPrimary : AppTheme.textSecondary,
+          color: reminder.isEnabled
+              ? AppTheme.textPrimary
+              : AppTheme.textSecondary,
         ),
       ),
       subtitle: Text(
         reminder.time,
-        style: const TextStyle(color: AppTheme.accent, fontWeight: FontWeight.bold),
+        style: const TextStyle(
+          color: AppTheme.accent,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1170,14 +1554,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onChanged: (val) => cubit.toggleReminder(index),
           ),
           IconButton(
-            icon: const Icon(Icons.edit_outlined, size: 20, color: AppTheme.textSecondary),
+            icon: const Icon(
+              Icons.edit_outlined,
+              size: 20,
+              color: AppTheme.textSecondary,
+            ),
             onPressed: () {
               HapticFeedback.lightImpact();
               _showAddReminderDialog(context, index: index, reminder: reminder);
             },
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline, size: 20, color: AppTheme.missed),
+            icon: const Icon(
+              Icons.delete_outline,
+              size: 20,
+              color: AppTheme.missed,
+            ),
             onPressed: () {
               HapticFeedback.mediumImpact();
               cubit.removeReminder(index);
@@ -1188,7 +1580,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showAddReminderDialog(BuildContext context, {int? index, AzkarReminder? reminder}) {
+  void _showAddReminderDialog(
+    BuildContext context, {
+    int? index,
+    AzkarReminder? reminder,
+  }) {
     final cubit = context.read<SettingsCubit>();
     final azkarBloc = context.read<AzkarBloc>();
     final l10n = AppLocalizations.of(context)!;
@@ -1205,7 +1601,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             return BlocBuilder<AzkarBloc, AzkarState>(
               bloc: azkarBloc,
               builder: (context, azkarState) {
-                if (selectedCategory.isEmpty && azkarState.categories.isNotEmpty) {
+                if (selectedCategory.isEmpty &&
+                    azkarState.categories.isNotEmpty) {
                   selectedCategory = azkarState.categories.first;
                 }
 
@@ -1225,25 +1622,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           onTap: () {
                             HapticFeedback.lightImpact();
                             _showSearchableCategoryPicker(
-                              context, 
-                              azkarState.categories, 
+                              context,
+                              azkarState.categories,
                               (val) {
                                 setDialogState(() {
                                   selectedCategory = val;
                                 });
-                              }
+                              },
                             );
                           },
                           child: InputDecorator(
                             decoration: InputDecoration(
                               labelText: l10n.category,
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                               suffixIcon: const Icon(Icons.search),
                               filled: true,
                               fillColor: AppTheme.surfaceLight,
                             ),
                             child: Text(
-                              selectedCategory.isEmpty ? l10n.selectCategory : selectedCategory,
+                              selectedCategory.isEmpty
+                                  ? l10n.selectCategory
+                                  : selectedCategory,
                               style: const TextStyle(fontSize: 14),
                             ),
                           ),
@@ -1254,7 +1655,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           decoration: InputDecoration(
                             labelText: l10n.customTitleOptional,
                             hintText: selectedCategory,
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                             filled: true,
                             fillColor: AppTheme.surfaceLight,
                           ),
@@ -1269,7 +1672,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           time: selectedTime,
                           onTap: () async {
                             HapticFeedback.lightImpact();
-                            final time = await _selectTime(context, selectedTime);
+                            final time = await _selectTime(
+                              context,
+                              selectedTime,
+                            );
                             if (time != null) {
                               setDialogState(() => selectedTime = time);
                             }
@@ -1281,7 +1687,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
+                      child: Text(
+                        l10n.cancel,
+                        style: const TextStyle(color: AppTheme.textSecondary),
+                      ),
                     ),
                     ElevatedButton(
                       onPressed: () {
@@ -1291,7 +1700,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         final newReminder = AzkarReminder(
                           category: selectedCategory,
                           time: selectedTime,
-                          title: customTitle.isNotEmpty ? customTitle : selectedCategory,
+                          title: customTitle.isNotEmpty
+                              ? customTitle
+                              : selectedCategory,
                           isEnabled: reminder?.isEnabled ?? true,
                         );
 
@@ -1308,13 +1719,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 );
               },
             );
-          }
+          },
         );
       },
     );
   }
 
-  void _showSearchableCategoryPicker(BuildContext context, List<String> categories, Function(String) onSelected) {
+  void _showSearchableCategoryPicker(
+    BuildContext context,
+    List<String> categories,
+    Function(String) onSelected,
+  ) {
     final l10n = AppLocalizations.of(context)!;
     String sheetSearchQuery = '';
     showModalBottomSheet(
@@ -1327,9 +1742,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            final filteredCategories = categories.where((cat) => 
-              sheetSearchQuery.isEmpty || cat.toLowerCase().contains(sheetSearchQuery)
-            ).toList();
+            final filteredCategories = categories
+                .where(
+                  (cat) =>
+                      sheetSearchQuery.isEmpty ||
+                      cat.toLowerCase().contains(sheetSearchQuery),
+                )
+                .toList();
 
             return Container(
               padding: EdgeInsets.only(
@@ -1355,7 +1774,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     decoration: InputDecoration(
                       hintText: l10n.searchCategory,
                       prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       filled: true,
                       fillColor: AppTheme.surfaceLight,
                     ),
@@ -1373,8 +1794,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       itemBuilder: (context, index) {
                         final cat = filteredCategories[index];
                         return ListTile(
-                          title: Text(cat, textAlign: l10n.localeName == 'ar' ? TextAlign.right : TextAlign.left),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          title: Text(
+                            cat,
+                            textAlign: l10n.localeName == 'ar'
+                                ? TextAlign.right
+                                : TextAlign.left,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           onTap: () {
                             HapticFeedback.selectionClick();
                             onSelected(cat);
@@ -1393,7 +1821,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSection(BuildContext context, {required String title, required IconData icon, required List<Widget> children}) {   
+  Widget _buildSection(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+  }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1439,7 +1872,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSettingItem({required String title, required String description, required Widget trailing, VoidCallback? onTap}) {
+  Widget _buildSettingItem({
+    required String title,
+    required String description,
+    required Widget trailing,
+    VoidCallback? onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -1457,12 +1895,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         description,
-                        style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 13,
+                        ),
                       ),
                     ],
                   ),
@@ -1485,7 +1929,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
+      title: Text(
+        title,
+        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
+      ),
       trailing: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(10),
@@ -1532,12 +1979,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             dialogTheme: DialogThemeData(
               backgroundColor: AppTheme.surface,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
             ),
             textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: AppTheme.accent,
-              ),
+              style: TextButton.styleFrom(foregroundColor: AppTheme.accent),
             ),
           ),
           child: child!,

@@ -1,27 +1,49 @@
 import 'dart:math';
+import 'package:fard/features/azkar/data/azkar_source.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:fard/core/services/prayer_time_service.dart';
-import 'package:fard/features/azkar/data/azkar_repository.dart';
 import 'package:fard/features/azkar/domain/azkar_item.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
+import 'package:fard/core/di/injection.dart';
 import 'channel_manager.dart';
 import 'sound_manager.dart';
 
 @singleton
 class PrayerNotificationScheduler {
   final PrayerTimeService _prayerTimeService;
-  final AzkarRepository _azkarRepository;
+  final IAzkarSource _azkarSource;
   final ChannelManager _channelManager;
   final SoundManager _soundManager;
+
+  static const String groupKey = 'com.nagar.fard.NOTIFICATIONS';
 
   // Notification ID Ranges
   static const int azkarReminderIdStart = 100;
   static const int azanIdStart = 200;
   static const int prayerReminderIdStart = 300;
   static const int afterSalahAzkarIdStart = 400;
+
+  String _applyRtl(String text) {
+    // Use Right-to-Left Mark (U+200F) + Right-to-Left Embedding (U+202B)
+    // to ensure the entire string is treated as RTL and aligned correctly on most devices.
+    // In background, getIt might not be available or SettingsCubit might not be init.
+    // Safer to check for getIt availability or just assume RTL if locale is not available?
+    // For now, let's try-catch getIt usage or accept that it might fail in background if not careful.
+    try {
+      if (getIt.isRegistered<SettingsCubit>()) {
+         final locale = getIt<SettingsCubit>().state.locale;
+         if (locale.languageCode == 'ar') {
+           return '\u200F\u202B$text\u202C';
+         }
+      }
+    } catch (_) {}
+    // Default to simple text if can't determine
+    return text;
+  }
 
   // Max counts for cancellation
   static const int maxAzkarReminders = 50;
@@ -31,7 +53,7 @@ class PrayerNotificationScheduler {
 
   PrayerNotificationScheduler(
     this._prayerTimeService,
-    this._azkarRepository,
+    @Named.from(IAzkarSource) this._azkarSource,
     this._channelManager,
     this._soundManager,
   );
@@ -52,8 +74,11 @@ class PrayerNotificationScheduler {
     ], maxPrayerNotificationIds);
 
     final now = tz.TZDateTime.now(tz.local);
-    final allAzkar = await _azkarRepository.getAllAzkar();
-    final List<Future<void>> scheduleFutures = [];
+    // Use the source interface
+    final allAzkar = await _azkarSource.getAllAzkar();
+    
+    // ... rest of method ...
+    final List<({DateTime time, Future<void> Function(int?) schedule})> events = [];
 
     for (int day = 0; day < maxScheduledDays; day++) {
       final date = DateTime.now().add(Duration(days: day));
@@ -72,46 +97,83 @@ class PrayerNotificationScheduler {
         final tzSalaahTime = tz.TZDateTime.from(salaahTime, tz.local);
         final dayOffset = day * prayersPerDay + salaahSetting.salaah.index;
 
-        // 1. Schedule Azan
+        // 1. Azan Event
         if (salaahSetting.isAzanEnabled && tzSalaahTime.isAfter(now)) {
-          scheduleFutures.add(_scheduleAzan(
-            notificationsPlugin,
-            id: azanIdStart + dayOffset,
-            salaah: salaahSetting.salaah,
-            scheduledDate: tzSalaahTime,
-            sound: salaahSetting.azanSound,
+          events.add((
+            time: tzSalaahTime,
+            schedule: (int? timeout) => _scheduleAzan(
+              notificationsPlugin,
+              id: azanIdStart + dayOffset,
+              salaah: salaahSetting.salaah,
+              scheduledDate: tzSalaahTime,
+              sound: salaahSetting.azanSound,
+              timeoutAfter: timeout,
+            ),
           ));
         }
 
-        // 2. Schedule Reminder
+        // 2. Reminder Event
         if (salaahSetting.isReminderEnabled && salaahSetting.reminderMinutesBefore > 0) {
           final reminderTime = tzSalaahTime.subtract(Duration(minutes: salaahSetting.reminderMinutesBefore));
-          if (reminderTime.isAfter(now.subtract(const Duration(seconds: 10)))) {
-            scheduleFutures.add(_schedulePrayerReminder(
-              notificationsPlugin,
-              id: prayerReminderIdStart + dayOffset,
-              salaah: salaahSetting.salaah,
-              scheduledDate: reminderTime.isBefore(now) ? now.add(const Duration(seconds: 1)) : reminderTime,
-              minutesBefore: salaahSetting.reminderMinutesBefore,
+          // Check if reminder is in the future (or very recently past to handle "just now" race conditions)
+          // We allow reminders slightly in the past if they are still relevant, but here we strictly check vs now
+          if (reminderTime.isAfter(now.subtract(const Duration(minutes: 1)))) {
+             final scheduledTime = reminderTime.isBefore(now) ? now.add(const Duration(seconds: 5)) : reminderTime;
+             events.add((
+              time: scheduledTime,
+              schedule: (int? timeout) => _schedulePrayerReminder(
+                notificationsPlugin,
+                id: prayerReminderIdStart + dayOffset,
+                salaah: salaahSetting.salaah,
+                scheduledDate: scheduledTime, // cast safe because we created it
+                minutesBefore: salaahSetting.reminderMinutesBefore,
+                timeoutAfter: timeout,
+              ),
             ));
           }
         }
 
-        // 3. Schedule After Salah Azkar
+        // 3. After Salah Azkar Event
         if (settings.isAfterSalahAzkarEnabled && salaahSetting.isAfterSalahAzkarEnabled) {
-          final azkarTime = tzSalaahTime.add(const Duration(minutes: 15));
+          final azkarTime = tzSalaahTime.add(Duration(minutes: salaahSetting.afterSalaahAzkarMinutes));
           if (azkarTime.isAfter(now)) {
-            scheduleFutures.add(_scheduleAfterSalahAzkar(
-              notificationsPlugin,
-              id: afterSalahAzkarIdStart + dayOffset,
-              scheduledDate: azkarTime,
-              allAzkar: allAzkar,
+            events.add((
+              time: azkarTime,
+              schedule: (int? timeout) => _scheduleAfterSalahAzkar(
+                notificationsPlugin,
+                id: afterSalahAzkarIdStart + dayOffset,
+                scheduledDate: azkarTime,
+                allAzkar: allAzkar,
+                timeoutAfter: timeout,
+              ),
             ));
           }
         }
       }
     }
-    await Future.wait(scheduleFutures);
+
+    // Sort events by time
+    events.sort((a, b) => a.time.compareTo(b.time));
+
+    // Schedule events with timeouts
+    for (int i = 0; i < events.length; i++) {
+      int? timeout;
+      if (i < events.length - 1) {
+        final nextTime = events[i + 1].time;
+        final duration = nextTime.difference(events[i].time);
+        if (duration.isNegative) {
+           timeout = null; // Should not happen if sorted
+        } else {
+           timeout = duration.inMilliseconds;
+        }
+      } else {
+        // Last event: default timeout or none?
+        // Let's set a safe max timeout of 8 hours to avoid stale notifications forever
+        timeout = const Duration(hours: 8).inMilliseconds; 
+      }
+      
+      await events[i].schedule(timeout);
+    }
   }
 
   Future<void> scheduleAzkarReminders(
@@ -164,6 +226,7 @@ class PrayerNotificationScheduler {
     required String body,
     required DateTime scheduledDate,
     String? payload,
+    int? timeoutAfter,
   }) async {
     var scheduledTzDate = tz.TZDateTime.from(scheduledDate, tz.local);
     if (scheduledTzDate.isBefore(tz.TZDateTime.now(tz.local))) {
@@ -172,15 +235,19 @@ class PrayerNotificationScheduler {
 
     await notificationsPlugin.zonedSchedule(
       id: id,
-      title: title,
-      body: body,
+      title: _applyRtl(title),
+      body: _applyRtl(body),
       scheduledDate: scheduledTzDate,
-      notificationDetails: const NotificationDetails(
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           'azkar_reminders',
-          'Azkar Reminders',
+          _applyRtl('Azkar Reminders'),
           importance: Importance.max,
           priority: Priority.high,
+          groupKey: groupKey,
+          ticker: _applyRtl(title),
+          subText: _applyRtl(title),
+          timeoutAfter: timeoutAfter,
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -194,21 +261,27 @@ class PrayerNotificationScheduler {
     required int id,
     required tz.TZDateTime scheduledDate,
     required List<AzkarItem> allAzkar,
+    int? timeoutAfter,
   }) async {
     const String category = 'الأذكار بعد السلام من الصلاة';
     final String zekrBody = _getRandomZekr(allAzkar, category);
+    final String title = 'أذكار بعد الصلاة';
     
     await notificationsPlugin.zonedSchedule(
       id: id,
-      title: 'أذكار بعد الصلاة',
-      body: zekrBody,
+      title: _applyRtl(title),
+      body: _applyRtl(zekrBody),
       scheduledDate: scheduledDate,
-      notificationDetails: const NotificationDetails(
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           'azkar_reminders',
-          'Azkar Reminders',
+          _applyRtl('Azkar Reminders'),
           importance: Importance.max,
           priority: Priority.high,
+          groupKey: groupKey,
+          ticker: _applyRtl(title),
+          subText: _applyRtl(title),
+          timeoutAfter: timeoutAfter,
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -231,6 +304,7 @@ class PrayerNotificationScheduler {
     required Salaah salaah,
     required tz.TZDateTime scheduledDate,
     String? sound,
+    int? timeoutAfter,
   }) async {
     final String salaahName = _getSalaahName(salaah);
     final String soundPath = sound ?? 'default';
@@ -254,10 +328,11 @@ class PrayerNotificationScheduler {
       }
     }
     
+    final String title = 'حان وقت صلاة $salaahName';
     AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
       channelId,
-      'Azan ${salaah.name.toUpperCase()}',
-      channelDescription: 'Azan notifications for ${salaah.name.toUpperCase()}',
+      _applyRtl('Azan ${salaah.name.toUpperCase()}'),
+      channelDescription: _applyRtl('Azan notifications for ${salaah.name.toUpperCase()}'),
       importance: Importance.max,
       priority: Priority.high,
       fullScreenIntent: true,
@@ -267,6 +342,10 @@ class PrayerNotificationScheduler {
       sound: notificationSound,
       visibility: NotificationVisibility.public,
       autoCancel: true,
+      groupKey: groupKey,
+      ticker: _applyRtl(title),
+      subText: _applyRtl(title),
+      timeoutAfter: timeoutAfter,
     );
 
     NotificationDetails platformChannelSpecifics = NotificationDetails(
@@ -281,8 +360,8 @@ class PrayerNotificationScheduler {
 
     await notificationsPlugin.zonedSchedule(
       id: id,
-      title: 'حان وقت صلاة $salaahName',
-      body: 'أقم الصلاة يرحمك الله',
+      title: _applyRtl(title),
+      body: _applyRtl('أقم الصلاة يرحمك الله'),
       scheduledDate: scheduledDate,
       notificationDetails: platformChannelSpecifics,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -295,32 +374,38 @@ class PrayerNotificationScheduler {
     required Salaah salaah,
     required tz.TZDateTime scheduledDate,
     required int minutesBefore,
+    int? timeoutAfter,
   }) async {
     final String salaahName = _getSalaahName(salaah);
+    final String title = 'تذكير بصلاة $salaahName';
 
     await notificationsPlugin.zonedSchedule(
       id: id,
-      title: 'تذكير بصلاة $salaahName',
-      body: 'باقي $minutesBefore دقيقة على الأذان',
+      title: _applyRtl(title),
+      body: _applyRtl('باقي $minutesBefore دقيقة على الأذان'),
       scheduledDate: scheduledDate,
-      notificationDetails: const NotificationDetails(
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           ChannelManager.reminderChannelId,
-          'Prayer Reminders',
-          channelDescription: 'Notifications before prayer time',
+          _applyRtl('Prayer Reminders'),
+          channelDescription: _applyRtl('Notifications before prayer time'),
           importance: Importance.max,
           priority: Priority.high,
           fullScreenIntent: true,
           category: AndroidNotificationCategory.alarm,
           audioAttributesUsage: AudioAttributesUsage.alarm,
           visibility: NotificationVisibility.public,
+          groupKey: groupKey,
+          ticker: _applyRtl(title),
+          subText: _applyRtl(title),
+          timeoutAfter: timeoutAfter,
         ),
         iOS: DarwinNotificationDetails(
           presentAlert: true,
           presentBadge: true,
           presentSound: true,
         ),
-        windows: WindowsNotificationDetails(),
+        windows: const WindowsNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );

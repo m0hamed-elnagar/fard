@@ -2,6 +2,7 @@ import 'package:fard/core/errors/failure.dart';
 import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
+import 'package:fard/features/audio/domain/entities/audio_track.dart';
 import 'package:equatable/equatable.dart';
 
 enum AudioQuality {
@@ -17,16 +18,16 @@ abstract interface class AudioRepository {
   /// Fetch all available audio reciters from Al Quran Cloud
   Future<Result<List<Reciter>>> getAvailableReciters();
   
-  /// Get audio URL for specific ayah
-  String getAyahAudioUrl({
-    required String reciterId, // e.g., 'ar.alafasy'
+  /// Get audio track for specific ayah (includes URL and local path)
+  Future<AudioTrack> getAyahAudioTrack({
+    required String reciterId,
     required int surahNumber,
     required int ayahNumber,
     AudioQuality quality = AudioQuality.medium128,
   });
   
-  /// Get list of URLs for full surah playback
-  Future<Result<List<String>>> getSurahAudioUrls({
+  /// Get list of tracks for full surah playback
+  Future<Result<List<AudioTrack>>> getSurahAudioTracks({
     required String reciterId,
     required int surahNumber,
     int? ayahCount,
@@ -35,7 +36,8 @@ abstract interface class AudioRepository {
 
   bool shouldPrependBismillah(int surahNumber, String reciterId);
 
-  Future<Result<AudioSource>> getAudioUrl({
+  // Deprecated: Use getAyahAudioTrack instead
+  Future<Result<AudioTrack>> getAudioUrl({
     required AyahNumber ayah,
     required String reciterId,
     required AudioQuality quality,
@@ -63,19 +65,22 @@ abstract interface class AudioRepository {
   
   /// Get cached reciters
   Future<Result<List<Reciter>>> getCachedReciters();
+
+  /// Cache reciter progress and sizes
+  Future<void> cacheReciterData(Map<String, double> progress, Map<String, int> sizes);
+  
+  /// Get cached reciter progress and sizes
+  Future<ReciterData> getCachedReciterData();
+  
+  /// Get number of ayahs in a surah (from local constant)
+  int getAyahCount(int surahNumber);
 }
 
-class AudioSource extends Equatable {
-  final String url;
-  final String? localPath;
+class ReciterData {
+  final Map<String, double> progress;
+  final Map<String, int> sizes;
 
-  const AudioSource({
-    required this.url,
-    this.localPath,
-  });
-
-  @override
-  List<Object?> get props => [url, localPath];
+  const ReciterData({required this.progress, required this.sizes});
 }
 
 class GaplessAudioSource extends Equatable {

@@ -44,6 +44,13 @@ class VoiceDownloadService {
     final url = azanVoices[voiceName];
     if (url == null) return null;
 
+    final localPath = await getLocalPath(voiceName);
+    final file = File(localPath);
+    if (await file.exists()) {
+      debugPrint('Azan voice $voiceName already exists at $localPath, skipping download.');
+      return localPath;
+    }
+
     try {
       // Use a client that follows redirects
       final response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 45));

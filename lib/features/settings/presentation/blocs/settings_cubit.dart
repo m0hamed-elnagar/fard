@@ -3,7 +3,7 @@ import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/features/azkar/data/azkar_repository.dart';
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
-import 'package:fard/features/prayer_tracking/domain/salaah.dart';
+import 'package:fard/core/services/settings_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,53 +37,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     this._locationService, 
     this._notificationService, 
     this._azkarRepository,
-  ) : super(SettingsState(
-          locale: Locale(_prefs.getString(_localeKey) ?? 'ar'),
-          latitude: _prefs.getDouble(_latKey),
-          longitude: _prefs.getDouble(_lonKey),
-          cityName: _prefs.getString(_cityKey),
-          calculationMethod: _prefs.getString(_methodKey) ?? 'muslim_league',
-          madhab: _prefs.getString(_madhabKey) ?? 'shafi',
-          morningAzkarTime: _prefs.getString(_morningAzkarKey) ?? '05:00',
-          eveningAzkarTime: _prefs.getString(_eveningAzkarKey) ?? '18:00',
-          isAfterSalahAzkarEnabled: _prefs.getBool(_afterSalahAzkarKey) ?? false,
-          isQadaEnabled: _prefs.getBool(_qadaKey) ?? true,
-          hijriAdjustment: _prefs.getInt(_hijriAdjustmentKey) ?? 0,
-          reminders: _loadReminders(_prefs, _prefs.getString(_morningAzkarKey) ?? '05:00', _prefs.getString(_eveningAzkarKey) ?? '18:00'),
-          salaahSettings: _loadSalaahSettings(_prefs),
-        ));
-
-  static List<SalaahSettings> _loadSalaahSettings(SharedPreferences prefs) {
-    final String? jsonStr = prefs.getString(_salaahSettingsKey);
-    if (jsonStr == null) {
-      return Salaah.values.map((s) => SalaahSettings(salaah: s)).toList();
-    }
-    try {
-      final List<dynamic> decoded = jsonDecode(jsonStr);
-      return decoded.map((e) => SalaahSettings.fromJson(e)).toList();
-    } catch (_) {
-      return Salaah.values.map((s) => SalaahSettings(salaah: s)).toList();
-    }
-  }
-
-  static List<AzkarReminder> _loadReminders(SharedPreferences prefs, String morningTime, String eveningTime) {
-    final String? jsonStr = prefs.getString(_remindersKey);
-    if (jsonStr == null) {
-      return [
-        AzkarReminder(category: 'أذكار الصباح', time: morningTime, title: 'أذكار الصباح'),
-        AzkarReminder(category: 'أذكار المساء', time: eveningTime, title: 'أذكار المساء'),
-      ];
-    }
-    try {
-      final List<dynamic> decoded = jsonDecode(jsonStr);
-      return decoded.map((e) => AzkarReminder.fromJson(e)).toList();
-    } catch (_) {
-      return [
-        AzkarReminder(category: 'أذكار الصباح', time: morningTime, title: 'أذكار الصباح'),
-        AzkarReminder(category: 'أذكار المساء', time: eveningTime, title: 'أذكار المساء'),
-      ];
-    }
-  }
+  ) : super(SettingsLoader.loadSettings(_prefs));
 
   void _saveReminders(List<AzkarReminder> reminders) {
     final String jsonStr = jsonEncode(reminders.map((e) => e.toJson()).toList());

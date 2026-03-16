@@ -964,4 +964,91 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get backupVersionError =>
       'Backup version is newer than app version. Please update the app.';
+
+  @override
+  String get offlineAudio => 'Offline Audio';
+
+  @override
+  String errorLoadingReciters(Object error) {
+    return 'Error loading reciters: $error';
+  }
+
+  @override
+  String get deleteAll => 'Delete All';
+
+  @override
+  String get deleteAllDownloads => 'Delete All Downloads?';
+
+  @override
+  String deleteReciterConfirm(Object name) {
+    return 'Are you sure you want to delete all downloaded audio for $name?';
+  }
+
+  @override
+  String get manageOfflineAudio => 'Manage Offline Audio';
+
+  @override
+  String get downloadSurahsDesc =>
+      'Download Surahs to listen without internet.';
+
+  @override
+  String get stopAll => 'Stop All';
+
+  @override
+  String get approx => 'Approx';
+
+  @override
+  String get deleteSurahAudio => 'Delete Surah Audio?';
+
+  @override
+  String deleteSurahConfirm(Object name) {
+    return 'Are you sure you want to delete the downloaded audio for $name?';
+  }
+
+  @override
+  String get quranAudio => 'Quran Audio';
+
+  @override
+  String get manageRecitersDesc =>
+      'Manage and download reciters for offline playback';
+
+  @override
+  String get manageDownloads => 'Manage Downloads';
+
+  @override
+  String get downloadRecitersOffline =>
+      'Download reciters for offline playback';
+
+  @override
+  String downloadingSurah(Object number) {
+    return 'Downloading Surah $number';
+  }
+
+  @override
+  String downloadingReciter(Object id) {
+    return 'Downloading Reciter $id';
+  }
+
+  @override
+  String get downloadComplete => 'Download complete';
+
+  @override
+  String filesCount(Object downloaded, Object total) {
+    return '$downloaded / $total files';
+  }
+
+  @override
+  String get downloadError => 'Download Error';
+
+  @override
+  String get downloadsChannelName => 'Downloads';
+
+  @override
+  String get downloadsChannelDesc => 'Ongoing file downloads';
+
+  @override
+  String get starting => 'Starting...';
+
+  @override
+  String get stopping => 'Stopping...';
 }

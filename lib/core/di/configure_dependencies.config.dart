@@ -23,12 +23,18 @@ import '../../features/audio/data/repositories/audio_player_service_impl.dart'
     as _i241;
 import '../../features/audio/data/repositories/audio_repository_impl.dart'
     as _i757;
+import '../../features/audio/data/services/audio_download_service_impl.dart'
+    as _i779;
 import '../../features/audio/domain/repositories/audio_player_service.dart'
     as _i720;
 import '../../features/audio/domain/repositories/audio_repository.dart'
     as _i451;
+import '../../features/audio/domain/services/audio_download_service.dart'
+    as _i224;
 import '../../features/audio/domain/usecases/play_audio.dart' as _i1008;
 import '../../features/audio/presentation/blocs/audio_bloc.dart' as _i9;
+import '../../features/audio/presentation/blocs/audio_download/audio_download_cubit.dart'
+    as _i352;
 import '../../features/azkar/data/azkar_repository.dart' as _i1004;
 import '../../features/azkar/presentation/blocs/azkar_bloc.dart' as _i1037;
 import '../../features/prayer_tracking/data/daily_record_entity.dart' as _i453;
@@ -54,7 +60,7 @@ import '../../features/quran/domain/repositories/quran_repository.dart'
     as _i498;
 import '../../features/quran/domain/usecases/get_all_surahs.dart' as _i177;
 import '../../features/quran/domain/usecases/get_page.dart' as _i451;
-import '../../features/quran/domain/usecases/get_surah.dart' as _i941;
+import '../../features/quran/domain/usecases/get_surah.dart' as _i941_2;
 import '../../features/quran/domain/usecases/get_tafsir.dart' as _i289;
 import '../../features/quran/domain/usecases/search_quran.dart' as _i623;
 import '../../features/quran/domain/usecases/update_last_read.dart' as _i588;
@@ -261,8 +267,8 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i177.GetAllSurahs(gh<_i498.QuranRepository>()),
     );
     gh.factory<_i451.GetPage>(() => _i451.GetPage(gh<_i498.QuranRepository>()));
-    gh.factory<_i941.GetSurah>(
-      () => _i941.GetSurah(gh<_i498.QuranRepository>()),
+    gh.factory<_i941_2.GetSurah>(
+      () => _i941_2.GetSurah(gh<_i498.QuranRepository>()),
     );
     gh.factory<_i289.GetTafsir>(
       () => _i289.GetTafsir(gh<_i498.QuranRepository>()),
@@ -273,21 +279,29 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i358.WatchLastRead>(
       () => _i358.WatchLastRead(gh<_i498.QuranRepository>()),
     );
-    gh.factory<_i1060.ReaderBloc>(
-      () => _i1060.ReaderBloc(
-        getSurah: gh<_i941.GetSurah>(),
-        getPage: gh<_i451.GetPage>(),
-        updateLastRead: gh<_i588.UpdateLastRead>(),
-        watchLastRead: gh<_i358.WatchLastRead>(),
-        bookmarkRepository: gh<_i33.BookmarkRepository>(),
-        quranRepository: gh<_i498.QuranRepository>(),
+    gh.lazySingleton<_i224.AudioDownloadService>(
+      () => _i779.AudioDownloadServiceImpl(
+        gh<_i451.AudioRepository>(),
+        gh<_i519.Client>(),
+        gh<_i941.NotificationService>(),
       ),
     );
     gh.factory<_i9.AudioBloc>(
       () => _i9.AudioBloc(
         audioRepository: gh<_i451.AudioRepository>(),
         playerService: gh<_i720.AudioPlayerService>(),
+        downloadService: gh<_i224.AudioDownloadService>(),
         settingsCubit: gh<_i573.SettingsCubit>(),
+      ),
+    );
+    gh.factory<_i1060.ReaderBloc>(
+      () => _i1060.ReaderBloc(
+        getSurah: gh<_i941_2.GetSurah>(),
+        getPage: gh<_i451.GetPage>(),
+        updateLastRead: gh<_i588.UpdateLastRead>(),
+        watchLastRead: gh<_i358.WatchLastRead>(),
+        bookmarkRepository: gh<_i33.BookmarkRepository>(),
+        quranRepository: gh<_i498.QuranRepository>(),
       ),
     );
     gh.factory<_i733.QuranBloc>(
@@ -296,6 +310,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i358.WatchLastRead>(),
         gh<_i33.BookmarkRepository>(),
       ),
+    );
+    gh.factory<_i352.AudioDownloadCubit>(
+      () => _i352.AudioDownloadCubit(gh<_i224.AudioDownloadService>()),
     );
     return this;
   }
