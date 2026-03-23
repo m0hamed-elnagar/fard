@@ -63,6 +63,30 @@ class AudioRepositoryImpl implements AudioRepository {
           style: e['format'] == 'audio' ? null : e['format'],
         )).toList();
 
+        // Ensure popular reciters that might be missing from API are added
+        final requiredReciters = [
+          const Reciter(
+            identifier: 'ar.alijaber',
+            name: 'علي جابر',
+            englishName: 'Ali Jaber',
+            language: 'ar',
+            style: 'Murattal',
+          ),
+          const Reciter(
+            identifier: 'ar.yasseraldossari',
+            name: 'ياسر الدوسري',
+            englishName: 'Yasser Al-Dosari',
+            language: 'ar',
+            style: 'Murattal',
+          ),
+        ];
+
+        for (final required in requiredReciters) {
+          if (!reciters.any((r) => r.identifier == required.identifier)) {
+            reciters.add(required);
+          }
+        }
+
         await cacheReciters(reciters);
         return Result.success(reciters);
       } else {
@@ -330,24 +354,24 @@ class AudioRepositoryImpl implements AudioRepository {
       }
 
       // Ensure popular reciters that might be missing from cache are added
-      final requiredIdentifiers = {
-        'ar.alijaber': const Reciter(
+      final requiredReciters = [
+        const Reciter(
           identifier: 'ar.alijaber',
           name: 'علي جابر',
           englishName: 'Ali Jaber',
           language: 'ar',
         ),
-        'ar.yasseraldossari': const Reciter(
+        const Reciter(
           identifier: 'ar.yasseraldossari',
           name: 'ياسر الدوسري',
           englishName: 'Yasser Al-Dosari',
           language: 'ar',
         ),
-      };
+      ];
 
-      for (final entry in requiredIdentifiers.entries) {
-        if (!reciters.any((r) => r.identifier == entry.key)) {
-          reciters.add(entry.value);
+      for (final required in requiredReciters) {
+        if (!reciters.any((r) => r.identifier == required.identifier)) {
+          reciters.add(required);
         }
       }
 
@@ -394,7 +418,7 @@ class AudioRepositoryImpl implements AudioRepository {
   }
 
   Future<String> _getLocalPath(String reciterId, int surah, int ayah) async {
-    final directory = await getApplicationSupportDirectory();
+    final directory = await getApplicationDocumentsDirectory();
     final surahStr = surah.toString().padLeft(3, '0');
     final ayahStr = ayah.toString().padLeft(3, '0');
     return '${directory.path}/audio/$reciterId/$surahStr$ayahStr.mp3';

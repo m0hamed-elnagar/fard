@@ -97,8 +97,8 @@ class AudioPlayerBar extends StatelessWidget {
                                 Text(
                                   state.currentSurah != null && state.currentAyah != null
                                       ? l10n.surahWithAyah(
-                                          isArabic ? quran.getSurahNameArabic(state.currentSurah!) : quran.getSurahName(state.currentSurah!),
-                                          isArabic ? state.currentAyah!.toArabicIndic() : state.currentAyah!.toString()
+                                          isArabic ? state.currentAyah!.toArabicIndic() : state.currentAyah!.toString(),
+                                          isArabic ? quran.getSurahNameArabic(state.currentSurah!) : quran.getSurahName(state.currentSurah!)
                                         )
                                       : l10n.readyToPlay,
                                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -252,6 +252,21 @@ class AudioPlayerBar extends StatelessWidget {
                           Text(
                             _formatDuration(state.duration),
                             style: TextStyle(fontSize: 8, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                          ),
+                          const SizedBox(width: 8),
+                          // Repeat Button
+                          IconButton(
+                            iconSize: isNarrow ? 16 : 18,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            tooltip: l10n.repeatAyah,
+                            icon: Icon(
+                              Icons.repeat_one_rounded,
+                              color: state.isRepeating 
+                                ? Theme.of(context).colorScheme.primary 
+                                : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                            ),
+                            onPressed: () => context.read<AudioBloc>().add(AudioEvent.toggleRepeat()),
                           ),
                         ],
                       ),
