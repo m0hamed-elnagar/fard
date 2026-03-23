@@ -1,6 +1,7 @@
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/background_service.dart';
+import 'package:fard/core/services/migration_service.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/features/onboarding/presentation/screens/splash_screen.dart';
@@ -23,6 +24,14 @@ void main() async {
   debugPrint('App starting...');
   WidgetsFlutterBinding.ensureInitialized();
   debugPrint('WidgetsFlutterBinding initialized');
+
+  debugPrint('Starting asset migration check...');
+  try {
+    await MigrationService.migrateAssets();
+    debugPrint('Asset migration check completed');
+  } catch (e) {
+    debugPrint('Asset migration failed: $e');
+  }
 
   if (Platform.isAndroid || Platform.isIOS) {
     debugPrint('Initializing JustAudioBackground...');
@@ -86,7 +95,6 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
           create: (_) {
             final bloc = getIt<PrayerTrackerBloc>();
             bloc.add(const PrayerTrackerEvent.checkMissedDays());
-            bloc.add(PrayerTrackerEvent.load(DateTime.now()));
             return bloc;
           },
         ),

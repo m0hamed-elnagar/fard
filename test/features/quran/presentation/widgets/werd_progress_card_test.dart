@@ -72,8 +72,9 @@ void main() {
     );
 
     await tester.pumpWidget(createWidgetUnderTest(locale: const Locale('en')));
-    // In new implementation, if lastReadAbsolute is null, it might show "Surah 1, Ayah 1"
-    expect(find.text('Surah 1, Ayah 1'), findsOneWidget);
+    
+    // In new implementation, if lastReadAbsolute is null, it might show "Al Fatiha, 1"
+    expect(find.text('Al Fatiha, 1'), findsOneWidget);
   });
 
   testWidgets('should show Surah 1, Ayah 1 when no progress yet (Arabic)', (tester) async {
@@ -96,7 +97,8 @@ void main() {
     );
 
     await tester.pumpWidget(createWidgetUnderTest(locale: const Locale('ar')));
-    expect(find.text('سورة ١، آية ١'), findsOneWidget);
+    
+    expect(find.text('الفاتحة، ١'), findsOneWidget);
   });
 
   testWidgets('Go button should be present and enabled even with no progress', (tester) async {

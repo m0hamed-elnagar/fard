@@ -33,6 +33,7 @@ void main() {
     when(() => mockPrefs.setString(any(), any())).thenAnswer((_) async => true);
     when(() => mockPrefs.setDouble(any(), any())).thenAnswer((_) async => true);
     when(() => mockPrefs.setBool(any(), any())).thenAnswer((_) async => true);
+    when(() => mockPrefs.setInt(any(), any())).thenAnswer((_) async => true);
 
     // Mock notification service
     when(() => mockNotificationService.scheduleAzkarReminders(
@@ -43,6 +44,8 @@ void main() {
     when(() => mockNotificationService.schedulePrayerNotifications(
       settings: any(named: 'settings'),
     )).thenAnswer((_) async {});
+
+    when(() => mockLocationService.checkLocationStatus()).thenAnswer((_) async => LocationStatus.success);
 
     // Mock Azkar Repository
     when(() => mockAzkarRepository.getAllAzkar()).thenAnswer((_) async => []);
@@ -75,15 +78,17 @@ void main() {
 
       cubit.updateSalaahSettings(updatedSettings);
       
-      await Future.delayed(Duration.zero); // Allow async _updateReminders to run
+      // Wait for the 50ms delay in SettingsCubit._updateReminders
+      await Future.delayed(const Duration(milliseconds: 100));
 
       expect(cubit.state.salaahSettings.first.isAzanEnabled, false);
       verify(() => mockPrefs.setString('salaah_settings', any())).called(1);
       verify(() => mockNotificationService.schedulePrayerNotifications(settings: any(named: 'settings'))).called(1);
     });
 
-    test('updateLocale updates state and prefs', () {
+    test('updateLocale updates state and prefs', () async {
       cubit.updateLocale(const Locale('en'));
+      await Future.delayed(const Duration(milliseconds: 100));
       expect(cubit.state.locale, const Locale('en'));
       verify(() => mockPrefs.setString('locale', 'en')).called(1);
     });
@@ -108,6 +113,7 @@ void main() {
           .thenAnswer((_) async => {'city': 'Cairo', 'countryCode': 'EG'});
 
       await cubit.refreshLocation();
+      await Future.delayed(const Duration(milliseconds: 100));
 
       expect(cubit.state.cityName, 'Cairo');
       expect(cubit.state.calculationMethod, 'egyptian'); // EG maps to egyptian
@@ -115,7 +121,7 @@ void main() {
       verify(() => mockPrefs.setString('calculation_method', 'egyptian')).called(1);
     });
 
-    test('mapCountryToMethod returns correct methods', () {
+    test('mapCountryToMethod returns correct methods', () async {
       // We can test private method indirectly via refreshLocation or exposing it for test
       // But let's trust the logic if it works for EG. 
       // Test another one: SA -> umm_al_qura
@@ -131,9 +137,10 @@ void main() {
       when(() => mockLocationService.getLocationDataFromCoordinates(any(), any()))
           .thenAnswer((_) async => {'city': 'Mecca', 'countryCode': 'SA'});
 
-      cubit.refreshLocation().then((_) {
-         expect(cubit.state.calculationMethod, 'umm_al_qura');
-      });
+      await cubit.refreshLocation();
+      await Future.delayed(const Duration(milliseconds: 100));
+      
+      expect(cubit.state.calculationMethod, 'umm_al_qura');
     });
   });
 }

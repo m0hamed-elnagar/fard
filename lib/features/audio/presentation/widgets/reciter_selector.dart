@@ -6,8 +6,35 @@ import 'package:fard/features/audio/domain/entities/reciter.dart';
 
 import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
 
-class ReciterSelector extends StatelessWidget {
+class ReciterSelector extends StatefulWidget {
   const ReciterSelector({super.key});
+
+  @override
+  State<ReciterSelector> createState() => _ReciterSelectorState();
+}
+
+class _ReciterSelectorState extends State<ReciterSelector> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToReciter(int index) {
+    // 72.0 is the approximate height of a ListTile with title and subtitle
+    // We add a bit of padding estimation if needed, but 72 is standard for 3-line list tile
+    // Actually standard 2-line list tile is 72.0
+    if (_scrollController.hasClients) {
+      final offset = index * 72.0;
+      _scrollController.animateTo(
+        offset,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +128,7 @@ class ReciterSelector extends StatelessWidget {
               // Quick select: Popular reciters
               if (state.availableReciters.isNotEmpty)
                 SizedBox(
-                  height: 100,
+                  height: 120, // Increased height for better visibility
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -119,6 +146,10 @@ class ReciterSelector extends StatelessWidget {
                         isSelected: isSelected,
                         onTap: () {
                           context.read<AudioBloc>().add(AudioEvent.selectReciter(reciter));
+                          final index = state.availableReciters.indexWhere((r) => r.identifier == reciter.identifier);
+                          if (index != -1) {
+                            _scrollToReciter(index);
+                          }
                         },
                       );
                     }).toList(),
@@ -130,6 +161,7 @@ class ReciterSelector extends StatelessWidget {
               // Full list
               Expanded(
                 child: ListView.builder(
+                  controller: _scrollController,
                   itemCount: state.availableReciters.length,
                   itemBuilder: (context, index) {
                     final reciter = state.availableReciters[index];

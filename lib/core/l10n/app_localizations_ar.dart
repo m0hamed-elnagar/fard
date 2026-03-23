@@ -127,7 +127,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addAll => 'إضافة للمتبقي';
 
   @override
+  String get saveSelection => 'حفظ المحدد';
+
+  @override
   String get edit => 'تعديل';
+
+  @override
+  String get selectAll => 'تحديد الكل';
+
+  @override
+  String get deselectAll => 'إلغاء تحديد الكل';
+
+  @override
+  String get toggleDates => 'قم بتبديل الأيام التي فاتتك';
 
   @override
   String get update => 'تحديث';
@@ -927,6 +939,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get goToPlayingAyah => 'الذهاب إلى الآية الحالية';
+
+  @override
+  String get repeatAyah => 'تكرار الآية';
 
   @override
   String get dataBackup => 'البيانات والنسخ الاحتياطي';

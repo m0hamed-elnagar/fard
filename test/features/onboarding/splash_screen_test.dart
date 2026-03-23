@@ -105,6 +105,7 @@ void main() {
         BlocProvider<TasbihBloc>.value(value: mockTasbihBloc),
         BlocProvider<ReaderBloc>.value(value: mockReaderBloc),
         BlocProvider<QuranBloc>.value(value: mockQuranBloc),
+        BlocProvider<PrayerTrackerBloc>.value(value: mockPrayerTrackerBloc),
       ],
       child: const MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,

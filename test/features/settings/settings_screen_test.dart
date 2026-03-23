@@ -81,13 +81,13 @@ void main() {
     expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Location Settings'), findsOneWidget);
     
-    await tester.scrollUntilVisible(find.text('Global Notification Settings'), 500);
+    await tester.dragUntilVisible(find.text('Global Notification Settings'), find.byType(ListView), const Offset(0, -200));
     expect(find.text('Global Notification Settings'), findsOneWidget);
     
-    await tester.scrollUntilVisible(find.text('Individual Prayer Settings'), 500);
+    await tester.dragUntilVisible(find.text('Individual Prayer Settings'), find.byType(ListView), const Offset(0, -200));
     expect(find.text('Individual Prayer Settings'), findsOneWidget);
 
-    await tester.scrollUntilVisible(find.text('General App Settings'), 500);
+    await tester.dragUntilVisible(find.text('General App Settings'), find.byType(ListView), const Offset(0, -200));
     expect(find.text('General App Settings'), findsOneWidget);
   });
 
@@ -104,7 +104,7 @@ void main() {
 
     // Scroll to Individual Prayer Settings
     final individualSettingsFinder = find.text('Individual Prayer Settings');
-    await tester.scrollUntilVisible(individualSettingsFinder, 500);
+    await tester.dragUntilVisible(individualSettingsFinder, find.byType(ListView), const Offset(0, -200));
     await tester.pumpAndSettle();
 
     // Tap "Edit each prayer" ExpansionTile
@@ -114,7 +114,7 @@ void main() {
 
     // Scroll to Fajr
     final fajrFinder = find.text('Fajr');
-    await tester.scrollUntilVisible(fajrFinder, 500);
+    await tester.dragUntilVisible(fajrFinder, find.byType(ListView), const Offset(0, -200));
     await tester.pumpAndSettle();
     
     await tester.tap(fajrFinder);

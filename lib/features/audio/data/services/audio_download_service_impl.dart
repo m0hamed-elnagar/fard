@@ -239,7 +239,7 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
 
   @override
   Future<void> deleteReciter({required String reciterId}) async {
-    final directory = await getApplicationSupportDirectory();
+    final directory = await getApplicationDocumentsDirectory();
     final reciterDir = Directory('${directory.path}/audio/$reciterId');
     if (await reciterDir.exists()) {
       await reciterDir.delete(recursive: true);
@@ -302,7 +302,7 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
   @override
   Future<double> getReciterDownloadPercentage(String reciterId) async {
     try {
-      final directory = await getApplicationSupportDirectory();
+      final directory = await getApplicationDocumentsDirectory();
       final reciterDir = Directory('${directory.path}/audio/$reciterId');
 
       if (!await reciterDir.exists()) return 0.0;
@@ -320,7 +320,7 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
   @override
   Future<int> getReciterDownloadedSize(String reciterId) async {
     try {
-      final directory = await getApplicationSupportDirectory();
+      final directory = await getApplicationDocumentsDirectory();
       final reciterDir = Directory('${directory.path}/audio/$reciterId');
 
       if (!await reciterDir.exists()) return 0;
@@ -343,7 +343,7 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
   }) async {
     // Checking 6000 files is slow.
     // Optimization: Check directory size and file count?
-    final directory = await getApplicationSupportDirectory();
+    final directory = await getApplicationDocumentsDirectory();
     final reciterDir = Directory('${directory.path}/audio/$reciterId');
 
     if (await reciterDir.exists()) {

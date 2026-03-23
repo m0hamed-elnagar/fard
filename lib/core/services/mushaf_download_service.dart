@@ -13,7 +13,7 @@ class MushafDownloadService {
   final Map<int, Future<String?>> _activeDownloads = {};
 
   Future<String> get _localPath async {
-    final directory = await getApplicationSupportDirectory();
+    final directory = await getApplicationDocumentsDirectory();
     final path = '${directory.path}/mushaf_pages';
     final dir = Directory(path);
     if (!await dir.exists()) {

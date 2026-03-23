@@ -7,6 +7,7 @@ import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
 import 'package:fard/features/werd/domain/entities/werd_progress.dart';
 import 'package:fard/features/quran/presentation/widgets/ayah_text.dart';
 import 'package:fard/features/quran/domain/entities/ayah.dart';
+import 'package:fard/features/quran/domain/entities/bookmark.dart';
 import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -33,7 +34,7 @@ void main() {
   }
 
   group('ReaderInfoBar Jump Buttons', () {
-    testWidgets('should show both start and bookmark buttons when data is present', (tester) async {
+    testWidgets('should show all jump buttons when data is present', (tester) async {
       when(() => mockWerdBloc.state).thenReturn(
         WerdState(
           progress: WerdProgress(
@@ -52,17 +53,24 @@ void main() {
           surahNumber: 1,
           ayahNumber: 1,
           onJumpToStart: () {},
+          onJumpToLastRead: () {},
           onJumpToBookmark: () {},
+          bookmarkAbsolutes: const [20],
         ),
       ));
+      await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.flag_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.arrow_forward_rounded), findsOneWidget);
       expect(find.byIcon(Icons.bookmark_rounded), findsOneWidget);
       
-      // Verify Arabic numbers (using toArabicIndic extensions)
-      // 10 -> ١٠, 15 -> ١٥
-      expect(find.text('١٠'), findsOneWidget);
-      expect(find.text('١٥'), findsOneWidget);
+      // Verify Arabic numbers
+      // Absolute 10 -> Surah 2, Ayah 3 -> ٣
+      // Absolute 15 -> Surah 2, Ayah 8 -> ٨
+      // Absolute 20 -> Surah 2, Ayah 13 -> ١٣
+      expect(find.text('٣'), findsOneWidget);
+      expect(find.text('٨'), findsOneWidget);
+      expect(find.text('١٣'), findsOneWidget);
     });
   });
 
@@ -84,20 +92,19 @@ void main() {
           body: AyahText(
             ayahs: [ayah],
             dayStartAyah: ayah,
-            lastReadAyah: ayah,
+            bookmarks: [
+              Bookmark(id: '1', ayahNumber: ayah.number, createdAt: DateTime.now()),
+            ],
             onAyahTap: (_) {},
             textScale: 1.0,
           ),
         ),
       ));
+      await tester.pumpAndSettle();
 
-      // Both icons should be present
-      expect(find.byIcon(Icons.flag_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.bookmark_rounded), findsOneWidget);
-
-      // Verify they are rendered (no overlap error)
-      // In a real widget test, we could check offsets if needed, 
-      // but the fact they both find widgets in a RichText is a good start.
+      // AyahText uses Unicode characters, not Icon widgets
+      expect(find.textContaining('\u2691'), findsOneWidget); // Flag
+      expect(find.textContaining('\u{1F516}'), findsOneWidget); // Bookmark
     });
   });
 }

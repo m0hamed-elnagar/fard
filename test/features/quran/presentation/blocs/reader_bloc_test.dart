@@ -51,6 +51,9 @@ void main() {
     when(() => mockBookmarkRepository.getBookmarks())
         .thenAnswer((_) async => Result.success([]));
     
+    when(() => mockBookmarkRepository.watchBookmarks())
+        .thenAnswer((_) => Stream.value(Result.success([])));
+    
     when(() => mockQuranRepository.getReaderSeparator())
         .thenAnswer((_) async => 0);
 

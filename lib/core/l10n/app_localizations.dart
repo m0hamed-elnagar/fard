@@ -320,11 +320,35 @@ abstract class AppLocalizations {
   /// **'Add to remaining'**
   String get addAll;
 
+  /// No description provided for @saveSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Save selection'**
+  String get saveSelection;
+
   /// No description provided for @edit.
   ///
   /// In en, this message translates to:
   /// **'Edit'**
   String get edit;
+
+  /// No description provided for @selectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get selectAll;
+
+  /// No description provided for @deselectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect All'**
+  String get deselectAll;
+
+  /// No description provided for @toggleDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle dates you missed'**
+  String get toggleDates;
 
   /// No description provided for @update.
   ///
@@ -1807,6 +1831,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go to playing Ayah'**
   String get goToPlayingAyah;
+
+  /// No description provided for @repeatAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat Ayah'**
+  String get repeatAyah;
 
   /// No description provided for @dataBackup.
   ///

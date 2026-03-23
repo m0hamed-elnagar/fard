@@ -26,24 +26,37 @@ class UpdateLastRead {
           position.ayahNumber.ayahNumberInSurah,
         );
 
-        final startAbs = currentProgress.sessionStartAbsolute ?? 1;
-        
+        // If sessionStartAbsolute is null, it means this is the first read of the day.
+        // Or if it was from a previous day (lastUpdated is not today), we should reset.
+        final now = DateTime.now();
+        final isSameDay = currentProgress.lastUpdated.year == now.year &&
+            currentProgress.lastUpdated.month == now.month &&
+            currentProgress.lastUpdated.day == now.day;
+
+        final startAbs = (isSameDay && currentProgress.sessionStartAbsolute != null)
+            ? currentProgress.sessionStartAbsolute!
+            : newAbs;
+
         // Progress is direct distance from session start to current position
         int newTotal = 0;
         Set<int> newItems = {};
         if (newAbs >= startAbs) {
            newTotal = newAbs - startAbs + 1;
+           // In "reading flow", we assume user read everything from start to current
            newItems = Set.from(List.generate(newTotal, (i) => startAbs + i));
         } else {
-           newTotal = 0;
-           newItems = {};
+           // If user jumps BACKWARDS from start, we don't count it towards progress for now
+           // to keep the simplified "session start" logic.
+           newTotal = currentProgress.totalAmountReadToday;
+           newItems = currentProgress.readItemsToday;
         }
 
         final newProgress = currentProgress.copyWith(
           totalAmountReadToday: newTotal,
           readItemsToday: newItems,
           lastReadAbsolute: newAbs,
-          lastUpdated: DateTime.now(),
+          sessionStartAbsolute: startAbs,
+          lastUpdated: now,
         );
         
         return werdRepository.updateProgress(newProgress);

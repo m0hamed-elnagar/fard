@@ -128,7 +128,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addAll => 'Add to remaining';
 
   @override
+  String get saveSelection => 'Save selection';
+
+  @override
   String get edit => 'Edit';
+
+  @override
+  String get selectAll => 'Select All';
+
+  @override
+  String get deselectAll => 'Deselect All';
+
+  @override
+  String get toggleDates => 'Toggle dates you missed';
 
   @override
   String get update => 'Update';
@@ -930,6 +942,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goToPlayingAyah => 'Go to playing Ayah';
+
+  @override
+  String get repeatAyah => 'Repeat Ayah';
 
   @override
   String get dataBackup => 'Data & Backup';

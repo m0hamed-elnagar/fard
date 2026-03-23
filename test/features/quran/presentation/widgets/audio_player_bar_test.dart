@@ -8,6 +8,9 @@ import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/audio/presentation/widgets/audio_player_bar.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
 
+import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
 class MockAudioBloc extends MockBloc<AudioEvent, AudioState> implements AudioBloc {}
 
 void main() {
@@ -19,6 +22,13 @@ void main() {
 
   Widget createWidgetUnderTest() {
     return MaterialApp(
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('en'), Locale('ar')],
       home: Scaffold(
         bottomNavigationBar: BlocProvider<AudioBloc>.value(
           value: mockAudioBloc,
@@ -44,7 +54,9 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pump();
 
-    expect(find.text('Surah 1, Ayah 1'), findsOneWidget);
+    // Surah 1 is Al Fatiha (no hyphen in quran package)
+    // English surahWithAyah format is "Surah {surah}, Ayah {ayah}"
+    expect(find.text('Surah Al Fatiha, Ayah 1'), findsOneWidget);
   });
 
   testWidgets('AudioPlayerBar clamps slider value when position > duration', (tester) async {

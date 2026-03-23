@@ -56,7 +56,7 @@ class VoiceDownloadService {
       final response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 45));
       
       if (response.statusCode == 200) {
-        final directory = await getApplicationSupportDirectory();
+        final directory = await getApplicationDocumentsDirectory();
         final fileName = _getFileName(voiceName);
         final file = File('${directory.path}/$fileName');
         
@@ -83,13 +83,13 @@ class VoiceDownloadService {
   }
 
   Future<bool> isDownloaded(String voiceName) async {
-    final directory = await getApplicationSupportDirectory();
+    final directory = await getApplicationDocumentsDirectory();
     final fileName = _getFileName(voiceName);
     return File('${directory.path}/$fileName').exists();
   }
   
   Future<String> getLocalPath(String voiceName) async {
-    final directory = await getApplicationSupportDirectory();
+    final directory = await getApplicationDocumentsDirectory();
     final fileName = _getFileName(voiceName);
     return '${directory.path}/$fileName';
   }

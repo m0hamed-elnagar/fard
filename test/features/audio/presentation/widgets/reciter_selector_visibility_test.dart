@@ -8,6 +8,9 @@ import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 
+import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
 class MockAudioBloc extends MockBloc<AudioEvent, AudioState> implements AudioBloc {}
 
 void main() {
@@ -19,6 +22,13 @@ void main() {
 
   Widget createWidgetUnderTest() {
     return MaterialApp(
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('en'), Locale('ar')],
       home: BlocProvider<AudioBloc>.value(
         value: mockAudioBloc,
         child: const Scaffold(
@@ -30,26 +40,26 @@ void main() {
 
   const tReciters = [
     Reciter(
-      identifier: 'ar.alijaber',
-      name: 'علي جابر',
-      englishName: 'Ali Jaber',
-      language: 'ar',
-    ),
-    Reciter(
-      identifier: 'ar.yasseraldossari',
-      name: 'ياسر الدوسري',
-      englishName: 'Yasser Al-Dosari',
-      language: 'ar',
-    ),
-    Reciter(
       identifier: 'ar.alafasy',
       name: 'مشاري العفاسي',
       englishName: 'Alafasy',
       language: 'ar',
     ),
+    Reciter(
+      identifier: 'ar.husary',
+      name: 'محمود خليل الحصري',
+      englishName: 'Husary',
+      language: 'ar',
+    ),
+    Reciter(
+      identifier: 'ar.minshawi',
+      name: 'محمد صديق المنشاوي',
+      englishName: 'Minshawi',
+      language: 'ar',
+    ),
   ];
 
-  testWidgets('ReciterSelector should display Ali Jaber and Yasser Al-Dosari', (tester) async {
+  testWidgets('ReciterSelector should display Alafasy and Husary', (tester) async {
     when(() => mockAudioBloc.state).thenReturn(
       const AudioState(
         availableReciters: tReciters,
@@ -59,13 +69,12 @@ void main() {
 
     await tester.pumpWidget(createWidgetUnderTest());
 
-    // Check popular horizontal list (using englishName or parts of it as split in widget)
-    // The widget shows englishName.split(' ').last
-    expect(find.text('Jaber'), findsOneWidget);
-    expect(find.text('Al-Dosari'), findsOneWidget);
+    // Check popular horizontal list and full list
+    expect(find.text('Alafasy'), findsAtLeastNWidgets(1));
+    expect(find.text('Husary'), findsAtLeastNWidgets(1));
 
     // Check full list (shows full name)
-    expect(find.text('علي جابر'), findsOneWidget);
-    expect(find.text('ياسر الدوسري'), findsOneWidget);
+    expect(find.text('مشاري العفاسي'), findsAtLeastNWidgets(1));
+    expect(find.text('محمود خليل الحصري'), findsAtLeastNWidgets(1));
   });
 }

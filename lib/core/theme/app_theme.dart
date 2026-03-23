@@ -19,6 +19,7 @@ class AppTheme {
   static const Color missed = Color(0xFFF85149); // Brighter red
   static const Color onMissed = Colors.white;
   static const Color saved = Color(0xFF3FB950); // Brighter green
+  static const Color completed = saved;
   static const Color onSaved = Color(0xFF003300);
   static const Color onPrimary = Color(0xFF003300);
   static const Color neutral = Color(0xFF8B949E); // Much brighter neutral (GitHub's secondary text color)
@@ -91,7 +92,7 @@ class AppTheme {
         elevation: 0.0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.0),
+          borderRadius: BorderRadius.circular(24.0),
           side: const BorderSide(color: cardBorder, width: 1.0),
         ),
       ),
@@ -100,6 +101,7 @@ class AppTheme {
         textColor: textPrimary,
         titleTextStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         subtitleTextStyle: TextStyle(fontSize: 14, color: textSecondary),
+        contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
       ),
       expansionTileTheme: const ExpansionTileThemeData(
         backgroundColor: surface,
@@ -107,11 +109,11 @@ class AppTheme {
         iconColor: textSecondary,
         collapsedIconColor: textSecondary,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16.0)),
+          borderRadius: BorderRadius.all(Radius.circular(24.0)),
           side: BorderSide(color: cardBorder, width: 1.0),
         ),
         collapsedShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16.0)),
+          borderRadius: BorderRadius.all(Radius.circular(24.0)),
           side: BorderSide(color: cardBorder, width: 1.0),
         ),
       ),

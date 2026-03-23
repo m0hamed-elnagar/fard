@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fard/features/quran/presentation/widgets/ayah_text.dart';
 import 'package:fard/features/quran/domain/entities/ayah.dart';
 import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
-import 'package:fard/features/quran/presentation/widgets/ayah_number_marker.dart';
 import 'package:fard/features/quran/presentation/widgets/sajdah_indicator.dart';
 
 void main() {
@@ -30,7 +29,7 @@ void main() {
     sajdahType: SajdahType.obligatory,
   );
 
-  testWidgets('AyahText renders multiple ayahs and markers', (WidgetTester tester) async {
+  testWidgets('AyahText renders multiple ayahs', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -43,7 +42,6 @@ void main() {
     );
 
     expect(find.byType(RichText), findsWidgets);
-    expect(find.byType(AyahNumberMarker), findsNWidgets(2));
     expect(find.textContaining('بسم الله'), findsOneWidget);
     expect(find.textContaining('الحمد لله'), findsOneWidget);
   });
@@ -61,7 +59,15 @@ void main() {
       ),
     );
 
-    await tester.tap(find.textContaining('بسم الله'));
+    // Find the RichText and tap its right side (since it is RTL)
+    final richTextFinder = find.byType(RichText).first;
+    final Offset topRight = tester.getTopRight(richTextFinder);
+    
+    // Tap 50 pixels from the right edge, middle vertically
+    final Offset tapPoint = Offset(topRight.dx - 50, topRight.dy + 30);
+    await tester.tapAt(tapPoint);
+    await tester.pumpAndSettle(); // Wait for all animations and timers
+    
     expect(tappedAyah, testAyah1);
   });
 

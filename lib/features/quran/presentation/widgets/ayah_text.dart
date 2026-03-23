@@ -308,21 +308,25 @@ class _AyahTextState extends State<AyahText> {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Directionality(
             textDirection: TextDirection.rtl,
-            child: GestureDetector(
-              onTapUp: (details) => _handleGesture(details.localPosition, 'tap', blockKey, ranges),
-              onLongPressStart: (details) => _handleGesture(details.localPosition, 'longPress', blockKey, ranges),
-              onDoubleTapDown: (details) => _handleGesture(details.localPosition, 'doubleTap', blockKey, ranges),
-              child: Text.rich(
-                key: blockKey,
-                TextSpan(children: spans),
-                textAlign: TextAlign.justify,
-                softWrap: true,
-                strutStyle: StrutStyle(
-                  fontFamily: GoogleFonts.amiri().fontFamily,
-                  fontSize: baseFontSize,
-                  height: lineHeight,
-                  forceStrutHeight: true,
-                  leadingDistribution: TextLeadingDistribution.even,
+            child: Listener(
+              behavior: HitTestBehavior.opaque,
+              onPointerDown: (event) => _handleGesture(event.localPosition, 'tap', blockKey, ranges),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onLongPressStart: (details) => _handleGesture(details.localPosition, 'longPress', blockKey, ranges),
+                onDoubleTapDown: (details) => _handleGesture(details.localPosition, 'doubleTap', blockKey, ranges),
+                child: Text.rich(
+                  key: blockKey,
+                  TextSpan(children: spans),
+                  textAlign: TextAlign.justify,
+                  softWrap: true,
+                  strutStyle: StrutStyle(
+                    fontFamily: GoogleFonts.amiri().fontFamily,
+                    fontSize: baseFontSize,
+                    height: lineHeight,
+                    forceStrutHeight: true,
+                    leadingDistribution: TextLeadingDistribution.even,
+                  ),
                 ),
               ),
             ),
@@ -334,7 +338,9 @@ class _AyahTextState extends State<AyahText> {
 
   void _handleGesture(Offset localOffset, String type, GlobalKey textKey, List<_AyahRange> ranges) {
     final RenderObject? renderObject = textKey.currentContext?.findRenderObject();
-    if (renderObject == null || renderObject is! RenderParagraph) return;
+    if (renderObject == null || renderObject is! RenderParagraph) {
+      return;
+    }
 
     final RenderParagraph renderParagraph = renderObject;
     final TextPosition position = renderParagraph.getPositionForOffset(localOffset);
