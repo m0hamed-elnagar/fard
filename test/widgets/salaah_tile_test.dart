@@ -58,7 +58,7 @@ void main() {
       // Verify labels
       expect(find.text(Salaah.fajr.localizedName(l10n)), findsOneWidget);
       expect(find.text('5'), findsOneWidget);
-      expect(find.text('rem.'), findsOneWidget); // Localized text for remaining in narrow view
+      expect(find.text('المتبقي'), findsOneWidget); // Localized text for remaining (wide view default)
 
       // Test interactions
       // In the new logic, add button is only active if we just removed one in the same session

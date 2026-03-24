@@ -97,17 +97,23 @@ void main() {
             date: any(named: 'date'))).thenReturn(true);
       },
       act: (bloc) => bloc.add(PrayerTrackerEvent.load(today)),
-      verify: (bloc) {
-        final state = bloc.state;
-        state.maybeMap(
-          loaded: (l) {
-            for (final s in Salaah.values) {
-               expect(l.qadaStatus[s]?.value, 1, reason: 'Prayer ${s.name} should have 1 qada');
-            }
-          },
-          orElse: () => fail('State should be loaded'),
-        );
-      },
+      expect: () => [
+        const PrayerTrackerState.loading(),
+        isA<PrayerTrackerState>().having(
+          (s) => s.maybeMap(
+            loaded: (l) {
+              for (final s in Salaah.values) {
+                if (l.qadaStatus[s]?.value != 1) return false;
+              }
+              return true;
+            },
+            orElse: () => false,
+          ),
+          'all prayers should have 1 qada',
+          true,
+        ),
+        isA<PrayerTrackerState>(), // Loaded with month
+      ],
     );
 
     blocTest<PrayerTrackerBloc, PrayerTrackerState>(
@@ -135,18 +141,19 @@ void main() {
             date: any(named: 'date'))).thenReturn(true);
       },
       act: (bloc) => bloc.add(PrayerTrackerEvent.load(today)),
-      verify: (bloc) {
-        final state = bloc.state;
-        state.maybeMap(
-          loaded: (l) {
-            // Yesterday Fajr was 1. Today it's missed again. Total 2.
-            // Others were 0 yesterday. Today they are missed. Total 1.
-            expect(l.qadaStatus[Salaah.fajr]?.value, 2, reason: 'Fajr should have 2 qada');
-            expect(l.qadaStatus[Salaah.dhuhr]?.value, 1, reason: 'Dhuhr should have 1 qada');
-          },
-          orElse: () => fail('State should be loaded'),
-        );
-      },
+      expect: () => [
+        const PrayerTrackerState.loading(),
+        isA<PrayerTrackerState>().having(
+          (s) => s.maybeMap(
+            loaded: (l) => l.qadaStatus[Salaah.fajr]?.value == 2 && 
+                           l.qadaStatus[Salaah.dhuhr]?.value == 1,
+            orElse: () => false,
+          ),
+          'Fajr should have 2 qada, others 1',
+          true,
+        ),
+        isA<PrayerTrackerState>(), // Loaded with month
+      ],
     );
   });
 }

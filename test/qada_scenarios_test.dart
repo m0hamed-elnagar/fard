@@ -49,6 +49,7 @@ void main() {
     when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => null);
     when(() => repo.loadLastRecordBefore(any())).thenAnswer((_) async => null);
     when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {});
+    when(() => repo.loadAllRecords()).thenAnswer((_) async => []);
     when(() => repo.saveToday(any())).thenAnswer((_) async {});
 
     when(() => prefs.getDouble(any())).thenReturn(null);

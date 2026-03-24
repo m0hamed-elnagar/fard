@@ -119,6 +119,30 @@ This document provides a detailed breakdown of all features currently implemente
 
 ---
 
+## 7. Recent Fixes & Verifications (March 2026)
+**Purpose:** Ensure stability and correctness of core features before further enhancements.
+
+### Resolved Issues:
+- **AyahText Gesture Handling:** 
+  - Fixed an issue where taps on Arabic text were not being detected in tests.
+  - Switched to a robust `Listener` + `GestureDetector` combination to handle taps, long presses, and double taps reliably across RTL text layouts.
+  - Verified with `ayah_text_test.dart`.
+
+- **Prayer Tracker Logic:**
+  - Corrected the `removeQada` logic in `PrayerTrackerBloc`.
+  - recovering a missed prayer for the *current day* now correctly increments the `completedQadaToday` counter, ensuring daily progress is tracked accurately.
+  - Verified with `prayer_tracker_bloc_test.dart`.
+
+- **Reciter Data Verification:**
+  - Confirmed the presence of **Ali Jaber** (`ar.alijaber`) and **Yasser Al-Dosari** (`ar.yasseraldossari`) in the `reciters.json` asset file.
+  - These reciters are available for selection in the audio settings.
+
+- **Test Suite Health:**
+  - Fixed `ayah_icons_position_test.dart` to pass visual order checks.
+  - Cleaned up debug prints from production code and tests.
+
+---
+
 # PROMPT: Enhancing Fard (Functionalities & UI)
 
 **Role:** You are an expert Flutter Developer and UI/UX Designer specializing in Islamic apps.

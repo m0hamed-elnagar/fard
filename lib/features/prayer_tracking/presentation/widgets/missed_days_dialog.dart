@@ -25,6 +25,7 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
   @override
   void initState() {
     super.initState();
+    // Default selection: All gap days are missed
     _selectedDates = Set<DateTime>.from(widget.missedDates);
     _scrollController = ScrollController();
   }
@@ -70,14 +71,26 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
     }
   }
 
+  void _toggleAll() {
+    setState(() {
+      if (_selectedDates.length == widget.missedDates.length) {
+        _selectedDates.clear();
+      } else {
+        _selectedDates = Set<DateTime>.from(widget.missedDates);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final allSelected = _selectedDates.length == widget.missedDates.length;
+
     return Dialog(
       elevation: 0.0,
       backgroundColor: Colors.transparent,
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 450.0, maxHeight: 650.0),
+        constraints: const BoxConstraints(maxWidth: 450.0, maxHeight: 750.0),
         padding: const EdgeInsets.all(20.0),
         decoration: BoxDecoration(
           color: AppTheme.surface,
@@ -105,15 +118,37 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16.0),
-            Text(
-              "Swipe or tap to toggle dates",
-              style: GoogleFonts.amiri(
-                color: AppTheme.accent,
-                fontSize: 13.0,
-                fontStyle: FontStyle.italic,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    "Toggle dates you missed",
+                    style: GoogleFonts.amiri(
+                      color: AppTheme.accent,
+                      fontSize: 13.0,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: _toggleAll,
+                  icon: Icon(
+                    allSelected ? Icons.deselect : Icons.select_all,
+                    size: 18,
+                    color: AppTheme.accent,
+                  ),
+                  label: Text(
+                    allSelected ? "Deselect All" : "Select All",
+                    style: GoogleFonts.amiri(
+                      color: AppTheme.accent,
+                      fontSize: 13.0,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12.0),
+            const SizedBox(height: 8.0),
             _buildWeekdayHeader(),
             const SizedBox(height: 8.0),
             Flexible(
@@ -169,12 +204,18 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
                     },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppTheme.textSecondary,
-                      padding: const EdgeInsets.symmetric(vertical: 12.0),
+                      padding: const EdgeInsets.symmetric(vertical: 14.0),
+                      side: const BorderSide(color: AppTheme.cardBorder, width: 1.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.0),
                       ),
                     ),
-                    child: Text(l10n.skip, style: GoogleFonts.amiri()),
+                    child: Text(l10n.skip,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.amiri(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        )),
                   ),
                 ),
                 const SizedBox(width: 12.0),
@@ -186,15 +227,15 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.accent,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12.0),
+                      foregroundColor: AppTheme.onAccent,
+                      padding: const EdgeInsets.symmetric(vertical: 14.0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.0),
                       ),
                     ),
-                    child: Text(l10n.addAll,
+                    child: Text(l10n.done,
                         style: GoogleFonts.amiri(
-                          color: AppTheme.onAccent,
+                          fontSize: 16,
                           fontWeight: FontWeight.w700,
                         )),
                   ),
@@ -246,19 +287,19 @@ class _CalendarDayItem extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           margin: const EdgeInsets.all(4.0),
           decoration: BoxDecoration(
-            color: isSelected ? AppTheme.accent : AppTheme.surfaceLight,
+            color: isSelected ? AppTheme.missed : AppTheme.surfaceLight,
             borderRadius: BorderRadius.circular(12.0),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: AppTheme.accent.withValues(alpha: 0.3),
+                      color: AppTheme.missed.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     )
                   ]
                 : [],
             border: Border.all(
-              color: isSelected ? AppTheme.accent : AppTheme.cardBorder,
+              color: isSelected ? AppTheme.missed : AppTheme.cardBorder,
               width: 1.5,
             ),
           ),
@@ -268,7 +309,7 @@ class _CalendarDayItem extends StatelessWidget {
               Text(
                 '${date.day}',
                 style: GoogleFonts.outfit(
-                  color: isSelected ? AppTheme.onAccent : AppTheme.textPrimary,
+                  color: isSelected ? Colors.white : AppTheme.textPrimary,
                   fontSize: 16.0,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 ),
@@ -276,7 +317,7 @@ class _CalendarDayItem extends StatelessWidget {
               Text(
                 _getMonthName(date.month),
                 style: GoogleFonts.outfit(
-                  color: isSelected ? AppTheme.onAccent.withValues(alpha: 0.8) : AppTheme.textSecondary,
+                  color: isSelected ? Colors.white.withValues(alpha: 0.8) : AppTheme.textSecondary,
                   fontSize: 10.0,
                 ),
               ),

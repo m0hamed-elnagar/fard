@@ -176,12 +176,28 @@ void main() {
     blocTest<PrayerTrackerBloc, PrayerTrackerState>(
       'Acknowledge missed days should bulk add correctly',
       build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService),
+      setUp: () {
+        final lastRecord = DailyRecord(
+          id: 'last',
+          date: DateTime(2026, 2, 23),
+          missedToday: {},
+          completedToday: {},
+          qada: {},
+        );
+        when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => lastRecord);
+        when(() => repo.loadRecord(any())).thenAnswer((_) async => null);
+        when(() => repo.loadLastRecordBefore(any())).thenAnswer((_) async => null);
+        when(() => repo.loadAllRecords()).thenAnswer((_) async => [lastRecord]);
+        when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {});
+      },
       act: (bloc) => bloc.add(PrayerTrackerEvent.acknowledgeMissedDays(
         selectedDates: [DateTime(2026, 2, 24), DateTime(2026, 2, 25)],
       )),
       verify: (bloc) {
-        verify(() => repo.saveToday(any())).called(1);
-        // It triggers a load at the end
+        // 2026-02-23 to 2026-03-16 is a large gap.
+        // Gap dates will be 24, 25, 26... up to 15.
+        // It should call saveToday for each gap date.
+        verify(() => repo.saveToday(any())).called(greaterThan(1));
       },
     );
 

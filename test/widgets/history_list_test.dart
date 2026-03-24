@@ -61,7 +61,7 @@ void main() {
       id: 'test',
       date: DateTime(2024, 2, 17),
       missedToday: {Salaah.fajr},
-      completedToday: const {},
+      completedToday: {Salaah.dhuhr, Salaah.asr, Salaah.maghrib, Salaah.isha},
       qada: {
         Salaah.fajr: const MissedCounter(10),
         Salaah.dhuhr: const MissedCounter(0),

@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import 'package:adhan/adhan.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:fard/core/di/injection.dart';
@@ -48,6 +49,10 @@ void main() {
     getIt.registerSingleton<SharedPreferences>(prefs);
     getIt.registerSingleton<PrayerTimeService>(prayerTimeService);
 
+    when(() => prefs.getDouble('latitude')).thenReturn(30.0);
+    when(() => prefs.getDouble('longitude')).thenReturn(31.0);
+    when(() => prefs.getString(any())).thenReturn(null);
+
     when(() => prayerTimeService.isPassed(any(), 
         prayerTimes: any(named: 'prayerTimes'), 
         date: any(named: 'date'))).thenReturn(true);
@@ -64,6 +69,7 @@ void main() {
     when(() => repo.loadLastRecordBefore(any())).thenAnswer((_) async => null);
     when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {});
     when(() => repo.saveToday(any())).thenAnswer((_) async {});
+    when(() => repo.loadAllRecords()).thenAnswer((_) async => []);
   });
 
   group('PrayerTrackerBloc - Remove Qada Limit Repro', () {
@@ -77,12 +83,13 @@ void main() {
         await Future.delayed(const Duration(milliseconds: 100));
       },
       verify: (bloc) {
+        print('Current State: ${bloc.state}');
         bloc.state.maybeMap(
           loaded: (l) {
             expect(l.qadaStatus[Salaah.fajr]?.value, 0);
             expect(l.completedQadaToday[Salaah.fajr], 1);
           },
-          orElse: () => fail('State should be loaded'),
+          orElse: () => fail('State should be loaded, but was ${bloc.state}'),
         );
       },
     );
@@ -97,12 +104,13 @@ void main() {
         await Future.delayed(const Duration(milliseconds: 100));
       },
       verify: (bloc) {
+        print('Current State: ${bloc.state}');
         bloc.state.maybeMap(
           loaded: (l) {
             expect(l.qadaStatus[Salaah.fajr]?.value, 0);
             expect(l.completedQadaToday[Salaah.fajr], 1);
           },
-          orElse: () => fail('State should be loaded'),
+          orElse: () => fail('State should be loaded, but was ${bloc.state}'),
         );
       },
     );

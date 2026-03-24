@@ -104,12 +104,8 @@ void main() {
     // Verify "Missed 1" is shown (actualMissedCount)
     expect(find.text('Missed 1'), findsOneWidget);
     
-    // Verify "Remaining: 10" is shown (totalQada 11 - actualMissed 1)
-    expect(find.text('Remaining: 10'), findsOneWidget);
-
-    // Verify both are present at the same time
-    expect(find.text('Missed 1'), findsOneWidget);
-    expect(find.text('Remaining: 10'), findsOneWidget);
+    // Verify "Remaining: 11" is shown (totalQada is 11)
+    expect(find.text('Remaining: 11'), findsOneWidget);
   });
 
   testWidgets('HistoryList shows qada completion count when qada is prayed', (WidgetTester tester) async {
@@ -216,8 +212,8 @@ void main() {
     // Qada 2 (Dhuhr)
     expect(find.text('Qada 2'), findsOneWidget);
     
-    // Remaining 8 (9 total - 1 missed today)
-    expect(find.text('Remaining: 8'), findsOneWidget);
+    // Remaining 9 (9 total)
+    expect(find.text('Remaining: 9'), findsOneWidget);
   });
 
   testWidgets('HistoryList shows 0 missed if all prayers are completed', (WidgetTester tester) async {

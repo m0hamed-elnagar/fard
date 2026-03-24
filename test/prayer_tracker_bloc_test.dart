@@ -180,7 +180,7 @@ void main() {
       );
 
       blocTest<PrayerTrackerBloc, PrayerTrackerState>(
-        'RemoveQada: does NOT increment completedQadaToday when recovering today missed',
+        'RemoveQada: increments completedQadaToday when recovering today missed',
         build: () => bloc,
         seed: () => PrayerTrackerState.loaded(
           selectedDate: DateTime.now(), // Today
@@ -196,10 +196,10 @@ void main() {
         expect: () => [
           isA<PrayerTrackerState>().having(
             (s) => s.maybeMap(
-              loaded: (l) => (l.completedQadaToday[Salaah.fajr] ?? 0) == 0 && l.completedToday.contains(Salaah.fajr),
+              loaded: (l) => l.completedQadaToday[Salaah.fajr] == 1 && l.completedToday.contains(Salaah.fajr),
               orElse: () => false,
             ),
-            'completedQadaToday NOT incremented, but completedToday updated',
+            'completedQadaToday incremented AND completedToday updated',
             true,
           ),
           isA<PrayerTrackerState>().having(
