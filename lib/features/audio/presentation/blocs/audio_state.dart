@@ -6,7 +6,8 @@ class AudioState extends Equatable {
   final int? currentSurah;
   final int? currentAyah;
   final List<Reciter> availableReciters;
-  final Map<String, double> reciterDownloadProgress; // reciterId -> percentage (0.0 to 1.0)
+  final Map<String, double>
+  reciterDownloadProgress; // reciterId -> percentage (0.0 to 1.0)
   final Map<String, int> reciterDownloadSizes; // reciterId -> size in bytes
   final AudioPlayMode mode;
   final AudioQuality quality;
@@ -57,11 +58,18 @@ class AudioState extends Equatable {
   }) {
     return AudioState(
       status: status ?? this.status,
-      currentReciter: currentReciter == _sentinel ? this.currentReciter : currentReciter as Reciter?,
-      currentSurah: currentSurah == _sentinel ? this.currentSurah : currentSurah as int?,
-      currentAyah: currentAyah == _sentinel ? this.currentAyah : currentAyah as int?,
+      currentReciter: currentReciter == _sentinel
+          ? this.currentReciter
+          : currentReciter as Reciter?,
+      currentSurah: currentSurah == _sentinel
+          ? this.currentSurah
+          : currentSurah as int?,
+      currentAyah: currentAyah == _sentinel
+          ? this.currentAyah
+          : currentAyah as int?,
       availableReciters: availableReciters ?? this.availableReciters,
-      reciterDownloadProgress: reciterDownloadProgress ?? this.reciterDownloadProgress,
+      reciterDownloadProgress:
+          reciterDownloadProgress ?? this.reciterDownloadProgress,
       reciterDownloadSizes: reciterDownloadSizes ?? this.reciterDownloadSizes,
       mode: mode ?? this.mode,
       quality: quality ?? this.quality,
@@ -71,7 +79,9 @@ class AudioState extends Equatable {
       isRepeating: isRepeating ?? this.isRepeating,
       isBannerVisible: isBannerVisible ?? this.isBannerVisible,
       error: error == _sentinel ? this.error : error as String?,
-      lastErrorMessage: lastErrorMessage == _sentinel ? this.lastErrorMessage : lastErrorMessage as String?,
+      lastErrorMessage: lastErrorMessage == _sentinel
+          ? this.lastErrorMessage
+          : lastErrorMessage as String?,
     );
   }
 
@@ -79,23 +89,23 @@ class AudioState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        currentReciter,
-        currentSurah,
-        currentAyah,
-        availableReciters,
-        reciterDownloadProgress,
-        reciterDownloadSizes,
-        mode,
-        quality,
-        position,
-        duration,
-        speed,
-        isRepeating,
-        isBannerVisible,
-        error,
-        lastErrorMessage,
-      ];
+    status,
+    currentReciter,
+    currentSurah,
+    currentAyah,
+    availableReciters,
+    reciterDownloadProgress,
+    reciterDownloadSizes,
+    mode,
+    quality,
+    position,
+    duration,
+    speed,
+    isRepeating,
+    isBannerVisible,
+    error,
+    lastErrorMessage,
+  ];
 }
 
 extension AudioStateX on AudioState {
@@ -104,9 +114,8 @@ extension AudioStateX on AudioState {
   bool get isLoading => status == AudioStatus.loading;
   bool get isActive => isPlaying || isPaused || isLoading;
   bool get hasError => error != null;
-  
-  String? get currentPlayingId => 
-      currentSurah != null && currentAyah != null 
-          ? '${currentSurah}_$currentAyah' 
-          : null;
+
+  String? get currentPlayingId => currentSurah != null && currentAyah != null
+      ? '${currentSurah}_$currentAyah'
+      : null;
 }

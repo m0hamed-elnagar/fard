@@ -41,10 +41,10 @@ void main() {
       // and conservative expectations or just verify the switch coverage.
       // Since we can't easily mock DateTime.now() in pure Dart without a wrapper,
       // we'll rely on current time but check if it matches the service's hardcoded hours.
-      
+
       final now = DateTime.now();
       final isPassed = service.isPassed(Salaah.fajr);
-      
+
       if (now.hour >= 5) {
         expect(isPassed, isTrue);
       } else {

@@ -37,7 +37,8 @@ class Surah extends Equatable {
       number: number ?? this.number,
       name: name ?? this.name,
       englishName: englishName ?? this.englishName,
-      englishNameTranslation: englishNameTranslation ?? this.englishNameTranslation,
+      englishNameTranslation:
+          englishNameTranslation ?? this.englishNameTranslation,
       numberOfAyahs: numberOfAyahs ?? this.numberOfAyahs,
       revelationType: revelationType ?? this.revelationType,
       revelationOrder: revelationOrder ?? this.revelationOrder,
@@ -47,13 +48,13 @@ class Surah extends Equatable {
 
   @override
   List<Object?> get props => [
-        number,
-        name,
-        englishName,
-        englishNameTranslation,
-        numberOfAyahs,
-        revelationType,
-        revelationOrder,
-        ayahs,
-      ];
+    number,
+    name,
+    englishName,
+    englishNameTranslation,
+    numberOfAyahs,
+    revelationType,
+    revelationOrder,
+    ayahs,
+  ];
 }

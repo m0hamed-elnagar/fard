@@ -17,7 +17,11 @@ abstract interface class QuranRepository {
   Future<Result<void>> updateLastReadPosition(LastReadPosition position);
   Future<int> getReaderSeparator();
   Future<void> updateReaderSeparator(int separatorIndex);
-  Future<Result<String>> getTafsir(int surahNumber, int ayahNumber, {int? tafsirId});
+  Future<Result<String>> getTafsir(
+    int surahNumber,
+    int ayahNumber, {
+    int? tafsirId,
+  });
   Stream<double> downloadAllSurahs();
   Future<double> getTextDownloadProgress();
 }
@@ -56,10 +60,7 @@ class LastReadPosition extends Equatable {
   final AyahNumber ayahNumber;
   final DateTime updatedAt;
 
-  const LastReadPosition({
-    required this.ayahNumber,
-    required this.updatedAt,
-  });
+  const LastReadPosition({required this.ayahNumber, required this.updatedAt});
 
   @override
   List<Object?> get props => [ayahNumber, updatedAt];

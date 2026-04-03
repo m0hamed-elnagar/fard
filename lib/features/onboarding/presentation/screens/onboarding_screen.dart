@@ -31,15 +31,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_complete', true);
-    
+
     if (mounted) {
       if (!_isQadaEnabled) {
         context.read<SettingsCubit>().toggleQadaEnabled();
       }
-      
+
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => MainNavigationScreen(showAddQadaOnStart: _isQadaEnabled),
+          builder: (_) =>
+              MainNavigationScreen(showAddQadaOnStart: _isQadaEnabled),
         ),
       );
     }
@@ -58,7 +59,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               builder: (context, state) {
                 return PageView(
                   controller: _pageController,
-                  onPageChanged: (index) => setState(() => _currentPage = index),
+                  onPageChanged: (index) =>
+                      setState(() => _currentPage = index),
                   children: [
                     _OnboardingPage(
                       title: l10n.onboardingTitle1,
@@ -72,11 +74,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       icon: Icons.history_rounded,
                       bottomPadding: bottomPadding,
                     ),
-                    _LocationPrayerPage(state: state, bottomPadding: bottomPadding),
+                    _LocationPrayerPage(
+                      state: state,
+                      bottomPadding: bottomPadding,
+                    ),
                     _AzanSelectionPage(
-                      state: state, 
+                      state: state,
                       isDownloading: _isDownloading,
-                      onDownloadingChanged: (val) => setState(() => _isDownloading = val),
+                      onDownloadingChanged: (val) =>
+                          setState(() => _isDownloading = val),
                       bottomPadding: bottomPadding,
                     ),
                     _QadaSelectionPage(
@@ -93,7 +99,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               right: 16.0,
               child: IconButton(
                 onPressed: () => context.read<SettingsCubit>().toggleLocale(),
-                icon: const Icon(Icons.language_rounded, color: AppTheme.accent),
+                icon: const Icon(
+                  Icons.language_rounded,
+                  color: AppTheme.accent,
+                ),
                 tooltip: l10n.switchLanguage,
               ),
             ),
@@ -127,12 +136,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     width: double.infinity,
                     height: 56.0,
                     child: ElevatedButton(
-                      onPressed: _isDownloading ? null : (_currentPage == _totalPages - 1
-                          ? _completeOnboarding
-                          : () => _pageController.nextPage(
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInOut,
-                              )),
+                      onPressed: _isDownloading
+                          ? null
+                          : (_currentPage == _totalPages - 1
+                                ? _completeOnboarding
+                                : () => _pageController.nextPage(
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                  )),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primaryLight,
                         foregroundColor: AppTheme.onPrimary,
@@ -141,19 +152,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           borderRadius: BorderRadius.circular(16.0),
                         ),
                       ),
-                      child: _isDownloading 
-                        ? const SizedBox(
-                            height: 24, 
-                            width: 24, 
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                          )
-                        : Text(
-                            _currentPage == _totalPages - 1 ? l10n.getStarted : l10n.next,
-                            style: GoogleFonts.outfit(
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.w600,
+                      child: _isDownloading
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text(
+                              _currentPage == _totalPages - 1
+                                  ? l10n.getStarted
+                                  : l10n.next,
+                              style: GoogleFonts.outfit(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
                     ),
                   ),
                 ],
@@ -187,7 +203,11 @@ class _LocationPrayerPage extends StatelessWidget {
               color: AppTheme.primaryLight.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.location_on_rounded, size: 64.0, color: AppTheme.primaryLight),
+            child: Icon(
+              Icons.location_on_rounded,
+              size: 64.0,
+              color: AppTheme.primaryLight,
+            ),
           ),
           const SizedBox(height: 32.0),
           Text(
@@ -238,10 +258,7 @@ class _LocationPrayerPage extends StatelessWidget {
           _SettingsDropdownSelector(
             label: l10n.madhab,
             value: state.madhab,
-            options: {
-              'shafi': l10n.shafiMadhab,
-              'hanafi': l10n.hanafiMadhab,
-            },
+            options: {'shafi': l10n.shafiMadhab, 'hanafi': l10n.hanafiMadhab},
             onChanged: (val) => cubit.updateMadhab(val!),
           ),
         ],
@@ -257,7 +274,7 @@ class _AzanSelectionPage extends StatelessWidget {
   final double bottomPadding;
 
   const _AzanSelectionPage({
-    required this.state, 
+    required this.state,
     required this.isDownloading,
     required this.onDownloadingChanged,
     required this.bottomPadding,
@@ -280,7 +297,11 @@ class _AzanSelectionPage extends StatelessWidget {
               color: AppTheme.primaryLight.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.notifications_active_rounded, size: 64.0, color: AppTheme.primaryLight),
+            child: Icon(
+              Icons.notifications_active_rounded,
+              size: 64.0,
+              color: AppTheme.primaryLight,
+            ),
           ),
           const SizedBox(height: 32.0),
           Text(
@@ -307,7 +328,9 @@ class _AzanSelectionPage extends StatelessWidget {
                   l10n.enableAzan,
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.w600,
-                    color: isAzanEnabled ? AppTheme.accent : AppTheme.textSecondary,
+                    color: isAzanEnabled
+                        ? AppTheme.accent
+                        : AppTheme.textSecondary,
                   ),
                 ),
                 CustomToggle(
@@ -324,7 +347,9 @@ class _AzanSelectionPage extends StatelessWidget {
               value: _getDisplayName(currentSound) ?? l10n.defaultVal,
               options: {
                 l10n.defaultVal: l10n.defaultVal,
-                ...VoiceDownloadService.azanVoices.map((k, v) => MapEntry(k, k)),
+                ...VoiceDownloadService.azanVoices.map(
+                  (k, v) => MapEntry(k, k),
+                ),
               },
               onChanged: (val) async {
                 if (val == null || val == l10n.defaultVal) {
@@ -342,7 +367,13 @@ class _AzanSelectionPage extends StatelessWidget {
             ),
             const SizedBox(height: 16.0),
             TextButton.icon(
-              onPressed: isDownloading ? null : () => getIt<NotificationService>().testAzan(Salaah.fajr, currentSound, settings: state),
+              onPressed: isDownloading
+                  ? null
+                  : () => getIt<NotificationService>().testAzan(
+                      Salaah.fajr,
+                      currentSound,
+                      settings: state,
+                    ),
               icon: const Icon(Icons.play_circle_filled_rounded),
               label: Text(l10n.testAzan),
               style: TextButton.styleFrom(foregroundColor: AppTheme.accent),
@@ -401,18 +432,29 @@ class _SettingsDropdown extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: GoogleFonts.outfit(fontSize: 12, color: AppTheme.textSecondary),
+                    style: GoogleFonts.outfit(
+                      fontSize: 12,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                   Text(
                     value,
-                    style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                    style: GoogleFonts.outfit(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.refresh_rounded, size: 20, color: AppTheme.textSecondary),
+            const Icon(
+              Icons.refresh_rounded,
+              size: 20,
+              color: AppTheme.textSecondary,
+            ),
           ],
         ),
       ),
@@ -449,23 +491,30 @@ class _SettingsDropdownSelector extends StatelessWidget {
             padding: const EdgeInsets.only(top: 8.0),
             child: Text(
               label,
-              style: GoogleFonts.outfit(fontSize: 12, color: AppTheme.textSecondary),
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                color: AppTheme.textSecondary,
+              ),
             ),
           ),
           DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: options.containsKey(value) ? value : options.keys.first,
               isExpanded: true,
-              icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.accent),
+              icon: const Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: AppTheme.accent,
+              ),
               items: options.entries.map((e) {
                 return DropdownMenuItem(
                   value: e.key,
                   child: Text(
                     e.value,
-                    style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w600),
-                  )
-
-                        ,
+                    style: GoogleFonts.outfit(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 );
               }).toList(),
               onChanged: onChanged,
@@ -545,10 +594,7 @@ class _QadaSelectionPage extends StatelessWidget {
                     color: isEnabled ? AppTheme.accent : AppTheme.textSecondary,
                   ),
                 ),
-                CustomToggle(
-                  value: isEnabled,
-                  onChanged: onChanged,
-                ),
+                CustomToggle(value: isEnabled, onChanged: onChanged),
               ],
             ),
           ),

@@ -15,7 +15,7 @@ class CompletionDuaCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final dua = state.currentCompletionDua!;
-    
+
     return Card(
       color: AppTheme.primaryDark.withValues(alpha: 0.1),
       child: Padding(
@@ -29,13 +29,18 @@ class CompletionDuaCard extends StatelessWidget {
                 TextButton.icon(
                   onPressed: () => _showDuaSelector(context, state),
                   icon: const Icon(Icons.edit_rounded, size: 16),
-                  label: Text(l10n.changeDua, style: GoogleFonts.outfit(fontSize: 12)),
+                  label: Text(
+                    l10n.changeDua,
+                    style: GoogleFonts.outfit(fontSize: 12),
+                  ),
                   style: TextButton.styleFrom(foregroundColor: AppTheme.accent),
                 ),
                 if (!state.duaRemembered)
                   TextButton.icon(
                     onPressed: () {
-                      context.read<TasbihBloc>().add(const TasbihEvent.rememberCompletionDua());
+                      context.read<TasbihBloc>().add(
+                        const TasbihEvent.rememberCompletionDua(),
+                      );
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(l10n.duaSaved),
@@ -45,15 +50,30 @@ class CompletionDuaCard extends StatelessWidget {
                       );
                     },
                     icon: const Icon(Icons.bookmark_add_outlined, size: 16),
-                    label: Text(l10n.rememberDua, style: GoogleFonts.outfit(fontSize: 12)),
-                    style: TextButton.styleFrom(foregroundColor: AppTheme.accent),
+                    label: Text(
+                      l10n.rememberDua,
+                      style: GoogleFonts.outfit(fontSize: 12),
+                    ),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppTheme.accent,
+                    ),
                   )
                 else
                   Row(
                     children: [
-                      const Icon(Icons.check_circle_outline_rounded, color: AppTheme.saved, size: 16),
+                      const Icon(
+                        Icons.check_circle_outline_rounded,
+                        color: AppTheme.saved,
+                        size: 16,
+                      ),
                       const SizedBox(width: 4),
-                      Text(l10n.duaSaved, style: GoogleFonts.outfit(fontSize: 12, color: AppTheme.saved)),
+                      Text(
+                        l10n.duaSaved,
+                        style: GoogleFonts.outfit(
+                          fontSize: 12,
+                          color: AppTheme.saved,
+                        ),
+                      ),
                     ],
                   ),
               ],
@@ -99,7 +119,8 @@ class CompletionDuaCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => context.read<TasbihBloc>().add(const TasbihEvent.reset()),
+                onPressed: () =>
+                    context.read<TasbihBloc>().add(const TasbihEvent.reset()),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.accent,
                   foregroundColor: AppTheme.onAccent,

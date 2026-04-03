@@ -21,7 +21,7 @@ final getIt = GetIt.instance;
 )
 Future<void> configureDependencies({String? hivePath}) async {
   debugPrint('configureDependencies: Starting...');
-  
+
   // Initialize timezones
   tz.initializeTimeZones();
   tz.setLocalLocation(tz.getLocation('UTC'));

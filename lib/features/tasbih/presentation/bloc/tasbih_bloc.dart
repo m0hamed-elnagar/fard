@@ -36,50 +36,89 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
         (c) => c.id == data.settings.defaultCategory,
         orElse: () => data.categories.first,
       );
-      
+
       final progress = await _repository.getSessionProgress(defaultCategory.id);
-      final preferredDuaId = await _repository.getPreferredCompletionDuaId(defaultCategory.id);
-      
-      final currentDua = _resolveCompletionDua(data, defaultCategory, preferredDuaId);
-      
-      emit(state.copyWith(
-        isLoading: false,
-        data: data,
-        currentCategory: defaultCategory,
-        currentCompletionDua: currentDua,
-        totalCount: progress,
-        currentCycleCount: progress == 0 ? 0 : (progress - 1) % defaultCategory.countsPerCycle + 1,
-        currentCycleIndex: progress == 0 ? 0 : (progress - 1) ~/ defaultCategory.countsPerCycle,
-        customTasbihTarget: data.settings.customTasbihTarget,
-      ));
+      final preferredDuaId = await _repository.getPreferredCompletionDuaId(
+        defaultCategory.id,
+      );
+
+      final currentDua = _resolveCompletionDua(
+        data,
+        defaultCategory,
+        preferredDuaId,
+      );
+
+      emit(
+        state.copyWith(
+          isLoading: false,
+          data: data,
+          currentCategory: defaultCategory,
+          currentCompletionDua: currentDua,
+          totalCount: progress,
+          currentCycleCount: progress == 0
+              ? 0
+              : (progress - 1) % defaultCategory.countsPerCycle + 1,
+          currentCycleIndex: progress == 0
+              ? 0
+              : (progress - 1) ~/ defaultCategory.countsPerCycle,
+          customTasbihTarget: data.settings.customTasbihTarget,
+        ),
+      );
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: e.toString()));
     }
   }
 
-  CompletionDua? _resolveCompletionDua(TasbihData data, TasbihCategory category, String? preferredId) {
+  CompletionDua? _resolveCompletionDua(
+    TasbihData data,
+    TasbihCategory category,
+    String? preferredId,
+  ) {
     final duaId = preferredId ?? category.defaultCompletionDuaId;
     if (duaId == null) return null;
-    return data.completionDuas.firstWhere((d) => d.id == duaId, orElse: () => data.completionDuas.first);
+    return data.completionDuas.firstWhere(
+      (d) => d.id == duaId,
+      orElse: () => data.completionDuas.first,
+    );
   }
 
-  Future<void> _onSelectCategory(_SelectCategory event, Emitter<TasbihState> emit) async {
-    final category = state.data.categories.firstWhere((c) => c.id == event.categoryId);
+  Future<void> _onSelectCategory(
+    _SelectCategory event,
+    Emitter<TasbihState> emit,
+  ) async {
+    final category = state.data.categories.firstWhere(
+      (c) => c.id == event.categoryId,
+    );
     final progress = await _repository.getSessionProgress(category.id);
-    final preferredDuaId = await _repository.getPreferredCompletionDuaId(category.id);
-    
-    final currentDua = _resolveCompletionDua(state.data, category, preferredDuaId);
-    
-    emit(state.copyWith(
-      currentCategory: category,
-      currentCompletionDua: currentDua,
-      totalCount: progress,
-      currentCycleCount: progress == 0 ? 0 : (progress - 1) % category.countsPerCycle + 1,
-      currentCycleIndex: progress == 0 ? 0 : (progress - 1) ~/ category.countsPerCycle,
-      showCompletionDua: false,
-      duaRemembered: false,
-      customTasbihTarget: state.data.settings.customTasbihTarget, // Keep the custom target across categories
-    ));
+    final preferredDuaId = await _repository.getPreferredCompletionDuaId(
+      category.id,
+    );
+
+    final currentDua = _resolveCompletionDua(
+      state.data,
+      category,
+      preferredDuaId,
+    );
+
+    emit(
+      state.copyWith(
+        currentCategory: category,
+        currentCompletionDua: currentDua,
+        totalCount: progress,
+        currentCycleCount: progress == 0
+            ? 0
+            : (progress - 1) % category.countsPerCycle + 1,
+        currentCycleIndex: progress == 0
+            ? 0
+            : (progress - 1) ~/ category.countsPerCycle,
+        showCompletionDua: false,
+        duaRemembered: false,
+        customTasbihTarget: state
+            .data
+            .settings
+            .customTasbihTarget, // Keep the custom target across categories
+      ),
+    );
   }
 
   Future<void> _onIncrement(_Increment event, Emitter<TasbihState> emit) async {
@@ -89,69 +128,92 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
     }
 
     final nextTotalCount = state.totalCount + 1;
-    
+
     if (state.currentCategory.sequenceMode == 'rotating') {
       final countsPerCycle = state.currentCategory.countsPerCycle;
       final completionTrigger = state.currentCategory.completionTrigger;
-      
+
       if (nextTotalCount > completionTrigger) {
         emit(state.copyWith(showCompletionDua: true));
       } else {
         final nextCycleCount = (nextTotalCount - 1) % countsPerCycle + 1;
         final nextCycleIndex = (nextTotalCount - 1) ~/ countsPerCycle;
-        
-        emit(state.copyWith(
-          totalCount: nextTotalCount,
-          currentCycleCount: nextCycleCount,
-          currentCycleIndex: nextCycleIndex,
-        ));
-        
+
+        emit(
+          state.copyWith(
+            totalCount: nextTotalCount,
+            currentCycleCount: nextCycleCount,
+            currentCycleIndex: nextCycleIndex,
+          ),
+        );
+
         if (nextTotalCount == completionTrigger) {
           emit(state.copyWith(showCompletionDua: true));
         }
       }
     } else {
       // Individual mode - each item can have its own target count
-      final currentDhikr = state.currentCategory.items.isNotEmpty 
-          ? state.currentCategory.items[state.currentCycleIndex.clamp(0, state.currentCategory.items.length - 1)]
+      final currentDhikr = state.currentCategory.items.isNotEmpty
+          ? state.currentCategory.items[state.currentCycleIndex.clamp(
+              0,
+              state.currentCategory.items.length - 1,
+            )]
           : null;
-      
-      final targetCount = state.customTasbihTarget ?? 
-                           (currentDhikr != null ? currentDhikr.targetCount : 33);
-          
+
+      final targetCount =
+          state.customTasbihTarget ??
+          (currentDhikr != null ? currentDhikr.targetCount : 33);
+
       if (nextTotalCount >= targetCount) {
         // Current item completed
-        final isLastItem = state.currentCycleIndex >= state.currentCategory.items.length - 1;
-        
+        final isLastItem =
+            state.currentCycleIndex >= state.currentCategory.items.length - 1;
+
         if (isLastItem) {
-          emit(state.copyWith(
-            totalCount: nextTotalCount,
-            currentCycleCount: nextTotalCount,
-            showCompletionDua: state.currentCategory.allowCompletionDua || state.currentCompletionDua != null,
-          ));
+          emit(
+            state.copyWith(
+              totalCount: nextTotalCount,
+              currentCycleCount: nextTotalCount,
+              showCompletionDua:
+                  state.currentCategory.allowCompletionDua ||
+                  state.currentCompletionDua != null,
+            ),
+          );
         } else {
           // Auto-advance to next item in individual mode?
           // For now, let's just keep the count and let user finish
-          emit(state.copyWith(
-            totalCount: nextTotalCount,
-            currentCycleCount: nextTotalCount,
-          ));
+          emit(
+            state.copyWith(
+              totalCount: nextTotalCount,
+              currentCycleCount: nextTotalCount,
+            ),
+          );
         }
       } else {
-        emit(state.copyWith(
-          totalCount: nextTotalCount,
-          currentCycleCount: nextTotalCount,
-        ));
+        emit(
+          state.copyWith(
+            totalCount: nextTotalCount,
+            currentCycleCount: nextTotalCount,
+          ),
+        );
       }
     }
 
-    await _repository.saveSessionProgress(state.currentCategory.id, state.totalCount);
-    
+    await _repository.saveSessionProgress(
+      state.currentCategory.id,
+      state.totalCount,
+    );
+
     if (state.currentCategory.items.isNotEmpty) {
-      final itemIndex = state.currentCategory.sequenceMode == 'rotating' 
-          ? state.currentCycleIndex.clamp(0, state.currentCategory.items.length - 1)
+      final itemIndex = state.currentCategory.sequenceMode == 'rotating'
+          ? state.currentCycleIndex.clamp(
+              0,
+              state.currentCategory.items.length - 1,
+            )
           : 0;
-      await _repository.incrementHistory(state.currentCategory.items[itemIndex].id);
+      await _repository.incrementHistory(
+        state.currentCategory.items[itemIndex].id,
+      );
     }
 
     if (state.data.settings.hapticFeedback && !Platform.isWindows) {
@@ -161,57 +223,97 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
 
   Future<void> _onReset(_Reset event, Emitter<TasbihState> emit) async {
     await _repository.saveSessionProgress(state.currentCategory.id, 0);
-    emit(state.copyWith(
-      totalCount: 0,
-      currentCycleCount: 0,
-      currentCycleIndex: 0,
-      showCompletionDua: false,
-      duaRemembered: false,
-    ));
+    emit(
+      state.copyWith(
+        totalCount: 0,
+        currentCycleCount: 0,
+        currentCycleIndex: 0,
+        showCompletionDua: false,
+        duaRemembered: false,
+      ),
+    );
   }
 
-  Future<void> _onSelectCompletionDua(_SelectCompletionDua event, Emitter<TasbihState> emit) async {
-    final dua = state.data.completionDuas.firstWhere((d) => d.id == event.duaId);
+  Future<void> _onSelectCompletionDua(
+    _SelectCompletionDua event,
+    Emitter<TasbihState> emit,
+  ) async {
+    final dua = state.data.completionDuas.firstWhere(
+      (d) => d.id == event.duaId,
+    );
     emit(state.copyWith(currentCompletionDua: dua, duaRemembered: false));
   }
 
-  Future<void> _onRememberCompletionDua(_RememberCompletionDua event, Emitter<TasbihState> emit) async {
+  Future<void> _onRememberCompletionDua(
+    _RememberCompletionDua event,
+    Emitter<TasbihState> emit,
+  ) async {
     if (state.currentCompletionDua != null) {
-      await _repository.savePreferredCompletionDuaId(state.currentCategory.id, state.currentCompletionDua!.id);
+      await _repository.savePreferredCompletionDuaId(
+        state.currentCategory.id,
+        state.currentCompletionDua!.id,
+      );
       emit(state.copyWith(duaRemembered: true));
     }
   }
 
-  Future<void> _onToggleSound(_ToggleSound event, Emitter<TasbihState> emit) async {
-    final newSettings = state.data.settings.copyWith(soundEffect: !state.data.settings.soundEffect);
+  Future<void> _onToggleSound(
+    _ToggleSound event,
+    Emitter<TasbihState> emit,
+  ) async {
+    final newSettings = state.data.settings.copyWith(
+      soundEffect: !state.data.settings.soundEffect,
+    );
     await _repository.saveSettings(newSettings);
     emit(state.copyWith(data: state.data.copyWith(settings: newSettings)));
   }
 
-  Future<void> _onToggleVibration(_ToggleVibration event, Emitter<TasbihState> emit) async {
-    final newSettings = state.data.settings.copyWith(hapticFeedback: !state.data.settings.hapticFeedback);
+  Future<void> _onToggleVibration(
+    _ToggleVibration event,
+    Emitter<TasbihState> emit,
+  ) async {
+    final newSettings = state.data.settings.copyWith(
+      hapticFeedback: !state.data.settings.hapticFeedback,
+    );
     await _repository.saveSettings(newSettings);
     emit(state.copyWith(data: state.data.copyWith(settings: newSettings)));
   }
 
-  Future<void> _onToggleTranslation(_ToggleTranslation event, Emitter<TasbihState> emit) async {
-    final newSettings = state.data.settings.copyWith(showTranslation: !state.data.settings.showTranslation);
+  Future<void> _onToggleTranslation(
+    _ToggleTranslation event,
+    Emitter<TasbihState> emit,
+  ) async {
+    final newSettings = state.data.settings.copyWith(
+      showTranslation: !state.data.settings.showTranslation,
+    );
     await _repository.saveSettings(newSettings);
     emit(state.copyWith(data: state.data.copyWith(settings: newSettings)));
   }
 
-  Future<void> _onToggleTransliteration(_ToggleTransliteration event, Emitter<TasbihState> emit) async {
-    final newSettings = state.data.settings.copyWith(showTransliteration: !state.data.settings.showTransliteration);
+  Future<void> _onToggleTransliteration(
+    _ToggleTransliteration event,
+    Emitter<TasbihState> emit,
+  ) async {
+    final newSettings = state.data.settings.copyWith(
+      showTransliteration: !state.data.settings.showTransliteration,
+    );
     await _repository.saveSettings(newSettings);
     emit(state.copyWith(data: state.data.copyWith(settings: newSettings)));
   }
 
-  Future<void> _onUpdateCustomTarget(_UpdateCustomTarget event, Emitter<TasbihState> emit) async {
-    final newSettings = state.data.settings.copyWith(customTasbihTarget: event.target);
-    await _repository.saveSettings(newSettings);
-    emit(state.copyWith(
-      data: state.data.copyWith(settings: newSettings),
+  Future<void> _onUpdateCustomTarget(
+    _UpdateCustomTarget event,
+    Emitter<TasbihState> emit,
+  ) async {
+    final newSettings = state.data.settings.copyWith(
       customTasbihTarget: event.target,
-    ));
+    );
+    await _repository.saveSettings(newSettings);
+    emit(
+      state.copyWith(
+        data: state.data.copyWith(settings: newSettings),
+        customTasbihTarget: event.target,
+      ),
+    );
   }
 }

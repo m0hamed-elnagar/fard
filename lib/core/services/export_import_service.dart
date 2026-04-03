@@ -25,12 +25,15 @@ class ExportImportService {
     try {
       final packageInfo = await PackageInfo.fromPlatform();
       final prayerRecords = await prayerRepo.loadAllRecords();
-      
+
       final goalsResult = await werdRepo.getAllGoals();
       final progressResult = await werdRepo.getAllProgress();
-      
+
       final werdGoals = goalsResult.fold((l) => <WerdGoal>[], (r) => r);
-      final werdProgress = progressResult.fold((l) => <WerdProgress>[], (r) => r);
+      final werdProgress = progressResult.fold(
+        (l) => <WerdProgress>[],
+        (r) => r,
+      );
 
       final backup = AppBackup(
         version: currentBackupVersion,
@@ -42,8 +45,11 @@ class ExportImportService {
       );
 
       // Perform serialization in an isolate to keep UI responsive
-      final jsonString = await compute((backup) => json.encode(backup.toJson()), backup);
-      
+      final jsonString = await compute(
+        (backup) => json.encode(backup.toJson()),
+        backup,
+      );
+
       final directory = await getTemporaryDirectory();
       final dateStr = DateTime.now().toIso8601String().split('T')[0];
       final file = File('${directory.path}/fard_backup_$dateStr.json');
@@ -72,19 +78,24 @@ class ExportImportService {
 
       final file = File(result.files.single.path!);
       final jsonString = await file.readAsString();
-      
+
       // Parse in an isolate
-      final Map<String, dynamic> jsonData = await compute((s) => json.decode(s), jsonString);
-      
+      final Map<String, dynamic> jsonData = await compute(
+        (s) => json.decode(s),
+        jsonString,
+      );
+
       final backup = AppBackup.fromJson(jsonData);
 
       if (backup.version > currentBackupVersion) {
-        throw Exception('Backup version is newer than app version. Please update the app.');
+        throw Exception(
+          'Backup version is newer than app version. Please update the app.',
+        );
       }
 
       // Atomic-like import: Validate first, then import
       // (In this case, we trust our factory constructors for validation)
-      
+
       await prayerRepo.importAllRecords(backup.prayerRecords);
       await werdRepo.importGoals(backup.werdGoals);
       await werdRepo.importProgress(backup.werdProgress);

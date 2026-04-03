@@ -26,16 +26,16 @@ class AzkarReminder {
   }
 
   Map<String, dynamic> toJson() => {
-        'category': category,
-        'time': time,
-        'isEnabled': isEnabled,
-        'title': title,
-      };
+    'category': category,
+    'time': time,
+    'isEnabled': isEnabled,
+    'title': title,
+  };
 
   factory AzkarReminder.fromJson(Map<String, dynamic> json) => AzkarReminder(
-        category: json['category'] as String,
-        time: json['time'] as String,
-        isEnabled: json['isEnabled'] as bool? ?? true,
-        title: json['title'] as String? ?? '',
-      );
+    category: json['category'] as String,
+    time: json['time'] as String,
+    isEnabled: json['isEnabled'] as bool? ?? true,
+    title: json['title'] as String? ?? '',
+  );
 }

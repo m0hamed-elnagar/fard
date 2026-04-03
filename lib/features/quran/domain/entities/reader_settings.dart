@@ -1,7 +1,1 @@
-enum ReaderSeparator {
-  none,
-  page,
-  juz,
-  hizb,
-  quarter,
-}
+enum ReaderSeparator { none, page, juz, hizb, quarter }

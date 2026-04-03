@@ -16,10 +16,7 @@ import 'package:quran/quran.dart' as quran;
 class WerdProgressCard extends StatefulWidget {
   final VoidCallback onSetGoalPressed;
 
-  const WerdProgressCard({
-    super.key,
-    required this.onSetGoalPressed,
-  });
+  const WerdProgressCard({super.key, required this.onSetGoalPressed});
 
   @override
   State<WerdProgressCard> createState() => _WerdProgressCardState();
@@ -28,11 +25,19 @@ class WerdProgressCard extends StatefulWidget {
 class _WerdProgressCardState extends State<WerdProgressCard> {
   WerdUnit _displayUnit = WerdUnit.ayah;
 
-  double _convertValue(int ayahCount, WerdUnit unit, WerdGoal goal, bool isCurrent, WerdProgress? progress) {
+  double _convertValue(
+    int ayahCount,
+    WerdUnit unit,
+    WerdGoal goal,
+    bool isCurrent,
+    WerdProgress? progress,
+  ) {
     if (unit == WerdUnit.ayah) return ayahCount.toDouble();
 
     // If display unit matches goal unit and we are calculating the total part, use goal value exactly
-    if (!isCurrent && unit == goal.unit && goal.type == WerdGoalType.fixedAmount) {
+    if (!isCurrent &&
+        unit == goal.unit &&
+        goal.type == WerdGoalType.fixedAmount) {
       return goal.value.toDouble();
     }
 
@@ -43,7 +48,9 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
       // For total value, we calculate how many fractional units are in the REQUIRED range
       final startAbs = progress?.sessionStartAbsolute ?? 1;
       final requiredCount = goal.valueInAyahs;
-      final targetItems = Set<int>.from(List.generate(requiredCount, (i) => startAbs + i));
+      final targetItems = Set<int>.from(
+        List.generate(requiredCount, (i) => startAbs + i),
+      );
       return QuranHizbProvider.calculateFractionalProgress(targetItems, unit);
     }
   }
@@ -55,8 +62,8 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
     }
     // Check if it's almost an integer (to handle floating point precision issues)
     if ((value - value.round()).abs() < 0.05) {
-       final intVal = value.round();
-       return isAr ? intVal.toArabicIndic() : intVal.toString();
+      final intVal = value.round();
+      return isAr ? intVal.toArabicIndic() : intVal.toString();
     }
     final formatted = value.toStringAsFixed(1);
     if (isAr) {
@@ -81,55 +88,101 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
 
         int currentAyahs = progress?.totalAmountReadToday ?? 0;
         int totalAyahs = goal.valueInAyahs;
-        final percent = totalAyahs > 0 ? (currentAyahs / totalAyahs).clamp(0.0, 1.0) : 0.0;
+        final percent = totalAyahs > 0
+            ? (currentAyahs / totalAyahs).clamp(0.0, 1.0)
+            : 0.0;
         final isCompleted = currentAyahs >= totalAyahs;
 
         final now = DateTime.now();
-        final currentMonthKey = "${now.year}-${now.month.toString().padLeft(2, '0')}";
-        
+        final currentMonthKey =
+            "${now.year}-${now.month.toString().padLeft(2, '0')}";
+
         // Accurate month totals by summing history and today's granular progress
-        double monthTotalPages = progress?.history.entries
-            .where((e) => e.key.startsWith(currentMonthKey))
-            .fold(0.0, (sum, e) => sum! + e.value.pagesRead) ?? 0.0;
-        monthTotalPages += QuranHizbProvider.calculateFractionalProgress(progress?.readItemsToday ?? {}, WerdUnit.page);
+        double monthTotalPages =
+            progress?.history.entries
+                .where((e) => e.key.startsWith(currentMonthKey))
+                .fold(0.0, (sum, e) => sum! + e.value.pagesRead) ??
+            0.0;
+        monthTotalPages += QuranHizbProvider.calculateFractionalProgress(
+          progress?.readItemsToday ?? {},
+          WerdUnit.page,
+        );
 
-        double monthTotalJuz = progress?.history.entries
-            .where((e) => e.key.startsWith(currentMonthKey))
-            .fold(0.0, (sum, e) => sum! + e.value.juzRead) ?? 0.0;
-        monthTotalJuz += QuranHizbProvider.calculateFractionalProgress(progress?.readItemsToday ?? {}, WerdUnit.juz);
+        double monthTotalJuz =
+            progress?.history.entries
+                .where((e) => e.key.startsWith(currentMonthKey))
+                .fold(0.0, (sum, e) => sum! + e.value.juzRead) ??
+            0.0;
+        monthTotalJuz += QuranHizbProvider.calculateFractionalProgress(
+          progress?.readItemsToday ?? {},
+          WerdUnit.juz,
+        );
 
-        int monthTotalAyahs = progress?.history.entries
-            .where((e) => e.key.startsWith(currentMonthKey))
-            .fold(0, (sum, e) => sum! + e.value.totalAyahsRead) ?? 0;
+        int monthTotalAyahs =
+            progress?.history.entries
+                .where((e) => e.key.startsWith(currentMonthKey))
+                .fold(0, (sum, e) => sum! + e.value.totalAyahsRead) ??
+            0;
         monthTotalAyahs += currentAyahs;
 
         // Fractional Calculations for Daily
-        final displayCurrentVal = _convertValue(currentAyahs, _displayUnit, goal, true, progress);
-        final displayTotalVal = _convertValue(totalAyahs, _displayUnit, goal, false, progress);
-        
+        final displayCurrentVal = _convertValue(
+          currentAyahs,
+          _displayUnit,
+          goal,
+          true,
+          progress,
+        );
+        final displayTotalVal = _convertValue(
+          totalAyahs,
+          _displayUnit,
+          goal,
+          false,
+          progress,
+        );
+
         // Month total based on display unit
         double displayMonthTotalVal;
         switch (_displayUnit) {
-          case WerdUnit.page: displayMonthTotalVal = monthTotalPages; break;
-          case WerdUnit.juz: displayMonthTotalVal = monthTotalJuz; break;
-          case WerdUnit.ayah: default: displayMonthTotalVal = monthTotalAyahs.toDouble(); break;
+          case WerdUnit.page:
+            displayMonthTotalVal = monthTotalPages;
+            break;
+          case WerdUnit.juz:
+            displayMonthTotalVal = monthTotalJuz;
+            break;
+          case WerdUnit.ayah:
+          default:
+            displayMonthTotalVal = monthTotalAyahs.toDouble();
+            break;
         }
 
-        final displayCurrent = _formatValue(displayCurrentVal, _displayUnit, isAr);
+        final displayCurrent = _formatValue(
+          displayCurrentVal,
+          _displayUnit,
+          isAr,
+        );
         final displayTotal = _formatValue(displayTotalVal, _displayUnit, isAr);
-        final displayMonthTotal = _formatValue(displayMonthTotalVal, _displayUnit, isAr);
+        final displayMonthTotal = _formatValue(
+          displayMonthTotalVal,
+          _displayUnit,
+          isAr,
+        );
 
-        final unitLabel = {
-          WerdUnit.ayah: isAr ? 'آية' : 'Ayah',
-          WerdUnit.page: isAr ? 'صفحة' : 'Page',
-          WerdUnit.juz: isAr ? 'جزء' : 'Juz',
-        }[_displayUnit] ?? (isAr ? 'آية' : 'Ayah');
+        final unitLabel =
+            {
+              WerdUnit.ayah: isAr ? 'آية' : 'Ayah',
+              WerdUnit.page: isAr ? 'صفحة' : 'Page',
+              WerdUnit.juz: isAr ? 'جزء' : 'Juz',
+            }[_displayUnit] ??
+            (isAr ? 'آية' : 'Ayah');
 
         final last7Days = List.generate(7, (i) {
           final date = now.subtract(Duration(days: 6 - i));
-          final key = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+          final key =
+              "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
           final historyEntry = progress?.history[key];
-          final amount = historyEntry?.totalAyahsRead ?? (i == 6 ? currentAyahs : 0);
+          final amount =
+              historyEntry?.totalAyahsRead ?? (i == 6 ? currentAyahs : 0);
           return MapEntry(date, amount);
         });
 
@@ -144,8 +197,8 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
           final diff = now.difference(goal.startDate).inDays;
           final remaining = (goal.value - diff).clamp(0, goal.value);
           remainingDaysText = isAr
-            ? 'متبقي ${remaining.toArabicIndic()} أيام'
-            : '$remaining days left';
+              ? 'متبقي ${remaining.toArabicIndic()} أيام'
+              : '$remaining days left';
         }
 
         return Container(
@@ -171,21 +224,35 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                   bottom: -30,
                   child: Opacity(
                     opacity: 0.05,
-                    child: Icon(Icons.menu_book_rounded, size: 200, color: AppTheme.accent),
+                    child: Icon(
+                      Icons.menu_book_rounded,
+                      size: 200,
+                      color: AppTheme.accent,
+                    ),
                   ),
                 ),
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final bool isShort = constraints.maxHeight < 280;
-                    
+
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildHeader(isAr, progress, remainingDaysText),
                           const Flexible(flex: 2, child: SizedBox(height: 8)),
-                          _buildMainProgress(displayCurrent, displayTotal, unitLabel, targetLocation, isAr, isShort),
+                          _buildMainProgress(
+                            displayCurrent,
+                            displayTotal,
+                            unitLabel,
+                            targetLocation,
+                            isAr,
+                            isShort,
+                          ),
                           const Flexible(flex: 1, child: SizedBox(height: 4)),
                           _buildProgressBar(percent, isCompleted, isShort),
                           const Flexible(flex: 2, child: SizedBox(height: 8)),
@@ -193,10 +260,22 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Expanded(
-                                child: _buildMonthStats(isAr, displayMonthTotal, displayTotal, unitLabel, isShort),
+                                child: _buildMonthStats(
+                                  isAr,
+                                  displayMonthTotal,
+                                  displayTotal,
+                                  unitLabel,
+                                  isShort,
+                                ),
                               ),
                               const SizedBox(width: 8),
-                              _buildSmallChart(last7Days, totalAyahs, now, isAr, isShort),
+                              _buildSmallChart(
+                                last7Days,
+                                totalAyahs,
+                                now,
+                                isAr,
+                                isShort,
+                              ),
                             ],
                           ),
                           const Flexible(flex: 2, child: SizedBox(height: 8)),
@@ -206,7 +285,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                         ],
                       ),
                     );
-                  }
+                  },
                 ),
               ],
             ),
@@ -248,12 +327,20 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if ((progress?.streak ?? 0) > 0) _buildStreakBadge(isAr, progress!.streak),
+            if ((progress?.streak ?? 0) > 0)
+              _buildStreakBadge(isAr, progress!.streak),
             const SizedBox(width: 8),
             _buildIconButton(Icons.history_rounded, () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const WerdHistoryPage()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const WerdHistoryPage()),
+              );
             }, isAr ? 'السجل' : 'History'),
-            _buildIconButton(Icons.settings_outlined, widget.onSetGoalPressed, isAr ? 'تعديل' : 'Edit'),
+            _buildIconButton(
+              Icons.settings_outlined,
+              widget.onSetGoalPressed,
+              isAr ? 'تعديل' : 'Edit',
+            ),
           ],
         ),
       ],
@@ -284,7 +371,10 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
       onTap: () => setState(() => _displayUnit = unit),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(horizontal: isShort ? 6 : 10, vertical: isShort ? 2 : 4),
+        padding: EdgeInsets.symmetric(
+          horizontal: isShort ? 6 : 10,
+          vertical: isShort ? 2 : 4,
+        ),
         decoration: BoxDecoration(
           color: isSelected ? AppTheme.accent : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
@@ -301,7 +391,11 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
     );
   }
 
-  Widget _buildIconButton(IconData icon, VoidCallback onPressed, String tooltip) {
+  Widget _buildIconButton(
+    IconData icon,
+    VoidCallback onPressed,
+    String tooltip,
+  ) {
     return Tooltip(
       message: tooltip,
       child: Material(
@@ -327,7 +421,11 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.local_fire_department_rounded, color: Colors.orange, size: 14),
+          const Icon(
+            Icons.local_fire_department_rounded,
+            color: Colors.orange,
+            size: 14,
+          ),
           const SizedBox(width: 4),
           Text(
             isAr ? streak.toArabicIndic() : streak.toString(),
@@ -342,7 +440,14 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
     );
   }
 
-  Widget _buildMainProgress(String current, String total, String label, String targetLocation, bool isAr, bool isShort) {
+  Widget _buildMainProgress(
+    String current,
+    String total,
+    String label,
+    String targetLocation,
+    bool isAr,
+    bool isShort,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -385,7 +490,9 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
         ),
         const SizedBox(height: 4),
         Text(
-          isAr ? 'الهدف اليوم: $targetLocation' : 'Target today: $targetLocation',
+          isAr
+              ? 'الهدف اليوم: $targetLocation'
+              : 'Target today: $targetLocation',
           style: GoogleFonts.amiri(
             color: AppTheme.accent.withValues(alpha: 0.8),
             fontSize: isShort ? 12 : 14,
@@ -397,7 +504,6 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
       ],
     );
   }
-
 
   Widget _buildProgressBar(double percent, bool isCompleted, bool isShort) {
     return Stack(
@@ -418,13 +524,23 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
             right: 10,
             top: 0,
             bottom: 0,
-            child: Icon(Icons.check_circle, size: isShort ? 6 : 8, color: Colors.white.withValues(alpha: 0.8)),
+            child: Icon(
+              Icons.check_circle,
+              size: isShort ? 6 : 8,
+              color: Colors.white.withValues(alpha: 0.8),
+            ),
           ),
       ],
     );
   }
 
-  Widget _buildMonthStats(bool isAr, String total, String dailyTarget, String label, bool isShort) {
+  Widget _buildMonthStats(
+    bool isAr,
+    String total,
+    String dailyTarget,
+    String label,
+    bool isShort,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -466,9 +582,18 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
     );
   }
 
-  Widget _buildSmallChart(List<MapEntry<DateTime, int>> data, int total, DateTime now, bool isAr, bool isShort) {
+  Widget _buildSmallChart(
+    List<MapEntry<DateTime, int>> data,
+    int total,
+    DateTime now,
+    bool isAr,
+    bool isShort,
+  ) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: isShort ? 8 : 12, vertical: isShort ? 4 : 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: isShort ? 8 : 12,
+        vertical: isShort ? 4 : 8,
+      ),
       decoration: BoxDecoration(
         color: AppTheme.cardBorder.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
@@ -486,8 +611,8 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
 
           return Tooltip(
             message: isAr
-              ? '${DateFormat('EEEE', 'ar').format(e.key)}: ${val.toArabicIndic()}'
-              : '${DateFormat('EEEE', 'en').format(e.key)}: $val',
+                ? '${DateFormat('EEEE', 'ar').format(e.key)}: ${val.toArabicIndic()}'
+                : '${DateFormat('EEEE', 'en').format(e.key)}: $val',
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Column(
@@ -513,17 +638,22 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: isToday
-                              ? [Colors.amber, Colors.orange]
-                              : [AppTheme.accent, AppTheme.accent.withValues(alpha: 0.7)],
+                                ? [Colors.amber, Colors.orange]
+                                : [
+                                    AppTheme.accent,
+                                    AppTheme.accent.withValues(alpha: 0.7),
+                                  ],
                           ),
                           borderRadius: BorderRadius.circular(5),
-                          boxShadow: isToday ? [
-                            BoxShadow(
-                              color: Colors.amber.withValues(alpha: 0.3),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            )
-                          ] : null,
+                          boxShadow: isToday
+                              ? [
+                                  BoxShadow(
+                                    color: Colors.amber.withValues(alpha: 0.3),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ]
+                              : null,
                         ),
                       ),
                     ],
@@ -533,11 +663,18 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                     SizedBox(
                       width: 12,
                       child: Text(
-                        DateFormat('E', isAr ? 'ar' : 'en').format(e.key).substring(0, 1),
+                        DateFormat(
+                          'E',
+                          isAr ? 'ar' : 'en',
+                        ).format(e.key).substring(0, 1),
                         style: GoogleFonts.outfit(
-                          color: isToday ? AppTheme.textPrimary : AppTheme.textSecondary.withValues(alpha: 0.6),
+                          color: isToday
+                              ? AppTheme.textPrimary
+                              : AppTheme.textSecondary.withValues(alpha: 0.6),
                           fontSize: 10,
-                          fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: isToday
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                         textAlign: TextAlign.center,
                         maxLines: 1,
@@ -553,12 +690,18 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
     );
   }
 
-  Widget _buildFooter(BuildContext context, dynamic progress, bool isAr, bool isShort) {
+  Widget _buildFooter(
+    BuildContext context,
+    dynamic progress,
+    bool isAr,
+    bool isShort,
+  ) {
     // Correct Continue Logic:
     // If we have not read anything today, start from the sessionStartAbsolute.
     // If we have read something today, continue from the lastReadAbsolute.
     int targetAbs = progress?.sessionStartAbsolute ?? 1;
-    if ((progress?.totalAmountReadToday ?? 0) > 0 && progress?.lastReadAbsolute != null) {
+    if ((progress?.totalAmountReadToday ?? 0) > 0 &&
+        progress?.lastReadAbsolute != null) {
       targetAbs = progress!.lastReadAbsolute!;
     }
 
@@ -593,21 +736,25 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
           height: isShort ? 36 : 42,
           child: ElevatedButton.icon(
             onPressed: () {
-              final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(targetAbs);
+              final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(
+                targetAbs,
+              );
               Navigator.push(
                 context,
-                QuranReaderPage.route(
-                  surahNumber: pos[0],
-                  ayahNumber: pos[1],
-                ),
+                QuranReaderPage.route(surahNumber: pos[0], ayahNumber: pos[1]),
               );
             },
             icon: Icon(Icons.play_arrow_rounded, size: isShort ? 18 : 20),
-            label: Text(isAr ? 'متابعة' : 'Continue', style: TextStyle(fontSize: isShort ? 12 : 14)),
+            label: Text(
+              isAr ? 'متابعة' : 'Continue',
+              style: TextStyle(fontSize: isShort ? 12 : 14),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.accent,
               foregroundColor: AppTheme.onAccent,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               padding: EdgeInsets.symmetric(horizontal: isShort ? 12 : 20),
               elevation: 2,
             ),
@@ -620,10 +767,12 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
   String _getAyahInfo(int abs, bool isAr) {
     if (abs <= 0) return isAr ? 'الفاتحة، ١' : 'Al-Fatihah, 1';
     final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(abs);
-    final surahName = isAr ? quran.getSurahNameArabic(pos[0]) : quran.getSurahName(pos[0]);
+    final surahName = isAr
+        ? quran.getSurahNameArabic(pos[0])
+        : quran.getSurahName(pos[0]);
     return isAr
-      ? '$surahName، ${pos[1].toArabicIndic()}'
-      : '$surahName, ${pos[1]}';
+        ? '$surahName، ${pos[1].toArabicIndic()}'
+        : '$surahName, ${pos[1]}';
   }
 
   Widget _buildNoGoalCard(BuildContext context, bool isAr) {
@@ -644,18 +793,31 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
               color: AppTheme.accent.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.auto_awesome_rounded, color: AppTheme.accent, size: 48),
+            child: const Icon(
+              Icons.auto_awesome_rounded,
+              color: AppTheme.accent,
+              size: 48,
+            ),
           ),
           const SizedBox(height: 24),
           Text(
             isAr ? 'ابدأ رحلتك مع القرآن' : 'Start Your Quran Journey',
-            style: GoogleFonts.amiri(color: AppTheme.textPrimary, fontSize: 22, fontWeight: FontWeight.bold),
+            style: GoogleFonts.amiri(
+              color: AppTheme.textPrimary,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
           Text(
-            isAr ? 'حدد وردك اليومي وتابع تقدمك بسهولة' : 'Set your daily werd and track your progress easily',
-            style: GoogleFonts.amiri(color: AppTheme.textSecondary, fontSize: 14),
+            isAr
+                ? 'حدد وردك اليومي وتابع تقدمك بسهولة'
+                : 'Set your daily werd and track your progress easily',
+            style: GoogleFonts.amiri(
+              color: AppTheme.textSecondary,
+              fontSize: 14,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
@@ -664,13 +826,15 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.accent,
               foregroundColor: AppTheme.onAccent,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
               elevation: 4,
             ),
             child: Text(
               isAr ? 'تحديد ورد الآن' : 'Set Goal Now',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),
         ],

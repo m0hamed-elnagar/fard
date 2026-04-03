@@ -8,8 +8,12 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockFlutterLocalNotificationsPlugin extends Mock implements FlutterLocalNotificationsPlugin {}
-class MockAndroidFlutterLocalNotificationsPlugin extends Mock implements AndroidFlutterLocalNotificationsPlugin {}
+class MockFlutterLocalNotificationsPlugin extends Mock
+    implements FlutterLocalNotificationsPlugin {}
+
+class MockAndroidFlutterLocalNotificationsPlugin extends Mock
+    implements AndroidFlutterLocalNotificationsPlugin {}
+
 class MockSoundManager extends Mock implements SoundManager {}
 
 void main() {
@@ -26,24 +30,39 @@ void main() {
     mockSoundManager = MockSoundManager();
     mockNotificationsPlugin = MockFlutterLocalNotificationsPlugin();
     mockAndroidPlugin = MockAndroidFlutterLocalNotificationsPlugin();
-    
+
     channelManager = ChannelManager(mockSoundManager);
 
-    when(() => mockNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>())
-        .thenReturn(mockAndroidPlugin);
-    when(() => mockAndroidPlugin.createNotificationChannel(any())).thenAnswer((_) async {});
-    when(() => mockAndroidPlugin.getNotificationChannels()).thenAnswer((_) async => []);
+    when(
+      () => mockNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >(),
+    ).thenReturn(mockAndroidPlugin);
+    when(
+      () => mockAndroidPlugin.createNotificationChannel(any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockAndroidPlugin.getNotificationChannels(),
+    ).thenAnswer((_) async => []);
   });
 
   group('ChannelManager', () {
     test('getChannelId returns correct IDs', () {
-      expect(channelManager.getChannelId('fajr', 'default'), 'azan_channel_fajr');
-      expect(channelManager.getChannelId('fajr', 'path/to/sound.mp3'), 'azan_fajr_sound');
+      expect(
+        channelManager.getChannelId('fajr', 'default'),
+        'azan_channel_fajr',
+      );
+      expect(
+        channelManager.getChannelId('fajr', 'path/to/sound.mp3'),
+        'azan_fajr_sound',
+      );
     });
 
     test('ensureChannelExists creates channel if missing', () async {
-      when(() => mockSoundManager.getSoundUriForChannel('sound.mp3'))
-          .thenAnswer((_) async => 'file:///sound.mp3');
+      when(
+        () => mockSoundManager.getSoundUriForChannel('sound.mp3'),
+      ).thenAnswer((_) async => 'file:///sound.mp3');
 
       await channelManager.ensureChannelExists(
         mockNotificationsPlugin,
@@ -52,11 +71,20 @@ void main() {
         sound: 'sound.mp3',
       );
 
-      verify(() => mockAndroidPlugin.createNotificationChannel(any(that: isA<AndroidNotificationChannel>()
-          .having((c) => c.id, 'id', 'test_channel')
-          .having((c) => c.name, 'name', 'Azan FAJR')
-          .having((c) => c.sound, 'sound', isA<UriAndroidNotificationSound>())
-      ))).called(1);
+      verify(
+        () => mockAndroidPlugin.createNotificationChannel(
+          any(
+            that: isA<AndroidNotificationChannel>()
+                .having((c) => c.id, 'id', 'test_channel')
+                .having((c) => c.name, 'name', 'Azan FAJR')
+                .having(
+                  (c) => c.sound,
+                  'sound',
+                  isA<UriAndroidNotificationSound>(),
+                ),
+          ),
+        ),
+      ).called(1);
     });
 
     test('createNotificationChannels creates channels for settings', () async {
@@ -67,13 +95,19 @@ void main() {
         ],
       );
 
-      when(() => mockSoundManager.getSoundUriForChannel('fajr.mp3'))
-          .thenAnswer((_) async => null); // Resource sound
+      when(
+        () => mockSoundManager.getSoundUriForChannel('fajr.mp3'),
+      ).thenAnswer((_) async => null); // Resource sound
 
-      await channelManager.createNotificationChannels(mockNotificationsPlugin, settings: settings);
+      await channelManager.createNotificationChannels(
+        mockNotificationsPlugin,
+        settings: settings,
+      );
 
       // 1 for Fajr, 1 for Reminder, 1 for Azkar = 3
-      verify(() => mockAndroidPlugin.createNotificationChannel(any())).called(3);
+      verify(
+        () => mockAndroidPlugin.createNotificationChannel(any()),
+      ).called(3);
     });
   });
 }

@@ -45,7 +45,11 @@ class HomeAppBar extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.location_on_rounded, size: 14, color: AppTheme.accent),
+                      const Icon(
+                        Icons.location_on_rounded,
+                        size: 14,
+                        color: AppTheme.accent,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         cityName!,
@@ -81,14 +85,20 @@ class HomeAppBar extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsScreen(),
+                    ),
                   );
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(top: 4.0),
                   child: Row(
                     children: [
-                      const Icon(Icons.location_off_rounded, size: 14, color: AppTheme.missed),
+                      const Icon(
+                        Icons.location_off_rounded,
+                        size: 14,
+                        color: AppTheme.missed,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         l10n.locationNotSet,
@@ -109,5 +119,3 @@ class HomeAppBar extends StatelessWidget {
     );
   }
 }
-
-

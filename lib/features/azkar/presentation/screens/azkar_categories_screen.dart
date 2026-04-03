@@ -46,7 +46,7 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       appBar: AppBar(
         leading: _isSearching
@@ -74,7 +74,10 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
               )
             : Text(
                 l10n.azkar,
-                style: GoogleFonts.amiri(fontWeight: FontWeight.bold, fontSize: 24),
+                style: GoogleFonts.amiri(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
               ),
         centerTitle: false,
         actions: [
@@ -94,35 +97,41 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
           ),
           IconButton(
             onPressed: () async {
-                final confirmed = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text(l10n.resetAllProgress, style: GoogleFonts.amiri()),
-                    content: Text(l10n.resetAzkarProgressConfirm),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.missed,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: Text(l10n.delete),
-                      ),
-                    ],
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text(
+                    l10n.resetAllProgress,
+                    style: GoogleFonts.amiri(),
                   ),
-                );
+                  content: Text(l10n.resetAzkarProgressConfirm),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text(
+                        l10n.cancel,
+                        style: const TextStyle(color: AppTheme.textSecondary),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.missed,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text(l10n.delete),
+                    ),
+                  ],
+                ),
+              );
 
-                if (confirmed == true && context.mounted) {
-                  context.read<AzkarBloc>().add(const AzkarEvent.resetAll());
-                }
-              },
-              icon: const Icon(Icons.refresh_rounded),
-              tooltip: l10n.resetAllProgress,
-            ),
+              if (confirmed == true && context.mounted) {
+                context.read<AzkarBloc>().add(const AzkarEvent.resetAll());
+              }
+            },
+            icon: const Icon(Icons.refresh_rounded),
+            tooltip: l10n.resetAllProgress,
+          ),
         ],
       ),
       body: BlocBuilder<AzkarBloc, AzkarState>(
@@ -147,7 +156,11 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 64),
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 64,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       l10n.errorLoadingAzkar,
@@ -165,9 +178,9 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton.icon(
-                      onPressed: () => context
-                          .read<AzkarBloc>()
-                          .add(const AzkarEvent.loadCategories()),
+                      onPressed: () => context.read<AzkarBloc>().add(
+                        const AzkarEvent.loadCategories(),
+                      ),
                       icon: const Icon(Icons.refresh),
                       label: Text(l10n.retry),
                     ),
@@ -186,18 +199,24 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey),
+                  const Icon(
+                    Icons.inventory_2_outlined,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
                   const SizedBox(height: 16),
                   Text(
-                    _searchQuery.isEmpty ? l10n.noCategoriesFound : l10n.noSearchResults,
+                    _searchQuery.isEmpty
+                        ? l10n.noCategoriesFound
+                        : l10n.noSearchResults,
                     style: GoogleFonts.amiri(fontSize: 20),
                   ),
                   const SizedBox(height: 24),
                   if (_searchQuery.isEmpty)
                     ElevatedButton.icon(
-                      onPressed: () => context
-                          .read<AzkarBloc>()
-                          .add(const AzkarEvent.loadCategories()),
+                      onPressed: () => context.read<AzkarBloc>().add(
+                        const AzkarEvent.loadCategories(),
+                      ),
                       icon: const Icon(Icons.refresh),
                       label: Text(l10n.refreshData),
                     ),
@@ -209,12 +228,16 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
           return RefreshIndicator(
             onRefresh: () async {
               context.read<AzkarBloc>().add(const AzkarEvent.loadCategories());
-              await context.read<AzkarBloc>().stream.firstWhere((s) => !s.isLoading).timeout(const Duration(seconds: 15), onTimeout: () => state);
+              await context
+                  .read<AzkarBloc>()
+                  .stream
+                  .firstWhere((s) => !s.isLoading)
+                  .timeout(const Duration(seconds: 15), onTimeout: () => state);
             },
             child: BlocBuilder<SettingsCubit, SettingsState>(
               builder: (context, settingsState) {
                 final now = DateTime.now();
-                
+
                 DateTime morningTime;
                 DateTime eveningTime;
 
@@ -227,7 +250,12 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                   itemCount: filteredCategories.length,
                   itemBuilder: (context, index) {
                     final category = filteredCategories[index];
-                    final isRecommended = _checkIsRecommended(category, now, morningTime, eveningTime);
+                    final isRecommended = _checkIsRecommended(
+                      category,
+                      now,
+                      morningTime,
+                      eveningTime,
+                    );
 
                     return _CategoryCard(
                       key: Key('category_$category'),
@@ -247,20 +275,31 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
   DateTime _parseTime(String timeStr, DateTime now) {
     try {
       final parts = timeStr.split(':');
-      return DateTime(now.year, now.month, now.day, int.parse(parts[0]), int.parse(parts[1]));
+      return DateTime(
+        now.year,
+        now.month,
+        now.day,
+        int.parse(parts[0]),
+        int.parse(parts[1]),
+      );
     } catch (_) {
       return now;
     }
   }
 
-  bool _checkIsRecommended(String category, DateTime now, DateTime morningTime, DateTime eveningTime) {
+  bool _checkIsRecommended(
+    String category,
+    DateTime now,
+    DateTime morningTime,
+    DateTime eveningTime,
+  ) {
     if (category.contains('الصباح') || category.contains('Morning')) {
-      return now.isAfter(morningTime.subtract(const Duration(minutes: 30))) && 
-             now.isBefore(morningTime.add(const Duration(hours: 4)));
+      return now.isAfter(morningTime.subtract(const Duration(minutes: 30))) &&
+          now.isBefore(morningTime.add(const Duration(hours: 4)));
     }
     if (category.contains('المساء') || category.contains('Evening')) {
-      return now.isAfter(eveningTime.subtract(const Duration(minutes: 30))) && 
-             now.isBefore(eveningTime.add(const Duration(hours: 4)));
+      return now.isAfter(eveningTime.subtract(const Duration(minutes: 30))) &&
+          now.isBefore(eveningTime.add(const Duration(hours: 4)));
     }
     return false;
   }
@@ -279,23 +318,25 @@ void _showAddReminderDialog(BuildContext context, String category) {
       return StatefulBuilder(
         builder: (context, setDialogState) {
           return AlertDialog(
-            title: Text(
-              l10n.addAlarm,
-              style: GoogleFonts.amiri(),
-            ),
+            title: Text(l10n.addAlarm, style: GoogleFonts.amiri()),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
                   title: Text(l10n.category),
-                  subtitle: Text(category, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text(
+                    category,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   contentPadding: EdgeInsets.zero,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   decoration: InputDecoration(
                     labelText: l10n.title,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   initialValue: customTitle,
                   onChanged: (val) => customTitle = val,
@@ -312,7 +353,10 @@ void _showAddReminderDialog(BuildContext context, String category) {
                       }
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.accent.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
@@ -332,16 +376,21 @@ void _showAddReminderDialog(BuildContext context, String category) {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
+                child: Text(
+                  l10n.cancel,
+                  style: const TextStyle(color: AppTheme.textSecondary),
+                ),
               ),
               ElevatedButton(
                 onPressed: () {
-                  cubit.addReminder(AzkarReminder(
-                    category: category,
-                    time: selectedTime,
-                    title: customTitle,
-                    isEnabled: true,
-                  ));
+                  cubit.addReminder(
+                    AzkarReminder(
+                      category: category,
+                      time: selectedTime,
+                      title: customTitle,
+                      isEnabled: true,
+                    ),
+                  );
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -354,7 +403,7 @@ void _showAddReminderDialog(BuildContext context, String category) {
               ),
             ],
           );
-        }
+        },
       );
     },
   );
@@ -393,25 +442,28 @@ class _CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: isRecommended ? 4 : 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: isRecommended 
-          ? const BorderSide(color: AppTheme.accent, width: 2)
-          : BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
+        side: isRecommended
+            ? const BorderSide(color: AppTheme.accent, width: 2)
+            : BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
       ),
       color: isRecommended ? AppTheme.accent.withValues(alpha: 0.05) : null,
       child: Stack(
         children: [
           ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
             title: Text(
               category,
               style: GoogleFonts.amiri(
-                fontSize: 18, 
+                fontSize: 18,
                 fontWeight: isRecommended ? FontWeight.bold : FontWeight.w600,
                 color: isRecommended ? AppTheme.accent : null,
               ),
@@ -422,10 +474,17 @@ class _CategoryCard extends StatelessWidget {
               children: [
                 TextButton.icon(
                   onPressed: () => _showAddReminderDialog(context, category),
-                  icon: const Icon(Icons.alarm_add_rounded, size: 16, color: AppTheme.accent),
+                  icon: const Icon(
+                    Icons.alarm_add_rounded,
+                    size: 16,
+                    color: AppTheme.accent,
+                  ),
                   label: Text(
                     l10n.addAlarm,
-                    style: const TextStyle(fontSize: 12, color: AppTheme.accent),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppTheme.accent,
+                    ),
                   ),
                 ),
               ],
@@ -451,7 +510,10 @@ class _CategoryCard extends StatelessWidget {
               bottom: 0,
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.accent,
                     borderRadius: BorderRadius.circular(8),
@@ -459,14 +521,20 @@ class _CategoryCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text('★', style: TextStyle(color: AppTheme.onAccent, fontSize: 10)),
+                      const Text(
+                        '★',
+                        style: TextStyle(
+                          color: AppTheme.onAccent,
+                          fontSize: 10,
+                        ),
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         AppLocalizations.of(context)!.recommended,
                         style: const TextStyle(
-                          color: AppTheme.onAccent, 
-                          fontSize: 10, 
-                          fontWeight: FontWeight.bold
+                          color: AppTheme.onAccent,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],

@@ -39,7 +39,10 @@ class QuranMetadata {
       final data = quran.getSurahAndVersesFromJuz(j);
       final firstSurah = data.keys.first;
       final firstAyah = data[firstSurah]![0];
-      starts[j - 1] = QuranHizbProvider.getAbsoluteAyahNumber(firstSurah, firstAyah);
+      starts[j - 1] = QuranHizbProvider.getAbsoluteAyahNumber(
+        firstSurah,
+        firstAyah,
+      );
     }
     return starts;
   }
@@ -51,9 +54,9 @@ class QuranMetadata {
     // hizbStarts in provider are [surah, ayah]
     // Since I can't access private _hizbStarts, I'll use the logic
     for (int h = 1; h <= 60; h++) {
-       // Re-using logic from provider if possible or just mapping
-       // For now, let's just implement a way to get them
-       // I'll skip the unused fields error by using them in a method
+      // Re-using logic from provider if possible or just mapping
+      // For now, let's just implement a way to get them
+      // I'll skip the unused fields error by using them in a method
     }
     return starts;
   }
@@ -68,7 +71,7 @@ class QuranMetadata {
     final end = page < 604 ? pageStarts[page] : 6237;
     return end - start;
   }
-  
+
   static int getJuzAyahs(int juz) {
     if (juz < 1 || juz > 30) return 0;
     final start = juzStarts[juz - 1];

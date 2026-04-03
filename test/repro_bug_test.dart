@@ -12,7 +12,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:adhan/adhan.dart';
 
 class MockPrayerRepo extends Mock implements PrayerRepo {}
+
 class MockSharedPreferences extends Mock implements SharedPreferences {}
+
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
 void main() {
@@ -33,13 +35,15 @@ void main() {
   setUpAll(() {
     registerFallbackValue(DateTime(2024));
     registerFallbackValue(Salaah.fajr);
-    registerFallbackValue(DailyRecord(
-      id: 'dummy',
-      date: DateTime.now(),
-      missedToday: {},
-      completedToday: {},
-      qada: {},
-    ));
+    registerFallbackValue(
+      DailyRecord(
+        id: 'dummy',
+        date: DateTime.now(),
+        missedToday: {},
+        completedToday: {},
+        qada: {},
+      ),
+    );
     registerFallbackValue(dummyPrayerTimes);
   });
 
@@ -48,7 +52,7 @@ void main() {
     repo = MockPrayerRepo();
     prefs = MockSharedPreferences();
     prayerTimeService = MockPrayerTimeService();
-    
+
     getIt.registerSingleton<SharedPreferences>(prefs);
     getIt.registerSingleton<PrayerTimeService>(prayerTimeService);
 
@@ -56,19 +60,21 @@ void main() {
 
     when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {});
     when(() => repo.saveToday(any())).thenAnswer((_) async {});
-    
+
     when(() => prefs.getDouble('latitude')).thenReturn(30.0);
     when(() => prefs.getDouble('longitude')).thenReturn(31.0);
     when(() => prefs.getString('calculation_method')).thenReturn('egyptian');
     when(() => prefs.getString('madhab')).thenReturn('shafi');
-    
-    when(() => prayerTimeService.getPrayerTimes(
-      latitude: any(named: 'latitude'),
-      longitude: any(named: 'longitude'),
-      method: any(named: 'method'),
-      madhab: any(named: 'madhab'),
-      date: any(named: 'date'),
-    )).thenReturn(dummyPrayerTimes);
+
+    when(
+      () => prayerTimeService.getPrayerTimes(
+        latitude: any(named: 'latitude'),
+        longitude: any(named: 'longitude'),
+        method: any(named: 'method'),
+        madhab: any(named: 'madhab'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(dummyPrayerTimes);
   });
 
   tearDown(() => bloc.close());
@@ -88,13 +94,21 @@ void main() {
         );
 
         when(() => repo.loadRecord(today)).thenAnswer((_) async => null);
-        when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => lastSaved);
-        when(() => repo.loadLastRecordBefore(today)).thenAnswer((_) async => lastSaved);
-        
+        when(
+          () => repo.loadLastSavedRecord(),
+        ).thenAnswer((_) async => lastSaved);
+        when(
+          () => repo.loadLastRecordBefore(today),
+        ).thenAnswer((_) async => lastSaved);
+
         // Mock all prayers as PASSED both yesterday and today
-        when(() => prayerTimeService.isPassed(any(), 
-            prayerTimes: any(named: 'prayerTimes'), 
-            date: any(named: 'date'))).thenReturn(true);
+        when(
+          () => prayerTimeService.isPassed(
+            any(),
+            prayerTimes: any(named: 'prayerTimes'),
+            date: any(named: 'date'),
+          ),
+        ).thenReturn(true);
       },
       act: (bloc) => bloc.add(PrayerTrackerEvent.load(today)),
       expect: () => [
@@ -124,29 +138,42 @@ void main() {
           id: 'yesterday',
           date: yesterday,
           missedToday: {Salaah.fajr},
-          completedToday: Set<Salaah>.from(Salaah.values).where((s) => s != Salaah.fajr).toSet(),
+          completedToday: Set<Salaah>.from(
+            Salaah.values,
+          ).where((s) => s != Salaah.fajr).toSet(),
           qada: {
-            for (var s in Salaah.values) 
-              s: s == Salaah.fajr ? const MissedCounter(1) : const MissedCounter(0)
+            for (var s in Salaah.values)
+              s: s == Salaah.fajr
+                  ? const MissedCounter(1)
+                  : const MissedCounter(0),
           },
         );
 
         when(() => repo.loadRecord(today)).thenAnswer((_) async => null);
-        when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => lastSaved);
-        when(() => repo.loadLastRecordBefore(today)).thenAnswer((_) async => lastSaved);
-        
+        when(
+          () => repo.loadLastSavedRecord(),
+        ).thenAnswer((_) async => lastSaved);
+        when(
+          () => repo.loadLastRecordBefore(today),
+        ).thenAnswer((_) async => lastSaved);
+
         // Mock all prayers as PASSED both yesterday and today
-        when(() => prayerTimeService.isPassed(any(), 
-            prayerTimes: any(named: 'prayerTimes'), 
-            date: any(named: 'date'))).thenReturn(true);
+        when(
+          () => prayerTimeService.isPassed(
+            any(),
+            prayerTimes: any(named: 'prayerTimes'),
+            date: any(named: 'date'),
+          ),
+        ).thenReturn(true);
       },
       act: (bloc) => bloc.add(PrayerTrackerEvent.load(today)),
       expect: () => [
         const PrayerTrackerState.loading(),
         isA<PrayerTrackerState>().having(
           (s) => s.maybeMap(
-            loaded: (l) => l.qadaStatus[Salaah.fajr]?.value == 2 && 
-                           l.qadaStatus[Salaah.dhuhr]?.value == 1,
+            loaded: (l) =>
+                l.qadaStatus[Salaah.fajr]?.value == 2 &&
+                l.qadaStatus[Salaah.dhuhr]?.value == 1,
             orElse: () => false,
           ),
           'Fajr should have 2 qada, others 1',

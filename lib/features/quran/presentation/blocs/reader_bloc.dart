@@ -39,48 +39,53 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
   }) : super(const ReaderState.initial()) {
     on<_LoadSurah>((event, emit) async {
       emit(const ReaderState.loading());
-      final result = await getSurah(GetSurahParams(surahNumber: event.surahNumber));
+      final result = await getSurah(
+        GetSurahParams(surahNumber: event.surahNumber),
+      );
       final separatorIndex = await quranRepository.getReaderSeparator();
       final separator = ReaderSeparator.values[separatorIndex];
-      
+
       await result.fold(
         (failure) async => emit(ReaderState.error(failure.message)),
         (surah) async {
           final bookmarksRes = await bookmarkRepository.getBookmarks();
           final bookmarks = bookmarksRes.fold((_) => <Bookmark>[], (v) => v);
-          
-          emit(ReaderState.loaded(
-            surah: surah, 
-            separator: separator,
-            bookmarks: bookmarks,
-          ));
-          
+
+          emit(
+            ReaderState.loaded(
+              surah: surah,
+              separator: separator,
+              bookmarks: bookmarks,
+            ),
+          );
+
           _lastReadSubscription?.cancel();
           _lastReadSubscription = watchLastRead().listen((result) {
-            result.fold(
-              (_) => null,
-              (position) {
-                state.mapOrNull(
-                  loaded: (s) {
-                    if (position.ayahNumber.surahNumber == s.surah.number.value) {
-                      final ayah = s.surah.ayahs.firstWhere(
-                        (a) => a.number.ayahNumberInSurah == position.ayahNumber.ayahNumberInSurah,
-                        orElse: () => s.surah.ayahs.first,
-                      );
-                      
-                      // CRITICAL FIX: Only update if lastReadAyah is null (initial load)
-                      if (s.lastReadAyah == null) {
-                        add(ReaderEvent.saveLastRead(ayah));
-                      }
+            result.fold((_) => null, (position) {
+              state.mapOrNull(
+                loaded: (s) {
+                  if (position.ayahNumber.surahNumber == s.surah.number.value) {
+                    final ayah = s.surah.ayahs.firstWhere(
+                      (a) =>
+                          a.number.ayahNumberInSurah ==
+                          position.ayahNumber.ayahNumberInSurah,
+                      orElse: () => s.surah.ayahs.first,
+                    );
+
+                    // CRITICAL FIX: Only update if lastReadAyah is null (initial load)
+                    if (s.lastReadAyah == null) {
+                      add(ReaderEvent.saveLastRead(ayah));
                     }
-                  },
-                );
-              },
-            );
+                  }
+                },
+              );
+            });
           });
 
           _bookmarksSubscription?.cancel();
-          _bookmarksSubscription = bookmarkRepository.watchBookmarks().listen((result) {
+          _bookmarksSubscription = bookmarkRepository.watchBookmarks().listen((
+            result,
+          ) {
             result.fold(
               (_) => null,
               (bookmarks) => add(ReaderEvent.bookmarksUpdated(bookmarks)),
@@ -109,16 +114,20 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
     on<_SaveLastRead>((event, emit) async {
       final s = state.mapOrNull(loaded: (s) => s);
       if (s != null) {
-        emit(s.copyWith(
-          lastReadAyah: event.ayah,
-          highlightedAyah: event.ayah, // Highlight it
-        ));
+        emit(
+          s.copyWith(
+            lastReadAyah: event.ayah,
+            highlightedAyah: event.ayah, // Highlight it
+          ),
+        );
       }
-      
-      await updateLastRead(LastReadPosition(
-        ayahNumber: event.ayah.number,
-        updatedAt: DateTime.now(),
-      ));
+
+      await updateLastRead(
+        LastReadPosition(
+          ayahNumber: event.ayah.number,
+          updatedAt: DateTime.now(),
+        ),
+      );
     });
 
     on<_UpdateScale>((event, emit) {
@@ -150,7 +159,9 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
       final s = state.mapOrNull(loaded: (s) => s);
       if (s == null) return;
 
-      final isBookmarked = s.bookmarks.any((b) => b.ayahNumber == event.ayah.number);
+      final isBookmarked = s.bookmarks.any(
+        (b) => b.ayahNumber == event.ayah.number,
+      );
 
       if (isBookmarked) {
         await bookmarkRepository.removeBookmark(event.ayah.number);

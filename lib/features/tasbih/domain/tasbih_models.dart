@@ -17,7 +17,8 @@ sealed class TasbihItem with _$TasbihItem {
     String? time,
   }) = _TasbihItem;
 
-  factory TasbihItem.fromJson(Map<String, dynamic> json) => _$TasbihItemFromJson(json);
+  factory TasbihItem.fromJson(Map<String, dynamic> json) =>
+      _$TasbihItemFromJson(json);
 }
 
 @freezed
@@ -33,7 +34,8 @@ sealed class CompletionDua with _$CompletionDua {
     String? note,
   }) = _CompletionDua;
 
-  factory CompletionDua.fromJson(Map<String, dynamic> json) => _$CompletionDuaFromJson(json);
+  factory CompletionDua.fromJson(Map<String, dynamic> json) =>
+      _$CompletionDuaFromJson(json);
 }
 
 @freezed
@@ -50,21 +52,28 @@ sealed class TasbihCategory with _$TasbihCategory {
     @JsonKey(name: 'completion_trigger') @Default(99) int completionTrigger,
     @JsonKey(name: 'is_editable') @Default(false) bool isEditable,
     @JsonKey(name: 'max_target_count') @Default(1000) int maxTargetCount,
-    @JsonKey(name: 'allow_completion_dua') @Default(false) bool allowCompletionDua,
+    @JsonKey(name: 'allow_completion_dua')
+    @Default(false)
+    bool allowCompletionDua,
   }) = _TasbihCategory;
 
-  factory TasbihCategory.fromJson(Map<String, dynamic> json) => _$TasbihCategoryFromJson(json);
+  factory TasbihCategory.fromJson(Map<String, dynamic> json) =>
+      _$TasbihCategoryFromJson(json);
 }
 
 @freezed
 sealed class TasbihData with _$TasbihData {
   const factory TasbihData({
-    @JsonKey(name: 'completion_duas') @Default([]) List<CompletionDua> completionDuas,
-    @JsonKey(name: 'tasbih_categories') required List<TasbihCategory> categories,
+    @JsonKey(name: 'completion_duas')
+    @Default([])
+    List<CompletionDua> completionDuas,
+    @JsonKey(name: 'tasbih_categories')
+    required List<TasbihCategory> categories,
     required TasbihSettings settings,
   }) = _TasbihData;
 
-  factory TasbihData.fromJson(Map<String, dynamic> json) => _$TasbihDataFromJson(json);
+  factory TasbihData.fromJson(Map<String, dynamic> json) =>
+      _$TasbihDataFromJson(json);
 }
 
 @freezed
@@ -74,7 +83,9 @@ sealed class TasbihSettings with _$TasbihSettings {
     @JsonKey(name: 'haptic_feedback') @Default(true) bool hapticFeedback,
     @JsonKey(name: 'sound_effect') @Default(false) bool soundEffect,
     @JsonKey(name: 'auto_reset') @Default(true) bool autoReset,
-    @JsonKey(name: 'show_transliteration') @Default(true) bool showTransliteration,
+    @JsonKey(name: 'show_transliteration')
+    @Default(true)
+    bool showTransliteration,
     @JsonKey(name: 'show_translation') @Default(true) bool showTranslation,
     @JsonKey(name: 'dark_mode') @Default(false) bool darkMode,
     @JsonKey(name: 'keep_screen_on') @Default(true) bool keepScreenOn,
@@ -82,5 +93,6 @@ sealed class TasbihSettings with _$TasbihSettings {
     @JsonKey(name: 'custom_tasbih_target') int? customTasbihTarget,
   }) = _TasbihSettings;
 
-  factory TasbihSettings.fromJson(Map<String, dynamic> json) => _$TasbihSettingsFromJson(json);
+  factory TasbihSettings.fromJson(Map<String, dynamic> json) =>
+      _$TasbihSettingsFromJson(json);
 }

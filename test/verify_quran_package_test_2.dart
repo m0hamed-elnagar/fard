@@ -8,7 +8,7 @@ void main() {
       final hizbNum = QuranHizbProvider.getHizbNumber(1, 1);
       debugPrint('Surah 1, Ayah 1 is in Hizb: $hizbNum');
       expect(hizbNum, 1);
-      
+
       final hizb2 = QuranHizbProvider.getHizbNumber(2, 142);
       debugPrint('Surah 2, Ayah 142 is in Hizb: $hizb2');
       expect(hizb2, 2);

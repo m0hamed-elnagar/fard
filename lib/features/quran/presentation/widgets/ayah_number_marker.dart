@@ -23,7 +23,9 @@ class AyahNumberMarker extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: color ?? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+          color:
+              color ??
+              Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
           width: 1.5,
         ),
       ),

@@ -47,14 +47,18 @@ class FakePrayerRepo implements PrayerRepo {
   }
 
   @override
-  Future<Map<Salaah, int>> calculateRemaining(DateTime from, DateTime to) async {
+  Future<Map<Salaah, int>> calculateRemaining(
+    DateTime from,
+    DateTime to,
+  ) async {
     return {for (var s in Salaah.values) s: 0};
   }
 
   @override
   Future<DailyRecord?> loadLastSavedRecord() async {
     if (_records.isEmpty) return null;
-    final sorted = _records.values.toList()..sort((a, b) => a.date.compareTo(b.date));
+    final sorted = _records.values.toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
     return sorted.last;
   }
 
@@ -82,6 +86,7 @@ class FakePrayerRepo implements PrayerRepo {
 }
 
 class MockSharedPreferences extends Mock implements SharedPreferences {}
+
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
 void main() {
@@ -92,7 +97,7 @@ void main() {
   final today = DateTime.now();
   final normalizedToday = DateTime(today.year, today.month, today.day);
   final sixDaysAgo = normalizedToday.subtract(const Duration(days: 6));
-  
+
   final dummyPrayerTimes = PrayerTimes(
     Coordinates(30.0, 31.0),
     DateComponents.from(today),
@@ -102,13 +107,15 @@ void main() {
   setUpAll(() {
     registerFallbackValue(DateTime(2024));
     registerFallbackValue(Salaah.fajr);
-    registerFallbackValue(DailyRecord(
-      id: 'dummy',
-      date: DateTime.now(),
-      missedToday: {},
-      completedToday: {},
-      qada: {},
-    ));
+    registerFallbackValue(
+      DailyRecord(
+        id: 'dummy',
+        date: DateTime.now(),
+        missedToday: {},
+        completedToday: {},
+        qada: {},
+      ),
+    );
     registerFallbackValue(dummyPrayerTimes);
   });
 
@@ -122,25 +129,35 @@ void main() {
     getIt.registerSingleton<PrayerTimeService>(prayerTimeService);
 
     // Default: all prayers passed
-    when(() => prayerTimeService.isPassed(any(), 
-        prayerTimes: any(named: 'prayerTimes'), 
-        date: any(named: 'date'))).thenReturn(true);
-    when(() => prayerTimeService.getPrayerTimes(
-      latitude: any(named: 'latitude'),
-      longitude: any(named: 'longitude'),
-      method: any(named: 'method'),
-      madhab: any(named: 'madhab'),
-      date: any(named: 'date'),
-    )).thenReturn(dummyPrayerTimes);
+    when(
+      () => prayerTimeService.isPassed(
+        any(),
+        prayerTimes: any(named: 'prayerTimes'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(true);
+    when(
+      () => prayerTimeService.getPrayerTimes(
+        latitude: any(named: 'latitude'),
+        longitude: any(named: 'longitude'),
+        method: any(named: 'method'),
+        madhab: any(named: 'madhab'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(dummyPrayerTimes);
 
     when(() => prefs.getDouble('latitude')).thenReturn(30.0);
     when(() => prefs.getDouble('longitude')).thenReturn(31.0);
-    when(() => prefs.getString('calculation_method')).thenReturn('muslim_league');
+    when(
+      () => prefs.getString('calculation_method'),
+    ).thenReturn('muslim_league');
     when(() => prefs.getString('madhab')).thenReturn('shafi');
   });
 
   group('Missed Days Selection Integration', () {
-    testWidgets('Can toggle specific days and correctly update Qada', (tester) async {
+    testWidgets('Can toggle specific days and correctly update Qada', (
+      tester,
+    ) async {
       // Gap: 6 days ago (last record) -> Today.
       // Gap days: 5, 4, 3, 2, 1 days ago (5 days in total).
       final lastRecord = DailyRecord(
@@ -168,7 +185,11 @@ void main() {
                       context: context,
                       builder: (_) => MissedDaysDialog(
                         missedDates: dates,
-                        onResponse: (selected) => bloc.add(PrayerTrackerEvent.acknowledgeMissedDays(selectedDates: selected)),
+                        onResponse: (selected) => bloc.add(
+                          PrayerTrackerEvent.acknowledgeMissedDays(
+                            selectedDates: selected,
+                          ),
+                        ),
                       ),
                     );
                   },
@@ -185,13 +206,16 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(MissedDaysDialog), findsOneWidget);
-      
+
       // All days are selected by default. 5 gap days.
       // Let's unselect 3 of them.
       // Days in gap: sixDaysAgo + 1, + 2, + 3, + 4, + 5.
-      
-      final gapDates = List.generate(5, (i) => sixDaysAgo.add(Duration(days: i + 1)));
-      
+
+      final gapDates = List.generate(
+        5,
+        (i) => sixDaysAgo.add(Duration(days: i + 1)),
+      );
+
       // Tap on 1st, 2nd, and 3rd gap day to unselect them
       for (int i = 0; i < 3; i++) {
         final date = gapDates[i];
@@ -225,9 +249,17 @@ void main() {
         final record = await repo.loadRecord(date);
         expect(record, isNotNull, reason: 'Record for $date should exist');
         if (i < 3) {
-          expect(record!.missedToday, isEmpty, reason: 'Day $i should be marked as prayed');
+          expect(
+            record!.missedToday,
+            isEmpty,
+            reason: 'Day $i should be marked as prayed',
+          );
         } else {
-          expect(record!.missedToday, isNotEmpty, reason: 'Day $i should be marked as missed');
+          expect(
+            record!.missedToday,
+            isNotEmpty,
+            reason: 'Day $i should be marked as missed',
+          );
         }
       }
     });
@@ -258,7 +290,11 @@ void main() {
                       context: context,
                       builder: (_) => MissedDaysDialog(
                         missedDates: dates,
-                        onResponse: (selected) => bloc.add(PrayerTrackerEvent.acknowledgeMissedDays(selectedDates: selected)),
+                        onResponse: (selected) => bloc.add(
+                          PrayerTrackerEvent.acknowledgeMissedDays(
+                            selectedDates: selected,
+                          ),
+                        ),
                       ),
                     );
                   },
@@ -276,18 +312,18 @@ void main() {
 
       // Drag from the first day to the third day.
       // They are all selected by default, so dragging over them will TOGGLE them to unselected.
-      
+
       final gridFinder = find.byType(GridView);
       final Offset topLeft = tester.getTopLeft(gridFinder);
-      
+
       // We want to drag across the first 3 items in the first row.
       // Item size is roughly itemWidth x 60.0.
       // constraints.maxWidth / 7 is itemWidth.
       // Let's just drag horizontally from topLeft + small offset.
-      
+
       await tester.dragFrom(
         topLeft + const Offset(10, 30), // Start in first item
-        const Offset(150, 0),          // Drag right through next items
+        const Offset(150, 0), // Drag right through next items
       );
       await tester.pump();
 
@@ -303,7 +339,7 @@ void main() {
           // Since they are toggled, and they were all selected, some are now 0.
           // 10 (base) + (5 - unselected_count) + 1 (today)
           // We expect at least 1 or 2 to be unselected.
-          expect(l.qadaStatus[Salaah.fajr]!.value, lessThan(16)); 
+          expect(l.qadaStatus[Salaah.fajr]!.value, lessThan(16));
         },
         orElse: () => fail('Should be loaded'),
       );

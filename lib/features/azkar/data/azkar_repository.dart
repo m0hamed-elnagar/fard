@@ -58,31 +58,33 @@ class AzkarRepository implements IAzkarSource {
         _loadingCompleter!.complete([]);
         return [];
       }
-      
+
       final data = await json.decode(response);
       final List<dynamic>? rows = data['rows'];
-      
+
       if (rows == null) {
         _cachedAzkar = [];
         _loadingCompleter!.complete([]);
         return [];
       }
-      
+
       _cachedAzkar = rows.map((row) {
-      final zekr = row.length > 1 ? row[1]?.toString() ?? '' : '';
-      final category = row.length > 0 ? row[0]?.toString() ?? '' : '';
-      final progressKey = _getStableKey(category, zekr);
-        
+        final zekr = row.length > 1 ? row[1]?.toString() ?? '' : '';
+        final category = row.length > 0 ? row[0]?.toString() ?? '' : '';
+        final progressKey = _getStableKey(category, zekr);
+
         return AzkarItem(
           category: category,
           zekr: zekr,
           description: row.length > 2 ? row[2]?.toString() ?? '' : '',
-          count: row.length > 3 ? int.tryParse(row[3]?.toString() ?? '1') ?? 1 : 1,
+          count: row.length > 3
+              ? int.tryParse(row[3]?.toString() ?? '1') ?? 1
+              : 1,
           reference: row.length > 4 ? row[4]?.toString() ?? '' : '',
           currentCount: _progressBox.get(progressKey) ?? 0,
         );
       }).toList();
-      
+
       _loadingCompleter!.complete(_cachedAzkar!);
       return _cachedAzkar!;
     } catch (e, stack) {
@@ -93,23 +95,27 @@ class AzkarRepository implements IAzkarSource {
     }
   }
 
+  @override
   Future<void> saveProgress(AzkarItem item) async {
     final progressKey = _getStableKey(item.category, item.zekr);
     await _progressBox.put(progressKey, item.currentCount);
-    
+
     // Update cache in place
     if (_cachedAzkar != null) {
-      final index = _cachedAzkar!.indexWhere((e) => e.zekr == item.zekr && e.category == item.category);
+      final index = _cachedAzkar!.indexWhere(
+        (e) => e.zekr == item.zekr && e.category == item.category,
+      );
       if (index != -1) {
         _cachedAzkar![index] = item;
       }
     }
   }
 
+  @override
   Future<void> resetCategory(String category) async {
     // Ensure data is loaded
     await getAllAzkar();
-    
+
     final keysToDelete = <String>[];
     if (_cachedAzkar != null) {
       for (int i = 0; i < _cachedAzkar!.length; i++) {
@@ -121,30 +127,37 @@ class AzkarRepository implements IAzkarSource {
         }
       }
     }
-    
+
     if (keysToDelete.isNotEmpty) {
       await _progressBox.deleteAll(keysToDelete);
     }
   }
 
+  @override
   Future<void> resetAll() async {
     const todayKey = 'last_reset_date';
     final lastReset = _progressBox.get(todayKey);
-    
+
     await _progressBox.clear();
-    
+
     if (lastReset != null) {
       await _progressBox.put(todayKey, lastReset);
     }
-    
+
     _cachedAzkar = null; // Reset cache so next load gets fresh data
   }
 
+  @override
   Future<List<String>> getCategories() async {
     final azkar = await getAllAzkar();
-    return azkar.map((e) => e.category).where((c) => c.isNotEmpty).toSet().toList();
+    return azkar
+        .map((e) => e.category)
+        .where((c) => c.isNotEmpty)
+        .toSet()
+        .toList();
   }
 
+  @override
   Future<List<AzkarItem>> getAzkarByCategory(String category) async {
     final azkar = await getAllAzkar();
     return azkar.where((e) => e.category == category).toList();

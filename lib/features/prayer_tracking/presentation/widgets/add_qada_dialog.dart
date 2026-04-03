@@ -33,7 +33,9 @@ class _AddQadaDialogState extends State<AddQadaDialog>
     super.initState();
     _toDate = DateTime.now();
     _tabController = TabController(
-        length: widget.initialCounts == null ? 2 : 1, vsync: this);
+      length: widget.initialCounts == null ? 2 : 1,
+      vsync: this,
+    );
     for (final s in Salaah.values) {
       final initialValue = widget.initialCounts?[s] ?? 0;
       _controllers[s] = TextEditingController(text: '$initialValue');
@@ -60,7 +62,7 @@ class _AddQadaDialogState extends State<AddQadaDialog>
       backgroundColor: Colors.transparent,
       child: Container(
         constraints: BoxConstraints(
-          maxWidth: 400.0, 
+          maxWidth: 400.0,
           maxHeight: (screenHeight * 0.8).clamp(300.0, 600.0),
         ),
         padding: const EdgeInsets.all(20.0),
@@ -95,20 +97,28 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                 decoration: BoxDecoration(
                   color: AppTheme.surfaceLight,
                   borderRadius: BorderRadius.circular(14.0),
-                  border: Border.all(color: AppTheme.cardBorder.withValues(alpha: 0.5)),
+                  border: Border.all(
+                    color: AppTheme.cardBorder.withValues(alpha: 0.5),
+                  ),
                 ),
                 child: TabBar(
                   controller: _tabController,
                   indicator: BoxDecoration(
                     color: AppTheme.accent.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12.0),
-                    border: Border.all(color: AppTheme.accent.withValues(alpha: 0.3), width: 1.0),
+                    border: Border.all(
+                      color: AppTheme.accent.withValues(alpha: 0.3),
+                      width: 1.0,
+                    ),
                   ),
                   indicatorSize: TabBarIndicatorSize.tab,
                   dividerColor: Colors.transparent,
                   labelColor: AppTheme.accent,
                   unselectedLabelColor: AppTheme.textSecondary,
-                  labelStyle: GoogleFonts.amiri(fontWeight: FontWeight.bold, fontSize: 14.0),
+                  labelStyle: GoogleFonts.amiri(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.0,
+                  ),
                   unselectedLabelStyle: GoogleFonts.amiri(fontSize: 14.0),
                   tabs: [
                     Tab(text: l10n.byCount),
@@ -138,11 +148,18 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                   ),
-                  child: Text(l10n.cancel,
-                      style: GoogleFonts.amiri(
-                          color: AppTheme.textSecondary, fontSize: 15.0)),
+                  child: Text(
+                    l10n.cancel,
+                    style: GoogleFonts.amiri(
+                      color: AppTheme.textSecondary,
+                      fontSize: 15.0,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 8.0),
                 ElevatedButton(
@@ -151,13 +168,20 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                     backgroundColor: AppTheme.accent,
                     foregroundColor: AppTheme.onAccent,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 24.0, vertical: 10.0),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      horizontal: 24.0,
+                      vertical: 10.0,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: Text(
-                      widget.initialCounts == null ? l10n.add : l10n.update,
-                      style: GoogleFonts.amiri(
-                          fontWeight: FontWeight.w700, fontSize: 15.0)),
+                    widget.initialCounts == null ? l10n.add : l10n.update,
+                    style: GoogleFonts.amiri(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15.0,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -275,9 +299,9 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                 builder: (context, child) => Theme(
                   data: Theme.of(context).copyWith(
                     colorScheme: Theme.of(context).colorScheme.copyWith(
-                          primary: AppTheme.primaryLight,
-                          surface: AppTheme.surface,
-                        ),
+                      primary: AppTheme.primaryLight,
+                      surface: AppTheme.surface,
+                    ),
                   ),
                   child: child!,
                 ),
@@ -299,9 +323,9 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                 builder: (context, child) => Theme(
                   data: Theme.of(context).copyWith(
                     colorScheme: Theme.of(context).colorScheme.copyWith(
-                          primary: AppTheme.primaryLight,
-                          surface: AppTheme.surface,
-                        ),
+                      primary: AppTheme.primaryLight,
+                      surface: AppTheme.surface,
+                    ),
                   ),
                   child: child!,
                 ),
@@ -316,15 +340,19 @@ class _AddQadaDialogState extends State<AddQadaDialog>
               decoration: BoxDecoration(
                 color: AppTheme.accent.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(12.0),
-                border:
-                    Border.all(color: AppTheme.accent.withValues(alpha: 0.30), width: 1.0),
+                border: Border.all(
+                  color: AppTheme.accent.withValues(alpha: 0.30),
+                  width: 1.0,
+                ),
               ),
               child: Column(
                 children: [
                   Text(
                     l10n.daysCount,
                     style: GoogleFonts.amiri(
-                        color: AppTheme.textSecondary, fontSize: 13.0),
+                      color: AppTheme.textSecondary,
+                      fontSize: 13.0,
+                    ),
                   ),
                   Text(
                     '${_toDate!.difference(_fromDate!).inDays.abs() + 1}',
@@ -337,7 +365,9 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                   Text(
                     l10n.prayersPerFard,
                     style: GoogleFonts.amiri(
-                        color: AppTheme.textSecondary, fontSize: 13.0),
+                      color: AppTheme.textSecondary,
+                      fontSize: 13.0,
+                    ),
                   ),
                 ],
               ),
@@ -419,7 +449,9 @@ class _DatePickerRow extends StatelessWidget {
             Text(
               label,
               style: GoogleFonts.amiri(
-                  color: AppTheme.textSecondary, fontSize: 15.0),
+                color: AppTheme.textSecondary,
+                fontSize: 15.0,
+              ),
             ),
             const Spacer(),
             Text(
@@ -434,8 +466,11 @@ class _DatePickerRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8.0),
-            const Icon(Icons.calendar_today_rounded,
-                color: AppTheme.textSecondary, size: 18.0),
+            const Icon(
+              Icons.calendar_today_rounded,
+              color: AppTheme.textSecondary,
+              size: 18.0,
+            ),
           ],
         ),
       ),

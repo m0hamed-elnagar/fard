@@ -18,7 +18,7 @@ import 'package:quran/quran.dart' as quran;
 class AudioDownloadServiceImpl implements AudioDownloadService {
   final AudioRepository _audioRepository;
   final http.Client _client;
-  NotificationService? _notificationService;
+  final NotificationService _notificationService;
 
   final _progressController = StreamController<DownloadProgress>.broadcast();
   // Track cancel tokens or flags per reciter
@@ -32,17 +32,7 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
     this._notificationService,
   );
 
-  NotificationService get _notifications {
-    if (_notificationService != null) return _notificationService!;
-    try {
-      _notificationService = getIt<NotificationService>();
-      return _notificationService!;
-    } catch (e) {
-      // Fallback or handle error
-      debugPrint('Error resolving NotificationService: $e');
-      throw Exception('NotificationService not initialized');
-    }
-  }
+  NotificationService get _notifications => _notificationService;
 
   @override
   Stream<DownloadProgress> get progressStream => _progressController.stream;
@@ -102,10 +92,16 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
       for (int i = 0; i < tracks.length; i += batchSize) {
         // Yield to event loop to check cancellation flag more effectively
         await Future.delayed(Duration.zero);
-        
+
         if (_cancellationFlags[reciterId] == true) {
           _activeDownloads.remove(downloadKey);
-          _emitError(reciterId, surahNumber, "Cancelled", total: totalFiles, downloaded: currentlyOnDisk);
+          _emitError(
+            reciterId,
+            surahNumber,
+            "Cancelled",
+            total: totalFiles,
+            downloaded: currentlyOnDisk,
+          );
           return;
         }
 
@@ -133,10 +129,10 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
                   if (response.statusCode == 200) {
                     final file = File(track.localPath);
                     await file.parent.create(recursive: true);
-                    
+
                     if (_cancellationFlags[reciterId] == true) return;
                     await file.writeAsBytes(response.bodyBytes);
-                    
+
                     success = true;
                     currentlyOnDisk++;
                     _emitProgress(
@@ -176,7 +172,7 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
       }
 
       final isAllDone = finalCount == totalFiles;
-      
+
       // CRITICAL: Remove from active downloads BEFORE emitting final progress
       // so that any status checks (getSurahStatus) see it as finished.
       _activeDownloads.remove(downloadKey);
@@ -384,16 +380,19 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
     if (total > 0) {
       final l10n = lookupAppLocalizations(getIt<SettingsCubit>().state.locale);
       final id = _getNotificationId(reciterId, surahNumber);
-      
+
       String title;
       if (surahNumber != null) {
-        final isArabic = getIt<SettingsCubit>().state.locale.languageCode == 'ar';
-        final surahName = isArabic ? quran.getSurahNameArabic(surahNumber) : quran.getSurahName(surahNumber);
+        final isArabic =
+            getIt<SettingsCubit>().state.locale.languageCode == 'ar';
+        final surahName = isArabic
+            ? quran.getSurahNameArabic(surahNumber)
+            : quran.getSurahName(surahNumber);
         title = l10n.downloadingSurah(surahName);
       } else {
         title = l10n.downloadingReciter(reciterId);
       }
-      
+
       final body = isCompleted
           ? l10n.downloadComplete
           : l10n.filesCount(downloaded, total);
@@ -409,7 +408,13 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
     }
   }
 
-  void _emitError(String reciterId, int? surahNumber, String error, {int total = 0, int downloaded = 0}) {
+  void _emitError(
+    String reciterId,
+    int? surahNumber,
+    String error, {
+    int total = 0,
+    int downloaded = 0,
+  }) {
     // Try to get last known progress for this surah to avoid UI flickering to 0
     _progressController.add(
       DownloadProgress(
@@ -423,11 +428,13 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
 
     final l10n = lookupAppLocalizations(getIt<SettingsCubit>().state.locale);
     final id = _getNotificationId(reciterId, surahNumber);
-    
+
     String title;
     if (surahNumber != null) {
       final isArabic = getIt<SettingsCubit>().state.locale.languageCode == 'ar';
-      final surahName = isArabic ? quran.getSurahNameArabic(surahNumber) : quran.getSurahName(surahNumber);
+      final surahName = isArabic
+          ? quran.getSurahNameArabic(surahNumber)
+          : quran.getSurahName(surahNumber);
       title = '${l10n.downloadError}: $surahName';
     } else {
       title = l10n.downloadError;

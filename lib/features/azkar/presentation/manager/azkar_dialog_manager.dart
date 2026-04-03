@@ -47,11 +47,11 @@ class _AzkarDialogManagerState extends State<AzkarDialogManager> {
     if (azkarState.categories.isEmpty) return;
 
     final now = DateTime.now();
-    
+
     // Prevent showing multiple times for the exact same minute
-    if (_lastShownDate != null && 
-        _lastShownDate!.year == now.year && 
-        _lastShownDate!.month == now.month && 
+    if (_lastShownDate != null &&
+        _lastShownDate!.year == now.year &&
+        _lastShownDate!.month == now.month &&
         _lastShownDate!.day == now.day &&
         _lastShownDate!.hour == now.hour &&
         _lastShownDate!.minute == now.minute) {
@@ -60,7 +60,7 @@ class _AzkarDialogManagerState extends State<AzkarDialogManager> {
 
     for (final reminder in settings.reminders) {
       if (!reminder.isEnabled) continue;
-      
+
       final reminderTime = _parseTime(reminder.time, now);
       if (now.hour == reminderTime.hour && now.minute == reminderTime.minute) {
         final category = azkarState.categories.firstWhere(
@@ -68,9 +68,12 @@ class _AzkarDialogManagerState extends State<AzkarDialogManager> {
           orElse: () => '',
         );
         if (category.isNotEmpty) {
-           _lastShownDate = now;
-           _showAzkarDialog(category, reminder.title.isNotEmpty ? reminder.title : category);
-           break;
+          _lastShownDate = now;
+          _showAzkarDialog(
+            category,
+            reminder.title.isNotEmpty ? reminder.title : category,
+          );
+          break;
         }
       }
     }
@@ -79,7 +82,13 @@ class _AzkarDialogManagerState extends State<AzkarDialogManager> {
   DateTime _parseTime(String timeStr, DateTime now) {
     try {
       final parts = timeStr.split(':');
-      return DateTime(now.year, now.month, now.day, int.parse(parts[0]), int.parse(parts[1]));
+      return DateTime(
+        now.year,
+        now.month,
+        now.day,
+        int.parse(parts[0]),
+        int.parse(parts[1]),
+      );
     } catch (_) {
       return now;
     }
@@ -104,7 +113,10 @@ class _AzkarDialogManagerState extends State<AzkarDialogManager> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(color: AppTheme.textSecondary),
+            ),
           ),
           ElevatedButton(
             onPressed: () {

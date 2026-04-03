@@ -11,7 +11,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-class MockAudioBloc extends MockBloc<AudioEvent, AudioState> implements AudioBloc {}
+class MockAudioBloc extends MockBloc<AudioEvent, AudioState>
+    implements AudioBloc {}
 
 void main() {
   late MockAudioBloc mockAudioBloc;
@@ -31,9 +32,7 @@ void main() {
       supportedLocales: const [Locale('en'), Locale('ar')],
       home: BlocProvider<AudioBloc>.value(
         value: mockAudioBloc,
-        child: const Scaffold(
-          body: ReciterSelector(),
-        ),
+        child: const Scaffold(body: ReciterSelector()),
       ),
     );
   }
@@ -59,12 +58,11 @@ void main() {
     ),
   ];
 
-  testWidgets('ReciterSelector should display Alafasy and Husary', (tester) async {
+  testWidgets('ReciterSelector should display Alafasy and Husary', (
+    tester,
+  ) async {
     when(() => mockAudioBloc.state).thenReturn(
-      const AudioState(
-        availableReciters: tReciters,
-        status: AudioStatus.idle,
-      ),
+      const AudioState(availableReciters: tReciters, status: AudioStatus.idle),
     );
 
     await tester.pumpWidget(createWidgetUnderTest());

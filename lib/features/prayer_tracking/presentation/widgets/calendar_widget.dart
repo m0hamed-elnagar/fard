@@ -60,11 +60,11 @@ class _CalendarWidgetState extends State<CalendarWidget> {
 
   Widget _buildCell(DateTime day, bool isSelected, {bool isToday = false}) {
     final hijri = _getHijriDate(day);
-    
+
     final primaryValue = _hijriFocused ? '${hijri.hDay}' : '${day.day}';
     final secondaryValue = _hijriFocused ? '${day.day}' : '${hijri.hDay}';
-    
-    final primaryStyle = _hijriFocused 
+
+    final primaryStyle = _hijriFocused
         ? GoogleFonts.amiri(
             color: isSelected ? Colors.black87 : AppTheme.textPrimary,
             fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
@@ -75,7 +75,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
             fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
             fontSize: 14.0,
           );
-          
+
     final secondaryStyle = _hijriFocused
         ? GoogleFonts.outfit(
             color: isSelected
@@ -102,30 +102,29 @@ class _CalendarWidgetState extends State<CalendarWidget> {
             : (isToday ? AppTheme.primaryLight.withValues(alpha: 0.15) : null),
         shape: BoxShape.circle,
         border: isToday && !isSelected
-            ? Border.all(color: AppTheme.primaryLight.withValues(alpha: 0.5), width: 1.5)
-            : isSelected 
-                ? Border.all(color: Colors.black.withValues(alpha: 0.1), width: 1.0)
-                : null,
+            ? Border.all(
+                color: AppTheme.primaryLight.withValues(alpha: 0.5),
+                width: 1.5,
+              )
+            : isSelected
+            ? Border.all(color: Colors.black.withValues(alpha: 0.1), width: 1.0)
+            : null,
         boxShadow: [
           BoxShadow(
-            color: isSelected ? AppTheme.accent.withValues(alpha: 0.3) : Colors.transparent,
+            color: isSelected
+                ? AppTheme.accent.withValues(alpha: 0.3)
+                : Colors.transparent,
             blurRadius: isSelected ? 8 : 0,
             offset: isSelected ? const Offset(0, 2) : Offset.zero,
-          )
+          ),
         ],
       ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              primaryValue,
-              style: primaryStyle,
-            ),
-            Text(
-              secondaryValue,
-              style: secondaryStyle,
-            ),
+            Text(primaryValue, style: primaryStyle),
+            Text(secondaryValue, style: secondaryStyle),
           ],
         ),
       ),
@@ -136,17 +135,17 @@ class _CalendarWidgetState extends State<CalendarWidget> {
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).languageCode;
     final hijri = _getHijriDate(_focusedDay);
-    
+
     // Calculate display strings for the header
     final gregMonth = DateFormat.MMMM(locale).format(_focusedDay);
     final gregYear = DateFormat.y(locale).format(_focusedDay);
-    
+
     HijriCalendar.setLocal(locale);
     final hijriMonth = hijri.getLongMonthName();
     final hijriYear = hijri.hYear;
-    
-    final focusedMonthText = _hijriFocused 
-        ? '$hijriMonth $hijriYear هـ' 
+
+    final focusedMonthText = _hijriFocused
+        ? '$hijriMonth $hijriYear هـ'
         : '$gregMonth $gregYear';
 
     return AnimatedContainer(
@@ -175,7 +174,10 @@ class _CalendarWidgetState extends State<CalendarWidget> {
               setState(() => _isExpanded = !_isExpanded);
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 12.0,
+              ),
               child: Row(
                 children: [
                   AnimatedContainer(
@@ -186,9 +188,11 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
-                      _hijriFocused ? Icons.nightlight_round : Icons.calendar_month_rounded, 
-                      color: AppTheme.accent, 
-                      size: 18.0
+                      _hijriFocused
+                          ? Icons.nightlight_round
+                          : Icons.calendar_month_rounded,
+                      color: AppTheme.accent,
+                      size: 18.0,
                     ),
                   ),
                   const SizedBox(width: 12.0),
@@ -198,7 +202,9 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          _isExpanded ? AppLocalizations.of(context)!.calendar : focusedMonthText,
+                          _isExpanded
+                              ? AppLocalizations.of(context)!.calendar
+                              : focusedMonthText,
                           style: GoogleFonts.amiri(
                             color: AppTheme.textPrimary,
                             fontSize: 18.0,
@@ -227,19 +233,32 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                       },
                       borderRadius: BorderRadius.circular(12),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.accent.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppTheme.accent.withValues(alpha: 0.1)),
+                          border: Border.all(
+                            color: AppTheme.accent.withValues(alpha: 0.1),
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.swap_horiz_rounded, size: 16, color: AppTheme.accent),
+                            const Icon(
+                              Icons.swap_horiz_rounded,
+                              size: 16,
+                              color: AppTheme.accent,
+                            ),
                             const SizedBox(width: 4),
                             Text(
-                              _hijriFocused ? AppLocalizations.of(context)!.hijriCalendar : AppLocalizations.of(context)!.gregorianCalendar,
+                              _hijriFocused
+                                  ? AppLocalizations.of(context)!.hijriCalendar
+                                  : AppLocalizations.of(
+                                      context,
+                                    )!.gregorianCalendar,
                               style: GoogleFonts.outfit(
                                 color: AppTheme.accent,
                                 fontSize: 10,
@@ -255,8 +274,11 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                   AnimatedRotation(
                     turns: _isExpanded ? 0.5 : 0.0,
                     duration: const Duration(milliseconds: 200),
-                    child: const Icon(Icons.keyboard_arrow_down_rounded,
-                        color: AppTheme.textSecondary, size: 24.0),
+                    child: const Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: AppTheme.textSecondary,
+                      size: 24.0,
+                    ),
                   ),
                 ],
               ),
@@ -269,14 +291,17 @@ class _CalendarWidgetState extends State<CalendarWidget> {
               firstDay: DateTime(1900, 1, 1),
               lastDay: DateTime.now(),
               focusedDay: _focusedDay,
-              calendarFormat: _isExpanded ? CalendarFormat.month : CalendarFormat.week,
+              calendarFormat: _isExpanded
+                  ? CalendarFormat.month
+                  : CalendarFormat.week,
               rowHeight: 54.0,
               availableCalendarFormats: const {
                 CalendarFormat.month: 'Month',
                 CalendarFormat.week: 'Week',
               },
               headerVisible: _isExpanded,
-              selectedDayPredicate: (day) => isSameDay(day, widget.selectedDate),
+              selectedDayPredicate: (day) =>
+                  isSameDay(day, widget.selectedDate),
               onDaySelected: (selectedDay, focusedDay) {
                 HapticFeedback.selectionClick();
                 setState(() => _focusedDay = focusedDay);
@@ -288,7 +313,10 @@ class _CalendarWidgetState extends State<CalendarWidget> {
               },
               calendarStyle: const CalendarStyle(
                 todayTextStyle: TextStyle(color: AppTheme.textPrimary),
-                selectedTextStyle: TextStyle(color: Colors.black87, fontWeight: FontWeight.w700),
+                selectedTextStyle: TextStyle(
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w700,
+                ),
                 defaultTextStyle: TextStyle(color: AppTheme.textPrimary),
                 weekendTextStyle: TextStyle(color: AppTheme.textSecondary),
                 outsideTextStyle: TextStyle(color: Color(0x66C9D1D9)),
@@ -303,37 +331,49 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                   fontSize: 16.0,
                   fontWeight: FontWeight.w600,
                 ),
-                leftChevronIcon: const Icon(Icons.chevron_left_rounded,
-                    color: AppTheme.textSecondary, size: 24.0),
-                rightChevronIcon: const Icon(Icons.chevron_right_rounded,
-                    color: AppTheme.textSecondary, size: 24.0),
+                leftChevronIcon: const Icon(
+                  Icons.chevron_left_rounded,
+                  color: AppTheme.textSecondary,
+                  size: 24.0,
+                ),
+                rightChevronIcon: const Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppTheme.textSecondary,
+                  size: 24.0,
+                ),
               ),
               daysOfWeekStyle: DaysOfWeekStyle(
                 weekdayStyle: GoogleFonts.outfit(
-                    color: AppTheme.textSecondary.withValues(alpha: 0.8), fontSize: 12.0, fontWeight: FontWeight.w600),
+                  color: AppTheme.textSecondary.withValues(alpha: 0.8),
+                  fontSize: 12.0,
+                  fontWeight: FontWeight.w600,
+                ),
                 weekendStyle: GoogleFonts.outfit(
-                    color: AppTheme.textSecondary.withValues(alpha: 0.8), fontSize: 12.0, fontWeight: FontWeight.w600),
+                  color: AppTheme.textSecondary.withValues(alpha: 0.8),
+                  fontSize: 12.0,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               calendarBuilders: CalendarBuilders(
                 headerTitleBuilder: (context, day) {
                   final h = _getHijriDate(day);
                   final loc = Localizations.localeOf(context).languageCode;
-                  
+
                   // Localize Gregorian Month
                   final gM = DateFormat.MMMM(loc).format(day);
                   final gY = DateFormat.y(loc).format(day);
-                  
+
                   // Localize Hijri Month
                   HijriCalendar.setLocal(loc);
                   final hM = h.getLongMonthName();
                   final hY = h.hYear;
-                  
+
                   final primaryMonth = _hijriFocused ? hM : gM;
                   final primaryYear = _hijriFocused ? '$hY هـ' : gY;
                   final secondaryMonth = _hijriFocused ? gM : hM;
                   final secondaryYear = _hijriFocused ? gY : '$hY هـ';
 
-                  final primaryStyle = _hijriFocused 
+                  final primaryStyle = _hijriFocused
                       ? GoogleFonts.amiri(
                           color: AppTheme.textPrimary,
                           fontSize: 18.0,
@@ -373,9 +413,12 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                     ],
                   );
                 },
-                defaultBuilder: (context, day, focusedDay) => _buildCell(day, false),
-                selectedBuilder: (context, day, focusedDay) => _buildCell(day, true),
-                todayBuilder: (context, day, focusedDay) => _buildCell(day, false, isToday: true),
+                defaultBuilder: (context, day, focusedDay) =>
+                    _buildCell(day, false),
+                selectedBuilder: (context, day, focusedDay) =>
+                    _buildCell(day, true),
+                todayBuilder: (context, day, focusedDay) =>
+                    _buildCell(day, false, isToday: true),
                 markerBuilder: (context, date, events) {
                   final normalized = _normalize(date);
                   final record = widget.monthRecords[normalized];
@@ -391,7 +434,9 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                           color: hasMissed ? AppTheme.missed : AppTheme.saved,
                           boxShadow: [
                             BoxShadow(
-                              color: (hasMissed ? AppTheme.missed : AppTheme.saved).withValues(alpha: 0.4),
+                              color:
+                                  (hasMissed ? AppTheme.missed : AppTheme.saved)
+                                      .withValues(alpha: 0.4),
                               blurRadius: 4.0,
                             ),
                           ],

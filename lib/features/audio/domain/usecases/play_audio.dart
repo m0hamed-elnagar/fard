@@ -9,12 +9,9 @@ import 'package:injectable/injectable.dart';
 class PlayAudio implements UseCase<void, PlayAudioParams> {
   final AudioRepository audioRepository;
   final AudioPlayerService playerService;
-  
-  const PlayAudio({
-    required this.audioRepository,
-    required this.playerService,
-  });
-  
+
+  const PlayAudio({required this.audioRepository, required this.playerService});
+
   @override
   Future<Result<void>> call(PlayAudioParams params) async {
     // 1. Get audio track
@@ -24,10 +21,10 @@ class PlayAudio implements UseCase<void, PlayAudioParams> {
       ayahNumber: params.ayah.ayahNumberInSurah,
       quality: params.quality,
     );
-    
+
     // 2. Play using playerService (which handles remote/local switching automatically)
     return playerService.playStreaming(
-      track, 
+      track,
       mode: params.mode,
       metadata: {
         'title': 'Ayah ${params.ayah.ayahNumberInSurah}',
@@ -43,7 +40,7 @@ class PlayAudioParams {
   final AudioQuality quality;
   final String? audioUrl;
   final AudioPlayMode mode;
-  
+
   const PlayAudioParams({
     required this.ayah,
     required this.reciterId,

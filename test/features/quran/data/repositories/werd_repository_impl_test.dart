@@ -27,7 +27,10 @@ void main() {
         streak: 1,
       );
 
-      await sharedPreferences.setString('werd_progress_default', json.encode(progress.toJson()));
+      await sharedPreferences.setString(
+        'werd_progress_default',
+        json.encode(progress.toJson()),
+      );
 
       // 2. Act: Get progress today
       final result = await repository.getProgress();
@@ -36,7 +39,7 @@ void main() {
       final fetchedProgress = result.fold((_) => null, (p) => p)!;
       expect(fetchedProgress.totalAmountReadToday, 0);
       // In my new implementation it sets sessionStartAbsolute to (lastReadAbsolute ?? 0) + 1
-      expect(fetchedProgress.sessionStartAbsolute, 11); 
+      expect(fetchedProgress.sessionStartAbsolute, 11);
       expect(fetchedProgress.lastReadAbsolute, 10); // Should keep last read
     });
   });

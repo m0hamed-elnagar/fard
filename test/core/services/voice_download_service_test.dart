@@ -6,7 +6,10 @@ import 'package:path_provider_platform_interface/path_provider_platform_interfac
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 class MockHttpClient extends Mock implements http.Client {}
-class FakePathProviderPlatform extends Fake with MockPlatformInterfaceMixin implements PathProviderPlatform {
+
+class FakePathProviderPlatform extends Fake
+    with MockPlatformInterfaceMixin
+    implements PathProviderPlatform {
   @override
   Future<String?> getApplicationDocumentsPath() async => '/tmp/docs';
   @override
@@ -25,12 +28,15 @@ void main() {
 
   group('VoiceDownloadService', () {
     test('azanVoices contains islamcan links', () {
-      expect(VoiceDownloadService.azanVoices.values, anyElement(contains('islamcan.com')));
+      expect(
+        VoiceDownloadService.azanVoices.values,
+        anyElement(contains('islamcan.com')),
+      );
     });
 
     test('getFileName returns sanitized name', () {
       // Accessing private method via reflection or just testing behavior if it was public
-      // Since it's private, we test through public methods if possible, 
+      // Since it's private, we test through public methods if possible,
       // but here I just want to ensure the logic in my head matches.
     });
 

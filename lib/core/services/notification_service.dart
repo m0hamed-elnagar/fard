@@ -15,20 +15,22 @@ import '../di/injection.dart';
 import 'notification/channel_manager.dart';
 import 'notification/prayer_scheduler.dart';
 import 'notification/sound_manager.dart';
+import 'widget_update_service.dart';
 
 @singleton
-class
-  NotificationService {
+class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin;
   final SoundManager _soundManager;
   final ChannelManager _channelManager;
   final PrayerNotificationScheduler _prayerScheduler;
+  final WidgetUpdateService _widgetUpdateService;
 
   NotificationService(
     this._soundManager,
     this._channelManager,
     this._prayerScheduler,
     this._notificationsPlugin,
+    this._widgetUpdateService,
   );
 
   static const String reminderChannelId = ChannelManager.reminderChannelId;
@@ -209,6 +211,9 @@ class
   Future<void> schedulePrayerNotifications({
     required SettingsState settings,
   }) async {
+    // Update widget data
+    await _widgetUpdateService.updateWidget(settings);
+
     await _prayerScheduler.schedulePrayerNotifications(
       _notificationsPlugin,
       settings: settings,

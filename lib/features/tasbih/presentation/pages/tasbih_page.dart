@@ -15,7 +15,8 @@ class TasbihPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => getIt<TasbihBloc>()..add(const TasbihEvent.loadData()),
+      create: (context) =>
+          getIt<TasbihBloc>()..add(const TasbihEvent.loadData()),
       child: const TasbihView(),
     );
   }
@@ -40,7 +41,7 @@ class _TasbihViewState extends State<TasbihView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return BlocBuilder<TasbihBloc, TasbihState>(
       builder: (context, state) {
         if (state.isLoading) {
@@ -53,15 +54,23 @@ class _TasbihViewState extends State<TasbihView> {
           return _buildErrorView(context, state.error!, l10n);
         }
 
-        final currentDhikr = state.currentCategory.items.isNotEmpty 
-            ? state.currentCategory.items[state.currentCycleIndex.clamp(0, state.currentCategory.items.length - 1)]
+        final currentDhikr = state.currentCategory.items.isNotEmpty
+            ? state.currentCategory.items[state.currentCycleIndex.clamp(
+                0,
+                state.currentCategory.items.length - 1,
+              )]
             : null;
 
-        final title = _getLocalizedCategoryName(state.currentCategory.id, l10n) ?? state.currentCategory.name;
+        final title =
+            _getLocalizedCategoryName(state.currentCategory.id, l10n) ??
+            state.currentCategory.name;
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+            title: Text(
+              title,
+              style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+            ),
             actions: [
               IconButton(
                 icon: const Icon(Icons.settings_outlined),
@@ -72,20 +81,23 @@ class _TasbihViewState extends State<TasbihView> {
           body: LayoutBuilder(
             builder: (context, constraints) {
               final maxHeight = constraints.maxHeight;
-              
+
               // Responsive sizes
               final screenHeight = MediaQuery.of(context).size.height;
               final isSmallScreen = screenHeight < 700;
               final counterSize = isSmallScreen ? 180.0 : 240.0;
               final buttonSize = isSmallScreen ? 80.0 : 100.0;
-              
+
               return SingleChildScrollView(
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(minHeight: maxHeight),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24.0,
+                      vertical: 16.0,
+                    ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -94,26 +106,30 @@ class _TasbihViewState extends State<TasbihView> {
                           children: [
                             _buildCategorySelector(context, state, l10n),
                             const SizedBox(height: 20),
-                            if (state.currentCategory.sequenceMode == 'rotating') ...[
+                            if (state.currentCategory.sequenceMode ==
+                                'rotating') ...[
                               CycleProgressIndicator(
                                 currentIndex: state.currentCycleIndex,
                                 totalCycles: state.currentCategory.cycles,
                               ),
                               const SizedBox(height: 16),
                             ],
-                            if (state.showCompletionDua && state.currentCompletionDua != null)
+                            if (state.showCompletionDua &&
+                                state.currentCompletionDua != null)
                               CompletionDuaCard(state: state)
                             else if (currentDhikr != null)
                               DhikrDisplayCard(
                                 arabic: currentDhikr.arabic,
                                 transliteration: currentDhikr.transliteration,
                                 translation: currentDhikr.translation,
-                                showTransliteration: state.data.settings.showTransliteration,
-                                showTranslation: state.data.settings.showTranslation,
+                                showTransliteration:
+                                    state.data.settings.showTransliteration,
+                                showTranslation:
+                                    state.data.settings.showTranslation,
                               ),
                           ],
                         ),
-                        
+
                         // Bottom Section: Counter & Button
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 32.0),
@@ -124,10 +140,17 @@ class _TasbihViewState extends State<TasbihView> {
                                 children: [
                                   CounterCircle(
                                     count: state.currentCycleCount,
-                                    targetCount: state.customTasbihTarget ?? 
-                                      (state.currentCategory.sequenceMode == 'rotating' 
-                                        ? state.currentCategory.countsPerCycle 
-                                        : (currentDhikr?.targetCount ?? state.currentCategory.countsPerCycle)),
+                                    targetCount:
+                                        state.customTasbihTarget ??
+                                        (state.currentCategory.sequenceMode ==
+                                                'rotating'
+                                            ? state
+                                                  .currentCategory
+                                                  .countsPerCycle
+                                            : (currentDhikr?.targetCount ??
+                                                  state
+                                                      .currentCategory
+                                                      .countsPerCycle)),
                                     size: counterSize,
                                   ),
                                   Positioned(
@@ -137,8 +160,15 @@ class _TasbihViewState extends State<TasbihView> {
                                       color: AppTheme.surfaceLight,
                                       shape: const CircleBorder(),
                                       child: IconButton(
-                                        icon: const Icon(Icons.edit_note_rounded, color: AppTheme.accent),
-                                        onPressed: () => _showCustomTargetDialog(context, state),
+                                        icon: const Icon(
+                                          Icons.edit_note_rounded,
+                                          color: AppTheme.accent,
+                                        ),
+                                        onPressed: () =>
+                                            _showCustomTargetDialog(
+                                              context,
+                                              state,
+                                            ),
                                         tooltip: l10n.customTasbihTarget,
                                       ),
                                     ),
@@ -162,7 +192,11 @@ class _TasbihViewState extends State<TasbihView> {
     );
   }
 
-  Widget _buildErrorView(BuildContext context, String error, AppLocalizations l10n) {
+  Widget _buildErrorView(
+    BuildContext context,
+    String error,
+    AppLocalizations l10n,
+  ) {
     return Scaffold(
       body: Center(
         child: Padding(
@@ -172,14 +206,24 @@ class _TasbihViewState extends State<TasbihView> {
             children: [
               const Icon(Icons.error_outline, color: AppTheme.missed, size: 48),
               const SizedBox(height: 16),
-              Text(l10n.errorLoadingTasbih, 
-                style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(
+                l10n.errorLoadingTasbih,
+                style: GoogleFonts.outfit(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: 12),
-              Text(error, textAlign: TextAlign.center, 
-                style: GoogleFonts.outfit(color: AppTheme.textSecondary)),
+              Text(
+                error,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.outfit(color: AppTheme.textSecondary),
+              ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () => context.read<TasbihBloc>().add(const TasbihEvent.loadData()),
+                onPressed: () => context.read<TasbihBloc>().add(
+                  const TasbihEvent.loadData(),
+                ),
                 child: Text(l10n.retry),
               ),
             ],
@@ -189,7 +233,11 @@ class _TasbihViewState extends State<TasbihView> {
     );
   }
 
-  Widget _buildControlBar(BuildContext context, TasbihState state, double buttonSize) {
+  Widget _buildControlBar(
+    BuildContext context,
+    TasbihState state,
+    double buttonSize,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -200,17 +248,22 @@ class _TasbihViewState extends State<TasbihView> {
         ),
         TasbihButton(
           size: buttonSize,
-          onTap: () => context.read<TasbihBloc>().add(const TasbihEvent.increment()),
+          onTap: () =>
+              context.read<TasbihBloc>().add(const TasbihEvent.increment()),
         ),
         IconButton(
           icon: Icon(
-            state.data.settings.hapticFeedback 
-                ? Icons.vibration_rounded 
-                : Icons.phonelink_ring_rounded, 
+            state.data.settings.hapticFeedback
+                ? Icons.vibration_rounded
+                : Icons.phonelink_ring_rounded,
             size: 32,
           ),
-          onPressed: () => context.read<TasbihBloc>().add(const TasbihEvent.toggleVibration()),
-          color: state.data.settings.hapticFeedback ? AppTheme.accent : AppTheme.textSecondary,
+          onPressed: () => context.read<TasbihBloc>().add(
+            const TasbihEvent.toggleVibration(),
+          ),
+          color: state.data.settings.hapticFeedback
+              ? AppTheme.accent
+              : AppTheme.textSecondary,
         ),
       ],
     );
@@ -218,27 +271,43 @@ class _TasbihViewState extends State<TasbihView> {
 
   String? _getLocalizedCategoryName(String id, AppLocalizations l10n) {
     switch (id) {
-      case 'tasbih_after_salah': return l10n.tasbih_after_salah_name;
-      case 'tasbih_fatimah': return l10n.tasbih_fatimah_name;
-      case 'four_foundations': return l10n.four_foundations_name;
-      case 'yunus_dhikr': return l10n.yunus_dhikr_name;
-      case 'morning_evening': return l10n.morning_evening_name;
-      case 'istighfar': return l10n.istighfar_name;
-      case 'salat_ala_nabi': return 'الصلاة على النبي';
-      default: return null;
+      case 'tasbih_after_salah':
+        return l10n.tasbih_after_salah_name;
+      case 'tasbih_fatimah':
+        return l10n.tasbih_fatimah_name;
+      case 'four_foundations':
+        return l10n.four_foundations_name;
+      case 'yunus_dhikr':
+        return l10n.yunus_dhikr_name;
+      case 'morning_evening':
+        return l10n.morning_evening_name;
+      case 'istighfar':
+        return l10n.istighfar_name;
+      case 'salat_ala_nabi':
+        return 'الصلاة على النبي';
+      default:
+        return null;
     }
   }
 
   String? _getLocalizedCategoryDesc(String id, AppLocalizations l10n) {
     switch (id) {
-      case 'tasbih_after_salah': return l10n.tasbih_after_salah_desc;
-      case 'tasbih_fatimah': return l10n.tasbih_fatimah_desc;
-      case 'four_foundations': return l10n.four_foundations_desc;
-      case 'yunus_dhikr': return l10n.yunus_dhikr_desc;
-      case 'morning_evening': return l10n.morning_evening_desc;
-      case 'istighfar': return l10n.istighfar_desc;
-      case 'salat_ala_nabi': return 'الصلاة والسلام على نبينا محمد صلى الله عليه وسلم';
-      default: return null;
+      case 'tasbih_after_salah':
+        return l10n.tasbih_after_salah_desc;
+      case 'tasbih_fatimah':
+        return l10n.tasbih_fatimah_desc;
+      case 'four_foundations':
+        return l10n.four_foundations_desc;
+      case 'yunus_dhikr':
+        return l10n.yunus_dhikr_desc;
+      case 'morning_evening':
+        return l10n.morning_evening_desc;
+      case 'istighfar':
+        return l10n.istighfar_desc;
+      case 'salat_ala_nabi':
+        return 'الصلاة والسلام على نبينا محمد صلى الله عليه وسلم';
+      default:
+        return null;
     }
   }
 
@@ -259,14 +328,21 @@ class _TasbihViewState extends State<TasbihView> {
               context.read<TasbihBloc>().add(const TasbihEvent.reset());
               Navigator.pop(context);
             },
-            child: Text(l10n.delete, style: const TextStyle(color: AppTheme.missed)),
+            child: Text(
+              l10n.delete,
+              style: const TextStyle(color: AppTheme.missed),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCategorySelector(BuildContext context, TasbihState state, AppLocalizations l10n) {
+  Widget _buildCategorySelector(
+    BuildContext context,
+    TasbihState state,
+    AppLocalizations l10n,
+  ) {
     return InkWell(
       onTap: () => _showCategorySheet(context, state),
       borderRadius: BorderRadius.circular(16),
@@ -280,11 +356,16 @@ class _TasbihViewState extends State<TasbihView> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.collections_bookmark_rounded, color: AppTheme.accent, size: 20),
+            const Icon(
+              Icons.collections_bookmark_rounded,
+              color: AppTheme.accent,
+              size: 20,
+            ),
             const SizedBox(width: 12),
             Flexible(
               child: Text(
-                _getLocalizedCategoryName(state.currentCategory.id, l10n) ?? state.currentCategory.name,
+                _getLocalizedCategoryName(state.currentCategory.id, l10n) ??
+                    state.currentCategory.name,
                 style: GoogleFonts.outfit(
                   fontWeight: FontWeight.w600,
                   fontSize: 15,
@@ -294,7 +375,11 @@ class _TasbihViewState extends State<TasbihView> {
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.unfold_more_rounded, color: AppTheme.textSecondary, size: 18),
+            const Icon(
+              Icons.unfold_more_rounded,
+              color: AppTheme.textSecondary,
+              size: 18,
+            ),
           ],
         ),
       ),
@@ -317,7 +402,9 @@ class _TasbihViewState extends State<TasbihView> {
           keyboardType: TextInputType.number,
           autofocus: true,
           decoration: InputDecoration(
-            hintText: l10n.customTasbihTargetHint(state.currentCategory.countsPerCycle),
+            hintText: l10n.customTasbihTargetHint(
+              state.currentCategory.countsPerCycle,
+            ),
           ),
         ),
         actions: [
@@ -326,7 +413,10 @@ class _TasbihViewState extends State<TasbihView> {
               tasbihBloc.add(const TasbihEvent.updateCustomTarget(null));
               Navigator.pop(context);
             },
-            child: Text(l10n.resetItem, style: const TextStyle(color: AppTheme.missed)),
+            child: Text(
+              l10n.resetItem,
+              style: const TextStyle(color: AppTheme.missed),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context),

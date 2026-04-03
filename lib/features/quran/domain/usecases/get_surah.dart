@@ -8,9 +8,9 @@ import 'package:injectable/injectable.dart';
 @injectable
 class GetSurah implements UseCase<Surah, GetSurahParams> {
   final QuranRepository repository;
-  
+
   const GetSurah(this.repository);
-  
+
   @override
   Future<Result<Surah>> call(GetSurahParams params) {
     return repository.getSurah(
@@ -23,9 +23,6 @@ class GetSurah implements UseCase<Surah, GetSurahParams> {
 class GetSurahParams {
   final SurahNumber surahNumber;
   final String? translation;
-  
-  const GetSurahParams({
-    required this.surahNumber,
-    this.translation,
-  });
+
+  const GetSurahParams({required this.surahNumber, this.translation});
 }

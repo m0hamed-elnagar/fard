@@ -9,10 +9,26 @@ abstract class AudioEvent extends Equatable {
   // Factory-like methods for convenience
   static AudioEvent loadReciters() => const LoadReciters();
   static AudioEvent selectReciter(Reciter reciter) => SelectReciter(reciter);
-  static AudioEvent playAyah({required int surahNumber, required int ayahNumber, Reciter? reciter}) =>
-      PlayAyah(surahNumber: surahNumber, ayahNumber: ayahNumber, reciter: reciter);
-  static AudioEvent playSurah({required int surahNumber, Reciter? reciter, int? startAyah, int? ayahCount}) =>
-      PlaySurah(surahNumber: surahNumber, reciter: reciter, startAyah: startAyah, ayahCount: ayahCount);
+  static AudioEvent playAyah({
+    required int surahNumber,
+    required int ayahNumber,
+    Reciter? reciter,
+  }) => PlayAyah(
+    surahNumber: surahNumber,
+    ayahNumber: ayahNumber,
+    reciter: reciter,
+  );
+  static AudioEvent playSurah({
+    required int surahNumber,
+    Reciter? reciter,
+    int? startAyah,
+    int? ayahCount,
+  }) => PlaySurah(
+    surahNumber: surahNumber,
+    reciter: reciter,
+    startAyah: startAyah,
+    ayahCount: ayahCount,
+  );
   static AudioEvent togglePlayback() => const TogglePlayback();
   static AudioEvent pause() => const Pause();
   static AudioEvent resume() => const Resume();
@@ -22,17 +38,23 @@ abstract class AudioEvent extends Equatable {
   static AudioEvent skipToPrevious() => const SkipToPrevious();
   static AudioEvent changeSpeed(double speed) => ChangeSpeed(speed);
   static AudioEvent toggleRepeat() => const ToggleRepeat();
-  static AudioEvent changePlaybackMode(AudioPlayMode mode) => ChangePlaybackMode(mode);
-  static AudioEvent changeQuality(AudioQuality quality) => ChangeQuality(quality);
+  static AudioEvent changePlaybackMode(AudioPlayMode mode) =>
+      ChangePlaybackMode(mode);
+  static AudioEvent changeQuality(AudioQuality quality) =>
+      ChangeQuality(quality);
   static AudioEvent hideBanner() => const HideBanner();
   static AudioEvent showBanner() => const ShowBanner();
   static AudioEvent statusChanged(AudioStatus status) => StatusChanged(status);
   static AudioEvent lastErrorChanged(String? error) => LastErrorChanged(error);
-  static AudioEvent positionChanged(Duration position) => PositionChanged(position);
-  static AudioEvent durationChanged(Duration duration) => DurationChanged(duration);
+  static AudioEvent positionChanged(Duration position) =>
+      PositionChanged(position);
+  static AudioEvent durationChanged(Duration duration) =>
+      DurationChanged(duration);
   static AudioEvent indexChanged(int? index) => IndexChanged(index);
-  static AudioEvent updateCurrentPosition({required int surahNumber, int? ayahNumber}) =>
-      UpdateCurrentPosition(surahNumber: surahNumber, ayahNumber: ayahNumber);
+  static AudioEvent updateCurrentPosition({
+    required int surahNumber,
+    int? ayahNumber,
+  }) => UpdateCurrentPosition(surahNumber: surahNumber, ayahNumber: ayahNumber);
   static AudioEvent refreshReciterStatuses() => const RefreshReciterStatuses();
 }
 
@@ -63,7 +85,11 @@ class PlayAyah extends AudioEvent {
   final int surahNumber;
   final int ayahNumber;
   final Reciter? reciter;
-  const PlayAyah({required this.surahNumber, required this.ayahNumber, this.reciter});
+  const PlayAyah({
+    required this.surahNumber,
+    required this.ayahNumber,
+    this.reciter,
+  });
   @override
   List<Object?> get props => [surahNumber, ayahNumber, reciter];
 }
@@ -73,7 +99,12 @@ class PlaySurah extends AudioEvent {
   final Reciter? reciter;
   final int? startAyah;
   final int? ayahCount;
-  const PlaySurah({required this.surahNumber, this.reciter, this.startAyah, this.ayahCount});
+  const PlaySurah({
+    required this.surahNumber,
+    this.reciter,
+    this.startAyah,
+    this.ayahCount,
+  });
   @override
   List<Object?> get props => [surahNumber, reciter, startAyah, ayahCount];
 }

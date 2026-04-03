@@ -18,7 +18,8 @@ class BookmarkList extends StatefulWidget {
   State<BookmarkList> createState() => _BookmarkListState();
 }
 
-class _BookmarkListState extends State<BookmarkList> with AutomaticKeepAliveClientMixin {
+class _BookmarkListState extends State<BookmarkList>
+    with AutomaticKeepAliveClientMixin {
   final Set<AyahNumber> _selectedBookmarks = {};
   bool _isSelectionMode = false;
 
@@ -52,44 +53,56 @@ class _BookmarkListState extends State<BookmarkList> with AutomaticKeepAliveClie
     });
   }
 
-  Future<bool> _confirmDelete(BuildContext context, {required int count}) async {
+  Future<bool> _confirmDelete(
+    BuildContext context, {
+    required int count,
+  }) async {
     return await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'تأكيد الحذف',
-          style: GoogleFonts.amiri(fontWeight: FontWeight.bold),
-          textAlign: TextAlign.right,
-        ),
-        content: Text(
-          count > 1 
-            ? 'هل أنت متأكد من حذف ${count.toArabicIndic()} إشارات مرجعية؟'
-            : 'هل أنت متأكد من حذف هذه الإشارة المرجعية؟',
-          style: GoogleFonts.amiri(),
-          textAlign: TextAlign.right,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('إلغاء', style: GoogleFonts.amiri(color: Colors.grey)),
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(
+              'تأكيد الحذف',
+              style: GoogleFonts.amiri(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.right,
+            ),
+            content: Text(
+              count > 1
+                  ? 'هل أنت متأكد من حذف ${count.toArabicIndic()} إشارات مرجعية؟'
+                  : 'هل أنت متأكد من حذف هذه الإشارة المرجعية؟',
+              style: GoogleFonts.amiri(),
+              textAlign: TextAlign.right,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(
+                  'إلغاء',
+                  style: GoogleFonts.amiri(color: Colors.grey),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text('حذف', style: GoogleFonts.amiri(color: Colors.red)),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text('حذف', style: GoogleFonts.amiri(color: Colors.red)),
-          ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
     return BlocConsumer<QuranBloc, QuranState>(
-      listenWhen: (previous, current) => previous.bookmarks != current.bookmarks,
+      listenWhen: (previous, current) =>
+          previous.bookmarks != current.bookmarks,
       listener: (context, state) {
-        final currentAyahNumbers = state.bookmarks.map((b) => b.ayahNumber).toSet();
-        final toRemove = _selectedBookmarks.where((selected) => !currentAyahNumbers.contains(selected)).toList();
+        final currentAyahNumbers = state.bookmarks
+            .map((b) => b.ayahNumber)
+            .toSet();
+        final toRemove = _selectedBookmarks
+            .where((selected) => !currentAyahNumbers.contains(selected))
+            .toList();
         if (toRemove.isNotEmpty) {
           setState(() {
             for (final item in toRemove) {
@@ -103,12 +116,16 @@ class _BookmarkListState extends State<BookmarkList> with AutomaticKeepAliveClie
       },
       builder: (context, state) {
         final bookmarks = state.bookmarks;
-        
+
         final filteredBookmarks = bookmarks.where((bookmark) {
           if (widget.searchQuery.isEmpty) return true;
-          final surahName = quran.getSurahNameArabic(bookmark.ayahNumber.surahNumber);
-          return surahName.contains(widget.searchQuery) || 
-                 bookmark.ayahNumber.ayahNumberInSurah.toString().contains(widget.searchQuery);
+          final surahName = quran.getSurahNameArabic(
+            bookmark.ayahNumber.surahNumber,
+          );
+          return surahName.contains(widget.searchQuery) ||
+              bookmark.ayahNumber.ayahNumberInSurah.toString().contains(
+                widget.searchQuery,
+              );
         }).toList();
 
         if (filteredBookmarks.isEmpty) {
@@ -116,7 +133,11 @@ class _BookmarkListState extends State<BookmarkList> with AutomaticKeepAliveClie
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.bookmark_border_rounded, size: 64, color: Colors.grey),
+                const Icon(
+                  Icons.bookmark_border_rounded,
+                  size: 64,
+                  color: Colors.grey,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'لا توجد إشارات مرجعية',
@@ -131,17 +152,25 @@ class _BookmarkListState extends State<BookmarkList> with AutomaticKeepAliveClie
           children: [
             if (_isSelectionMode)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                 child: Row(
                   children: [
                     IconButton(
                       icon: const Icon(Icons.delete_outline, color: Colors.red),
                       onPressed: () async {
-                        if (await _confirmDelete(context, count: _selectedBookmarks.length)) {
+                        if (await _confirmDelete(
+                          context,
+                          count: _selectedBookmarks.length,
+                        )) {
                           if (context.mounted) {
                             context.read<QuranBloc>().add(
-                              QuranEvent.removeMultipleBookmarks(_selectedBookmarks.toList()),
+                              QuranEvent.removeMultipleBookmarks(
+                                _selectedBookmarks.toList(),
+                              ),
                             );
                             _clearSelection();
                           }
@@ -151,7 +180,10 @@ class _BookmarkListState extends State<BookmarkList> with AutomaticKeepAliveClie
                     const Spacer(),
                     Text(
                       'تم تحديد ${_selectedBookmarks.length.toArabicIndic()}',
-                      style: GoogleFonts.amiri(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: GoogleFonts.amiri(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     IconButton(
@@ -167,12 +199,16 @@ class _BookmarkListState extends State<BookmarkList> with AutomaticKeepAliveClie
                 itemCount: filteredBookmarks.length,
                 itemBuilder: (context, index) {
                   final bookmark = filteredBookmarks[index];
-                  final surahName = quran.getSurahNameArabic(bookmark.ayahNumber.surahNumber);
-                  final page = quran.getPageNumber(
-                    bookmark.ayahNumber.surahNumber, 
-                    bookmark.ayahNumber.ayahNumberInSurah
+                  final surahName = quran.getSurahNameArabic(
+                    bookmark.ayahNumber.surahNumber,
                   );
-                  final isSelected = _selectedBookmarks.contains(bookmark.ayahNumber);
+                  final page = quran.getPageNumber(
+                    bookmark.ayahNumber.surahNumber,
+                    bookmark.ayahNumber.ayahNumberInSurah,
+                  );
+                  final isSelected = _selectedBookmarks.contains(
+                    bookmark.ayahNumber,
+                  );
 
                   return Card(
                     elevation: isSelected ? 4 : 0,
@@ -180,25 +216,37 @@ class _BookmarkListState extends State<BookmarkList> with AutomaticKeepAliveClie
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                       side: BorderSide(
-                        color: isSelected ? Theme.of(context).primaryColor : Colors.grey.withValues(alpha: 0.2),
+                        color: isSelected
+                            ? Theme.of(context).primaryColor
+                            : Colors.grey.withValues(alpha: 0.2),
                         width: isSelected ? 2 : 1,
                       ),
                     ),
                     child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       leading: _isSelectionMode
                           ? Checkbox(
                               value: isSelected,
                               activeColor: Theme.of(context).primaryColor,
-                              onChanged: (_) => _toggleSelection(bookmark.ayahNumber),
+                              onChanged: (_) =>
+                                  _toggleSelection(bookmark.ayahNumber),
                             )
                           : IconButton(
-                              icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                color: Colors.red,
+                                size: 20,
+                              ),
                               onPressed: () async {
                                 if (await _confirmDelete(context, count: 1)) {
                                   if (context.mounted) {
                                     context.read<QuranBloc>().add(
-                                      QuranEvent.removeBookmark(bookmark.ayahNumber),
+                                      QuranEvent.removeBookmark(
+                                        bookmark.ayahNumber,
+                                      ),
                                     );
                                   }
                                 }
@@ -224,15 +272,20 @@ class _BookmarkListState extends State<BookmarkList> with AutomaticKeepAliveClie
                             Text(
                               'الآية ${bookmark.ayahNumber.ayahNumberInSurah.toArabicIndic()} | صفحة ${page.toArabicIndic()}',
                               style: GoogleFonts.amiri(
-                                fontSize: 14, 
+                                fontSize: 14,
                                 color: Colors.grey[600],
                                 height: 1.4,
                                 wordSpacing: 2,
                               ),
                             ),
                             Text(
-                              DateFormat('yyyy/MM/dd HH:mm').format(bookmark.createdAt),
-                              style: const TextStyle(fontSize: 10, color: Colors.grey),
+                              DateFormat(
+                                'yyyy/MM/dd HH:mm',
+                              ).format(bookmark.createdAt),
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey,
+                              ),
                             ),
                           ],
                         ),
@@ -251,14 +304,19 @@ class _BookmarkListState extends State<BookmarkList> with AutomaticKeepAliveClie
                           );
                         }
                       },
-                      trailing: !_isSelectionMode ? Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.amber.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.bookmark_rounded, color: Colors.amber),
-                      ) : null,
+                      trailing: !_isSelectionMode
+                          ? Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.amber.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.bookmark_rounded,
+                                color: Colors.amber,
+                              ),
+                            )
+                          : null,
                     ),
                   );
                 },

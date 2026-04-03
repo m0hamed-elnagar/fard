@@ -24,7 +24,8 @@ class CustomToggle extends StatefulWidget {
   State<CustomToggle> createState() => _CustomToggleState();
 }
 
-class _CustomToggleState extends State<CustomToggle> with SingleTickerProviderStateMixin {
+class _CustomToggleState extends State<CustomToggle>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _toggleAnimation;
@@ -36,11 +37,14 @@ class _CustomToggleState extends State<CustomToggle> with SingleTickerProviderSt
       vsync: this,
       duration: const Duration(milliseconds: 250),
     );
-    _scaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.9), weight: 50),
-      TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.0), weight: 50),
-    ]).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.5)));
-    
+    _scaleAnimation =
+        TweenSequence<double>([
+          TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.9), weight: 50),
+          TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.0), weight: 50),
+        ]).animate(
+          CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.5)),
+        );
+
     _toggleAnimation = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOutBack,
@@ -84,22 +88,29 @@ class _CustomToggleState extends State<CustomToggle> with SingleTickerProviderSt
           child: AnimatedBuilder(
             animation: _controller,
             builder: (context, child) {
-              final color = Color.lerp(AppTheme.surfaceLight, AppTheme.accent, _toggleAnimation.value);
-              final borderColor = Color.lerp(AppTheme.cardBorder, AppTheme.accent, _toggleAnimation.value);
-              
+              final color = Color.lerp(
+                AppTheme.surfaceLight,
+                AppTheme.accent,
+                _toggleAnimation.value,
+              );
+              final borderColor = Color.lerp(
+                AppTheme.cardBorder,
+                AppTheme.accent,
+                _toggleAnimation.value,
+              );
+
               return Container(
                 width: widget.width,
                 height: widget.height,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(widget.height / 2),
                   color: color,
-                  border: Border.all(
-                    color: borderColor!,
-                    width: 1.5,
-                  ),
+                  border: Border.all(color: borderColor!, width: 1.5),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.accent.withValues(alpha: 0.3 * _toggleAnimation.value),
+                      color: AppTheme.accent.withValues(
+                        alpha: 0.3 * _toggleAnimation.value,
+                      ),
                       blurRadius: 8 * _toggleAnimation.value,
                       spreadRadius: 1 * _toggleAnimation.value,
                       offset: Offset(0, 2 * _toggleAnimation.value),
@@ -125,18 +136,26 @@ class _CustomToggleState extends State<CustomToggle> with SingleTickerProviderSt
                             ),
                           ],
                         ),
-                        child: (widget.activeLabel != null || widget.inactiveLabel != null) 
-                          ? Center(
-                              child: Text(
-                                widget.value ? (widget.activeLabel ?? '') : (widget.inactiveLabel ?? ''),
-                                style: TextStyle(
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.lerp(AppTheme.textSecondary, AppTheme.accent, _toggleAnimation.value),
+                        child:
+                            (widget.activeLabel != null ||
+                                widget.inactiveLabel != null)
+                            ? Center(
+                                child: Text(
+                                  widget.value
+                                      ? (widget.activeLabel ?? '')
+                                      : (widget.inactiveLabel ?? ''),
+                                  style: TextStyle(
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color.lerp(
+                                      AppTheme.textSecondary,
+                                      AppTheme.accent,
+                                      _toggleAnimation.value,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            )
-                          : null,
+                              )
+                            : null,
                       ),
                     ),
                   ],

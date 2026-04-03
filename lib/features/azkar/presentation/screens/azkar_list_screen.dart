@@ -55,13 +55,9 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
           ),
           body: Column(
             children: [
-              if (state.isLoading) 
-                const LinearProgressIndicator(minHeight: 2),
-              if (state.azkar.isNotEmpty)
-                _buildProgressBar(state.azkar),
-              Expanded(
-                child: _buildBody(context, state),
-              ),
+              if (state.isLoading) const LinearProgressIndicator(minHeight: 2),
+              if (state.azkar.isNotEmpty) _buildProgressBar(state.azkar),
+              Expanded(child: _buildBody(context, state)),
             ],
           ),
         );
@@ -78,9 +74,13 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
-                value: (azkar.isNotEmpty) ? (_currentPage + 1) / azkar.length : 0,
+                value: (azkar.isNotEmpty)
+                    ? (_currentPage + 1) / azkar.length
+                    : 0,
                 backgroundColor: AppTheme.surfaceLight,
-                valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.accent),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  AppTheme.accent,
+                ),
                 minHeight: 6,
               ),
             ),
@@ -106,14 +106,17 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
       builder: (context) => AlertDialog(
         title: Text(l10n.resetAllProgress, style: GoogleFonts.amiri()),
         content: Text(
-          l10n.localeName == 'ar' 
-            ? 'هل أنت متأكد من إعادة تعيين جميع تقدم هذه الفئة؟'
-            : 'Are you sure you want to reset all progress for this category?',
+          l10n.localeName == 'ar'
+              ? 'هل أنت متأكد من إعادة تعيين جميع تقدم هذه الفئة؟'
+              : 'Are you sure you want to reset all progress for this category?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(color: AppTheme.textSecondary),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -148,8 +151,11 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.info_outline,
-                size: 48, color: AppTheme.textSecondary),
+            const Icon(
+              Icons.info_outline,
+              size: 48,
+              color: AppTheme.textSecondary,
+            ),
             const SizedBox(height: 16),
             Text(
               l10n.noItemsFound,
@@ -176,10 +182,13 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
                   context.read<AzkarBloc>().add(AzkarEvent.resetItem(index));
                 },
                 onTap: () async {
-                  context.read<AzkarBloc>().add(AzkarEvent.incrementCount(index));
+                  context.read<AzkarBloc>().add(
+                    AzkarEvent.incrementCount(index),
+                  );
 
                   // Tactile feedback
-                  if (!Platform.isWindows && await Vibration.hasVibrator() == true) {
+                  if (!Platform.isWindows &&
+                      await Vibration.hasVibrator() == true) {
                     if (item.currentCount + 1 >= item.count) {
                       Vibration.vibrate(duration: 100, amplitude: 255);
                       // Auto-advance to next page if completed
@@ -227,7 +236,11 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
                 ),
                 child: IconButton(
                   // Arabic RTL: Previous is Right. DO NOT CHANGE to arrow_back.
-                  icon: const Icon(Icons.arrow_back_ios_rounded, color: AppTheme.accent, size: 20),
+                  icon: const Icon(
+                    Icons.arrow_back_ios_rounded,
+                    color: AppTheme.accent,
+                    size: 20,
+                  ),
                   onPressed: () {
                     _pageController.previousPage(
                       duration: const Duration(milliseconds: 300),
@@ -251,7 +264,11 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
                 ),
                 child: IconButton(
                   // Arabic RTL: Next is Left. DO NOT CHANGE to arrow_forward.
-                  icon: const Icon(Icons.arrow_forward_ios_rounded, color: AppTheme.accent, size: 20),
+                  icon: const Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: AppTheme.accent,
+                    size: 20,
+                  ),
                   onPressed: () {
                     _pageController.nextPage(
                       duration: const Duration(milliseconds: 300),
@@ -273,8 +290,8 @@ class _ZekrCard extends StatelessWidget {
   final VoidCallback onReset;
 
   const _ZekrCard({
-    required this.item, 
-    required this.onTap, 
+    required this.item,
+    required this.onTap,
     required this.onReset,
   });
 
@@ -292,7 +309,9 @@ class _ZekrCard extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: isCompleted ? AppTheme.saved.withValues(alpha: 0.1) : AppTheme.surface,
+          color: isCompleted
+              ? AppTheme.saved.withValues(alpha: 0.1)
+              : AppTheme.surface,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: isCompleted ? AppTheme.saved : AppTheme.cardBorder,
@@ -311,9 +330,9 @@ class _ZekrCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              QuranTextUtils.isQuranicText(item.reference) 
-                ? QuranTextUtils.formatWithQuranSymbols(item.zekr)
-                : item.zekr,
+              QuranTextUtils.isQuranicText(item.reference)
+                  ? QuranTextUtils.formatWithQuranSymbols(item.zekr)
+                  : item.zekr,
               style: GoogleFonts.amiri(
                 fontSize: 24,
                 height: 1.8,
@@ -344,7 +363,10 @@ class _ZekrCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     item.reference,
-                    style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppTheme.textSecondary,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -353,7 +375,11 @@ class _ZekrCard extends StatelessWidget {
                 if (item.currentCount > 0)
                   IconButton(
                     onPressed: onReset,
-                    icon: const Icon(Icons.history_rounded, size: 24, color: AppTheme.textSecondary),
+                    icon: const Icon(
+                      Icons.history_rounded,
+                      size: 24,
+                      color: AppTheme.textSecondary,
+                    ),
                     tooltip: l10n.resetItem,
                   ),
               ],
@@ -370,7 +396,8 @@ class _ZekrCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: (isCompleted ? AppTheme.saved : AppTheme.accent).withValues(alpha: 0.3),
+                      color: (isCompleted ? AppTheme.saved : AppTheme.accent)
+                          .withValues(alpha: 0.3),
                       blurRadius: 15,
                       spreadRadius: 2,
                     ),
@@ -383,7 +410,9 @@ class _ZekrCard extends StatelessWidget {
                       Text(
                         '${item.currentCount}',
                         style: GoogleFonts.outfit(
-                          color: isCompleted ? AppTheme.onSaved : AppTheme.onAccent,
+                          color: isCompleted
+                              ? AppTheme.onSaved
+                              : AppTheme.onAccent,
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
                         ),
@@ -391,13 +420,19 @@ class _ZekrCard extends StatelessWidget {
                       Container(
                         width: 40,
                         height: 2,
-                        color: (isCompleted ? AppTheme.onSaved : AppTheme.onAccent).withValues(alpha: 0.5),
+                        color:
+                            (isCompleted ? AppTheme.onSaved : AppTheme.onAccent)
+                                .withValues(alpha: 0.5),
                         margin: const EdgeInsets.symmetric(vertical: 4),
                       ),
                       Text(
                         '${item.count}',
                         style: GoogleFonts.outfit(
-                          color: (isCompleted ? AppTheme.onSaved : AppTheme.onAccent).withValues(alpha: 0.8),
+                          color:
+                              (isCompleted
+                                      ? AppTheme.onSaved
+                                      : AppTheme.onAccent)
+                                  .withValues(alpha: 0.8),
                           fontSize: 18,
                         ),
                       ),

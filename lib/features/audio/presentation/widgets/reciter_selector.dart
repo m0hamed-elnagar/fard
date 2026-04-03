@@ -59,7 +59,7 @@ class _ReciterSelectorState extends State<ReciterSelector> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              
+
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
@@ -113,18 +113,21 @@ class _ReciterSelectorState extends State<ReciterSelector> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 16),
               const Divider(),
-              
+
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Text(
                   l10n.selectReciter,
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
               ),
-              
+
               // Quick select: Popular reciters
               if (state.availableReciters.isNotEmpty)
                 SizedBox(
@@ -138,15 +141,21 @@ class _ReciterSelectorState extends State<ReciterSelector> {
                         orElse: () => state.availableReciters.first,
                       );
                       // Only show if it matches the id
-                      if (reciter.identifier != id) return const SizedBox.shrink();
-                      
+                      if (reciter.identifier != id) {
+                        return const SizedBox.shrink();
+                      }
+
                       final isSelected = state.currentReciter?.identifier == id;
                       return _PopularReciterCard(
                         reciter: reciter,
                         isSelected: isSelected,
                         onTap: () {
-                          context.read<AudioBloc>().add(AudioEvent.selectReciter(reciter));
-                          final index = state.availableReciters.indexWhere((r) => r.identifier == reciter.identifier);
+                          context.read<AudioBloc>().add(
+                            AudioEvent.selectReciter(reciter),
+                          );
+                          final index = state.availableReciters.indexWhere(
+                            (r) => r.identifier == reciter.identifier,
+                          );
                           if (index != -1) {
                             _scrollToReciter(index);
                           }
@@ -155,9 +164,9 @@ class _ReciterSelectorState extends State<ReciterSelector> {
                     }).toList(),
                   ),
                 ),
-              
+
               const Divider(),
-              
+
               // Full list
               Expanded(
                 child: ListView.builder(
@@ -165,33 +174,43 @@ class _ReciterSelectorState extends State<ReciterSelector> {
                   itemCount: state.availableReciters.length,
                   itemBuilder: (context, index) {
                     final reciter = state.availableReciters[index];
-                    final isSelected = state.currentReciter?.identifier == 
-                                       reciter.identifier;
-                    
+                    final isSelected =
+                        state.currentReciter?.identifier == reciter.identifier;
+
                     final isArabic = l10n.localeName == 'ar';
-                    
+
                     return ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: isSelected 
+                        backgroundColor: isSelected
                             ? Theme.of(context).colorScheme.primaryContainer
                             : Colors.grey[200],
                         child: Text(
-                          reciter.name.isNotEmpty ? reciter.name.substring(0, 1) : 'A',
+                          reciter.name.isNotEmpty
+                              ? reciter.name.substring(0, 1)
+                              : 'A',
                           style: TextStyle(
-                            color: isSelected 
+                            color: isSelected
                                 ? Theme.of(context).colorScheme.primary
                                 : Colors.grey[600],
                           ),
                         ),
                       ),
-                      title: Text(isArabic ? reciter.name : reciter.englishName),
-                      subtitle: Text(isArabic ? reciter.englishName : reciter.name),
-                      trailing: isSelected 
-                          ? Icon(Icons.check_circle, 
-                                color: Theme.of(context).colorScheme.primary)
+                      title: Text(
+                        isArabic ? reciter.name : reciter.englishName,
+                      ),
+                      subtitle: Text(
+                        isArabic ? reciter.englishName : reciter.name,
+                      ),
+                      trailing: isSelected
+                          ? Icon(
+                              Icons.check_circle,
+                              color: Theme.of(context).colorScheme.primary,
+                            )
                           : null,
                       onTap: () {
-                        context.read<AudioBloc>().add(AudioEvent.selectReciter(reciter));
+                        context.read<AudioBloc>().add(
+                          AudioEvent.selectReciter(reciter),
+                        );
                       },
                     );
                   },
@@ -220,7 +239,7 @@ class _PopularReciterCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isArabic = l10n.localeName == 'ar';
-    
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -230,7 +249,7 @@ class _PopularReciterCard extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 30,
-              backgroundColor: isSelected 
+              backgroundColor: isSelected
                   ? Theme.of(context).colorScheme.primary
                   : Theme.of(context).colorScheme.surfaceContainerHighest,
               child: Text(
@@ -243,13 +262,15 @@ class _PopularReciterCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              isArabic 
-                ? reciter.name.split(' ').last 
-                : reciter.englishName.split(' ').last,
+              isArabic
+                  ? reciter.name.split(' ').last
+                  : reciter.englishName.split(' ').last,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? Theme.of(context).colorScheme.primary : null,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : null,
               ),
               textAlign: TextAlign.center,
               maxLines: 1,

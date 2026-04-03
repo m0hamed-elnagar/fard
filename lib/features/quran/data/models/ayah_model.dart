@@ -21,7 +21,8 @@ class WordModel {
     this.translation,
   });
 
-  factory WordModel.fromJson(Map<String, dynamic> json) => _$WordModelFromJson(json);
+  factory WordModel.fromJson(Map<String, dynamic> json) =>
+      _$WordModelFromJson(json);
   Map<String, dynamic> toJson() => _$WordModelToJson(this);
 
   Word toDomain() {
@@ -41,7 +42,8 @@ class AudioModel {
 
   const AudioModel({this.url});
 
-  factory AudioModel.fromJson(Map<String, dynamic> json) => _$AudioModelFromJson(json);
+  factory AudioModel.fromJson(Map<String, dynamic> json) =>
+      _$AudioModelFromJson(json);
   Map<String, dynamic> toJson() => _$AudioModelToJson(this);
 }
 
@@ -85,7 +87,8 @@ class AyahModel {
     this.audio,
   });
 
-  factory AyahModel.fromJson(Map<String, dynamic> json) => _$AyahModelFromJson(json);
+  factory AyahModel.fromJson(Map<String, dynamic> json) =>
+      _$AyahModelFromJson(json);
   Map<String, dynamic> toJson() => _$AyahModelToJson(this);
 
   Ayah toDomain(int surahNumber, {String? translation}) {

@@ -18,7 +18,7 @@ void main() {
       tempDir = await Directory.systemTemp.createTemp('fard_app_test_');
       SharedPreferences.setMockInitialValues({});
       await configureDependencies(hivePath: tempDir.path);
-      
+
       // Clear boxes in case Hive is reusing the path from previous tests
       if (Hive.isBoxOpen('daily_records')) {
         await Hive.box<DailyRecordEntity>('daily_records').clear();
@@ -34,25 +34,27 @@ void main() {
       // Do not delete tempDir as Hive might be locked to it
     });
 
-    testWidgets('Onboarding to Home, toggle prayer, and switch language', (tester) async {
+    testWidgets('Onboarding to Home, toggle prayer, and switch language', (
+      tester,
+    ) async {
       await tester.pumpWidget(app.QadaTrackerApp(hivePath: tempDir.path));
       await tester.pumpAndSettle();
 
       // --- Onboarding Page 1 ---
       expect(find.text('تتبع صلواتك'), findsOneWidget);
-      await tester.tap(find.text('التالي')); 
+      await tester.tap(find.text('التالي'));
       await tester.pumpAndSettle();
 
       // --- Onboarding Page 2 ---
       expect(find.text('إدارة القضاء'), findsOneWidget);
-      await tester.tap(find.text('ابدأ الآن')); 
+      await tester.tap(find.text('ابدأ الآن'));
       await tester.pumpAndSettle();
 
       // --- Home Screen (starts in Arabic) ---
       expect(find.text('فرض'), findsOneWidget);
-      
+
       await tester.pumpAndSettle();
-      
+
       // Switch to Settings
       final settingsTab = find.text('الإعدادات').last;
       await tester.tap(settingsTab);
@@ -62,7 +64,7 @@ void main() {
       // Open dropdown
       await tester.tap(find.byType(DropdownButton<String>).first);
       await tester.pumpAndSettle();
-      
+
       // Select English
       await tester.tap(find.text('English').last);
       await tester.pumpAndSettle();

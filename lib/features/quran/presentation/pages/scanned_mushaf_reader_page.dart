@@ -80,10 +80,13 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
       final surahNum = data['surah'] as int;
       final startAyah = data['start'] as int;
       final endAyah = data['end'] as int;
-      
-      final startAbs = QuranHizbProvider.getAbsoluteAyahNumber(surahNum, startAyah);
+
+      final startAbs = QuranHizbProvider.getAbsoluteAyahNumber(
+        surahNum,
+        startAyah,
+      );
       final endAbs = QuranHizbProvider.getAbsoluteAyahNumber(surahNum, endAyah);
-      
+
       context.read<WerdBloc>().add(WerdEvent.trackRangeRead(startAbs, endAbs));
     }
   }
@@ -117,9 +120,15 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
     }
 
     final bgColor = _isDarkMode ? AppTheme.background : const Color(0xFFFBF9F1);
-    final appBarColor = _isDarkMode ? AppTheme.surface : const Color(0xFF2D5D40);
-    final navBarColor = _isDarkMode ? AppTheme.surface : const Color(0xFFFBF9F1);
-    final primaryTextColor = _isDarkMode ? AppTheme.textPrimary : const Color(0xFF2D5D40);
+    final appBarColor = _isDarkMode
+        ? AppTheme.surface
+        : const Color(0xFF2D5D40);
+    final navBarColor = _isDarkMode
+        ? AppTheme.surface
+        : const Color(0xFFFBF9F1);
+    final primaryTextColor = _isDarkMode
+        ? AppTheme.textPrimary
+        : const Color(0xFF2D5D40);
 
     return Theme(
       data: _isDarkMode ? AppTheme.darkTheme : Theme.of(context),
@@ -135,7 +144,9 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
           title: Column(
             children: [
               Text(
-                surahName.isNotEmpty ? l10n.surahWithVal(surahName) : l10n.scannedMushaf,
+                surahName.isNotEmpty
+                    ? l10n.surahWithVal(surahName)
+                    : l10n.scannedMushaf,
                 style: GoogleFonts.amiri(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -154,7 +165,9 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
           actions: [
             IconButton(
               icon: Icon(
-                _isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                _isDarkMode
+                    ? Icons.light_mode_rounded
+                    : Icons.dark_mode_rounded,
                 color: Colors.white,
               ),
               tooltip: _isDarkMode ? l10n.lightMode : l10n.darkMode,
@@ -172,7 +185,7 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
                 if (pageData.isNotEmpty) {
                   final surahNum = pageData.first['surah'] as int;
                   final ayahNum = pageData.first['start'] as int;
-  
+
                   Navigator.pushReplacement(
                     context,
                     QuranReaderPage.route(
@@ -197,8 +210,10 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
                   previous.currentAyah != current.currentAyah),
           listener: (context, state) {
             if (state.currentSurah != null && state.currentAyah != null) {
-              final targetPage =
-                  quran.getPageNumber(state.currentSurah!, state.currentAyah!);
+              final targetPage = quran.getPageNumber(
+                state.currentSurah!,
+                state.currentAyah!,
+              );
               if (targetPage != _currentPage) {
                 _pageController.animateToPage(
                   targetPage - 1,
@@ -239,7 +254,10 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
                 ),
                 // Navigation Bar
                 Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 24,
+                  ),
                   decoration: BoxDecoration(
                     color: navBarColor,
                     boxShadow: [
@@ -254,15 +272,15 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       PageNavButton(
-                        // Arabic RTL: Next Page (Right side). 
+                        // Arabic RTL: Next Page (Right side).
                         // The user considers Right-pointing as 'Next'. DO NOT SWAP ICONS.
                         icon: Icons.chevron_left,
                         isDarkMode: _isDarkMode,
                         onPressed: _currentPage > 1
                             ? () => _pageController.previousPage(
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut,
-                                )
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              )
                             : null,
                       ),
                       Text(
@@ -280,16 +298,18 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
                         isDarkMode: _isDarkMode,
                         onPressed: _currentPage < 604
                             ? () => _pageController.nextPage(
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut,
-                                )
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              )
                             : null,
                       ),
                     ],
                   ),
                 ),
                 AudioPlayerBar(
-                  currentViewedSurah: quran.getPageData(_currentPage).firstOrNull?['surah'] as int?,
+                  currentViewedSurah:
+                      quran.getPageData(_currentPage).firstOrNull?['surah']
+                          as int?,
                   onScrollRequest: (surah, ayah) {
                     final targetPage = quran.getPageNumber(surah, ayah);
                     if (targetPage != _currentPage) {

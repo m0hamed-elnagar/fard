@@ -14,10 +14,7 @@ import 'package:google_fonts/google_fonts.dart';
 class QuranReaderBody extends StatefulWidget {
   final ReaderScrollController scrollController;
 
-  const QuranReaderBody({
-    super.key,
-    required this.scrollController,
-  });
+  const QuranReaderBody({super.key, required this.scrollController});
 
   @override
   State<QuranReaderBody> createState() => _QuranReaderBodyState();
@@ -29,7 +26,7 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
 
   void _showAyahDetail(BuildContext context, Ayah ayah) async {
     if (_isSheetShowing) return;
-    
+
     final readerBloc = context.read<ReaderBloc>();
     final readerState = readerBloc.state;
     int? count;
@@ -37,7 +34,7 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
       loaded: (s) => count = s.surah.numberOfAyahs,
       orElse: () => null,
     );
-    
+
     setState(() => _isSheetShowing = true);
     await showModalBottomSheet(
       context: context,
@@ -58,8 +55,12 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
     return BlocBuilder<ReaderBloc, ReaderState>(
       builder: (context, state) {
         return state.map(
-          initial: (_) => const SliverToBoxAdapter(child: Center(child: CircularProgressIndicator())),
-          loading: (_) => const SliverToBoxAdapter(child: Center(child: CircularProgressIndicator())),
+          initial: (_) => const SliverToBoxAdapter(
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          loading: (_) => const SliverToBoxAdapter(
+            child: Center(child: CircularProgressIndicator()),
+          ),
           error: (e) => SliverToBoxAdapter(
             child: Center(
               child: Padding(
@@ -67,20 +68,26 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: Colors.red,
+                    ),
                     const SizedBox(height: 16),
                     Text(e.message, textAlign: TextAlign.center),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
-                         // This needs to be handled by the parent or we need to pass the surah number
-                         // Ideally ReaderBloc already has the event to retry or we just re-add loadSurah
-                         // But we don't have the surah number here easily unless we store it or get it from arguments
-                         // For now, let's assume the user will go back or the parent handles error refetching logic 
-                         // or we can just ask the bloc to retry if it supports it.
-                         // The original code used widget.surahNumber.
+                        // This needs to be handled by the parent or we need to pass the surah number
+                        // Ideally ReaderBloc already has the event to retry or we just re-add loadSurah
+                        // But we don't have the surah number here easily unless we store it or get it from arguments
+                        // For now, let's assume the user will go back or the parent handles error refetching logic
+                        // or we can just ask the bloc to retry if it supports it.
+                        // The original code used widget.surahNumber.
                       },
-                      child: const Text('Retry'), // Localize if possible, or pass l10n
+                      child: const Text(
+                        'Retry',
+                      ), // Localize if possible, or pass l10n
                     ),
                   ],
                 ),
@@ -93,9 +100,11 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   // Bismillah logic
-                  if (s.surah.number.value != 9 && 
-                      s.surah.ayahs.isNotEmpty && 
-                      !s.surah.ayahs.first.uthmaniText.startsWith('بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ'))
+                  if (s.surah.number.value != 9 &&
+                      s.surah.ayahs.isNotEmpty &&
+                      !s.surah.ayahs.first.uthmaniText.startsWith(
+                        'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ',
+                      ))
                     Padding(
                       padding: const EdgeInsets.only(bottom: 32.0),
                       child: Text(
@@ -109,25 +118,32 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
                         textAlign: TextAlign.center,
                       ),
                     ),
-                  
+
                   BlocBuilder<AudioBloc, AudioState>(
                     builder: (context, audioState) {
-                      final isThisSurah = audioState.currentSurah == s.surah.number.value;
-                      final playingAyah = isThisSurah && audioState.isActive 
-                        ? s.surah.ayahs.firstWhere(
-                            (a) => a.number.ayahNumberInSurah == audioState.currentAyah,
-                            orElse: () => s.surah.ayahs.first,
-                          ) 
-                        : null;
+                      final isThisSurah =
+                          audioState.currentSurah == s.surah.number.value;
+                      final playingAyah = isThisSurah && audioState.isActive
+                          ? s.surah.ayahs.firstWhere(
+                              (a) =>
+                                  a.number.ayahNumberInSurah ==
+                                  audioState.currentAyah,
+                              orElse: () => s.surah.ayahs.first,
+                            )
+                          : null;
 
                       return BlocBuilder<WerdBloc, WerdState>(
                         builder: (context, werdState) {
                           Ayah? dayStartAyah;
                           Ayah? lastReadAyah;
-                          
-                          final startAbs = werdState.progress?.sessionStartAbsolute;
+
+                          final startAbs =
+                              werdState.progress?.sessionStartAbsolute;
                           if (startAbs != null) {
-                            final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(startAbs);
+                            final pos =
+                                QuranHizbProvider.getSurahAndAyahFromAbsolute(
+                                  startAbs,
+                                );
                             if (pos[0] == s.surah.number.value) {
                               try {
                                 dayStartAyah = s.surah.ayahs.firstWhere(
@@ -138,7 +154,10 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
                           }
 
                           if (werdState.progress?.lastReadAbsolute != null) {
-                            final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(werdState.progress!.lastReadAbsolute!);
+                            final pos =
+                                QuranHizbProvider.getSurahAndAyahFromAbsolute(
+                                  werdState.progress!.lastReadAbsolute!,
+                                );
                             if (pos[0] == s.surah.number.value) {
                               try {
                                 lastReadAyah = s.surah.ayahs.firstWhere(
@@ -149,25 +168,34 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
                           }
 
                           return GestureDetector(
-                             onScaleStart: (details) {
-                                _baseScale = s.textScale;
-                              },
-                              onScaleUpdate: (details) {
-                                context.read<ReaderBloc>().add(
-                                      ReaderEvent.updateScale(_baseScale * details.scale),
-                                    );
-                              },
+                            onScaleStart: (details) {
+                              _baseScale = s.textScale;
+                            },
+                            onScaleUpdate: (details) {
+                              context.read<ReaderBloc>().add(
+                                ReaderEvent.updateScale(
+                                  _baseScale * details.scale,
+                                ),
+                              );
+                            },
                             child: AyahText(
                               ayahs: s.surah.ayahs,
                               highlightedAyah: playingAyah ?? s.highlightedAyah,
                               dayStartAyah: dayStartAyah,
-                              lastReadAyah: (werdState.progress?.totalAmountReadToday ?? 0) > 0 ? lastReadAyah : null,
+                              lastReadAyah:
+                                  (werdState.progress?.totalAmountReadToday ??
+                                          0) >
+                                      0
+                                  ? lastReadAyah
+                                  : null,
                               bookmarks: s.bookmarks,
                               textScale: s.textScale,
                               ayahKeys: widget.scrollController.ayahKeys,
                               separator: s.separator,
                               onAyahTap: (ayah) {
-                                context.read<ReaderBloc>().add(ReaderEvent.selectAyah(ayah));
+                                context.read<ReaderBloc>().add(
+                                  ReaderEvent.selectAyah(ayah),
+                                );
                               },
                               onAyahLongPress: (ayah) {
                                 _showAyahDetail(context, ayah);
@@ -181,7 +209,7 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
                       );
                     },
                   ),
-                  
+
                   const SizedBox(height: 120),
                 ]),
               ),

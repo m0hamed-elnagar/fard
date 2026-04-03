@@ -2,6 +2,7 @@ import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/background_service.dart';
 import 'package:fard/core/services/migration_service.dart';
+import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/features/onboarding/presentation/screens/splash_screen.dart';
@@ -42,7 +43,7 @@ void main() async {
       androidNotificationIcon: 'mipmap/ic_launcher',
     );
     debugPrint('JustAudioBackground initialized');
-    
+
     debugPrint('Initializing BackgroundService...');
     await BackgroundService.initialize();
     debugPrint('BackgroundService initialized');
@@ -56,10 +57,10 @@ void main() async {
   debugPrint('Initializing NotificationService...');
   await notificationService.init();
   debugPrint('NotificationService initialized');
-  
+
   debugPrint('Running app...');
   runApp(const QadaTrackerApp());
-  
+
   // Handle notification that launched the app
   notificationService.handleInitialNotification();
 }
@@ -76,10 +77,25 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
   @override
   void initState() {
     super.initState();
-    // Initialize reminders after first frame to ensure localization is ready if needed
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Initialize reminders and update widget after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       getIt<SettingsCubit>().initReminders();
+      // Force widget update on app start to ensure fresh prayer times
+      await _updateWidgetOnStart();
     });
+  }
+
+  /// Updates widget on app start to ensure fresh prayer times after time change.
+  Future<void> _updateWidgetOnStart() async {
+    try {
+      final settings = getIt<SettingsCubit>().state;
+      if (settings.latitude != null && settings.longitude != null) {
+        debugPrint('MainActivity: Forcing widget update on app start');
+        await getIt<WidgetUpdateService>().updateWidget(settings);
+      }
+    } catch (e) {
+      debugPrint('MainActivity: Failed to update widget on start: $e');
+    }
   }
 
   @override
@@ -87,10 +103,17 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => getIt<SettingsCubit>()),
-        BlocProvider(create: (_) => getIt<AzkarBloc>()..add(const AzkarEvent.loadCategories())),
+        BlocProvider(
+          create: (_) =>
+              getIt<AzkarBloc>()..add(const AzkarEvent.loadCategories()),
+        ),
         BlocProvider(create: (_) => getIt<AudioBloc>()),
-        BlocProvider(create: (_) => getIt<QuranBloc>()..add(const QuranEvent.loadSurahs())),
-        BlocProvider(create: (_) => getIt<WerdBloc>()..add(const WerdEvent.load())),
+        BlocProvider(
+          create: (_) => getIt<QuranBloc>()..add(const QuranEvent.loadSurahs()),
+        ),
+        BlocProvider(
+          create: (_) => getIt<WerdBloc>()..add(const WerdEvent.load()),
+        ),
         BlocProvider(
           create: (_) {
             final bloc = getIt<PrayerTrackerBloc>();
@@ -122,8 +145,8 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
                   GlobalCupertinoLocalizations.delegate,
                 ],
                 builder: (context, child) {
-                  final textDirection = state.locale.languageCode == 'ar' 
-                      ? TextDirection.rtl 
+                  final textDirection = state.locale.languageCode == 'ar'
+                      ? TextDirection.rtl
                       : TextDirection.ltr;
                   return Localizations.override(
                     context: context,
@@ -142,5 +165,3 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
     );
   }
 }
-
-

@@ -27,30 +27,30 @@ class WerdHistoryEntry extends Equatable {
 
   @override
   List<Object?> get props => [
-        totalAyahsRead,
-        startAbsolute,
-        endAbsolute,
-        pagesRead,
-        juzRead,
-        startSurahName,
-        startAyahNumber,
-        endSurahName,
-        endAyahNumber,
-        summary,
-      ];
+    totalAyahsRead,
+    startAbsolute,
+    endAbsolute,
+    pagesRead,
+    juzRead,
+    startSurahName,
+    startAyahNumber,
+    endSurahName,
+    endAyahNumber,
+    summary,
+  ];
 
   Map<String, dynamic> toJson() => {
-        'totalAyahsRead': totalAyahsRead,
-        'startAbsolute': startAbsolute,
-        'endAbsolute': endAbsolute,
-        'pagesRead': pagesRead,
-        'juzRead': juzRead,
-        'startSurahName': startSurahName,
-        'startAyahNumber': startAyahNumber,
-        'endSurahName': endSurahName,
-        'endAyahNumber': endAyahNumber,
-        'summary': summary,
-      };
+    'totalAyahsRead': totalAyahsRead,
+    'startAbsolute': startAbsolute,
+    'endAbsolute': endAbsolute,
+    'pagesRead': pagesRead,
+    'juzRead': juzRead,
+    'startSurahName': startSurahName,
+    'startAyahNumber': startAyahNumber,
+    'endSurahName': endSurahName,
+    'endAyahNumber': endAyahNumber,
+    'summary': summary,
+  };
 
   factory WerdHistoryEntry.fromJson(Map<String, dynamic> json) {
     return WerdHistoryEntry(

@@ -31,11 +31,12 @@ void main() {
     );
   }
 
-  testWidgets('AyahText renders spans in correct order', (WidgetTester tester) async {
-    await tester.pumpWidget(createWidget(
-      dayStartAyah: testAyah,
-      lastReadAyah: testAyah,
-    ));
+  testWidgets('AyahText renders spans in correct order', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      createWidget(dayStartAyah: testAyah, lastReadAyah: testAyah),
+    );
 
     final richTextFinder = find.byWidgetPredicate(
       (widget) => widget is RichText && widget.textAlign == TextAlign.justify,
@@ -44,7 +45,7 @@ void main() {
 
     final RichText richText = tester.widget(richTextFinder);
     final List<InlineSpan> allSpans = [];
-    
+
     void collectSpans(InlineSpan? span) {
       if (span == null) return;
       if (span is TextSpan) {
@@ -64,8 +65,10 @@ void main() {
     collectSpans(richText.text);
 
     // Filter out the root spans that don't have text or widget directly
-    final leafSpans = allSpans.where((s) => (s is TextSpan && s.text != null) || s is WidgetSpan).toList();
-    
+    final leafSpans = allSpans
+        .where((s) => (s is TextSpan && s.text != null) || s is WidgetSpan)
+        .toList();
+
     // leafSpans should be:
     // 0: Anchor (WidgetSpan)
     // 1: Flag (TextSpan)
@@ -73,7 +76,7 @@ void main() {
     // 3: Marker (TextSpan)
     // 4: Last Read Arrow (TextSpan)
     // 5: Trailing space (TextSpan)
-    
+
     expect(leafSpans.length, 6);
     expect(leafSpans[0], isA<WidgetSpan>()); // Anchor
     expect(leafSpans[1], isA<TextSpan>()); // Flag
@@ -81,14 +84,19 @@ void main() {
     expect(leafSpans[2], isA<TextSpan>()); // Text
     expect((leafSpans[2] as TextSpan).text, testAyah.uthmaniText);
     expect(leafSpans[3], isA<TextSpan>()); // Marker
-    expect((leafSpans[3] as TextSpan).text, contains('\u2009')); // Marker starts with thin space
+    expect(
+      (leafSpans[3] as TextSpan).text,
+      contains('\u2009'),
+    ); // Marker starts with thin space
     expect(leafSpans[4], isA<TextSpan>()); // Last Read ➤
     expect((leafSpans[4] as TextSpan).text, contains('\u27A4'));
     expect(leafSpans[5], isA<TextSpan>());
     expect((leafSpans[5] as TextSpan).text, ' ');
-    
+
     // Verify RTL
-    final directionality = tester.widget<Directionality>(find.byType(Directionality).last);
+    final directionality = tester.widget<Directionality>(
+      find.byType(Directionality).last,
+    );
     expect(directionality.textDirection, TextDirection.rtl);
     expect(richText.textAlign, TextAlign.justify);
   });

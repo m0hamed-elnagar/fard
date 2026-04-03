@@ -14,7 +14,7 @@ class SurahHeader extends StatelessWidget {
   final VoidCallback? onPrevious;
 
   const SurahHeader({
-    super.key, 
+    super.key,
     required this.surah,
     this.onNext,
     this.onPrevious,
@@ -47,7 +47,7 @@ class SurahHeader extends StatelessWidget {
                 )
               else
                 const SizedBox(width: 48),
-              
+
               Expanded(
                 child: Text(
                   surah.name,
@@ -59,7 +59,7 @@ class SurahHeader extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               // Next Surah Button
               if (onNext != null)
                 IconButton(
@@ -78,7 +78,9 @@ class SurahHeader extends StatelessWidget {
             children: [
               _InfoChip(
                 icon: Icons.place_outlined,
-                label: surah.revelationType == 'Meccan' ? l10n.meccan : l10n.medinan,
+                label: surah.revelationType == 'Meccan'
+                    ? l10n.meccan
+                    : l10n.medinan,
               ),
               const SizedBox(width: 12),
               _InfoChip(
@@ -104,29 +106,50 @@ class SurahHeader extends StatelessWidget {
                     onPressed: () {
                       if (isPlaying && isThisSurah) {
                         context.read<AudioBloc>().add(AudioEvent.pause());
-                      } else if (state.status == AudioStatus.paused && isThisSurah) {
+                      } else if (state.status == AudioStatus.paused &&
+                          isThisSurah) {
                         context.read<AudioBloc>().add(AudioEvent.resume());
                       } else {
-                        context.read<AudioBloc>().add(AudioEvent.playSurah(
-                          surahNumber: surah.number.value,
-                          ayahCount: surah.numberOfAyahs,
-                          reciter: state.currentReciter,
-                        ));
+                        context.read<AudioBloc>().add(
+                          AudioEvent.playSurah(
+                            surahNumber: surah.number.value,
+                            ayahCount: surah.numberOfAyahs,
+                            reciter: state.currentReciter,
+                          ),
+                        );
                       }
                     },
                     icon: isLoading && isThisSurah
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : Icon(isPlaying && isThisSurah ? Icons.pause_rounded : Icons.play_arrow_rounded),
-                    label: Text(isPlaying && isThisSurah ? l10n.pauseSurah : l10n.playSurahBtn),
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Icon(
+                            isPlaying && isThisSurah
+                                ? Icons.pause_rounded
+                                : Icons.play_arrow_rounded,
+                          ),
+                    label: Text(
+                      isPlaying && isThisSurah
+                          ? l10n.pauseSurah
+                          : l10n.playSurahBtn,
+                    ),
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
                     ),
                   ),
                   ActionChip(
                     avatar: const Icon(Icons.person_outline, size: 18),
                     label: Text(
-                      state.currentReciter?.name.split(' ').first ?? l10n.reciter
+                      state.currentReciter?.name.split(' ').first ??
+                          l10n.reciter,
                     ),
                     onPressed: () => _showReciterSelector(context),
                   ),

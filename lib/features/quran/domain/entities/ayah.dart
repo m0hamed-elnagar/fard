@@ -73,19 +73,19 @@ class Ayah extends Equatable {
 
   @override
   List<Object?> get props => [
-        number,
-        uthmaniText,
-        indoPakText,
-        translation,
-        transliteration,
-        page,
-        juz,
-        hizb,
-        rub,
-        isSajdah,
-        sajdahType,
-        revelationOrder,
-        words,
-        audioUrl,
-      ];
+    number,
+    uthmaniText,
+    indoPakText,
+    translation,
+    transliteration,
+    page,
+    juz,
+    hizb,
+    rub,
+    isSajdah,
+    sajdahType,
+    revelationOrder,
+    words,
+    audioUrl,
+  ];
 }

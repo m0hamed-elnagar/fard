@@ -25,8 +25,8 @@ class AyahDetailSheet extends StatelessWidget {
 
   String _formatAyah(int absoluteAyah, String locale) {
     final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(absoluteAyah);
-    final surahName = locale == 'ar' 
-        ? quran.getSurahNameArabic(pos[0]) 
+    final surahName = locale == 'ar'
+        ? quran.getSurahNameArabic(pos[0])
         : quran.getSurahName(pos[0]);
     return "$surahName ${pos[1]}";
   }
@@ -34,7 +34,7 @@ class AyahDetailSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return DraggableScrollableSheet(
       initialChildSize: 0.6,
       maxChildSize: 0.9,
@@ -46,7 +46,9 @@ class AyahDetailSheet extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               color: Theme.of(context).scaffoldBackgroundColor,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
             ),
             child: NestedScrollView(
               controller: scrollController,
@@ -71,9 +73,14 @@ class AyahDetailSheet extends StatelessWidget {
                               Row(
                                 children: [
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 4,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: Theme.of(context).colorScheme.primaryContainer,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primaryContainer,
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(
@@ -81,7 +88,9 @@ class AyahDetailSheet extends StatelessWidget {
                                       style: GoogleFonts.outfit(
                                         fontSize: 14,
                                         fontWeight: FontWeight.bold,
-                                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onPrimaryContainer,
                                       ),
                                     ),
                                   ),
@@ -89,12 +98,16 @@ class AyahDetailSheet extends StatelessWidget {
                                   BlocBuilder<ReaderBloc, ReaderState>(
                                     builder: (context, state) {
                                       final isLastRead = state.maybeMap(
-                                        loaded: (s) => s.lastReadAyah?.number == ayah.number,
+                                        loaded: (s) =>
+                                            s.lastReadAyah?.number ==
+                                            ayah.number,
                                         orElse: () => false,
                                       );
-                                      
+
                                       final isBookmarked = state.maybeMap(
-                                        loaded: (s) => s.bookmarks.any((b) => b.ayahNumber == ayah.number),
+                                        loaded: (s) => s.bookmarks.any(
+                                          (b) => b.ayahNumber == ayah.number,
+                                        ),
                                         orElse: () => false,
                                       );
 
@@ -103,10 +116,17 @@ class AyahDetailSheet extends StatelessWidget {
                                         children: [
                                           IconButton(
                                             icon: Icon(
-                                              isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-                                              color: isBookmarked ? Colors.amber : null,
+                                              isBookmarked
+                                                  ? Icons.bookmark_rounded
+                                                  : Icons
+                                                        .bookmark_border_rounded,
+                                              color: isBookmarked
+                                                  ? Colors.amber
+                                                  : null,
                                             ),
-                                            tooltip: isBookmarked ? l10n.removeFromBookmarks : l10n.addToBookmarks,
+                                            tooltip: isBookmarked
+                                                ? l10n.removeFromBookmarks
+                                                : l10n.addToBookmarks,
                                             onPressed: () async {
                                               bool shouldToggle = true;
                                               if (isBookmarked) {
@@ -115,35 +135,77 @@ class AyahDetailSheet extends StatelessWidget {
                                                   builder: (dialogContext) => AlertDialog(
                                                     title: Text(
                                                       l10n.removeFromBookmarks,
-                                                      style: GoogleFonts.amiri(fontWeight: FontWeight.bold),
-                                                      textAlign: TextAlign.right,
+                                                      style: GoogleFonts.amiri(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                      textAlign:
+                                                          TextAlign.right,
                                                     ),
                                                     content: Text(
                                                       'هل أنت متأكد من حذف هذه الإشارة المرجعية؟', // Using Arabic since it's most common in this app's Quran feature
-                                                      style: GoogleFonts.amiri(),
-                                                      textAlign: TextAlign.right,
+                                                      style:
+                                                          GoogleFonts.amiri(),
+                                                      textAlign:
+                                                          TextAlign.right,
                                                     ),
                                                     actions: [
                                                       TextButton(
-                                                        onPressed: () => Navigator.pop(dialogContext, false),
-                                                        child: Text('إلغاء', style: GoogleFonts.amiri(color: Colors.grey)),
+                                                        onPressed: () =>
+                                                            Navigator.pop(
+                                                              dialogContext,
+                                                              false,
+                                                            ),
+                                                        child: Text(
+                                                          'إلغاء',
+                                                          style:
+                                                              GoogleFonts.amiri(
+                                                                color:
+                                                                    Colors.grey,
+                                                              ),
+                                                        ),
                                                       ),
                                                       TextButton(
-                                                        onPressed: () => Navigator.pop(dialogContext, true),
-                                                        child: Text('حذف', style: GoogleFonts.amiri(color: Colors.red)),
+                                                        onPressed: () =>
+                                                            Navigator.pop(
+                                                              dialogContext,
+                                                              true,
+                                                            ),
+                                                        child: Text(
+                                                          'حذف',
+                                                          style:
+                                                              GoogleFonts.amiri(
+                                                                color:
+                                                                    Colors.red,
+                                                              ),
+                                                        ),
                                                       ),
                                                     ],
                                                   ),
                                                 );
-                                                shouldToggle = confirmed ?? false;
+                                                shouldToggle =
+                                                    confirmed ?? false;
                                               }
 
-                                              if (shouldToggle && context.mounted) {
-                                                context.read<ReaderBloc>().add(ReaderEvent.toggleBookmark(ayah));
-                                                ScaffoldMessenger.of(context).showSnackBar(
+                                              if (shouldToggle &&
+                                                  context.mounted) {
+                                                context.read<ReaderBloc>().add(
+                                                  ReaderEvent.toggleBookmark(
+                                                    ayah,
+                                                  ),
+                                                );
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
                                                   SnackBar(
-                                                    content: Text(isBookmarked ? l10n.removedFromBookmarks : l10n.addedToBookmarks),
-                                                    duration: const Duration(seconds: 1),
+                                                    content: Text(
+                                                      isBookmarked
+                                                          ? l10n.removedFromBookmarks
+                                                          : l10n.addedToBookmarks,
+                                                    ),
+                                                    duration: const Duration(
+                                                      seconds: 1,
+                                                    ),
                                                   ),
                                                 );
                                               }
@@ -151,60 +213,129 @@ class AyahDetailSheet extends StatelessWidget {
                                           ),
                                           IconButton(
                                             icon: Icon(
-                                              isLastRead ? Icons.menu_book_rounded : Icons.menu_book_outlined,
-                                              color: isLastRead ? Theme.of(context).colorScheme.primary : null,
+                                              isLastRead
+                                                  ? Icons.menu_book_rounded
+                                                  : Icons.menu_book_outlined,
+                                              color: isLastRead
+                                                  ? Theme.of(
+                                                      context,
+                                                    ).colorScheme.primary
+                                                  : null,
                                             ),
                                             tooltip: l10n.markAsLastRead,
                                             onPressed: () async {
                                               bool shouldProceed = true;
                                               if (!isLastRead) {
-                                                final werdState = context.read<WerdBloc>().state;
-                                                final progress = werdState.progress;
+                                                final werdState = context
+                                                    .read<WerdBloc>()
+                                                    .state;
+                                                final progress =
+                                                    werdState.progress;
                                                 // Reference for jump check should be current position (lastRead)
                                                 // if not available, use start of today's werd.
-                                                final referenceAbs = progress?.lastReadAbsolute ?? progress?.sessionStartAbsolute;
-                                                final targetAbs = QuranHizbProvider.getAbsoluteAyahNumber(
-                                                  ayah.number.surahNumber,
-                                                  ayah.number.ayahNumberInSurah,
-                                                );
+                                                final referenceAbs =
+                                                    progress
+                                                        ?.lastReadAbsolute ??
+                                                    progress
+                                                        ?.sessionStartAbsolute;
+                                                final targetAbs =
+                                                    QuranHizbProvider.getAbsoluteAyahNumber(
+                                                      ayah.number.surahNumber,
+                                                      ayah
+                                                          .number
+                                                          .ayahNumberInSurah,
+                                                    );
 
-                                                if (referenceAbs != null && (targetAbs - referenceAbs).abs() > 50) {
-                                                  final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(referenceAbs);
-                                                  final startPage = quran.getPageNumber(startPos[0], startPos[1]);
-                                                  final endPage = quran.getPageNumber(ayah.number.surahNumber, ayah.number.ayahNumberInSurah);
-                                                  final pagesCount = (endPage - startPage).abs();
+                                                if (referenceAbs != null &&
+                                                    (targetAbs - referenceAbs)
+                                                            .abs() >
+                                                        50) {
+                                                  final startPos =
+                                                      QuranHizbProvider.getSurahAndAyahFromAbsolute(
+                                                        referenceAbs,
+                                                      );
+                                                  final startPage = quran
+                                                      .getPageNumber(
+                                                        startPos[0],
+                                                        startPos[1],
+                                                      );
+                                                  final endPage = quran
+                                                      .getPageNumber(
+                                                        ayah.number.surahNumber,
+                                                        ayah
+                                                            .number
+                                                            .ayahNumberInSurah,
+                                                      );
+                                                  final pagesCount =
+                                                      (endPage - startPage)
+                                                          .abs();
 
                                                   final confirmed = await showDialog<bool>(
                                                     context: context,
                                                     builder: (dialogContext) => AlertDialog(
-                                                      title: Text(l10n.jumpConfirmTitle),
-                                                      content: Text(l10n.jumpConfirmMessage(
-                                                        _formatAyah(referenceAbs, l10n.localeName),
-                                                        _formatAyah(targetAbs, l10n.localeName),
-                                                        l10n.localeName == 'ar' ? pagesCount.toArabicIndic() : pagesCount.toString(),
-                                                      )),
+                                                      title: Text(
+                                                        l10n.jumpConfirmTitle,
+                                                      ),
+                                                      content: Text(
+                                                        l10n.jumpConfirmMessage(
+                                                          _formatAyah(
+                                                            referenceAbs,
+                                                            l10n.localeName,
+                                                          ),
+                                                          _formatAyah(
+                                                            targetAbs,
+                                                            l10n.localeName,
+                                                          ),
+                                                          l10n.localeName ==
+                                                                  'ar'
+                                                              ? pagesCount
+                                                                    .toArabicIndic()
+                                                              : pagesCount
+                                                                    .toString(),
+                                                        ),
+                                                      ),
                                                       actions: [
                                                         TextButton(
-                                                          onPressed: () => Navigator.pop(dialogContext, false),
+                                                          onPressed: () =>
+                                                              Navigator.pop(
+                                                                dialogContext,
+                                                                false,
+                                                              ),
                                                           child: Text(l10n.no),
                                                         ),
                                                         TextButton(
-                                                          onPressed: () => Navigator.pop(dialogContext, true),
+                                                          onPressed: () =>
+                                                              Navigator.pop(
+                                                                dialogContext,
+                                                                true,
+                                                              ),
                                                           child: Text(l10n.yes),
                                                         ),
                                                       ],
                                                     ),
                                                   );
-                                                  shouldProceed = confirmed ?? false;
+                                                  shouldProceed =
+                                                      confirmed ?? false;
                                                 }
                                               }
 
-                                              if (shouldProceed && context.mounted) {
-                                                context.read<ReaderBloc>().add(ReaderEvent.saveLastRead(ayah));
-                                                ScaffoldMessenger.of(context).showSnackBar(
+                                              if (shouldProceed &&
+                                                  context.mounted) {
+                                                context.read<ReaderBloc>().add(
+                                                  ReaderEvent.saveLastRead(
+                                                    ayah,
+                                                  ),
+                                                );
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
                                                   SnackBar(
-                                                    content: Text(l10n.markAsLastReadSuccess),
-                                                    duration: const Duration(seconds: 1),
+                                                    content: Text(
+                                                      l10n.markAsLastReadSuccess,
+                                                    ),
+                                                    duration: const Duration(
+                                                      seconds: 1,
+                                                    ),
                                                   ),
                                                 );
                                               }
@@ -225,10 +356,16 @@ class AyahDetailSheet extends StatelessWidget {
                                 width: double.infinity,
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest
+                                      .withValues(alpha: 0.3),
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
-                                    color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .outlineVariant
+                                        .withValues(alpha: 0.5),
                                   ),
                                 ),
                                 child: Text(
@@ -254,9 +391,13 @@ class AyahDetailSheet extends StatelessWidget {
                     delegate: _SliverAppBarDelegate(
                       TabBar(
                         labelColor: Theme.of(context).colorScheme.primary,
-                        unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                        unselectedLabelColor: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant,
                         indicatorColor: Theme.of(context).colorScheme.primary,
-                        labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                        labelStyle: GoogleFonts.outfit(
+                          fontWeight: FontWeight.bold,
+                        ),
                         tabs: [
                           Tab(text: l10n.tafsir),
                           Tab(text: l10n.audio),
@@ -269,10 +410,7 @@ class AyahDetailSheet extends StatelessWidget {
               body: TabBarView(
                 children: [
                   _TafsirTab(ayah: ayah),
-                  _AudioTab(
-                    ayah: ayah, 
-                    surahAyahCount: surahAyahCount,
-                  ),
+                  _AudioTab(ayah: ayah, surahAyahCount: surahAyahCount),
                 ],
               ),
             ),
@@ -294,7 +432,11 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => _tabBar.preferredSize.height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: _tabBar,
@@ -350,7 +492,10 @@ class _TafsirTab extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
                   l10n.selectTafsir,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               Expanded(
@@ -362,16 +507,24 @@ class _TafsirTab extends StatelessWidget {
                     return ListTile(
                       title: Text(
                         tafsir.name,
-                        style: isArabic ? GoogleFonts.amiri(fontWeight: FontWeight.bold) : null,
+                        style: isArabic
+                            ? GoogleFonts.amiri(fontWeight: FontWeight.bold)
+                            : null,
                         textAlign: isArabic ? TextAlign.right : TextAlign.left,
                       ),
                       subtitle: Text(
                         tafsir.authorName,
-                        style: isArabic ? GoogleFonts.amiri(fontSize: 14) : null,
+                        style: isArabic
+                            ? GoogleFonts.amiri(fontSize: 14)
+                            : null,
                         textAlign: isArabic ? TextAlign.right : TextAlign.left,
                       ),
-                      leading: !isArabic && tafsir.id == currentId ? const Icon(Icons.check, color: Colors.green) : null,
-                      trailing: isArabic && tafsir.id == currentId ? const Icon(Icons.check, color: Colors.green) : null,
+                      leading: !isArabic && tafsir.id == currentId
+                          ? const Icon(Icons.check, color: Colors.green)
+                          : null,
+                      trailing: isArabic && tafsir.id == currentId
+                          ? const Icon(Icons.check, color: Colors.green)
+                          : null,
                       onTap: () {
                         readerBloc.add(ReaderEvent.updateTafsir(tafsir.id));
                         Navigator.pop(modalContext);
@@ -396,7 +549,7 @@ class _TafsirTab extends StatelessWidget {
           loaded: (s) => s.selectedTafsirId,
           orElse: () => 16,
         );
-        
+
         final selectedTafsir = TafsirInfo.availableTafsirs.firstWhere(
           (t) => t.id == tafsirId,
           orElse: () => TafsirInfo.availableTafsirs.first,
@@ -418,20 +571,32 @@ class _TafsirTab extends StatelessWidget {
             Expanded(
               child: FutureBuilder<String>(
                 key: ValueKey(tafsirId), // Re-fetch when tafsirId changes
-                future: getIt<GetTafsir>().call(GetTafsirParams(
-                  surahNumber: ayah.number.surahNumber,
-                  ayahNumber: ayah.number.ayahNumberInSurah,
-                  tafsirId: tafsirId,
-                )).then((res) => res.fold((f) => l10n.errorLoadingTafsir(f.message), (d) => d)),
+                future: getIt<GetTafsir>()
+                    .call(
+                      GetTafsirParams(
+                        surahNumber: ayah.number.surahNumber,
+                        ayahNumber: ayah.number.ayahNumberInSurah,
+                        tafsirId: tafsirId,
+                      ),
+                    )
+                    .then(
+                      (res) => res.fold(
+                        (f) => l10n.errorLoadingTafsir(f.message),
+                        (d) => d,
+                      ),
+                    ),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
-                  
+
                   final tafsir = snapshot.data ?? l10n.noTafsirAvailable;
-                  
+
                   return ListView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
                     children: [
                       Text(
                         _cleanHtml(tafsir),
@@ -460,10 +625,7 @@ class _AudioTab extends StatelessWidget {
   final Ayah ayah;
   final int? surahAyahCount;
 
-  const _AudioTab({
-    required this.ayah, 
-    this.surahAyahCount,
-  });
+  const _AudioTab({required this.ayah, this.surahAyahCount});
 
   @override
   Widget build(BuildContext context) {
@@ -471,10 +633,11 @@ class _AudioTab extends StatelessWidget {
     return BlocBuilder<AudioBloc, AudioState>(
       builder: (context, state) {
         final status = state.status;
-        
-        final isCurrentAyah = state.currentSurah == ayah.number.surahNumber && 
-                            state.currentAyah == ayah.number.ayahNumberInSurah;
-        
+
+        final isCurrentAyah =
+            state.currentSurah == ayah.number.surahNumber &&
+            state.currentAyah == ayah.number.ayahNumberInSurah;
+
         final isLoading = state.isLoading && isCurrentAyah;
         final isPlaying = state.isPlaying && isCurrentAyah;
         final isError = state.hasError && isCurrentAyah;
@@ -486,18 +649,26 @@ class _AudioTab extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.headset_rounded, size: 64, color: Theme.of(context).colorScheme.primary),
+                child: Icon(
+                  Icons.headset_rounded,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
             ),
             const SizedBox(height: 24),
             Text(
-              isError ? l10n.errorPlayingAudio(state.error ?? '') : l10n.quranRecitation,
+              isError
+                  ? l10n.errorPlayingAudio(state.error ?? '')
+                  : l10n.quranRecitation,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 18, 
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: isError ? Colors.red : null,
               ),
@@ -513,11 +684,13 @@ class _AudioTab extends StatelessWidget {
                   icon: Icons.repeat_one_rounded,
                   label: l10n.ayahBtn,
                   onPressed: () {
-                    context.read<AudioBloc>().add(AudioEvent.playAyah(
-                      surahNumber: ayah.number.surahNumber,
-                      ayahNumber: ayah.number.ayahNumberInSurah,
-                      reciter: state.currentReciter,
-                    ));
+                    context.read<AudioBloc>().add(
+                      AudioEvent.playAyah(
+                        surahNumber: ayah.number.surahNumber,
+                        ayahNumber: ayah.number.ayahNumberInSurah,
+                        reciter: state.currentReciter,
+                      ),
+                    );
                   },
                 ),
                 Column(
@@ -527,47 +700,70 @@ class _AudioTab extends StatelessWidget {
                       width: 72,
                       height: 72,
                       decoration: BoxDecoration(
-                        color: isError ? Colors.red : Theme.of(context).colorScheme.primary,
+                        color: isError
+                            ? Colors.red
+                            : Theme.of(context).colorScheme.primary,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: (isError ? Colors.red : Theme.of(context).colorScheme.primary).withValues(alpha: 0.3),
+                            color:
+                                (isError
+                                        ? Colors.red
+                                        : Theme.of(context).colorScheme.primary)
+                                    .withValues(alpha: 0.3),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
                         ],
                       ),
-                      child: isLoading 
-                        ? const Padding(
-                            padding: EdgeInsets.all(18.0),
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
-                          )
-                        : IconButton(
-                            icon: Icon(
-                              isError ? Icons.refresh_rounded : (isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded), 
-                              size: 40, 
-                              color: Colors.white
+                      child: isLoading
+                          ? const Padding(
+                              padding: EdgeInsets.all(18.0),
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 3,
+                              ),
+                            )
+                          : IconButton(
+                              icon: Icon(
+                                isError
+                                    ? Icons.refresh_rounded
+                                    : (isPlaying
+                                          ? Icons.pause_rounded
+                                          : Icons.play_arrow_rounded),
+                                size: 40,
+                                color: Colors.white,
+                              ),
+                              onPressed: () {
+                                if (isPlaying) {
+                                  context.read<AudioBloc>().add(
+                                    AudioEvent.pause(),
+                                  );
+                                } else if (status == AudioStatus.paused &&
+                                    isCurrentAyah) {
+                                  context.read<AudioBloc>().add(
+                                    AudioEvent.resume(),
+                                  );
+                                } else {
+                                  context.read<AudioBloc>().add(
+                                    AudioEvent.playSurah(
+                                      surahNumber: ayah.number.surahNumber,
+                                      startAyah: ayah.number.ayahNumberInSurah,
+                                      ayahCount: surahAyahCount,
+                                      reciter: state.currentReciter,
+                                    ),
+                                  );
+                                }
+                              },
                             ),
-                            onPressed: () {
-                              if (isPlaying) {
-                                context.read<AudioBloc>().add(AudioEvent.pause());
-                              } else if (status == AudioStatus.paused && isCurrentAyah) {
-                                context.read<AudioBloc>().add(AudioEvent.resume());
-                              } else {
-                                context.read<AudioBloc>().add(AudioEvent.playSurah(
-                                  surahNumber: ayah.number.surahNumber,
-                                  startAyah: ayah.number.ayahNumberInSurah,
-                                  ayahCount: surahAyahCount,
-                                  reciter: state.currentReciter,
-                                ));
-                              }
-                            },
-                          ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       isPlaying ? l10n.pause : l10n.playSurah,
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
                       maxLines: 1,
                     ),
                   ],
@@ -587,9 +783,13 @@ class _AudioTab extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.person_outline),
               title: Text(l10n.reciter),
-              subtitle: Text(state.currentReciter != null 
-                  ? (l10n.localeName == 'ar' ? state.currentReciter!.name : state.currentReciter!.englishName)
-                  : l10n.selectReciter),
+              subtitle: Text(
+                state.currentReciter != null
+                    ? (l10n.localeName == 'ar'
+                          ? state.currentReciter!.name
+                          : state.currentReciter!.englishName)
+                    : l10n.selectReciter,
+              ),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => _showReciterSelector(context),
             ),
@@ -618,7 +818,7 @@ class _AudioButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const _AudioButton({
-    required this.icon, 
+    required this.icon,
     required this.label,
     required this.onPressed,
   });

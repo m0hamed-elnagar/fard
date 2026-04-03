@@ -38,19 +38,23 @@ void main() {
       );
     }
 
-    testWidgets('renders all components correctly', (WidgetTester tester) async {
+    testWidgets('renders all components correctly', (
+      WidgetTester tester,
+    ) async {
       bool addCalled = false;
       bool removeCalled = false;
       bool toggleCalled = false;
 
-      await tester.pumpWidget(createWidgetUnderTest(
-        salaah: Salaah.fajr,
-        qadaCount: 5,
-        isMissedToday: true,
-        onAdd: () => addCalled = true,
-        onRemove: () => removeCalled = true,
-        onToggleMissed: () => toggleCalled = true,
-      ));
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          salaah: Salaah.fajr,
+          qadaCount: 5,
+          isMissedToday: true,
+          onAdd: () => addCalled = true,
+          onRemove: () => removeCalled = true,
+          onToggleMissed: () => toggleCalled = true,
+        ),
+      );
       await tester.pumpAndSettle();
 
       final l10n = lookupAppLocalizations(const Locale('ar'));
@@ -58,7 +62,10 @@ void main() {
       // Verify labels
       expect(find.text(Salaah.fajr.localizedName(l10n)), findsOneWidget);
       expect(find.text('5'), findsOneWidget);
-      expect(find.text('المتبقي'), findsOneWidget); // Localized text for remaining (wide view default)
+      expect(
+        find.text('المتبقي'),
+        findsOneWidget,
+      ); // Localized text for remaining (wide view default)
 
       // Test interactions
       // In the new logic, add button is only active if we just removed one in the same session
@@ -75,48 +82,56 @@ void main() {
       expect(toggleCalled, isTrue);
     });
 
-    testWidgets('displays prayer time when provided', (WidgetTester tester) async {
+    testWidgets('displays prayer time when provided', (
+      WidgetTester tester,
+    ) async {
       final testTime = DateTime(2026, 2, 14, 13, 45); // 1:45 PM
 
-      await tester.pumpWidget(MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('en'),
-        home: Scaffold(
-          body: SalaahTile(
-            salaah: Salaah.dhuhr,
-            qadaCount: 0,
-            isMissedToday: false,
-            isCompletedToday: false,
-            time: testTime,
-            onAdd: () {},
-            onRemove: () {},
-            onToggleMissed: () {},
-            completedQadaCount: 0,
-            isQadaEnabled: true,
-            isUpcoming: false,
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: Scaffold(
+            body: SalaahTile(
+              salaah: Salaah.dhuhr,
+              qadaCount: 0,
+              isMissedToday: false,
+              isCompletedToday: false,
+              time: testTime,
+              onAdd: () {},
+              onRemove: () {},
+              onToggleMissed: () {},
+              completedQadaCount: 0,
+              isQadaEnabled: true,
+              isUpcoming: false,
+            ),
           ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       expect(find.textContaining('1:45'), findsOneWidget);
     });
 
-    testWidgets('remove button is disabled when count is 0', (WidgetTester tester) async {
-       bool removeCalled = false;
+    testWidgets('remove button is disabled when count is 0', (
+      WidgetTester tester,
+    ) async {
+      bool removeCalled = false;
 
-       await tester.pumpWidget(createWidgetUnderTest(
-         salaah: Salaah.fajr,
-         qadaCount: 0,
-         isMissedToday: false,
-         onRemove: () => removeCalled = true,
-       ));
-       await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          salaah: Salaah.fajr,
+          qadaCount: 0,
+          isMissedToday: false,
+          onRemove: () => removeCalled = true,
+        ),
+      );
+      await tester.pumpAndSettle();
 
       // Tap remove button
       await tester.tap(find.byIcon(Icons.remove_rounded));
-      
+
       // Should NOT have been called because it's passed as null in the widget when count is 0
       expect(removeCalled, isFalse);
     });

@@ -1,14 +1,17 @@
 import 'dart:convert';
+
+import 'package:fard/core/services/location_service.dart';
 import 'package:fard/core/services/notification_service.dart';
-import 'package:fard/features/azkar/data/azkar_repository.dart';
+import 'package:fard/core/services/settings_loader.dart';
+import 'package:fard/core/services/widget_update_service.dart';
+import 'package:fard/features/azkar/data/azkar_source.dart';
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
-import 'package:fard/core/services/settings_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fard/core/services/location_service.dart';
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'settings_state.dart';
 
 @injectable
@@ -16,7 +19,8 @@ class SettingsCubit extends Cubit<SettingsState> {
   final SharedPreferences _prefs;
   final LocationService _locationService;
   final NotificationService _notificationService;
-  final AzkarRepository _azkarRepository;
+  final IAzkarSource _azkarRepository;
+  final WidgetUpdateService _widgetUpdateService;
 
   static const String _localeKey = 'locale';
   static const String _latKey = 'latitude';
@@ -33,14 +37,17 @@ class SettingsCubit extends Cubit<SettingsState> {
   static const String _hijriAdjustmentKey = 'hijri_adjustment';
 
   SettingsCubit(
-    this._prefs, 
-    this._locationService, 
-    this._notificationService, 
+    this._prefs,
+    this._locationService,
+    this._notificationService,
     this._azkarRepository,
+    this._widgetUpdateService,
   ) : super(SettingsLoader.loadSettings(_prefs));
 
   void _saveReminders(List<AzkarReminder> reminders) {
-    final String jsonStr = jsonEncode(reminders.map((e) => e.toJson()).toList());
+    final String jsonStr = jsonEncode(
+      reminders.map((e) => e.toJson()).toList(),
+    );
     _prefs.setString(_remindersKey, jsonStr);
   }
 
@@ -82,11 +89,14 @@ class SettingsCubit extends Cubit<SettingsState> {
   void _saveSalaahSettings(List<SalaahSettings> settings) {
     final String jsonStr = jsonEncode(settings.map((e) => e.toJson()).toList());
     _prefs.setString(_salaahSettingsKey, jsonStr);
+    _syncToHomeWidget();
   }
 
   void toggleReminder(int index) {
     final newList = List<AzkarReminder>.from(state.reminders);
-    newList[index] = newList[index].copyWith(isEnabled: !newList[index].isEnabled);
+    newList[index] = newList[index].copyWith(
+      isEnabled: !newList[index].isEnabled,
+    );
     emit(state.copyWith(reminders: newList));
     _saveReminders(newList);
     _updateReminders();
@@ -96,6 +106,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     _prefs.setString(_localeKey, locale.languageCode);
     emit(state.copyWith(locale: locale));
     _updateReminders();
+    _syncToHomeWidget();
   }
 
   void toggleLocale() {
@@ -107,7 +118,7 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   Future<void> refreshLocation() async {
     final status = await _locationService.checkLocationStatus();
-    
+
     if (status != LocationStatus.success) {
       emit(state.copyWith(lastLocationStatus: status));
       // Reset status after a short delay so UI can show/hide dialogs
@@ -119,14 +130,15 @@ class SettingsCubit extends Cubit<SettingsState> {
 
     final position = await _locationService.getCurrentPosition();
     if (position != null) {
-      final locationData = await _locationService.getLocationDataFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-      
-      await _prefs.setDouble(_latKey, position.latitude);
-      await _prefs.setDouble(_lonKey, position.longitude);
-      
+      final locationData = await _locationService
+          .getLocationDataFromCoordinates(
+            position.latitude,
+            position.longitude,
+          );
+
+      await _prefs.setString(_latKey, position.latitude.toString());
+      await _prefs.setString(_lonKey, position.longitude.toString());
+
       String? cityName;
       String? countryCode;
       String method = state.calculationMethod;
@@ -137,25 +149,42 @@ class SettingsCubit extends Cubit<SettingsState> {
         if (cityName != null) {
           await _prefs.setString(_cityKey, cityName);
         }
-        
+
         if (countryCode != null) {
           method = _mapCountryToMethod(countryCode);
           await _prefs.setString(_methodKey, method);
-          
-          // Apply Egypt default hijri adjustment if country is Egypt
-          if (countryCode.toUpperCase() == 'EG') {
-            updateHijriAdjustment(-1);
+
+          // Apply Hijri adjustment based on country/region (GPS auto-detect)
+          // The hijri_calendar package uses Umm al-Qura calendar
+          // Users can manually override in Settings
+          final upperCode = countryCode.toUpperCase();
+          if (upperCode == 'SA' ||
+              upperCode == 'AE' ||
+              upperCode == 'QA' ||
+              upperCode == 'KW') {
+            updateHijriAdjustment(0); // Gulf countries (Umm al-Qura based)
+          } else if (upperCode == 'PK' ||
+              upperCode == 'IN' ||
+              upperCode == 'BD') {
+            updateHijriAdjustment(
+              1,
+            ); // South Asia (local moon sighting may be +1)
+          } else {
+            // Egypt, Turkey, Iran, and other regions use 0 as default
+            updateHijriAdjustment(0);
           }
         }
       }
 
-      emit(state.copyWith(
-        latitude: position.latitude,
-        longitude: position.longitude,
-        cityName: cityName,
-        calculationMethod: method,
-        lastLocationStatus: LocationStatus.success,
-      ));
+      emit(
+        state.copyWith(
+          latitude: position.latitude,
+          longitude: position.longitude,
+          cityName: cityName,
+          calculationMethod: method,
+          lastLocationStatus: LocationStatus.success,
+        ),
+      );
 
       // Reset status
       Future.delayed(const Duration(seconds: 1), () {
@@ -163,6 +192,7 @@ class SettingsCubit extends Cubit<SettingsState> {
       });
 
       _updateReminders();
+      _syncToHomeWidget();
     }
   }
 
@@ -208,20 +238,30 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   void updateCalculationMethod(String method) {
     _prefs.setString(_methodKey, method);
-    
-    // Default Hijri adjustment for Egypt this year (Ramadan 1447) is -1
-    if (method == 'egyptian') {
-      updateHijriAdjustment(-1);
+
+    // Default Hijri adjustment based on calculation method
+    // The hijri_calendar package uses Umm al-Qura calendar
+    // Users can manually override in Settings
+    if (method == 'umm_al_qura') {
+      updateHijriAdjustment(0); // Saudi Arabia (Umm al-Qura) is baseline
+    } else if (method == 'karachi' || method == 'muslim_world_league') {
+      // South Asia and Muslim World League regions may need +1
+      updateHijriAdjustment(1);
+    } else {
+      // Egyptian, Dubai, Kuwait, Qatar, and others use 0 as default
+      updateHijriAdjustment(0);
     }
-    
+
     emit(state.copyWith(calculationMethod: method));
     _updateReminders();
+    _syncToHomeWidget();
   }
 
   void updateMadhab(String madhab) {
     _prefs.setString(_madhabKey, madhab);
     emit(state.copyWith(madhab: madhab));
     _updateReminders();
+    _syncToHomeWidget();
   }
 
   void updateMorningAzkarTime(String time) {
@@ -239,51 +279,63 @@ class SettingsCubit extends Cubit<SettingsState> {
   void toggleAfterSalahAzkar() {
     final newValue = !state.isAfterSalahAzkarEnabled;
     _prefs.setBool(_afterSalahAzkarKey, newValue);
-    
+
     // Update all individual salaah settings to match the global toggle
-    final updatedSalaahSettings = state.salaahSettings.map((s) => s.copyWith(
-      isAfterSalahAzkarEnabled: newValue
-    )).toList();
-    
+    final updatedSalaahSettings = state.salaahSettings
+        .map((s) => s.copyWith(isAfterSalahAzkarEnabled: newValue))
+        .toList();
+
     _saveSalaahSettings(updatedSalaahSettings);
-    
-    emit(state.copyWith(
-      isAfterSalahAzkarEnabled: newValue,
-      salaahSettings: updatedSalaahSettings,
-    ));
+
+    emit(
+      state.copyWith(
+        isAfterSalahAzkarEnabled: newValue,
+        salaahSettings: updatedSalaahSettings,
+      ),
+    );
     _updateReminders();
   }
 
   void updateAllAzanEnabled(bool enabled) {
-    final updated = state.salaahSettings.map((s) => s.copyWith(isAzanEnabled: enabled)).toList();
+    final updated = state.salaahSettings
+        .map((s) => s.copyWith(isAzanEnabled: enabled))
+        .toList();
     _saveSalaahSettings(updated);
     emit(state.copyWith(salaahSettings: updated));
     _updateReminders();
   }
 
   void updateAllReminderEnabled(bool enabled) {
-    final updated = state.salaahSettings.map((s) => s.copyWith(isReminderEnabled: enabled)).toList();
+    final updated = state.salaahSettings
+        .map((s) => s.copyWith(isReminderEnabled: enabled))
+        .toList();
     _saveSalaahSettings(updated);
     emit(state.copyWith(salaahSettings: updated));
     _updateReminders();
   }
 
   void updateAllAzanSound(String? sound) {
-    final updated = state.salaahSettings.map((s) => s.copyWith(azanSound: sound)).toList();
+    final updated = state.salaahSettings
+        .map((s) => s.copyWith(azanSound: sound))
+        .toList();
     _saveSalaahSettings(updated);
     emit(state.copyWith(salaahSettings: updated));
     _updateReminders();
   }
 
   void updateAllReminderMinutes(int minutes) {
-    final updated = state.salaahSettings.map((s) => s.copyWith(reminderMinutesBefore: minutes)).toList();
+    final updated = state.salaahSettings
+        .map((s) => s.copyWith(reminderMinutesBefore: minutes))
+        .toList();
     _saveSalaahSettings(updated);
     emit(state.copyWith(salaahSettings: updated));
     _updateReminders();
   }
 
   void updateAllAfterSalahMinutes(int minutes) {
-    final updated = state.salaahSettings.map((s) => s.copyWith(afterSalaahAzkarMinutes: minutes)).toList();
+    final updated = state.salaahSettings
+        .map((s) => s.copyWith(afterSalaahAzkarMinutes: minutes))
+        .toList();
     _saveSalaahSettings(updated);
     emit(state.copyWith(salaahSettings: updated));
     _updateReminders();
@@ -298,6 +350,7 @@ class SettingsCubit extends Cubit<SettingsState> {
   void updateHijriAdjustment(int adjustment) {
     _prefs.setInt(_hijriAdjustmentKey, adjustment);
     emit(state.copyWith(hijriAdjustment: adjustment));
+    _syncToHomeWidget();
   }
 
   Future<void> _updateReminders() async {
@@ -305,7 +358,10 @@ class SettingsCubit extends Cubit<SettingsState> {
     Future.delayed(const Duration(milliseconds: 50), () async {
       try {
         final azkar = await _azkarRepository.getAllAzkar();
-        await _notificationService.scheduleAzkarReminders(settings: state, allAzkar: azkar);
+        await _notificationService.scheduleAzkarReminders(
+          settings: state,
+          allAzkar: azkar,
+        );
         await _notificationService.schedulePrayerNotifications(settings: state);
       } catch (e) {
         debugPrint('Error updating reminders in background: $e');
@@ -318,6 +374,14 @@ class SettingsCubit extends Cubit<SettingsState> {
       await _updateReminders();
     } catch (e) {
       debugPrint('Error initializing reminders: $e');
+    }
+  }
+
+  Future<void> _syncToHomeWidget() async {
+    try {
+      await _widgetUpdateService.updateWidget(state);
+    } catch (e) {
+      debugPrint('Error syncing to home widget: $e');
     }
   }
 }

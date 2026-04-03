@@ -22,9 +22,7 @@ void main() {
             Salaah.fajr: const MissedCounter(10),
             Salaah.dhuhr: const MissedCounter(5),
           },
-          completedQada: {
-            Salaah.fajr: 2,
-          },
+          completedQada: {Salaah.fajr: 2},
         ),
       ];
 
@@ -85,26 +83,65 @@ void main() {
       // 4. Assertions
       expect(restoredBackup.version, originalBackup.version);
       expect(restoredBackup.appVersion, originalBackup.appVersion);
-      
+
       // Prayer Records Check
-      expect(restoredBackup.prayerRecords.length, originalBackup.prayerRecords.length);
-      expect(restoredBackup.prayerRecords.first.id, originalBackup.prayerRecords.first.id);
-      expect(restoredBackup.prayerRecords.first.missedToday, originalBackup.prayerRecords.first.missedToday);
-      expect(restoredBackup.prayerRecords.first.qada[Salaah.fajr]?.value, originalBackup.prayerRecords.first.qada[Salaah.fajr]?.value);
-      expect(restoredBackup.prayerRecords.first.completedQada[Salaah.fajr], originalBackup.prayerRecords.first.completedQada[Salaah.fajr]);
+      expect(
+        restoredBackup.prayerRecords.length,
+        originalBackup.prayerRecords.length,
+      );
+      expect(
+        restoredBackup.prayerRecords.first.id,
+        originalBackup.prayerRecords.first.id,
+      );
+      expect(
+        restoredBackup.prayerRecords.first.missedToday,
+        originalBackup.prayerRecords.first.missedToday,
+      );
+      expect(
+        restoredBackup.prayerRecords.first.qada[Salaah.fajr]?.value,
+        originalBackup.prayerRecords.first.qada[Salaah.fajr]?.value,
+      );
+      expect(
+        restoredBackup.prayerRecords.first.completedQada[Salaah.fajr],
+        originalBackup.prayerRecords.first.completedQada[Salaah.fajr],
+      );
 
       // Werd Goals Check
       expect(restoredBackup.werdGoals.length, originalBackup.werdGoals.length);
-      expect(restoredBackup.werdGoals.first.id, originalBackup.werdGoals.first.id);
-      expect(restoredBackup.werdGoals.first.type, originalBackup.werdGoals.first.type);
-      expect(restoredBackup.werdGoals.first.value, originalBackup.werdGoals.first.value);
+      expect(
+        restoredBackup.werdGoals.first.id,
+        originalBackup.werdGoals.first.id,
+      );
+      expect(
+        restoredBackup.werdGoals.first.type,
+        originalBackup.werdGoals.first.type,
+      );
+      expect(
+        restoredBackup.werdGoals.first.value,
+        originalBackup.werdGoals.first.value,
+      );
 
       // Werd Progress Check
-      expect(restoredBackup.werdProgress.length, originalBackup.werdProgress.length);
-      expect(restoredBackup.werdProgress.first.goalId, originalBackup.werdProgress.first.goalId);
-      expect(restoredBackup.werdProgress.first.readItemsToday, originalBackup.werdProgress.first.readItemsToday);
-      expect(restoredBackup.werdProgress.first.history['2024-01-01']?.totalAyahsRead, 5);
-      expect(restoredBackup.werdProgress.first.history['2024-01-01']?.startSurahName, 'Al-Baqarah');
+      expect(
+        restoredBackup.werdProgress.length,
+        originalBackup.werdProgress.length,
+      );
+      expect(
+        restoredBackup.werdProgress.first.goalId,
+        originalBackup.werdProgress.first.goalId,
+      );
+      expect(
+        restoredBackup.werdProgress.first.readItemsToday,
+        originalBackup.werdProgress.first.readItemsToday,
+      );
+      expect(
+        restoredBackup.werdProgress.first.history['2024-01-01']?.totalAyahsRead,
+        5,
+      );
+      expect(
+        restoredBackup.werdProgress.first.history['2024-01-01']?.startSurahName,
+        'Al-Baqarah',
+      );
     });
 
     test('Should handle newer backup version error', () {

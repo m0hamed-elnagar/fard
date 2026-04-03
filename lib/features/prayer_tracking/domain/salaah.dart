@@ -1,7 +1,1 @@
-enum Salaah {
-  fajr,
-  dhuhr,
-  asr,
-  maghrib,
-  isha;
-}
+enum Salaah { fajr, dhuhr, asr, maghrib, isha }

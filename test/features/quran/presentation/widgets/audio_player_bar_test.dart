@@ -11,7 +11,8 @@ import 'package:fard/features/audio/domain/entities/reciter.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-class MockAudioBloc extends MockBloc<AudioEvent, AudioState> implements AudioBloc {}
+class MockAudioBloc extends MockBloc<AudioEvent, AudioState>
+    implements AudioBloc {}
 
 void main() {
   late MockAudioBloc mockAudioBloc;
@@ -46,9 +47,14 @@ void main() {
       currentAyah: 1,
       duration: Duration(seconds: 10),
       position: Duration(seconds: 2),
-      currentReciter: Reciter(identifier: 'id', name: 'Reciter Name', englishName: 'English Name', language: 'ar'),
+      currentReciter: Reciter(
+        identifier: 'id',
+        name: 'Reciter Name',
+        englishName: 'English Name',
+        language: 'ar',
+      ),
     );
-    
+
     when(() => mockAudioBloc.state).thenReturn(state);
 
     await tester.pumpWidget(createWidgetUnderTest());
@@ -59,7 +65,9 @@ void main() {
     expect(find.text('Surah Al Fatiha, Ayah 1'), findsOneWidget);
   });
 
-  testWidgets('AudioPlayerBar clamps slider value when position > duration', (tester) async {
+  testWidgets('AudioPlayerBar clamps slider value when position > duration', (
+    tester,
+  ) async {
     final state = const AudioState(
       status: AudioStatus.playing,
       isBannerVisible: true,
@@ -67,9 +75,14 @@ void main() {
       currentAyah: 1,
       duration: Duration(seconds: 10),
       position: Duration(seconds: 12), // Position > Duration
-      currentReciter: Reciter(identifier: 'id', name: 'Reciter Name', englishName: 'English Name', language: 'ar'),
+      currentReciter: Reciter(
+        identifier: 'id',
+        name: 'Reciter Name',
+        englishName: 'English Name',
+        language: 'ar',
+      ),
     );
-    
+
     when(() => mockAudioBloc.state).thenReturn(state);
 
     await tester.pumpWidget(createWidgetUnderTest());
@@ -77,15 +90,17 @@ void main() {
 
     final sliderFinder = find.byType(Slider);
     expect(sliderFinder, findsOneWidget);
-    
+
     final slider = tester.widget<Slider>(sliderFinder);
     expect(slider.value, equals(10000.0)); // Should be clamped to duration
     expect(slider.max, equals(10000.0));
   });
 
   testWidgets('AudioPlayerBar shows nothing when idle', (tester) async {
-     when(() => mockAudioBloc.state).thenReturn(const AudioState(status: AudioStatus.idle));
-     await tester.pumpWidget(createWidgetUnderTest());
-     expect(find.byType(Container), findsNothing);
+    when(
+      () => mockAudioBloc.state,
+    ).thenReturn(const AudioState(status: AudioStatus.idle));
+    await tester.pumpWidget(createWidgetUnderTest());
+    expect(find.byType(Container), findsNothing);
   });
 }

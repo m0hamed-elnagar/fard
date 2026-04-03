@@ -33,10 +33,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: AyahText(
-            ayahs: [testAyah1, testAyah2],
-            onAyahTap: (_) {},
-          ),
+          body: AyahText(ayahs: [testAyah1, testAyah2], onAyahTap: (_) {}),
         ),
       ),
     );
@@ -51,10 +48,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: AyahText(
-            ayahs: [testAyah1],
-            onAyahTap: (a) => tappedAyah = a,
-          ),
+          body: AyahText(ayahs: [testAyah1], onAyahTap: (a) => tappedAyah = a),
         ),
       ),
     );
@@ -62,12 +56,12 @@ void main() {
     // Find the RichText and tap its right side (since it is RTL)
     final richTextFinder = find.byType(RichText).first;
     final Offset topRight = tester.getTopRight(richTextFinder);
-    
+
     // Tap 50 pixels from the right edge, middle vertically
     final Offset tapPoint = Offset(topRight.dx - 50, topRight.dy + 30);
     await tester.tapAt(tapPoint);
     await tester.pumpAndSettle(); // Wait for all animations and timers
-    
+
     expect(tappedAyah, testAyah1);
   });
 
@@ -75,10 +69,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: AyahText(
-            ayahs: [testAyahSajdah],
-            onAyahTap: (_) {},
-          ),
+          body: AyahText(ayahs: [testAyahSajdah], onAyahTap: (_) {}),
         ),
       ),
     );

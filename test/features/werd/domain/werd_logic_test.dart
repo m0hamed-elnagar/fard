@@ -43,7 +43,7 @@ void main() {
   });
 
   test('QuranHizbProvider absolute conversion', () {
-    // Fatihah has 7 ayahs. 
+    // Fatihah has 7 ayahs.
     // Surah 2, Ayah 1 should be absolute 8.
     expect(QuranHizbProvider.getAbsoluteAyahNumber(1, 1), 1);
     expect(QuranHizbProvider.getAbsoluteAyahNumber(1, 7), 7);

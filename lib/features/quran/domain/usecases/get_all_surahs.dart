@@ -7,9 +7,9 @@ import 'package:injectable/injectable.dart';
 @injectable
 class GetAllSurahs implements UseCase<List<Surah>, NoParams> {
   final QuranRepository repository;
-  
+
   const GetAllSurahs(this.repository);
-  
+
   @override
   Future<Result<List<Surah>>> call(NoParams params) {
     // We need to add getAllSurahs to QuranRepository interface

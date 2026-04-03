@@ -17,35 +17,48 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
         load: (e) async {
           emit(state.copyWith(isLoading: true));
           _progressSubscription?.cancel();
-          _progressSubscription = _repository.watchProgress(goalId: e.id).listen((result) {
-            result.fold(
-              (_) => null,
-              (progress) => add(WerdEvent.progressUpdated(progress)),
-            );
-          });
+          _progressSubscription = _repository
+              .watchProgress(goalId: e.id)
+              .listen((result) {
+                result.fold(
+                  (_) => null,
+                  (progress) => add(WerdEvent.progressUpdated(progress)),
+                );
+              });
 
           final goalRes = await _repository.getGoal(id: e.id);
           final progressRes = await _repository.getProgress(goalId: e.id);
-          
-          emit(state.copyWith(
-            isLoading: false,
-            goal: goalRes.fold((_) => null, (g) => g),
-            progress: progressRes.fold((_) => null, (p) => p),
-          ));
+
+          emit(
+            state.copyWith(
+              isLoading: false,
+              goal: goalRes.fold((_) => null, (g) => g),
+              progress: progressRes.fold((_) => null, (p) => p),
+            ),
+          );
         },
         setGoal: (e) async {
           emit(state.copyWith(isLoading: true));
           await _repository.setGoal(e.goal);
-          
+
           // Reset progress for the new goal starting point
-          final currentProgressRes = await _repository.getProgress(goalId: e.goal.id);
+          final currentProgressRes = await _repository.getProgress(
+            goalId: e.goal.id,
+          );
           final currentProgress = currentProgressRes.fold(
-            (_) => WerdProgress(goalId: e.goal.id, totalAmountReadToday: 0, lastUpdated: DateTime.now(), streak: 0),
-            (p) => p
+            (_) => WerdProgress(
+              goalId: e.goal.id,
+              totalAmountReadToday: 0,
+              lastUpdated: DateTime.now(),
+              streak: 0,
+            ),
+            (p) => p,
           );
 
           final updatedProgress = currentProgress.copyWith(
-            lastReadAbsolute: e.goal.startAbsolute != null ? e.goal.startAbsolute! - 1 : null,
+            lastReadAbsolute: e.goal.startAbsolute != null
+                ? e.goal.startAbsolute! - 1
+                : null,
             sessionStartAbsolute: e.goal.startAbsolute,
             totalAmountReadToday: 0,
             readItemsToday: const {},
@@ -55,17 +68,23 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           if (state.goal?.id != e.goal.id) {
             add(WerdEvent.load(id: e.goal.id));
           } else {
-            emit(state.copyWith(isLoading: false, goal: e.goal, progress: updatedProgress));
+            emit(
+              state.copyWith(
+                isLoading: false,
+                goal: e.goal,
+                progress: updatedProgress,
+              ),
+            );
           }
         },
         progressUpdated: (e) {
           emit(state.copyWith(progress: e.progress));
         },
         updateBookmark: (e) async {
-           // No longer used to update progress
+          // No longer used to update progress
         },
         trackItemRead: (e) async {
-          // If we track a single item (e.g. from Mushaf tap), 
+          // If we track a single item (e.g. from Mushaf tap),
           // we treat it as "reached this point" for today's session
           await _handleBookmarkUpdate(e.absoluteIndex);
         },
@@ -81,35 +100,43 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
     final goalId = state.goal?.id ?? 'default';
     final progressRes = await _repository.getProgress(goalId: goalId);
     final currentProgress = progressRes.fold(
-      (_) => WerdProgress(goalId: goalId, totalAmountReadToday: 0, lastUpdated: DateTime.now(), streak: 0),
-      (p) => p
+      (_) => WerdProgress(
+        goalId: goalId,
+        totalAmountReadToday: 0,
+        lastUpdated: DateTime.now(),
+        streak: 0,
+      ),
+      (p) => p,
     );
 
     final startAbs = currentProgress.sessionStartAbsolute ?? 1;
-    
+
     // PROGRESS LOGIC: Reverted to Linear (Distance from start)
     int newTotal = 0;
     Set<int> newItems = Set.from(currentProgress.readItemsToday);
-    
+
     if (bookmarkAbs >= startAbs) {
-       newTotal = bookmarkAbs - startAbs + 1;
-       // Still update items for granular UI checks (like fractional page progress)
-       for (int i = startAbs; i <= bookmarkAbs; i++) {
-         newItems.add(i);
-       }
+      newTotal = bookmarkAbs - startAbs + 1;
+      // Still update items for granular UI checks (like fractional page progress)
+      for (int i = startAbs; i <= bookmarkAbs; i++) {
+        newItems.add(i);
+      }
     } else {
-       // If reading before start, we don't count it as today's "distance" progress
-       // but we can still track the item if it helps other UI parts.
-       newItems.add(bookmarkAbs);
-       newTotal = currentProgress.totalAmountReadToday; // No change in linear distance
+      // If reading before start, we don't count it as today's "distance" progress
+      // but we can still track the item if it helps other UI parts.
+      newItems.add(bookmarkAbs);
+      newTotal =
+          currentProgress.totalAmountReadToday; // No change in linear distance
     }
 
     int newStreak = currentProgress.streak;
     if (state.goal != null) {
       final dailyGoal = state.goal!.valueInAyahs;
-      if (currentProgress.totalAmountReadToday < dailyGoal && newTotal >= dailyGoal) {
+      if (currentProgress.totalAmountReadToday < dailyGoal &&
+          newTotal >= dailyGoal) {
         newStreak++;
-      } else if (currentProgress.totalAmountReadToday >= dailyGoal && newTotal < dailyGoal) {
+      } else if (currentProgress.totalAmountReadToday >= dailyGoal &&
+          newTotal < dailyGoal) {
         newStreak = (newStreak > 0) ? newStreak - 1 : 0;
       }
     }

@@ -14,7 +14,7 @@ class QuranReaderAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return AppBar(
       title: BlocBuilder<ReaderBloc, ReaderState>(
         builder: (context, state) {
@@ -34,7 +34,10 @@ class QuranReaderAppBar extends StatelessWidget implements PreferredSizeWidget {
                 int page = 1;
                 state.maybeMap(
                   loaded: (s) {
-                    final targetAyah = s.highlightedAyah ?? s.lastReadAyah ?? s.surah.ayahs.firstOrNull;
+                    final targetAyah =
+                        s.highlightedAyah ??
+                        s.lastReadAyah ??
+                        s.surah.ayahs.firstOrNull;
                     if (targetAyah != null) {
                       page = quran.getPageNumber(
                         s.surah.number.value,

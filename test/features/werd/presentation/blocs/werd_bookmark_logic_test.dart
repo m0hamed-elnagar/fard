@@ -36,15 +36,19 @@ void main() {
 
     registerFallbackValue(testGoal);
     registerFallbackValue(initialProgress);
-    
-    when(() => mockRepository.getGoal(id: any(named: 'id')))
-        .thenAnswer((_) async => Result.success(testGoal));
-    when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
-        .thenAnswer((_) async => Result.success(initialProgress));
-    when(() => mockRepository.watchProgress(goalId: any(named: 'goalId')))
-        .thenAnswer((_) => Stream.value(Result.success(initialProgress)));
-    when(() => mockRepository.updateProgress(any()))
-        .thenAnswer((_) async => Result.success(null));
+
+    when(
+      () => mockRepository.getGoal(id: any(named: 'id')),
+    ).thenAnswer((_) async => Result.success(testGoal));
+    when(
+      () => mockRepository.getProgress(goalId: any(named: 'goalId')),
+    ).thenAnswer((_) async => Result.success(initialProgress));
+    when(
+      () => mockRepository.watchProgress(goalId: any(named: 'goalId')),
+    ).thenAnswer((_) => Stream.value(Result.success(initialProgress)));
+    when(
+      () => mockRepository.updateProgress(any()),
+    ).thenAnswer((_) async => Result.success(null));
   });
 
   group('WerdBloc Bookmark Decoupling', () {

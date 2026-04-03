@@ -16,15 +16,23 @@ import 'package:fard/core/errors/failure.dart';
 import 'dart:async';
 
 class MockGetSurah extends Mock implements GetSurah {}
+
 class MockGetPage extends Mock implements GetPage {}
+
 class MockUpdateLastRead extends Mock implements UpdateLastRead {}
+
 class MockWatchLastRead extends Mock implements WatchLastRead {}
+
 class MockBookmarkRepository extends Mock implements BookmarkRepository {}
+
 class MockQuranRepository extends Mock implements QuranRepository {}
 
 class FakeGetSurahParams extends Fake implements GetSurahParams {}
+
 class FakeAyahNumber extends Fake implements AyahNumber {}
+
 class FakeBookmark extends Fake implements Bookmark {}
+
 class FakeLastReadPosition extends Fake implements LastReadPosition {}
 
 void main() {
@@ -72,16 +80,32 @@ void main() {
     mockBookmarkRepository = MockBookmarkRepository();
     mockQuranRepository = MockQuranRepository();
 
-    when(() => mockQuranRepository.getReaderSeparator()).thenAnswer((_) async => 0);
-    when(() => mockGetSurah(any())).thenAnswer((_) async => Result.success(tSurah));
+    when(
+      () => mockQuranRepository.getReaderSeparator(),
+    ).thenAnswer((_) async => 0);
+    when(
+      () => mockGetSurah(any()),
+    ).thenAnswer((_) async => Result.success(tSurah));
     when(() => mockWatchLastRead()).thenAnswer((_) => const Stream.empty());
-    when(() => mockBookmarkRepository.getBookmarks()).thenAnswer((_) async => Result.success([]));
-    when(() => mockBookmarkRepository.isBookmarked(any())).thenAnswer((_) async => Result.success(false));
-    when(() => mockBookmarkRepository.addBookmark(any())).thenAnswer((_) async => Result.success(null));
-    when(() => mockBookmarkRepository.removeBookmark(any())).thenAnswer((_) async => Result.success(null));
-    when(() => mockBookmarkRepository.clearAllBookmarks()).thenAnswer((_) async => Result.success(null));
-    when(() => mockUpdateLastRead(any())).thenAnswer((_) async => Result.success(null));
-    
+    when(
+      () => mockBookmarkRepository.getBookmarks(),
+    ).thenAnswer((_) async => Result.success([]));
+    when(
+      () => mockBookmarkRepository.isBookmarked(any()),
+    ).thenAnswer((_) async => Result.success(false));
+    when(
+      () => mockBookmarkRepository.addBookmark(any()),
+    ).thenAnswer((_) async => Result.success(null));
+    when(
+      () => mockBookmarkRepository.removeBookmark(any()),
+    ).thenAnswer((_) async => Result.success(null));
+    when(
+      () => mockBookmarkRepository.clearAllBookmarks(),
+    ).thenAnswer((_) async => Result.success(null));
+    when(
+      () => mockUpdateLastRead(any()),
+    ).thenAnswer((_) async => Result.success(null));
+
     readerBloc = ReaderBloc(
       getSurah: mockGetSurah,
       getPage: mockGetPage,
@@ -92,24 +116,40 @@ void main() {
     );
   });
 
-  test('Reproduction: Toggling bookmark should NOT update lastReadAyah', () async {
-    // 1. Load Surah
-    readerBloc.add(ReaderEvent.loadSurah(surahNumber: tSurahNumber));
-    await expectLater(
-      readerBloc.stream,
-      emitsThrough(isA<ReaderState>().having((s) => s.maybeMap(loaded: (l) => l.surah.name, orElse: () => null), 'name', 'Al-Fatihah')),
-    );
+  test(
+    'Reproduction: Toggling bookmark should NOT update lastReadAyah',
+    () async {
+      // 1. Load Surah
+      readerBloc.add(ReaderEvent.loadSurah(surahNumber: tSurahNumber));
+      await expectLater(
+        readerBloc.stream,
+        emitsThrough(
+          isA<ReaderState>().having(
+            (s) => s.maybeMap(loaded: (l) => l.surah.name, orElse: () => null),
+            'name',
+            'Al-Fatihah',
+          ),
+        ),
+      );
 
-    // 2. Toggle Bookmark on Ayah 2
-    readerBloc.add(ReaderEvent.toggleBookmark(tAyah2));
-    
-    // Wait for state update
-    await Future.delayed(Duration.zero);
-    
-    final state = readerBloc.state.mapOrNull(loaded: (s) => s);
-    expect(state?.bookmarks.any((b) => b.ayahNumber == tAyah2.number), isTrue);
-    
-    // THE CRITICAL CHECK:
-    expect(state?.lastReadAyah, isNull, reason: 'Toggling bookmark MUST NOT update lastReadAyah');
-  });
+      // 2. Toggle Bookmark on Ayah 2
+      readerBloc.add(ReaderEvent.toggleBookmark(tAyah2));
+
+      // Wait for state update
+      await Future.delayed(Duration.zero);
+
+      final state = readerBloc.state.mapOrNull(loaded: (s) => s);
+      expect(
+        state?.bookmarks.any((b) => b.ayahNumber == tAyah2.number),
+        isTrue,
+      );
+
+      // THE CRITICAL CHECK:
+      expect(
+        state?.lastReadAyah,
+        isNull,
+        reason: 'Toggling bookmark MUST NOT update lastReadAyah',
+      );
+    },
+  );
 }

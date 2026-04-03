@@ -6,11 +6,7 @@ enum WerdGoalType {
   finishInDays, // E.g. Finish in 30 days
 }
 
-enum WerdCategory {
-  quran,
-  dhikr,
-  custom,
-}
+enum WerdCategory { quran, dhikr, custom }
 
 enum WerdUnit {
   // Quran units
@@ -43,8 +39,16 @@ class WerdGoal extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, category, type, value, unit, startDate, startAbsolute];
-  
+  List<Object?> get props => [
+    id,
+    category,
+    type,
+    value,
+    unit,
+    startDate,
+    startAbsolute,
+  ];
+
   Map<String, dynamic> toJson() => {
     'id': id,
     'category': category.index,
@@ -57,7 +61,9 @@ class WerdGoal extends Equatable {
 
   factory WerdGoal.fromJson(Map<String, dynamic> json) => WerdGoal(
     id: json['id'] ?? 'default',
-    category: json['category'] != null ? WerdCategory.values[json['category']] : WerdCategory.quran,
+    category: json['category'] != null
+        ? WerdCategory.values[json['category']]
+        : WerdCategory.quran,
     type: WerdGoalType.values[json['type']],
     value: json['value'],
     unit: json['unit'] != null ? WerdUnit.values[json['unit']] : WerdUnit.ayah,
@@ -68,14 +74,14 @@ class WerdGoal extends Equatable {
   // Conversion helpers to Ayahs (for Quran category)
   int get valueInAyahs {
     if (category != WerdCategory.quran) return value;
-    
+
     final startAbs = startAbsolute ?? 1;
 
     if (type == WerdGoalType.finishInDays) {
       final remainingAyahs = 6236 - startAbs + 1;
       return (remainingAyahs / value).ceil();
     }
-    
+
     return QuranHizbProvider.getGoalRequiredAyahs(startAbs, unit, value);
   }
 }

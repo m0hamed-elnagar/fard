@@ -39,15 +39,25 @@ class ReciterDownloadScreen extends StatelessWidget {
                         context: context,
                         builder: (c) => AlertDialog(
                           title: Text(l10n.deleteAllDownloads),
-                          content: Text(l10n.deleteReciterConfirm(reciter.name)),
+                          content: Text(
+                            l10n.deleteReciterConfirm(reciter.name),
+                          ),
                           actions: [
-                            TextButton(onPressed: () => Navigator.pop(c), child: Text(l10n.cancel)),
+                            TextButton(
+                              onPressed: () => Navigator.pop(c),
+                              child: Text(l10n.cancel),
+                            ),
                             TextButton(
                               onPressed: () {
                                 Navigator.pop(c);
-                                context.read<AudioDownloadCubit>().deleteReciter(reciter);
+                                context
+                                    .read<AudioDownloadCubit>()
+                                    .deleteReciter(reciter);
                               },
-                              child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+                              child: Text(
+                                l10n.delete,
+                                style: const TextStyle(color: Colors.red),
+                              ),
                             ),
                           ],
                         ),
@@ -67,12 +77,17 @@ class ReciterDownloadScreen extends StatelessWidget {
                     if (state.isLoading && state.surahStatuses.isEmpty) {
                       return const Center(child: CircularProgressIndicator());
                     }
-                    
+
                     return ListView.builder(
                       itemCount: 114,
                       itemBuilder: (context, index) {
                         final surahNumber = index + 1;
-                        return _buildSurahTile(context, surahNumber, state, l10n);
+                        return _buildSurahTile(
+                          context,
+                          surahNumber,
+                          state,
+                          l10n,
+                        );
                       },
                     );
                   },
@@ -202,8 +217,8 @@ class ReciterDownloadScreen extends StatelessWidget {
     final progress = (state.activeSurahNumber == surahNumber)
         ? state.progress
         : (status != null && status.totalAyahs > 0
-            ? status.downloadedAyahs / status.totalAyahs
-            : 0.0);
+              ? status.downloadedAyahs / status.totalAyahs
+              : 0.0);
 
     return ListTile(
       leading: CircleAvatar(child: Text('$surahNumber')),
@@ -217,9 +232,9 @@ class ReciterDownloadScreen extends StatelessWidget {
                 LinearProgressIndicator(
                   value: isStopping ? null : progress,
                   backgroundColor: Colors.grey[200],
-                  valueColor: isStopping 
-                    ? const AlwaysStoppedAnimation<Color>(Colors.grey)
-                    : null,
+                  valueColor: isStopping
+                      ? const AlwaysStoppedAnimation<Color>(Colors.grey)
+                      : null,
                 ),
                 const SizedBox(height: 2),
                 Text(sizeText, style: const TextStyle(fontSize: 10)),
@@ -235,7 +250,10 @@ class ReciterDownloadScreen extends StatelessWidget {
             const SizedBox(
               width: 20,
               height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.grey)),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+              ),
             )
           else if (isDownloading)
             Row(
@@ -275,34 +293,36 @@ class ReciterDownloadScreen extends StatelessWidget {
           if (isDownloaded || isDownloading || hasPartial || isStopping)
             IconButton(
               icon: const Icon(Icons.delete_outline, color: Colors.red),
-              onPressed: isStopping ? null : () {
-                showDialog(
-                  context: context,
-                  builder: (c) => AlertDialog(
-                    title: Text(l10n.deleteSurahAudio),
-                    content: Text(l10n.deleteSurahConfirm(surahName)),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(c),
-                        child: Text(l10n.cancel),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(c);
-                          context.read<AudioDownloadCubit>().deleteSurah(
-                            reciter,
-                            surahNumber,
-                          );
-                        },
-                        child: Text(
-                          l10n.delete,
-                          style: const TextStyle(color: Colors.red),
+              onPressed: isStopping
+                  ? null
+                  : () {
+                      showDialog(
+                        context: context,
+                        builder: (c) => AlertDialog(
+                          title: Text(l10n.deleteSurahAudio),
+                          content: Text(l10n.deleteSurahConfirm(surahName)),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(c),
+                              child: Text(l10n.cancel),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(c);
+                                context.read<AudioDownloadCubit>().deleteSurah(
+                                  reciter,
+                                  surahNumber,
+                                );
+                              },
+                              child: Text(
+                                l10n.delete,
+                                style: const TextStyle(color: Colors.red),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+                      );
+                    },
             ),
         ],
       ),

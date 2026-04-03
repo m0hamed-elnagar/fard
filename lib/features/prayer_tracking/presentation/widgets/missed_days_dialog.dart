@@ -43,14 +43,14 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
 
     final direction = Directionality.of(context);
     final bool isRtl = direction == TextDirection.rtl;
-    
+
     int column;
     if (isRtl) {
       column = 6 - (localPosition.dx / itemWidth).floor();
     } else {
       column = (localPosition.dx / itemWidth).floor();
     }
-    
+
     final int row = (scrolledY / itemHeight).floor();
 
     if (column < 0 || column >= 7 || row < 0) return;
@@ -167,10 +167,11 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
                       shrinkWrap: true,
                       itemCount: widget.missedDates.length,
                       padding: EdgeInsets.zero,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 7,
-                        mainAxisExtent: 60.0,
-                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 7,
+                            mainAxisExtent: 60.0,
+                          ),
                       itemBuilder: (context, index) {
                         final date = widget.missedDates[index];
                         final isSelected = _selectedDates.contains(date);
@@ -205,17 +206,22 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppTheme.textSecondary,
                       padding: const EdgeInsets.symmetric(vertical: 14.0),
-                      side: const BorderSide(color: AppTheme.cardBorder, width: 1.5),
+                      side: const BorderSide(
+                        color: AppTheme.cardBorder,
+                        width: 1.5,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.0),
                       ),
                     ),
-                    child: Text(l10n.skip,
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.amiri(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                        )),
+                    child: Text(
+                      l10n.skip,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.amiri(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12.0),
@@ -233,11 +239,13 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
                         borderRadius: BorderRadius.circular(12.0),
                       ),
                     ),
-                    child: Text(l10n.done,
-                        style: GoogleFonts.amiri(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        )),
+                    child: Text(
+                      l10n.done,
+                      style: GoogleFonts.amiri(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -254,11 +262,16 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: (isRtl ? weekdays.reversed.toList() : weekdays)
-          .map((d) => Text(d,
+          .map(
+            (d) => Text(
+              d,
               style: GoogleFonts.outfit(
-                  fontSize: 12,
-                  color: AppTheme.textSecondary,
-                  fontWeight: FontWeight.w600)))
+                fontSize: 12,
+                color: AppTheme.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          )
           .toList(),
     );
   }
@@ -295,7 +308,7 @@ class _CalendarDayItem extends StatelessWidget {
                       color: AppTheme.missed.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
-                    )
+                    ),
                   ]
                 : [],
             border: Border.all(
@@ -317,7 +330,9 @@ class _CalendarDayItem extends StatelessWidget {
               Text(
                 _getMonthName(date.month),
                 style: GoogleFonts.outfit(
-                  color: isSelected ? Colors.white.withValues(alpha: 0.8) : AppTheme.textSecondary,
+                  color: isSelected
+                      ? Colors.white.withValues(alpha: 0.8)
+                      : AppTheme.textSecondary,
                   fontSize: 10.0,
                 ),
               ),
@@ -330,8 +345,18 @@ class _CalendarDayItem extends StatelessWidget {
 
   String _getMonthName(int month) {
     const names = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return names[month - 1];
   }

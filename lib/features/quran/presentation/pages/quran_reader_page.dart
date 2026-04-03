@@ -84,13 +84,25 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                     listeners: [
                       BlocListener<ReaderBloc, ReaderState>(
                         listenWhen: (prev, curr) {
-                          final prevAyah = prev.maybeMap(loaded: (s) => s.highlightedAyah, orElse: () => null);
-                          final currAyah = curr.maybeMap(loaded: (s) => s.highlightedAyah, orElse: () => null);
-                          
+                          final prevAyah = prev.maybeMap(
+                            loaded: (s) => s.highlightedAyah,
+                            orElse: () => null,
+                          );
+                          final currAyah = curr.maybeMap(
+                            loaded: (s) => s.highlightedAyah,
+                            orElse: () => null,
+                          );
+
                           // Trigger when transitioning to loaded or when highlight changes
-                          return (prev.maybeMap(loaded: (_) => false, orElse: () => true) && 
-                                  curr.maybeMap(loaded: (_) => true, orElse: () => false)) ||
-                                 (prevAyah != currAyah);
+                          return (prev.maybeMap(
+                                    loaded: (_) => false,
+                                    orElse: () => true,
+                                  ) &&
+                                  curr.maybeMap(
+                                    loaded: (_) => true,
+                                    orElse: () => false,
+                                  )) ||
+                              (prevAyah != currAyah);
                         },
                         listener: (context, state) {
                           state.mapOrNull(
@@ -98,18 +110,27 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                               // Generate keys for all ayahs if not already done
                               _scrollController.generateKeys(s.surah.ayahs);
 
-                              if (!_hasHandledInitialAyah && widget.initialAyahNumber != null) {
+                              if (!_hasHandledInitialAyah &&
+                                  widget.initialAyahNumber != null) {
                                 _hasHandledInitialAyah = true;
                                 try {
                                   final ayah = s.surah.ayahs.firstWhere(
-                                    (a) => a.number.ayahNumberInSurah == widget.initialAyahNumber
+                                    (a) =>
+                                        a.number.ayahNumberInSurah ==
+                                        widget.initialAyahNumber,
                                   );
-                                  context.read<ReaderBloc>().add(ReaderEvent.selectAyah(ayah));
-                                  _scrollController.scrollToAyah(widget.initialAyahNumber!);
+                                  context.read<ReaderBloc>().add(
+                                    ReaderEvent.selectAyah(ayah),
+                                  );
+                                  _scrollController.scrollToAyah(
+                                    widget.initialAyahNumber!,
+                                  );
                                 } catch (_) {}
                               } else if (s.highlightedAyah != null) {
                                 // If highlight changed (e.g. from navigation elsewhere), scroll to it
-                                _scrollController.scrollToAyah(s.highlightedAyah!.number.ayahNumberInSurah);
+                                _scrollController.scrollToAyah(
+                                  s.highlightedAyah!.number.ayahNumberInSurah,
+                                );
                               }
 
                               // Play on load logic
@@ -127,7 +148,14 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                               context.read<AudioBloc>().add(
                                 AudioEvent.updateCurrentPosition(
                                   surahNumber: s.surah.number.value,
-                                  ayahNumber: s.surah.ayahs.isNotEmpty ? s.surah.ayahs.first.number.ayahNumberInSurah : null,
+                                  ayahNumber: s.surah.ayahs.isNotEmpty
+                                      ? s
+                                            .surah
+                                            .ayahs
+                                            .first
+                                            .number
+                                            .ayahNumberInSurah
+                                      : null,
                                 ),
                               );
                             },
@@ -136,19 +164,28 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                       ),
                       BlocListener<ReaderBloc, ReaderState>(
                         listenWhen: (prev, curr) {
-                          final prevLast = prev.maybeMap(loaded: (s) => s.lastReadAyah, orElse: () => null);
-                          final currLast = curr.maybeMap(loaded: (s) => s.lastReadAyah, orElse: () => null);
+                          final prevLast = prev.maybeMap(
+                            loaded: (s) => s.lastReadAyah,
+                            orElse: () => null,
+                          );
+                          final currLast = curr.maybeMap(
+                            loaded: (s) => s.lastReadAyah,
+                            orElse: () => null,
+                          );
                           return currLast != null && currLast != prevLast;
                         },
                         listener: (context, state) {
                           state.mapOrNull(
                             loaded: (s) {
                               if (s.lastReadAyah != null) {
-                                final abs = QuranHizbProvider.getAbsoluteAyahNumber(
-                                  s.surah.number.value, 
-                                  s.lastReadAyah!.number.ayahNumberInSurah
+                                final abs =
+                                    QuranHizbProvider.getAbsoluteAyahNumber(
+                                      s.surah.number.value,
+                                      s.lastReadAyah!.number.ayahNumberInSurah,
+                                    );
+                                context.read<WerdBloc>().add(
+                                  WerdEvent.trackItemRead(abs),
                                 );
-                                context.read<WerdBloc>().add(WerdEvent.trackItemRead(abs));
                               }
                             },
                           );
@@ -158,9 +195,9 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                         listenWhen: (prev, curr) {
                           // Only trigger if ayah changed while active in the current surah
                           return curr.currentSurah == widget.surahNumber &&
-                                 curr.currentAyah != null &&
-                                 curr.currentAyah != prev.currentAyah &&
-                                 curr.isActive;
+                              curr.currentAyah != null &&
+                              curr.currentAyah != prev.currentAyah &&
+                              curr.isActive;
                         },
                         listener: (context, state) {
                           _scrollController.scrollToAyah(state.currentAyah!);
@@ -170,23 +207,25 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                     child: CustomScrollView(
                       controller: _scrollController.scrollController,
                       slivers: [
-                        const SliverToBoxAdapter(
-                          child: SizedBox(height: 16),
-                        ),
+                        const SliverToBoxAdapter(child: SizedBox(height: 16)),
                         QuranReaderHeader(
                           surahNumber: widget.surahNumber,
-                          onNextSurah: widget.surahNumber < 114 
-                            ? () => Navigator.pushReplacement(
-                                context,
-                                QuranReaderPage.route(surahNumber: widget.surahNumber + 1),
-                              )
-                            : null,
+                          onNextSurah: widget.surahNumber < 114
+                              ? () => Navigator.pushReplacement(
+                                  context,
+                                  QuranReaderPage.route(
+                                    surahNumber: widget.surahNumber + 1,
+                                  ),
+                                )
+                              : null,
                           onPreviousSurah: widget.surahNumber > 1
-                            ? () => Navigator.pushReplacement(
-                                context,
-                                QuranReaderPage.route(surahNumber: widget.surahNumber - 1),
-                              )
-                            : null,
+                              ? () => Navigator.pushReplacement(
+                                  context,
+                                  QuranReaderPage.route(
+                                    surahNumber: widget.surahNumber - 1,
+                                  ),
+                                )
+                              : null,
                         ),
                         QuranReaderBody(scrollController: _scrollController),
                       ],
@@ -205,7 +244,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
               ],
             ),
           );
-        }
+        },
       ),
     );
   }

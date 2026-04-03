@@ -12,7 +12,9 @@ import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MockPrayerRepo extends Mock implements PrayerRepo {}
+
 class MockSharedPreferences extends Mock implements SharedPreferences {}
+
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
 void main() {
@@ -30,13 +32,15 @@ void main() {
   setUpAll(() {
     registerFallbackValue(DateTime(2024));
     registerFallbackValue(Salaah.fajr);
-    registerFallbackValue(DailyRecord(
-      id: 'dummy',
-      date: DateTime.now(),
-      missedToday: {},
-      completedToday: {},
-      qada: {},
-    ));
+    registerFallbackValue(
+      DailyRecord(
+        id: 'dummy',
+        date: DateTime.now(),
+        missedToday: {},
+        completedToday: {},
+        qada: {},
+      ),
+    );
     registerFallbackValue(dummyPrayerTimes);
   });
 
@@ -57,20 +61,30 @@ void main() {
     when(() => repo.saveToday(any())).thenAnswer((_) async {});
     when(() => repo.loadAllRecords()).thenAnswer((_) async => []);
     when(() => repo.deleteRecord(any())).thenAnswer((_) async {});
-    
-    when(() => prayerTimeService.isPassed(any(), 
-        prayerTimes: any(named: 'prayerTimes'), 
-        date: any(named: 'date'))).thenReturn(false);
-    when(() => prayerTimeService.isUpcoming(any(), 
-        prayerTimes: any(named: 'prayerTimes'), 
-        date: any(named: 'date'))).thenReturn(false);
-    when(() => prayerTimeService.getPrayerTimes(
-      latitude: any(named: 'latitude'),
-      longitude: any(named: 'longitude'),
-      method: any(named: 'method'),
-      madhab: any(named: 'madhab'),
-      date: any(named: 'date'),
-    )).thenReturn(dummyPrayerTimes);
+
+    when(
+      () => prayerTimeService.isPassed(
+        any(),
+        prayerTimes: any(named: 'prayerTimes'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(false);
+    when(
+      () => prayerTimeService.isUpcoming(
+        any(),
+        prayerTimes: any(named: 'prayerTimes'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(false);
+    when(
+      () => prayerTimeService.getPrayerTimes(
+        latitude: any(named: 'latitude'),
+        longitude: any(named: 'longitude'),
+        method: any(named: 'method'),
+        madhab: any(named: 'madhab'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(dummyPrayerTimes);
   });
 
   tearDown(() {
@@ -82,9 +96,13 @@ void main() {
       'Load when no previous record exists and all prayers passed',
       build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService),
       setUp: () {
-        when(() => prayerTimeService.isPassed(any(), 
-            prayerTimes: any(named: 'prayerTimes'), 
-            date: any(named: 'date'))).thenReturn(true);
+        when(
+          () => prayerTimeService.isPassed(
+            any(),
+            prayerTimes: any(named: 'prayerTimes'),
+            date: any(named: 'date'),
+          ),
+        ).thenReturn(true);
       },
       act: (bloc) => bloc.add(PrayerTrackerEvent.load(today)),
       verify: (bloc) {
@@ -119,7 +137,9 @@ void main() {
           qada: {for (var s in Salaah.values) s: const MissedCounter(6)},
         );
         when(() => repo.loadAllRecords()).thenAnswer((_) async => [r2, r1]);
-        when(() => repo.loadLastRecordBefore(r2.date)).thenAnswer((_) async => r1);
+        when(
+          () => repo.loadLastRecordBefore(r2.date),
+        ).thenAnswer((_) async => r1);
       },
       act: (bloc) async {
         bloc.add(PrayerTrackerEvent.load(today));
@@ -150,10 +170,9 @@ void main() {
           completedToday: {},
           qada: {},
         );
-        when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {
-          DateTime(2026, 2, 24): r1,
-          DateTime(2026, 2, 25): r2,
-        });
+        when(() => repo.loadMonth(any(), any())).thenAnswer(
+          (_) async => {DateTime(2026, 2, 24): r1, DateTime(2026, 2, 25): r2},
+        );
       },
       act: (bloc) async {
         bloc.add(PrayerTrackerEvent.load(today));
@@ -184,15 +203,21 @@ void main() {
           completedToday: {},
           qada: {},
         );
-        when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => lastRecord);
+        when(
+          () => repo.loadLastSavedRecord(),
+        ).thenAnswer((_) async => lastRecord);
         when(() => repo.loadRecord(any())).thenAnswer((_) async => null);
-        when(() => repo.loadLastRecordBefore(any())).thenAnswer((_) async => null);
+        when(
+          () => repo.loadLastRecordBefore(any()),
+        ).thenAnswer((_) async => null);
         when(() => repo.loadAllRecords()).thenAnswer((_) async => [lastRecord]);
         when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {});
       },
-      act: (bloc) => bloc.add(PrayerTrackerEvent.acknowledgeMissedDays(
-        selectedDates: [DateTime(2026, 2, 24), DateTime(2026, 2, 25)],
-      )),
+      act: (bloc) => bloc.add(
+        PrayerTrackerEvent.acknowledgeMissedDays(
+          selectedDates: [DateTime(2026, 2, 24), DateTime(2026, 2, 25)],
+        ),
+      ),
       verify: (bloc) {
         // 2026-02-23 to 2026-03-16 is a large gap.
         // Gap dates will be 24, 25, 26... up to 15.
@@ -212,14 +237,18 @@ void main() {
           completedToday: {},
           qada: {},
         );
-        when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => lastRecord);
+        when(
+          () => repo.loadLastSavedRecord(),
+        ).thenAnswer((_) async => lastRecord);
       },
       act: (bloc) => bloc.add(const PrayerTrackerEvent.checkMissedDays()),
       expect: () => [
-        predicate<PrayerTrackerState>((s) => s.maybeMap(
-          missedDaysPrompt: (p) => p.missedDates.length == 2,
-          orElse: () => false,
-        )),
+        predicate<PrayerTrackerState>(
+          (s) => s.maybeMap(
+            missedDaysPrompt: (p) => p.missedDates.length == 2,
+            orElse: () => false,
+          ),
+        ),
       ],
     );
 

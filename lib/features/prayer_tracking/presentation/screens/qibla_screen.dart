@@ -35,7 +35,11 @@ class _QiblaScreenState extends State<QiblaScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.compass_calibration_rounded, size: 64, color: AppTheme.missed),
+              const Icon(
+                Icons.compass_calibration_rounded,
+                size: 64,
+                color: AppTheme.missed,
+              ),
               const SizedBox(height: 16),
               Text(
                 l10n.compassNotSupported,
@@ -67,7 +71,11 @@ class _QiblaScreenState extends State<QiblaScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.location_off_rounded, size: 64, color: AppTheme.missed),
+                  const Icon(
+                    Icons.location_off_rounded,
+                    size: 64,
+                    color: AppTheme.missed,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     l10n.locationNotSet,
@@ -75,7 +83,8 @@ class _QiblaScreenState extends State<QiblaScreen> {
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(
-                    onPressed: () => context.read<SettingsCubit>().refreshLocation(),
+                    onPressed: () =>
+                        context.read<SettingsCubit>().refreshLocation(),
                     child: Text(l10n.refreshLocation),
                   ),
                 ],
@@ -83,14 +92,21 @@ class _QiblaScreenState extends State<QiblaScreen> {
             );
           }
 
-          final coordinates = Coordinates(settings.latitude!, settings.longitude!);
+          final coordinates = Coordinates(
+            settings.latitude!,
+            settings.longitude!,
+          );
           final qiblaDirection = Qibla(coordinates).direction;
 
           return StreamBuilder<CompassEvent>(
             stream: FlutterCompass.events,
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return Center(child: Text(l10n.errorReadingCompass(snapshot.error.toString())));
+                return Center(
+                  child: Text(
+                    l10n.errorReadingCompass(snapshot.error.toString()),
+                  ),
+                );
               }
 
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -123,7 +139,10 @@ class _QiblaScreenState extends State<QiblaScreen> {
                             height: 300,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              border: Border.all(color: AppTheme.cardBorder, width: 2),
+                              border: Border.all(
+                                color: AppTheme.cardBorder,
+                                width: 2,
+                              ),
                               color: AppTheme.surface,
                             ),
                             child: Stack(
@@ -140,7 +159,9 @@ class _QiblaScreenState extends State<QiblaScreen> {
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,
-                                          color: i == 0 ? Colors.red : AppTheme.textSecondary,
+                                          color: i == 0
+                                              ? Colors.red
+                                              : AppTheme.textSecondary,
                                         ),
                                       ),
                                     ),
@@ -164,13 +185,22 @@ class _QiblaScreenState extends State<QiblaScreen> {
                           ),
                         ),
                         // Kaaba Icon at the center
-                        const Icon(Icons.mosque, size: 40, color: AppTheme.primaryLight),
+                        const Icon(
+                          Icons.mosque,
+                          size: 40,
+                          color: AppTheme.primaryLight,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 48),
                     Text(
-                      l10n.qiblaDirectionWithVal(qiblaDirection.toStringAsFixed(1)),
-                      style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+                      l10n.qiblaDirectionWithVal(
+                        qiblaDirection.toStringAsFixed(1),
+                      ),
+                      style: GoogleFonts.outfit(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -189,11 +219,16 @@ class _QiblaScreenState extends State<QiblaScreen> {
 
   String _getDirectionLabel(int angle) {
     switch (angle) {
-      case 0: return 'N';
-      case 90: return 'E';
-      case 180: return 'S';
-      case 270: return 'W';
-      default: return '';
+      case 0:
+        return 'N';
+      case 90:
+        return 'E';
+      case 180:
+        return 'S';
+      case 270:
+        return 'W';
+      default:
+        return '';
     }
   }
 }

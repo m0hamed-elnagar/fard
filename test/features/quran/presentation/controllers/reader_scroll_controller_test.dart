@@ -19,7 +19,10 @@ void main() {
     final List<Ayah> ayahs = List.generate(
       7,
       (i) => Ayah(
-        number: AyahNumber.create(surahNumber: 1, ayahNumberInSurah: i + 1).data!,
+        number: AyahNumber.create(
+          surahNumber: 1,
+          ayahNumberInSurah: i + 1,
+        ).data!,
         uthmaniText: 'Text ${i + 1}',
         page: 1,
         juz: 1,
@@ -57,7 +60,9 @@ void main() {
     expect(controller.ayahKeys[1], same(key));
   });
 
-  testWidgets('currentVisibleAyah should update when scrolling', (tester) async {
+  testWidgets('currentVisibleAyah should update when scrolling', (
+    tester,
+  ) async {
     // This is hard to unit test without a real RenderBox layout.
     // We would need a full widget test with mock layout.
     // For now, let's just verify the ValueNotifier exists.

@@ -6,33 +6,41 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('AddQadaDialog', () {
-    testWidgets('Add mode: shows both tabs and "Add" button', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: AddQadaDialog(onConfirm: (_) {}),
-      ));
+    testWidgets('Add mode: shows both tabs and "Add" button', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: AddQadaDialog(onConfirm: (_) {}),
+        ),
+      );
       await tester.pumpAndSettle();
 
       final l10n = lookupAppLocalizations(const Locale('en'));
-      
+
       expect(find.text(l10n.byCount), findsOneWidget);
       expect(find.text(l10n.byTime), findsOneWidget);
       expect(find.text(l10n.add), findsOneWidget);
       expect(find.text(l10n.addQada), findsOneWidget);
     });
 
-    testWidgets('Edit mode: shows only count list and "Update" button', (WidgetTester tester) async {
+    testWidgets('Edit mode: shows only count list and "Update" button', (
+      WidgetTester tester,
+    ) async {
       final initial = {for (var s in Salaah.values) s: 5};
-      await tester.pumpWidget(MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: AddQadaDialog(
-          title: 'Edit My Prayers',
-          initialCounts: initial,
-          onConfirm: (_) {},
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: AddQadaDialog(
+            title: 'Edit My Prayers',
+            initialCounts: initial,
+            onConfirm: (_) {},
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       final l10n = lookupAppLocalizations(const Locale('en'));
@@ -40,20 +48,22 @@ void main() {
       expect(find.text('Edit My Prayers'), findsOneWidget);
       expect(find.text(l10n.byTime), findsNothing);
       expect(find.text(l10n.update), findsOneWidget);
-      
+
       // Verify initial values are loaded
       expect(find.text('5'), findsNWidgets(5));
     });
 
-    testWidgets('can increment and decrement values', (WidgetTester tester) async {
+    testWidgets('can increment and decrement values', (
+      WidgetTester tester,
+    ) async {
       Map<Salaah, int>? result;
-      await tester.pumpWidget(MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: AddQadaDialog(
-          onConfirm: (val) => result = val,
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: AddQadaDialog(onConfirm: (val) => result = val),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       // Find first increment button (for Fajr)

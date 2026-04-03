@@ -12,7 +12,9 @@ import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MockPrayerRepo extends Mock implements PrayerRepo {}
+
 class MockSharedPreferences extends Mock implements SharedPreferences {}
+
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
 void main() {
@@ -30,13 +32,15 @@ void main() {
   setUpAll(() {
     registerFallbackValue(DateTime(2024));
     registerFallbackValue(Salaah.fajr);
-    registerFallbackValue(DailyRecord(
-      id: 'dummy',
-      date: DateTime.now(),
-      missedToday: {},
-      completedToday: {},
-      qada: {},
-    ));
+    registerFallbackValue(
+      DailyRecord(
+        id: 'dummy',
+        date: DateTime.now(),
+        missedToday: {},
+        completedToday: {},
+        qada: {},
+      ),
+    );
     registerFallbackValue(dummyPrayerTimes);
   });
 
@@ -53,17 +57,23 @@ void main() {
     when(() => prefs.getDouble('longitude')).thenReturn(31.0);
     when(() => prefs.getString(any())).thenReturn(null);
 
-    when(() => prayerTimeService.isPassed(any(), 
-        prayerTimes: any(named: 'prayerTimes'), 
-        date: any(named: 'date'))).thenReturn(true);
-    when(() => prayerTimeService.getPrayerTimes(
-      latitude: any(named: 'latitude'),
-      longitude: any(named: 'longitude'),
-      method: any(named: 'method'),
-      madhab: any(named: 'madhab'),
-      date: any(named: 'date'),
-    )).thenReturn(dummyPrayerTimes);
-    
+    when(
+      () => prayerTimeService.isPassed(
+        any(),
+        prayerTimes: any(named: 'prayerTimes'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(true);
+    when(
+      () => prayerTimeService.getPrayerTimes(
+        latitude: any(named: 'latitude'),
+        longitude: any(named: 'longitude'),
+        method: any(named: 'method'),
+        madhab: any(named: 'madhab'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(dummyPrayerTimes);
+
     when(() => repo.loadRecord(any())).thenAnswer((_) async => null);
     when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => null);
     when(() => repo.loadLastRecordBefore(any())).thenAnswer((_) async => null);

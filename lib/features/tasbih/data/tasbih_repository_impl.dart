@@ -14,15 +14,17 @@ class TasbihRepositoryImpl implements TasbihRepository {
   final SharedPreferences _prefs;
 
   TasbihRepositoryImpl(
-    @Named('tasbihProgressBox') this._progressBox, 
-    @Named('tasbihHistoryBox') this._historyBox, 
+    @Named('tasbihProgressBox') this._progressBox,
+    @Named('tasbihHistoryBox') this._historyBox,
     @Named('tasbihPreferredDuaBox') this._preferredDuaBox,
-    this._prefs
+    this._prefs,
   );
 
   @override
   Future<TasbihData> getTasbihData() async {
-    final String response = await rootBundle.loadString('assets/tasbih_data.json');
+    final String response = await rootBundle.loadString(
+      'assets/tasbih_data.json',
+    );
     final data = await json.decode(response);
     return TasbihData.fromJson(data);
   }
@@ -63,7 +65,10 @@ class TasbihRepositoryImpl implements TasbihRepository {
   }
 
   @override
-  Future<void> savePreferredCompletionDuaId(String categoryId, String duaId) async {
+  Future<void> savePreferredCompletionDuaId(
+    String categoryId,
+    String duaId,
+  ) async {
     await _preferredDuaBox.put(categoryId, duaId);
   }
 }

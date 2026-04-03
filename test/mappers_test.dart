@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('DailyRecordMapper', () {
     final date = DateTime(2024, 1, 1);
-    
+
     test('converts entity to domain correctly', () {
       final entity = DailyRecordEntity(
         id: '1',

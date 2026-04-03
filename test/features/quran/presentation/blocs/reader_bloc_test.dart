@@ -14,13 +14,19 @@ import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
 import 'package:fard/core/errors/failure.dart';
 
 class MockGetSurah extends Mock implements GetSurah {}
+
 class MockGetPage extends Mock implements GetPage {}
+
 class MockUpdateLastRead extends Mock implements UpdateLastRead {}
+
 class MockWatchLastRead extends Mock implements WatchLastRead {}
+
 class MockBookmarkRepository extends Mock implements BookmarkRepository {}
+
 class MockQuranRepository extends Mock implements QuranRepository {}
 
 class FakeGetSurahParams extends Fake implements GetSurahParams {}
+
 class FakeAyahNumber extends Fake implements AyahNumber {}
 
 void main() {
@@ -44,18 +50,22 @@ void main() {
     mockWatchLastRead = MockWatchLastRead();
     mockBookmarkRepository = MockBookmarkRepository();
     mockQuranRepository = MockQuranRepository();
-    
-    when(() => mockBookmarkRepository.isBookmarked(any()))
-        .thenAnswer((_) async => Result.success(false));
-    
-    when(() => mockBookmarkRepository.getBookmarks())
-        .thenAnswer((_) async => Result.success([]));
-    
-    when(() => mockBookmarkRepository.watchBookmarks())
-        .thenAnswer((_) => Stream.value(Result.success([])));
-    
-    when(() => mockQuranRepository.getReaderSeparator())
-        .thenAnswer((_) async => 0);
+
+    when(
+      () => mockBookmarkRepository.isBookmarked(any()),
+    ).thenAnswer((_) async => Result.success(false));
+
+    when(
+      () => mockBookmarkRepository.getBookmarks(),
+    ).thenAnswer((_) async => Result.success([]));
+
+    when(
+      () => mockBookmarkRepository.watchBookmarks(),
+    ).thenAnswer((_) => Stream.value(Result.success([])));
+
+    when(
+      () => mockQuranRepository.getReaderSeparator(),
+    ).thenAnswer((_) async => 0);
 
     readerBloc = ReaderBloc(
       getSurah: mockGetSurah,
@@ -84,9 +94,13 @@ void main() {
     blocTest<ReaderBloc, ReaderState>(
       'emits [loading, loaded] when loadSurah is added',
       build: () {
-        when(() => mockGetSurah(any())).thenAnswer((_) async => Result.success(tSurah));
+        when(
+          () => mockGetSurah(any()),
+        ).thenAnswer((_) async => Result.success(tSurah));
         when(() => mockWatchLastRead()).thenAnswer(
-          (_) => Stream.value(Result.failure(const CacheFailure('No last read position found')))
+          (_) => Stream.value(
+            Result.failure(const CacheFailure('No last read position found')),
+          ),
         );
         return readerBloc;
       },

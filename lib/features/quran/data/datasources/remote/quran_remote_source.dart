@@ -8,7 +8,10 @@ import 'package:injectable/injectable.dart';
 abstract interface class QuranRemoteSource {
   Future<List<SurahModel>> getAllSurahs();
   Future<SurahModel> getSurahDetail(int surahNumber);
-  Future<List<AyahModel>> getSurahVerses(int surahNumber, {String? translationId});
+  Future<List<AyahModel>> getSurahVerses(
+    int surahNumber, {
+    String? translationId,
+  });
   Future<String> getTafsir(int surahNumber, int ayahNumber, {int? tafsirId});
 }
 
@@ -51,7 +54,10 @@ class QuranRemoteSourceImpl implements QuranRemoteSource {
   }
 
   @override
-  Future<List<AyahModel>> getSurahVerses(int surahNumber, {String? translationId}) async {
+  Future<List<AyahModel>> getSurahVerses(
+    int surahNumber, {
+    String? translationId,
+  }) async {
     final fields = [
       'text_uthmani',
       'chapter_id',
@@ -60,12 +66,14 @@ class QuranRemoteSourceImpl implements QuranRemoteSource {
       'sajdah_number',
       'sajdah_type',
       'page_number',
-      'juz_number'
+      'juz_number',
     ].join(',');
 
     // Using audio=7 (Alafasy) as default for better reliability
     final response = await client.get(
-      Uri.parse('$baseUrl/verses/by_chapter/$surahNumber?language=en&words=true&fields=$fields&per_page=300&audio=7'),
+      Uri.parse(
+        '$baseUrl/verses/by_chapter/$surahNumber?language=en&words=true&fields=$fields&per_page=300&audio=7',
+      ),
       headers: {'Accept': 'application/json'},
     );
 
@@ -79,7 +87,11 @@ class QuranRemoteSourceImpl implements QuranRemoteSource {
   }
 
   @override
-  Future<String> getTafsir(int surahNumber, int ayahNumber, {int? tafsirId}) async {
+  Future<String> getTafsir(
+    int surahNumber,
+    int ayahNumber, {
+    int? tafsirId,
+  }) async {
     final id = tafsirId ?? 16;
     final response = await client.get(
       Uri.parse('$baseUrl/tafsirs/$id/by_ayah/$surahNumber:$ayahNumber'),

@@ -13,7 +13,8 @@ import 'package:injectable/injectable.dart';
 @LazySingleton(as: WerdRepository)
 class WerdRepositoryImpl implements WerdRepository {
   final SharedPreferences sharedPreferences;
-  final _progressControllers = <String, StreamController<Result<WerdProgress>>>{};
+  final _progressControllers =
+      <String, StreamController<Result<WerdProgress>>>{};
 
   WerdRepositoryImpl(this.sharedPreferences);
 
@@ -34,7 +35,10 @@ class WerdRepositoryImpl implements WerdRepository {
   @override
   Future<Result<void>> setGoal(WerdGoal goal) async {
     try {
-      await sharedPreferences.setString(_getGoalKey(goal.id), json.encode(goal.toJson()));
+      await sharedPreferences.setString(
+        _getGoalKey(goal.id),
+        json.encode(goal.toJson()),
+      );
       return Result.success(null);
     } catch (e) {
       return Result.failure(CacheFailure(e.toString()));
@@ -46,43 +50,56 @@ class WerdRepositoryImpl implements WerdRepository {
     try {
       final jsonStr = sharedPreferences.getString(_getProgressKey(goalId));
       if (jsonStr == null) {
-        return Result.success(WerdProgress(
-          goalId: goalId,
-          totalAmountReadToday: 0,
-          lastUpdated: DateTime.now(),
-          streak: 0,
-        ));
+        return Result.success(
+          WerdProgress(
+            goalId: goalId,
+            totalAmountReadToday: 0,
+            lastUpdated: DateTime.now(),
+            streak: 0,
+          ),
+        );
       }
-      
+
       var progress = WerdProgress.fromJson(json.decode(jsonStr));
-      
+
       // Check if it's a new day
       final now = DateTime.now();
       final lastUpdated = progress.lastUpdated;
-      
-      if (now.year != lastUpdated.year || 
-          now.month != lastUpdated.month || 
+
+      if (now.year != lastUpdated.year ||
+          now.month != lastUpdated.month ||
           now.day != lastUpdated.day) {
-        
-        final dateKey = "${lastUpdated.year}-${lastUpdated.month.toString().padLeft(2, '0')}-${lastUpdated.day.toString().padLeft(2, '0')}";
-        
+        final dateKey =
+            "${lastUpdated.year}-${lastUpdated.month.toString().padLeft(2, '0')}-${lastUpdated.day.toString().padLeft(2, '0')}";
+
         // Calculate details for history entry
         final startAbs = progress.sessionStartAbsolute ?? 1;
-        final endAbs = progress.lastReadAbsolute ?? (startAbs - 1).clamp(1, 6236);
-        final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(startAbs);
+        final endAbs =
+            progress.lastReadAbsolute ?? (startAbs - 1).clamp(1, 6236);
+        final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(
+          startAbs,
+        );
         final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(endAbs);
-        
-        final pagesRead = QuranHizbProvider.calculateFractionalProgress(progress.readItemsToday, WerdUnit.page);
-        final juzRead = QuranHizbProvider.calculateFractionalProgress(progress.readItemsToday, WerdUnit.juz);
-        
+
+        final pagesRead = QuranHizbProvider.calculateFractionalProgress(
+          progress.readItemsToday,
+          WerdUnit.page,
+        );
+        final juzRead = QuranHizbProvider.calculateFractionalProgress(
+          progress.readItemsToday,
+          WerdUnit.juz,
+        );
+
         final startSurahName = quran.getSurahName(startPos[0]);
         final endSurahName = quran.getSurahName(endPos[0]);
-        
+
         String summary;
         if (progress.totalAmountReadToday > 0) {
-           summary = "Read ${progress.totalAmountReadToday} ayahs (${pagesRead.toStringAsFixed(1)} pages) from $startSurahName ${startPos[1]} to $endSurahName ${endPos[1]}";
+          summary =
+              "Read ${progress.totalAmountReadToday} ayahs (${pagesRead.toStringAsFixed(1)} pages) from $startSurahName ${startPos[1]} to $endSurahName ${endPos[1]}";
         } else {
-           summary = "No progress recorded today. Last position: $startSurahName ${startPos[1]}";
+          summary =
+              "No progress recorded today. Last position: $startSurahName ${startPos[1]}";
         }
 
         final entry = WerdHistoryEntry(
@@ -101,23 +118,37 @@ class WerdRepositoryImpl implements WerdRepository {
         final newHistory = Map<String, WerdHistoryEntry>.from(progress.history);
         newHistory[dateKey] = entry;
 
-        bool wasYesterday = now.difference(DateTime(lastUpdated.year, lastUpdated.month, lastUpdated.day)).inDays == 1;
-        
+        bool wasYesterday =
+            now
+                .difference(
+                  DateTime(
+                    lastUpdated.year,
+                    lastUpdated.month,
+                    lastUpdated.day,
+                  ),
+                )
+                .inDays ==
+            1;
+
         progress = WerdProgress(
           goalId: goalId,
           totalAmountReadToday: 0,
           readItemsToday: const {}, // Reset for new day
           lastReadAbsolute: progress.lastReadAbsolute,
-          sessionStartAbsolute: (progress.lastReadAbsolute ?? 0) + 1, // Start where we left off
+          sessionStartAbsolute:
+              (progress.lastReadAbsolute ?? 0) + 1, // Start where we left off
           lastUpdated: now,
           streak: wasYesterday ? progress.streak : 0,
           history: newHistory,
         );
-        
+
         // Save the updated progress (reset for new day)
-        await sharedPreferences.setString(_getProgressKey(goalId), json.encode(progress.toJson()));
+        await sharedPreferences.setString(
+          _getProgressKey(goalId),
+          json.encode(progress.toJson()),
+        );
       }
-      
+
       return Result.success(progress);
     } catch (e) {
       return Result.failure(CacheFailure(e.toString()));
@@ -127,8 +158,8 @@ class WerdRepositoryImpl implements WerdRepository {
   @override
   Stream<Result<WerdProgress>> watchProgress({String goalId = 'default'}) {
     final controller = _progressControllers.putIfAbsent(
-      goalId, 
-      () => StreamController<Result<WerdProgress>>.broadcast()
+      goalId,
+      () => StreamController<Result<WerdProgress>>.broadcast(),
     );
     // Emit initial
     getProgress(goalId: goalId).then((res) => controller.add(res));
@@ -138,7 +169,10 @@ class WerdRepositoryImpl implements WerdRepository {
   @override
   Future<Result<void>> updateProgress(WerdProgress progress) async {
     try {
-      await sharedPreferences.setString(_getProgressKey(progress.goalId), json.encode(progress.toJson()));
+      await sharedPreferences.setString(
+        _getProgressKey(progress.goalId),
+        json.encode(progress.toJson()),
+      );
       _progressControllers[progress.goalId]?.add(Result.success(progress));
       return Result.success(null);
     } catch (e) {
@@ -149,7 +183,9 @@ class WerdRepositoryImpl implements WerdRepository {
   @override
   Future<Result<List<WerdGoal>>> getAllGoals() async {
     try {
-      final keys = sharedPreferences.getKeys().where((k) => k.startsWith('werd_goal_'));
+      final keys = sharedPreferences.getKeys().where(
+        (k) => k.startsWith('werd_goal_'),
+      );
       final goals = <WerdGoal>[];
       for (final key in keys) {
         final jsonStr = sharedPreferences.getString(key);
@@ -166,7 +202,9 @@ class WerdRepositoryImpl implements WerdRepository {
   @override
   Future<Result<List<WerdProgress>>> getAllProgress() async {
     try {
-      final keys = sharedPreferences.getKeys().where((k) => k.startsWith('werd_progress_'));
+      final keys = sharedPreferences.getKeys().where(
+        (k) => k.startsWith('werd_progress_'),
+      );
       final progressList = <WerdProgress>[];
       for (final key in keys) {
         final jsonStr = sharedPreferences.getString(key);
@@ -184,13 +222,18 @@ class WerdRepositoryImpl implements WerdRepository {
   Future<Result<void>> importGoals(List<WerdGoal> goals) async {
     try {
       // Clear existing goals first
-      final existingKeys = sharedPreferences.getKeys().where((k) => k.startsWith('werd_goal_'));
+      final existingKeys = sharedPreferences.getKeys().where(
+        (k) => k.startsWith('werd_goal_'),
+      );
       for (final key in existingKeys) {
         await sharedPreferences.remove(key);
       }
-      
+
       for (final goal in goals) {
-        await sharedPreferences.setString(_getGoalKey(goal.id), json.encode(goal.toJson()));
+        await sharedPreferences.setString(
+          _getGoalKey(goal.id),
+          json.encode(goal.toJson()),
+        );
       }
       return Result.success(null);
     } catch (e) {
@@ -202,13 +245,18 @@ class WerdRepositoryImpl implements WerdRepository {
   Future<Result<void>> importProgress(List<WerdProgress> progressList) async {
     try {
       // Clear existing progress first
-      final existingKeys = sharedPreferences.getKeys().where((k) => k.startsWith('werd_progress_'));
+      final existingKeys = sharedPreferences.getKeys().where(
+        (k) => k.startsWith('werd_progress_'),
+      );
       for (final key in existingKeys) {
         await sharedPreferences.remove(key);
       }
 
       for (final p in progressList) {
-        await sharedPreferences.setString(_getProgressKey(p.goalId), json.encode(p.toJson()));
+        await sharedPreferences.setString(
+          _getProgressKey(p.goalId),
+          json.encode(p.toJson()),
+        );
         _progressControllers[p.goalId]?.add(Result.success(p));
       }
       return Result.success(null);

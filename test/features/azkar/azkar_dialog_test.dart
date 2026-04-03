@@ -15,10 +15,18 @@ import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 
-class MockSettingsCubit extends MockCubit<SettingsState> implements SettingsCubit {}
-class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState> implements AzkarBloc {}
-class MockPrayerTrackerBloc extends MockBloc<PrayerTrackerEvent, PrayerTrackerState> implements PrayerTrackerBloc {}
+class MockSettingsCubit extends MockCubit<SettingsState>
+    implements SettingsCubit {}
+
+class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState>
+    implements AzkarBloc {}
+
+class MockPrayerTrackerBloc
+    extends MockBloc<PrayerTrackerEvent, PrayerTrackerState>
+    implements PrayerTrackerBloc {}
+
 class MockSharedPreferences extends Mock implements SharedPreferences {}
+
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
 void main() {
@@ -44,20 +52,30 @@ void main() {
     getIt.registerSingleton<PrayerTimeService>(mockPrayerTimeService);
 
     // Default mocks for PrayerTimeService
-    when(() => mockPrayerTimeService.isUpcoming(any(), 
-        prayerTimes: any(named: 'prayerTimes'), 
-        date: any(named: 'date'))).thenReturn(false);
-    when(() => mockPrayerTimeService.isPassed(any(), 
-        prayerTimes: any(named: 'prayerTimes'), 
-        date: any(named: 'date'))).thenReturn(true);
+    when(
+      () => mockPrayerTimeService.isUpcoming(
+        any(),
+        prayerTimes: any(named: 'prayerTimes'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(false);
+    when(
+      () => mockPrayerTimeService.isPassed(
+        any(),
+        prayerTimes: any(named: 'prayerTimes'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(true);
 
-    when(() => mockPrayerTrackerBloc.state).thenReturn(PrayerTrackerState.loaded(
-      selectedDate: DateTime.now(),
-      missedToday: {},
-      qadaStatus: {},
-      monthRecords: {},
-      history: [],
-    ));
+    when(() => mockPrayerTrackerBloc.state).thenReturn(
+      PrayerTrackerState.loaded(
+        selectedDate: DateTime.now(),
+        missedToday: {},
+        qadaStatus: {},
+        monthRecords: {},
+        history: [],
+      ),
+    );
   });
 
   Widget createWidgetUnderTest() {
@@ -77,26 +95,35 @@ void main() {
 
   testWidgets('Morning Azkar Dialog appears when time matches', (tester) async {
     final now = DateTime.now();
-    final timeStr = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+    final timeStr =
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
 
-    when(() => mockSettingsCubit.state).thenReturn(SettingsState(
-      locale: const Locale('en'),
-      morningAzkarTime: timeStr,
-      eveningAzkarTime: '23:59',
-      isAzanVoiceDownloading: false,
-      reminders: [
-        AzkarReminder(category: 'Morning Azkar', time: timeStr, title: 'Morning Azkar'),
-      ],
-    ));
+    when(() => mockSettingsCubit.state).thenReturn(
+      SettingsState(
+        locale: const Locale('en'),
+        morningAzkarTime: timeStr,
+        eveningAzkarTime: '23:59',
+        isAzanVoiceDownloading: false,
+        reminders: [
+          AzkarReminder(
+            category: 'Morning Azkar',
+            time: timeStr,
+            title: 'Morning Azkar',
+          ),
+        ],
+      ),
+    );
 
-    when(() => mockAzkarBloc.state).thenReturn(const AzkarState(
-      categories: ['Morning Azkar', 'Evening Azkar'],
-      azkar: [],
-      isLoading: false,
-    ));
+    when(() => mockAzkarBloc.state).thenReturn(
+      const AzkarState(
+        categories: ['Morning Azkar', 'Evening Azkar'],
+        azkar: [],
+        isLoading: false,
+      ),
+    );
 
     await tester.pumpWidget(createWidgetUnderTest());
-    await tester.pump(); 
+    await tester.pump();
 
     expect(find.textContaining('Morning Azkar'), findsAtLeast(1));
     expect(find.text('Yes'), findsOneWidget);
@@ -104,26 +131,35 @@ void main() {
 
   testWidgets('Evening Azkar Dialog appears when time matches', (tester) async {
     final now = DateTime.now();
-    final timeStr = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+    final timeStr =
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
 
-    when(() => mockSettingsCubit.state).thenReturn(SettingsState(
-      locale: const Locale('en'),
-      morningAzkarTime: '00:00',
-      eveningAzkarTime: timeStr,
-      isAzanVoiceDownloading: false,
-      reminders: [
-        AzkarReminder(category: 'Evening Azkar', time: timeStr, title: 'Evening Azkar'),
-      ],
-    ));
+    when(() => mockSettingsCubit.state).thenReturn(
+      SettingsState(
+        locale: const Locale('en'),
+        morningAzkarTime: '00:00',
+        eveningAzkarTime: timeStr,
+        isAzanVoiceDownloading: false,
+        reminders: [
+          AzkarReminder(
+            category: 'Evening Azkar',
+            time: timeStr,
+            title: 'Evening Azkar',
+          ),
+        ],
+      ),
+    );
 
-    when(() => mockAzkarBloc.state).thenReturn(const AzkarState(
-      categories: ['Morning Azkar', 'Evening Azkar'],
-      azkar: [],
-      isLoading: false,
-    ));
+    when(() => mockAzkarBloc.state).thenReturn(
+      const AzkarState(
+        categories: ['Morning Azkar', 'Evening Azkar'],
+        azkar: [],
+        isLoading: false,
+      ),
+    );
 
     await tester.pumpWidget(createWidgetUnderTest());
-    await tester.pump(); 
+    await tester.pump();
 
     expect(find.textContaining('Evening Azkar'), findsAtLeast(1));
     expect(find.text('Yes'), findsOneWidget);

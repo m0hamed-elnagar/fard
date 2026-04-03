@@ -32,9 +32,9 @@ class _DownloadAllDialogState extends State<DownloadAllDialog> {
         });
         if (progress >= 1.0) {
           Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.pagesDownloadedSuccess)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.pagesDownloadedSuccess)));
         }
       }
     });
@@ -48,10 +48,7 @@ class _DownloadAllDialogState extends State<DownloadAllDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            l10n.downloadMushafDesc,
-            textAlign: TextAlign.center,
-          ),
+          Text(l10n.downloadMushafDesc, textAlign: TextAlign.center),
           const SizedBox(height: 20),
           if (_isDownloading) ...[
             LinearProgressIndicator(
@@ -73,16 +70,12 @@ class _DownloadAllDialogState extends State<DownloadAllDialog> {
                 Navigator.of(context).pop();
                 Navigator.pushReplacement(
                   context,
-                  ScannedMushafReaderPage.route(
-                    pageNumber: widget.currentPage,
-                  ),
+                  ScannedMushafReaderPage.route(pageNumber: widget.currentPage),
                 );
-                
+
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(l10n.cacheClearedReloading),
-                  ),
+                  SnackBar(content: Text(l10n.cacheClearedReloading)),
                 );
               },
               icon: const Icon(Icons.delete_sweep_rounded, color: Colors.red),
