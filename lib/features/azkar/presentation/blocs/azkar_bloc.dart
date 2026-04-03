@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
-import '../../data/azkar_repository.dart';
+import '../../data/azkar_source.dart';
 import '../../domain/azkar_item.dart';
 
 part 'azkar_bloc.freezed.dart';
@@ -32,38 +32,46 @@ sealed class AzkarState with _$AzkarState {
 
 @injectable
 class AzkarBloc extends Bloc<AzkarEvent, AzkarState> {
-  final AzkarRepository _repository;
+  final IAzkarSource _repository;
 
   AzkarBloc(this._repository) : super(AzkarState.initial()) {
     on<_LoadCategories>((event, emit) async {
       emit(state.copyWith(isLoading: true, error: null));
       try {
-        final categories = await _repository.getCategories()
-            .timeout(const Duration(seconds: 15));
+        final categories = await _repository.getCategories().timeout(
+          const Duration(seconds: 15),
+        );
         emit(state.copyWith(isLoading: false, categories: categories));
       } catch (e) {
-        emit(state.copyWith(
-          isLoading: false, 
-          error: e is TimeoutException ? 'Request timed out' : e.toString()
-        ));
+        emit(
+          state.copyWith(
+            isLoading: false,
+            error: e is TimeoutException ? 'Request timed out' : e.toString(),
+          ),
+        );
       }
     });
 
     on<_LoadAzkar>((event, emit) async {
       emit(state.copyWith(isLoading: true, error: null));
       try {
-        final azkar = await _repository.getAzkarByCategory(event.category)
+        final azkar = await _repository
+            .getAzkarByCategory(event.category)
             .timeout(const Duration(seconds: 15));
-        emit(state.copyWith(
-          isLoading: false, 
-          azkar: azkar, 
-          currentCategory: event.category
-        ));
+        emit(
+          state.copyWith(
+            isLoading: false,
+            azkar: azkar,
+            currentCategory: event.category,
+          ),
+        );
       } catch (e) {
-        emit(state.copyWith(
-          isLoading: false, 
-          error: e is TimeoutException ? 'Request timed out' : e.toString()
-        ));
+        emit(
+          state.copyWith(
+            isLoading: false,
+            error: e is TimeoutException ? 'Request timed out' : e.toString(),
+          ),
+        );
       }
     });
 
@@ -73,10 +81,10 @@ class AzkarBloc extends Bloc<AzkarEvent, AzkarState> {
       if (item.currentCount < item.count) {
         final updatedItem = item.copyWith(currentCount: item.currentCount + 1);
         newList[event.index] = updatedItem;
-        
+
         // Save to repository (persistence)
         await _repository.saveProgress(updatedItem);
-        
+
         emit(state.copyWith(azkar: newList));
       }
     });
@@ -85,7 +93,8 @@ class AzkarBloc extends Bloc<AzkarEvent, AzkarState> {
       emit(state.copyWith(isLoading: true, error: null));
       try {
         await _repository.resetCategory(event.category);
-        final azkar = await _repository.getAzkarByCategory(event.category)
+        final azkar = await _repository
+            .getAzkarByCategory(event.category)
             .timeout(const Duration(seconds: 15));
         emit(state.copyWith(isLoading: false, azkar: azkar));
       } catch (e) {
@@ -98,7 +107,7 @@ class AzkarBloc extends Bloc<AzkarEvent, AzkarState> {
       final item = newList[event.index];
       final updatedItem = item.copyWith(currentCount: 0);
       newList[event.index] = updatedItem;
-      
+
       await _repository.saveProgress(updatedItem);
       emit(state.copyWith(azkar: newList));
     });
@@ -108,12 +117,14 @@ class AzkarBloc extends Bloc<AzkarEvent, AzkarState> {
       try {
         await _repository.resetAll();
         // Clear everything and reload categories to show fresh counts (all 0)
-        emit(state.copyWith(
-          isLoading: false, 
-          categories: [], 
-          azkar: [], 
-          currentCategory: null
-        ));
+        emit(
+          state.copyWith(
+            isLoading: false,
+            categories: [],
+            azkar: [],
+            currentCategory: null,
+          ),
+        );
         add(const AzkarEvent.loadCategories());
       } catch (e) {
         emit(state.copyWith(isLoading: false, error: e.toString()));

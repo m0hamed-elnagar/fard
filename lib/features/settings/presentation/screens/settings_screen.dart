@@ -1,4 +1,5 @@
 import 'package:fard/core/services/export_import_service.dart';
+import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
@@ -663,6 +664,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Icons.file_upload_rounded,
                         size: 20,
                         color: AppTheme.accent,
+                      ),
+                    ),
+                  ],
+                ),
+                // Debug: Widget Refresh Section
+                const SizedBox(height: 20),
+                _buildSection(
+                  context,
+                  title: 'Debug: Widget',
+                  icon: Icons.bug_report_rounded,
+                  children: [
+                    Text(
+                      'Force refresh the home screen widget. Use this for testing.',
+                      style: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Refresh Widget'),
+                      trailing: ElevatedButton.icon(
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          getIt<WidgetUpdateService>().updateWidget(
+                            context.read<SettingsCubit>().state,
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Widget refresh triggered!'),
+                              backgroundColor: AppTheme.primaryLight,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.refresh, size: 18),
+                        label: const Text('Refresh'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                        ),
                       ),
                     ),
                   ],

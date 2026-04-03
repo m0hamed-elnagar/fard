@@ -17,10 +17,10 @@ void main() {
 
     test('removeMissed should decrement value but not go below zero', () {
       const counter = MissedCounter(1);
-      
+
       final updated1 = counter.removeMissed();
       expect(updated1.value, 0);
-      
+
       final updated2 = updated1.removeMissed();
       expect(updated2.value, 0);
     });

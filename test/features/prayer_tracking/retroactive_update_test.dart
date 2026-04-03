@@ -65,7 +65,9 @@ class FakePrayerRepo extends Fake implements PrayerRepo {
 }
 
 class MockSharedPreferences extends Mock implements SharedPreferences {}
+
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
+
 class MockPrayerTimes extends Mock implements PrayerTimes {}
 
 void main() {
@@ -83,7 +85,10 @@ void main() {
     date: yesterday,
     missedToday: {Salaah.fajr},
     completedToday: const {},
-    qada: {for (var s in Salaah.values) s: s == Salaah.fajr ? const MissedCounter(1) : const MissedCounter(0)},
+    qada: {
+      for (var s in Salaah.values)
+        s: s == Salaah.fajr ? const MissedCounter(1) : const MissedCounter(0),
+    },
   );
 
   final todayRecord = DailyRecord(
@@ -91,19 +96,24 @@ void main() {
     date: today,
     missedToday: {Salaah.fajr},
     completedToday: const {},
-    qada: {for (var s in Salaah.values) s: s == Salaah.fajr ? const MissedCounter(2) : const MissedCounter(0)},
+    qada: {
+      for (var s in Salaah.values)
+        s: s == Salaah.fajr ? const MissedCounter(2) : const MissedCounter(0),
+    },
   );
 
   setUpAll(() {
     registerFallbackValue(Salaah.fajr);
     registerFallbackValue(today);
-    registerFallbackValue(DailyRecord(
-      id: '1',
-      date: today,
-      missedToday: {},
-      completedToday: const {},
-      qada: {},
-    ));
+    registerFallbackValue(
+      DailyRecord(
+        id: '1',
+        date: today,
+        missedToday: {},
+        completedToday: const {},
+        qada: {},
+      ),
+    );
   });
 
   setUp(() {
@@ -119,21 +129,27 @@ void main() {
     when(() => prefs.getDouble('latitude')).thenReturn(25.0);
     when(() => prefs.getDouble('longitude')).thenReturn(55.0);
     when(() => prefs.getString(any())).thenReturn(null);
-    when(() => prayerTimeService.getPrayerTimes(
-      latitude: any(named: 'latitude'),
-      longitude: any(named: 'longitude'),
-      method: any(named: 'method'),
-      madhab: any(named: 'madhab'),
-      date: any(named: 'date'),
-    )).thenReturn(mockPrayerTimes);
-    
-    when(() => prayerTimeService.isPassed(any(), 
-        prayerTimes: any(named: 'prayerTimes'), 
-        date: any(named: 'date'))).thenAnswer((invocation) {
+    when(
+      () => prayerTimeService.getPrayerTimes(
+        latitude: any(named: 'latitude'),
+        longitude: any(named: 'longitude'),
+        method: any(named: 'method'),
+        madhab: any(named: 'madhab'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(mockPrayerTimes);
+
+    when(
+      () => prayerTimeService.isPassed(
+        any(),
+        prayerTimes: any(named: 'prayerTimes'),
+        date: any(named: 'date'),
+      ),
+    ).thenAnswer((invocation) {
       final salaah = invocation.positionalArguments[0] as Salaah;
       return salaah == Salaah.fajr;
     });
-    
+
     // Seed initial records
     repo.saveToday(yesterdayRecord);
     repo.saveToday(todayRecord);
@@ -156,60 +172,104 @@ void main() {
         const PrayerTrackerState.loading(),
         // Load(yesterday)
         isA<PrayerTrackerState>().having(
-          (s) => s.maybeMap(loaded: (l) => l.qadaStatus[Salaah.fajr]?.value == 1 && l.selectedDate == yesterday, orElse: () => false),
+          (s) => s.maybeMap(
+            loaded: (l) =>
+                l.qadaStatus[Salaah.fajr]?.value == 1 &&
+                l.selectedDate == yesterday,
+            orElse: () => false,
+          ),
           'yesterday loaded with qada 1 (stage 1)',
           true,
         ),
         isA<PrayerTrackerState>().having(
-          (s) => s.maybeMap(loaded: (l) => l.qadaStatus[Salaah.fajr]?.value == 1 && l.selectedDate == yesterday && l.history.isNotEmpty, orElse: () => false),
+          (s) => s.maybeMap(
+            loaded: (l) =>
+                l.qadaStatus[Salaah.fajr]?.value == 1 &&
+                l.selectedDate == yesterday &&
+                l.history.isNotEmpty,
+            orElse: () => false,
+          ),
           'yesterday loaded with qada 1 (stage 2 - history)',
           true,
         ),
         // Toggle(Salaah.fajr)
         isA<PrayerTrackerState>().having(
-          (s) => s.maybeMap(loaded: (l) => l.qadaStatus[Salaah.fajr]?.value == 0 && l.selectedDate == yesterday && l.completedToday.contains(Salaah.fajr), orElse: () => false),
+          (s) => s.maybeMap(
+            loaded: (l) =>
+                l.qadaStatus[Salaah.fajr]?.value == 0 &&
+                l.selectedDate == yesterday &&
+                l.completedToday.contains(Salaah.fajr),
+            orElse: () => false,
+          ),
           'yesterday toggled, qada becomes 0 (stage 1)',
           true,
         ),
         isA<PrayerTrackerState>().having(
-          (s) => s.maybeMap(loaded: (l) => l.qadaStatus[Salaah.fajr]?.value == 0 && l.selectedDate == yesterday && l.monthRecords.values.any((r) => r.qada[Salaah.fajr]?.value == 0), orElse: () => false),
+          (s) => s.maybeMap(
+            loaded: (l) =>
+                l.qadaStatus[Salaah.fajr]?.value == 0 &&
+                l.selectedDate == yesterday &&
+                l.monthRecords.values.any(
+                  (r) => r.qada[Salaah.fajr]?.value == 0,
+                ),
+            orElse: () => false,
+          ),
           'yesterday toggled, qada becomes 0 (stage 2 - monthRecords updated)',
           true,
         ),
         // Load(today)
         const PrayerTrackerState.loading(),
         isA<PrayerTrackerState>().having(
-          (s) => s.maybeMap(loaded: (l) => l.qadaStatus[Salaah.fajr]?.value == 1 && l.selectedDate == today, orElse: () => false),
+          (s) => s.maybeMap(
+            loaded: (l) =>
+                l.qadaStatus[Salaah.fajr]?.value == 1 &&
+                l.selectedDate == today,
+            orElse: () => false,
+          ),
           'today loaded, qada should be 1 (rippled from yesterday)',
           true,
         ),
         isA<PrayerTrackerState>().having(
-          (s) => s.maybeMap(loaded: (l) => l.qadaStatus[Salaah.fajr]?.value == 1 && l.selectedDate == today && l.history.isNotEmpty, orElse: () => false),
+          (s) => s.maybeMap(
+            loaded: (l) =>
+                l.qadaStatus[Salaah.fajr]?.value == 1 &&
+                l.selectedDate == today &&
+                l.history.isNotEmpty,
+            orElse: () => false,
+          ),
           'today loaded with qada 1 (stage 2 - history)',
           true,
         ),
       ],
     );
-   group('Date Change Interaction', () {
-    blocTest<PrayerTrackerBloc, PrayerTrackerState>(
-      'switching dates should preserve toggled state in repo',
-      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService),
-      act: (bloc) async {
-        bloc.add(PrayerTrackerEvent.load(yesterday));
-        await Future.delayed(const Duration(milliseconds: 200));
-        bloc.add(const PrayerTrackerEvent.togglePrayer(Salaah.fajr));
-        await Future.delayed(const Duration(milliseconds: 200));
-        bloc.add(PrayerTrackerEvent.load(today));
-        await Future.delayed(const Duration(milliseconds: 200));
-        bloc.add(PrayerTrackerEvent.load(yesterday));
-        await Future.delayed(const Duration(milliseconds: 200));
-      },
-      verify: (_) async {
-        final rec = await repo.loadRecord(yesterday);
-        expect(rec?.completedToday.contains(Salaah.fajr), true, reason: 'Yesterday should be marked as completed in repo');
-        expect(rec?.qada[Salaah.fajr]?.value, 0, reason: 'Yesterday Qada should be 0 in repo');
-      }
-    );
+    group('Date Change Interaction', () {
+      blocTest<PrayerTrackerBloc, PrayerTrackerState>(
+        'switching dates should preserve toggled state in repo',
+        build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService),
+        act: (bloc) async {
+          bloc.add(PrayerTrackerEvent.load(yesterday));
+          await Future.delayed(const Duration(milliseconds: 200));
+          bloc.add(const PrayerTrackerEvent.togglePrayer(Salaah.fajr));
+          await Future.delayed(const Duration(milliseconds: 200));
+          bloc.add(PrayerTrackerEvent.load(today));
+          await Future.delayed(const Duration(milliseconds: 200));
+          bloc.add(PrayerTrackerEvent.load(yesterday));
+          await Future.delayed(const Duration(milliseconds: 200));
+        },
+        verify: (_) async {
+          final rec = await repo.loadRecord(yesterday);
+          expect(
+            rec?.completedToday.contains(Salaah.fajr),
+            true,
+            reason: 'Yesterday should be marked as completed in repo',
+          );
+          expect(
+            rec?.qada[Salaah.fajr]?.value,
+            0,
+            reason: 'Yesterday Qada should be 0 in repo',
+          );
+        },
+      );
+    });
   });
- });
 }

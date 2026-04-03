@@ -10,7 +10,8 @@ class AudioDownloadCubit extends Cubit<AudioDownloadState> {
   final AudioDownloadService _downloadService;
   StreamSubscription? _progressSubscription;
 
-  AudioDownloadCubit(this._downloadService) : super(const AudioDownloadState()) {
+  AudioDownloadCubit(this._downloadService)
+    : super(const AudioDownloadState()) {
     _progressSubscription = _downloadService.progressStream.listen(_onProgress);
   }
 
@@ -18,16 +19,19 @@ class AudioDownloadCubit extends Cubit<AudioDownloadState> {
 
   void init(Reciter reciter) {
     _currentLoadId++;
-    emit(state.copyWith(
-      isLoading: true,
-      activeReciterId: reciter.identifier, // Tracks which reciter page is open
-    ));
+    emit(
+      state.copyWith(
+        isLoading: true,
+        activeReciterId:
+            reciter.identifier, // Tracks which reciter page is open
+      ),
+    );
     _loadStatuses(reciter, _currentLoadId);
   }
 
   Future<void> _loadStatuses(Reciter reciter, int loadId) async {
     final statuses = <int, SurahDownloadStatus>{};
-    
+
     // Load in chunks to avoid UI jank
     const int chunkSize = 20;
     for (int i = 1; i <= 114; i += chunkSize) {
@@ -42,18 +46,21 @@ class AudioDownloadCubit extends Cubit<AudioDownloadState> {
             surahNumber: surahNum,
           );
           statuses[surahNum] = status;
-        } ());
+        }());
       }
       await Future.wait(futures);
-      
+
       if (loadId != _currentLoadId) return;
 
-      // Merge carefully: don't overwrite "Downloading" or "Stopping" states 
+      // Merge carefully: don't overwrite "Downloading" or "Stopping" states
       // if they were set by optimistic updates or progress events while we were loading
-      final currentStatuses = Map<int, SurahDownloadStatus>.from(state.surahStatuses);
+      final currentStatuses = Map<int, SurahDownloadStatus>.from(
+        state.surahStatuses,
+      );
       statuses.forEach((key, newStatus) {
         final existing = currentStatuses[key];
-        if (existing == null || (!existing.isDownloading && !existing.isStopping)) {
+        if (existing == null ||
+            (!existing.isDownloading && !existing.isStopping)) {
           currentStatuses[key] = newStatus;
         }
       });
@@ -70,7 +77,9 @@ class AudioDownloadCubit extends Cubit<AudioDownloadState> {
     // Optimistic update
     final currentStatus = state.surahStatuses[surahNumber];
     if (currentStatus != null) {
-      final newStatuses = Map<int, SurahDownloadStatus>.from(state.surahStatuses);
+      final newStatuses = Map<int, SurahDownloadStatus>.from(
+        state.surahStatuses,
+      );
       newStatuses[surahNumber] = currentStatus.copyWith(
         isDownloading: true,
         isStopping: false,
@@ -78,7 +87,10 @@ class AudioDownloadCubit extends Cubit<AudioDownloadState> {
       emit(state.copyWith(surahStatuses: newStatuses));
     }
 
-    await _downloadService.downloadSurah(reciter: reciter, surahNumber: surahNumber);
+    await _downloadService.downloadSurah(
+      reciter: reciter,
+      surahNumber: surahNumber,
+    );
   }
 
   Future<void> downloadReciter(Reciter reciter) async {
@@ -111,19 +123,20 @@ class AudioDownloadCubit extends Cubit<AudioDownloadState> {
     if (changed) emit(state.copyWith(surahStatuses: newStatuses));
 
     await _downloadService.cancelDownload(reciter.identifier);
-    
+
     // Refresh to ensure final states are correct after service stops
     _currentLoadId++;
     await _loadStatuses(reciter, _currentLoadId);
   }
 
-
   Future<void> deleteSurah(Reciter reciter, int surahNumber) async {
-
-    await _downloadService.deleteSurah(reciterId: reciter.identifier, surahNumber: surahNumber);
+    await _downloadService.deleteSurah(
+      reciterId: reciter.identifier,
+      surahNumber: surahNumber,
+    );
     // Reload status for this surah
     final status = await _downloadService.getSurahStatus(
-      reciterId: reciter.identifier, 
+      reciterId: reciter.identifier,
       surahNumber: surahNumber,
     );
     final newStatuses = Map<int, SurahDownloadStatus>.from(state.surahStatuses);
@@ -142,32 +155,40 @@ class AudioDownloadCubit extends Cubit<AudioDownloadState> {
   void _onProgress(DownloadProgress progress) {
     if (state.activeReciterId == progress.reciterId) {
       final surahNum = progress.surahNumber;
-      
+
       if (surahNum != null) {
-        final newStatuses = Map<int, SurahDownloadStatus>.from(state.surahStatuses);
+        final newStatuses = Map<int, SurahDownloadStatus>.from(
+          state.surahStatuses,
+        );
         final current = newStatuses[surahNum];
-        
+
         final size = current?.sizeInBytes ?? 0;
         final total = progress.totalFiles;
-        
+
         // Preserve isStopping state if it was set optimistically or by a previous event
         // But clear it if we just received a completion or an error (which happens when stopped)
-        final isStopping = (current?.isStopping ?? false) && !progress.isCompleted && progress.error == null;
+        final isStopping =
+            (current?.isStopping ?? false) &&
+            !progress.isCompleted &&
+            progress.error == null;
 
         newStatuses[surahNum] = SurahDownloadStatus(
           isDownloaded: progress.isCompleted,
-          isDownloading: !progress.isCompleted && progress.error == null && !isStopping,
+          isDownloading:
+              !progress.isCompleted && progress.error == null && !isStopping,
           isStopping: isStopping,
           sizeInBytes: size,
           downloadedAyahs: progress.downloadedFiles,
           totalAyahs: total,
         );
 
-        emit(state.copyWith(
-          surahStatuses: newStatuses,
-          activeSurahNumber: surahNum,
-          progress: progress.percentage,
-        ));
+        emit(
+          state.copyWith(
+            surahStatuses: newStatuses,
+            activeSurahNumber: surahNum,
+            progress: progress.percentage,
+          ),
+        );
       }
     }
   }

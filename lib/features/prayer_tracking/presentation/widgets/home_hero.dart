@@ -35,7 +35,10 @@ class HomeHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final totalQada = qadaStatus.values.fold(0, (sum, counter) => sum + counter.value);
+    final totalQada = qadaStatus.values.fold(
+      0,
+      (sum, counter) => sum + counter.value,
+    );
     final hijriDate = selectedDate.toHijriDate(locale);
 
     return Container(
@@ -61,19 +64,15 @@ class HomeHero extends StatelessWidget {
                 ),
                 child: Opacity(
                   opacity: 0.08,
-                  child: CustomPaint(
-                    painter: IslamicGeometricPatternPainter(),
-                  ),
+                  child: CustomPaint(painter: IslamicGeometricPatternPainter()),
                 ),
               ),
             ),
           ),
-          
+
           // 2. Content Column
           ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: isQadaEnabled ? 460 : 360,
-            ),
+            constraints: BoxConstraints(minHeight: isQadaEnabled ? 460 : 360),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -112,9 +111,13 @@ class HomeHero extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 // Crescent Icon at top of Dome
-                const Icon(Icons.nightlight_round, color: AppTheme.accent, size: 28),
+                const Icon(
+                  Icons.nightlight_round,
+                  color: AppTheme.accent,
+                  size: 28,
+                ),
                 const SizedBox(height: 8),
-                
+
                 if (isQadaEnabled) ...[
                   // Debt Info
                   Text(
@@ -144,7 +147,9 @@ class HomeHero extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    l10n.localeName == 'ar' ? 'صلوات مفروضة لإكمالها' : 'Fard Prayers to Complete',
+                    l10n.localeName == 'ar'
+                        ? 'صلوات مفروضة لإكمالها'
+                        : 'Fard Prayers to Complete',
                     style: GoogleFonts.outfit(
                       color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 14,
@@ -189,15 +194,20 @@ class HomeHero extends StatelessWidget {
                 ],
 
                 const SizedBox(height: 40),
-                
+
                 // Date & Hijri
                 Container(
                   margin: EdgeInsets.only(bottom: isQadaEnabled ? 12 : 32),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.1),
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.2),
@@ -233,7 +243,7 @@ class HomeHero extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // 3. Prayer Cards
           if (isQadaEnabled)
             Positioned(
@@ -261,11 +271,7 @@ class _LocationChip extends StatelessWidget {
   final VoidCallback onTap;
   final AppLocalizations l10n;
 
-  const _LocationChip({
-    this.cityName,
-    required this.onTap,
-    required this.l10n,
-  });
+  const _LocationChip({this.cityName, required this.onTap, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -278,14 +284,18 @@ class _LocationChip extends StatelessWidget {
           color: Colors.white.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: hasLocation ? Colors.white.withValues(alpha: 0.2) : AppTheme.missed.withValues(alpha: 0.4),
+            color: hasLocation
+                ? Colors.white.withValues(alpha: 0.2)
+                : AppTheme.missed.withValues(alpha: 0.4),
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              hasLocation ? Icons.location_on_rounded : Icons.location_off_rounded,
+              hasLocation
+                  ? Icons.location_on_rounded
+                  : Icons.location_off_rounded,
               size: 14,
               color: hasLocation ? AppTheme.accent : AppTheme.missed,
             ),
@@ -361,10 +371,7 @@ class _TraditionalPrayerCard extends StatelessWidget {
   final Salaah salaah;
   final int count;
 
-  const _TraditionalPrayerCard({
-    required this.salaah,
-    required this.count,
-  });
+  const _TraditionalPrayerCard({required this.salaah, required this.count});
 
   @override
   Widget build(BuildContext context) {
@@ -415,34 +422,38 @@ class IslamicMosqueClipper extends CustomClipper<Path> {
     final path = Path();
     final w = size.width;
     final h = size.height;
-    
+
     path.lineTo(w, 0);
-    final baseH = h * 0.9; 
+    final baseH = h * 0.9;
     path.lineTo(w, baseH);
 
     // Right Minaret
     path.lineTo(w * 0.96, baseH);
-    path.quadraticBezierTo(w * 0.96, baseH - 80, w * 0.93, baseH - 95); // Pointy top
+    path.quadraticBezierTo(
+      w * 0.96,
+      baseH - 80,
+      w * 0.93,
+      baseH - 95,
+    ); // Pointy top
     path.quadraticBezierTo(w * 0.90, baseH - 80, w * 0.90, baseH);
-    
+
     // Shoulder to Dome
     path.lineTo(w * 0.85, baseH);
     path.cubicTo(
-      w * 0.80, baseH - 10, 
-      w * 0.75, baseH - 100, 
-      w * 0.5, baseH - 110
+      w * 0.80,
+      baseH - 10,
+      w * 0.75,
+      baseH - 100,
+      w * 0.5,
+      baseH - 110,
     ); // Dome peak
-    path.cubicTo(
-      w * 0.25, baseH - 100, 
-      w * 0.20, baseH - 10, 
-      w * 0.15, baseH
-    );
+    path.cubicTo(w * 0.25, baseH - 100, w * 0.20, baseH - 10, w * 0.15, baseH);
 
     // Left Minaret
     path.lineTo(w * 0.10, baseH);
     path.quadraticBezierTo(w * 0.10, baseH - 80, w * 0.07, baseH - 95);
     path.quadraticBezierTo(w * 0.04, baseH - 80, w * 0.04, baseH);
-    
+
     path.lineTo(0, baseH);
     path.close();
     return path;
@@ -468,14 +479,19 @@ class IslamicGeometricPatternPainter extends CustomPainter {
     }
   }
 
-  void _drawEightPointStar(Canvas canvas, Offset center, double radius, Paint paint) {
+  void _drawEightPointStar(
+    Canvas canvas,
+    Offset center,
+    double radius,
+    Paint paint,
+  ) {
     final path = Path();
     for (int i = 0; i < 8; i++) {
       double angle = i * math.pi / 4;
-      
+
       double x = center.dx + radius * math.cos(angle);
       double y = center.dy + radius * math.sin(angle);
-      
+
       if (i == 0) {
         path.moveTo(x, y);
       } else {
@@ -490,7 +506,7 @@ class IslamicGeometricPatternPainter extends CustomPainter {
     }
     path.close();
     canvas.drawPath(path, paint);
-    
+
     // Draw a small circle in center
     canvas.drawCircle(center, 2, paint);
   }

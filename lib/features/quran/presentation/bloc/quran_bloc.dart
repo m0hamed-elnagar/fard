@@ -16,13 +16,19 @@ part 'quran_bloc.freezed.dart';
 @freezed
 abstract class QuranEvent with _$QuranEvent {
   const factory QuranEvent.loadSurahs() = _LoadSurahs;
-  const factory QuranEvent.loadSurahDetails(int surahNumber) = _LoadSurahDetails;
+  const factory QuranEvent.loadSurahDetails(int surahNumber) =
+      _LoadSurahDetails;
   const factory QuranEvent.search(String query) = _Search;
-  const factory QuranEvent.lastReadUpdated(LastReadPosition position) = _LastReadUpdated;
+  const factory QuranEvent.lastReadUpdated(LastReadPosition position) =
+      _LastReadUpdated;
   const factory QuranEvent.loadBookmarks() = _LoadBookmarks;
-  const factory QuranEvent.bookmarksUpdated(List<Bookmark> bookmarks) = _BookmarksUpdated;
-  const factory QuranEvent.removeBookmark(AyahNumber ayahNumber) = _RemoveBookmark;
-  const factory QuranEvent.removeMultipleBookmarks(List<AyahNumber> ayahNumbers) = _RemoveMultipleBookmarks;
+  const factory QuranEvent.bookmarksUpdated(List<Bookmark> bookmarks) =
+      _BookmarksUpdated;
+  const factory QuranEvent.removeBookmark(AyahNumber ayahNumber) =
+      _RemoveBookmark;
+  const factory QuranEvent.removeMultipleBookmarks(
+    List<AyahNumber> ayahNumbers,
+  ) = _RemoveMultipleBookmarks;
 }
 
 @freezed
@@ -49,15 +55,15 @@ class QuranBloc extends Bloc<QuranEvent, QuranState> {
   StreamSubscription? _lastReadSubscription;
   StreamSubscription? _bookmarksSubscription;
 
-  QuranBloc(this._repository, this._watchLastRead, this._bookmarkRepository) : super(QuranState.initial()) {
+  QuranBloc(this._repository, this._watchLastRead, this._bookmarkRepository)
+    : super(QuranState.initial()) {
     _lastReadSubscription = _watchLastRead().listen((result) {
-      result.fold(
-        (_) => null,
-        (pos) => add(QuranEvent.lastReadUpdated(pos)),
-      );
+      result.fold((_) => null, (pos) => add(QuranEvent.lastReadUpdated(pos)));
     });
 
-    _bookmarksSubscription = _bookmarkRepository.watchBookmarks().listen((result) {
+    _bookmarksSubscription = _bookmarkRepository.watchBookmarks().listen((
+      result,
+    ) {
       result.fold(
         (_) => null,
         (bookmarks) => add(QuranEvent.bookmarksUpdated(bookmarks)),
@@ -70,11 +76,12 @@ class QuranBloc extends Bloc<QuranEvent, QuranState> {
 
     on<_LoadSurahs>((event, emit) async {
       if (state.surahs.isNotEmpty) return;
-      
+
       emit(state.copyWith(isLoading: true, error: null));
       final result = await _repository.getSurahs();
       result.fold(
-        (failure) => emit(state.copyWith(isLoading: false, error: failure.message)),
+        (failure) =>
+            emit(state.copyWith(isLoading: false, error: failure.message)),
         (surahs) => emit(state.copyWith(isLoading: false, surahs: surahs)),
       );
     });
@@ -113,8 +120,10 @@ class QuranBloc extends Bloc<QuranEvent, QuranState> {
       emit(state.copyWith(isLoading: true, error: null));
       final result = await _repository.search(event.query);
       result.fold(
-        (failure) => emit(state.copyWith(isLoading: false, error: failure.message)),
-        (results) => emit(state.copyWith(isLoading: false, searchResults: results)),
+        (failure) =>
+            emit(state.copyWith(isLoading: false, error: failure.message)),
+        (results) =>
+            emit(state.copyWith(isLoading: false, searchResults: results)),
       );
     });
   }

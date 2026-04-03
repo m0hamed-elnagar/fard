@@ -33,55 +33,65 @@ void main() {
         history: {},
       );
 
-      await sharedPreferences.setString('werd_progress_default', json.encode(progress.toJson()));
+      await sharedPreferences.setString(
+        'werd_progress_default',
+        json.encode(progress.toJson()),
+      );
 
       // 2. Act: Get progress today (this triggers the rollover logic)
       final result = await repository.getProgress();
       final updatedProgress = result.fold((_) => null, (p) => p)!;
 
       // 3. Assert
-      final dateKey = "${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}";
-      
+      final dateKey =
+          "${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}";
+
       expect(updatedProgress.history.containsKey(dateKey), isTrue);
-      
+
       final entry = updatedProgress.history[dateKey]!;
       expect(entry.totalAyahsRead, 10);
       expect(entry.startAbsolute, 1);
       expect(entry.endAbsolute, 10);
       expect(entry.startSurahName, quran.getSurahName(1)); // Al-Fatiha
       expect(entry.startAyahNumber, 1);
-      expect(entry.endSurahName, quran.getSurahName(2));   // Al-Baqarah
+      expect(entry.endSurahName, quran.getSurahName(2)); // Al-Baqarah
       expect(entry.endAyahNumber, 3);
-      
+
       // Verification of fractional progress
       // 10 ayahs is less than 1 page and less than 1 juz
       expect(entry.pagesRead, greaterThan(0));
       expect(entry.juzRead, greaterThan(0));
-      
+
       expect(entry.summary, contains("Read 10 ayahs"));
       expect(entry.summary, contains(quran.getSurahName(1)));
       expect(entry.summary, contains(quran.getSurahName(2)));
     });
 
-    test('should maintain backward compatibility with old integer history', () async {
-       final yesterdayKey = "2024-01-01";
-       final jsonString = json.encode({
-         'goalId': 'default',
-         'totalAmountReadToday': 0,
-         'lastReadAbsolute': 10,
-         'sessionStartAbsolute': 1,
-         'lastUpdated': DateTime.now().toIso8601String(),
-         'streak': 1,
-         'history': {
-           yesterdayKey: 50 // Old format: date -> int
-         }
-       });
+    test(
+      'should maintain backward compatibility with old integer history',
+      () async {
+        final yesterdayKey = "2024-01-01";
+        final jsonString = json.encode({
+          'goalId': 'default',
+          'totalAmountReadToday': 0,
+          'lastReadAbsolute': 10,
+          'sessionStartAbsolute': 1,
+          'lastUpdated': DateTime.now().toIso8601String(),
+          'streak': 1,
+          'history': {
+            yesterdayKey: 50, // Old format: date -> int
+          },
+        });
 
-       final progress = WerdProgress.fromJson(json.decode(jsonString));
-       
-       expect(progress.history[yesterdayKey], isA<WerdHistoryEntry>());
-       expect(progress.history[yesterdayKey]!.totalAyahsRead, 50);
-       expect(progress.history[yesterdayKey]!.summary, contains("Read 50 ayahs"));
-    });
+        final progress = WerdProgress.fromJson(json.decode(jsonString));
+
+        expect(progress.history[yesterdayKey], isA<WerdHistoryEntry>());
+        expect(progress.history[yesterdayKey]!.totalAyahsRead, 50);
+        expect(
+          progress.history[yesterdayKey]!.summary,
+          contains("Read 50 ayahs"),
+        );
+      },
+    );
   });
 }

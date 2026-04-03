@@ -7,9 +7,9 @@ import 'package:injectable/injectable.dart';
 @injectable
 class GetPage implements UseCase<MushafPage, GetPageParams> {
   final QuranRepository repository;
-  
+
   const GetPage(this.repository);
-  
+
   @override
   Future<Result<MushafPage>> call(GetPageParams params) {
     return repository.getPage(
@@ -22,9 +22,6 @@ class GetPage implements UseCase<MushafPage, GetPageParams> {
 class GetPageParams {
   final int pageNumber;
   final String? translation;
-  
-  const GetPageParams({
-    required this.pageNumber,
-    this.translation,
-  });
+
+  const GetPageParams({required this.pageNumber, this.translation});
 }

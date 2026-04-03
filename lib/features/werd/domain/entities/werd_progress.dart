@@ -4,7 +4,8 @@ import 'werd_history_entry.dart';
 class WerdProgress extends Equatable {
   final String goalId;
   final int totalAmountReadToday;
-  final Set<int> readItemsToday; // Items (ayahs/counts/etc) read TODAY (absolute indices)
+  final Set<int>
+  readItemsToday; // Items (ayahs/counts/etc) read TODAY (absolute indices)
   final int? lastReadAbsolute;
   final int? sessionStartAbsolute;
   final DateTime lastUpdated;
@@ -25,11 +26,11 @@ class WerdProgress extends Equatable {
   @override
   List<Object?> get props => [
     goalId,
-    totalAmountReadToday, 
+    totalAmountReadToday,
     readItemsToday,
-    lastReadAbsolute, 
+    lastReadAbsolute,
     sessionStartAbsolute,
-    lastUpdated, 
+    lastUpdated,
     streak,
     history,
   ];
@@ -50,20 +51,26 @@ class WerdProgress extends Equatable {
     final history = rawHistory.map((key, value) {
       if (value is int) {
         // Backward compatibility for old simple amount history
-        return MapEntry(key, WerdHistoryEntry(
-          totalAyahsRead: value,
-          startAbsolute: 0,
-          endAbsolute: 0,
-          pagesRead: 0.0,
-          juzRead: 0.0,
-          startSurahName: '',
-          startAyahNumber: 0,
-          endSurahName: '',
-          endAyahNumber: 0,
-          summary: 'Read $value ayahs',
-        ));
+        return MapEntry(
+          key,
+          WerdHistoryEntry(
+            totalAyahsRead: value,
+            startAbsolute: 0,
+            endAbsolute: 0,
+            pagesRead: 0.0,
+            juzRead: 0.0,
+            startSurahName: '',
+            startAyahNumber: 0,
+            endSurahName: '',
+            endAyahNumber: 0,
+            summary: 'Read $value ayahs',
+          ),
+        );
       } else {
-        return MapEntry(key, WerdHistoryEntry.fromJson(value as Map<String, dynamic>));
+        return MapEntry(
+          key,
+          WerdHistoryEntry.fromJson(value as Map<String, dynamic>),
+        );
       }
     });
 

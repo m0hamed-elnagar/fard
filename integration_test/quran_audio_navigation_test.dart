@@ -13,16 +13,18 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Quran Audio Navigation and Bismillah Integrity Test', () {
-    testWidgets('Verify Switching Surahs Stops Previous and Starts New', (tester) async {
+    testWidgets('Verify Switching Surahs Stops Previous and Starts New', (
+      tester,
+    ) async {
       debugPrint('DEBUG: Starting Integration Test');
-      
+
       // Reset dependencies to avoid state bleed
       await GetIt.instance.reset();
-      
+
       // Start the app
       app.main();
       await tester.pumpAndSettle();
-      
+
       debugPrint('DEBUG: Handling Splash and Onboarding');
       await tester.pump(const Duration(seconds: 2));
       await tester.pumpAndSettle();
@@ -73,15 +75,17 @@ void main() {
         }
       }
       expect(isPlaying1, isTrue, reason: "Surah 1 should start playing");
-      
-      final audioBloc = tester.element(find.byType(AudioPlayerBar)).read<AudioBloc>();
+
+      final audioBloc = tester
+          .element(find.byType(AudioPlayerBar))
+          .read<AudioBloc>();
       expect(audioBloc.state.currentSurah, 1);
 
       // 2. NAVIGATE TO SURAH 2 (Al-Baqarah)
       debugPrint('DEBUG: Navigating to Surah 2 while Surah 1 is playing');
       await tester.pageBack();
       await tester.pumpAndSettle();
-      
+
       final surah2Tile = find.textContaining('البقرة');
       await tester.tap(surah2Tile.first);
       await tester.pumpAndSettle();
@@ -89,8 +93,13 @@ void main() {
       // VERIFY BUG FIX: Surah 2's header should show "Play", NOT "Stop/Pause" from Surah 1
       debugPrint('DEBUG: Verifying Surah 2 header state');
       final playButton2 = find.textContaining('تشغيل السورة');
-      expect(playButton2, findsOneWidget, reason: "Surah 2 should show 'Play' even if Surah 1 is active in background");
-      
+      expect(
+        playButton2,
+        findsOneWidget,
+        reason:
+            "Surah 2 should show 'Play' even if Surah 1 is active in background",
+      );
+
       // The audio bar should still show Surah 1
       expect(find.textContaining('الفاتحة'), findsWidgets);
 
@@ -104,12 +113,17 @@ void main() {
       bool isPlaying2 = false;
       for (int i = 0; i < 10; i++) {
         await tester.pump(const Duration(seconds: 1));
-        if (tester.any(find.byIcon(Icons.pause_rounded)) && audioBloc.state.currentSurah == 2) {
+        if (tester.any(find.byIcon(Icons.pause_rounded)) &&
+            audioBloc.state.currentSurah == 2) {
           isPlaying2 = true;
           break;
         }
       }
-      expect(isPlaying2, isTrue, reason: "Surah 2 should replace Surah 1 and start playing");
+      expect(
+        isPlaying2,
+        isTrue,
+        reason: "Surah 2 should replace Surah 1 and start playing",
+      );
       expect(audioBloc.state.currentSurah, 2);
 
       // 4. VERIFY BISMILLAH INTEGRITY (Logic)
@@ -117,7 +131,7 @@ void main() {
       // For Surah 2, we know we prepended Bismillah.
       // We can check the state - when playing Bismillah, currentAyah should be 1.
       expect(audioBloc.state.currentAyah, 1);
-      
+
       debugPrint('DEBUG: Integration test completed successfully!');
     });
   });

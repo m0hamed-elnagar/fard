@@ -18,7 +18,8 @@ class QuranRepositoryImpl implements QuranRepository {
   final QuranLocalSource localSource;
   final SharedPreferences sharedPreferences;
 
-  final _lastReadController = StreamController<Result<LastReadPosition>>.broadcast();
+  final _lastReadController =
+      StreamController<Result<LastReadPosition>>.broadcast();
   static const String _lastReadKey = 'last_read_position';
   static const String _separatorKey = 'reader_separator_choice';
 
@@ -76,16 +77,24 @@ class QuranRepositoryImpl implements QuranRepository {
   }
 
   @override
-  Future<Result<Surah>> getSurah(SurahNumber number, {String? translation}) async {
+  Future<Result<Surah>> getSurah(
+    SurahNumber number, {
+    String? translation,
+  }) async {
     try {
       final cached = await localSource.getCachedSurahDetail(number.value);
-      if (cached != null && cached.ayahs.isNotEmpty && cached.ayahs.length == cached.numberOfAyahs) {
+      if (cached != null &&
+          cached.ayahs.isNotEmpty &&
+          cached.ayahs.length == cached.numberOfAyahs) {
         return Result.success(cached);
       }
       final surahModel = await remoteSource.getSurahDetail(number.value);
       final verses = await remoteSource.getSurahVerses(number.value);
       final sortedAyahs = verses.map((v) => v.toDomain(number.value)).toList()
-        ..sort((a, b) => a.number.ayahNumberInSurah.compareTo(b.number.ayahNumberInSurah));
+        ..sort(
+          (a, b) =>
+              a.number.ayahNumberInSurah.compareTo(b.number.ayahNumberInSurah),
+        );
       final surah = surahModel.toDomain().copyWith(ayahs: sortedAyahs);
       await localSource.cacheSurahDetail(surah);
       return Result.success(surah);
@@ -95,23 +104,26 @@ class QuranRepositoryImpl implements QuranRepository {
   }
 
   @override
-  Future<Result<MushafPage>> getPage(int pageNumber, {String? translation}) async {
+  Future<Result<MushafPage>> getPage(
+    int pageNumber, {
+    String? translation,
+  }) async {
     return Result.failure(const UnknownFailure('Not implemented'));
   }
 
   @override
   Future<Result<Juz>> getJuz(int juzNumber, {String? translation}) async {
-     return Result.failure(const UnknownFailure('Not implemented'));
+    return Result.failure(const UnknownFailure('Not implemented'));
   }
 
   @override
   Future<Result<List<SearchResult>>> search(String query) async {
-     return Result.failure(const UnknownFailure('Not implemented'));
+    return Result.failure(const UnknownFailure('Not implemented'));
   }
 
   @override
   Future<Result<List<Translation>>> getAvailableTranslations() async {
-     return Result.failure(const UnknownFailure('Not implemented'));
+    return Result.failure(const UnknownFailure('Not implemented'));
   }
 
   @override
@@ -150,9 +162,17 @@ class QuranRepositoryImpl implements QuranRepository {
   }
 
   @override
-  Future<Result<String>> getTafsir(int surahNumber, int ayahNumber, {int? tafsirId}) async {
+  Future<Result<String>> getTafsir(
+    int surahNumber,
+    int ayahNumber, {
+    int? tafsirId,
+  }) async {
     try {
-      final tafsir = await remoteSource.getTafsir(surahNumber, ayahNumber, tafsirId: tafsirId ?? 16);
+      final tafsir = await remoteSource.getTafsir(
+        surahNumber,
+        ayahNumber,
+        tafsirId: tafsirId ?? 16,
+      );
       return Result.success(tafsir);
     } catch (e) {
       return Result.failure(UnknownFailure(e.toString()));
@@ -168,16 +188,18 @@ class QuranRepositoryImpl implements QuranRepository {
         yield 0.0;
         return;
       }
-      
+
       final surahs = surahsResult.data!;
       int totalSurahs = surahs.length;
-      
+
       // Step 2: Calculate initial progress and track what's downloaded
       int downloaded = 0;
       List<bool> isDownloaded = List.filled(totalSurahs + 1, false);
       for (int i = 1; i <= totalSurahs; i++) {
         final cached = await localSource.getCachedSurahDetail(i);
-        if (cached != null && cached.ayahs.isNotEmpty && cached.ayahs.length == cached.numberOfAyahs) {
+        if (cached != null &&
+            cached.ayahs.isNotEmpty &&
+            cached.ayahs.length == cached.numberOfAyahs) {
           downloaded++;
           isDownloaded[i] = true;
         }
@@ -192,7 +214,7 @@ class QuranRepositoryImpl implements QuranRepository {
       // Step 3: Download missing surahs
       for (int i = 1; i <= totalSurahs; i++) {
         if (isDownloaded[i]) continue;
-        
+
         final surahNum = SurahNumber.create(i).data!;
         final result = await getSurah(surahNum);
         if (result.isSuccess) {
@@ -200,7 +222,7 @@ class QuranRepositoryImpl implements QuranRepository {
           yield downloaded / totalSurahs;
         }
       }
-      
+
       yield 1.0;
     } catch (_) {
       yield 0.0;
@@ -214,7 +236,9 @@ class QuranRepositoryImpl implements QuranRepository {
       int downloaded = 0;
       for (int i = 1; i <= totalSurahs; i++) {
         final cached = await localSource.getCachedSurahDetail(i);
-        if (cached != null && cached.ayahs.isNotEmpty && cached.ayahs.length == cached.numberOfAyahs) {
+        if (cached != null &&
+            cached.ayahs.isNotEmpty &&
+            cached.ayahs.length == cached.numberOfAyahs) {
           downloaded++;
         }
       }

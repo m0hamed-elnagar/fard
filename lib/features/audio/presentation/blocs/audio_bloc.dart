@@ -20,7 +20,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
   final AudioPlayerService playerService;
   final AudioDownloadService downloadService;
   final SettingsCubit settingsCubit;
-  
+
   StreamSubscription? _statusSubscription;
   StreamSubscription? _errorSubscription;
   StreamSubscription? _positionSubscription;
@@ -33,14 +33,20 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
     required this.downloadService,
     required this.settingsCubit,
   }) : super(const AudioState()) {
-    
     on<AudioEvent>((event, emit) async {
       debugPrint('AudioBloc: Event received: $event');
       await event.map<Future<void>>(
         loadReciters: (e) => _onLoadReciters(emit),
         selectReciter: (e) => _onSelectReciter(e.reciter, emit),
-        playAyah: (e) => _onPlayAyah(e.surahNumber, e.ayahNumber, e.reciter, emit),
-        playSurah: (e) => _onPlaySurah(e.surahNumber, e.reciter, e.startAyah, e.ayahCount, emit),
+        playAyah: (e) =>
+            _onPlayAyah(e.surahNumber, e.ayahNumber, e.reciter, emit),
+        playSurah: (e) => _onPlaySurah(
+          e.surahNumber,
+          e.reciter,
+          e.startAyah,
+          e.ayahCount,
+          emit,
+        ),
         togglePlayback: (e) => _onTogglePlayback(emit),
         pause: (e) => _onPause(emit),
         resume: (e) => _onResume(emit),
@@ -59,7 +65,8 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
         positionChanged: (e) async => _onPositionChanged(e.position, emit),
         durationChanged: (e) async => _onDurationChanged(e.duration, emit),
         indexChanged: (e) async => _onIndexChanged(index: e.index, emit: emit),
-        updateCurrentPosition: (e) async => _onUpdateCurrentPosition(e.surahNumber, e.ayahNumber, emit),
+        updateCurrentPosition: (e) async =>
+            _onUpdateCurrentPosition(e.surahNumber, e.ayahNumber, emit),
         refreshReciterStatuses: (e) => _onLoadReciters(emit),
       );
     });
@@ -118,22 +125,25 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
         return a.englishName.compareTo(b.englishName);
       });
 
-      emit(state.copyWith(
-        availableReciters: sortedReciters,
-        reciterDownloadProgress: progress,
-        reciterDownloadSizes: sizes,
-        currentReciter: state.currentReciter ?? sortedReciters.firstOrNull,
-        error: null,
-      ));
+      emit(
+        state.copyWith(
+          availableReciters: sortedReciters,
+          reciterDownloadProgress: progress,
+          reciterDownloadSizes: sizes,
+          currentReciter: state.currentReciter ?? sortedReciters.firstOrNull,
+          error: null,
+        ),
+      );
     }
 
     // 2. Load cached reciters AND data immediately
     final cachedRecitersResult = await audioRepository.getCachedReciters();
     final cachedData = await audioRepository.getCachedReciterData();
-    
+
     List<Reciter> currentReciters = [];
-    
-    if (cachedRecitersResult.isSuccess && cachedRecitersResult.data!.isNotEmpty) {
+
+    if (cachedRecitersResult.isSuccess &&
+        cachedRecitersResult.data!.isNotEmpty) {
       currentReciters = cachedRecitersResult.data!;
       emitSorted(currentReciters, cachedData.progress, cachedData.sizes);
     }
@@ -157,17 +167,21 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
     // 4. Calculate fresh data in background
     final freshProgress = <String, double>{};
     final freshSizes = <String, int>{};
-    
-    await Future.wait(currentReciters.map((r) async {
-      freshProgress[r.identifier] = await downloadService.getReciterDownloadPercentage(r.identifier);
-      freshSizes[r.identifier] = await downloadService.getReciterDownloadedSize(r.identifier);
-    }));
+
+    await Future.wait(
+      currentReciters.map((r) async {
+        freshProgress[r.identifier] = await downloadService
+            .getReciterDownloadPercentage(r.identifier);
+        freshSizes[r.identifier] = await downloadService
+            .getReciterDownloadedSize(r.identifier);
+      }),
+    );
 
     // 5. Check if data changed
     bool hasChanged = false;
-    
+
     // Check lengths
-    if (freshProgress.length != cachedData.progress.length || 
+    if (freshProgress.length != cachedData.progress.length ||
         freshSizes.length != cachedData.sizes.length) {
       hasChanged = true;
     } else {
@@ -186,51 +200,67 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
       await audioRepository.cacheReciterData(freshProgress, freshSizes);
       emitSorted(currentReciters, freshProgress, freshSizes);
     } else if (state.availableReciters.length != currentReciters.length) {
-       // Also re-emit if only the list of reciters changed (e.g. new ones added)
-       // but their download data is effectively 0 for the new ones
-       emitSorted(currentReciters, freshProgress, freshSizes);
+      // Also re-emit if only the list of reciters changed (e.g. new ones added)
+      // but their download data is effectively 0 for the new ones
+      emitSorted(currentReciters, freshProgress, freshSizes);
     }
   }
 
-  Future<void> _onSelectReciter(Reciter reciter, Emitter<AudioState> emit) async {
+  Future<void> _onSelectReciter(
+    Reciter reciter,
+    Emitter<AudioState> emit,
+  ) async {
     emit(state.copyWith(currentReciter: reciter));
     await audioRepository.cacheReciters(state.availableReciters);
 
     // If already playing or paused, restart with new reciter
-    if (state.isActive && state.currentSurah != null && state.currentAyah != null) {
+    if (state.isActive &&
+        state.currentSurah != null &&
+        state.currentAyah != null) {
       if (state.mode == AudioPlayMode.surah) {
-        add(AudioEvent.playSurah(
-          surahNumber: state.currentSurah!,
-          startAyah: state.currentAyah!,
-          reciter: reciter,
-        ));
+        add(
+          AudioEvent.playSurah(
+            surahNumber: state.currentSurah!,
+            startAyah: state.currentAyah!,
+            reciter: reciter,
+          ),
+        );
       } else {
-        add(AudioEvent.playAyah(
-          surahNumber: state.currentSurah!,
-          ayahNumber: state.currentAyah!,
-          reciter: reciter,
-        ));
+        add(
+          AudioEvent.playAyah(
+            surahNumber: state.currentSurah!,
+            ayahNumber: state.currentAyah!,
+            reciter: reciter,
+          ),
+        );
       }
     }
   }
 
-  Future<void> _onPlayAyah(int surahNumber, int ayahNumber, Reciter? reciter, Emitter<AudioState> emit) async {
+  Future<void> _onPlayAyah(
+    int surahNumber,
+    int ayahNumber,
+    Reciter? reciter,
+    Emitter<AudioState> emit,
+  ) async {
     final activeReciter = reciter ?? state.currentReciter;
     if (activeReciter == null) return;
 
     // Stop existing playback first to ensure a clean state
     await playerService.stop();
 
-    emit(state.copyWith(
-      status: AudioStatus.loading,
-      currentSurah: surahNumber,
-      currentAyah: ayahNumber,
-      currentReciter: activeReciter,
-      mode: AudioPlayMode.ayah,
-      isBannerVisible: true,
-      error: null,
-      lastErrorMessage: null,
-    ));
+    emit(
+      state.copyWith(
+        status: AudioStatus.loading,
+        currentSurah: surahNumber,
+        currentAyah: ayahNumber,
+        currentReciter: activeReciter,
+        mode: AudioPlayMode.ayah,
+        isBannerVisible: true,
+        error: null,
+        lastErrorMessage: null,
+      ),
+    );
 
     final track = await audioRepository.getAyahAudioTrack(
       reciterId: activeReciter.identifier,
@@ -239,13 +269,22 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
       quality: state.quality,
     );
 
-    final bool isPrependActive = ayahNumber == 1 && audioRepository.shouldPrependBismillah(surahNumber, activeReciter.identifier);
+    final bool isPrependActive =
+        ayahNumber == 1 &&
+        audioRepository.shouldPrependBismillah(
+          surahNumber,
+          activeReciter.identifier,
+        );
 
     final currentLanguage = settingsCubit.state.locale.languageCode;
     final isArabic = currentLanguage == 'ar';
-    
-    final surahName = isArabic ? quran.getSurahNameArabic(surahNumber) : quran.getSurahName(surahNumber);
-    final reciterName = isArabic ? activeReciter.name : activeReciter.englishName;
+
+    final surahName = isArabic
+        ? quran.getSurahNameArabic(surahNumber)
+        : quran.getSurahName(surahNumber);
+    final reciterName = isArabic
+        ? activeReciter.name
+        : activeReciter.englishName;
     final ayahLabel = isArabic ? "الآية" : "Ayah";
     final bismillahLabel = isArabic ? "بسم الله الرحمن الرحيم" : "Bismillah";
     final surahLabel = isArabic ? "سورة" : "Surah";
@@ -261,75 +300,85 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
     }
 
     final result = isPrependActive && bismillahTrack != null
-      ? await playerService.playPlaylist(
-          [
-            bismillahTrack,
+        ? await playerService.playPlaylist(
+            [bismillahTrack, track],
+            mode: AudioPlayMode.ayah,
+            metadataList: [
+              {
+                'title': '$surahLabel $surahName: $bismillahLabel',
+                'artist': reciterName,
+                'album': surahName,
+              },
+              {
+                'title': '$surahLabel $surahName: $ayahLabel $ayahNumber',
+                'artist': reciterName,
+                'album': surahName,
+              },
+            ],
+          )
+        : await playerService.playStreaming(
             track,
-          ],
-          mode: AudioPlayMode.ayah,
-          metadataList: [
-            {
-              'title': '$surahLabel $surahName: $bismillahLabel', 
-              'artist': reciterName, 
-              'album': surahName
+            mode: AudioPlayMode.ayah,
+            metadata: {
+              'title': '$surahLabel $surahName: $ayahLabel $ayahNumber',
+              'artist': reciterName,
+              'album': surahName,
             },
-            {
-              'title': '$surahLabel $surahName: $ayahLabel $ayahNumber', 
-              'artist': reciterName, 
-              'album': surahName
-            },
-          ],
-        )
-      : await playerService.playStreaming(
-          track, 
-          mode: AudioPlayMode.ayah,
-          metadata: {
-            'title': '$surahLabel $surahName: $ayahLabel $ayahNumber', 
-            'artist': reciterName, 
-            'album': surahName
-          },
+          );
+
+    result.fold((failure) async {
+      final errorMessage = failure.message;
+      final isPluginError = errorMessage.contains('MissingPluginException');
+
+      add(AudioEvent.lastErrorChanged(errorMessage));
+
+      if (!isPluginError && state.quality == AudioQuality.high192) {
+        emit(
+          state.copyWith(
+            error: "192k not available for this reciter. Trying 128k...",
+          ),
         );
-      
-    result.fold(
-      (failure) async {
-        final errorMessage = failure.message;
-        final isPluginError = errorMessage.contains('MissingPluginException');
-        
-        add(AudioEvent.lastErrorChanged(errorMessage));
-        
-        if (!isPluginError && state.quality == AudioQuality.high192) {
-           emit(state.copyWith(error: "192k not available for this reciter. Trying 128k..."));
-           add(AudioEvent.changeQuality(AudioQuality.medium128));
-        } else if (!isPluginError && state.quality == AudioQuality.medium128) {
-           emit(state.copyWith(error: "128k failed. Trying 64k..."));
-           add(AudioEvent.changeQuality(AudioQuality.low64));
-        } else {
-           emit(state.copyWith(
-             error: isPluginError ? "Audio plugin missing. Please rebuild the app." : "Playback failed: $errorMessage", 
-             status: AudioStatus.error,
-           ));
-        }
-      },
-      (_) => null,
-    );
+        add(AudioEvent.changeQuality(AudioQuality.medium128));
+      } else if (!isPluginError && state.quality == AudioQuality.medium128) {
+        emit(state.copyWith(error: "128k failed. Trying 64k..."));
+        add(AudioEvent.changeQuality(AudioQuality.low64));
+      } else {
+        emit(
+          state.copyWith(
+            error: isPluginError
+                ? "Audio plugin missing. Please rebuild the app."
+                : "Playback failed: $errorMessage",
+            status: AudioStatus.error,
+          ),
+        );
+      }
+    }, (_) => null);
   }
 
-  Future<void> _onPlaySurah(int surahNumber, Reciter? reciter, int? startAyah, int? ayahCount, Emitter<AudioState> emit) async {
+  Future<void> _onPlaySurah(
+    int surahNumber,
+    Reciter? reciter,
+    int? startAyah,
+    int? ayahCount,
+    Emitter<AudioState> emit,
+  ) async {
     final activeReciter = reciter ?? state.currentReciter;
     if (activeReciter == null) return;
 
     await playerService.stop();
 
-    emit(state.copyWith(
-      status: AudioStatus.loading,
-      currentSurah: surahNumber,
-      currentAyah: startAyah ?? 1,
-      currentReciter: activeReciter,
-      mode: AudioPlayMode.surah,
-      isBannerVisible: true,
-      error: null,
-      lastErrorMessage: null,
-    ));
+    emit(
+      state.copyWith(
+        status: AudioStatus.loading,
+        currentSurah: surahNumber,
+        currentAyah: startAyah ?? 1,
+        currentReciter: activeReciter,
+        mode: AudioPlayMode.surah,
+        isBannerVisible: true,
+        error: null,
+        lastErrorMessage: null,
+      ),
+    );
 
     final tracksResult = await audioRepository.getSurahAudioTracks(
       reciterId: activeReciter.identifier,
@@ -339,77 +388,87 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
     );
 
     await tracksResult.fold(
-      (failure) async => emit(state.copyWith(error: failure.message, status: AudioStatus.error)),
+      (failure) async => emit(
+        state.copyWith(error: failure.message, status: AudioStatus.error),
+      ),
       (tracks) async {
         final bool isPrependActive = audioRepository.shouldPrependBismillah(
-          surahNumber, 
+          surahNumber,
           activeReciter.identifier,
         );
-        
+
         int initialIndex = (startAyah ?? 1) - 1;
         if (isPrependActive) {
           if (startAyah == null || startAyah == 1) {
-            initialIndex = 0; 
+            initialIndex = 0;
           } else {
-            initialIndex = startAyah; 
+            initialIndex = startAyah;
           }
         }
 
         final currentLanguage = settingsCubit.state.locale.languageCode;
         final isArabic = currentLanguage == 'ar';
-        
-        final surahName = isArabic ? quran.getSurahNameArabic(surahNumber) : quran.getSurahName(surahNumber);
-        final reciterName = isArabic ? activeReciter.name : activeReciter.englishName;
+
+        final surahName = isArabic
+            ? quran.getSurahNameArabic(surahNumber)
+            : quran.getSurahName(surahNumber);
+        final reciterName = isArabic
+            ? activeReciter.name
+            : activeReciter.englishName;
         final ayahLabel = isArabic ? "الآية" : "Ayah";
-        final bismillahLabel = isArabic ? "بسم الله الرحمن الرحيم" : "Bismillah";
+        final bismillahLabel = isArabic
+            ? "بسم الله الرحمن الرحيم"
+            : "Bismillah";
         final surahLabel = isArabic ? "سورة" : "Surah";
-        
+
         final metadataList = <Map<String, dynamic>>[];
         for (var i = 0; i < tracks.length; i++) {
           if (isPrependActive && i == 0) {
             metadataList.add({
-              'title': '$surahLabel $surahName: $bismillahLabel', 
-              'artist': reciterName, 
-              'album': surahName
+              'title': '$surahLabel $surahName: $bismillahLabel',
+              'artist': reciterName,
+              'album': surahName,
             });
           } else {
             final displayAyah = isPrependActive ? i : i + 1;
             metadataList.add({
-              'title': '$surahLabel $surahName: $ayahLabel $displayAyah', 
-              'artist': reciterName, 
-              'album': surahName
+              'title': '$surahLabel $surahName: $ayahLabel $displayAyah',
+              'artist': reciterName,
+              'album': surahName,
             });
           }
         }
 
         final result = await playerService.playPlaylist(
-          tracks, 
+          tracks,
           initialIndex: initialIndex,
           mode: AudioPlayMode.surah,
           metadataList: metadataList,
         );
-        result.fold(
-          (failure) async {
-             final errorMessage = failure.message;
-             final isPluginError = errorMessage.contains('MissingPluginException');
-             
-             add(AudioEvent.lastErrorChanged(errorMessage));
-             
-             if (!isPluginError && state.quality == AudioQuality.high192) {
-                emit(state.copyWith(error: "192k not available. Trying 128k..."));
-                add(AudioEvent.changeQuality(AudioQuality.medium128));
-             } else if (!isPluginError && state.quality == AudioQuality.medium128) {
-                emit(state.copyWith(error: "128k failed. Trying 64k..."));
-                add(AudioEvent.changeQuality(AudioQuality.low64));
-             } else {
-                emit(state.copyWith(
-                  error: isPluginError ? "Audio plugin missing. Please rebuild the app." : "Playback failed: $errorMessage", 
-                  status: AudioStatus.error,
-                ));
-             }
-          },
-          (_) => null,
-        );
+        result.fold((failure) async {
+          final errorMessage = failure.message;
+          final isPluginError = errorMessage.contains('MissingPluginException');
+
+          add(AudioEvent.lastErrorChanged(errorMessage));
+
+          if (!isPluginError && state.quality == AudioQuality.high192) {
+            emit(state.copyWith(error: "192k not available. Trying 128k..."));
+            add(AudioEvent.changeQuality(AudioQuality.medium128));
+          } else if (!isPluginError &&
+              state.quality == AudioQuality.medium128) {
+            emit(state.copyWith(error: "128k failed. Trying 64k..."));
+            add(AudioEvent.changeQuality(AudioQuality.low64));
+          } else {
+            emit(
+              state.copyWith(
+                error: isPluginError
+                    ? "Audio plugin missing. Please rebuild the app."
+                    : "Playback failed: $errorMessage",
+                status: AudioStatus.error,
+              ),
+            );
+          }
+        }, (_) => null);
       },
     );
   }
@@ -422,17 +481,21 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
     } else {
       if (state.currentSurah != null) {
         if (state.mode == AudioPlayMode.surah) {
-          add(AudioEvent.playSurah(
-            surahNumber: state.currentSurah!,
-            startAyah: state.currentAyah ?? 1,
-            reciter: state.currentReciter,
-          ));
+          add(
+            AudioEvent.playSurah(
+              surahNumber: state.currentSurah!,
+              startAyah: state.currentAyah ?? 1,
+              reciter: state.currentReciter,
+            ),
+          );
         } else {
-          add(AudioEvent.playAyah(
-            surahNumber: state.currentSurah!,
-            ayahNumber: state.currentAyah ?? 1,
-            reciter: state.currentReciter,
-          ));
+          add(
+            AudioEvent.playAyah(
+              surahNumber: state.currentSurah!,
+              ayahNumber: state.currentAyah ?? 1,
+              reciter: state.currentReciter,
+            ),
+          );
         }
       }
     }
@@ -464,7 +527,13 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
   }
 
   Future<void> _onHideBanner(Emitter<AudioState> emit) async {
-    emit(state.copyWith(isBannerVisible: false, error: null, lastErrorMessage: null));
+    emit(
+      state.copyWith(
+        isBannerVisible: false,
+        error: null,
+        lastErrorMessage: null,
+      ),
+    );
   }
 
   Future<void> _onShowBanner(Emitter<AudioState> emit) async {
@@ -482,40 +551,61 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
     await playerService.setLoopMode(newValue);
   }
 
-  Future<void> _onChangePlaybackMode(AudioPlayMode mode, Emitter<AudioState> emit) async {
+  Future<void> _onChangePlaybackMode(
+    AudioPlayMode mode,
+    Emitter<AudioState> emit,
+  ) async {
     emit(state.copyWith(mode: mode));
     playerService.setMode(mode);
   }
 
-  Future<void> _onChangeQuality(AudioQuality quality, Emitter<AudioState> emit) async {
+  Future<void> _onChangeQuality(
+    AudioQuality quality,
+    Emitter<AudioState> emit,
+  ) async {
     emit(state.copyWith(quality: quality));
-    
-    if (state.isActive && state.currentSurah != null && state.currentAyah != null) {
+
+    if (state.isActive &&
+        state.currentSurah != null &&
+        state.currentAyah != null) {
       if (state.mode == AudioPlayMode.surah) {
-        add(AudioEvent.playSurah(
-          surahNumber: state.currentSurah!,
-          startAyah: state.currentAyah!,
-          reciter: state.currentReciter,
-        ));
+        add(
+          AudioEvent.playSurah(
+            surahNumber: state.currentSurah!,
+            startAyah: state.currentAyah!,
+            reciter: state.currentReciter,
+          ),
+        );
       } else {
-        add(AudioEvent.playAyah(
-          surahNumber: state.currentSurah!,
-          ayahNumber: state.currentAyah!,
-          reciter: state.currentReciter,
-        ));
+        add(
+          AudioEvent.playAyah(
+            surahNumber: state.currentSurah!,
+            ayahNumber: state.currentAyah!,
+            reciter: state.currentReciter,
+          ),
+        );
       }
     }
   }
 
   void _onStatusChanged(AudioStatus status, Emitter<AudioState> emit) {
-    final shouldShowBanner = status != AudioStatus.idle && status != AudioStatus.stopped && status != state.status;
-    
-    emit(state.copyWith(
-      status: status, 
-      error: status == AudioStatus.error ? (state.error ?? "Playback Error") : null,
-      lastErrorMessage: status == AudioStatus.error ? state.lastErrorMessage : null,
-      isBannerVisible: shouldShowBanner ? true : state.isBannerVisible,
-    ));
+    final shouldShowBanner =
+        status != AudioStatus.idle &&
+        status != AudioStatus.stopped &&
+        status != state.status;
+
+    emit(
+      state.copyWith(
+        status: status,
+        error: status == AudioStatus.error
+            ? (state.error ?? "Playback Error")
+            : null,
+        lastErrorMessage: status == AudioStatus.error
+            ? state.lastErrorMessage
+            : null,
+        isBannerVisible: shouldShowBanner ? true : state.isBannerVisible,
+      ),
+    );
   }
 
   void _onLastErrorChanged(String? error, Emitter<AudioState> emit) {
@@ -531,17 +621,20 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
   }
 
   void _onIndexChanged({int? index, required Emitter<AudioState> emit}) {
-    if (index != null && state.mode == AudioPlayMode.surah && state.currentSurah != null && state.currentReciter != null) {
+    if (index != null &&
+        state.mode == AudioPlayMode.surah &&
+        state.currentSurah != null &&
+        state.currentReciter != null) {
       final bool isPrependActive = audioRepository.shouldPrependBismillah(
-        state.currentSurah!, 
+        state.currentSurah!,
         state.currentReciter!.identifier,
       );
-      
+
       if (isPrependActive) {
         if (index == 0) {
-          emit(state.copyWith(currentAyah: 1)); 
+          emit(state.copyWith(currentAyah: 1));
         } else {
-          emit(state.copyWith(currentAyah: index)); 
+          emit(state.copyWith(currentAyah: index));
         }
       } else {
         emit(state.copyWith(currentAyah: index + 1));
@@ -549,18 +642,19 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
     }
   }
 
-  void _onUpdateCurrentPosition(int surahNumber, int? ayahNumber, Emitter<AudioState> emit) {
+  void _onUpdateCurrentPosition(
+    int surahNumber,
+    int? ayahNumber,
+    Emitter<AudioState> emit,
+  ) {
     if (state.isActive) {
       return;
     }
-    
+
     if (state.currentSurah == surahNumber && state.currentAyah == ayahNumber) {
       return;
     }
-    emit(state.copyWith(
-      currentSurah: surahNumber,
-      currentAyah: ayahNumber,
-    ));
+    emit(state.copyWith(currentSurah: surahNumber, currentAyah: ayahNumber));
   }
 
   @override

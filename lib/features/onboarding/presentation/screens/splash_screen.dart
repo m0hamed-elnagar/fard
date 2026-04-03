@@ -13,7 +13,7 @@ class RootScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final prefs = getIt<SharedPreferences>();
     final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
-    
+
     if (onboardingComplete) {
       return const MainNavigationScreen();
     } else {

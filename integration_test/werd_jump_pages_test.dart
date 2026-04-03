@@ -20,8 +20,10 @@ void main() {
       final prefs = getIt<SharedPreferences>();
       await prefs.setBool('onboarding_complete', true);
       await prefs.setString('locale', 'ar'); // Arabic
-      await prefs.setString('werd_progress_default', 
-        '{"goalId":"default","totalAmountReadToday":0,"readItemsToday":[],"lastUpdated":"2026-03-09T12:00:00.000","streak":0,"sessionStartAbsolute":1}');
+      await prefs.setString(
+        'werd_progress_default',
+        '{"goalId":"default","totalAmountReadToday":0,"readItemsToday":[],"lastUpdated":"2026-03-09T12:00:00.000","streak":0,"sessionStartAbsolute":1}',
+      );
     });
 
     tearDown(() async {
@@ -32,33 +34,35 @@ void main() {
       } catch (_) {}
     });
 
-    testWidgets('Verify jump dialog shows correct page count in Arabic', (tester) async {
+    testWidgets('Verify jump dialog shows correct page count in Arabic', (
+      tester,
+    ) async {
       await tester.pumpWidget(const QadaTrackerApp());
       await tester.pumpAndSettle();
 
       getIt<GlobalKey<NavigatorState>>().currentState?.push(
-        QuranReaderPage.route(surahNumber: 2, ayahNumber: 1), 
+        QuranReaderPage.route(surahNumber: 2, ayahNumber: 1),
       );
       await tester.pumpAndSettle(const Duration(seconds: 5));
 
-      final marker60 = find.textContaining('٦٠'); 
-      
+      final marker60 = find.textContaining('٦٠');
+
       bool found = false;
       for (int i = 0; i < 40; i++) {
         if (marker60.evaluate().isNotEmpty) {
-           try {
-             await tester.ensureVisible(marker60.first);
-             await tester.pumpAndSettle();
-             found = true;
-             break;
-           } catch (e) {
-             // Ignore if not found yet
-           }
+          try {
+            await tester.ensureVisible(marker60.first);
+            await tester.pumpAndSettle();
+            found = true;
+            break;
+          } catch (e) {
+            // Ignore if not found yet
+          }
         }
         await tester.drag(find.byType(ListView), const Offset(0, -700));
         await tester.pumpAndSettle();
       }
-      
+
       expect(found, true);
 
       await tester.longPress(marker60.first);
@@ -69,11 +73,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('قفزة كبيرة'), findsOneWidget);
-      
+
       // We expect the message to contain "٨" (Arabic 8) now.
       // Search only in the dialog to avoid matching Quran text
       final dialog = find.byType(AlertDialog);
-      expect(find.descendant(of: dialog, matching: find.textContaining('٨')), findsOneWidget);
+      expect(
+        find.descendant(of: dialog, matching: find.textContaining('٨')),
+        findsOneWidget,
+      );
     });
   });
 }

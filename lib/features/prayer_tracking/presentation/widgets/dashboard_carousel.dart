@@ -42,8 +42,11 @@ class _DashboardCarouselState extends State<DashboardCarousel> {
   @override
   void initState() {
     super.initState();
-    _pageController = widget.pageController ?? PageController(viewportFraction: 0.9);
-    _currentPage = _pageController.hasClients ? _pageController.page?.round() ?? 0 : 0;
+    _pageController =
+        widget.pageController ?? PageController(viewportFraction: 0.9);
+    _currentPage = _pageController.hasClients
+        ? _pageController.page?.round() ?? 0
+        : 0;
   }
 
   @override
@@ -57,7 +60,7 @@ class _DashboardCarouselState extends State<DashboardCarousel> {
   @override
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
-    
+
     // Calculate a responsive height for the cards
     double cardHeight;
     if (screenHeight < 600) {
@@ -81,9 +84,7 @@ class _DashboardCarouselState extends State<DashboardCarousel> {
           onAddPressed: widget.onAddQadaPressed,
           onEditPressed: widget.onEditQadaPressed,
         ),
-      WerdProgressCard(
-        onSetGoalPressed: widget.onSetWerdGoalPressed,
-      ),
+      WerdProgressCard(onSetGoalPressed: widget.onSetWerdGoalPressed),
     ];
 
     return Column(
@@ -115,17 +116,19 @@ class _DashboardCarouselState extends State<DashboardCarousel> {
               height: 6,
               width: isSelected ? 24 : 6,
               decoration: BoxDecoration(
-                color: isSelected 
-                    ? AppTheme.accent 
+                color: isSelected
+                    ? AppTheme.accent
                     : AppTheme.cardBorder.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(3),
-                boxShadow: isSelected ? [
-                  BoxShadow(
-                    color: AppTheme.accent.withValues(alpha: 0.3),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  )
-                ] : null,
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: AppTheme.accent.withValues(alpha: 0.3),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
               ),
             );
           }),
@@ -145,10 +148,10 @@ class _DashboardCarouselState extends State<DashboardCarousel> {
         } else {
           // Handle initial state before first frame/layout
           if (_currentPage != index) {
-             value = 0.9;
+            value = 0.9;
           }
         }
-        
+
         return Center(
           child: Transform.scale(
             scale: value,

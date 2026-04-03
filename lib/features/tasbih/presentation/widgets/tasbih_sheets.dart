@@ -37,10 +37,7 @@ class CategorySelectionSheet extends StatelessWidget {
         const SizedBox(height: 20),
         Text(
           l10n.selectDhikrCategory,
-          style: GoogleFonts.outfit(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         Expanded(
@@ -52,35 +49,49 @@ class CategorySelectionSheet extends StatelessWidget {
               final category = state.data.categories[index];
               final isSelected = category.id == state.currentCategory.id;
               final localizedName = getName(category.id) ?? category.name;
-              final localizedDesc = getDesc(category.id) ?? category.description;
-              
+              final localizedDesc =
+                  getDesc(category.id) ?? category.description;
+
               return Container(
                 margin: const EdgeInsets.only(bottom: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppTheme.primaryLight.withValues(alpha: 0.1) : Colors.transparent,
+                  color: isSelected
+                      ? AppTheme.primaryLight.withValues(alpha: 0.1)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: isSelected ? AppTheme.primaryLight : AppTheme.cardBorder,
+                    color: isSelected
+                        ? AppTheme.primaryLight
+                        : AppTheme.cardBorder,
                   ),
                 ),
                 child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: isSelected ? AppTheme.primaryLight : AppTheme.surfaceLight,
+                      color: isSelected
+                          ? AppTheme.primaryLight
+                          : AppTheme.surfaceLight,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       isSelected ? Icons.check_rounded : Icons.category_rounded,
-                      color: isSelected ? AppTheme.onPrimary : AppTheme.textSecondary,
+                      color: isSelected
+                          ? AppTheme.onPrimary
+                          : AppTheme.textSecondary,
                       size: 20,
                     ),
                   ),
                   title: Text(
                     localizedName,
                     style: GoogleFonts.outfit(
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.w500,
                     ),
                   ),
                   subtitle: Text(
@@ -90,7 +101,9 @@ class CategorySelectionSheet extends StatelessWidget {
                     style: GoogleFonts.outfit(fontSize: 13),
                   ),
                   onTap: () {
-                    context.read<TasbihBloc>().add(TasbihEvent.selectCategory(category.id));
+                    context.read<TasbihBloc>().add(
+                      TasbihEvent.selectCategory(category.id),
+                    );
                     Navigator.pop(context);
                   },
                 ),
@@ -138,21 +151,27 @@ class TasbihSettingsSheet extends StatelessWidget {
                 icon: Icons.vibration_rounded,
                 title: l10n.hapticFeedback,
                 value: state.data.settings.hapticFeedback,
-                onChanged: (_) => context.read<TasbihBloc>().add(const TasbihEvent.toggleVibration()),
+                onChanged: (_) => context.read<TasbihBloc>().add(
+                  const TasbihEvent.toggleVibration(),
+                ),
               ),
               _buildSettingToggle(
                 context,
                 icon: Icons.translate_rounded,
                 title: l10n.showTranslation,
                 value: state.data.settings.showTranslation,
-                onChanged: (_) => context.read<TasbihBloc>().add(const TasbihEvent.toggleTranslation()),
+                onChanged: (_) => context.read<TasbihBloc>().add(
+                  const TasbihEvent.toggleTranslation(),
+                ),
               ),
               _buildSettingToggle(
                 context,
                 icon: Icons.text_fields_rounded,
                 title: l10n.showTransliteration,
                 value: state.data.settings.showTransliteration,
-                onChanged: (_) => context.read<TasbihBloc>().add(const TasbihEvent.toggleTransliteration()),
+                onChanged: (_) => context.read<TasbihBloc>().add(
+                  const TasbihEvent.toggleTransliteration(),
+                ),
               ),
             ],
           ),
@@ -178,24 +197,27 @@ class TasbihSettingsSheet extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: value ? AppTheme.accent : AppTheme.textSecondary, size: 22),
+          Icon(
+            icon,
+            color: value ? AppTheme.accent : AppTheme.textSecondary,
+            size: 22,
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
               title,
-              style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w500),
+              style: GoogleFonts.outfit(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-          CustomToggle(
-            value: value,
-            onChanged: onChanged,
-          ),
+          CustomToggle(value: value, onChanged: onChanged),
         ],
       ),
     );
   }
 }
-
 
 class DuaSelectionSheet extends StatelessWidget {
   final TasbihState state;
@@ -213,7 +235,10 @@ class DuaSelectionSheet extends StatelessWidget {
         children: [
           Text(
             l10n.chooseCompletionDua,
-            style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold),
+            style: GoogleFonts.outfit(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 16),
           Flexible(
@@ -225,10 +250,21 @@ class DuaSelectionSheet extends StatelessWidget {
                 final isSelected = dua.id == state.currentCompletionDua?.id;
                 return ListTile(
                   leading: Icon(
-                    isSelected ? Icons.check_circle_rounded : Icons.circle_outlined,
-                    color: isSelected ? AppTheme.accent : AppTheme.textSecondary,
+                    isSelected
+                        ? Icons.check_circle_rounded
+                        : Icons.circle_outlined,
+                    color: isSelected
+                        ? AppTheme.accent
+                        : AppTheme.textSecondary,
                   ),
-                  title: Text(dua.title, style: GoogleFonts.outfit(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                  title: Text(
+                    dua.title,
+                    style: GoogleFonts.outfit(
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
+                  ),
                   onTap: () {
                     tasbihBloc.add(TasbihEvent.selectCompletionDua(dua.id));
                     Navigator.pop(context);

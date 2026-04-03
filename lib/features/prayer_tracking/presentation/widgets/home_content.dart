@@ -1,5 +1,6 @@
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
+import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
 import 'package:fard/features/prayer_tracking/domain/missed_counter.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
@@ -63,7 +64,7 @@ class _HomeContentState extends State<HomeContent> {
       duration: const Duration(milliseconds: 600),
       curve: Curves.easeOutQuart,
     );
-    
+
     // Change PageView to index 1 (PrayerTrackingCard)
     if (_pageController.hasClients) {
       _pageController.animateToPage(
@@ -100,7 +101,8 @@ class _HomeContentState extends State<HomeContent> {
           previous.isQadaEnabled != current.isQadaEnabled ||
           previous.hijriAdjustment != current.hijriAdjustment,
       builder: (context, settings) {
-        final prayerTimes = (settings.latitude != null && settings.longitude != null)
+        final prayerTimes =
+            (settings.latitude != null && settings.longitude != null)
             ? getIt<PrayerTimeService>().getPrayerTimes(
                 latitude: settings.latitude!,
                 longitude: settings.longitude!,
@@ -109,6 +111,11 @@ class _HomeContentState extends State<HomeContent> {
                 date: widget.selectedDate,
               )
             : null;
+
+        // Update widget when critical settings change (locale, location, method, etc.)
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          getIt<WidgetUpdateService>().updateWidget(settings);
+        });
 
         return Scaffold(
           backgroundColor: AppTheme.background,
@@ -126,11 +133,16 @@ class _HomeContentState extends State<HomeContent> {
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.settings_outlined, color: AppTheme.textPrimary),
+                icon: const Icon(
+                  Icons.settings_outlined,
+                  color: AppTheme.textPrimary,
+                ),
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsScreen(),
+                    ),
                   );
                 },
               ),
@@ -155,15 +167,16 @@ class _HomeContentState extends State<HomeContent> {
                         showDialog(
                           context: context,
                           builder: (_) => AddQadaDialog(
-                            onConfirm: (counts) =>
-                                bloc.add(PrayerTrackerEvent.bulkAddQada(counts)),
+                            onConfirm: (counts) => bloc.add(
+                              PrayerTrackerEvent.bulkAddQada(counts),
+                            ),
                           ),
                         );
                       },
                       onEditQadaPressed: () {
                         final currentCounts = {
                           for (final s in Salaah.values)
-                            s: widget.qadaStatus[s]?.value ?? 0
+                            s: widget.qadaStatus[s]?.value ?? 0,
                         };
                         showDialog(
                           context: context,
@@ -179,7 +192,7 @@ class _HomeContentState extends State<HomeContent> {
                     ),
                   ),
                 ),
-                
+
                 // Calendar section with subtle top padding
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 8.0),
@@ -195,10 +208,10 @@ class _HomeContentState extends State<HomeContent> {
                     ),
                   ),
                 ),
-                
+
                 // Suggested Azkar Section
                 SuggestedAzkarSection(settings: settings),
-                
+
                 // Location Warning
                 if (settings.latitude == null || settings.longitude == null)
                   SliverPadding(
@@ -209,18 +222,26 @@ class _HomeContentState extends State<HomeContent> {
                         decoration: BoxDecoration(
                           color: AppTheme.missed.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppTheme.missed.withValues(alpha: 0.3)),
+                          border: Border.all(
+                            color: AppTheme.missed.withValues(alpha: 0.3),
+                          ),
                         ),
                         child: Column(
                           children: [
                             Row(
                               children: [
-                                const Icon(Icons.location_off_rounded, color: AppTheme.missed),
+                                const Icon(
+                                  Icons.location_off_rounded,
+                                  color: AppTheme.missed,
+                                ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
                                     l10n.locationWarning,
-                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -229,14 +250,20 @@ class _HomeContentState extends State<HomeContent> {
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton.icon(
-                                onPressed: () => context.read<SettingsCubit>().refreshLocation(),
+                                onPressed: () => context
+                                    .read<SettingsCubit>()
+                                    .refreshLocation(),
                                 icon: const Icon(Icons.my_location, size: 18),
                                 label: Text(l10n.givePermission),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppTheme.missed,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 8),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                 ),
                               ),
                             ),
@@ -245,14 +272,18 @@ class _HomeContentState extends State<HomeContent> {
                       ),
                     ),
                   ),
-                
+
                 // Today's Prayers Section Header
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(20.0, 24.0, 20.0, 12.0),
                   sliver: SliverToBoxAdapter(
                     child: Row(
                       children: [
-                        const Icon(Icons.today_rounded, color: AppTheme.accent, size: 20),
+                        const Icon(
+                          Icons.today_rounded,
+                          color: AppTheme.accent,
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           l10n.dailyPrayers,
@@ -267,47 +298,50 @@ class _HomeContentState extends State<HomeContent> {
                     ),
                   ),
                 ),
-                
+
                 // Salaah list
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final salaah = Salaah.values[index];
-                        final time = prayerTimes != null 
-                            ? getIt<PrayerTimeService>().getTimeForSalaah(prayerTimes, salaah)
-                            : null;
-                        
-                        final isUpcoming = getIt<PrayerTimeService>().isUpcoming(
-                          salaah, 
-                          prayerTimes: prayerTimes, 
-                          date: widget.selectedDate,
-                        );
-                        
-                        return SalaahTile(
-                          salaah: salaah,
-                          qadaCount: widget.qadaStatus[salaah]?.value ?? 0,
-                          completedQadaCount: widget.completedQadaToday[salaah] ?? 0,
-                          isMissedToday: widget.missedToday.contains(salaah),
-                          isCompletedToday: widget.completedToday.contains(salaah),
-                          isUpcoming: isUpcoming,
-                          time: time,
-                          isQadaEnabled: settings.isQadaEnabled,
-                          onAdd: () =>
-                              bloc.add(PrayerTrackerEvent.addQada(salaah)),
-                          onRemove: () =>
-                              bloc.add(PrayerTrackerEvent.removeQada(salaah)),
-                          onToggleMissed: () =>
-                              bloc.add(PrayerTrackerEvent.togglePrayer(salaah)),
-                          onLimitExceeded: _scrollToAddQada,
-                        );
-                      },
-                      childCount: Salaah.values.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final salaah = Salaah.values[index];
+                      final time = prayerTimes != null
+                          ? getIt<PrayerTimeService>().getTimeForSalaah(
+                              prayerTimes,
+                              salaah,
+                            )
+                          : null;
+
+                      final isUpcoming = getIt<PrayerTimeService>().isUpcoming(
+                        salaah,
+                        prayerTimes: prayerTimes,
+                        date: widget.selectedDate,
+                      );
+
+                      return SalaahTile(
+                        salaah: salaah,
+                        qadaCount: widget.qadaStatus[salaah]?.value ?? 0,
+                        completedQadaCount:
+                            widget.completedQadaToday[salaah] ?? 0,
+                        isMissedToday: widget.missedToday.contains(salaah),
+                        isCompletedToday: widget.completedToday.contains(
+                          salaah,
+                        ),
+                        isUpcoming: isUpcoming,
+                        time: time,
+                        isQadaEnabled: settings.isQadaEnabled,
+                        onAdd: () =>
+                            bloc.add(PrayerTrackerEvent.addQada(salaah)),
+                        onRemove: () =>
+                            bloc.add(PrayerTrackerEvent.removeQada(salaah)),
+                        onToggleMissed: () =>
+                            bloc.add(PrayerTrackerEvent.togglePrayer(salaah)),
+                        onLimitExceeded: _scrollToAddQada,
+                      );
+                    }, childCount: Salaah.values.length),
                   ),
                 ),
-                
+
                 // History section
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 40.0),

@@ -6,7 +6,7 @@ class AudioDownloadState extends Equatable {
   final ReciterDownloadStatus? reciterStatus;
   final bool isLoading;
   final String? error;
-  
+
   // Active download tracking
   final String? activeReciterId;
   final int? activeSurahNumber; // Null if full reciter download
@@ -35,7 +35,8 @@ class AudioDownloadState extends Equatable {
       surahStatuses: surahStatuses ?? this.surahStatuses,
       reciterStatus: reciterStatus ?? this.reciterStatus,
       isLoading: isLoading ?? this.isLoading,
-      error: error, // If passed null, it clears error. If omitted, keeps old. Wait, standard pattern usually:
+      error:
+          error, // If passed null, it clears error. If omitted, keeps old. Wait, standard pattern usually:
       // error: error == _sentinel ? this.error : error as String?
       // For simplicity:
       activeReciterId: activeReciterId ?? this.activeReciterId,
@@ -46,12 +47,12 @@ class AudioDownloadState extends Equatable {
 
   @override
   List<Object?> get props => [
-    surahStatuses, 
-    reciterStatus, 
-    isLoading, 
-    error, 
-    activeReciterId, 
-    activeSurahNumber, 
-    progress
+    surahStatuses,
+    reciterStatus,
+    isLoading,
+    error,
+    activeReciterId,
+    activeSurahNumber,
+    progress,
   ];
 }

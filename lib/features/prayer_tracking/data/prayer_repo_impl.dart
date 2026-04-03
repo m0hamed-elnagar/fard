@@ -48,7 +48,9 @@ class PrayerRepoImpl implements PrayerRepo {
 
   @override
   Future<Map<Salaah, int>> calculateRemaining(
-      DateTime from, DateTime to) async {
+    DateTime from,
+    DateTime to,
+  ) async {
     final totals = <Salaah, int>{};
     for (final s in Salaah.values) {
       totals[s] = 0;
@@ -78,12 +80,15 @@ class PrayerRepoImpl implements PrayerRepo {
   @override
   Future<DailyRecord?> loadLastRecordBefore(DateTime date) async {
     if (_box.isEmpty) return null;
-    final dateMillis = DateTime(date.year, date.month, date.day).millisecondsSinceEpoch;
-    final sortedBefore = _box.values
-        .where((e) => e.dateMillis < dateMillis)
-        .toList()
-      ..sort((a, b) => b.dateMillis.compareTo(a.dateMillis));
-    
+    final dateMillis = DateTime(
+      date.year,
+      date.month,
+      date.day,
+    ).millisecondsSinceEpoch;
+    final sortedBefore =
+        _box.values.where((e) => e.dateMillis < dateMillis).toList()
+          ..sort((a, b) => b.dateMillis.compareTo(a.dateMillis));
+
     if (sortedBefore.isEmpty) return null;
     return DailyRecordMapper.toDomain(sortedBefore.first);
   }

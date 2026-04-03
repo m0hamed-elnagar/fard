@@ -194,8 +194,8 @@ class CycleProgressIndicator extends StatelessWidget {
           width: 32,
           height: 6,
           decoration: BoxDecoration(
-            color: isCompleted 
-                ? AppTheme.primaryLight 
+            color: isCompleted
+                ? AppTheme.primaryLight
                 : (isActive ? AppTheme.accent : AppTheme.surfaceLight),
             borderRadius: BorderRadius.circular(3),
           ),

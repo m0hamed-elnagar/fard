@@ -87,14 +87,19 @@ class _CounterCardState extends State<CounterCard>
                               const SizedBox(width: 8.0),
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 8.0, vertical: 2.0),
+                                  horizontal: 8.0,
+                                  vertical: 2.0,
+                                ),
                                 decoration: BoxDecoration(
-                                  color:
-                                      AppTheme.missed.withValues(alpha: 0.15),
+                                  color: AppTheme.missed.withValues(
+                                    alpha: 0.15,
+                                  ),
                                   borderRadius: BorderRadius.circular(8.0),
                                   border: Border.all(
-                                      color:
-                                          AppTheme.missed.withValues(alpha: 0.30)),
+                                    color: AppTheme.missed.withValues(
+                                      alpha: 0.30,
+                                    ),
+                                  ),
                                 ),
                                 child: Text(
                                   '+${widget.todayMissedCount}',
@@ -117,12 +122,16 @@ class _CounterCardState extends State<CounterCard>
                       color: AppTheme.primaryLight.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12.0),
                       border: Border.all(
-                          color: AppTheme.primaryLight.withValues(alpha: 0.30)),
+                        color: AppTheme.primaryLight.withValues(alpha: 0.30),
+                      ),
                     ),
                     child: IconButton(
                       onPressed: widget.onAddPressed,
-                      icon: const Icon(Icons.add_rounded,
-                          color: AppTheme.primaryLight, size: 28.0),
+                      icon: const Icon(
+                        Icons.add_rounded,
+                        color: AppTheme.primaryLight,
+                        size: 28.0,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8.0),
@@ -130,8 +139,10 @@ class _CounterCardState extends State<CounterCard>
                   AnimatedRotation(
                     turns: _expanded ? 0.5 : 0.0,
                     duration: const Duration(milliseconds: 200),
-                    child: const Icon(Icons.keyboard_arrow_down_rounded,
-                        color: AppTheme.textSecondary),
+                    child: const Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -183,8 +194,7 @@ class _CounterCardState extends State<CounterCard>
                   padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 12.0),
                   child: Column(
                     children: Salaah.values.map((salaah) {
-                      final count =
-                          widget.qadaStatus[salaah]?.value ?? 0;
+                      final count = widget.qadaStatus[salaah]?.value ?? 0;
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4.0),
                         child: Row(

@@ -21,51 +21,59 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
   }
 
   void _init() {
-    _player.playerStateStream.listen((state) {
-      AudioStatus newStatus;
-      if (state.processingState == ProcessingState.loading ||
-          state.processingState == ProcessingState.buffering) {
-        newStatus = AudioStatus.loading;
-      } else if (state.playing) {
-        newStatus = AudioStatus.playing;
-      } else if (state.processingState == ProcessingState.completed) {
-        newStatus = AudioStatus.completed;
-      } else if (state.processingState == ProcessingState.idle) {
-        newStatus = AudioStatus.idle;
-      } else {
-        newStatus = AudioStatus.paused;
-      }
+    _player.playerStateStream.listen(
+      (state) {
+        AudioStatus newStatus;
+        if (state.processingState == ProcessingState.loading ||
+            state.processingState == ProcessingState.buffering) {
+          newStatus = AudioStatus.loading;
+        } else if (state.playing) {
+          newStatus = AudioStatus.playing;
+        } else if (state.processingState == ProcessingState.completed) {
+          newStatus = AudioStatus.completed;
+        } else if (state.processingState == ProcessingState.idle) {
+          newStatus = AudioStatus.idle;
+        } else {
+          newStatus = AudioStatus.paused;
+        }
 
-      if (_lastStatus != newStatus) {
-        _lastStatus = newStatus;
-        _statusController.add(newStatus);
-      }
+        if (_lastStatus != newStatus) {
+          _lastStatus = newStatus;
+          _statusController.add(newStatus);
+        }
 
-      // If mode is Ayah and it finished, stop
-      if (_currentMode == AudioPlayMode.ayah && 
-          state.processingState == ProcessingState.completed) {
-        stop();
-      }
-    }, onError: (e) {
-      debugPrint('AudioPlayerService: playerStateStream Error: $e');
-      _lastStatus = AudioStatus.error;
-      _statusController.add(AudioStatus.error);
-      _errorController.add(e.toString());
-    });
+        // If mode is Ayah and it finished, stop
+        if (_currentMode == AudioPlayMode.ayah &&
+            state.processingState == ProcessingState.completed) {
+          stop();
+        }
+      },
+      onError: (e) {
+        debugPrint('AudioPlayerService: playerStateStream Error: $e');
+        _lastStatus = AudioStatus.error;
+        _statusController.add(AudioStatus.error);
+        _errorController.add(e.toString());
+      },
+    );
 
-    _player.playbackEventStream.listen((event) {
-       if (event.errorMessage != null) {
-          debugPrint('AudioPlayerService: playbackEventStream Error: ${event.errorMessage}');
+    _player.playbackEventStream.listen(
+      (event) {
+        if (event.errorMessage != null) {
+          debugPrint(
+            'AudioPlayerService: playbackEventStream Error: ${event.errorMessage}',
+          );
           _lastStatus = AudioStatus.error;
           _statusController.add(AudioStatus.error);
           _errorController.add(event.errorMessage);
-       }
-    }, onError: (e) {
-       debugPrint('AudioPlayerService: playbackEventStream Stream Error: $e');
-       _lastStatus = AudioStatus.error;
-       _statusController.add(AudioStatus.error);
-       _errorController.add(e.toString());
-    });
+        }
+      },
+      onError: (e) {
+        debugPrint('AudioPlayerService: playbackEventStream Stream Error: $e');
+        _lastStatus = AudioStatus.error;
+        _statusController.add(AudioStatus.error);
+        _errorController.add(e.toString());
+      },
+    );
   }
 
   @override
@@ -83,18 +91,19 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
   @override
   int? get currentIndex => _player.currentIndex;
 
-  Future<AudioSource> _createAudioSource(AudioTrack track, MediaItem mediaItem) async {
+  Future<AudioSource> _createAudioSource(
+    AudioTrack track,
+    MediaItem mediaItem,
+  ) async {
     if (track.isDownloaded) {
-      return AudioSource.file(
-        track.localPath,
-        tag: mediaItem,
-      );
+      return AudioSource.file(track.localPath, tag: mediaItem);
     } else {
       if (Platform.isWindows) {
         return AudioSource.uri(
           Uri.parse(track.remoteUrl),
           headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+            'User-Agent':
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
           },
           tag: mediaItem,
         );
@@ -106,7 +115,8 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
           Uri.parse(track.remoteUrl),
           cacheFile: File(track.localPath),
           headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+            'User-Agent':
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
           },
           tag: mediaItem,
         );
@@ -121,27 +131,32 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
     Map<String, dynamic>? metadata,
   }) async {
     try {
-      debugPrint('AudioPlayerService: playStreaming called with url: ${track.remoteUrl}');
+      debugPrint(
+        'AudioPlayerService: playStreaming called with url: ${track.remoteUrl}',
+      );
       _currentMode = mode;
-      
+
       await _player.stop();
-      
+
       final mediaItem = MediaItem(
         id: track.remoteUrl,
         album: metadata?['album'] ?? "Al-Quran",
-        title: metadata?['title'] ?? (mode == AudioPlayMode.ayah ? "Quran Ayah" : "Quran Surah"),
+        title:
+            metadata?['title'] ??
+            (mode == AudioPlayMode.ayah ? "Quran Ayah" : "Quran Surah"),
         artist: metadata?['artist'] ?? "Quran Reciter",
-        artUri: Uri.parse(metadata?['artUri'] ?? 'resource://mipmap/ic_launcher'),
+        artUri: Uri.parse(
+          metadata?['artUri'] ?? 'resource://mipmap/ic_launcher',
+        ),
       );
 
       final source = await _createAudioSource(track, mediaItem);
-      
-      await _player.setAudioSource(
-        source, 
-        preload: false,
-      );
+
+      await _player.setAudioSource(source, preload: false);
       _player.play();
-      debugPrint('AudioPlayerService: play() called successfully with caching check');
+      debugPrint(
+        'AudioPlayerService: play() called successfully with caching check',
+      );
       return Result.success(null);
     } catch (e) {
       debugPrint('AudioPlayerService: Error in playStreaming: $e');
@@ -170,12 +185,12 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
           album: metadata?['album'] ?? "Al-Quran",
           title: metadata?['title'] ?? "Quran Recitation",
           artist: metadata?['artist'] ?? "Quran Reciter",
-          artUri: Uri.parse(metadata?['artUri'] ?? 'resource://mipmap/ic_launcher'),
+          artUri: Uri.parse(
+            metadata?['artUri'] ?? 'resource://mipmap/ic_launcher',
+          ),
         ),
       );
-      await _player.setAudioSource(
-        source,
-      );
+      await _player.setAudioSource(source);
       _player.play();
       return Result.success(null);
     } catch (e) {
@@ -196,35 +211,43 @@ class AudioPlayerServiceImpl implements AudioPlayerService {
     List<Map<String, dynamic>>? metadataList,
   }) async {
     try {
-      debugPrint('AudioPlayerService: playPlaylist called with ${tracks.length} tracks, start index: $initialIndex');
+      debugPrint(
+        'AudioPlayerService: playPlaylist called with ${tracks.length} tracks, start index: $initialIndex',
+      );
       _currentMode = mode;
-      
+
       // Stop and clear the current source completely
       await _player.stop();
-      
+
       final sources = <AudioSource>[];
       for (var i = 0; i < tracks.length; i++) {
         final track = tracks[i];
-        final metadata = metadataList != null && i < metadataList.length ? metadataList[i] : null;
-        
+        final metadata = metadataList != null && i < metadataList.length
+            ? metadataList[i]
+            : null;
+
         final mediaItem = MediaItem(
           id: track.remoteUrl,
           album: metadata?['album'] ?? "Al-Quran",
           title: metadata?['title'] ?? "Ayah ${i + 1}",
           artist: metadata?['artist'] ?? "Quran Reciter",
-          artUri: Uri.parse(metadata?['artUri'] ?? 'resource://mipmap/ic_launcher'),
+          artUri: Uri.parse(
+            metadata?['artUri'] ?? 'resource://mipmap/ic_launcher',
+          ),
         );
 
         sources.add(await _createAudioSource(track, mediaItem));
       }
-      
+
       await _player.setAudioSources(
         sources,
         initialIndex: initialIndex,
         preload: true,
       );
       _player.play();
-      debugPrint('AudioPlayerService: playlist play() called successfully with caching check');
+      debugPrint(
+        'AudioPlayerService: playlist play() called successfully with caching check',
+      );
       return Result.success(null);
     } catch (e) {
       debugPrint('AudioPlayerService: Error in playPlaylist: $e');

@@ -3,7 +3,7 @@ import 'package:fard/core/errors/failure.dart';
 
 class SurahNumber extends Equatable {
   final int value;
-  
+
   const SurahNumber._(this.value);
 
   static Result<SurahNumber> create(int value) {

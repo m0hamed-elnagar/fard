@@ -14,14 +14,15 @@ class SoundManager {
 
   Future<String?> getSoundUriForChannel(String sound) async {
     if (sound == 'default') return null;
-    
+
     // Check if it's a local file path
-    final bool isLocalFile = sound.startsWith('/') || (sound.length > 1 && sound[1] == ':');
+    final bool isLocalFile =
+        sound.startsWith('/') || (sound.length > 1 && sound[1] == ':');
     if (!isLocalFile) return null;
 
     final file = File(sound);
     if (!await file.exists()) return null;
-    
+
     try {
       if (Platform.isAndroid) {
         return await _prepareAndroidSoundUri(file);
@@ -40,19 +41,21 @@ class SoundManager {
     // Standardize path separator for extraction regardless of current platform (during tests)
     final String fileName = file.path.split(RegExp(r'[/\\]')).last;
     final azanDir = Directory('${externalDir.path}/azan_sounds');
-    
+
     if (!await azanDir.exists()) {
       await azanDir.create(recursive: true);
     }
-    
+
     final destFile = File('${azanDir.path}/$fileName');
-    
+
     // Copy if file doesn't exist or size differs
-    if (!await destFile.exists() || (await destFile.length() != await file.length())) {
+    if (!await destFile.exists() ||
+        (await destFile.length() != await file.length())) {
       await file.copy(destFile.path);
     }
-    
-    final String authority = '${_packageInfo?.packageName ?? 'com.qada.fard'}.fileprovider';
+
+    final String authority =
+        '${_packageInfo?.packageName ?? 'com.qada.fard'}.fileprovider';
     return 'content://$authority/external_azan/$fileName';
   }
 }

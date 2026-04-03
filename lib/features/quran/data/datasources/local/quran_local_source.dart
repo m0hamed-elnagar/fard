@@ -24,9 +24,7 @@ class QuranLocalSourceImpl implements QuranLocalSource {
   @override
   Future<void> cacheSurahs(List<Surah> surahs) async {
     // We only cache the basic info if ayahs are empty
-    final entities = {
-      for (var s in surahs) s.number.value: _toEntity(s)
-    };
+    final entities = {for (var s in surahs) s.number.value: _toEntity(s)};
     await _surahBox.putAll(entities);
   }
 
@@ -55,15 +53,19 @@ class QuranLocalSourceImpl implements QuranLocalSource {
       englishNameTranslation: s.englishNameTranslation,
       numberOfAyahs: s.numberOfAyahs,
       revelationType: s.revelationType,
-      ayahs: s.ayahs.map((a) => AyahEntity(
-        surahNumber: a.number.surahNumber,
-        ayahNumber: a.number.ayahNumberInSurah,
-        uthmaniText: a.uthmaniText,
-        translation: a.translation,
-        page: a.page,
-        juz: a.juz,
-        audioUrl: a.audioUrl,
-      )).toList(),
+      ayahs: s.ayahs
+          .map(
+            (a) => AyahEntity(
+              surahNumber: a.number.surahNumber,
+              ayahNumber: a.number.ayahNumberInSurah,
+              uthmaniText: a.uthmaniText,
+              translation: a.translation,
+              page: a.page,
+              juz: a.juz,
+              audioUrl: a.audioUrl,
+            ),
+          )
+          .toList(),
     );
   }
 
@@ -75,17 +77,21 @@ class QuranLocalSourceImpl implements QuranLocalSource {
       englishNameTranslation: e.englishNameTranslation,
       numberOfAyahs: e.numberOfAyahs,
       revelationType: e.revelationType,
-      ayahs: e.ayahs.map((ae) => Ayah(
-        number: AyahNumber.create(
-          surahNumber: ae.surahNumber,
-          ayahNumberInSurah: ae.ayahNumber,
-        ).data!,
-        uthmaniText: ae.uthmaniText,
-        translation: ae.translation,
-        page: ae.page,
-        juz: ae.juz,
-        audioUrl: ae.audioUrl,
-      )).toList(),
+      ayahs: e.ayahs
+          .map(
+            (ae) => Ayah(
+              number: AyahNumber.create(
+                surahNumber: ae.surahNumber,
+                ayahNumberInSurah: ae.ayahNumber,
+              ).data!,
+              uthmaniText: ae.uthmaniText,
+              translation: ae.translation,
+              page: ae.page,
+              juz: ae.juz,
+              audioUrl: ae.audioUrl,
+            ),
+          )
+          .toList(),
     );
   }
 }

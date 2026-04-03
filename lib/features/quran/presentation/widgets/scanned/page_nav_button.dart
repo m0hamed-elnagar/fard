@@ -18,7 +18,9 @@ class PageNavButton extends StatelessWidget {
     final color = isDarkMode ? AppTheme.textPrimary : const Color(0xFF2D5D40);
     return Container(
       decoration: BoxDecoration(
-        color: isDarkMode ? AppTheme.surfaceLight.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.05),
+        color: isDarkMode
+            ? AppTheme.surfaceLight.withValues(alpha: 0.5)
+            : Colors.black.withValues(alpha: 0.05),
         shape: BoxShape.circle,
         border: Border.all(color: color.withValues(alpha: 0.2)),
       ),

@@ -21,7 +21,9 @@ class BackgroundAzkarSource implements IAzkarSource {
           category: category,
           zekr: zekr,
           description: row.length > 2 ? row[2]?.toString() ?? '' : '',
-          count: row.length > 3 ? int.tryParse(row[3]?.toString() ?? '1') ?? 1 : 1,
+          count: row.length > 3
+              ? int.tryParse(row[3]?.toString() ?? '1') ?? 1
+              : 1,
           reference: row.length > 4 ? row[4]?.toString() ?? '' : '',
           currentCount: 0, // No progress tracking in background
         );
@@ -30,5 +32,30 @@ class BackgroundAzkarSource implements IAzkarSource {
       // Return empty list on error
       return [];
     }
+  }
+
+  @override
+  Future<void> saveProgress(AzkarItem item) async {}
+
+  @override
+  Future<void> resetCategory(String category) async {}
+
+  @override
+  Future<void> resetAll() async {}
+
+  @override
+  Future<List<String>> getCategories() async {
+    final azkar = await getAllAzkar();
+    return azkar
+        .map((e) => e.category)
+        .where((c) => c.isNotEmpty)
+        .toSet()
+        .toList();
+  }
+
+  @override
+  Future<List<AzkarItem>> getAzkarByCategory(String category) async {
+    final azkar = await getAllAzkar();
+    return azkar.where((e) => e.category == category).toList();
   }
 }

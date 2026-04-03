@@ -7,10 +7,7 @@ class MigrationService {
     final supportDir = await getApplicationSupportDirectory();
     final docsDir = await getApplicationDocumentsDirectory();
 
-    final assetsToMigrate = [
-      'mushaf_pages',
-      'audio',
-    ];
+    final assetsToMigrate = ['mushaf_pages', 'audio'];
 
     for (final asset in assetsToMigrate) {
       final oldDir = Directory('${supportDir.path}/$asset');
@@ -18,7 +15,7 @@ class MigrationService {
 
       if (await oldDir.exists()) {
         debugPrint('Migrating $asset from ${oldDir.path} to ${newDir.path}');
-        
+
         if (!await newDir.exists()) {
           await newDir.create(recursive: true);
         }
@@ -28,7 +25,7 @@ class MigrationService {
           final newPath = '${newDir.path}/${entity.uri.pathSegments.last}';
           await entity.rename(newPath);
         }
-        
+
         // Remove old directory
         await oldDir.delete(recursive: true);
       }

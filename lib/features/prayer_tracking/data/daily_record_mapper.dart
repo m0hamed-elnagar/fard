@@ -5,26 +5,28 @@ import 'package:fard/features/prayer_tracking/data/daily_record_entity.dart';
 
 class DailyRecordMapper {
   static DailyRecord toDomain(DailyRecordEntity e) => DailyRecord(
-        id: e.id,
-        date: DateTime.fromMillisecondsSinceEpoch(e.dateMillis),
-        missedToday: e.missedIndices.map((i) => Salaah.values[i]).toSet(),
-        completedToday: (e.completedIndices ?? []).map((i) => Salaah.values[i]).toSet(),
-        qada: {
-          for (final entry in e.qadaValues.entries)
-            Salaah.values[entry.key]: MissedCounter(entry.value),
-        },
-        completedQada: {
-          for (final entry in (e.completedQadaValues ?? {}).entries)
-            Salaah.values[entry.key]: entry.value,
-        },
-      );
+    id: e.id,
+    date: DateTime.fromMillisecondsSinceEpoch(e.dateMillis),
+    missedToday: e.missedIndices.map((i) => Salaah.values[i]).toSet(),
+    completedToday: (e.completedIndices ?? [])
+        .map((i) => Salaah.values[i])
+        .toSet(),
+    qada: {
+      for (final entry in e.qadaValues.entries)
+        Salaah.values[entry.key]: MissedCounter(entry.value),
+    },
+    completedQada: {
+      for (final entry in (e.completedQadaValues ?? {}).entries)
+        Salaah.values[entry.key]: entry.value,
+    },
+  );
 
   static DailyRecordEntity toEntity(DailyRecord m) => DailyRecordEntity(
-        id: m.id,
-        dateMillis: m.date.millisecondsSinceEpoch,
-        missedIndices: m.missedToday.map((s) => s.index).toList(),
-        qadaValues: m.qada.map((k, v) => MapEntry(k.index, v.value)),
-        completedIndices: m.completedToday.map((s) => s.index).toList(),
-        completedQadaValues: m.completedQada.map((k, v) => MapEntry(k.index, v)),
-      );
+    id: m.id,
+    dateMillis: m.date.millisecondsSinceEpoch,
+    missedIndices: m.missedToday.map((s) => s.index).toList(),
+    qadaValues: m.qada.map((k, v) => MapEntry(k.index, v.value)),
+    completedIndices: m.completedToday.map((s) => s.index).toList(),
+    completedQadaValues: m.completedQada.map((k, v) => MapEntry(k.index, v)),
+  );
 }

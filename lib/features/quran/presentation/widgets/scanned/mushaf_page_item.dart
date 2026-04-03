@@ -66,7 +66,9 @@ class _MushafPageItemState extends State<MushafPageItem> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final primaryColor = widget.isDarkMode ? AppTheme.textPrimary : const Color(0xFF2D5D40);
+    final primaryColor = widget.isDarkMode
+        ? AppTheme.textPrimary
+        : const Color(0xFF2D5D40);
 
     return FutureBuilder<File?>(
       future: _pageFileFuture,
@@ -78,10 +80,7 @@ class _MushafPageItemState extends State<MushafPageItem> {
               children: [
                 CircularProgressIndicator(color: primaryColor),
                 const SizedBox(height: 16),
-                Text(
-                  l10n.loadingPage,
-                  style: TextStyle(color: primaryColor),
-                ),
+                Text(l10n.loadingPage, style: TextStyle(color: primaryColor)),
               ],
             ),
           );
@@ -107,7 +106,9 @@ class _MushafPageItemState extends State<MushafPageItem> {
                   ),
                   child: Text(
                     l10n.retry,
-                    style: TextStyle(color: widget.isDarkMode ? Colors.black : Colors.white),
+                    style: TextStyle(
+                      color: widget.isDarkMode ? Colors.black : Colors.white,
+                    ),
                   ),
                 ),
               ],
@@ -121,17 +122,33 @@ class _MushafPageItemState extends State<MushafPageItem> {
           child: Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: widget.isDarkMode 
-                ? ColorFiltered(
-                    colorFilter: const ColorFilter.matrix([
-                      -0.85, 0, 0, 0, 235,
-                      0, -0.85, 0, 0, 235,
-                      0, -0.85, 0, 0, 235,
-                      0, 0, 0, 1, 0,
-                    ]),
-                    child: Image.file(file, fit: BoxFit.contain),
-                  )
-                : Image.file(file, fit: BoxFit.contain),
+              child: widget.isDarkMode
+                  ? ColorFiltered(
+                      colorFilter: const ColorFilter.matrix([
+                        -0.85,
+                        0,
+                        0,
+                        0,
+                        235,
+                        0,
+                        -0.85,
+                        0,
+                        0,
+                        235,
+                        0,
+                        -0.85,
+                        0,
+                        0,
+                        235,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                      ]),
+                      child: Image.file(file, fit: BoxFit.contain),
+                    )
+                  : Image.file(file, fit: BoxFit.contain),
             ),
           ),
         );

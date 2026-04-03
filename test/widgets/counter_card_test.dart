@@ -8,11 +8,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('CounterCard', () {
-    final status = {
-      for (var s in Salaah.values) s: const MissedCounter(10)
-    };
+    final status = {for (var s in Salaah.values) s: const MissedCounter(10)};
 
-    Widget createWidgetUnderTest(Map<Salaah, MissedCounter> qadaStatus, int todayMissedCount) {
+    Widget createWidgetUnderTest(
+      Map<Salaah, MissedCounter> qadaStatus,
+      int todayMissedCount,
+    ) {
       return MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
@@ -28,7 +29,9 @@ void main() {
       );
     }
 
-    testWidgets('displays total remaining count correctly', (WidgetTester tester) async {
+    testWidgets('displays total remaining count correctly', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(createWidgetUnderTest(status, 2));
       await tester.pumpAndSettle();
 
@@ -38,12 +41,14 @@ void main() {
       expect(find.text('+2'), findsOneWidget);
     });
 
-    testWidgets('expands to show breakdown on tap', (WidgetTester tester) async {
-       await tester.pumpWidget(createWidgetUnderTest(status, 0));
-       await tester.pumpAndSettle();
+    testWidgets('expands to show breakdown on tap', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(createWidgetUnderTest(status, 0));
+      await tester.pumpAndSettle();
 
       final l10n = lookupAppLocalizations(const Locale('ar'));
-      
+
       // Tap to expand
       await tester.tap(find.text(l10n.remaining));
       await tester.pumpAndSettle();
@@ -55,20 +60,24 @@ void main() {
       }
     });
 
-    testWidgets('shows edit button when expanded and triggers callback', (WidgetTester tester) async {
+    testWidgets('shows edit button when expanded and triggers callback', (
+      WidgetTester tester,
+    ) async {
       bool editPressed = false;
-      await tester.pumpWidget(MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
-          body: CounterCard(
-            qadaStatus: status,
-            todayMissedCount: 0,
-            onAddPressed: () {},
-            onEditPressed: () => editPressed = true,
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: CounterCard(
+              qadaStatus: status,
+              todayMissedCount: 0,
+              onAddPressed: () {},
+              onEditPressed: () => editPressed = true,
+            ),
           ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       final l10n = lookupAppLocalizations(const Locale('en'));
@@ -83,7 +92,7 @@ void main() {
 
       await tester.tap(editBtn);
       await tester.pumpAndSettle();
-      
+
       expect(editPressed, isTrue);
     });
   });

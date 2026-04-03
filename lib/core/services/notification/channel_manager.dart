@@ -10,12 +10,15 @@ class ChannelManager {
   ChannelManager(this._soundManager);
 
   static const String reminderChannelId = 'prayer_reminders_v1';
-  
+
   String getChannelId(String salaahId, String sound) {
     if (sound == 'default') return 'azan_channel_$salaahId';
-    
+
     // Use the filename as a key to make it deterministic but unique to the sound
-    final String fileName = sound.split(RegExp(r'[/\\]')).last.replaceAll('.mp3', '');
+    final String fileName = sound
+        .split(RegExp(r'[/\\]'))
+        .last
+        .replaceAll('.mp3', '');
     return 'azan_${salaahId}_$fileName';
   }
 
@@ -23,7 +26,10 @@ class ChannelManager {
     FlutterLocalNotificationsPlugin notificationsPlugin, {
     SettingsState? settings,
   }) async {
-    final androidPlugin = notificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    final androidPlugin = notificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     if (androidPlugin == null) return;
 
     // Salah specific channels for Azan
@@ -32,7 +38,7 @@ class ChannelManager {
         final String salaahId = salaahSetting.salaah.name;
         final String sound = salaahSetting.azanSound ?? 'default';
         final String channelId = getChannelId(salaahId, sound);
-        
+
         await ensureChannelExists(
           notificationsPlugin,
           channelId: channelId,
@@ -50,7 +56,7 @@ class ChannelManager {
       playSound: true,
       audioAttributesUsage: AudioAttributesUsage.alarm,
     );
-    
+
     await androidPlugin.createNotificationChannel(reminderChannel);
 
     const azkarChannel = AndroidNotificationChannel(
@@ -60,7 +66,7 @@ class ChannelManager {
       importance: Importance.max,
       playSound: true,
     );
-    
+
     await androidPlugin.createNotificationChannel(azkarChannel);
   }
 
@@ -72,29 +78,33 @@ class ChannelManager {
     bool isTest = false,
   }) async {
     final androidPlugin = notificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     if (androidPlugin == null) return;
 
     final channels = await androidPlugin.getNotificationChannels();
-    
+
     final bool exists = channels?.any((c) => c.id == channelId) ?? false;
     if (exists && !isTest) return;
 
     // Create new channel with proper sound
     final String? soundUri = await _soundManager.getSoundUriForChannel(sound);
-    
+
     final androidChannel = AndroidNotificationChannel(
       channelId,
       isTest ? 'Azan Test' : 'Azan ${salaahId.toUpperCase()}',
-      description: isTest ? 'Temporary channel for Azan testing' : 'Azan notifications for ${salaahId.toUpperCase()}',
+      description: isTest
+          ? 'Temporary channel for Azan testing'
+          : 'Azan notifications for ${salaahId.toUpperCase()}',
       importance: Importance.max,
       playSound: true,
       audioAttributesUsage: AudioAttributesUsage.alarm,
-      sound: sound == 'default' 
-          ? null 
-          : (soundUri != null 
-              ? UriAndroidNotificationSound(soundUri) 
-              : RawResourceAndroidNotificationSound(sound.split('.').first)),
+      sound: sound == 'default'
+          ? null
+          : (soundUri != null
+                ? UriAndroidNotificationSound(soundUri)
+                : RawResourceAndroidNotificationSound(sound.split('.').first)),
     );
 
     await androidPlugin.createNotificationChannel(androidChannel);

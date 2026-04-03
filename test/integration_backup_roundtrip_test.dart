@@ -18,7 +18,8 @@ class FakeWerdRepository implements WerdRepository {
   Future<Result<List<WerdGoal>>> getAllGoals() async => Result.success(goals);
 
   @override
-  Future<Result<List<WerdProgress>>> getAllProgress() async => Result.success(progress);
+  Future<Result<List<WerdProgress>>> getAllProgress() async =>
+      Result.success(progress);
 
   @override
   Future<Result<void>> importGoals(List<WerdGoal> goals) async {
@@ -34,15 +35,19 @@ class FakeWerdRepository implements WerdRepository {
 
   // Other methods not needed for this specific test
   @override
-  Future<Result<WerdGoal?>> getGoal({String id = 'default'}) async => Result.success(null);
+  Future<Result<WerdGoal?>> getGoal({String id = 'default'}) async =>
+      Result.success(null);
   @override
   Future<Result<void>> setGoal(WerdGoal goal) async => Result.success(null);
   @override
-  Future<Result<WerdProgress>> getProgress({String goalId = 'default'}) async => throw UnimplementedError();
+  Future<Result<WerdProgress>> getProgress({String goalId = 'default'}) async =>
+      throw UnimplementedError();
   @override
-  Stream<Result<WerdProgress>> watchProgress({String goalId = 'default'}) => throw UnimplementedError();
+  Stream<Result<WerdProgress>> watchProgress({String goalId = 'default'}) =>
+      throw UnimplementedError();
   @override
-  Future<Result<void>> updateProgress(WerdProgress progress) async => Result.success(null);
+  Future<Result<void>> updateProgress(WerdProgress progress) async =>
+      Result.success(null);
 }
 
 class FakePrayerRepo implements PrayerRepo {
@@ -57,13 +62,23 @@ class FakePrayerRepo implements PrayerRepo {
   }
 
   // Not needed
-  @override Future<void> saveToday(DailyRecord record) async {}
-  @override Future<void> deleteRecord(DateTime date) async {}
-  @override Future<DailyRecord?> loadRecord(DateTime date) async => null;
-  @override Future<Map<DateTime, DailyRecord>> loadMonth(int year, int month) async => {};
-  @override Future<Map<Salaah, int>> calculateRemaining(DateTime from, DateTime to) async => {};
-  @override Future<DailyRecord?> loadLastSavedRecord() async => null;
-  @override Future<DailyRecord?> loadLastRecordBefore(DateTime date) async => null;
+  @override
+  Future<void> saveToday(DailyRecord record) async {}
+  @override
+  Future<void> deleteRecord(DateTime date) async {}
+  @override
+  Future<DailyRecord?> loadRecord(DateTime date) async => null;
+  @override
+  Future<Map<DateTime, DailyRecord>> loadMonth(int year, int month) async => {};
+  @override
+  Future<Map<Salaah, int>> calculateRemaining(
+    DateTime from,
+    DateTime to,
+  ) async => {};
+  @override
+  Future<DailyRecord?> loadLastSavedRecord() async => null;
+  @override
+  Future<DailyRecord?> loadLastRecordBefore(DateTime date) async => null;
 }
 
 void main() {
@@ -75,57 +90,73 @@ void main() {
     prayerRepo = FakePrayerRepo();
   });
 
-  test('Full System Round-trip: Data should be identical after export and import', () async {
-    // 1. Seed Initial Data
-    prayerRepo.db = [
-      DailyRecord(
-        id: '1',
-        date: DateTime(2024, 1, 1),
-        missedToday: {Salaah.fajr},
-        completedToday: {},
-        qada: {Salaah.fajr: const MissedCounter(1)},
-      ),
-    ];
+  test(
+    'Full System Round-trip: Data should be identical after export and import',
+    () async {
+      // 1. Seed Initial Data
+      prayerRepo.db = [
+        DailyRecord(
+          id: '1',
+          date: DateTime(2024, 1, 1),
+          missedToday: {Salaah.fajr},
+          completedToday: {},
+          qada: {Salaah.fajr: const MissedCounter(1)},
+        ),
+      ];
 
-    werdRepo.goals = [
-      WerdGoal(id: 'g1', type: WerdGoalType.fixedAmount, value: 5, startDate: DateTime(2024, 1, 1)),
-    ];
+      werdRepo.goals = [
+        WerdGoal(
+          id: 'g1',
+          type: WerdGoalType.fixedAmount,
+          value: 5,
+          startDate: DateTime(2024, 1, 1),
+        ),
+      ];
 
-    werdRepo.progress = [
-      WerdProgress(goalId: 'g1', totalAmountReadToday: 2, lastUpdated: DateTime(2024, 1, 1), streak: 1),
-    ];
+      werdRepo.progress = [
+        WerdProgress(
+          goalId: 'g1',
+          totalAmountReadToday: 2,
+          lastUpdated: DateTime(2024, 1, 1),
+          streak: 1,
+        ),
+      ];
 
-    // 2. Simulate Export Action
-    final exportedBackup = AppBackup(
-      version: 1,
-      appVersion: '1.0.0',
-      timestamp: DateTime.now(),
-      prayerRecords: await prayerRepo.loadAllRecords(),
-      werdGoals: (await werdRepo.getAllGoals()).fold((l) => [], (r) => r),
-      werdProgress: (await werdRepo.getAllProgress()).fold((l) => [], (r) => r),
-    );
+      // 2. Simulate Export Action
+      final exportedBackup = AppBackup(
+        version: 1,
+        appVersion: '1.0.0',
+        timestamp: DateTime.now(),
+        prayerRecords: await prayerRepo.loadAllRecords(),
+        werdGoals: (await werdRepo.getAllGoals()).fold((l) => [], (r) => r),
+        werdProgress: (await werdRepo.getAllProgress()).fold(
+          (l) => [],
+          (r) => r,
+        ),
+      );
 
-    final jsonString = jsonEncode(exportedBackup.toJson());
+      final jsonString = jsonEncode(exportedBackup.toJson());
 
-    // 3. Clear System (Simulate app reinstall)
-    prayerRepo.db = [];
-    werdRepo.goals = [];
-    werdRepo.progress = [];
+      // 3. Clear System (Simulate app reinstall)
+      prayerRepo.db = [];
+      werdRepo.goals = [];
+      werdRepo.progress = [];
 
-    // 4. Simulate Import Action
-    final decodedJson = jsonDecode(jsonString);
-    final importedBackup = AppBackup.fromJson(decodedJson);
+      // 4. Simulate Import Action
+      final decodedJson = jsonDecode(jsonString);
+      final importedBackup = AppBackup.fromJson(decodedJson);
 
-    await prayerRepo.importAllRecords(importedBackup.prayerRecords);
-    await werdRepo.importGoals(importedBackup.werdGoals);
-    await werdRepo.importProgress(importedBackup.werdProgress);
+      await prayerRepo.importAllRecords(importedBackup.prayerRecords);
+      await werdRepo.importGoals(importedBackup.werdGoals);
+      await werdRepo.importProgress(importedBackup.werdProgress);
 
-    // 5. Final Verification
-    expect(prayerRepo.db.length, 1);
-    expect(prayerRepo.db.first.missedToday, {Salaah.fajr});
-    expect(werdRepo.goals.length, 1);
-    expect(werdRepo.goals.first.id, 'g1');
-    expect(werdRepo.progress.length, 1);
-    expect(werdRepo.progress.first.streak, 1);
-  });
+      // 5. Final Verification
+      expect(prayerRepo.db.length, 1);
+      expect(prayerRepo.db.first.missedToday, {Salaah.fajr});
+      expect(werdRepo.goals.length, 1);
+      expect(werdRepo.goals.first.id, 'g1');
+      expect(werdRepo.progress.length, 1);
+      expect(werdRepo.progress.first.streak, 1);
+    },
+  );
 }

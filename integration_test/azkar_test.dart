@@ -38,7 +38,9 @@ void main() {
       // Do not delete tempDir as Hive might be locked to it
     });
 
-    testWidgets('Repeat Azkar Sequence: Choose, Count, Back (2 times)', (tester) async {
+    testWidgets('Repeat Azkar Sequence: Choose, Count, Back (2 times)', (
+      tester,
+    ) async {
       await tester.pumpWidget(app.QadaTrackerApp(hivePath: tempDir.path));
       await tester.pumpAndSettle();
 
@@ -49,20 +51,32 @@ void main() {
 
       // Repeat sequence 2 times
       for (int i = 0; i < 2; i++) {
-        debugPrint('--- SEQUENCE REPETITION ${i+1} ---');
-        
+        debugPrint('--- SEQUENCE REPETITION ${i + 1} ---');
+
         // Ensure we are on AzkarCategoriesScreen
         expect(find.byType(AzkarCategoriesScreen), findsOneWidget);
 
-        final BuildContext categoriesContext = tester.element(find.byType(AzkarCategoriesScreen));
+        final BuildContext categoriesContext = tester.element(
+          find.byType(AzkarCategoriesScreen),
+        );
         if (categoriesContext.mounted) {
-          categoriesContext.read<AzkarBloc>().add(const AzkarEvent.loadCategories());
+          categoriesContext.read<AzkarBloc>().add(
+            const AzkarEvent.loadCategories(),
+          );
         }
         await tester.pumpAndSettle();
 
         // Wait for categories to load
         for (int wait = 0; wait < 5; wait++) {
-          if (find.descendant(of: find.byType(AzkarCategoriesScreen), matching: find.byType(ListTile)).evaluate().isNotEmpty) break;
+          if (find
+              .descendant(
+                of: find.byType(AzkarCategoriesScreen),
+                matching: find.byType(ListTile),
+              )
+              .evaluate()
+              .isNotEmpty) {
+            break;
+          }
           await tester.pump(const Duration(seconds: 1));
         }
 
@@ -72,7 +86,7 @@ void main() {
         );
 
         expect(categoryItems, findsAtLeast(i + 1));
-        
+
         // Tap the i-th category
         await tester.tap(categoryItems.at(i));
         await tester.pumpAndSettle();
@@ -83,19 +97,21 @@ void main() {
 
         // In new UI, we have one item at a time.
         // Look for the large counter button (Circle)
-        final counterButton = find.descendant(
-          of: find.byType(AzkarListScreen),
-          matching: find.byType(GestureDetector),
-        ).first;
-        
+        final counterButton = find
+            .descendant(
+              of: find.byType(AzkarListScreen),
+              matching: find.byType(GestureDetector),
+            )
+            .first;
+
         expect(counterButton, findsOneWidget);
-        
+
         // Tap to increment
         await tester.tap(counterButton);
         await tester.pumpAndSettle();
 
         // Go back to categories
-        await tester.tap(find.byIcon(Icons.arrow_back)); 
+        await tester.tap(find.byIcon(Icons.arrow_back));
         await tester.pumpAndSettle();
         await tester.pump(const Duration(seconds: 1));
       }

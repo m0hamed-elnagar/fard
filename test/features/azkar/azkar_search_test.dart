@@ -14,9 +14,14 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 
-class MockSettingsCubit extends MockCubit<SettingsState> implements SettingsCubit {}
-class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState> implements AzkarBloc {}
+class MockSettingsCubit extends MockCubit<SettingsState>
+    implements SettingsCubit {}
+
+class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState>
+    implements AzkarBloc {}
+
 class MockNotificationService extends Mock implements NotificationService {}
+
 class MockVoiceDownloadService extends Mock implements VoiceDownloadService {}
 
 void main() {
@@ -40,22 +45,35 @@ void main() {
     getIt.registerSingleton<NotificationService>(mockNotificationService);
     getIt.registerSingleton<VoiceDownloadService>(mockVoiceDownloadService);
 
-    when(() => mockNotificationService.canScheduleExactNotifications()).thenAnswer((_) async => true);
-    when(() => mockNotificationService.testReminder(any(), any())).thenAnswer((_) async {});
+    when(
+      () => mockNotificationService.canScheduleExactNotifications(),
+    ).thenAnswer((_) async => true);
+    when(
+      () => mockNotificationService.testReminder(any(), any()),
+    ).thenAnswer((_) async {});
 
-    when(() => mockSettingsCubit.state).thenReturn(const SettingsState(
-      locale: Locale('en'),
-      morningAzkarTime: '05:00',
-      eveningAzkarTime: '18:00',
-      reminders: [],
-      isAzanVoiceDownloading: false,
-    ));
+    when(() => mockSettingsCubit.state).thenReturn(
+      const SettingsState(
+        locale: Locale('en'),
+        morningAzkarTime: '05:00',
+        eveningAzkarTime: '18:00',
+        reminders: [],
+        isAzanVoiceDownloading: false,
+      ),
+    );
 
-    when(() => mockAzkarBloc.state).thenReturn(const AzkarState(
-      categories: ['Morning Azkar', 'Evening Azkar', 'Sleep Azkar', 'Travel Azkar'],
-      azkar: [],
-      isLoading: false,
-    ));
+    when(() => mockAzkarBloc.state).thenReturn(
+      const AzkarState(
+        categories: [
+          'Morning Azkar',
+          'Evening Azkar',
+          'Sleep Azkar',
+          'Travel Azkar',
+        ],
+        azkar: [],
+        isLoading: false,
+      ),
+    );
   });
 
   group('AzkarCategoriesScreen Search', () {
@@ -96,7 +114,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Enter search query
-      await tester.enterText(find.byKey(const Key('azkar_search_field')), 'sleep');
+      await tester.enterText(
+        find.byKey(const Key('azkar_search_field')),
+        'sleep',
+      );
       await tester.pumpAndSettle();
 
       // Verify filtered results
@@ -104,11 +125,11 @@ void main() {
       expect(find.text('Morning Azkar'), findsNothing);
       expect(find.text('Evening Azkar'), findsNothing);
       expect(find.text('Travel Azkar'), findsNothing);
-      
+
       // Clear search
       await tester.tap(find.byIcon(Icons.close));
       await tester.pumpAndSettle();
-      
+
       // Query should be empty but search field still there (based on my impl)
       // Actually my impl: if searching, close clears text.
       expect(find.text('Morning Azkar'), findsOneWidget);
@@ -138,7 +159,9 @@ void main() {
       );
     }
 
-    testWidgets('searchable category picker in reminder dialog works', (tester) async {
+    testWidgets('searchable category picker in reminder dialog works', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -149,7 +172,7 @@ void main() {
 
       final addButton = find.byKey(const Key('add_reminder_button'));
       expect(addButton, findsOneWidget);
-      
+
       await tester.tap(addButton);
       await tester.pumpAndSettle();
 
@@ -157,21 +180,31 @@ void main() {
       expect(find.text('Add Reminder'), findsOneWidget);
 
       // Tap the category picker
-      await tester.tap(find.ancestor(
-        of: find.text('Morning Azkar'),
-        matching: find.byWidgetPredicate((widget) => 
-          widget is InputDecorator && widget.decoration.labelText == 'Category'),
-      )); 
+      await tester.tap(
+        find.ancestor(
+          of: find.text('Morning Azkar'),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is InputDecorator &&
+                widget.decoration.labelText == 'Category',
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Verify bottom sheet is shown with search field
       expect(find.byType(TextField), findsAtLeast(1));
-      
-      final searchHint = AppLocalizations.of(tester.element(addButton))!.searchCategory;
+
+      final searchHint = AppLocalizations.of(
+        tester.element(addButton),
+      )!.searchCategory;
       expect(find.text(searchHint), findsOneWidget);
 
       // Filter categories in bottom sheet
-      await tester.enterText(find.widgetWithText(TextField, searchHint), 'travel');
+      await tester.enterText(
+        find.widgetWithText(TextField, searchHint),
+        'travel',
+      );
       await tester.pumpAndSettle();
 
       // Verify filtered results in bottom sheet
@@ -182,7 +215,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify dialog is updated
-      expect(find.widgetWithText(InputDecorator, 'Travel Azkar'), findsAtLeast(1));
+      expect(
+        find.widgetWithText(InputDecorator, 'Travel Azkar'),
+        findsAtLeast(1),
+      );
     });
   });
 }

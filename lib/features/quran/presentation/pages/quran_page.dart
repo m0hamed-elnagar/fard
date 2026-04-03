@@ -34,7 +34,7 @@ class _QuranPageState extends State<QuranPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return DefaultTabController(
       length: 4,
       child: Scaffold(
@@ -69,7 +69,10 @@ class _QuranPageState extends State<QuranPage> {
                 )
               : Text(
                   l10n.quran,
-                  style: GoogleFonts.amiri(fontWeight: FontWeight.bold, fontSize: 24),
+                  style: GoogleFonts.amiri(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                  ),
                 ),
           actions: [
             IconButton(
@@ -87,10 +90,8 @@ class _QuranPageState extends State<QuranPage> {
             IconButton(
               icon: const Icon(Icons.photo_library_outlined),
               tooltip: l10n.scannedMushaf,
-              onPressed: () => Navigator.push(
-                context,
-                ScannedMushafReaderPage.route(),
-              ),
+              onPressed: () =>
+                  Navigator.push(context, ScannedMushafReaderPage.route()),
             ),
             IconButton(
               icon: Icon(_isSearching ? Icons.close : Icons.search),
@@ -110,7 +111,10 @@ class _QuranPageState extends State<QuranPage> {
           bottom: TabBar(
             indicatorSize: TabBarIndicatorSize.tab,
             indicatorWeight: 3,
-            labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14),
+            labelStyle: GoogleFonts.outfit(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
             isScrollable: true,
             tabs: [
               Tab(text: l10n.surahsTab),
@@ -142,7 +146,11 @@ class _QuranPageState extends State<QuranPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.error_outline, color: Colors.red, size: 64),
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 64,
+                      ),
                       const SizedBox(height: 16),
                       Text(
                         l10n.errorLoadingQuran,
@@ -160,9 +168,9 @@ class _QuranPageState extends State<QuranPage> {
                       ),
                       const SizedBox(height: 24),
                       ElevatedButton.icon(
-                        onPressed: () => context
-                            .read<QuranBloc>()
-                            .add(const QuranEvent.loadSurahs()),
+                        onPressed: () => context.read<QuranBloc>().add(
+                          const QuranEvent.loadSurahs(),
+                        ),
                         icon: const Icon(Icons.refresh),
                         label: Text(l10n.retry),
                       ),
@@ -183,7 +191,7 @@ class _QuranPageState extends State<QuranPage> {
             if (hasLastRead) {
               try {
                 lastReadSurah = state.surahs.firstWhere(
-                  (s) => s.number.value == lastRead.ayahNumber.surahNumber
+                  (s) => s.number.value == lastRead.ayahNumber.surahNumber,
                 );
               } catch (_) {}
             }
@@ -196,10 +204,15 @@ class _QuranPageState extends State<QuranPage> {
                     : ListView.separated(
                         key: const Key('surah_list_view'),
                         padding: const EdgeInsets.all(16),
-                        itemCount: filteredSurahs.length + (hasLastRead && _searchQuery.isEmpty ? 1 : 0),
-                        separatorBuilder: (context, index) => const Divider(height: 1),
+                        itemCount:
+                            filteredSurahs.length +
+                            (hasLastRead && _searchQuery.isEmpty ? 1 : 0),
+                        separatorBuilder: (context, index) =>
+                            const Divider(height: 1),
                         itemBuilder: (context, index) {
-                          if (hasLastRead && _searchQuery.isEmpty && index == 0) {
+                          if (hasLastRead &&
+                              _searchQuery.isEmpty &&
+                              index == 0) {
                             return _ContinueReadingCard(
                               surah: lastReadSurah!,
                               ayahNumber: lastRead.ayahNumber.ayahNumberInSurah,
@@ -208,7 +221,8 @@ class _QuranPageState extends State<QuranPage> {
                                   context,
                                   QuranReaderPage.route(
                                     surahNumber: lastReadSurah!.number.value,
-                                    ayahNumber: lastRead.ayahNumber.ayahNumberInSurah,
+                                    ayahNumber:
+                                        lastRead.ayahNumber.ayahNumberInSurah,
                                     playOnLoad: true,
                                   ),
                                 );
@@ -216,15 +230,25 @@ class _QuranPageState extends State<QuranPage> {
                             );
                           }
 
-                          final surahIndex = hasLastRead && _searchQuery.isEmpty ? index - 1 : index;
+                          final surahIndex = hasLastRead && _searchQuery.isEmpty
+                              ? index - 1
+                              : index;
                           final surah = filteredSurahs[surahIndex];
                           return ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             leading: CircleAvatar(
-                              backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                              backgroundColor: Theme.of(
+                                context,
+                              ).primaryColor.withValues(alpha: 0.1),
                               child: Text(
                                 surah.number.value.toArabicIndic(),
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                             title: Align(
@@ -244,7 +268,10 @@ class _QuranPageState extends State<QuranPage> {
                               alignment: Alignment.centerRight,
                               child: Text(
                                 '${surah.numberOfAyahs.toArabicIndic()} ${l10n.ayah}',
-                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
                                 textAlign: TextAlign.right,
                               ),
                             ),
@@ -252,9 +279,14 @@ class _QuranPageState extends State<QuranPage> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: Icon(Icons.play_circle_outline, color: Theme.of(context).primaryColor),
+                                  icon: Icon(
+                                    Icons.play_circle_outline,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
                                   onPressed: () {
-                                    final startAyah = (lastRead?.ayahNumber.surahNumber == surah.number.value)
+                                    final startAyah =
+                                        (lastRead?.ayahNumber.surahNumber ==
+                                            surah.number.value)
                                         ? lastRead?.ayahNumber.ayahNumberInSurah
                                         : 1;
                                     Navigator.push(
@@ -282,18 +314,17 @@ class _QuranPageState extends State<QuranPage> {
                           );
                         },
                       ),
-                
+
                 // Juz Tab
                 JuzList(searchQuery: _searchQuery),
 
                 // Hizb Tab
                 HizbList(searchQuery: _searchQuery),
-                
+
                 // Bookmarks Tab
                 BookmarkList(searchQuery: _searchQuery),
               ],
             );
-
           },
         ),
       ),
@@ -341,7 +372,11 @@ class _ContinueReadingCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.menu_book, color: Colors.white, size: 18),
+                      const Icon(
+                        Icons.menu_book,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         l10n.continueReading,
@@ -378,7 +413,11 @@ class _ContinueReadingCard extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 32),
+                child: const Icon(
+                  Icons.play_arrow_rounded,
+                  color: Colors.white,
+                  size: 32,
+                ),
               ),
             ],
           ),

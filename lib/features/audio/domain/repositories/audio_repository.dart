@@ -9,7 +9,7 @@ enum AudioQuality {
   low64('64'),
   medium128('128'),
   high192('192');
-  
+
   final String kbps;
   const AudioQuality(this.kbps);
 }
@@ -17,7 +17,7 @@ enum AudioQuality {
 abstract interface class AudioRepository {
   /// Fetch all available audio reciters from Al Quran Cloud
   Future<Result<List<Reciter>>> getAvailableReciters();
-  
+
   /// Get audio track for specific ayah (includes URL and local path)
   Future<AudioTrack> getAyahAudioTrack({
     required String reciterId,
@@ -25,7 +25,7 @@ abstract interface class AudioRepository {
     required int ayahNumber,
     AudioQuality quality = AudioQuality.medium128,
   });
-  
+
   /// Get list of tracks for full surah playback
   Future<Result<List<AudioTrack>>> getSurahAudioTracks({
     required String reciterId,
@@ -43,35 +43,38 @@ abstract interface class AudioRepository {
     required AudioQuality quality,
     String? audioUrl,
   });
-  
+
   Future<Result<GaplessAudioSource>> getGaplessSurahAudio(
-    SurahNumber surah, 
+    SurahNumber surah,
     String reciterId,
   );
-  
+
   Future<Result<void>> downloadAudio({
     required AyahNumber ayah,
     required String reciterId,
     void Function(double progress)? onProgress,
   });
-  
+
   Future<Result<bool>> isAudioDownloaded({
     required AyahNumber ayah,
     required String reciterId,
   });
-  
+
   /// Cache reciter list locally
   Future<void> cacheReciters(List<Reciter> reciters);
-  
+
   /// Get cached reciters
   Future<Result<List<Reciter>>> getCachedReciters();
 
   /// Cache reciter progress and sizes
-  Future<void> cacheReciterData(Map<String, double> progress, Map<String, int> sizes);
-  
+  Future<void> cacheReciterData(
+    Map<String, double> progress,
+    Map<String, int> sizes,
+  );
+
   /// Get cached reciter progress and sizes
   Future<ReciterData> getCachedReciterData();
-  
+
   /// Get number of ayahs in a surah (from local constant)
   int getAyahCount(int surahNumber);
 }
@@ -87,10 +90,7 @@ class GaplessAudioSource extends Equatable {
   final String baseUrl;
   final List<AyahTiming> timings;
 
-  const GaplessAudioSource({
-    required this.baseUrl,
-    required this.timings,
-  });
+  const GaplessAudioSource({required this.baseUrl, required this.timings});
 
   @override
   List<Object?> get props => [baseUrl, timings];

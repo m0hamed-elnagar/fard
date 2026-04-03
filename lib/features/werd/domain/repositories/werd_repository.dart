@@ -8,7 +8,7 @@ abstract class WerdRepository {
   Future<Result<WerdProgress>> getProgress({String goalId = 'default'});
   Stream<Result<WerdProgress>> watchProgress({String goalId = 'default'});
   Future<Result<void>> updateProgress(WerdProgress progress);
-  
+
   // Backup/Restore methods
   Future<Result<List<WerdGoal>>> getAllGoals();
   Future<Result<List<WerdProgress>>> getAllProgress();

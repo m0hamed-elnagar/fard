@@ -1,5 +1,6 @@
 import 'package:fard/core/services/location_service.dart';
 import 'package:fard/core/services/notification_service.dart';
+import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/features/azkar/data/azkar_repository.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
@@ -11,9 +12,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
 
 class MockSharedPreferences extends Mock implements SharedPreferences {}
+
 class MockLocationService extends Mock implements LocationService {}
+
 class MockNotificationService extends Mock implements NotificationService {}
+
 class MockAzkarRepository extends Mock implements AzkarRepository {}
+
+class MockWidgetUpdateService extends Mock implements WidgetUpdateService {}
 
 void main() {
   late SettingsCubit cubit;
@@ -21,12 +27,14 @@ void main() {
   late MockLocationService mockLocationService;
   late MockNotificationService mockNotificationService;
   late MockAzkarRepository mockAzkarRepository;
+  late MockWidgetUpdateService mockWidgetUpdateService;
 
   setUp(() {
     mockPrefs = MockSharedPreferences();
     mockLocationService = MockLocationService();
     mockNotificationService = MockNotificationService();
     mockAzkarRepository = MockAzkarRepository();
+    mockWidgetUpdateService = MockWidgetUpdateService();
 
     when(() => mockPrefs.getString(any())).thenReturn(null);
     when(() => mockPrefs.getDouble(any())).thenReturn(null);
@@ -36,32 +44,45 @@ void main() {
     when(() => mockPrefs.setInt(any(), any())).thenAnswer((_) async => true);
 
     // Mock notification service
-    when(() => mockNotificationService.scheduleAzkarReminders(
-      settings: any(named: 'settings'),
-      allAzkar: any(named: 'allAzkar'),
-    )).thenAnswer((_) async {});
+    when(
+      () => mockNotificationService.scheduleAzkarReminders(
+        settings: any(named: 'settings'),
+        allAzkar: any(named: 'allAzkar'),
+      ),
+    ).thenAnswer((_) async {});
 
-    when(() => mockNotificationService.schedulePrayerNotifications(
-      settings: any(named: 'settings'),
-    )).thenAnswer((_) async {});
+    when(
+      () => mockNotificationService.schedulePrayerNotifications(
+        settings: any(named: 'settings'),
+      ),
+    ).thenAnswer((_) async {});
 
-    when(() => mockLocationService.checkLocationStatus()).thenAnswer((_) async => LocationStatus.success);
+    when(
+      () => mockWidgetUpdateService.updateWidget(any()),
+    ).thenAnswer((_) async {});
+
+    when(
+      () => mockLocationService.checkLocationStatus(),
+    ).thenAnswer((_) async => LocationStatus.success);
 
     // Mock Azkar Repository
     when(() => mockAzkarRepository.getAllAzkar()).thenAnswer((_) async => []);
 
     cubit = SettingsCubit(
-      mockPrefs, 
-      mockLocationService, 
-      mockNotificationService, 
+      mockPrefs,
+      mockLocationService,
+      mockNotificationService,
       mockAzkarRepository,
+      mockWidgetUpdateService,
     );
   });
 
   // Need to register fallback values for Mocktail if we use any() with complex types
   setUpAll(() {
     registerFallbackValue(const Locale('en'));
-    registerFallbackValue(const SettingsState(locale: Locale('ar'), isAzanVoiceDownloading: false));
+    registerFallbackValue(
+      const SettingsState(locale: Locale('ar'), isAzanVoiceDownloading: false),
+    );
     registerFallbackValue(<AzkarItem>[]);
   });
 
@@ -72,19 +93,26 @@ void main() {
       expect(cubit.state.salaahSettings, isNotEmpty);
     });
 
-    test('updateSalaahSettings updates state, saves to prefs and schedules notifications', () async {
-      final initialSettings = cubit.state.salaahSettings.first;
-      final updatedSettings = initialSettings.copyWith(isAzanEnabled: false);
+    test(
+      'updateSalaahSettings updates state, saves to prefs and schedules notifications',
+      () async {
+        final initialSettings = cubit.state.salaahSettings.first;
+        final updatedSettings = initialSettings.copyWith(isAzanEnabled: false);
 
-      cubit.updateSalaahSettings(updatedSettings);
-      
-      // Wait for the 50ms delay in SettingsCubit._updateReminders
-      await Future.delayed(const Duration(milliseconds: 100));
+        cubit.updateSalaahSettings(updatedSettings);
 
-      expect(cubit.state.salaahSettings.first.isAzanEnabled, false);
-      verify(() => mockPrefs.setString('salaah_settings', any())).called(1);
-      verify(() => mockNotificationService.schedulePrayerNotifications(settings: any(named: 'settings'))).called(1);
-    });
+        // Wait for the 50ms delay in SettingsCubit._updateReminders
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        expect(cubit.state.salaahSettings.first.isAzanEnabled, false);
+        verify(() => mockPrefs.setString('salaah_settings', any())).called(1);
+        verify(
+          () => mockNotificationService.schedulePrayerNotifications(
+            settings: any(named: 'settings'),
+          ),
+        ).called(1);
+      },
+    );
 
     test('updateLocale updates state and prefs', () async {
       cubit.updateLocale(const Locale('en'));
@@ -93,10 +121,53 @@ void main() {
       verify(() => mockPrefs.setString('locale', 'en')).called(1);
     });
 
-    test('refreshLocation updates state with mapped calculation method', () async {
+    test(
+      'refreshLocation updates state with mapped calculation method',
+      () async {
+        final position = Position(
+          latitude: 30.0444,
+          longitude: 31.2357,
+          timestamp: DateTime.now(),
+          accuracy: 0,
+          altitude: 0,
+          heading: 0,
+          speed: 0,
+          speedAccuracy: 0,
+          altitudeAccuracy: 0,
+          headingAccuracy: 0,
+        );
+
+        when(
+          () => mockLocationService.getCurrentPosition(),
+        ).thenAnswer((_) async => position);
+        when(
+          () =>
+              mockLocationService.getLocationDataFromCoordinates(any(), any()),
+        ).thenAnswer((_) async => {'city': 'Cairo', 'countryCode': 'EG'});
+
+        await cubit.refreshLocation();
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        expect(cubit.state.cityName, 'Cairo');
+        expect(
+          cubit.state.calculationMethod,
+          'egyptian',
+        ); // EG maps to egyptian
+        verify(() => mockPrefs.setString('latitude', '30.0444')).called(1);
+        verify(
+          () => mockPrefs.setString('calculation_method', 'egyptian'),
+        ).called(1);
+      },
+    );
+
+    test('mapCountryToMethod returns correct methods', () async {
+      // We can test private method indirectly via refreshLocation or exposing it for test
+      // But let's trust the logic if it works for EG.
+      // Test another one: SA -> umm_al_qura
+
       final position = Position(
-        latitude: 30.0444,
-        longitude: 31.2357,
+        latitude: 21.4225,
+        longitude: 39.8262,
         timestamp: DateTime.now(),
         accuracy: 0,
         altitude: 0,
@@ -107,40 +178,42 @@ void main() {
         headingAccuracy: 0,
       );
 
-      when(() => mockLocationService.getCurrentPosition())
-          .thenAnswer((_) async => position);
-      when(() => mockLocationService.getLocationDataFromCoordinates(any(), any()))
-          .thenAnswer((_) async => {'city': 'Cairo', 'countryCode': 'EG'});
+      when(
+        () => mockLocationService.getCurrentPosition(),
+      ).thenAnswer((_) async => position);
+      when(
+        () => mockLocationService.getLocationDataFromCoordinates(any(), any()),
+      ).thenAnswer((_) async => {'city': 'Mecca', 'countryCode': 'SA'});
 
       await cubit.refreshLocation();
       await Future.delayed(const Duration(milliseconds: 100));
 
-      expect(cubit.state.cityName, 'Cairo');
-      expect(cubit.state.calculationMethod, 'egyptian'); // EG maps to egyptian
-      verify(() => mockPrefs.setDouble('latitude', 30.0444)).called(1);
-      verify(() => mockPrefs.setString('calculation_method', 'egyptian')).called(1);
+      expect(cubit.state.calculationMethod, 'umm_al_qura');
     });
 
-    test('mapCountryToMethod returns correct methods', () async {
-      // We can test private method indirectly via refreshLocation or exposing it for test
-      // But let's trust the logic if it works for EG. 
-      // Test another one: SA -> umm_al_qura
-      
-      final position = Position(
-        latitude: 21.4225, longitude: 39.8262,
-        timestamp: DateTime.now(), accuracy: 0, altitude: 0, heading: 0, speed: 0, speedAccuracy: 0,
-        altitudeAccuracy: 0, headingAccuracy: 0,
-      );
-
-      when(() => mockLocationService.getCurrentPosition())
-          .thenAnswer((_) async => position);
-      when(() => mockLocationService.getLocationDataFromCoordinates(any(), any()))
-          .thenAnswer((_) async => {'city': 'Mecca', 'countryCode': 'SA'});
-
-      await cubit.refreshLocation();
+    test('updateMadhab triggers widget update', () async {
+      cubit.updateMadhab('hanafi');
       await Future.delayed(const Duration(milliseconds: 100));
-      
-      expect(cubit.state.calculationMethod, 'umm_al_qura');
+
+      expect(cubit.state.madhab, 'hanafi');
+      verify(() => mockWidgetUpdateService.updateWidget(any())).called(1);
+    });
+
+    test('updateCalculationMethod triggers widget update', () async {
+      cubit.updateCalculationMethod('egyptian');
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      expect(cubit.state.calculationMethod, 'egyptian');
+      // Called twice: once by updateHijriAdjustment (internal call) and once by updateCalculationMethod itself
+      verify(() => mockWidgetUpdateService.updateWidget(any())).called(2);
+    });
+
+    test('updateHijriAdjustment triggers widget update', () async {
+      cubit.updateHijriAdjustment(2);
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      expect(cubit.state.hijriAdjustment, 2);
+      verify(() => mockWidgetUpdateService.updateWidget(any())).called(1);
     });
   });
 }

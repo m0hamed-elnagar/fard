@@ -18,7 +18,9 @@ class ReaderSettingsSheet extends StatelessWidget {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Theme.of(context).scaffoldBackgroundColor,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -47,7 +49,10 @@ class ReaderSettingsSheet extends StatelessWidget {
                   children: [
                     const Icon(Icons.format_size, size: 20),
                     const SizedBox(width: 12),
-                    Text(l10n.textSize, style: const TextStyle(fontWeight: FontWeight.w500)),
+                    Text(
+                      l10n.textSize,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
                     const Spacer(),
                     Text('${(s.textScale * 100).toInt()}%'),
                   ],
@@ -58,7 +63,9 @@ class ReaderSettingsSheet extends StatelessWidget {
                   max: 3.0,
                   divisions: 22,
                   onChanged: (value) {
-                    context.read<ReaderBloc>().add(ReaderEvent.updateScale(value));
+                    context.read<ReaderBloc>().add(
+                      ReaderEvent.updateScale(value),
+                    );
                   },
                 ),
                 const SizedBox(height: 24),
@@ -66,7 +73,10 @@ class ReaderSettingsSheet extends StatelessWidget {
                   children: [
                     const Icon(Icons.view_day_outlined, size: 20),
                     const SizedBox(width: 12),
-                    Text(l10n.separators, style: const TextStyle(fontWeight: FontWeight.w500)),
+                    Text(
+                      l10n.separators,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -75,15 +85,32 @@ class ReaderSettingsSheet extends StatelessWidget {
                     scrollDirection: Axis.horizontal,
                     child: SegmentedButton<ReaderSeparator>(
                       segments: [
-                        ButtonSegment(value: ReaderSeparator.none, label: Text(l10n.none)),
-                        ButtonSegment(value: ReaderSeparator.page, label: Text(l10n.page)),
-                        ButtonSegment(value: ReaderSeparator.juz, label: Text(l10n.juzTab)),
-                        ButtonSegment(value: ReaderSeparator.hizb, label: Text(l10n.hizbTab)),
-                        ButtonSegment(value: ReaderSeparator.quarter, label: Text(l10n.quarter)),
+                        ButtonSegment(
+                          value: ReaderSeparator.none,
+                          label: Text(l10n.none),
+                        ),
+                        ButtonSegment(
+                          value: ReaderSeparator.page,
+                          label: Text(l10n.page),
+                        ),
+                        ButtonSegment(
+                          value: ReaderSeparator.juz,
+                          label: Text(l10n.juzTab),
+                        ),
+                        ButtonSegment(
+                          value: ReaderSeparator.hizb,
+                          label: Text(l10n.hizbTab),
+                        ),
+                        ButtonSegment(
+                          value: ReaderSeparator.quarter,
+                          label: Text(l10n.quarter),
+                        ),
                       ],
                       selected: {s.separator},
                       onSelectionChanged: (value) {
-                        context.read<ReaderBloc>().add(ReaderEvent.updateSeparator(value.first));
+                        context.read<ReaderBloc>().add(
+                          ReaderEvent.updateSeparator(value.first),
+                        );
                       },
                       showSelectedIcon: false,
                     ),

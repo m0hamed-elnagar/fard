@@ -12,7 +12,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-class MockAudioBloc extends MockBloc<AudioEvent, AudioState> implements AudioBloc {}
+class MockAudioBloc extends MockBloc<AudioEvent, AudioState>
+    implements AudioBloc {}
 
 void main() {
   late MockAudioBloc mockAudioBloc;
@@ -32,9 +33,7 @@ void main() {
       supportedLocales: const [Locale('en'), Locale('ar')],
       home: BlocProvider<AudioBloc>.value(
         value: mockAudioBloc,
-        child: const Scaffold(
-          body: ReciterSelector(),
-        ),
+        child: const Scaffold(body: ReciterSelector()),
       ),
     );
   }
@@ -57,7 +56,9 @@ void main() {
     );
   });
 
-  testWidgets('Selecting popular reciter should scroll the full list', (tester) async {
+  testWidgets('Selecting popular reciter should scroll the full list', (
+    tester,
+  ) async {
     // Set initial state
     when(() => mockAudioBloc.state).thenReturn(
       AudioState(
@@ -80,13 +81,15 @@ void main() {
 
     // Get the main list (second ListView)
     final mainListFinder = find.byType(ListView).last;
-    final ScrollController scrollController = tester.widget<ListView>(mainListFinder).controller!;
+    final ScrollController scrollController = tester
+        .widget<ListView>(mainListFinder)
+        .controller!;
 
     expect(scrollController.offset, 0.0);
 
     // Tap Alafasy in popular list
     await tester.tap(popularAlafasyFinder);
-    
+
     // Pump for animation (500ms in code)
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));

@@ -54,12 +54,20 @@ class HistoryList extends StatelessWidget {
           child: ExpansionTile(
             key: PageStorageKey('history_$monthKey'),
             initiallyExpanded: monthKey == sortedKeys.first,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
-            collapsedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            collapsedShape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.0),
+            ),
             tilePadding: const EdgeInsets.fromLTRB(16.0, 8.0, 12.0, 8.0),
             title: Row(
               children: [
-                const Icon(Icons.history_rounded, color: AppTheme.accent, size: 20.0),
+                const Icon(
+                  Icons.history_rounded,
+                  color: AppTheme.accent,
+                  size: 20.0,
+                ),
                 const SizedBox(width: 12.0),
                 Text(
                   monthKey,
@@ -71,7 +79,10 @@ class HistoryList extends StatelessWidget {
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 2.0,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.surfaceLight,
                     borderRadius: BorderRadius.circular(12.0),
@@ -97,7 +108,8 @@ class HistoryList extends StatelessWidget {
                       color: Colors.transparent,
                       child: InkWell(
                         onTap: () => onTap?.call(monthRecords[i].date),
-                        onLongPress: () => _confirmDelete(context, monthRecords[i]),
+                        onLongPress: () =>
+                            _confirmDelete(context, monthRecords[i]),
                         child: _buildRecordItem(context, monthRecords[i]),
                       ),
                     ),
@@ -118,16 +130,18 @@ class HistoryList extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final prayerTimeService = getIt<PrayerTimeService>();
     final settings = context.read<SettingsCubit>().state;
-    
+
     // Get prayer times for this specific record date to accurately determine if passed
     var totalQada = record.qada.values.fold(0, (sum, c) => sum + c.value);
     final today = DateTime.now();
-    final isToday = record.date.year == today.year &&
+    final isToday =
+        record.date.year == today.year &&
         record.date.month == today.month &&
         record.date.day == today.day;
-    
+
     // Get prayer times for this specific record date to accurately determine if passed
-    final prayerTimes = (isToday && settings.latitude != null && settings.longitude != null)
+    final prayerTimes =
+        (isToday && settings.latitude != null && settings.longitude != null)
         ? prayerTimeService.getPrayerTimes(
             latitude: settings.latitude!,
             longitude: settings.longitude!,
@@ -140,14 +154,27 @@ class HistoryList extends StatelessWidget {
     // A prayer is "missed" ONLY if it has passed and is NOT completed.
     // However, the record already stores missedToday and completedToday.
     // We should only show prayers that have PASSED their time.
-    final passedPrayers = Salaah.values.where((s) => 
-      prayerTimeService.isPassed(s, prayerTimes: prayerTimes, date: record.date)
-    ).toList();
+    final passedPrayers = Salaah.values
+        .where(
+          (s) => prayerTimeService.isPassed(
+            s,
+            prayerTimes: prayerTimes,
+            date: record.date,
+          ),
+        )
+        .toList();
 
     // A prayer is "missed" if it has passed and is NOT completed.
-    final actualMissedCount = passedPrayers.where((s) => !record.completedToday.contains(s)).length;
-    final performedToday = record.completedToday.where((s) => passedPrayers.contains(s)).length;
-    final qadaCompletedToday = record.completedQada.values.fold(0, (sum, val) => sum + val);
+    final actualMissedCount = passedPrayers
+        .where((s) => !record.completedToday.contains(s))
+        .length;
+    final performedToday = record.completedToday
+        .where((s) => passedPrayers.contains(s))
+        .length;
+    final qadaCompletedToday = record.completedQada.values.fold(
+      0,
+      (sum, val) => sum + val,
+    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
@@ -164,7 +191,9 @@ class HistoryList extends StatelessWidget {
                   : AppTheme.surfaceLight,
               borderRadius: BorderRadius.circular(10.0),
               border: isToday
-                  ? Border.all(color: AppTheme.primaryLight.withValues(alpha: 0.40))
+                  ? Border.all(
+                      color: AppTheme.primaryLight.withValues(alpha: 0.40),
+                    )
                   : Border.all(color: Colors.transparent, width: 0.0),
             ),
             child: Column(
@@ -172,7 +201,9 @@ class HistoryList extends StatelessWidget {
                 Text(
                   '${record.date.day}',
                   style: GoogleFonts.outfit(
-                    color: isToday ? AppTheme.primaryLight : AppTheme.textPrimary,
+                    color: isToday
+                        ? AppTheme.primaryLight
+                        : AppTheme.textPrimary,
                     fontSize: 16.0,
                     fontWeight: FontWeight.w700,
                   ),
@@ -200,7 +231,10 @@ class HistoryList extends StatelessWidget {
                   children: [
                     // Performed Count (Finished)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6.0,
+                        vertical: 2.0,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.saved.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(6.0),
@@ -216,7 +250,10 @@ class HistoryList extends StatelessWidget {
                     ),
                     if (settings.isQadaEnabled && qadaCompletedToday > 0)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6.0,
+                          vertical: 2.0,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.primaryLight.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6.0),
@@ -233,7 +270,9 @@ class HistoryList extends StatelessWidget {
                     if (actualMissedCount > 0)
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 6.0, vertical: 2.0),
+                          horizontal: 6.0,
+                          vertical: 2.0,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.missed.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6.0),
@@ -246,7 +285,7 @@ class HistoryList extends StatelessWidget {
                           ),
                         ),
                       ),
-                    
+
                     if (settings.isQadaEnabled)
                       Padding(
                         padding: const EdgeInsets.only(left: 4.0),
@@ -269,10 +308,12 @@ class HistoryList extends StatelessWidget {
                   children: passedPrayers.map((s) {
                     final wasCompleted = record.completedToday.contains(s);
                     final wasMissed = !wasCompleted;
-                    
+
                     return Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 4.0),
+                        horizontal: 8.0,
+                        vertical: 4.0,
+                      ),
                       decoration: BoxDecoration(
                         color: wasMissed
                             ? AppTheme.missed.withValues(alpha: 0.08)
@@ -288,7 +329,9 @@ class HistoryList extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            wasMissed ? Icons.close_rounded : Icons.check_circle_rounded,
+                            wasMissed
+                                ? Icons.close_rounded
+                                : Icons.check_circle_rounded,
                             color: wasMissed ? AppTheme.missed : AppTheme.saved,
                             size: 14.0,
                           ),
@@ -296,7 +339,9 @@ class HistoryList extends StatelessWidget {
                           Text(
                             s.localizedName(l10n),
                             style: GoogleFonts.amiri(
-                              color: wasMissed ? AppTheme.missed : AppTheme.saved,
+                              color: wasMissed
+                                  ? AppTheme.missed
+                                  : AppTheme.saved,
                               fontSize: 12.0,
                               fontWeight: FontWeight.bold,
                             ),
@@ -319,8 +364,8 @@ class HistoryList extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => Directionality(
-        textDirection: Localizations.localeOf(context).languageCode == 'ar' 
-            ? ui.TextDirection.rtl 
+        textDirection: Localizations.localeOf(context).languageCode == 'ar'
+            ? ui.TextDirection.rtl
             : ui.TextDirection.ltr,
         child: AlertDialog(
           backgroundColor: AppTheme.surface,
@@ -333,9 +378,7 @@ class HistoryList extends StatelessWidget {
           ),
           content: Text(
             l10n.deleteConfirm('${record.date.day}/${record.date.month}'),
-            style: GoogleFonts.amiri(
-              color: AppTheme.textSecondary,
-            ),
+            style: GoogleFonts.amiri(color: AppTheme.textSecondary),
           ),
           actions: [
             TextButton(
@@ -376,8 +419,11 @@ class HistoryList extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.history_rounded,
-              color: AppTheme.textSecondary.withValues(alpha: 0.40), size: 20.0),
+          Icon(
+            Icons.history_rounded,
+            color: AppTheme.textSecondary.withValues(alpha: 0.40),
+            size: 20.0,
+          ),
           const SizedBox(width: 8.0),
           Text(
             l10n.noHistory,

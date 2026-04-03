@@ -3,13 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:injectable/injectable.dart';
 
-enum LocationStatus {
-  success,
-  serviceDisabled,
-  denied,
-  deniedForever,
-  error,
-}
+enum LocationStatus { success, serviceDisabled, denied, deniedForever, error }
 
 @singleton
 class LocationService {
@@ -53,13 +47,19 @@ class LocationService {
     return await Geolocator.getCurrentPosition();
   }
 
-  Future<Map<String, String?>?> getLocationDataFromCoordinates(double latitude, double longitude) async {
+  Future<Map<String, String?>?> getLocationDataFromCoordinates(
+    double latitude,
+    double longitude,
+  ) async {
     if (Platform.isWindows) {
       return null; // Geocoding not supported on Windows
     }
-    
+
     try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        latitude,
+        longitude,
+      );
       if (placemarks.isNotEmpty) {
         final place = placemarks[0];
         return {

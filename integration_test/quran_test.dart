@@ -15,13 +15,13 @@ void main() {
       // Initialize dependencies manually with a temp directory for Hive
       final tempDir = Directory.systemTemp.createTempSync('fard_quran_test_');
       await configureDependencies(hivePath: tempDir.path);
-      
+
       final prefs = getIt<SharedPreferences>();
       await prefs.setBool('onboarding_complete', true);
-      await prefs.setString('locale', 'en'); 
+      await prefs.setString('locale', 'en');
 
       await tester.pumpWidget(const QadaTrackerApp());
-      
+
       // Wait for app to initialize and settle
       await tester.pumpAndSettle(const Duration(seconds: 5));
 
@@ -46,13 +46,16 @@ void main() {
         // Fallback to NavigationBar index if text/icon finders fail
         final navBar = find.byType(NavigationBar);
         if (navBar.evaluate().isNotEmpty) {
-          final destinations = find.descendant(of: navBar, matching: find.byType(NavigationDestination));
+          final destinations = find.descendant(
+            of: navBar,
+            matching: find.byType(NavigationDestination),
+          );
           if (destinations.evaluate().length > 1) {
             targetTab = destinations.at(1);
           }
         }
       }
-      
+
       if (targetTab != null) {
         await tester.tap(targetTab.first);
         await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -63,9 +66,10 @@ void main() {
       // Check if we are on the Quran page
       final loadingIndicator = find.byType(CircularProgressIndicator);
       final listTile = find.byType(ListTile);
-      
+
       expect(
-        loadingIndicator.evaluate().isNotEmpty || listTile.evaluate().isNotEmpty,
+        loadingIndicator.evaluate().isNotEmpty ||
+            listTile.evaluate().isNotEmpty,
         isTrue,
         reason: 'Should show either a loading indicator or surah list',
       );

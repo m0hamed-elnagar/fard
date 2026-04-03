@@ -62,7 +62,9 @@ class _SalaahTileState extends State<SalaahTile> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final timeFormat = DateFormat.jm(Localizations.localeOf(context).languageCode);
+    final timeFormat = DateFormat.jm(
+      Localizations.localeOf(context).languageCode,
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -80,28 +82,31 @@ class _SalaahTileState extends State<SalaahTile> {
               colors: widget.isUpcoming
                   ? [AppTheme.surface, AppTheme.surface]
                   : widget.isCompletedToday
-                      ? [
-                          AppTheme.primaryLight.withValues(alpha: 0.15),
-                          AppTheme.primaryLight.withValues(alpha: 0.05),
-                        ]
-                      : [
-                          AppTheme.missed.withValues(alpha: 0.15),
-                          AppTheme.missed.withValues(alpha: 0.05),
-                        ],
+                  ? [
+                      AppTheme.primaryLight.withValues(alpha: 0.15),
+                      AppTheme.primaryLight.withValues(alpha: 0.05),
+                    ]
+                  : [
+                      AppTheme.missed.withValues(alpha: 0.15),
+                      AppTheme.missed.withValues(alpha: 0.05),
+                    ],
             ),
             borderRadius: BorderRadius.circular(20.0),
             border: Border.all(
               color: widget.isUpcoming
                   ? AppTheme.cardBorder.withValues(alpha: 0.5)
                   : widget.isCompletedToday
-                      ? AppTheme.primaryLight.withValues(alpha: 0.4)
-                      : AppTheme.missed.withValues(alpha: 0.4),
+                  ? AppTheme.primaryLight.withValues(alpha: 0.4)
+                  : AppTheme.missed.withValues(alpha: 0.4),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: !widget.isUpcoming 
-                    ? (widget.isCompletedToday ? AppTheme.primaryLight : AppTheme.missed).withValues(alpha: 0.1)
+                color: !widget.isUpcoming
+                    ? (widget.isCompletedToday
+                              ? AppTheme.primaryLight
+                              : AppTheme.missed)
+                          .withValues(alpha: 0.1)
                     : Colors.transparent,
                 blurRadius: !widget.isUpcoming ? 10 : 0,
                 offset: !widget.isUpcoming ? const Offset(0, 4) : Offset.zero,
@@ -112,15 +117,17 @@ class _SalaahTileState extends State<SalaahTile> {
             color: Colors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(20.0),
-              onTap: widget.isUpcoming ? null : () {
-                HapticFeedback.lightImpact();
-                if (widget.isCompletedToday && _removedInSession > 0) {
-                  setState(() {
-                    _removedInSession--;
-                  });
-                }
-                widget.onToggleMissed();
-              },
+              onTap: widget.isUpcoming
+                  ? null
+                  : () {
+                      HapticFeedback.lightImpact();
+                      if (widget.isCompletedToday && _removedInSession > 0) {
+                        setState(() {
+                          _removedInSession--;
+                        });
+                      }
+                      widget.onToggleMissed();
+                    },
               child: Opacity(
                 opacity: widget.isUpcoming ? 0.6 : 1.0,
                 child: Padding(
@@ -130,19 +137,23 @@ class _SalaahTileState extends State<SalaahTile> {
                       // Today Missed Status
                       _StatusIndicator(
                         icon: _getSalaahIcon(widget.salaah),
-                        isMissed: !widget.isUpcoming && !widget.isCompletedToday,
+                        isMissed:
+                            !widget.isUpcoming && !widget.isCompletedToday,
                         isCompleted: widget.isCompletedToday,
                         isUpcoming: widget.isUpcoming,
                         size: isNarrow ? 40.0 : 48.0,
-                        onTap: widget.isUpcoming ? () {} : () {
-                          HapticFeedback.mediumImpact();
-                          if (widget.isCompletedToday && _removedInSession > 0) {
-                            setState(() {
-                              _removedInSession--;
-                            });
-                          }
-                          widget.onToggleMissed();
-                        },
+                        onTap: widget.isUpcoming
+                            ? () {}
+                            : () {
+                                HapticFeedback.mediumImpact();
+                                if (widget.isCompletedToday &&
+                                    _removedInSession > 0) {
+                                  setState(() {
+                                    _removedInSession--;
+                                  });
+                                }
+                                widget.onToggleMissed();
+                              },
                       ),
                       SizedBox(width: isNarrow ? 10.0 : 16.0),
 
@@ -161,47 +172,67 @@ class _SalaahTileState extends State<SalaahTile> {
                                 icon: Icons.add_rounded,
                                 size: isNarrow ? 20 : 24,
                                 padding: isNarrow ? 6 : 10,
-                                onPressed: widget.isUpcoming ? null : () {
-                                  HapticFeedback.lightImpact();
-                                  if (_removedInSession > 0 || widget.completedQadaCount > 0) {
-                                    widget.onAdd();
-                                    if (_removedInSession > 0) {
-                                      setState(() {
-                                        _removedInSession--;
-                                      });
-                                    }
-                                  } else {
-                                    widget.onLimitExceeded?.call();
-                                    ScaffoldMessenger.of(context).clearSnackBars();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Row(
-                                          children: [
-                                            const Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 20),
-                                            const SizedBox(width: 12),
-                                            Expanded(
-                                              child: Text(
-                                                l10n.useAddQadaToNewPrayers,
-                                                style: GoogleFonts.outfit(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
+                                onPressed: widget.isUpcoming
+                                    ? null
+                                    : () {
+                                        HapticFeedback.lightImpact();
+                                        if (_removedInSession > 0 ||
+                                            widget.completedQadaCount > 0) {
+                                          widget.onAdd();
+                                          if (_removedInSession > 0) {
+                                            setState(() {
+                                              _removedInSession--;
+                                            });
+                                          }
+                                        } else {
+                                          widget.onLimitExceeded?.call();
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).clearSnackBars();
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.arrow_upward_rounded,
+                                                    color: Colors.white,
+                                                    size: 20,
+                                                  ),
+                                                  const SizedBox(width: 12),
+                                                  Expanded(
+                                                    child: Text(
+                                                      l10n.useAddQadaToNewPrayers,
+                                                      style: GoogleFonts.outfit(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              backgroundColor: AppTheme.accent,
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                              margin: const EdgeInsets.all(16),
+                                              elevation: 4,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              duration: const Duration(
+                                                seconds: 3,
                                               ),
                                             ),
-                                          ],
-                                        ),
-                                        backgroundColor: AppTheme.accent,
-                                        behavior: SnackBarBehavior.floating,
-                                        margin: const EdgeInsets.all(16),
-                                        elevation: 4,
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                        duration: const Duration(seconds: 3),
-                                      ),
-                                    );
-                                  }
-                                },
-                                color: (_removedInSession > 0 && !widget.isUpcoming)
-                                    ? AppTheme.primaryLight 
+                                          );
+                                        }
+                                      },
+                                color:
+                                    (_removedInSession > 0 &&
+                                        !widget.isUpcoming)
+                                    ? AppTheme.primaryLight
                                     : AppTheme.neutral.withValues(alpha: 0.5),
                               ),
                               Container(
@@ -213,22 +244,25 @@ class _SalaahTileState extends State<SalaahTile> {
                                 icon: Icons.remove_rounded,
                                 size: isNarrow ? 20 : 24,
                                 padding: isNarrow ? 6 : 10,
-                                onPressed: (widget.qadaCount > 0 && !widget.isUpcoming) ? () {
-                                  HapticFeedback.lightImpact();
-                                  widget.onRemove();
-                                  setState(() {
-                                    _removedInSession++;
-                                  });
-                                } : null,
+                                onPressed:
+                                    (widget.qadaCount > 0 && !widget.isUpcoming)
+                                    ? () {
+                                        HapticFeedback.lightImpact();
+                                        widget.onRemove();
+                                        setState(() {
+                                          _removedInSession++;
+                                        });
+                                      }
+                                    : null,
                                 color: AppTheme.missed,
                               ),
                             ],
                           ),
                         ),
 
-                      if (widget.isQadaEnabled && !isVeryNarrow) 
+                      if (widget.isQadaEnabled && !isVeryNarrow)
                         SizedBox(width: isNarrow ? 10.0 : 16.0),
-                      
+
                       // Salaah Info
                       Expanded(
                         child: Column(
@@ -249,7 +283,11 @@ class _SalaahTileState extends State<SalaahTile> {
                                 padding: const EdgeInsets.only(top: 2),
                                 child: Row(
                                   children: [
-                                    Icon(Icons.access_time_rounded, size: isNarrow ? 12 : 14, color: AppTheme.accent),
+                                    Icon(
+                                      Icons.access_time_rounded,
+                                      size: isNarrow ? 12 : 14,
+                                      color: AppTheme.accent,
+                                    ),
                                     const SizedBox(width: 4),
                                     Text(
                                       timeFormat.format(widget.time!),
@@ -274,12 +312,19 @@ class _SalaahTileState extends State<SalaahTile> {
                             if (widget.completedQadaCount > 0 && !isVeryNarrow)
                               Container(
                                 margin: const EdgeInsets.only(right: 6.0),
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8.0,
+                                  vertical: 4.0,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.primaryLight.withValues(alpha: 0.1),
+                                  color: AppTheme.primaryLight.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(10.0),
                                   border: Border.all(
-                                    color: AppTheme.primaryLight.withValues(alpha: 0.3),
+                                    color: AppTheme.primaryLight.withValues(
+                                      alpha: 0.3,
+                                    ),
                                   ),
                                 ),
                                 child: Column(
@@ -296,7 +341,9 @@ class _SalaahTileState extends State<SalaahTile> {
                                     Text(
                                       l10n.done,
                                       style: GoogleFonts.outfit(
-                                        color: AppTheme.primaryLight.withValues(alpha: 0.7),
+                                        color: AppTheme.primaryLight.withValues(
+                                          alpha: 0.7,
+                                        ),
                                         fontSize: isNarrow ? 7.0 : 9.0,
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -306,18 +353,18 @@ class _SalaahTileState extends State<SalaahTile> {
                               ),
                             Container(
                               padding: EdgeInsets.symmetric(
-                                horizontal: isNarrow ? 10.0 : 16.0, 
-                                vertical: isNarrow ? 6.0 : 8.0
+                                horizontal: isNarrow ? 10.0 : 16.0,
+                                vertical: isNarrow ? 6.0 : 8.0,
                               ),
                               decoration: BoxDecoration(
-                                color: widget.qadaCount > 0 
-                                  ? AppTheme.accent.withValues(alpha: 0.1)
-                                  : Colors.transparent,
+                                color: widget.qadaCount > 0
+                                    ? AppTheme.accent.withValues(alpha: 0.1)
+                                    : Colors.transparent,
                                 borderRadius: BorderRadius.circular(12.0),
                                 border: Border.all(
-                                  color: widget.qadaCount > 0 
-                                    ? AppTheme.accent.withValues(alpha: 0.3)
-                                    : Colors.transparent,
+                                  color: widget.qadaCount > 0
+                                      ? AppTheme.accent.withValues(alpha: 0.3)
+                                      : Colors.transparent,
                                 ),
                               ),
                               child: Column(
@@ -334,10 +381,14 @@ class _SalaahTileState extends State<SalaahTile> {
                                     ),
                                   ),
                                   Text(
-                                    isNarrow ? 'rem.' : l10n.remaining.toLowerCase(),
+                                    isNarrow
+                                        ? 'rem.'
+                                        : l10n.remaining.toLowerCase(),
                                     style: GoogleFonts.outfit(
                                       color: widget.qadaCount > 0
-                                          ? AppTheme.accent.withValues(alpha: 0.7)
+                                          ? AppTheme.accent.withValues(
+                                              alpha: 0.7,
+                                            )
                                           : AppTheme.neutral,
                                       fontSize: isNarrow ? 7.0 : 10.0,
                                       fontWeight: FontWeight.w600,
@@ -390,33 +441,36 @@ class _StatusIndicator extends StatelessWidget {
           color: isUpcoming
               ? Colors.transparent
               : isCompleted
-                  ? AppTheme.primaryLight
-                  : isMissed
-                      ? AppTheme.missed
-                      : AppTheme.surfaceLight,
+              ? AppTheme.primaryLight
+              : isMissed
+              ? AppTheme.missed
+              : AppTheme.surfaceLight,
           shape: BoxShape.circle,
           border: Border.all(
             color: isUpcoming
                 ? AppTheme.neutral.withValues(alpha: 0.3)
                 : isCompleted
-                    ? AppTheme.primaryLight
-                    : isMissed
-                        ? AppTheme.missed
-                        : AppTheme.neutral.withValues(alpha: 0.5),
+                ? AppTheme.primaryLight
+                : isMissed
+                ? AppTheme.missed
+                : AppTheme.neutral.withValues(alpha: 0.5),
             width: 2.0,
           ),
-        boxShadow: [
-          BoxShadow(
-            color: ((isMissed || isCompleted) && !isUpcoming)
-                ? (isCompleted ? AppTheme.primaryLight : AppTheme.missed).withValues(alpha: 0.3)
-                : Colors.transparent,
-            blurRadius: ((isMissed || isCompleted) && !isUpcoming) ? 10 : 0,
-            spreadRadius: ((isMissed || isCompleted) && !isUpcoming) ? 1 : 0,
-          ),
-        ],
+          boxShadow: [
+            BoxShadow(
+              color: ((isMissed || isCompleted) && !isUpcoming)
+                  ? (isCompleted ? AppTheme.primaryLight : AppTheme.missed)
+                        .withValues(alpha: 0.3)
+                  : Colors.transparent,
+              blurRadius: ((isMissed || isCompleted) && !isUpcoming) ? 10 : 0,
+              spreadRadius: ((isMissed || isCompleted) && !isUpcoming) ? 1 : 0,
+            ),
+          ],
         ),
         child: Icon(
-          isUpcoming ? icon : (isCompleted ? Icons.check_rounded : Icons.close_rounded),
+          isUpcoming
+              ? icon
+              : (isCompleted ? Icons.check_rounded : Icons.close_rounded),
           color: isUpcoming
               ? AppTheme.neutral.withValues(alpha: 0.5)
               : Colors.white,
@@ -435,7 +489,7 @@ class _CounterButton extends StatelessWidget {
   final double padding;
 
   const _CounterButton({
-    required this.icon, 
+    required this.icon,
     this.onPressed,
     required this.color,
     this.size = 24.0,
@@ -448,7 +502,10 @@ class _CounterButton extends StatelessWidget {
       borderRadius: BorderRadius.circular(8.0),
       onTap: onPressed,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: padding + 2, vertical: padding),
+        padding: EdgeInsets.symmetric(
+          horizontal: padding + 2,
+          vertical: padding,
+        ),
         child: Icon(
           icon,
           color: onPressed != null

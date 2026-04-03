@@ -40,7 +40,9 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
           _startPointType = 0;
         } else {
           _startPointType = 2;
-          final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(currentGoal.startAbsolute!);
+          final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(
+            currentGoal.startAbsolute!,
+          );
           _selectedSurah = pos[0];
           _selectedAyah = pos[1];
         }
@@ -78,7 +80,10 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
       }
       return 1;
     }
-    return QuranHizbProvider.getAbsoluteAyahNumber(_selectedSurah, _selectedAyah);
+    return QuranHizbProvider.getAbsoluteAyahNumber(
+      _selectedSurah,
+      _selectedAyah,
+    );
   }
 
   @override
@@ -90,7 +95,10 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Container(
-        constraints: BoxConstraints(maxWidth: 500, maxHeight: size.height * 0.85),
+        constraints: BoxConstraints(
+          maxWidth: 500,
+          maxHeight: size.height * 0.85,
+        ),
         decoration: BoxDecoration(
           color: Theme.of(context).scaffoldBackgroundColor,
           borderRadius: BorderRadius.circular(28),
@@ -112,12 +120,18 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _buildSectionTitle(isAr ? 'نوع الهدف' : 'Goal Type', Icons.track_changes_rounded),
+                    _buildSectionTitle(
+                      isAr ? 'نوع الهدف' : 'Goal Type',
+                      Icons.track_changes_rounded,
+                    ),
                     const SizedBox(height: 12),
                     _buildGoalTypeToggle(isAr),
                     const SizedBox(height: 24),
 
-                    _buildSectionTitle(isAr ? 'نقطة البداية' : 'Start Point', Icons.place_rounded),
+                    _buildSectionTitle(
+                      isAr ? 'نقطة البداية' : 'Start Point',
+                      Icons.place_rounded,
+                    ),
                     const SizedBox(height: 12),
                     _buildStartPointSelector(isAr),
                     if (_startPointType == 2) ...[
@@ -127,7 +141,10 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
                     const SizedBox(height: 24),
 
                     if (_type == WerdGoalType.fixedAmount) ...[
-                      _buildSectionTitle(isAr ? 'الوحدة' : 'Unit', Icons.straighten_rounded),
+                      _buildSectionTitle(
+                        isAr ? 'الوحدة' : 'Unit',
+                        Icons.straighten_rounded,
+                      ),
                       const SizedBox(height: 12),
                       _buildUnitSelector(isAr),
                       const SizedBox(height: 24),
@@ -135,9 +152,11 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
 
                     _buildSectionTitle(
                       _type == WerdGoalType.finishInDays
-                        ? (isAr ? 'المدة الزمنية' : 'Duration')
-                        : (isAr ? 'الكمية اليومية' : 'Daily Amount'),
-                      _type == WerdGoalType.finishInDays ? Icons.calendar_today_rounded : Icons.numbers_rounded,
+                          ? (isAr ? 'المدة الزمنية' : 'Duration')
+                          : (isAr ? 'الكمية اليومية' : 'Daily Amount'),
+                      _type == WerdGoalType.finishInDays
+                          ? Icons.calendar_today_rounded
+                          : Icons.numbers_rounded,
                     ),
                     const SizedBox(height: 12),
                     _buildValueInput(isAr),
@@ -146,9 +165,12 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
                       const SizedBox(height: 12),
                       Text(
                         isAr
-                          ? 'سيتم تقسيم المتبقي من المصحف على عدد الأيام المختار.'
-                          : 'Remaining Quran will be divided over the selected days.',
-                        style: TextStyle(fontSize: 12, color: AppTheme.textSecondary.withValues(alpha: 0.7)),
+                            ? 'سيتم تقسيم المتبقي من المصحف على عدد الأيام المختار.'
+                            : 'Remaining Quran will be divided over the selected days.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary.withValues(alpha: 0.7),
+                        ),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -174,7 +196,10 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
               color: AppTheme.accent.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.auto_awesome_rounded, color: AppTheme.accent),
+            child: const Icon(
+              Icons.auto_awesome_rounded,
+              color: AppTheme.accent,
+            ),
           ),
           const SizedBox(width: 16),
           Text(
@@ -228,12 +253,12 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
         ButtonSegment(
           value: WerdGoalType.fixedAmount,
           label: Text(isAr ? 'كمية يومية' : 'Daily'),
-          icon: const Icon(Icons.bolt_rounded, size: 18)
+          icon: const Icon(Icons.bolt_rounded, size: 18),
         ),
         ButtonSegment(
           value: WerdGoalType.finishInDays,
           label: Text(isAr ? 'ختم القرآن' : 'Finish'),
-          icon: const Icon(Icons.auto_stories_rounded, size: 18)
+          icon: const Icon(Icons.auto_stories_rounded, size: 18),
         ),
       ],
       selected: {_type},
@@ -255,9 +280,18 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
           isExpanded: true,
           borderRadius: BorderRadius.circular(16),
           items: [
-            DropdownMenuItem(value: 0, child: Text(isAr ? 'من البداية' : 'From beginning')),
-            DropdownMenuItem(value: 1, child: Text(isAr ? 'من حيث توقفت' : 'From last read')),
-            DropdownMenuItem(value: 2, child: Text(isAr ? 'مكان محدد' : 'Specific place')),
+            DropdownMenuItem(
+              value: 0,
+              child: Text(isAr ? 'من البداية' : 'From beginning'),
+            ),
+            DropdownMenuItem(
+              value: 1,
+              child: Text(isAr ? 'من حيث توقفت' : 'From last read'),
+            ),
+            DropdownMenuItem(
+              value: 2,
+              child: Text(isAr ? 'مكان محدد' : 'Specific place'),
+            ),
           ],
           onChanged: (v) => setState(() => _startPointType = v ?? 0),
         ),
@@ -274,7 +308,9 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
             decoration: BoxDecoration(
               color: AppTheme.cardBorder.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.cardBorder.withValues(alpha: 0.2)),
+              border: Border.all(
+                color: AppTheme.cardBorder.withValues(alpha: 0.2),
+              ),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: DropdownButtonHideUnderline(
@@ -286,7 +322,9 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
                   return DropdownMenuItem(
                     value: s,
                     child: Text(
-                      isAr ? quran.getSurahNameArabic(s) : quran.getSurahName(s),
+                      isAr
+                          ? quran.getSurahNameArabic(s)
+                          : quran.getSurahName(s),
                       style: GoogleFonts.amiri(fontSize: 14),
                     ),
                   );
@@ -305,7 +343,9 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
             decoration: BoxDecoration(
               color: AppTheme.cardBorder.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.cardBorder.withValues(alpha: 0.2)),
+              border: Border.all(
+                color: AppTheme.cardBorder.withValues(alpha: 0.2),
+              ),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: DropdownButtonHideUnderline(
@@ -313,15 +353,16 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
                 value: _selectedAyah,
                 isExpanded: true,
                 borderRadius: BorderRadius.circular(16),
-                items: List.generate(
-                  quran.getVerseCount(_selectedSurah),
-                  (i) => i + 1
-                ).map((a) {
-                  return DropdownMenuItem(
-                    value: a,
-                    child: Text(isAr ? a.toArabicIndic() : a.toString()),
-                  );
-                }).toList(),
+                items:
+                    List.generate(
+                      quran.getVerseCount(_selectedSurah),
+                      (i) => i + 1,
+                    ).map((a) {
+                      return DropdownMenuItem(
+                        value: a,
+                        child: Text(isAr ? a.toArabicIndic() : a.toString()),
+                      );
+                    }).toList(),
                 onChanged: (v) => setState(() => _selectedAyah = v ?? 1),
               ),
             ),
@@ -335,11 +376,7 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: [
-        WerdUnit.ayah,
-        WerdUnit.page,
-        WerdUnit.juz,
-      ].map((u) {
+      children: [WerdUnit.ayah, WerdUnit.page, WerdUnit.juz].map((u) {
         final label = {
           WerdUnit.ayah: isAr ? 'آية' : 'Ayah',
           WerdUnit.page: isAr ? 'صفحة' : 'Page',
@@ -357,7 +394,9 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
             color: isSelected ? AppTheme.onAccent : AppTheme.textPrimary,
             fontWeight: FontWeight.bold,
           ),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         );
       }).toList(),
     );
@@ -385,7 +424,10 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
               controller: _valueController,
               keyboardType: TextInputType.number,
               textAlign: TextAlign.center,
-              style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold),
+              style: GoogleFonts.outfit(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
               decoration: const InputDecoration(
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
@@ -415,7 +457,7 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
             final val = int.tryParse(_valueController.text) ?? 1;
             int max = 10000;
             if (_type == WerdGoalType.finishInDays) {
-               max = 10000;
+              max = 10000;
             } else {
               if (_unit == WerdUnit.juz) max = 30;
               if (_unit == WerdUnit.page) max = 604;
@@ -456,9 +498,14 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
               onPressed: () => Navigator.pop(context),
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
-              child: Text(isAr ? 'إلغاء' : 'Cancel', style: const TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(
+                isAr ? 'إلغاء' : 'Cancel',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ),
           const SizedBox(width: 16),
@@ -469,24 +516,36 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
                 final val = int.tryParse(_valueController.text) ?? 10;
                 final startAbs = _calculateStartAbsolute();
 
-                context.read<WerdBloc>().add(WerdEvent.setGoal(WerdGoal(
-                  id: 'default',
-                  type: _type,
-                  value: val,
-                  unit: _unit,
-                  startDate: DateTime.now(),
-                  startAbsolute: startAbs,
-                )));
+                context.read<WerdBloc>().add(
+                  WerdEvent.setGoal(
+                    WerdGoal(
+                      id: 'default',
+                      type: _type,
+                      value: val,
+                      unit: _unit,
+                      startDate: DateTime.now(),
+                      startAbsolute: startAbs,
+                    ),
+                  ),
+                );
                 Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.accent,
                 foregroundColor: AppTheme.onAccent,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 elevation: 4,
               ),
-              child: Text(isAr ? 'حفظ الهدف' : 'Save Goal', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),   
+              child: Text(
+                isAr ? 'حفظ الهدف' : 'Save Goal',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
             ),
           ),
         ],

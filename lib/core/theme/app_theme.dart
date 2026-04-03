@@ -13,7 +13,9 @@ class AppTheme {
   static const Color background = Color(0xFF0D1117);
   static const Color surface = Color(0xFF161B22);
   static const Color surfaceLight = Color(0xFF21262D);
-  static const Color cardBorder = Color(0xFF3D444D); // Slightly lighter for visibility
+  static const Color cardBorder = Color(
+    0xFF3D444D,
+  ); // Slightly lighter for visibility
   static const Color textPrimary = Color(0xFFF0F6FC);
   static const Color textSecondary = Color(0xFFD1D5DA); // Brighter gray
   static const Color missed = Color(0xFFF85149); // Brighter red
@@ -22,7 +24,9 @@ class AppTheme {
   static const Color completed = saved;
   static const Color onSaved = Color(0xFF003300);
   static const Color onPrimary = Color(0xFF003300);
-  static const Color neutral = Color(0xFF8B949E); // Much brighter neutral (GitHub's secondary text color)
+  static const Color neutral = Color(
+    0xFF8B949E,
+  ); // Much brighter neutral (GitHub's secondary text color)
   static const Color onAccent = Color(0xFF3E2723);
 
   static ThemeData get darkTheme {
@@ -44,23 +48,50 @@ class AppTheme {
       textTheme: GoogleFonts.outfitTextTheme(
         const TextTheme(
           displayLarge: TextStyle(
-              color: textPrimary, fontWeight: FontWeight.w700, fontSize: 32.0),
+            color: textPrimary,
+            fontWeight: FontWeight.w700,
+            fontSize: 32.0,
+          ),
           displayMedium: TextStyle(
-              color: textPrimary, fontWeight: FontWeight.w600, fontSize: 28.0),
+            color: textPrimary,
+            fontWeight: FontWeight.w600,
+            fontSize: 28.0,
+          ),
           headlineLarge: TextStyle(
-              color: textPrimary, fontWeight: FontWeight.w600, fontSize: 24.0),
+            color: textPrimary,
+            fontWeight: FontWeight.w600,
+            fontSize: 24.0,
+          ),
           headlineMedium: TextStyle(
-              color: textPrimary, fontWeight: FontWeight.w500, fontSize: 20.0),
+            color: textPrimary,
+            fontWeight: FontWeight.w500,
+            fontSize: 20.0,
+          ),
           titleLarge: TextStyle(
-              color: textPrimary, fontWeight: FontWeight.w600, fontSize: 18.0),
+            color: textPrimary,
+            fontWeight: FontWeight.w600,
+            fontSize: 18.0,
+          ),
           titleMedium: TextStyle(
-              color: textPrimary, fontWeight: FontWeight.w500, fontSize: 16.0),
-          bodyLarge:
-              TextStyle(color: textPrimary, fontWeight: FontWeight.w400, fontSize: 16.0),
-          bodyMedium:
-              TextStyle(color: textSecondary, fontWeight: FontWeight.w400, fontSize: 14.0),
-          labelLarge:
-              TextStyle(color: textPrimary, fontWeight: FontWeight.w500, fontSize: 14.0),
+            color: textPrimary,
+            fontWeight: FontWeight.w500,
+            fontSize: 16.0,
+          ),
+          bodyLarge: TextStyle(
+            color: textPrimary,
+            fontWeight: FontWeight.w400,
+            fontSize: 16.0,
+          ),
+          bodyMedium: TextStyle(
+            color: textSecondary,
+            fontWeight: FontWeight.w400,
+            fontSize: 14.0,
+          ),
+          labelLarge: TextStyle(
+            color: textPrimary,
+            fontWeight: FontWeight.w500,
+            fontSize: 14.0,
+          ),
         ),
       ),
       appBarTheme: const AppBarTheme(
@@ -75,10 +106,16 @@ class AppTheme {
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return GoogleFonts.outfit(
-                color: accent, fontWeight: FontWeight.w600, fontSize: 12);
+              color: accent,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            );
           }
           return GoogleFonts.outfit(
-              color: textSecondary, fontWeight: FontWeight.w400, fontSize: 12);
+            color: textSecondary,
+            fontWeight: FontWeight.w400,
+            fontSize: 12,
+          );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -129,9 +166,7 @@ class AppTheme {
         ),
       ),
       iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(
-          foregroundColor: textSecondary,
-        ),
+        style: IconButton.styleFrom(foregroundColor: textSecondary),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: surface,
@@ -146,14 +181,16 @@ class AppTheme {
         unselectedLabelColor: textSecondary,
         indicatorColor: accent,
         dividerColor: cardBorder,
-        labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 14.0),
-        unselectedLabelStyle:
-            GoogleFonts.outfit(fontWeight: FontWeight.w400, fontSize: 14.0),
+        labelStyle: GoogleFonts.outfit(
+          fontWeight: FontWeight.w600,
+          fontSize: 14.0,
+        ),
+        unselectedLabelStyle: GoogleFonts.outfit(
+          fontWeight: FontWeight.w400,
+          fontSize: 14.0,
+        ),
       ),
-      dividerTheme: const DividerThemeData(
-        color: cardBorder,
-        thickness: 1.0,
-      ),
+      dividerTheme: const DividerThemeData(color: cardBorder, thickness: 1.0),
     );
   }
 }

@@ -1,13 +1,13 @@
 import 'package:equatable/equatable.dart';
 
 class Reciter extends Equatable {
-  final String identifier;      // e.g., 'ar.alafasy'
-  final String name;            // e.g., 'Mishary Rashid Alafasy'
-  final String englishName;     // e.g., 'Mishary Rashid Alafasy'
-  final String language;        // 'ar'
-  final String? style;          // e.g., 'Murattal'
-  final String? imageUrl;       // Optional: local asset or network
-  
+  final String identifier; // e.g., 'ar.alafasy'
+  final String name; // e.g., 'Mishary Rashid Alafasy'
+  final String englishName; // e.g., 'Mishary Rashid Alafasy'
+  final String language; // 'ar'
+  final String? style; // e.g., 'Murattal'
+  final String? imageUrl; // Optional: local asset or network
+
   const Reciter({
     required this.identifier,
     required this.name,
@@ -18,19 +18,26 @@ class Reciter extends Equatable {
   });
 
   @override
-  List<Object?> get props => [identifier, name, englishName, language, style, imageUrl];
+  List<Object?> get props => [
+    identifier,
+    name,
+    englishName,
+    language,
+    style,
+    imageUrl,
+  ];
 
   // Popular reciters to show first
   static const List<String> popularReciters = [
-    'ar.alijaber',           // Ali Jaber
-    'ar.yasseraldossari',   // Yasser Al-Dosari
-    'ar.alafasy',           // Mishary Rashid Alafasy
-    'ar.husary',            // Mahmoud Khalil Al-Husary
-    'ar.minshawi',          // Mohamed Siddiq Al-Minshawy
-    'ar.abdulbasitmurattal',// Abdul Basit Abdul Samad
-    'ar.ahmedajamy',        // Ahmed Ibn Ali Al-Ajamy
-    'ar.abdurrahmaansudais',// Abdurrahmaan As-Sudais
-    'ar.mahermuaiqly',      // Maher Al Muaiqly
-    'ar.saoodshuraym',      // Saood bin Ibraaheem Ash-Shuraym
+    'ar.alijaber', // Ali Jaber
+    'ar.yasseraldossari', // Yasser Al-Dosari
+    'ar.alafasy', // Mishary Rashid Alafasy
+    'ar.husary', // Mahmoud Khalil Al-Husary
+    'ar.minshawi', // Mohamed Siddiq Al-Minshawy
+    'ar.abdulbasitmurattal', // Abdul Basit Abdul Samad
+    'ar.ahmedajamy', // Ahmed Ibn Ali Al-Ajamy
+    'ar.abdurrahmaansudais', // Abdurrahmaan As-Sudais
+    'ar.mahermuaiqly', // Maher Al Muaiqly
+    'ar.saoodshuraym', // Saood bin Ibraaheem Ash-Shuraym
   ];
 }

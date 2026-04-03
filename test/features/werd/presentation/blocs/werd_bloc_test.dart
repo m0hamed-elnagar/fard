@@ -36,17 +36,22 @@ void main() {
 
     registerFallbackValue(testGoal);
     registerFallbackValue(initialProgress);
-    
-    when(() => mockRepository.getGoal(id: any(named: 'id')))
-        .thenAnswer((_) async => Result.success(testGoal));
-    when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
-        .thenAnswer((_) async => Result.success(initialProgress));
-    when(() => mockRepository.watchProgress(goalId: any(named: 'goalId')))
-        .thenAnswer((_) => Stream.value(Result.success(initialProgress)));
-    when(() => mockRepository.setGoal(any()))
-        .thenAnswer((_) async => Result.success(null));
-    when(() => mockRepository.updateProgress(any()))
-        .thenAnswer((_) async => Result.success(null));
+
+    when(
+      () => mockRepository.getGoal(id: any(named: 'id')),
+    ).thenAnswer((_) async => Result.success(testGoal));
+    when(
+      () => mockRepository.getProgress(goalId: any(named: 'goalId')),
+    ).thenAnswer((_) async => Result.success(initialProgress));
+    when(
+      () => mockRepository.watchProgress(goalId: any(named: 'goalId')),
+    ).thenAnswer((_) => Stream.value(Result.success(initialProgress)));
+    when(
+      () => mockRepository.setGoal(any()),
+    ).thenAnswer((_) async => Result.success(null));
+    when(
+      () => mockRepository.updateProgress(any()),
+    ).thenAnswer((_) async => Result.success(null));
   });
 
   group('WerdBloc Counting Logic (Linear)', () {
@@ -57,9 +62,17 @@ void main() {
       act: (bloc) => bloc.add(const WerdEvent.trackItemRead(10)),
       verify: (_) {
         // Linear distance: 10 - 1 + 1 = 10
-        verify(() => mockRepository.updateProgress(any(
-          that: isA<WerdProgress>().having((p) => p.totalAmountReadToday, 'totalAmountReadToday', 10)
-        ))).called(1);
+        verify(
+          () => mockRepository.updateProgress(
+            any(
+              that: isA<WerdProgress>().having(
+                (p) => p.totalAmountReadToday,
+                'totalAmountReadToday',
+                10,
+              ),
+            ),
+          ),
+        ).called(1);
       },
     );
 
@@ -70,9 +83,17 @@ void main() {
       act: (bloc) => bloc.add(const WerdEvent.trackRangeRead(1, 5)),
       verify: (_) {
         // Linear distance: 5 - 1 + 1 = 5
-        verify(() => mockRepository.updateProgress(any(
-          that: isA<WerdProgress>().having((p) => p.totalAmountReadToday, 'totalAmountReadToday', 5)
-        ))).called(1);
+        verify(
+          () => mockRepository.updateProgress(
+            any(
+              that: isA<WerdProgress>().having(
+                (p) => p.totalAmountReadToday,
+                'totalAmountReadToday',
+                5,
+              ),
+            ),
+          ),
+        ).called(1);
       },
     );
 
@@ -80,19 +101,27 @@ void main() {
       'maintains distance even with gaps',
       build: () => WerdBloc(mockRepository),
       seed: () => WerdState(
-        goal: testGoal, 
+        goal: testGoal,
         progress: initialProgress.copyWith(
           totalAmountReadToday: 1,
           readItemsToday: {1},
           lastReadAbsolute: 1,
-        )
+        ),
       ),
       act: (bloc) => bloc.add(const WerdEvent.trackItemRead(100)),
       verify: (_) {
         // Linear distance: 100 - 1 + 1 = 100
-        verify(() => mockRepository.updateProgress(any(
-          that: isA<WerdProgress>().having((p) => p.totalAmountReadToday, 'totalAmountReadToday', 100)
-        ))).called(1);
+        verify(
+          () => mockRepository.updateProgress(
+            any(
+              that: isA<WerdProgress>().having(
+                (p) => p.totalAmountReadToday,
+                'totalAmountReadToday',
+                100,
+              ),
+            ),
+          ),
+        ).called(1);
       },
     );
 
@@ -104,24 +133,33 @@ void main() {
           totalAmountReadToday: 0,
           lastReadAbsolute: null,
         );
-        when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
-            .thenAnswer((_) async => Result.success(specialProgress));
+        when(
+          () => mockRepository.getProgress(goalId: any(named: 'goalId')),
+        ).thenAnswer((_) async => Result.success(specialProgress));
         return WerdBloc(mockRepository);
       },
       seed: () => WerdState(
-        goal: testGoal, 
+        goal: testGoal,
         progress: initialProgress.copyWith(
           sessionStartAbsolute: 100,
           totalAmountReadToday: 0,
           lastReadAbsolute: null,
-        )
+        ),
       ),
       act: (bloc) => bloc.add(const WerdEvent.trackItemRead(50)),
       verify: (_) {
         // 50 < 100, so newTotal remains 0 (no backward progress counting distance)
-        verify(() => mockRepository.updateProgress(any(
-          that: isA<WerdProgress>().having((p) => p.totalAmountReadToday, 'totalAmountReadToday', 0)
-        ))).called(1);
+        verify(
+          () => mockRepository.updateProgress(
+            any(
+              that: isA<WerdProgress>().having(
+                (p) => p.totalAmountReadToday,
+                'totalAmountReadToday',
+                0,
+              ),
+            ),
+          ),
+        ).called(1);
       },
     );
   });

@@ -52,13 +52,15 @@ void main() {
     );
   }
 
-  testWidgets('should show Surah 1, Ayah 1 when no progress yet (English)', (tester) async {
+  testWidgets('should show Surah 1, Ayah 1 when no progress yet (English)', (
+    tester,
+  ) async {
     when(() => mockWerdBloc.state).thenReturn(
       WerdState(
         goal: WerdGoal(
           id: 'default',
-          type: WerdGoalType.fixedAmount, 
-          value: 10, 
+          type: WerdGoalType.fixedAmount,
+          value: 10,
           unit: WerdUnit.ayah,
           startDate: DateTime.now(),
         ),
@@ -72,18 +74,20 @@ void main() {
     );
 
     await tester.pumpWidget(createWidgetUnderTest(locale: const Locale('en')));
-    
+
     // In new implementation, if lastReadAbsolute is null, it might show "Al Fatiha, 1"
     expect(find.text('Al Fatiha, 1'), findsOneWidget);
   });
 
-  testWidgets('should show Surah 1, Ayah 1 when no progress yet (Arabic)', (tester) async {
+  testWidgets('should show Surah 1, Ayah 1 when no progress yet (Arabic)', (
+    tester,
+  ) async {
     when(() => mockWerdBloc.state).thenReturn(
       WerdState(
         goal: WerdGoal(
           id: 'default',
-          type: WerdGoalType.fixedAmount, 
-          value: 10, 
+          type: WerdGoalType.fixedAmount,
+          value: 10,
           unit: WerdUnit.ayah,
           startDate: DateTime.now(),
         ),
@@ -97,17 +101,19 @@ void main() {
     );
 
     await tester.pumpWidget(createWidgetUnderTest(locale: const Locale('ar')));
-    
+
     expect(find.text('الفاتحة، ١'), findsOneWidget);
   });
 
-  testWidgets('Go button should be present and enabled even with no progress', (tester) async {
+  testWidgets('Go button should be present and enabled even with no progress', (
+    tester,
+  ) async {
     when(() => mockWerdBloc.state).thenReturn(
       WerdState(
         goal: WerdGoal(
           id: 'default',
-          type: WerdGoalType.fixedAmount, 
-          value: 10, 
+          type: WerdGoalType.fixedAmount,
+          value: 10,
           unit: WerdUnit.ayah,
           startDate: DateTime.now(),
         ),
@@ -124,7 +130,7 @@ void main() {
 
     final goButton = find.byType(ElevatedButton);
     expect(goButton, findsOneWidget);
-    
+
     final button = tester.widget<ElevatedButton>(goButton);
     expect(button.enabled, isTrue);
   });

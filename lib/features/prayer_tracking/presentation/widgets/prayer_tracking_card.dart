@@ -24,7 +24,10 @@ class PrayerTrackingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isAr = l10n.localeName == 'ar';
-    final totalQada = qadaStatus.values.fold(0, (sum, counter) => sum + counter.value);
+    final totalQada = qadaStatus.values.fold(
+      0,
+      (sum, counter) => sum + counter.value,
+    );
 
     return Container(
       decoration: BoxDecoration(
@@ -49,13 +52,17 @@ class PrayerTrackingCard extends StatelessWidget {
               bottom: -20,
               child: Opacity(
                 opacity: 0.03,
-                child: const Icon(Icons.history_rounded, size: 180, color: Colors.white),
+                child: const Icon(
+                  Icons.history_rounded,
+                  size: 180,
+                  color: Colors.white,
+                ),
               ),
             ),
             LayoutBuilder(
               builder: (context, constraints) {
                 final bool isShort = constraints.maxHeight < 280;
-                
+
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
                   child: Column(
@@ -75,7 +82,9 @@ class PrayerTrackingCard extends StatelessWidget {
                         textBaseline: TextBaseline.alphabetic,
                         children: [
                           Text(
-                            isAr ? totalQada.toArabicIndic() : totalQada.toString(),
+                            isAr
+                                ? totalQada.toArabicIndic()
+                                : totalQada.toString(),
                             style: GoogleFonts.outfit(
                               color: AppTheme.textPrimary,
                               fontSize: isShort ? 36 : 42,
@@ -86,7 +95,9 @@ class PrayerTrackingCard extends StatelessWidget {
                           Text(
                             l10n.localeName == 'ar' ? 'صلاة' : 'Prayers',
                             style: GoogleFonts.amiri(
-                              color: AppTheme.textSecondary.withValues(alpha: 0.6),
+                              color: AppTheme.textSecondary.withValues(
+                                alpha: 0.6,
+                              ),
                               fontSize: 16,
                             ),
                           ),
@@ -140,7 +151,9 @@ class PrayerTrackingCard extends StatelessWidget {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     Text(
-                                      isAr ? count.toArabicIndic() : count.toString(),
+                                      isAr
+                                          ? count.toArabicIndic()
+                                          : count.toString(),
                                       style: GoogleFonts.outfit(
                                         color: AppTheme.textPrimary,
                                         fontSize: 14,
@@ -152,7 +165,7 @@ class PrayerTrackingCard extends StatelessWidget {
                               );
                             }).toList(),
                           );
-                        }
+                        },
                       ),
                     ],
                   ),
@@ -189,7 +202,9 @@ class _ActionButton extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
-              border: Border.all(color: AppTheme.cardBorder.withValues(alpha: 0.5)),
+              border: Border.all(
+                color: AppTheme.cardBorder.withValues(alpha: 0.5),
+              ),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(

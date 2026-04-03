@@ -1,15 +1,16 @@
 import 'dart:developer' as developer;
+
 import 'package:adhan/adhan.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
 import 'package:fard/features/prayer_tracking/domain/missed_counter.dart';
-import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/prayer_tracking/domain/prayer_repo.dart';
+import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'prayer_tracker_bloc.freezed.dart';
 part 'prayer_tracker_event.dart';
@@ -21,11 +22,8 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
   final SharedPreferences _prefs;
   final PrayerTimeService _prayerTimeService;
 
-  PrayerTrackerBloc(
-    this._repo,
-    this._prefs,
-    this._prayerTimeService,
-  ) : super(const PrayerTrackerState.loading()) {
+  PrayerTrackerBloc(this._repo, this._prefs, this._prayerTimeService)
+    : super(const PrayerTrackerState.loading()) {
     on<_Load>(_onLoad, transformer: sequential());
     on<_TogglePrayer>(_onTogglePrayer, transformer: sequential());
     on<_AddQada>(_onAddQada, transformer: sequential());
@@ -33,14 +31,19 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
     on<_Save>(_onSave, transformer: sequential());
     on<_LoadMonth>(_onLoadMonth, transformer: sequential());
     on<_CheckMissedDays>(_onCheckMissedDays, transformer: sequential());
-    on<_AcknowledgeMissedDays>(_onAcknowledgeMissedDays, transformer: sequential());
+    on<_AcknowledgeMissedDays>(
+      _onAcknowledgeMissedDays,
+      transformer: sequential(),
+    );
     on<_BulkAddQada>(_onBulkAddQada, transformer: sequential());
     on<_UpdateQada>(_onUpdateQada, transformer: sequential());
     on<_DeleteRecord>(_onDeleteRecord, transformer: sequential());
   }
 
   Future<void> _onUpdateQada(
-      _UpdateQada e, Emitter<PrayerTrackerState> em) async {
+    _UpdateQada e,
+    Emitter<PrayerTrackerState> em,
+  ) async {
     if (state is _Loaded) {
       final s = state as _Loaded;
       final oldQada = s.qadaStatus;
@@ -51,7 +54,11 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
       final newState = s.copyWith(qadaStatus: qada);
       em(newState);
 
-      final normalizedDate = DateTime(s.selectedDate.year, s.selectedDate.month, s.selectedDate.day);
+      final normalizedDate = DateTime(
+        s.selectedDate.year,
+        s.selectedDate.month,
+        s.selectedDate.day,
+      );
       final recordToSave = DailyRecord(
         id: '${normalizedDate.year}-${normalizedDate.month.toString().padLeft(2, '0')}-${normalizedDate.day.toString().padLeft(2, '0')}',
         date: normalizedDate,
@@ -63,14 +70,20 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
       await _repo.saveToday(recordToSave);
       await _cascadeUpdateFrom(recordToSave, oldBaseQada: oldQada);
 
-      final month = await _repo.loadMonth(s.selectedDate.year, s.selectedDate.month);
-      final history = month.values.toList()..sort((a, b) => b.date.compareTo(a.date));
+      final month = await _repo.loadMonth(
+        s.selectedDate.year,
+        s.selectedDate.month,
+      );
+      final history = month.values.toList()
+        ..sort((a, b) => b.date.compareTo(a.date));
       em(newState.copyWith(monthRecords: month, history: history));
     }
   }
 
   Future<void> _onDeleteRecord(
-      _DeleteRecord e, Emitter<PrayerTrackerState> em) async {
+    _DeleteRecord e,
+    Emitter<PrayerTrackerState> em,
+  ) async {
     if (state is _Loaded) {
       final s = state as _Loaded;
       final deletedDate = DateTime(e.date.year, e.date.month, e.date.day);
@@ -91,11 +104,16 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
 
           final updatedQada = <Salaah, MissedCounter>{};
           for (final s in Salaah.values) {
-            updatedQada[s] = earliest.missedToday.contains(s) ? const MissedCounter(1) : const MissedCounter(0);
+            updatedQada[s] = earliest.missedToday.contains(s)
+                ? const MissedCounter(1)
+                : const MissedCounter(0);
           }
           final updatedEarliest = earliest.copyWith(qada: updatedQada);
           await _repo.saveToday(updatedEarliest);
-          await _cascadeUpdateFrom(updatedEarliest, oldBaseQada: originalEarliestQada);
+          await _cascadeUpdateFrom(
+            updatedEarliest,
+            oldBaseQada: originalEarliestQada,
+          );
         }
       }
 
@@ -103,7 +121,8 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
     }
   }
 
-  Future<void> _cascadeUpdateFrom(DailyRecord updatedBaseRecord, {
+  Future<void> _cascadeUpdateFrom(
+    DailyRecord updatedBaseRecord, {
     Map<Salaah, MissedCounter>? oldBaseQada,
     DailyRecord? deletedRecord,
   }) async {
@@ -116,20 +135,30 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
     originalChain.sort((a, b) => a.date.compareTo(b.date));
 
     final todayDate = DateTime.now();
-    final todayNormalized = DateTime(todayDate.year, todayDate.month, todayDate.day);
+    final todayNormalized = DateTime(
+      todayDate.year,
+      todayDate.month,
+      todayDate.day,
+    );
 
-    final futureRecords = allRecords.where((r) =>
-        r.date.isAfter(updatedBaseRecord.date) &&
-        !r.date.isAtSameMomentAs(todayNormalized)
-    ).toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
+    final futureRecords =
+        allRecords
+            .where(
+              (r) =>
+                  r.date.isAfter(updatedBaseRecord.date) &&
+                  !r.date.isAtSameMomentAs(todayNormalized),
+            )
+            .toList()
+          ..sort((a, b) => a.date.compareTo(b.date));
 
     if (futureRecords.isEmpty) return;
 
     DailyRecord runningNewPrev = updatedBaseRecord;
 
     for (final fr in futureRecords) {
-      final currentIdx = originalChain.indexWhere((r) => r.date.isAtSameMomentAs(fr.date));
+      final currentIdx = originalChain.indexWhere(
+        (r) => r.date.isAtSameMomentAs(fr.date),
+      );
       if (currentIdx <= 0) {
         runningNewPrev = fr;
         continue;
@@ -138,12 +167,20 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
       final oldPrev = originalChain[currentIdx - 1];
       final updatedQada = <Salaah, MissedCounter>{};
 
-      final oldLastUtc = DateTime.utc(oldPrev.date.year, oldPrev.date.month, oldPrev.date.day);
+      final oldLastUtc = DateTime.utc(
+        oldPrev.date.year,
+        oldPrev.date.month,
+        oldPrev.date.day,
+      );
       final targetUtc = DateTime.utc(fr.date.year, fr.date.month, fr.date.day);
       final oldDiff = targetUtc.difference(oldLastUtc).inDays;
       final oldGaps = oldDiff > 1 ? (oldDiff - 1) : 0;
 
-      final newLastUtc = DateTime.utc(runningNewPrev.date.year, runningNewPrev.date.month, runningNewPrev.date.day);
+      final newLastUtc = DateTime.utc(
+        runningNewPrev.date.year,
+        runningNewPrev.date.month,
+        runningNewPrev.date.day,
+      );
       final newDiff = targetUtc.difference(newLastUtc).inDays;
       final newGaps = newDiff > 1 ? (newDiff - 1) : 0;
 
@@ -151,7 +188,8 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
         int oldVal = fr.qada[s]?.value ?? 0;
         int oldPrevVal = oldPrev.qada[s]?.value ?? 0;
 
-        if (oldPrev.date.isAtSameMomentAs(updatedBaseRecord.date) && oldBaseQada != null) {
+        if (oldPrev.date.isAtSameMomentAs(updatedBaseRecord.date) &&
+            oldBaseQada != null) {
           oldPrevVal = oldBaseQada[s]?.value ?? oldPrevVal;
         }
 
@@ -174,14 +212,17 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
       final record = await _repo.loadRecord(normalizedDate);
       final lastSavedBefore = await _repo.loadLastRecordBefore(normalizedDate);
 
-      developer.log('DEBUG: _onLoad record: ${record?.qada.map((k, v) => MapEntry(k, v.value))}, lastSavedBefore: ${lastSavedBefore?.qada.map((k, v) => MapEntry(k, v.value))}');
+      developer.log(
+        'DEBUG: _onLoad record: ${record?.qada.map((k, v) => MapEntry(k, v.value))}, lastSavedBefore: ${lastSavedBefore?.qada.map((k, v) => MapEntry(k, v.value))}',
+      );
 
-      final lat = _prefs.getDouble('latitude');
-      final lon = _prefs.getDouble('longitude');
+      final lat = double.tryParse(_prefs.get('latitude')?.toString() ?? '');
+      final lon = double.tryParse(_prefs.get('longitude')?.toString() ?? '');
 
       PrayerTimes? prayerTimes;
       if (lat != null && lon != null) {
-        final method = _prefs.getString('calculation_method') ?? 'muslim_league';
+        final method =
+            _prefs.getString('calculation_method') ?? 'muslim_league';
         final madhab = _prefs.getString('madhab') ?? 'shafi';
         prayerTimes = _prayerTimeService.getPrayerTimes(
           latitude: lat,
@@ -205,7 +246,11 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
         missedToday = <Salaah>{};
         completedToday = <Salaah>{};
         for (final s in Salaah.values) {
-          if (_prayerTimeService.isPassed(s, prayerTimes: prayerTimes, date: normalizedDate)) {
+          if (_prayerTimeService.isPassed(
+            s,
+            prayerTimes: prayerTimes,
+            date: normalizedDate,
+          )) {
             missedToday.add(s);
           }
         }
@@ -214,7 +259,7 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
         qada = {for (final s in Salaah.values) s: const MissedCounter(0)};
 
         if (lastSavedBefore != null) {
-           qada = Map<Salaah, MissedCounter>.from(lastSavedBefore.qada);
+          qada = Map<Salaah, MissedCounter>.from(lastSavedBefore.qada);
         }
 
         // For a brand new record (first load of the day), auto-increment Qada for missed prayers
@@ -233,15 +278,20 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
       }
 
       final now = DateTime.now();
-      final isToday = normalizedDate.year == now.year &&
-                      normalizedDate.month == now.month &&
-                      normalizedDate.day == now.day;
+      final isToday =
+          normalizedDate.year == now.year &&
+          normalizedDate.month == now.month &&
+          normalizedDate.day == now.day;
 
       if (isToday && record != null) {
         // If record exists and it is today, check if new prayers have passed since last load
         bool needsUpdate = false;
         for (final s in Salaah.values) {
-          if (_prayerTimeService.isPassed(s, prayerTimes: prayerTimes, date: normalizedDate)) {
+          if (_prayerTimeService.isPassed(
+            s,
+            prayerTimes: prayerTimes,
+            date: normalizedDate,
+          )) {
             if (!completedToday.contains(s) && !missedToday.contains(s)) {
               missedToday.add(s);
               qada[s] = (qada[s] ?? const MissedCounter(0)).addMissed();
@@ -266,27 +316,37 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
         completedToday: completedToday,
         qadaStatus: qada,
         completedQadaToday: record?.completedQada ?? {},
-        monthRecords: (currentState is _Loaded) ? currentState.monthRecords : {},
+        monthRecords: (currentState is _Loaded)
+            ? currentState.monthRecords
+            : {},
         history: (currentState is _Loaded) ? currentState.history : [],
       );
 
       em(loadedState);
 
-      final month = await _repo.loadMonth(normalizedDate.year, normalizedDate.month);
+      final month = await _repo.loadMonth(
+        normalizedDate.year,
+        normalizedDate.month,
+      );
       if (state is _Loaded) {
         final current = state as _Loaded;
-        em(current.copyWith(
-          monthRecords: month,
-          history: month.values.toList()
-            ..sort((a, b) => b.date.compareTo(a.date)),
-        ));
+        em(
+          current.copyWith(
+            monthRecords: month,
+            history: month.values.toList()
+              ..sort((a, b) => b.date.compareTo(a.date)),
+          ),
+        );
       }
     } catch (e) {
       em(PrayerTrackerState.error(message: e.toString()));
     }
   }
 
-  Future<void> _onTogglePrayer(_TogglePrayer e, Emitter<PrayerTrackerState> em) async {
+  Future<void> _onTogglePrayer(
+    _TogglePrayer e,
+    Emitter<PrayerTrackerState> em,
+  ) async {
     try {
       if (state is _Loaded) {
         final s = state as _Loaded;
@@ -301,11 +361,13 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
         if (isDayRecovery) {
           missed.remove(e.prayer);
           completed.add(e.prayer);
-          qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).removeMissed();
+          qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0))
+              .removeMissed();
         } else if (completed.contains(e.prayer)) {
           completed.remove(e.prayer);
           missed.add(e.prayer);
-          qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).addMissed();
+          qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0))
+              .addMissed();
         } else {
           // Case where prayer time hasn't passed yet but user wants to mark it done early
           completed.add(e.prayer);
@@ -318,7 +380,11 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
           completedQadaToday: completedQada,
         );
 
-        final normalizedDate = DateTime(s.selectedDate.year, s.selectedDate.month, s.selectedDate.day);
+        final normalizedDate = DateTime(
+          s.selectedDate.year,
+          s.selectedDate.month,
+          s.selectedDate.day,
+        );
         final recordToSave = DailyRecord(
           id: '${normalizedDate.year}-${normalizedDate.month.toString().padLeft(2, '0')}-${normalizedDate.day.toString().padLeft(2, '0')}',
           date: normalizedDate,
@@ -332,8 +398,12 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
 
         em(newState);
 
-        final month = await _repo.loadMonth(s.selectedDate.year, s.selectedDate.month);
-        final history = month.values.toList()..sort((a, b) => b.date.compareTo(a.date));
+        final month = await _repo.loadMonth(
+          s.selectedDate.year,
+          s.selectedDate.month,
+        );
+        final history = month.values.toList()
+          ..sort((a, b) => b.date.compareTo(a.date));
         em(newState.copyWith(monthRecords: month, history: history));
       }
     } catch (e) {
@@ -374,7 +444,11 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
       );
       em(newState);
 
-      final normalizedDate = DateTime(s.selectedDate.year, s.selectedDate.month, s.selectedDate.day);
+      final normalizedDate = DateTime(
+        s.selectedDate.year,
+        s.selectedDate.month,
+        s.selectedDate.day,
+      );
       final recordToSave = DailyRecord(
         id: '${normalizedDate.year}-${normalizedDate.month.toString().padLeft(2, '0')}-${normalizedDate.day.toString().padLeft(2, '0')}',
         date: normalizedDate,
@@ -386,13 +460,20 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
       await _repo.saveToday(recordToSave);
       await _cascadeUpdateFrom(recordToSave, oldBaseQada: oldQadaMap);
 
-      final month = await _repo.loadMonth(s.selectedDate.year, s.selectedDate.month);
-      final history = month.values.toList()..sort((a, b) => b.date.compareTo(a.date));
+      final month = await _repo.loadMonth(
+        s.selectedDate.year,
+        s.selectedDate.month,
+      );
+      final history = month.values.toList()
+        ..sort((a, b) => b.date.compareTo(a.date));
       em(newState.copyWith(monthRecords: month, history: history));
     }
   }
 
-  Future<void> _onRemoveQada(_RemoveQada e, Emitter<PrayerTrackerState> em) async {
+  Future<void> _onRemoveQada(
+    _RemoveQada e,
+    Emitter<PrayerTrackerState> em,
+  ) async {
     if (state is _Loaded) {
       final s = state as _Loaded;
       final oldQadaMap = s.qadaStatus;
@@ -408,7 +489,8 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
         completed.add(e.prayer);
       }
 
-      qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0)).removeMissed();
+      qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0))
+          .removeMissed();
 
       if (!isDayRecovery) {
         completedQada[e.prayer] = (completedQada[e.prayer] ?? 0) + 1;
@@ -422,7 +504,11 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
       );
       em(newState);
 
-      final normalizedDate = DateTime(s.selectedDate.year, s.selectedDate.month, s.selectedDate.day);
+      final normalizedDate = DateTime(
+        s.selectedDate.year,
+        s.selectedDate.month,
+        s.selectedDate.day,
+      );
       final recordToSave = DailyRecord(
         id: '${normalizedDate.year}-${normalizedDate.month.toString().padLeft(2, '0')}-${normalizedDate.day.toString().padLeft(2, '0')}',
         date: normalizedDate,
@@ -434,8 +520,12 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
       await _repo.saveToday(recordToSave);
       await _cascadeUpdateFrom(recordToSave, oldBaseQada: oldQadaMap);
 
-      final month = await _repo.loadMonth(s.selectedDate.year, s.selectedDate.month);
-      final history = month.values.toList()..sort((a, b) => b.date.compareTo(a.date));
+      final month = await _repo.loadMonth(
+        s.selectedDate.year,
+        s.selectedDate.month,
+      );
+      final history = month.values.toList()
+        ..sort((a, b) => b.date.compareTo(a.date));
       em(newState.copyWith(monthRecords: month, history: history));
     }
   }
@@ -447,9 +537,17 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
     }
   }
 
-  Future<void> _saveInternal(_Loaded s, Emitter<PrayerTrackerState> em, {Map<Salaah, MissedCounter>? oldQada}) async {
+  Future<void> _saveInternal(
+    _Loaded s,
+    Emitter<PrayerTrackerState> em, {
+    Map<Salaah, MissedCounter>? oldQada,
+  }) async {
     try {
-      final normalizedDate = DateTime(s.selectedDate.year, s.selectedDate.month, s.selectedDate.day);
+      final normalizedDate = DateTime(
+        s.selectedDate.year,
+        s.selectedDate.month,
+        s.selectedDate.day,
+      );
       final record = DailyRecord(
         id: '${normalizedDate.year}-${normalizedDate.month.toString().padLeft(2, '0')}-${normalizedDate.day.toString().padLeft(2, '0')}',
         date: normalizedDate,
@@ -461,8 +559,12 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
       await _repo.saveToday(record);
       await _cascadeUpdateFrom(record, oldBaseQada: oldQada);
 
-      final month = await _repo.loadMonth(s.selectedDate.year, s.selectedDate.month);
-      final history = month.values.toList()..sort((a, b) => b.date.compareTo(a.date));
+      final month = await _repo.loadMonth(
+        s.selectedDate.year,
+        s.selectedDate.month,
+      );
+      final history = month.values.toList()
+        ..sort((a, b) => b.date.compareTo(a.date));
       em(s.copyWith(monthRecords: month, history: history));
     } catch (e) {
       em(PrayerTrackerState.error(message: e.toString()));
@@ -470,9 +572,12 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
   }
 
   Future<void> _onLoadMonth(
-      _LoadMonth e, Emitter<PrayerTrackerState> em) async {
+    _LoadMonth e,
+    Emitter<PrayerTrackerState> em,
+  ) async {
     final month = await _repo.loadMonth(e.year, e.month);
-    final history = month.values.toList()..sort((a, b) => b.date.compareTo(a.date));
+    final history = month.values.toList()
+      ..sort((a, b) => b.date.compareTo(a.date));
     final s = state;
     if (s is _Loaded) {
       em(s.copyWith(monthRecords: month, history: history));
@@ -480,14 +585,23 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
   }
 
   Future<void> _onCheckMissedDays(
-      _CheckMissedDays e, Emitter<PrayerTrackerState> em) async {
+    _CheckMissedDays e,
+    Emitter<PrayerTrackerState> em,
+  ) async {
     final lastRecord = await _repo.loadLastSavedRecord();
-    if (lastRecord == null) return;
-
     final today = DateTime.now();
     final normalizedToday = DateTime(today.year, today.month, today.day);
+
+    if (lastRecord == null) {
+      add(PrayerTrackerEvent.load(normalizedToday));
+      return;
+    }
+
     final lastDate = DateTime(
-        lastRecord.date.year, lastRecord.date.month, lastRecord.date.day);
+      lastRecord.date.year,
+      lastRecord.date.month,
+      lastRecord.date.day,
+    );
     final diff = normalizedToday.difference(lastDate).inDays;
 
     if (diff > 1) {
@@ -496,21 +610,29 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
         missedDates.add(lastDate.add(Duration(days: i)));
       }
       em(PrayerTrackerState.missedDaysPrompt(missedDates: missedDates));
+    } else {
+      add(PrayerTrackerEvent.load(normalizedToday));
     }
   }
 
   Future<void> _onAcknowledgeMissedDays(
-      _AcknowledgeMissedDays e, Emitter<PrayerTrackerState> em) async {
+    _AcknowledgeMissedDays e,
+    Emitter<PrayerTrackerState> em,
+  ) async {
     final lastRecord = await _repo.loadLastSavedRecord();
+    final today = DateTime.now();
+    final normalizedToday = DateTime(today.year, today.month, today.day);
+
     if (lastRecord == null) {
-      add(PrayerTrackerEvent.load(DateTime.now()));
+      add(PrayerTrackerEvent.load(normalizedToday));
       return;
     }
 
-    final today = DateTime.now();
-    final normalizedToday = DateTime(today.year, today.month, today.day);
     final lastDate = DateTime(
-        lastRecord.date.year, lastRecord.date.month, lastRecord.date.day);
+      lastRecord.date.year,
+      lastRecord.date.month,
+      lastRecord.date.day,
+    );
     final diff = normalizedToday.difference(lastDate).inDays;
 
     if (diff <= 1) {
@@ -528,7 +650,8 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
     }
 
     final selectedSet = Set<DateTime>.from(
-        e.selectedDates.map((d) => DateTime(d.year, d.month, d.day)));
+      e.selectedDates.map((d) => DateTime(d.year, d.month, d.day)),
+    );
 
     var runningQada = Map<Salaah, MissedCounter>.from(lastRecord.qada);
 
@@ -537,7 +660,8 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
 
       if (isMissed) {
         for (final s in Salaah.values) {
-          runningQada[s] = (runningQada[s] ?? const MissedCounter(0)).addMissed();
+          runningQada[s] = (runningQada[s] ?? const MissedCounter(0))
+              .addMissed();
         }
       }
 
@@ -551,22 +675,17 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
       await _repo.saveToday(record);
     }
 
-    // Part B: Build today's record.
     final Set<Salaah> completedToday = <Salaah>{};
     final Set<Salaah> missedToday = <Salaah>{};
-
-    // Based on UI/test analysis:
-    // e.selectedDates.isEmpty means user clicked 'Skip' (I was praying All)
-    // e.selectedDates.isNotEmpty means user clicked 'Done' (Add Missed)
     final bool isPrayingToday = e.selectedDates.isEmpty;
 
-    final lat = _prefs.getDouble('latitude');
-    final lon = _prefs.getDouble('longitude');
+    final lat = double.tryParse(_prefs.get('latitude')?.toString() ?? '');
+    final lon = double.tryParse(_prefs.get('longitude')?.toString() ?? '');
 
     PrayerTimes? prayerTimes;
     if (lat != null && lon != null) {
       final method = _prefs.getString('calculation_method') ?? 'muslim_league';
-      final madhab = _prefs.getString('madhab' ) ?? 'shafi';
+      final madhab = _prefs.getString('madhab') ?? 'shafi';
       prayerTimes = _prayerTimeService.getPrayerTimes(
         latitude: lat,
         longitude: lon,
@@ -576,26 +695,30 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
       );
 
       for (final s in Salaah.values) {
-        if (_prayerTimeService.isPassed(s, prayerTimes: prayerTimes, date: today)) {
+        if (_prayerTimeService.isPassed(
+          s,
+          prayerTimes: prayerTimes,
+          date: today,
+        )) {
           if (isPrayingToday) {
             completedToday.add(s);
           } else {
             missedToday.add(s);
-            runningQada[s] = (runningQada[s] ?? const MissedCounter(0)).addMissed();
+            runningQada[s] = (runningQada[s] ?? const MissedCounter(0))
+                .addMissed();
           }
         }
       }
     } else {
-       // Fallback if no location: mark as completed if praying, else missed
-       for (final s in Salaah.values) {
-          if (isPrayingToday) {
-             // We don't know if it passed, but user said they were praying
-             completedToday.add(s);
-          } else {
-             missedToday.add(s);
-             runningQada[s] = (runningQada[s] ?? const MissedCounter(0)).addMissed();
-          }
-       }
+      for (final s in Salaah.values) {
+        if (isPrayingToday) {
+          completedToday.add(s);
+        } else {
+          missedToday.add(s);
+          runningQada[s] = (runningQada[s] ?? const MissedCounter(0))
+              .addMissed();
+        }
+      }
     }
 
     final todayRecord = DailyRecord(
@@ -611,7 +734,9 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
   }
 
   Future<void> _onBulkAddQada(
-      _BulkAddQada e, Emitter<PrayerTrackerState> em) async {
+    _BulkAddQada e,
+    Emitter<PrayerTrackerState> em,
+  ) async {
     if (state is _Loaded) {
       final s = state as _Loaded;
       final oldQada = s.qadaStatus;

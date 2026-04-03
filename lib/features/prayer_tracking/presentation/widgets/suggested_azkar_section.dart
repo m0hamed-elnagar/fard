@@ -17,26 +17,30 @@ class SuggestedAzkarSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AzkarBloc, AzkarState>(
       builder: (context, azkarState) {
-        if (azkarState.categories.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+        if (azkarState.categories.isEmpty) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
 
         final now = DateTime.now();
         AzkarReminder? activeReminder;
-        
+
         // Find the first enabled reminder that is within the suggested window
         for (final reminder in settings.reminders) {
           if (!reminder.isEnabled) continue;
           final reminderTime = _parseTime(reminder.time, now);
-          
+
           // Show if within 30 mins before or 4 hours after
-          if (now.isAfter(reminderTime.subtract(const Duration(minutes: 30))) && 
+          if (now.isAfter(reminderTime.subtract(const Duration(minutes: 30))) &&
               now.isBefore(reminderTime.add(const Duration(hours: 4)))) {
             activeReminder = reminder;
             break;
           }
         }
 
-        if (activeReminder == null) return const SliverToBoxAdapter(child: SizedBox.shrink());
-        
+        if (activeReminder == null) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+
         final reminder = activeReminder;
 
         final categoryToOpen = azkarState.categories.firstWhere(
@@ -44,17 +48,22 @@ class SuggestedAzkarSection extends StatelessWidget {
           orElse: () => '',
         );
 
-        if (categoryToOpen.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+        if (categoryToOpen.isEmpty) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
 
         final l10n = AppLocalizations.of(context)!;
-        final displayTitle = reminder.title.isNotEmpty ? reminder.title : categoryToOpen;
-        
-        final isEvening = displayTitle.contains('المساء') || 
-                          displayTitle.contains('Evening') || 
-                          (now.hour >= 16 || now.hour < 3);
-        
-        final isMorning = displayTitle.contains('الصباح') || 
-                          displayTitle.contains('Morning');
+        final displayTitle = reminder.title.isNotEmpty
+            ? reminder.title
+            : categoryToOpen;
+
+        final isEvening =
+            displayTitle.contains('المساء') ||
+            displayTitle.contains('Evening') ||
+            (now.hour >= 16 || now.hour < 3);
+
+        final isMorning =
+            displayTitle.contains('الصباح') || displayTitle.contains('Morning');
 
         // Prioritize title for icon/color selection
         final effectiveIsEvening = isEvening && !isMorning;
@@ -65,7 +74,7 @@ class SuggestedAzkarSection extends StatelessWidget {
           const Color(0xFFF9A825), // Orange/Gold
         ];
         Color mainColor = const Color(0xFFF9A825);
-        
+
         if (effectiveIsEvening) {
           icon = Icons.nightlight_round;
           gradientColors = [
@@ -83,7 +92,8 @@ class SuggestedAzkarSection extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AzkarListScreen(category: categoryToOpen),
+                    builder: (context) =>
+                        AzkarListScreen(category: categoryToOpen),
                   ),
                 );
               },
@@ -131,7 +141,9 @@ class SuggestedAzkarSection extends StatelessWidget {
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
-                                  color: gradientColors.first.withValues(alpha: 0.3),
+                                  color: gradientColors.first.withValues(
+                                    alpha: 0.3,
+                                  ),
                                   blurRadius: 8,
                                   offset: const Offset(0, 3),
                                 ),
@@ -173,26 +185,46 @@ class SuggestedAzkarSection extends StatelessWidget {
                               showDialog(
                                 context: context,
                                 builder: (context) => AlertDialog(
-                                  title: Text(l10n.resetItem, style: GoogleFonts.amiri()),
+                                  title: Text(
+                                    l10n.resetItem,
+                                    style: GoogleFonts.amiri(),
+                                  ),
                                   content: Text(l10n.resetSectionConfirm),
                                   actions: [
                                     TextButton(
                                       onPressed: () => Navigator.pop(context),
-                                      child: Text(l10n.cancel, style: const TextStyle(color: AppTheme.textSecondary)),
+                                      child: Text(
+                                        l10n.cancel,
+                                        style: const TextStyle(
+                                          color: AppTheme.textSecondary,
+                                        ),
+                                      ),
                                     ),
                                     TextButton(
                                       onPressed: () {
-                                        context.read<AzkarBloc>().add(AzkarEvent.resetCategory(categoryToOpen));
+                                        context.read<AzkarBloc>().add(
+                                          AzkarEvent.resetCategory(
+                                            categoryToOpen,
+                                          ),
+                                        );
                                         Navigator.pop(context);
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
                                           SnackBar(
                                             content: Text(l10n.resetSuccessful),
-                                            backgroundColor: AppTheme.primaryLight,
+                                            backgroundColor:
+                                                AppTheme.primaryLight,
                                             behavior: SnackBarBehavior.floating,
                                           ),
                                         );
                                       },
-                                      child: Text(l10n.yes, style: const TextStyle(color: AppTheme.missed)),
+                                      child: Text(
+                                        l10n.yes,
+                                        style: const TextStyle(
+                                          color: AppTheme.missed,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -235,7 +267,13 @@ class SuggestedAzkarSection extends StatelessWidget {
   DateTime _parseTime(String timeStr, DateTime now) {
     try {
       final parts = timeStr.split(':');
-      return DateTime(now.year, now.month, now.day, int.parse(parts[0]), int.parse(parts[1]));
+      return DateTime(
+        now.year,
+        now.month,
+        now.day,
+        int.parse(parts[0]),
+        int.parse(parts[1]),
+      );
     } catch (_) {
       return now;
     }

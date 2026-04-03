@@ -1,8 +1,11 @@
+import 'package:fard/core/di/injection.dart';
+import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/features/azkar/presentation/manager/azkar_dialog_manager.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/add_qada_dialog.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/home_content.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/missed_days_dialog.dart';
+import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,7 +18,9 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AzkarDialogManager(child: _HomeBody(showAddQadaOnStart: showAddQadaOnStart));
+    return AzkarDialogManager(
+      child: _HomeBody(showAddQadaOnStart: showAddQadaOnStart),
+    );
   }
 }
 
@@ -43,9 +48,9 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
     showDialog(
       context: context,
       builder: (context) => AddQadaDialog(
-        onConfirm: (counts) => context
-            .read<PrayerTrackerBloc>()
-            .add(PrayerTrackerEvent.bulkAddQada(counts)),
+        onConfirm: (counts) => context.read<PrayerTrackerBloc>().add(
+          PrayerTrackerEvent.bulkAddQada(counts),
+        ),
       ),
     );
   }
@@ -58,13 +63,50 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      final bloc = context.read<PrayerTrackerBloc>();
-      bloc.state.mapOrNull(
-        loaded: (s) {
-          bloc.add(PrayerTrackerEvent.load(s.selectedDate));
-        },
-      );
+    debugPrint('HomeScreen: App lifecycle state changed to $state');
+    switch (state) {
+      case AppLifecycleState.resumed:
+        debugPrint('HomeScreen: App resumed - triggering widget update');
+        // Refresh prayer data
+        final bloc = context.read<PrayerTrackerBloc>();
+        bloc.state.mapOrNull(
+          loaded: (s) {
+            bloc.add(PrayerTrackerEvent.load(s.selectedDate));
+          },
+        );
+
+        // Refresh widget with latest data (includes locale, location, prayer times)
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final settings = context.read<SettingsCubit>().state;
+          debugPrint(
+            'HomeScreen: Calling updateWidget with settings - locale: ${settings.locale}, lat: ${settings.latitude}, lng: ${settings.longitude}',
+          );
+          getIt<WidgetUpdateService>().updateWidget(settings);
+        });
+        break;
+
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+        debugPrint('HomeScreen: App pausing - flushing widget update');
+        // Flush data and update widget before app backgrounds
+        // This is the last reliable moment before Android may kill the process
+        _flushAndUpdateWidget();
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  /// Flushes current data to SharedPreferences and triggers widget update.
+  /// Called when app is about to background to prevent lost updates.
+  Future<void> _flushAndUpdateWidget() async {
+    try {
+      final settings = context.read<SettingsCubit>().state;
+      await getIt<WidgetUpdateService>().updateWidget(settings);
+    } catch (e) {
+      // Silently fail - widget update is not critical
+      debugPrint('Failed to update widget on pause: $e');
     }
   }
 
@@ -89,10 +131,10 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
                 missedDates: missedDates,
                 onResponse: (selectedDates) {
                   context.read<PrayerTrackerBloc>().add(
-                        PrayerTrackerEvent.acknowledgeMissedDays(
-                          selectedDates: selectedDates,
-                        ),
-                      );
+                    PrayerTrackerEvent.acknowledgeMissedDays(
+                      selectedDates: selectedDates,
+                    ),
+                  );
                 },
               ),
             );
@@ -104,7 +146,9 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
           loading: () => const Scaffold(
             body: Center(
               child: CircularProgressIndicator(
-                  color: AppTheme.primaryLight, strokeWidth: 4.0),
+                color: AppTheme.primaryLight,
+                strokeWidth: 4.0,
+              ),
             ),
           ),
           error: (message) => Scaffold(
@@ -112,8 +156,11 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline_rounded,
-                      color: AppTheme.missed, size: 48.0),
+                  const Icon(
+                    Icons.error_outline_rounded,
+                    color: AppTheme.missed,
+                    size: 48.0,
+                  ),
                   const SizedBox(height: 16.0),
                   Text(
                     AppLocalizations.of(context)!.errorOccurred,
@@ -124,9 +171,9 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
                   ),
                   const SizedBox(height: 8.0),
                   ElevatedButton(
-                    onPressed: () => context
-                        .read<PrayerTrackerBloc>()
-                        .add(PrayerTrackerEvent.load(DateTime.now())),
+                    onPressed: () => context.read<PrayerTrackerBloc>().add(
+                      PrayerTrackerEvent.load(DateTime.now()),
+                    ),
                     child: Text(AppLocalizations.of(context)!.retry),
                   ),
                 ],
@@ -136,20 +183,29 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
           missedDaysPrompt: (_) => const Scaffold(
             body: Center(
               child: CircularProgressIndicator(
-                  color: AppTheme.accent, strokeWidth: 4.0),
+                color: AppTheme.accent,
+                strokeWidth: 4.0,
+              ),
             ),
           ),
-          loaded: (selectedDate, missedToday, completedToday, qadaStatus, completedQadaToday, monthRecords,
-                  history) =>
-              HomeContent(
-            selectedDate: selectedDate,
-            missedToday: missedToday,
-            completedToday: completedToday,
-            qadaStatus: qadaStatus,
-            completedQadaToday: completedQadaToday,
-            monthRecords: monthRecords,
-            history: history,
-          ),
+          loaded:
+              (
+                selectedDate,
+                missedToday,
+                completedToday,
+                qadaStatus,
+                completedQadaToday,
+                monthRecords,
+                history,
+              ) => HomeContent(
+                selectedDate: selectedDate,
+                missedToday: missedToday,
+                completedToday: completedToday,
+                qadaStatus: qadaStatus,
+                completedQadaToday: completedQadaToday,
+                monthRecords: monthRecords,
+                history: history,
+              ),
         );
       },
     );

@@ -30,14 +30,17 @@ class ReaderInfoBar extends StatelessWidget {
     final juz = quran.getJuzNumber(surahNumber, ayahNumber);
     final hizb = QuranHizbProvider.getHizbNumber(surahNumber, ayahNumber);
     final page = quran.getPageNumber(surahNumber, ayahNumber);
-    final hasBookmarks = bookmarkAbsolutes != null && bookmarkAbsolutes!.isNotEmpty;
+    final hasBookmarks =
+        bookmarkAbsolutes != null && bookmarkAbsolutes!.isNotEmpty;
 
     return BlocBuilder<WerdBloc, WerdState>(
       builder: (context, state) {
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.9),
+            color: Theme.of(
+              context,
+            ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
@@ -51,25 +54,33 @@ class ReaderInfoBar extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (onJumpToStart != null && state.progress?.sessionStartAbsolute != null)
+                if (onJumpToStart != null &&
+                    state.progress?.sessionStartAbsolute != null)
                   Padding(
                     padding: const EdgeInsets.only(right: 4.0),
                     child: InkWell(
                       onTap: onJumpToStart,
                       borderRadius: BorderRadius.circular(12),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                          vertical: 4.0,
+                        ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.flag_rounded, 
+                            const Icon(
+                              Icons.flag_rounded,
                               color: Colors.green,
                               size: 18,
                             ),
                             const SizedBox(width: 4),
                             Builder(
                               builder: (context) {
-                                final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(state.progress!.sessionStartAbsolute!);
+                                final pos =
+                                    QuranHizbProvider.getSurahAndAyahFromAbsolute(
+                                      state.progress!.sessionStartAbsolute!,
+                                    );
                                 return Text(
                                   pos[1].toArabicIndic(),
                                   style: GoogleFonts.amiri(
@@ -78,7 +89,7 @@ class ReaderInfoBar extends StatelessWidget {
                                     color: Colors.green,
                                   ),
                                 );
-                              }
+                              },
                             ),
                           ],
                         ),
@@ -86,45 +97,57 @@ class ReaderInfoBar extends StatelessWidget {
                     ),
                   ),
 
-                if (onJumpToStart != null && state.progress?.sessionStartAbsolute != null)
+                if (onJumpToStart != null &&
+                    state.progress?.sessionStartAbsolute != null)
                   const _VerticalDivider(),
 
-                if (onJumpToLastRead != null && state.progress?.lastReadAbsolute != null)
+                if (onJumpToLastRead != null &&
+                    state.progress?.lastReadAbsolute != null)
                   Padding(
                     padding: const EdgeInsets.only(right: 4.0),
                     child: InkWell(
                       onTap: onJumpToLastRead,
                       borderRadius: BorderRadius.circular(12),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                          vertical: 4.0,
+                        ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.arrow_forward_rounded, 
+                            Icon(
+                              Icons.arrow_forward_rounded,
                               color: Theme.of(context).colorScheme.primary,
                               size: 18,
                             ),
                             const SizedBox(width: 4),
                             Builder(
                               builder: (context) {
-                                final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(state.progress!.lastReadAbsolute!);
+                                final pos =
+                                    QuranHizbProvider.getSurahAndAyahFromAbsolute(
+                                      state.progress!.lastReadAbsolute!,
+                                    );
                                 return Text(
                                   pos[1].toArabicIndic(),
                                   style: GoogleFonts.amiri(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                   ),
                                 );
-                              }
+                              },
                             ),
                           ],
                         ),
                       ),
                     ),
                   ),
-                
-                if (onJumpToLastRead != null && state.progress?.lastReadAbsolute != null)
+
+                if (onJumpToLastRead != null &&
+                    state.progress?.lastReadAbsolute != null)
                   const _VerticalDivider(),
 
                 if (onJumpToBookmark != null && hasBookmarks)
@@ -134,11 +157,15 @@ class ReaderInfoBar extends StatelessWidget {
                       onTap: onJumpToBookmark,
                       borderRadius: BorderRadius.circular(12),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                          vertical: 4.0,
+                        ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.bookmark_rounded, 
+                            const Icon(
+                              Icons.bookmark_rounded,
                               color: Colors.orange,
                               size: 18,
                             ),
@@ -146,12 +173,20 @@ class ReaderInfoBar extends StatelessWidget {
                             Builder(
                               builder: (context) {
                                 // Logic: Find the first bookmark that is after current ayah, or wrap to first
-                                final currentAbs = QuranHizbProvider.getAbsoluteAyahNumber(surahNumber, ayahNumber);
-                                final nextBookmarkAbs = bookmarkAbsolutes!.firstWhere(
-                                  (abs) => abs > currentAbs,
-                                  orElse: () => bookmarkAbsolutes!.first,
-                                );
-                                final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(nextBookmarkAbs);
+                                final currentAbs =
+                                    QuranHizbProvider.getAbsoluteAyahNumber(
+                                      surahNumber,
+                                      ayahNumber,
+                                    );
+                                final nextBookmarkAbs = bookmarkAbsolutes!
+                                    .firstWhere(
+                                      (abs) => abs > currentAbs,
+                                      orElse: () => bookmarkAbsolutes!.first,
+                                    );
+                                final pos =
+                                    QuranHizbProvider.getSurahAndAyahFromAbsolute(
+                                      nextBookmarkAbs,
+                                    );
                                 return Text(
                                   pos[1].toArabicIndic(),
                                   style: GoogleFonts.amiri(
@@ -160,7 +195,7 @@ class ReaderInfoBar extends StatelessWidget {
                                     color: Colors.orange,
                                   ),
                                 );
-                              }
+                              },
                             ),
                           ],
                         ),
@@ -175,7 +210,10 @@ class ReaderInfoBar extends StatelessWidget {
                   behavior: HitTestBehavior.opaque,
                   onTap: () => _showDetails(context, state, juz, hizb, page),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -196,12 +234,20 @@ class ReaderInfoBar extends StatelessWidget {
     );
   }
 
-  void _showDetails(BuildContext context, WerdState state, int juz, int hizb, int page) {
+  void _showDetails(
+    BuildContext context,
+    WerdState state,
+    int juz,
+    int hizb,
+    int page,
+  ) {
     String todayStartInfo = 'غير محدد';
     String nextStartInfo = 'غير محدد';
 
     if (state.progress?.sessionStartAbsolute != null) {
-      final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(state.progress!.sessionStartAbsolute!);
+      final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(
+        state.progress!.sessionStartAbsolute!,
+      );
       final surahName = quran.getSurahNameArabic(pos[0]);
       todayStartInfo = '$surahName، آية ${pos[1].toArabicIndic()}';
     }
@@ -223,9 +269,18 @@ class ReaderInfoBar extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text('الجزء: ${juz.toArabicIndic()}', style: GoogleFonts.amiri(fontSize: 18)),
-            Text('الحزب: ${hizb.toArabicIndic()}', style: GoogleFonts.amiri(fontSize: 18)),
-            Text('الصفحة: ${page.toArabicIndic()}', style: GoogleFonts.amiri(fontSize: 18)),
+            Text(
+              'الجزء: ${juz.toArabicIndic()}',
+              style: GoogleFonts.amiri(fontSize: 18),
+            ),
+            Text(
+              'الحزب: ${hizb.toArabicIndic()}',
+              style: GoogleFonts.amiri(fontSize: 18),
+            ),
+            Text(
+              'الصفحة: ${page.toArabicIndic()}',
+              style: GoogleFonts.amiri(fontSize: 18),
+            ),
             const Divider(),
             Text(
               'بداية ورد اليوم:',
@@ -245,7 +300,10 @@ class ReaderInfoBar extends StatelessWidget {
             ),
             Text(
               nextStartInfo,
-              style: GoogleFonts.amiri(fontSize: 16, color: Theme.of(context).colorScheme.primary),
+              style: GoogleFonts.amiri(
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               textAlign: TextAlign.right,
             ),
           ],

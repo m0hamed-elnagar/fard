@@ -13,15 +13,15 @@ class JuzList extends StatelessWidget {
   Widget build(BuildContext context) {
     // There are 30 Juz in the Quran
     final juzIndices = List.generate(30, (index) => index + 1);
-    
+
     final filteredJuz = juzIndices.where((juzNum) {
       if (searchQuery.isEmpty) return true;
       final juzTitle = 'الجزء $juzNum';
       final firstSurahNum = quran.getSurahAndVersesFromJuz(juzNum).keys.first;
       final surahName = quran.getSurahNameArabic(firstSurahNum);
-      return juzTitle.contains(searchQuery) || 
-             juzNum.toString().contains(searchQuery) ||
-             surahName.contains(searchQuery);
+      return juzTitle.contains(searchQuery) ||
+          juzNum.toString().contains(searchQuery) ||
+          surahName.contains(searchQuery);
     }).toList();
 
     if (filteredJuz.isEmpty) {
@@ -31,10 +31,7 @@ class JuzList extends StatelessWidget {
           children: [
             const Icon(Icons.grid_view_rounded, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
-            Text(
-              'لا توجد نتائج',
-              style: GoogleFonts.amiri(fontSize: 20),
-            ),
+            Text('لا توجد نتائج', style: GoogleFonts.amiri(fontSize: 20)),
           ],
         ),
       );
@@ -48,7 +45,8 @@ class JuzList extends StatelessWidget {
         return ListView.separated(
           padding: EdgeInsets.all(padding),
           itemCount: filteredJuz.length,
-          separatorBuilder: (context, index) => SizedBox(height: isWide ? 16 : 12),
+          separatorBuilder: (context, index) =>
+              SizedBox(height: isWide ? 16 : 12),
           itemBuilder: (context, index) {
             final juzNum = filteredJuz[index];
             final juzData = quran.getSurahAndVersesFromJuz(juzNum);
@@ -82,7 +80,9 @@ class JuzList extends StatelessWidget {
                         width: isWide ? 60 : 50,
                         height: isWide ? 60 : 50,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                          color: Theme.of(
+                            context,
+                          ).primaryColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         alignment: Alignment.center,

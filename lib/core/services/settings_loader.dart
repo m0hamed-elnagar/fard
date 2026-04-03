@@ -22,10 +22,15 @@ class SettingsLoader {
   static const String _hijriAdjustmentKey = 'hijri_adjustment';
 
   static SettingsState loadSettings(SharedPreferences prefs) {
+    // Read lat/lng. Using prefs.get() and toString() makes it resilient to both
+    // the new String standard and any legacy double values.
+    final latStr = prefs.get(_latKey)?.toString();
+    final lonStr = prefs.get(_lonKey)?.toString();
+
     return SettingsState(
       locale: Locale(prefs.getString(_localeKey) ?? 'ar'),
-      latitude: prefs.getDouble(_latKey),
-      longitude: prefs.getDouble(_lonKey),
+      latitude: latStr != null ? double.tryParse(latStr) : null,
+      longitude: lonStr != null ? double.tryParse(lonStr) : null,
       cityName: prefs.getString(_cityKey),
       calculationMethod: prefs.getString(_methodKey) ?? 'muslim_league',
       madhab: prefs.getString(_madhabKey) ?? 'shafi',
@@ -34,7 +39,11 @@ class SettingsLoader {
       isAfterSalahAzkarEnabled: prefs.getBool(_afterSalahAzkarKey) ?? false,
       isQadaEnabled: prefs.getBool(_qadaKey) ?? true,
       hijriAdjustment: prefs.getInt(_hijriAdjustmentKey) ?? 0,
-      reminders: _loadReminders(prefs, prefs.getString(_morningAzkarKey) ?? '05:00', prefs.getString(_eveningAzkarKey) ?? '18:00'),
+      reminders: _loadReminders(
+        prefs,
+        prefs.getString(_morningAzkarKey) ?? '05:00',
+        prefs.getString(_eveningAzkarKey) ?? '18:00',
+      ),
       salaahSettings: _loadSalaahSettings(prefs),
     );
   }
@@ -52,12 +61,24 @@ class SettingsLoader {
     }
   }
 
-  static List<AzkarReminder> _loadReminders(SharedPreferences prefs, String morningTime, String eveningTime) {
+  static List<AzkarReminder> _loadReminders(
+    SharedPreferences prefs,
+    String morningTime,
+    String eveningTime,
+  ) {
     final String? jsonStr = prefs.getString(_remindersKey);
     if (jsonStr == null) {
       return [
-        AzkarReminder(category: 'أذكار الصباح', time: morningTime, title: 'أذكار الصباح'),
-        AzkarReminder(category: 'أذكار المساء', time: eveningTime, title: 'أذكار المساء'),
+        AzkarReminder(
+          category: 'أذكار الصباح',
+          time: morningTime,
+          title: 'أذكار الصباح',
+        ),
+        AzkarReminder(
+          category: 'أذكار المساء',
+          time: eveningTime,
+          title: 'أذكار المساء',
+        ),
       ];
     }
     try {
@@ -65,8 +86,16 @@ class SettingsLoader {
       return decoded.map((e) => AzkarReminder.fromJson(e)).toList();
     } catch (_) {
       return [
-        AzkarReminder(category: 'أذكار الصباح', time: morningTime, title: 'أذكار الصباح'),
-        AzkarReminder(category: 'أذكار المساء', time: eveningTime, title: 'أذكار المساء'),
+        AzkarReminder(
+          category: 'أذكار الصباح',
+          time: morningTime,
+          title: 'أذكار الصباح',
+        ),
+        AzkarReminder(
+          category: 'أذكار المساء',
+          time: eveningTime,
+          title: 'أذكار المساء',
+        ),
       ];
     }
   }

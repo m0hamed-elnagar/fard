@@ -11,9 +11,7 @@ abstract interface class AudioDownloadService {
   });
 
   /// Download all Surahs for a Reciter
-  Future<void> downloadReciter({
-    required Reciter reciter,
-  });
+  Future<void> downloadReciter({required Reciter reciter});
 
   /// Cancel ongoing downloads for a reciter
   Future<void> cancelDownload(String reciterId);
@@ -25,9 +23,7 @@ abstract interface class AudioDownloadService {
   });
 
   /// Delete all downloaded files for a Reciter
-  Future<void> deleteReciter({
-    required String reciterId,
-  });
+  Future<void> deleteReciter({required String reciterId});
 
   /// Get status for a Surah
   Future<SurahDownloadStatus> getSurahStatus({
@@ -36,9 +32,7 @@ abstract interface class AudioDownloadService {
   });
 
   /// Get status for a Reciter (summary)
-  Future<ReciterDownloadStatus> getReciterStatus({
-    required String reciterId,
-  });
+  Future<ReciterDownloadStatus> getReciterStatus({required String reciterId});
 
   /// Get approximate percentage of downloaded ayahs for a reciter
   Future<double> getReciterDownloadPercentage(String reciterId);
@@ -65,7 +59,7 @@ class DownloadProgress {
     this.isCompleted = false,
     this.error,
   });
-  
+
   double get percentage => totalFiles > 0 ? downloadedFiles / totalFiles : 0.0;
 }
 

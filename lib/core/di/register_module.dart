@@ -17,7 +17,8 @@ abstract class RegisterModule {
 
   @preResolve
   @Named('dailyRecordsBox')
-  Future<Box<DailyRecordEntity>> get dailyRecordsBox => Hive.openBox<DailyRecordEntity>('daily_records');
+  Future<Box<DailyRecordEntity>> get dailyRecordsBox =>
+      Hive.openBox<DailyRecordEntity>('daily_records');
 
   @preResolve
   @Named('azkarBox')
@@ -25,7 +26,8 @@ abstract class RegisterModule {
 
   @preResolve
   @Named('tasbihProgressBox')
-  Future<Box<int>> get tasbihProgressBox => Hive.openBox<int>('tasbih_progress');
+  Future<Box<int>> get tasbihProgressBox =>
+      Hive.openBox<int>('tasbih_progress');
 
   @preResolve
   @Named('tasbihHistoryBox')
@@ -33,15 +35,18 @@ abstract class RegisterModule {
 
   @preResolve
   @Named('tasbihPreferredDuaBox')
-  Future<Box<String>> get tasbihPreferredDuaBox => Hive.openBox<String>('tasbih_preferred_dua');
+  Future<Box<String>> get tasbihPreferredDuaBox =>
+      Hive.openBox<String>('tasbih_preferred_dua');
 
   @preResolve
   @Named('surahBox')
-  Future<Box<SurahEntity>> get surahBox => Hive.openBox<SurahEntity>(QuranLocalSourceImpl.boxName);
+  Future<Box<SurahEntity>> get surahBox =>
+      Hive.openBox<SurahEntity>(QuranLocalSourceImpl.boxName);
 
   @preResolve
   @Named('bookmarkBox')
-  Future<Box<BookmarkEntity>> get bookmarkBox => Hive.openBox<BookmarkEntity>(BookmarkRepositoryImpl.boxName);
+  Future<Box<BookmarkEntity>> get bookmarkBox =>
+      Hive.openBox<BookmarkEntity>(BookmarkRepositoryImpl.boxName);
 
   @lazySingleton
   http.Client get httpClient => http.Client();
@@ -50,5 +55,6 @@ abstract class RegisterModule {
   GlobalKey<NavigatorState> get navigatorKey => GlobalKey<NavigatorState>();
 
   @lazySingleton
-  FlutterLocalNotificationsPlugin get flutterLocalNotificationsPlugin => FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin get flutterLocalNotificationsPlugin =>
+      FlutterLocalNotificationsPlugin();
 }

@@ -28,16 +28,18 @@ class WerdProgressBar extends StatelessWidget {
   String _getAyahInfo(int abs, bool isAr) {
     if (abs <= 0) return isAr ? 'الفاتحة، ١' : 'Al-Fatihah, 1';
     final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(abs);
-    final surahName = isAr ? quran.getSurahNameArabic(pos[0]) : quran.getSurahName(pos[0]);
+    final surahName = isAr
+        ? quran.getSurahNameArabic(pos[0])
+        : quran.getSurahName(pos[0]);
     return isAr
-      ? '$surahName، ${pos[1].toArabicIndic()}'
-      : '$surahName, ${pos[1]}';
+        ? '$surahName، ${pos[1].toArabicIndic()}'
+        : '$surahName, ${pos[1]}';
   }
 
   String _formatValue(double value, bool isAr) {
     if ((value - value.round()).abs() < 0.05) {
-       final intVal = value.round();
-       return isAr ? intVal.toArabicIndic() : intVal.toString();
+      final intVal = value.round();
+      return isAr ? intVal.toArabicIndic() : intVal.toString();
     }
     final formatted = value.toStringAsFixed(1);
     if (isAr) {
@@ -46,17 +48,23 @@ class WerdProgressBar extends StatelessWidget {
     return formatted;
   }
 
-  String _getProgressText(int current, int total, WerdGoal goal, dynamic progress, bool isAr) {
+  String _getProgressText(
+    int current,
+    int total,
+    WerdGoal goal,
+    dynamic progress,
+    bool isAr,
+  ) {
     if (goal.category != WerdCategory.quran) {
       return isAr
-        ? 'تم إكمال ${current.toArabicIndic()} من ${total.toArabicIndic()}'
-        : 'Completed ${current.toString()} of ${total.toString()}';
+          ? 'تم إكمال ${current.toArabicIndic()} من ${total.toArabicIndic()}'
+          : 'Completed ${current.toString()} of ${total.toString()}';
     }
 
     if (goal.type == WerdGoalType.finishInDays) {
       return isAr
-        ? 'تم إكمال ${current.toArabicIndic()} من ${total.toArabicIndic()} آية لختم المصحف'
-        : 'Completed ${current.toString()} of ${total.toString()} ayahs to finish';
+          ? 'تم إكمال ${current.toArabicIndic()} من ${total.toArabicIndic()} آية لختم المصحف'
+          : 'Completed ${current.toString()} of ${total.toString()} ayahs to finish';
     }
 
     // Fixed amount with specific unit
@@ -65,7 +73,10 @@ class WerdProgressBar extends StatelessWidget {
     double totalInUnit = goal.value.toDouble();
 
     final readItems = progress?.readItemsToday as Set<int>? ?? {};
-    currentInUnit = QuranHizbProvider.calculateFractionalProgress(readItems, goal.unit);
+    currentInUnit = QuranHizbProvider.calculateFractionalProgress(
+      readItems,
+      goal.unit,
+    );
 
     switch (goal.unit) {
       case WerdUnit.ayah:
@@ -109,7 +120,9 @@ class WerdProgressBar extends StatelessWidget {
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
+              border: Border.all(
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+              ),
             ),
             child: Row(
               children: [
@@ -119,7 +132,10 @@ class WerdProgressBar extends StatelessWidget {
                     color: AppTheme.primaryLight.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.track_changes_rounded, color: AppTheme.primaryLight),
+                  child: const Icon(
+                    Icons.track_changes_rounded,
+                    color: AppTheme.primaryLight,
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -128,11 +144,19 @@ class WerdProgressBar extends StatelessWidget {
                     children: [
                       Text(
                         isAr ? 'حدد وردك اليومي' : 'Set Daily Werd',
-                        style: GoogleFonts.amiri(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: GoogleFonts.amiri(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Text(
-                        isAr ? 'تابع تقدمك في قراءة القرآن' : 'Track your Quran progress',
-                        style: GoogleFonts.amiri(fontSize: 14, color: Colors.grey),
+                        isAr
+                            ? 'تابع تقدمك في قراءة القرآن'
+                            : 'Track your Quran progress',
+                        style: GoogleFonts.amiri(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
@@ -142,7 +166,9 @@ class WerdProgressBar extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryLight,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: Text(isAr ? 'بدء' : 'Start'),
                 ),
@@ -165,7 +191,9 @@ class WerdProgressBar extends StatelessWidget {
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
+            side: BorderSide(
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+            ),
           ),
           child: InkWell(
             onTap: () => _showSetGoalDialog(context),
@@ -181,14 +209,23 @@ class WerdProgressBar extends StatelessWidget {
                       Row(
                         children: [
                           Icon(
-                            isCompleted ? Icons.stars_rounded : Icons.menu_book_rounded,
-                            color: isCompleted ? Colors.amber : AppTheme.primaryLight,
+                            isCompleted
+                                ? Icons.stars_rounded
+                                : Icons.menu_book_rounded,
+                            color: isCompleted
+                                ? Colors.amber
+                                : AppTheme.primaryLight,
                             size: 20,
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            (progress?.totalAmountReadToday ?? 0) == 0 ? (isAr ? 'بداية الورد' : 'Werd Start') : (isAr ? 'ورد اليوم' : 'Daily Werd'),
-                            style: GoogleFonts.amiri(fontSize: 18, fontWeight: FontWeight.bold),
+                            (progress?.totalAmountReadToday ?? 0) == 0
+                                ? (isAr ? 'بداية الورد' : 'Werd Start')
+                                : (isAr ? 'ورد اليوم' : 'Daily Werd'),
+                            style: GoogleFonts.amiri(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -198,36 +235,62 @@ class WerdProgressBar extends StatelessWidget {
                             Padding(
                               padding: const EdgeInsets.only(left: 8.0),
                               child: Text(
-                                _getAyahInfo(progress?.sessionStartAbsolute ?? 1, isAr),
-                                style: GoogleFonts.amiri(fontSize: 12, color: Colors.grey),
+                                _getAyahInfo(
+                                  progress?.sessionStartAbsolute ?? 1,
+                                  isAr,
+                                ),
+                                style: GoogleFonts.amiri(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
                               ),
                             ),
                           IconButton(
                             onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => const WerdHistoryPage()));
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const WerdHistoryPage(),
+                                ),
+                              );
                             },
-                            icon: const Icon(Icons.history_rounded, size: 20, color: Colors.grey),
+                            icon: const Icon(
+                              Icons.history_rounded,
+                              size: 20,
+                              color: Colors.grey,
+                            ),
                             tooltip: isAr ? 'السجل' : 'History',
                             constraints: const BoxConstraints(),
                             padding: const EdgeInsets.all(8),
                           ),
                           IconButton(
                             onPressed: () => _showSetGoalDialog(context),
-                            icon: const Icon(Icons.edit_rounded, size: 20, color: Colors.grey),
+                            icon: const Icon(
+                              Icons.edit_rounded,
+                              size: 20,
+                              color: Colors.grey,
+                            ),
                             tooltip: isAr ? 'تعديل الهدف' : 'Edit Goal',
                             constraints: const BoxConstraints(),
                             padding: const EdgeInsets.all(8),
                           ),
-                          if (progress?.lastReadAbsolute != null || progress?.sessionStartAbsolute != null)
+                          if (progress?.lastReadAbsolute != null ||
+                              progress?.sessionStartAbsolute != null)
                             const SizedBox(width: 4),
-                          if (progress?.lastReadAbsolute != null || progress?.sessionStartAbsolute != null)
+                          if (progress?.lastReadAbsolute != null ||
+                              progress?.sessionStartAbsolute != null)
                             TextButton.icon(
                               onPressed: () {
-                                int targetAbs = progress?.sessionStartAbsolute ?? 1;
-                                if ((progress?.totalAmountReadToday ?? 0) > 0 && progress?.lastReadAbsolute != null) {
+                                int targetAbs =
+                                    progress?.sessionStartAbsolute ?? 1;
+                                if ((progress?.totalAmountReadToday ?? 0) > 0 &&
+                                    progress?.lastReadAbsolute != null) {
                                   targetAbs = progress!.lastReadAbsolute!;
                                 }
-                                final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(targetAbs);
+                                final pos =
+                                    QuranHizbProvider.getSurahAndAyahFromAbsolute(
+                                      targetAbs,
+                                    );
 
                                 Navigator.push(
                                   context,
@@ -237,7 +300,10 @@ class WerdProgressBar extends StatelessWidget {
                                   ),
                                 );
                               },
-                              icon: const Icon(Icons.play_arrow_rounded, size: 18),
+                              icon: const Icon(
+                                Icons.play_arrow_rounded,
+                                size: 18,
+                              ),
                               label: Text(isAr ? 'متابعة' : 'Continue'),
                               style: TextButton.styleFrom(
                                 visualDensity: VisualDensity.compact,
@@ -254,7 +320,9 @@ class WerdProgressBar extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: percent,
                       minHeight: 10,
-                      backgroundColor: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                      backgroundColor: Theme.of(
+                        context,
+                      ).dividerColor.withValues(alpha: 0.1),
                       valueColor: AlwaysStoppedAnimation<Color>(
                         isCompleted ? Colors.amber : AppTheme.primaryLight,
                       ),
@@ -266,19 +334,38 @@ class WerdProgressBar extends StatelessWidget {
                     children: [
                       Text(
                         _getProgressText(current, total, goal, progress, isAr),
-                        style: GoogleFonts.amiri(fontSize: 14, color: Colors.grey[600]),
+                        style: GoogleFonts.amiri(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
                       ),
                       if ((progress?.streak ?? 0) > 0)
                         Row(
                           children: [
-                            const Icon(Icons.local_fire_department_rounded, color: Colors.orange, size: 16),
+                            const Icon(
+                              Icons.local_fire_department_rounded,
+                              color: Colors.orange,
+                              size: 16,
+                            ),
                             const SizedBox(width: 4),
                             Text(
-                              isAr ? progress!.streak.toArabicIndic() : progress!.streak.toString(),
-                              style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.orange),
+                              isAr
+                                  ? progress!.streak.toArabicIndic()
+                                  : progress!.streak.toString(),
+                              style: GoogleFonts.outfit(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange,
+                              ),
                             ),
                             const SizedBox(width: 2),
-                            Text(isAr ? 'يوم' : 'd', style: GoogleFonts.amiri(fontSize: 12, color: Colors.orange)),
+                            Text(
+                              isAr ? 'يوم' : 'd',
+                              style: GoogleFonts.amiri(
+                                fontSize: 12,
+                                color: Colors.orange,
+                              ),
+                            ),
                           ],
                         ),
                     ],

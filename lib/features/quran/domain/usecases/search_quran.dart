@@ -6,9 +6,9 @@ import 'package:injectable/injectable.dart';
 @injectable
 class SearchQuran implements UseCase<List<SearchResult>, SearchParams> {
   final QuranRepository repository;
-  
+
   const SearchQuran(this.repository);
-  
+
   @override
   Future<Result<List<SearchResult>>> call(SearchParams params) {
     return repository.search(params.query);
@@ -17,6 +17,6 @@ class SearchQuran implements UseCase<List<SearchResult>, SearchParams> {
 
 class SearchParams {
   final String query;
-  
+
   const SearchParams({required this.query});
 }

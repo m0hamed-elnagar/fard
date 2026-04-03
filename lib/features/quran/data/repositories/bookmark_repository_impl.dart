@@ -14,7 +14,7 @@ class BookmarkRepositoryImpl implements BookmarkRepository {
 
   BookmarkRepositoryImpl(@Named('bookmarkBox') this._bookmarkBox);
 
-  String _getKey(AyahNumber ayahNumber) => 
+  String _getKey(AyahNumber ayahNumber) =>
       '${ayahNumber.surahNumber}_${ayahNumber.ayahNumberInSurah}';
 
   @override
@@ -31,7 +31,7 @@ class BookmarkRepositoryImpl implements BookmarkRepository {
   Stream<Result<List<Bookmark>>> watchBookmarks() {
     // Using a StreamController to emit the initial value and then any subsequent changes
     final controller = StreamController<Result<List<Bookmark>>>();
-    
+
     void emitCurrent() {
       if (controller.isClosed) return;
       try {
@@ -72,22 +72,22 @@ class BookmarkRepositoryImpl implements BookmarkRepository {
     try {
       // 1. Try deleting by current key format
       await _bookmarkBox.delete(_getKey(ayahNumber));
-      
+
       // 2. Scan for any remaining entities with same surah/ayah (handles old key formats)
       final keysToDelete = <dynamic>[];
       for (var i = 0; i < _bookmarkBox.length; i++) {
         final entity = _bookmarkBox.getAt(i);
-        if (entity != null && 
-            entity.surahNumber == ayahNumber.surahNumber && 
+        if (entity != null &&
+            entity.surahNumber == ayahNumber.surahNumber &&
             entity.ayahNumber == ayahNumber.ayahNumberInSurah) {
           keysToDelete.add(_bookmarkBox.keyAt(i));
         }
       }
-      
+
       if (keysToDelete.isNotEmpty) {
         await _bookmarkBox.deleteAll(keysToDelete);
       }
-      
+
       return Result.success(null);
     } catch (e) {
       return Result.failure(UnknownFailure(e.toString()));

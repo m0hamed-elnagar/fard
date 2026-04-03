@@ -8,7 +8,10 @@ void main() {
       final date = DateTime(2026, 2, 14);
       final hijri = date.toHijriDate('en');
       expect(hijri, contains('1447'));
-      expect(hijri.toLowerCase(), anyOf(contains('shaban'), contains('sha\'ban'), contains('sha\'aban')));
+      expect(
+        hijri.toLowerCase(),
+        anyOf(contains('shaban'), contains('sha\'ban'), contains('sha\'aban')),
+      );
       expect(hijri, contains('26'));
       expect(hijri, contains('AH'));
     });
@@ -16,10 +19,15 @@ void main() {
     test('converts Gregorian date to Hijri string (AR)', () {
       final date = DateTime(2026, 2, 14);
       final hijri = date.toHijriDate('ar');
-      expect(hijri, anyOf(contains('1447'), contains('١٤٤٧')));
+      // 2026-02-14 is 26 Shaban 1447
+      expect(hijri, contains('\u200F')); // RLM
+      expect(hijri, contains('١٤٤٧')); // 1447 in Arabic-Indic
       expect(hijri, contains('شعبان'));
-      expect(hijri, anyOf(contains('26'), contains('٢٦')));
+      expect(hijri, contains('٢٦')); // 26 in Arabic-Indic
       expect(hijri, contains('هـ'));
+
+      // Check full string structure (Right-to-Left Mark at start)
+      expect(hijri.startsWith('\u200F'), isTrue);
     });
 
     test('applies hijri adjustment', () {
@@ -27,7 +35,7 @@ void main() {
       final hijriNoAdj = date.toHijriDate('en');
       final hijriMinus1 = date.toHijriDate('en', adjustment: -1);
       final hijriPlus1 = date.toHijriDate('en', adjustment: 1);
-      
+
       expect(hijriNoAdj, contains('14 Ramadan'));
       expect(hijriMinus1, contains('13 Ramadan'));
       expect(hijriPlus1, contains('15 Ramadan'));

@@ -43,14 +43,18 @@ class FakePrayerRepo implements PrayerRepo {
   }
 
   @override
-  Future<Map<Salaah, int>> calculateRemaining(DateTime from, DateTime to) async {
+  Future<Map<Salaah, int>> calculateRemaining(
+    DateTime from,
+    DateTime to,
+  ) async {
     return {for (var s in Salaah.values) s: 0};
   }
 
   @override
   Future<DailyRecord?> loadLastSavedRecord() async {
     if (_records.isEmpty) return null;
-    final sorted = _records.values.toList()..sort((a, b) => a.date.compareTo(b.date));
+    final sorted = _records.values.toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
     return sorted.last;
   }
 
@@ -78,6 +82,7 @@ class FakePrayerRepo implements PrayerRepo {
 }
 
 class MockSharedPreferences extends Mock implements SharedPreferences {}
+
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
 void main() {
@@ -88,7 +93,7 @@ void main() {
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
   final threeDaysAgo = today.subtract(const Duration(days: 3));
-  
+
   final dummyPrayerTimes = PrayerTimes(
     Coordinates(30.0, 31.0),
     DateComponents.from(today),
@@ -98,13 +103,15 @@ void main() {
   setUpAll(() {
     registerFallbackValue(DateTime(2024));
     registerFallbackValue(Salaah.fajr);
-    registerFallbackValue(DailyRecord(
-      id: 'dummy',
-      date: DateTime.now(),
-      missedToday: {},
-      completedToday: {},
-      qada: {},
-    ));
+    registerFallbackValue(
+      DailyRecord(
+        id: 'dummy',
+        date: DateTime.now(),
+        missedToday: {},
+        completedToday: {},
+        qada: {},
+      ),
+    );
     registerFallbackValue(dummyPrayerTimes);
   });
 
@@ -118,58 +125,77 @@ void main() {
     getIt.registerSingleton<PrayerTimeService>(prayerTimeService);
 
     // Default: all prayers passed
-    when(() => prayerTimeService.isPassed(any(), 
-        prayerTimes: any(named: 'prayerTimes'), 
-        date: any(named: 'date'))).thenReturn(true);
-    when(() => prayerTimeService.getPrayerTimes(
-      latitude: any(named: 'latitude'),
-      longitude: any(named: 'longitude'),
-      method: any(named: 'method'),
-      madhab: any(named: 'madhab'),
-      date: any(named: 'date'),
-    )).thenReturn(dummyPrayerTimes);
+    when(
+      () => prayerTimeService.isPassed(
+        any(),
+        prayerTimes: any(named: 'prayerTimes'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(true);
+    when(
+      () => prayerTimeService.getPrayerTimes(
+        latitude: any(named: 'latitude'),
+        longitude: any(named: 'longitude'),
+        method: any(named: 'method'),
+        madhab: any(named: 'madhab'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(dummyPrayerTimes);
 
     // Mock prefs
     when(() => prefs.getDouble('latitude')).thenReturn(30.0);
     when(() => prefs.getDouble('longitude')).thenReturn(31.0);
-    when(() => prefs.getString('calculation_method')).thenReturn('muslim_league');
+    when(
+      () => prefs.getString('calculation_method'),
+    ).thenReturn('muslim_league');
     when(() => prefs.getString('madhab')).thenReturn('shafi');
   });
 
-  test('Reproduction: Clicking "I was praying" (skip) SHOULD NOT add to qada', () async {
-    // 1. Setup: last record was 3 days ago with qada = 10
-    final lastRecord = DailyRecord(
-      id: 'last',
-      date: threeDaysAgo,
-      missedToday: {},
-      completedToday: {for (var s in Salaah.values) s}, // All done 3 days ago
-      qada: {for (var s in Salaah.values) s: const MissedCounter(10)},
-    );
-    
-    await repo.saveToday(lastRecord);
+  test(
+    'Reproduction: Clicking "I was praying" (skip) SHOULD NOT add to qada',
+    () async {
+      // 1. Setup: last record was 3 days ago with qada = 10
+      final lastRecord = DailyRecord(
+        id: 'last',
+        date: threeDaysAgo,
+        missedToday: {},
+        completedToday: {for (var s in Salaah.values) s}, // All done 3 days ago
+        qada: {for (var s in Salaah.values) s: const MissedCounter(10)},
+      );
 
-    final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService);
+      await repo.saveToday(lastRecord);
 
-    // 2. Trigger acknowledgeMissedDays with empty list (Skip)
-    bloc.add(const PrayerTrackerEvent.acknowledgeMissedDays(selectedDates: []));
-    
-    // We need to wait for the bloc to process and eventually call load()
-    await Future.delayed(const Duration(milliseconds: 1000));
+      final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService);
 
-    // 3. Verify the final state
-    bloc.state.maybeMap(
-      loaded: (s) {
-        // If "I was praying" was clicked, qada for the 2 days in between should NOT be added.
-        // Base = 10.
-        // Today is 'today'. All prayers passed = +1 for today.
-        // Expected = 11.
-        
-        final fajrQada = s.qadaStatus[Salaah.fajr]?.value ?? 0;
+      // 2. Trigger acknowledgeMissedDays with empty list (Skip)
+      bloc.add(
+        const PrayerTrackerEvent.acknowledgeMissedDays(selectedDates: []),
+      );
 
-        expect(fajrQada, 11, reason: 'Should only have today\'s missed prayers added, not the skipped ones');      },
-      orElse: () => fail('Should be in loaded state, but was ${bloc.state}'),
-    );
-  });
+      // We need to wait for the bloc to process and eventually call load()
+      await Future.delayed(const Duration(milliseconds: 1000));
+
+      // 3. Verify the final state
+      bloc.state.maybeMap(
+        loaded: (s) {
+          // If "I was praying" was clicked, qada for the 2 days in between should NOT be added.
+          // Base = 10.
+          // Today is 'today'. All prayers passed = +1 for today.
+          // Expected = 11.
+
+          final fajrQada = s.qadaStatus[Salaah.fajr]?.value ?? 0;
+
+          expect(
+            fajrQada,
+            11,
+            reason:
+                'Should only have today\'s missed prayers added, not the skipped ones',
+          );
+        },
+        orElse: () => fail('Should be in loaded state, but was ${bloc.state}'),
+      );
+    },
+  );
 
   test('Reproduction: Clicking "Add All" SHOULD add to qada', () async {
     // 1. Setup: last record was 3 days ago with qada = 10
@@ -180,7 +206,7 @@ void main() {
       completedToday: {for (var s in Salaah.values) s},
       qada: {for (var s in Salaah.values) s: const MissedCounter(10)},
     );
-    
+
     await repo.saveToday(lastRecord);
 
     final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService);
@@ -190,9 +216,9 @@ void main() {
     for (int i = 1; i < 3; i++) {
       gapDates.add(threeDaysAgo.add(Duration(days: i)));
     }
-    
+
     bloc.add(PrayerTrackerEvent.acknowledgeMissedDays(selectedDates: gapDates));
-    
+
     await Future.delayed(const Duration(milliseconds: 1000));
 
     // 3. Verify the final state
@@ -200,8 +226,12 @@ void main() {
       loaded: (s) {
         // Base 10 + 2 gap days + 1 today = 13.
         final fajrQada = s.qadaStatus[Salaah.fajr]?.value ?? 0;
-        
-        expect(fajrQada, 13, reason: 'Should have today\'s AND gap days added to qada');
+
+        expect(
+          fajrQada,
+          13,
+          reason: 'Should have today\'s AND gap days added to qada',
+        );
       },
       orElse: () => fail('Should be in loaded state'),
     );

@@ -24,7 +24,7 @@ void main() {
       expect(times.asr, isNotNull);
       expect(times.maghrib, isNotNull);
       expect(times.isha, isNotNull);
-      
+
       // Basic check for Lagos on Feb 15
       // Fajr should be around 5:30 AM UTC+1
       // Dhuhr should be around 12:50 PM UTC+1

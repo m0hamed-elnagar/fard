@@ -13,8 +13,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockAudioRepository extends Mock implements AudioRepository {}
+
 class MockAudioPlayerService extends Mock implements AudioPlayerService {}
+
 class MockAudioDownloadService extends Mock implements AudioDownloadService {}
+
 class MockSettingsCubit extends Mock implements SettingsCubit {}
 
 void main() {
@@ -27,7 +30,9 @@ void main() {
   setUpAll(() {
     registerFallbackValue(AudioPlayMode.ayah);
     registerFallbackValue(AudioQuality.medium128);
-    registerFallbackValue(const AudioTrack(remoteUrl: '', localPath: '', isDownloaded: false));
+    registerFallbackValue(
+      const AudioTrack(remoteUrl: '', localPath: '', isDownloaded: false),
+    );
   });
 
   final tReciter = const Reciter(
@@ -43,37 +48,57 @@ void main() {
     mockDownloadService = MockAudioDownloadService();
     mockSettingsCubit = MockSettingsCubit();
 
-    when(() => mockSettingsCubit.state).thenReturn(const SettingsState(
-      locale: Locale('ar'),
-    ));
+    when(
+      () => mockSettingsCubit.state,
+    ).thenReturn(const SettingsState(locale: Locale('ar')));
 
-    when(() => mockRepository.getCachedReciters())
-        .thenAnswer((_) async => Result.success([tReciter]));
-    when(() => mockRepository.getAvailableReciters())
-        .thenAnswer((_) async => Result.success([tReciter]));
-    when(() => mockRepository.getCachedReciterData())
-        .thenAnswer((_) async => const ReciterData(progress: {}, sizes: {}));
-    when(() => mockRepository.cacheReciterData(any(), any()))
-        .thenAnswer((_) async {});
-    when(() => mockRepository.shouldPrependBismillah(any(), any())).thenReturn(false);
-    
-    when(() => mockDownloadService.getReciterDownloadPercentage(any()))
-        .thenAnswer((_) async => 0.0);
-    
-    when(() => mockDownloadService.getReciterDownloadedSize(any()))
-        .thenAnswer((_) async => 0);
+    when(
+      () => mockRepository.getCachedReciters(),
+    ).thenAnswer((_) async => Result.success([tReciter]));
+    when(
+      () => mockRepository.getAvailableReciters(),
+    ).thenAnswer((_) async => Result.success([tReciter]));
+    when(
+      () => mockRepository.getCachedReciterData(),
+    ).thenAnswer((_) async => const ReciterData(progress: {}, sizes: {}));
+    when(
+      () => mockRepository.cacheReciterData(any(), any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockRepository.shouldPrependBismillah(any(), any()),
+    ).thenReturn(false);
 
-    when(() => mockPlayerService.watchStatus()).thenAnswer((_) => const Stream.empty());
-    when(() => mockPlayerService.watchError()).thenAnswer((_) => const Stream.empty());
-    when(() => mockPlayerService.watchPosition()).thenAnswer((_) => const Stream.empty());
-    when(() => mockPlayerService.watchDuration()).thenAnswer((_) => const Stream.empty());
-    when(() => mockPlayerService.watchCurrentIndex()).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockDownloadService.getReciterDownloadPercentage(any()),
+    ).thenAnswer((_) async => 0.0);
+
+    when(
+      () => mockDownloadService.getReciterDownloadedSize(any()),
+    ).thenAnswer((_) async => 0);
+
+    when(
+      () => mockPlayerService.watchStatus(),
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockPlayerService.watchError(),
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockPlayerService.watchPosition(),
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockPlayerService.watchDuration(),
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockPlayerService.watchCurrentIndex(),
+    ).thenAnswer((_) => const Stream.empty());
     when(() => mockPlayerService.currentStatus).thenReturn(AudioStatus.idle);
     when(() => mockPlayerService.currentMode).thenReturn(AudioPlayMode.ayah);
     when(() => mockPlayerService.currentPosition).thenReturn(Duration.zero);
     when(() => mockPlayerService.currentDuration).thenReturn(null);
     when(() => mockPlayerService.currentIndex).thenReturn(null);
-    when(() => mockPlayerService.stop()).thenAnswer((_) async => Result.success(null));
+    when(
+      () => mockPlayerService.stop(),
+    ).thenAnswer((_) async => Result.success(null));
   });
 
   AudioBloc buildBloc() {
@@ -95,81 +120,130 @@ void main() {
     blocTest<AudioBloc, AudioState>(
       'falls back to low64 when playStreaming fails for medium128',
       build: () {
-        const track128 = AudioTrack(remoteUrl: 'url_128', localPath: 'path_128', isDownloaded: false);
-        const track64 = AudioTrack(remoteUrl: 'url_64', localPath: 'path_64', isDownloaded: false);
+        const track128 = AudioTrack(
+          remoteUrl: 'url_128',
+          localPath: 'path_128',
+          isDownloaded: false,
+        );
+        const track64 = AudioTrack(
+          remoteUrl: 'url_64',
+          localPath: 'path_64',
+          isDownloaded: false,
+        );
 
-        when(() => mockRepository.getAyahAudioTrack(
-              reciterId: any(named: 'reciterId'),
-              surahNumber: any(named: 'surahNumber'),
-              ayahNumber: any(named: 'ayahNumber'),
-              quality: AudioQuality.medium128,
-            )).thenAnswer((_) async => track128);
+        when(
+          () => mockRepository.getAyahAudioTrack(
+            reciterId: any(named: 'reciterId'),
+            surahNumber: any(named: 'surahNumber'),
+            ayahNumber: any(named: 'ayahNumber'),
+            quality: AudioQuality.medium128,
+          ),
+        ).thenAnswer((_) async => track128);
 
-        when(() => mockRepository.getAyahAudioTrack(
-              reciterId: any(named: 'reciterId'),
-              surahNumber: any(named: 'surahNumber'),
-              ayahNumber: any(named: 'ayahNumber'),
-              quality: AudioQuality.low64,
-            )).thenAnswer((_) async => track64);
-        
-        when(() => mockPlayerService.playStreaming(track128, mode: any(named: 'mode'), metadata: any(named: 'metadata')))
-            .thenAnswer((_) async => Result.failure(const ServerFailure('Failed')));
-            
-        when(() => mockPlayerService.playStreaming(track64, mode: any(named: 'mode'), metadata: any(named: 'metadata')))
-            .thenAnswer((_) async => Result.success(null));
+        when(
+          () => mockRepository.getAyahAudioTrack(
+            reciterId: any(named: 'reciterId'),
+            surahNumber: any(named: 'surahNumber'),
+            ayahNumber: any(named: 'ayahNumber'),
+            quality: AudioQuality.low64,
+          ),
+        ).thenAnswer((_) async => track64);
+
+        when(
+          () => mockPlayerService.playStreaming(
+            track128,
+            mode: any(named: 'mode'),
+            metadata: any(named: 'metadata'),
+          ),
+        ).thenAnswer(
+          (_) async => Result.failure(const ServerFailure('Failed')),
+        );
+
+        when(
+          () => mockPlayerService.playStreaming(
+            track64,
+            mode: any(named: 'mode'),
+            metadata: any(named: 'metadata'),
+          ),
+        ).thenAnswer((_) async => Result.success(null));
 
         return buildBloc();
       },
-      seed: () => AudioState(currentReciter: tReciter, quality: AudioQuality.medium128),
-      act: (bloc) => bloc.add(AudioEvent.playAyah(
-        surahNumber: 1,
-        ayahNumber: 1,
-      )),
+      seed: () =>
+          AudioState(currentReciter: tReciter, quality: AudioQuality.medium128),
+      act: (bloc) =>
+          bloc.add(AudioEvent.playAyah(surahNumber: 1, ayahNumber: 1)),
       verify: (_) {
-        verify(() => mockRepository.getAyahAudioTrack(
-              reciterId: any(named: 'reciterId'),
-              surahNumber: 1,
-              ayahNumber: 1,
-              quality: AudioQuality.low64,
-            )).called(1);
+        verify(
+          () => mockRepository.getAyahAudioTrack(
+            reciterId: any(named: 'reciterId'),
+            surahNumber: 1,
+            ayahNumber: 1,
+            quality: AudioQuality.low64,
+          ),
+        ).called(1);
       },
     );
 
     blocTest<AudioBloc, AudioState>(
       'stops fallback loop when low64 fails',
       build: () {
-        const track64 = AudioTrack(remoteUrl: 'url_64', localPath: 'path_64', isDownloaded: false);
+        const track64 = AudioTrack(
+          remoteUrl: 'url_64',
+          localPath: 'path_64',
+          isDownloaded: false,
+        );
 
-        when(() => mockRepository.getCachedReciters())
-            .thenAnswer((_) async => Result.success([]));
-        when(() => mockRepository.getAvailableReciters())
-            .thenAnswer((_) async => Result.success([]));
+        when(
+          () => mockRepository.getCachedReciters(),
+        ).thenAnswer((_) async => Result.success([]));
+        when(
+          () => mockRepository.getAvailableReciters(),
+        ).thenAnswer((_) async => Result.success([]));
 
-        when(() => mockRepository.getAyahAudioTrack(
-              reciterId: any(named: 'reciterId'),
-              surahNumber: any(named: 'surahNumber'),
-              ayahNumber: any(named: 'ayahNumber'),
-              quality: AudioQuality.low64,
-            )).thenAnswer((_) async => track64);
-        
-        when(() => mockPlayerService.playStreaming(track64, mode: any(named: 'mode'), metadata: any(named: 'metadata')))
-            .thenAnswer((_) async => Result.failure(const ServerFailure('Failed again')));
+        when(
+          () => mockRepository.getAyahAudioTrack(
+            reciterId: any(named: 'reciterId'),
+            surahNumber: any(named: 'surahNumber'),
+            ayahNumber: any(named: 'ayahNumber'),
+            quality: AudioQuality.low64,
+          ),
+        ).thenAnswer((_) async => track64);
+
+        when(
+          () => mockPlayerService.playStreaming(
+            track64,
+            mode: any(named: 'mode'),
+            metadata: any(named: 'metadata'),
+          ),
+        ).thenAnswer(
+          (_) async => Result.failure(const ServerFailure('Failed again')),
+        );
 
         return buildBloc();
       },
-      seed: () => AudioState(quality: AudioQuality.low64, currentReciter: tReciter),
-      act: (bloc) => bloc.add(AudioEvent.playAyah(
-        surahNumber: 1,
-        ayahNumber: 1,
-      )),
+      seed: () =>
+          AudioState(quality: AudioQuality.low64, currentReciter: tReciter),
+      act: (bloc) =>
+          bloc.add(AudioEvent.playAyah(surahNumber: 1, ayahNumber: 1)),
       expect: () => [
-        isA<AudioState>().having((s) => s.status, 'status', AudioStatus.loading),
-        isA<AudioState>().having((s) => s.status, 'status', AudioStatus.error)
-                         .having((s) => s.error, 'error', 'Playback failed: Failed again')
-                         .having((s) => s.lastErrorMessage, 'lastErrorMessage', null),
-        isA<AudioState>().having((s) => s.status, 'status', AudioStatus.error)
-                         .having((s) => s.error, 'error', 'Playback failed: Failed again')
-                         .having((s) => s.lastErrorMessage, 'lastErrorMessage', 'Failed again'),
+        isA<AudioState>().having(
+          (s) => s.status,
+          'status',
+          AudioStatus.loading,
+        ),
+        isA<AudioState>()
+            .having((s) => s.status, 'status', AudioStatus.error)
+            .having((s) => s.error, 'error', 'Playback failed: Failed again')
+            .having((s) => s.lastErrorMessage, 'lastErrorMessage', null),
+        isA<AudioState>()
+            .having((s) => s.status, 'status', AudioStatus.error)
+            .having((s) => s.error, 'error', 'Playback failed: Failed again')
+            .having(
+              (s) => s.lastErrorMessage,
+              'lastErrorMessage',
+              'Failed again',
+            ),
       ],
     );
   });

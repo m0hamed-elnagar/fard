@@ -25,16 +25,15 @@ void main() {
   Widget buildTestableWidget(Widget child) {
     return MaterialApp(
       home: Scaffold(
-        body: BlocProvider<WerdBloc>.value(
-          value: mockWerdBloc,
-          child: child,
-        ),
+        body: BlocProvider<WerdBloc>.value(value: mockWerdBloc, child: child),
       ),
     );
   }
 
   group('ReaderInfoBar Jump Buttons', () {
-    testWidgets('should show all jump buttons when data is present', (tester) async {
+    testWidgets('should show all jump buttons when data is present', (
+      tester,
+    ) async {
       when(() => mockWerdBloc.state).thenReturn(
         WerdState(
           progress: WerdProgress(
@@ -48,22 +47,24 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(buildTestableWidget(
-        ReaderInfoBar(
-          surahNumber: 1,
-          ayahNumber: 1,
-          onJumpToStart: () {},
-          onJumpToLastRead: () {},
-          onJumpToBookmark: () {},
-          bookmarkAbsolutes: const [20],
+      await tester.pumpWidget(
+        buildTestableWidget(
+          ReaderInfoBar(
+            surahNumber: 1,
+            ayahNumber: 1,
+            onJumpToStart: () {},
+            onJumpToLastRead: () {},
+            onJumpToBookmark: () {},
+            bookmarkAbsolutes: const [20],
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.flag_rounded), findsOneWidget);
       expect(find.byIcon(Icons.arrow_forward_rounded), findsOneWidget);
       expect(find.byIcon(Icons.bookmark_rounded), findsOneWidget);
-      
+
       // Verify Arabic numbers
       // Absolute 10 -> Surah 2, Ayah 3 -> ٣
       // Absolute 15 -> Surah 2, Ayah 8 -> ٨
@@ -75,36 +76,45 @@ void main() {
   });
 
   group('AyahText Icons', () {
-    testWidgets('should render flag and bookmark icons at different positions in same ayah', (tester) async {
-      final ayah = Ayah(
-        number: AyahNumber.create(surahNumber: 1, ayahNumberInSurah: 1).data!,
-        uthmaniText: 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ',
-        translation: 'Bismillah',
-        page: 1,
-        juz: 1,
-        hizb: 1,
-        rub: 1,
-        isSajdah: false,
-      );
+    testWidgets(
+      'should render flag and bookmark icons at different positions in same ayah',
+      (tester) async {
+        final ayah = Ayah(
+          number: AyahNumber.create(surahNumber: 1, ayahNumberInSurah: 1).data!,
+          uthmaniText: 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ',
+          translation: 'Bismillah',
+          page: 1,
+          juz: 1,
+          hizb: 1,
+          rub: 1,
+          isSajdah: false,
+        );
 
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: AyahText(
-            ayahs: [ayah],
-            dayStartAyah: ayah,
-            bookmarks: [
-              Bookmark(id: '1', ayahNumber: ayah.number, createdAt: DateTime.now()),
-            ],
-            onAyahTap: (_) {},
-            textScale: 1.0,
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: AyahText(
+                ayahs: [ayah],
+                dayStartAyah: ayah,
+                bookmarks: [
+                  Bookmark(
+                    id: '1',
+                    ayahNumber: ayah.number,
+                    createdAt: DateTime.now(),
+                  ),
+                ],
+                onAyahTap: (_) {},
+                textScale: 1.0,
+              ),
+            ),
           ),
-        ),
-      ));
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      // AyahText uses Unicode characters, not Icon widgets
-      expect(find.textContaining('\u2691'), findsOneWidget); // Flag
-      expect(find.textContaining('\u{1F516}'), findsOneWidget); // Bookmark
-    });
+        // AyahText uses Unicode characters, not Icon widgets
+        expect(find.textContaining('\u2691'), findsOneWidget); // Flag
+        expect(find.textContaining('\u{1F516}'), findsOneWidget); // Bookmark
+      },
+    );
   });
 }

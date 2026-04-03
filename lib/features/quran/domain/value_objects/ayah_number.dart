@@ -4,7 +4,7 @@ import 'package:fard/core/errors/failure.dart';
 class AyahNumber extends Equatable {
   final int surahNumber;
   final int ayahNumberInSurah;
-  
+
   const AyahNumber._({
     required this.surahNumber,
     required this.ayahNumberInSurah,
@@ -20,11 +20,13 @@ class AyahNumber extends Equatable {
     if (ayahNumberInSurah < 1) {
       return Result.failure(const InvalidAyahNumberFailure());
     }
-    
-    return Result.success(AyahNumber._(
-      surahNumber: surahNumber,
-      ayahNumberInSurah: ayahNumberInSurah,
-    ));
+
+    return Result.success(
+      AyahNumber._(
+        surahNumber: surahNumber,
+        ayahNumberInSurah: ayahNumberInSurah,
+      ),
+    );
   }
 
   @override

@@ -36,6 +36,7 @@ import '../../features/audio/presentation/blocs/audio_bloc.dart' as _i9;
 import '../../features/audio/presentation/blocs/audio_download/audio_download_cubit.dart'
     as _i352;
 import '../../features/azkar/data/azkar_repository.dart' as _i1004;
+import '../../features/azkar/data/azkar_source.dart' as _i1027;
 import '../../features/azkar/presentation/blocs/azkar_bloc.dart' as _i1037;
 import '../../features/prayer_tracking/data/daily_record_entity.dart' as _i453;
 import '../../features/prayer_tracking/data/prayer_repo_impl.dart' as _i107;
@@ -60,7 +61,7 @@ import '../../features/quran/domain/repositories/quran_repository.dart'
     as _i498;
 import '../../features/quran/domain/usecases/get_all_surahs.dart' as _i177;
 import '../../features/quran/domain/usecases/get_page.dart' as _i451;
-import '../../features/quran/domain/usecases/get_surah.dart' as _i941_2;
+import '../../features/quran/domain/usecases/get_surah.dart' as _i941;
 import '../../features/quran/domain/usecases/get_tafsir.dart' as _i289;
 import '../../features/quran/domain/usecases/search_quran.dart' as _i623;
 import '../../features/quran/domain/usecases/update_last_read.dart' as _i588;
@@ -86,6 +87,7 @@ import '../services/notification/sound_manager.dart' as _i1055;
 import '../services/notification_service.dart' as _i941;
 import '../services/prayer_time_service.dart' as _i552;
 import '../services/voice_download_service.dart' as _i492;
+import '../services/widget_update_service.dart' as _i682;
 import 'register_module.dart' as _i291;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -173,6 +175,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i451.AudioRepository>(
       () => _i757.AudioRepositoryImpl(client: gh<_i519.Client>()),
     );
+    gh.singleton<_i682.WidgetUpdateService>(
+      () => _i682.WidgetUpdateService(
+        gh<_i552.PrayerTimeService>(),
+        gh<_i460.SharedPreferences>(),
+      ),
+    );
     gh.factory<_i278.PrayerTrackerBloc>(
       () => _i278.PrayerTrackerBloc(
         gh<_i800.PrayerRepo>(),
@@ -188,17 +196,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i680.ChannelManager>(
       () => _i680.ChannelManager(gh<_i1055.SoundManager>()),
     );
-    gh.lazySingleton<_i1004.AzkarRepository>(
+    gh.lazySingleton<_i1027.IAzkarSource>(
       () =>
           _i1004.AzkarRepository(gh<_i1055.Box<int>>(instanceName: 'azkarBox')),
-    );
-    gh.singleton<_i3.PrayerNotificationScheduler>(
-      () => _i3.PrayerNotificationScheduler(
-        gh<_i552.PrayerTimeService>(),
-        gh<_i1004.AzkarRepository>(),
-        gh<_i680.ChannelManager>(),
-        gh<_i1055.SoundManager>(),
-      ),
     );
     gh.lazySingleton<_i1068.ExportImportService>(
       () => _i1068.ExportImportService(
@@ -229,17 +229,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i218.WatchBookmarks>(
       () => _i218.WatchBookmarks(gh<_i33.BookmarkRepository>()),
     );
-    gh.factory<_i1037.AzkarBloc>(
-      () => _i1037.AzkarBloc(gh<_i1004.AzkarRepository>()),
-    );
-    gh.singleton<_i941.NotificationService>(
-      () => _i941.NotificationService(
-        gh<_i1055.SoundManager>(),
-        gh<_i680.ChannelManager>(),
-        gh<_i3.PrayerNotificationScheduler>(),
-        gh<_i163.FlutterLocalNotificationsPlugin>(),
-      ),
-    );
     gh.factory<_i1008.PlayAudio>(
       () => _i1008.PlayAudio(
         audioRepository: gh<_i451.AudioRepository>(),
@@ -252,12 +241,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i724.WerdRepository>(),
       ),
     );
-    gh.factory<_i573.SettingsCubit>(
-      () => _i573.SettingsCubit(
-        gh<_i460.SharedPreferences>(),
-        gh<_i669.LocationService>(),
-        gh<_i941.NotificationService>(),
-        gh<_i1004.AzkarRepository>(),
+    gh.factory<_i1037.AzkarBloc>(
+      () => _i1037.AzkarBloc(gh<_i1027.IAzkarSource>()),
+    );
+    gh.singleton<_i3.PrayerNotificationScheduler>(
+      () => _i3.PrayerNotificationScheduler(
+        gh<_i552.PrayerTimeService>(),
+        gh<_i1027.IAzkarSource>(),
+        gh<_i680.ChannelManager>(),
+        gh<_i1055.SoundManager>(),
       ),
     );
     gh.factory<_i809.TasbihBloc>(
@@ -267,8 +259,8 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i177.GetAllSurahs(gh<_i498.QuranRepository>()),
     );
     gh.factory<_i451.GetPage>(() => _i451.GetPage(gh<_i498.QuranRepository>()));
-    gh.factory<_i941_2.GetSurah>(
-      () => _i941_2.GetSurah(gh<_i498.QuranRepository>()),
+    gh.factory<_i941.GetSurah>(
+      () => _i941.GetSurah(gh<_i498.QuranRepository>()),
     );
     gh.factory<_i289.GetTafsir>(
       () => _i289.GetTafsir(gh<_i498.QuranRepository>()),
@@ -279,24 +271,18 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i358.WatchLastRead>(
       () => _i358.WatchLastRead(gh<_i498.QuranRepository>()),
     );
-    gh.lazySingleton<_i224.AudioDownloadService>(
-      () => _i779.AudioDownloadServiceImpl(
-        gh<_i451.AudioRepository>(),
-        gh<_i519.Client>(),
-        gh<_i941.NotificationService>(),
-      ),
-    );
-    gh.factory<_i9.AudioBloc>(
-      () => _i9.AudioBloc(
-        audioRepository: gh<_i451.AudioRepository>(),
-        playerService: gh<_i720.AudioPlayerService>(),
-        downloadService: gh<_i224.AudioDownloadService>(),
-        settingsCubit: gh<_i573.SettingsCubit>(),
+    gh.singleton<_i941.NotificationService>(
+      () => _i941.NotificationService(
+        gh<_i1055.SoundManager>(),
+        gh<_i680.ChannelManager>(),
+        gh<_i3.PrayerNotificationScheduler>(),
+        gh<_i163.FlutterLocalNotificationsPlugin>(),
+        gh<_i682.WidgetUpdateService>(),
       ),
     );
     gh.factory<_i1060.ReaderBloc>(
       () => _i1060.ReaderBloc(
-        getSurah: gh<_i941_2.GetSurah>(),
+        getSurah: gh<_i941.GetSurah>(),
         getPage: gh<_i451.GetPage>(),
         updateLastRead: gh<_i588.UpdateLastRead>(),
         watchLastRead: gh<_i358.WatchLastRead>(),
@@ -309,6 +295,30 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i498.QuranRepository>(),
         gh<_i358.WatchLastRead>(),
         gh<_i33.BookmarkRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i224.AudioDownloadService>(
+      () => _i779.AudioDownloadServiceImpl(
+        gh<_i451.AudioRepository>(),
+        gh<_i519.Client>(),
+        gh<_i941.NotificationService>(),
+      ),
+    );
+    gh.factory<_i573.SettingsCubit>(
+      () => _i573.SettingsCubit(
+        gh<_i460.SharedPreferences>(),
+        gh<_i669.LocationService>(),
+        gh<_i941.NotificationService>(),
+        gh<_i1027.IAzkarSource>(),
+        gh<_i682.WidgetUpdateService>(),
+      ),
+    );
+    gh.factory<_i9.AudioBloc>(
+      () => _i9.AudioBloc(
+        audioRepository: gh<_i451.AudioRepository>(),
+        playerService: gh<_i720.AudioPlayerService>(),
+        downloadService: gh<_i224.AudioDownloadService>(),
+        settingsCubit: gh<_i573.SettingsCubit>(),
       ),
     );
     gh.factory<_i352.AudioDownloadCubit>(

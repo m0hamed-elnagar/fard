@@ -53,7 +53,8 @@ class _AyahTextState extends State<AyahText> {
   @override
   void didUpdateWidget(AyahText oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.ayahs != widget.ayahs || oldWidget.separator != widget.separator) {
+    if (oldWidget.ayahs != widget.ayahs ||
+        oldWidget.separator != widget.separator) {
       _calculateBlocks();
     }
   }
@@ -61,7 +62,9 @@ class _AyahTextState extends State<AyahText> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: _blocks.map((block) => RepaintBoundary(child: _buildBlock(block))).toList(),
+      children: _blocks
+          .map((block) => RepaintBoundary(child: _buildBlock(block)))
+          .toList(),
     );
   }
 
@@ -70,7 +73,10 @@ class _AyahTextState extends State<AyahText> {
     if (widget.ayahs.isEmpty) return;
 
     final sortedAyahs = List<Ayah>.from(widget.ayahs)
-      ..sort((a, b) => a.number.ayahNumberInSurah.compareTo(b.number.ayahNumberInSurah));
+      ..sort(
+        (a, b) =>
+            a.number.ayahNumberInSurah.compareTo(b.number.ayahNumberInSurah),
+      );
 
     List<Ayah> currentAyahs = [];
     String? currentLabel;
@@ -82,14 +88,20 @@ class _AyahTextState extends State<AyahText> {
 
       if (widget.separator != ReaderSeparator.none) {
         if (widget.separator == ReaderSeparator.page) {
-          final page = quran.getPageNumber(ayah.number.surahNumber, ayah.number.ayahNumberInSurah);
+          final page = quran.getPageNumber(
+            ayah.number.surahNumber,
+            ayah.number.ayahNumberInSurah,
+          );
           // If this is the first ayah of this page in this surah
           // We need to check if the previous ayah was on a different page
           bool isPageStart = false;
           if (i == 0) {
             isPageStart = true;
           } else {
-            final prevPage = quran.getPageNumber(sortedAyahs[i - 1].number.surahNumber, sortedAyahs[i - 1].number.ayahNumberInSurah);
+            final prevPage = quran.getPageNumber(
+              sortedAyahs[i - 1].number.surahNumber,
+              sortedAyahs[i - 1].number.ayahNumberInSurah,
+            );
             if (page != prevPage) isPageStart = true;
           }
 
@@ -97,25 +109,45 @@ class _AyahTextState extends State<AyahText> {
             newLabel = 'صفحة ${page.toArabicIndic()}';
           }
         } else if (widget.separator == ReaderSeparator.juz) {
-          final juz = quran.getJuzNumber(ayah.number.surahNumber, ayah.number.ayahNumberInSurah);
+          final juz = quran.getJuzNumber(
+            ayah.number.surahNumber,
+            ayah.number.ayahNumberInSurah,
+          );
           final juzData = quran.getSurahAndVersesFromJuz(juz);
-          if (juzData.keys.isNotEmpty && juzData.keys.first == ayah.number.surahNumber && juzData.values.first[0] == ayah.number.ayahNumberInSurah) {
+          if (juzData.keys.isNotEmpty &&
+              juzData.keys.first == ayah.number.surahNumber &&
+              juzData.values.first[0] == ayah.number.ayahNumberInSurah) {
             newLabel = 'الجزء ${juz.toArabicIndic()}';
           }
         } else if (widget.separator == ReaderSeparator.hizb) {
-          final hizb = QuranHizbProvider.getHizbNumber(ayah.number.surahNumber, ayah.number.ayahNumberInSurah);
+          final hizb = QuranHizbProvider.getHizbNumber(
+            ayah.number.surahNumber,
+            ayah.number.ayahNumberInSurah,
+          );
           final hizbData = QuranHizbProvider.getSurahAndVersesFromHizb(hizb);
-          if (hizbData[ayah.number.surahNumber]?.contains(ayah.number.ayahNumberInSurah) ?? false) {
+          if (hizbData[ayah.number.surahNumber]?.contains(
+                ayah.number.ayahNumberInSurah,
+              ) ??
+              false) {
             newLabel = 'الحزب ${hizb.toArabicIndic()}';
           }
         } else if (widget.separator == ReaderSeparator.quarter) {
           for (int r = 1; r <= 240; r++) {
             final rubData = QuranHizbProvider.getSurahAndVersesFromRub(r);
-            if (rubData[ayah.number.surahNumber]?.contains(ayah.number.ayahNumberInSurah) ?? false) {
+            if (rubData[ayah.number.surahNumber]?.contains(
+                  ayah.number.ayahNumberInSurah,
+                ) ??
+                false) {
               final hizb = ((r - 1) / 4).floor() + 1;
               final quarterInHizb = (r - 1) % 4;
-              final qNames = ['بداية الحزب', 'الربع الثاني', 'الربع الثالث', 'الربع الأخير'];
-              newLabel = '${qNames[quarterInHizb]} - الحزب ${hizb.toArabicIndic()}';
+              final qNames = [
+                'بداية الحزب',
+                'الربع الثاني',
+                'الربع الثالث',
+                'الربع الأخير',
+              ];
+              newLabel =
+                  '${qNames[quarterInHizb]} - الحزب ${hizb.toArabicIndic()}';
               break;
             }
           }
@@ -157,11 +189,16 @@ class _AyahTextState extends State<AyahText> {
       final isHighlighted = widget.highlightedAyah?.number == ayah.number;
       final isDayStart = widget.dayStartAyah?.number == ayah.number;
       final isLastRead = widget.lastReadAyah?.number == ayah.number;
-      final isBookmarked = widget.bookmarks.any((b) => b.ayahNumber == ayah.number);
-      
-      final String markerText = quran.getVerseEndSymbol(ayah.number.ayahNumberInSurah, arabicNumeral: true);
+      final isBookmarked = widget.bookmarks.any(
+        (b) => b.ayahNumber == ayah.number,
+      );
+
+      final String markerText = quran.getVerseEndSymbol(
+        ayah.number.ayahNumberInSurah,
+        arabicNumeral: true,
+      );
       final String ayahText = ayah.uthmaniText.trim();
-      
+
       // Calculate length for gesture detection
       // 1. SCROLL ANCHOR (WidgetSpan) = 1
       const int anchorLen = 1;
@@ -180,14 +217,24 @@ class _AyahTextState extends State<AyahText> {
       // 8. TRAILING SPACE (TextSpan) = 1
       const int trailingSpaceLen = 1;
 
-      final int totalLen = anchorLen + dayStartLen + textLen + markerLen + lastReadLen + bookmarkLen + sajdahLen + trailingSpaceLen;
+      final int totalLen =
+          anchorLen +
+          dayStartLen +
+          textLen +
+          markerLen +
+          lastReadLen +
+          bookmarkLen +
+          sajdahLen +
+          trailingSpaceLen;
 
-      ranges.add(_AyahRange(
-        ayah: ayah,
-        start: currentOffset,
-        end: currentOffset + totalLen,
-      ));
-      
+      ranges.add(
+        _AyahRange(
+          ayah: ayah,
+          start: currentOffset,
+          end: currentOffset + totalLen,
+        ),
+      );
+
       currentOffset += totalLen;
 
       final double baseFontSize = 28 * widget.textScale;
@@ -195,10 +242,7 @@ class _AyahTextState extends State<AyahText> {
 
       spans.add(
         TextSpan(
-          style: GoogleFonts.amiri(
-            fontSize: baseFontSize,
-            height: lineHeight,
-          ),
+          style: GoogleFonts.amiri(fontSize: baseFontSize, height: lineHeight),
           children: [
             // 0. SCROLL ANCHOR
             WidgetSpan(
@@ -208,7 +252,7 @@ class _AyahTextState extends State<AyahText> {
                 height: 0,
               ),
             ),
-            
+
             // 1. START FLAG (Werd session start)
             if (isDayStart)
               const TextSpan(
@@ -224,9 +268,13 @@ class _AyahTextState extends State<AyahText> {
               text: ayahText,
               style: TextStyle(
                 wordSpacing: 4,
-                color: isHighlighted ? colorScheme.primary : textTheme.bodyLarge?.color,
+                color: isHighlighted
+                    ? colorScheme.primary
+                    : textTheme.bodyLarge?.color,
                 fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
-                backgroundColor: isHighlighted ? colorScheme.primary.withValues(alpha: 0.2) : null,
+                backgroundColor: isHighlighted
+                    ? colorScheme.primary.withValues(alpha: 0.2)
+                    : null,
               ),
             ),
 
@@ -234,8 +282,12 @@ class _AyahTextState extends State<AyahText> {
             TextSpan(
               text: '\u2009$markerText',
               style: TextStyle(
-                color: isHighlighted ? colorScheme.primary : textTheme.bodyLarge?.color?.withValues(alpha: 0.7),
-                backgroundColor: isHighlighted ? colorScheme.primary.withValues(alpha: 0.2) : null,
+                color: isHighlighted
+                    ? colorScheme.primary
+                    : textTheme.bodyLarge?.color?.withValues(alpha: 0.7),
+                backgroundColor: isHighlighted
+                    ? colorScheme.primary.withValues(alpha: 0.2)
+                    : null,
               ),
             ),
 
@@ -248,25 +300,31 @@ class _AyahTextState extends State<AyahText> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            
+
             // 6. BOOKMARK
             if (isBookmarked)
               const TextSpan(
                 text: ' \u{1F516}', // Bookmark emoji
-                style: TextStyle(
-                  color: Colors.green,
-                ),
+                style: TextStyle(color: Colors.green),
               ),
-            
+
             if (ayah.isSajdah && ayah.sajdahType != null) ...[
               const TextSpan(text: ' '),
               WidgetSpan(
                 alignment: PlaceholderAlignment.middle,
                 child: Container(
-                  height: baseFontSize * (lineHeight * 0.8), // Slightly shorter to avoid overflow but keep alignment
+                  height:
+                      baseFontSize *
+                      (lineHeight *
+                          0.8), // Slightly shorter to avoid overflow but keep alignment
                   alignment: Alignment.center,
-                  color: isHighlighted ? colorScheme.primary.withValues(alpha: 0.1) : null,
-                  child: SajdahIndicator(type: ayah.sajdahType!, scale: widget.textScale),
+                  color: isHighlighted
+                      ? colorScheme.primary.withValues(alpha: 0.1)
+                      : null,
+                  child: SajdahIndicator(
+                    type: ayah.sajdahType!,
+                    scale: widget.textScale,
+                  ),
                 ),
               ),
             ],
@@ -289,8 +347,12 @@ class _AyahTextState extends State<AyahText> {
             decoration: BoxDecoration(
               color: colorScheme.primary.withValues(alpha: 0.05),
               border: Border(
-                top: BorderSide(color: colorScheme.primary.withValues(alpha: 0.2)),
-                bottom: BorderSide(color: colorScheme.primary.withValues(alpha: 0.2)),
+                top: BorderSide(
+                  color: colorScheme.primary.withValues(alpha: 0.2),
+                ),
+                bottom: BorderSide(
+                  color: colorScheme.primary.withValues(alpha: 0.2),
+                ),
               ),
             ),
             child: Text(
@@ -310,11 +372,22 @@ class _AyahTextState extends State<AyahText> {
             textDirection: TextDirection.rtl,
             child: Listener(
               behavior: HitTestBehavior.opaque,
-              onPointerDown: (event) => _handleGesture(event.localPosition, 'tap', blockKey, ranges),
+              onPointerDown: (event) =>
+                  _handleGesture(event.localPosition, 'tap', blockKey, ranges),
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onLongPressStart: (details) => _handleGesture(details.localPosition, 'longPress', blockKey, ranges),
-                onDoubleTapDown: (details) => _handleGesture(details.localPosition, 'doubleTap', blockKey, ranges),
+                onLongPressStart: (details) => _handleGesture(
+                  details.localPosition,
+                  'longPress',
+                  blockKey,
+                  ranges,
+                ),
+                onDoubleTapDown: (details) => _handleGesture(
+                  details.localPosition,
+                  'doubleTap',
+                  blockKey,
+                  ranges,
+                ),
                 child: Text.rich(
                   key: blockKey,
                   TextSpan(children: spans),
@@ -336,14 +409,22 @@ class _AyahTextState extends State<AyahText> {
     );
   }
 
-  void _handleGesture(Offset localOffset, String type, GlobalKey textKey, List<_AyahRange> ranges) {
-    final RenderObject? renderObject = textKey.currentContext?.findRenderObject();
+  void _handleGesture(
+    Offset localOffset,
+    String type,
+    GlobalKey textKey,
+    List<_AyahRange> ranges,
+  ) {
+    final RenderObject? renderObject = textKey.currentContext
+        ?.findRenderObject();
     if (renderObject == null || renderObject is! RenderParagraph) {
       return;
     }
 
     final RenderParagraph renderParagraph = renderObject;
-    final TextPosition position = renderParagraph.getPositionForOffset(localOffset);
+    final TextPosition position = renderParagraph.getPositionForOffset(
+      localOffset,
+    );
     final int offset = position.offset;
 
     for (final range in ranges) {

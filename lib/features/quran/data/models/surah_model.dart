@@ -33,7 +33,8 @@ class SurahModel {
     this.verses,
   });
 
-  factory SurahModel.fromJson(Map<String, dynamic> json) => _$SurahModelFromJson(json);
+  factory SurahModel.fromJson(Map<String, dynamic> json) =>
+      _$SurahModelFromJson(json);
   Map<String, dynamic> toJson() => _$SurahModelToJson(this);
 
   Surah toDomain() {

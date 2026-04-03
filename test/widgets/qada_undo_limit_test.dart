@@ -17,9 +17,13 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 class MockPrayerRepo extends Mock implements PrayerRepo {}
+
 class MockSharedPreferences extends Mock implements SharedPreferences {}
+
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
-class MockSettingsCubit extends MockCubit<SettingsState> implements SettingsCubit {}
+
+class MockSettingsCubit extends MockCubit<SettingsState>
+    implements SettingsCubit {}
 
 void main() {
   late MockPrayerRepo repo;
@@ -37,13 +41,15 @@ void main() {
   setUpAll(() {
     registerFallbackValue(DateTime(2024));
     registerFallbackValue(Salaah.fajr);
-    registerFallbackValue(DailyRecord(
-      id: 'dummy',
-      date: DateTime.now(),
-      missedToday: {},
-      completedToday: {},
-      qada: {},
-    ));
+    registerFallbackValue(
+      DailyRecord(
+        id: 'dummy',
+        date: DateTime.now(),
+        missedToday: {},
+        completedToday: {},
+        qada: {},
+      ),
+    );
     registerFallbackValue(dummyPrayerTimes);
   });
 
@@ -57,28 +63,40 @@ void main() {
     getIt.registerSingleton<SharedPreferences>(prefs);
     getIt.registerSingleton<PrayerTimeService>(prayerTimeService);
 
-    when(() => settingsCubit.state).thenReturn(const SettingsState(
-      locale: Locale('en'),
-      latitude: 30.0,
-      longitude: 31.0,
-      isQadaEnabled: true,
-    ));
+    when(() => settingsCubit.state).thenReturn(
+      const SettingsState(
+        locale: Locale('en'),
+        latitude: 30.0,
+        longitude: 31.0,
+        isQadaEnabled: true,
+      ),
+    );
     when(() => settingsCubit.stream).thenAnswer((_) => const Stream.empty());
 
-    when(() => prayerTimeService.isPassed(any(), 
-        prayerTimes: any(named: 'prayerTimes'), 
-        date: any(named: 'date'))).thenReturn(true);
-    when(() => prayerTimeService.isUpcoming(any(), 
-        prayerTimes: any(named: 'prayerTimes'), 
-        date: any(named: 'date'))).thenReturn(false);
-    when(() => prayerTimeService.getPrayerTimes(
-      latitude: any(named: 'latitude'),
-      longitude: any(named: 'longitude'),
-      method: any(named: 'method'),
-      madhab: any(named: 'madhab'),
-      date: any(named: 'date'),
-    )).thenReturn(dummyPrayerTimes);
-    
+    when(
+      () => prayerTimeService.isPassed(
+        any(),
+        prayerTimes: any(named: 'prayerTimes'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(true);
+    when(
+      () => prayerTimeService.isUpcoming(
+        any(),
+        prayerTimes: any(named: 'prayerTimes'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(false);
+    when(
+      () => prayerTimeService.getPrayerTimes(
+        latitude: any(named: 'latitude'),
+        longitude: any(named: 'longitude'),
+        method: any(named: 'method'),
+        madhab: any(named: 'madhab'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(dummyPrayerTimes);
+
     when(() => repo.loadRecord(any())).thenAnswer((_) async => null);
     when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => null);
     when(() => repo.loadLastRecordBefore(any())).thenAnswer((_) async => null);
@@ -91,7 +109,9 @@ void main() {
     getIt.popScope();
   });
 
-  testWidgets('SalaahTile: Manual toggle should decrement _removedInSession', (tester) async {
+  testWidgets('SalaahTile: Manual toggle should decrement _removedInSession', (
+    tester,
+  ) async {
     bool toggled = false;
     int addedCount = 0;
 
@@ -133,7 +153,7 @@ void main() {
     // Initial state: Fajr missed.
     expect(find.byIcon(Icons.close_rounded), findsOneWidget);
 
-    // 1. Press Minus (Recovers today). 
+    // 1. Press Minus (Recovers today).
     await tester.tap(find.byIcon(Icons.remove_rounded));
     await tester.pumpAndSettle();
     expect(toggled, isTrue);
@@ -148,7 +168,7 @@ void main() {
     // 3. Press Add (Undo).
     await tester.tap(find.byIcon(Icons.add_rounded));
     await tester.pumpAndSettle();
-    
+
     expect(addedCount, 0);
     expect(find.textContaining('Use "Add Qada"'), findsOneWidget);
   });

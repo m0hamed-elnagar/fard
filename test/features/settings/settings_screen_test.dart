@@ -14,8 +14,11 @@ import 'package:mocktail/mocktail.dart';
 import 'package:get_it/get_it.dart';
 
 class MockSettingsCubit extends Mock implements SettingsCubit {}
+
 class MockNotificationService extends Mock implements NotificationService {}
+
 class MockVoiceDownloadService extends Mock implements VoiceDownloadService {}
+
 class MockAzkarBloc extends Mock implements AzkarBloc {}
 
 void main() {
@@ -35,7 +38,9 @@ void main() {
     getIt.registerSingleton<NotificationService>(mockNotificationService);
     getIt.registerSingleton<VoiceDownloadService>(mockVoiceDownloadService);
 
-    when(() => mockNotificationService.canScheduleExactNotifications()).thenAnswer((_) async => true);
+    when(
+      () => mockNotificationService.canScheduleExactNotifications(),
+    ).thenAnswer((_) async => true);
 
     when(() => mockSettingsCubit.state).thenReturn(
       const SettingsState(
@@ -53,8 +58,10 @@ void main() {
         ],
       ),
     );
-    when(() => mockSettingsCubit.stream).thenAnswer((_) => const Stream.empty());
-    
+    when(
+      () => mockSettingsCubit.stream,
+    ).thenAnswer((_) => const Stream.empty());
+
     when(() => mockAzkarBloc.state).thenReturn(AzkarState.initial());
     when(() => mockAzkarBloc.stream).thenAnswer((_) => const Stream.empty());
   });
@@ -74,20 +81,34 @@ void main() {
     );
   }
 
-  testWidgets('renders settings screen with all sections', (WidgetTester tester) async {
+  testWidgets('renders settings screen with all sections', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
 
     expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Location Settings'), findsOneWidget);
-    
-    await tester.dragUntilVisible(find.text('Global Notification Settings'), find.byType(ListView), const Offset(0, -200));
+
+    await tester.dragUntilVisible(
+      find.text('Global Notification Settings'),
+      find.byType(ListView),
+      const Offset(0, -200),
+    );
     expect(find.text('Global Notification Settings'), findsOneWidget);
-    
-    await tester.dragUntilVisible(find.text('Individual Prayer Settings'), find.byType(ListView), const Offset(0, -200));
+
+    await tester.dragUntilVisible(
+      find.text('Individual Prayer Settings'),
+      find.byType(ListView),
+      const Offset(0, -200),
+    );
     expect(find.text('Individual Prayer Settings'), findsOneWidget);
 
-    await tester.dragUntilVisible(find.text('General App Settings'), find.byType(ListView), const Offset(0, -200));
+    await tester.dragUntilVisible(
+      find.text('General App Settings'),
+      find.byType(ListView),
+      const Offset(0, -200),
+    );
     expect(find.text('General App Settings'), findsOneWidget);
   });
 
@@ -98,13 +119,19 @@ void main() {
     expect(find.text('London'), findsOneWidget);
   });
 
-  testWidgets('tapping a prayer opens azan settings dialog', (WidgetTester tester) async {
+  testWidgets('tapping a prayer opens azan settings dialog', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
 
     // Scroll to Individual Prayer Settings
     final individualSettingsFinder = find.text('Individual Prayer Settings');
-    await tester.dragUntilVisible(individualSettingsFinder, find.byType(ListView), const Offset(0, -200));
+    await tester.dragUntilVisible(
+      individualSettingsFinder,
+      find.byType(ListView),
+      const Offset(0, -200),
+    );
     await tester.pumpAndSettle();
 
     // Tap "Edit each prayer" ExpansionTile
@@ -114,9 +141,13 @@ void main() {
 
     // Scroll to Fajr
     final fajrFinder = find.text('Fajr');
-    await tester.dragUntilVisible(fajrFinder, find.byType(ListView), const Offset(0, -200));
+    await tester.dragUntilVisible(
+      fajrFinder,
+      find.byType(ListView),
+      const Offset(0, -200),
+    );
     await tester.pumpAndSettle();
-    
+
     await tester.tap(fajrFinder);
     await tester.pumpAndSettle();
 

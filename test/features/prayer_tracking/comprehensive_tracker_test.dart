@@ -15,7 +15,11 @@ class FakePrayerRepo implements PrayerRepo {
 
   @override
   Future<void> saveToday(DailyRecord record) async {
-    final normalizedDate = DateTime(record.date.year, record.date.month, record.date.day);
+    final normalizedDate = DateTime(
+      record.date.year,
+      record.date.month,
+      record.date.day,
+    );
     db[normalizedDate] = record;
   }
 
@@ -73,12 +77,16 @@ class FakePrayerRepo implements PrayerRepo {
   }
 
   @override
-  Future<Map<Salaah, int>> calculateRemaining(DateTime from, DateTime to) async {
+  Future<Map<Salaah, int>> calculateRemaining(
+    DateTime from,
+    DateTime to,
+  ) async {
     return {for (var s in Salaah.values) s: 0};
   }
 }
 
 class MockSharedPreferences extends Mock implements SharedPreferences {}
+
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
 void main() {
@@ -107,86 +115,189 @@ void main() {
 
     when(() => prefs.getDouble('latitude')).thenReturn(30.0);
     when(() => prefs.getDouble('longitude')).thenReturn(31.0);
-    
+
     final dummyTimes = PrayerTimes(
       Coordinates(30.0, 31.0),
       DateComponents.from(today),
       CalculationMethod.muslim_world_league.getParameters(),
     );
 
-    when(() => prayerTimeService.isPassed(any(), 
-        prayerTimes: any(named: 'prayerTimes'), 
-        date: any(named: 'date'))).thenReturn(true);
-    when(() => prayerTimeService.getPrayerTimes(
-      latitude: any(named: 'latitude'),
-      longitude: any(named: 'longitude'),
-      method: any(named: 'method'),
-      madhab: any(named: 'madhab'),
-      date: any(named: 'date'),
-    )).thenReturn(dummyTimes);
+    when(
+      () => prayerTimeService.isPassed(
+        any(),
+        prayerTimes: any(named: 'prayerTimes'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(true);
+    when(
+      () => prayerTimeService.getPrayerTimes(
+        latitude: any(named: 'latitude'),
+        longitude: any(named: 'longitude'),
+        method: any(named: 'method'),
+        madhab: any(named: 'madhab'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(dummyTimes);
   });
 
   group('PrayerTrackerBloc Comprehensive Tests', () {
     test('Scenario 1: Retroactive toggle ripples forward correctly', () async {
       final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService);
-      
-      await repo.saveToday(DailyRecord(
-        id: 'dby', date: dby, missedToday: {}, completedToday: Set.from(Salaah.values),
-        qada: {for (var s in Salaah.values) s: const MissedCounter(0)},
-      ));
-      await repo.saveToday(DailyRecord(
-        id: 'yesterday', date: yesterday, missedToday: {Salaah.fajr}, completedToday: Set.from(Salaah.values.where((s) => s != Salaah.fajr)),
-        qada: {for (var s in Salaah.values) s: s == Salaah.fajr ? const MissedCounter(1) : const MissedCounter(0)},
-      ));
-      await repo.saveToday(DailyRecord(
-        id: 'today', date: today, missedToday: {Salaah.fajr}, completedToday: Set.from(Salaah.values.where((s) => s != Salaah.fajr)),
-        qada: {for (var s in Salaah.values) s: s == Salaah.fajr ? const MissedCounter(2) : const MissedCounter(0)},
-      ));
+
+      await repo.saveToday(
+        DailyRecord(
+          id: 'dby',
+          date: dby,
+          missedToday: {},
+          completedToday: Set.from(Salaah.values),
+          qada: {for (var s in Salaah.values) s: const MissedCounter(0)},
+        ),
+      );
+      await repo.saveToday(
+        DailyRecord(
+          id: 'yesterday',
+          date: yesterday,
+          missedToday: {Salaah.fajr},
+          completedToday: Set.from(
+            Salaah.values.where((s) => s != Salaah.fajr),
+          ),
+          qada: {
+            for (var s in Salaah.values)
+              s: s == Salaah.fajr
+                  ? const MissedCounter(1)
+                  : const MissedCounter(0),
+          },
+        ),
+      );
+      await repo.saveToday(
+        DailyRecord(
+          id: 'today',
+          date: today,
+          missedToday: {Salaah.fajr},
+          completedToday: Set.from(
+            Salaah.values.where((s) => s != Salaah.fajr),
+          ),
+          qada: {
+            for (var s in Salaah.values)
+              s: s == Salaah.fajr
+                  ? const MissedCounter(2)
+                  : const MissedCounter(0),
+          },
+        ),
+      );
 
       bloc.add(PrayerTrackerEvent.load(yesterday));
-      await expectLater(bloc.stream, emitsThrough(isA<PrayerTrackerState>().having((s) => s.maybeMap(loaded: (_) => true, orElse: () => false), 'loaded', true)));
-      
+      await expectLater(
+        bloc.stream,
+        emitsThrough(
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(loaded: (_) => true, orElse: () => false),
+            'loaded',
+            true,
+          ),
+        ),
+      );
+
       bloc.add(const PrayerTrackerEvent.togglePrayer(Salaah.fajr));
-      await expectLater(bloc.stream, emitsThrough(isA<PrayerTrackerState>().having((s) => s.maybeMap(
-        loaded: (l) => !l.missedToday.contains(Salaah.fajr), 
-        orElse: () => false,
-      ), 'toggle complete', true)));
+      await expectLater(
+        bloc.stream,
+        emitsThrough(
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(
+              loaded: (l) => !l.missedToday.contains(Salaah.fajr),
+              orElse: () => false,
+            ),
+            'toggle complete',
+            true,
+          ),
+        ),
+      );
 
       final todayRecord = await repo.loadRecord(today);
-      expect(todayRecord?.qada[Salaah.fajr]?.value, 1, reason: 'Today qada should ripple down to 1');
+      expect(
+        todayRecord?.qada[Salaah.fajr]?.value,
+        1,
+        reason: 'Today qada should ripple down to 1',
+      );
     });
 
     test('Scenario 2: Cascading across multi-day gaps', () async {
       final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService);
       final d1 = today.subtract(const Duration(days: 10));
       final d5 = today.subtract(const Duration(days: 5));
-      
+
       // Seed data:
       // d1 has 1 missed Fajr. Qada = 1.
       // Mark as MISSED explicitly so cascade logic sees it correctly.
-      await repo.saveToday(DailyRecord(id: 'd1', date: d1, missedToday: {Salaah.fajr}, completedToday: Set.from(Salaah.values.where((s) => s != Salaah.fajr)), qada: {Salaah.fajr: const MissedCounter(1)}));
+      await repo.saveToday(
+        DailyRecord(
+          id: 'd1',
+          date: d1,
+          missedToday: {Salaah.fajr},
+          completedToday: Set.from(
+            Salaah.values.where((s) => s != Salaah.fajr),
+          ),
+          qada: {Salaah.fajr: const MissedCounter(1)},
+        ),
+      );
       // Gaps d2, d3, d4 = 3 days missed. d5 total qada = 1 (d1) + 3 (gaps) = 4.
-      await repo.saveToday(DailyRecord(id: 'd5', date: d5, missedToday: {}, completedToday: Set.from(Salaah.values), qada: {Salaah.fajr: const MissedCounter(4)})); 
+      await repo.saveToday(
+        DailyRecord(
+          id: 'd5',
+          date: d5,
+          missedToday: {},
+          completedToday: Set.from(Salaah.values),
+          qada: {Salaah.fajr: const MissedCounter(4)},
+        ),
+      );
       // Gaps d6, d7, d8, d9 = 4 days missed. today.qada = 4 + 4 + 1 (missed today) = 9.
-      await repo.saveToday(DailyRecord(id: 'today', date: today, missedToday: {Salaah.fajr}, completedToday: Set.from(Salaah.values.where((s) => s != Salaah.fajr)), qada: {Salaah.fajr: const MissedCounter(9)}));
+      await repo.saveToday(
+        DailyRecord(
+          id: 'today',
+          date: today,
+          missedToday: {Salaah.fajr},
+          completedToday: Set.from(
+            Salaah.values.where((s) => s != Salaah.fajr),
+          ),
+          qada: {Salaah.fajr: const MissedCounter(9)},
+        ),
+      );
 
       bloc.add(PrayerTrackerEvent.load(d1));
-      await expectLater(bloc.stream, emitsThrough(isA<PrayerTrackerState>().having((s) => s.maybeMap(loaded: (_) => true, orElse: () => false), 'loaded', true)));
+      await expectLater(
+        bloc.stream,
+        emitsThrough(
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(loaded: (_) => true, orElse: () => false),
+            'loaded',
+            true,
+          ),
+        ),
+      );
 
-      // Toggle d1 Fajr to DONE. 
+      // Toggle d1 Fajr to DONE.
       bloc.add(const PrayerTrackerEvent.togglePrayer(Salaah.fajr));
-      await expectLater(bloc.stream, emitsThrough(isA<PrayerTrackerState>().having((s) => s.maybeMap(
-        loaded: (l) => !l.missedToday.contains(Salaah.fajr), 
-        orElse: () => false,
-      ), 'toggle complete', true)));
+      await expectLater(
+        bloc.stream,
+        emitsThrough(
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(
+              loaded: (l) => !l.missedToday.contains(Salaah.fajr),
+              orElse: () => false,
+            ),
+            'toggle complete',
+            true,
+          ),
+        ),
+      );
 
-      // Cascade is triggered. 
+      // Cascade is triggered.
       // d1 qada: 0.
       // gaps (3): 3.
       // d5 qada: 3.
       // gaps (4): 7.
       // today missed (1): 8.
-      
+
       // Wait for all saves to finish
       await Future.delayed(const Duration(seconds: 1));
 
@@ -194,45 +305,125 @@ void main() {
       final rToday = await repo.loadRecord(today);
 
       expect(r5?.qada[Salaah.fajr]?.value, 3, reason: 'd1:0 + 3 gaps = 3');
-      expect(rToday?.qada[Salaah.fajr]?.value, 8, reason: 'd5:3 + 4 gaps + today:1 = 8');
+      expect(
+        rToday?.qada[Salaah.fajr]?.value,
+        8,
+        reason: 'd5:3 + 4 gaps + today:1 = 8',
+      );
     });
 
     test('Scenario 3: Manual Qada addition ripples forward', () async {
       final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService);
-      await repo.saveToday(DailyRecord(id: 'yesterday', date: yesterday, missedToday: {}, completedToday: Set.from(Salaah.values), qada: {Salaah.fajr: const MissedCounter(0)}));
-      await repo.saveToday(DailyRecord(id: 'today', date: today, missedToday: {}, completedToday: Set.from(Salaah.values), qada: {Salaah.fajr: const MissedCounter(1)})); // 1 gap
+      await repo.saveToday(
+        DailyRecord(
+          id: 'yesterday',
+          date: yesterday,
+          missedToday: {},
+          completedToday: Set.from(Salaah.values),
+          qada: {Salaah.fajr: const MissedCounter(0)},
+        ),
+      );
+      await repo.saveToday(
+        DailyRecord(
+          id: 'today',
+          date: today,
+          missedToday: {},
+          completedToday: Set.from(Salaah.values),
+          qada: {Salaah.fajr: const MissedCounter(1)},
+        ),
+      ); // 1 gap
 
       bloc.add(PrayerTrackerEvent.load(yesterday));
-      await expectLater(bloc.stream, emitsThrough(isA<PrayerTrackerState>().having((s) => s.maybeMap(loaded: (_) => true, orElse: () => false), 'loaded', true)));
+      await expectLater(
+        bloc.stream,
+        emitsThrough(
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(loaded: (_) => true, orElse: () => false),
+            'loaded',
+            true,
+          ),
+        ),
+      );
 
       bloc.add(const PrayerTrackerEvent.addQada(Salaah.fajr));
       // Wait for state update and cascade to finish
       await Future.delayed(const Duration(seconds: 1));
 
       final rToday = await repo.loadRecord(today);
-      expect(rToday?.qada[Salaah.fajr]?.value, 2, reason: 'Manual addition should ripple to today');
+      expect(
+        rToday?.qada[Salaah.fajr]?.value,
+        2,
+        reason: 'Manual addition should ripple to today',
+      );
     });
 
     test('Scenario 4: Deleting a past record re-bases and ripples', () async {
       final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService);
-      
-      await repo.saveToday(DailyRecord(id: 'd1', date: dby, missedToday: {Salaah.fajr}, completedToday: Set.from(Salaah.values.where((s) => s != Salaah.fajr)), qada: {Salaah.fajr: const MissedCounter(1)}));
-      await repo.saveToday(DailyRecord(id: 'd2', date: yesterday, missedToday: {Salaah.fajr}, completedToday: Set.from(Salaah.values.where((s) => s != Salaah.fajr)), qada: {Salaah.fajr: const MissedCounter(2)}));
-      await repo.saveToday(DailyRecord(id: 'dToday', date: today, missedToday: {Salaah.fajr}, completedToday: Set.from(Salaah.values.where((s) => s != Salaah.fajr)), qada: {Salaah.fajr: const MissedCounter(3)}));
+
+      await repo.saveToday(
+        DailyRecord(
+          id: 'd1',
+          date: dby,
+          missedToday: {Salaah.fajr},
+          completedToday: Set.from(
+            Salaah.values.where((s) => s != Salaah.fajr),
+          ),
+          qada: {Salaah.fajr: const MissedCounter(1)},
+        ),
+      );
+      await repo.saveToday(
+        DailyRecord(
+          id: 'd2',
+          date: yesterday,
+          missedToday: {Salaah.fajr},
+          completedToday: Set.from(
+            Salaah.values.where((s) => s != Salaah.fajr),
+          ),
+          qada: {Salaah.fajr: const MissedCounter(2)},
+        ),
+      );
+      await repo.saveToday(
+        DailyRecord(
+          id: 'dToday',
+          date: today,
+          missedToday: {Salaah.fajr},
+          completedToday: Set.from(
+            Salaah.values.where((s) => s != Salaah.fajr),
+          ),
+          qada: {Salaah.fajr: const MissedCounter(3)},
+        ),
+      );
 
       bloc.add(PrayerTrackerEvent.load(today));
-      await expectLater(bloc.stream, emitsThrough(isA<PrayerTrackerState>().having((s) => s.maybeMap(loaded: (_) => true, orElse: () => false), 'loaded', true)));
+      await expectLater(
+        bloc.stream,
+        emitsThrough(
+          isA<PrayerTrackerState>().having(
+            (s) => s.maybeMap(loaded: (_) => true, orElse: () => false),
+            'loaded',
+            true,
+          ),
+        ),
+      );
 
       bloc.add(PrayerTrackerEvent.deleteRecord(dby));
-      
+
       // Wait for re-load state which happens after delete cascade
       await Future.delayed(const Duration(seconds: 1));
 
       final rYesterday = await repo.loadRecord(yesterday);
       final rToday = await repo.loadRecord(today);
 
-      expect(rYesterday?.qada[Salaah.fajr]?.value, 1, reason: 'Yesterday should be re-based to 1');
-      expect(rToday?.qada[Salaah.fajr]?.value, 2, reason: 'Today should ripple to 2');
+      expect(
+        rYesterday?.qada[Salaah.fajr]?.value,
+        1,
+        reason: 'Yesterday should be re-based to 1',
+      );
+      expect(
+        rToday?.qada[Salaah.fajr]?.value,
+        2,
+        reason: 'Today should ripple to 2',
+      );
     });
   });
 }

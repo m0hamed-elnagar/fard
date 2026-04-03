@@ -35,7 +35,10 @@ class FakePrayerRepo implements PrayerRepo {
   }
 
   @override
-  Future<Map<Salaah, int>> calculateRemaining(DateTime from, DateTime to) async {
+  Future<Map<Salaah, int>> calculateRemaining(
+    DateTime from,
+    DateTime to,
+  ) async {
     return {};
   }
 
@@ -68,6 +71,7 @@ class FakePrayerRepo implements PrayerRepo {
 }
 
 class MockSharedPreferences extends Mock implements SharedPreferences {}
+
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
 void main() {
@@ -89,13 +93,15 @@ void main() {
   setUpAll(() {
     registerFallbackValue(DateTime(2024));
     registerFallbackValue(Salaah.fajr);
-    registerFallbackValue(DailyRecord(
-      id: 'dummy',
-      date: DateTime.now(),
-      missedToday: {},
-      completedToday: {},
-      qada: {},
-    ));
+    registerFallbackValue(
+      DailyRecord(
+        id: 'dummy',
+        date: DateTime.now(),
+        missedToday: {},
+        completedToday: {},
+        qada: {},
+      ),
+    );
     registerFallbackValue(dummyPrayerTimes);
   });
 
@@ -109,16 +115,22 @@ void main() {
     when(() => prefs.getString(any())).thenReturn(null);
 
     // Default: all prayers passed
-    when(() => prayerTimeService.isPassed(any(), 
-        prayerTimes: any(named: 'prayerTimes'), 
-        date: any(named: 'date'))).thenReturn(true);
-    when(() => prayerTimeService.getPrayerTimes(
-      latitude: any(named: 'latitude'),
-      longitude: any(named: 'longitude'),
-      method: any(named: 'method'),
-      madhab: any(named: 'madhab'),
-      date: any(named: 'date'),
-    )).thenReturn(dummyPrayerTimes);
+    when(
+      () => prayerTimeService.isPassed(
+        any(),
+        prayerTimes: any(named: 'prayerTimes'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(true);
+    when(
+      () => prayerTimeService.getPrayerTimes(
+        latitude: any(named: 'latitude'),
+        longitude: any(named: 'longitude'),
+        method: any(named: 'method'),
+        madhab: any(named: 'madhab'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(dummyPrayerTimes);
   });
 
   group('PrayerTrackerBloc - Missed Days Regression Tests', () {
@@ -135,14 +147,24 @@ void main() {
         repo.saveToday(lastRecord);
         return PrayerTrackerBloc(repo, prefs, prayerTimeService);
       },
-      act: (bloc) => bloc.add(const PrayerTrackerEvent.acknowledgeMissedDays(selectedDates: [])),
+      act: (bloc) => bloc.add(
+        const PrayerTrackerEvent.acknowledgeMissedDays(selectedDates: []),
+      ),
       verify: (bloc) {
         bloc.state.maybeMap(
           loaded: (l) {
             // Qada should be exactly 10 (no increments from gap or today)
             for (var s in Salaah.values) {
-              expect(l.qadaStatus[s]?.value, 10, reason: 'Qada for $s should remain 10');
-              expect(l.completedToday.contains(s), isTrue, reason: 'Today\'s passed prayer $s should be marked as done');
+              expect(
+                l.qadaStatus[s]?.value,
+                10,
+                reason: 'Qada for $s should remain 10',
+              );
+              expect(
+                l.completedToday.contains(s),
+                isTrue,
+                reason: 'Today\'s passed prayer $s should be marked as done',
+              );
             }
           },
           orElse: () => fail('Should be loaded, but was ${bloc.state}'),
@@ -163,14 +185,22 @@ void main() {
         repo.saveToday(lastRecord);
         return PrayerTrackerBloc(repo, prefs, prayerTimeService);
       },
-      act: (bloc) => bloc.add(PrayerTrackerEvent.acknowledgeMissedDays(selectedDates: [gapDate1, gapDate2])),
+      act: (bloc) => bloc.add(
+        PrayerTrackerEvent.acknowledgeMissedDays(
+          selectedDates: [gapDate1, gapDate2],
+        ),
+      ),
       verify: (bloc) {
         bloc.state.maybeMap(
           loaded: (l) {
             // Gap (2 days) + Today (passed prayers)
             // 10 + 2 (gap) + 1 (today) = 13
             for (var s in Salaah.values) {
-              expect(l.qadaStatus[s]?.value, 13, reason: 'Qada for $s should be 13 (10 + 2 gap + 1 today)');
+              expect(
+                l.qadaStatus[s]?.value,
+                13,
+                reason: 'Qada for $s should be 13 (10 + 2 gap + 1 today)',
+              );
             }
           },
           orElse: () => fail('Should be loaded'),
@@ -191,14 +221,20 @@ void main() {
         repo.saveToday(lastRecord);
         return PrayerTrackerBloc(repo, prefs, prayerTimeService);
       },
-      act: (bloc) => bloc.add(PrayerTrackerEvent.acknowledgeMissedDays(selectedDates: [gapDate1])),
+      act: (bloc) => bloc.add(
+        PrayerTrackerEvent.acknowledgeMissedDays(selectedDates: [gapDate1]),
+      ),
       verify: (bloc) {
         bloc.state.maybeMap(
           loaded: (l) {
             // gapDate1 (missed) + gapDate2 (prayed) + today (missed because selectedDates is not empty)
             // 50 + 1 (gap1) + 1 (today) = 52
             for (var s in Salaah.values) {
-              expect(l.qadaStatus[s]?.value, 52, reason: 'Qada for $s should be 52 (50 + 1 gap1 + 1 today)');
+              expect(
+                l.qadaStatus[s]?.value,
+                52,
+                reason: 'Qada for $s should be 52 (50 + 1 gap1 + 1 today)',
+              );
             }
           },
           orElse: () => fail('Should be loaded'),
@@ -221,8 +257,13 @@ void main() {
         return PrayerTrackerBloc(repo, prefs, prayerTimeService);
       },
       act: (bloc) {
-        final gapDates = List.generate(10, (i) => today.subtract(Duration(days: 10 - i)));
-        bloc.add(PrayerTrackerEvent.acknowledgeMissedDays(selectedDates: gapDates));
+        final gapDates = List.generate(
+          10,
+          (i) => today.subtract(Duration(days: 10 - i)),
+        );
+        bloc.add(
+          PrayerTrackerEvent.acknowledgeMissedDays(selectedDates: gapDates),
+        );
       },
       verify: (bloc) {
         bloc.state.maybeMap(
@@ -242,7 +283,9 @@ void main() {
       build: () {
         final lastRecord = DailyRecord(
           id: 'yesterday',
-          date: today.subtract(const Duration(days: 2)), // Gap is 1 day (yesterday)
+          date: today.subtract(
+            const Duration(days: 2),
+          ), // Gap is 1 day (yesterday)
           missedToday: {},
           completedToday: {},
           qada: {for (var s in Salaah.values) s: const MissedCounter(1000)},
@@ -250,7 +293,11 @@ void main() {
         repo.saveToday(lastRecord);
         return PrayerTrackerBloc(repo, prefs, prayerTimeService);
       },
-      act: (bloc) => bloc.add(PrayerTrackerEvent.acknowledgeMissedDays(selectedDates: [today.subtract(const Duration(days: 1))])),
+      act: (bloc) => bloc.add(
+        PrayerTrackerEvent.acknowledgeMissedDays(
+          selectedDates: [today.subtract(const Duration(days: 1))],
+        ),
+      ),
       verify: (bloc) {
         bloc.state.maybeMap(
           loaded: (l) {
@@ -279,7 +326,11 @@ void main() {
         repo.saveToday(lastRecord);
         return PrayerTrackerBloc(repo, prefs, prayerTimeService);
       },
-      act: (bloc) => bloc.add(PrayerTrackerEvent.acknowledgeMissedDays(selectedDates: [gapDate1, gapDate2])),
+      act: (bloc) => bloc.add(
+        PrayerTrackerEvent.acknowledgeMissedDays(
+          selectedDates: [gapDate1, gapDate2],
+        ),
+      ),
       verify: (bloc) {
         bloc.state.maybeMap(
           loaded: (l) {

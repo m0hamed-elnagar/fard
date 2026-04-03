@@ -21,12 +21,12 @@ class Word extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        text,
-        transliteration,
-        translation,
-        root,
-        grammar,
-        position,
-      ];
+    id,
+    text,
+    transliteration,
+    translation,
+    root,
+    grammar,
+    position,
+  ];
 }

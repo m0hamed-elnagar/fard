@@ -22,15 +22,32 @@ import 'package:get_it/get_it.dart';
 import 'package:bloc_test/bloc_test.dart';
 
 class MockSharedPreferences extends Mock implements SharedPreferences {}
-class MockSettingsCubit extends MockCubit<SettingsState> implements SettingsCubit {}
-class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState> implements AzkarBloc {}
-class MockPrayerTrackerBloc extends MockBloc<PrayerTrackerEvent, PrayerTrackerState> implements PrayerTrackerBloc {}
+
+class MockSettingsCubit extends MockCubit<SettingsState>
+    implements SettingsCubit {}
+
+class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState>
+    implements AzkarBloc {}
+
+class MockPrayerTrackerBloc
+    extends MockBloc<PrayerTrackerEvent, PrayerTrackerState>
+    implements PrayerTrackerBloc {}
+
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
+
 class MockNotificationService extends Mock implements NotificationService {}
-class MockQuranBloc extends MockBloc<QuranEvent, QuranState> implements QuranBloc {}
-class MockAudioBloc extends MockBloc<AudioEvent, AudioState> implements AudioBloc {}
-class MockTasbihBloc extends MockBloc<TasbihEvent, TasbihState> implements TasbihBloc {}
-class MockReaderBloc extends MockBloc<ReaderEvent, ReaderState> implements ReaderBloc {}
+
+class MockQuranBloc extends MockBloc<QuranEvent, QuranState>
+    implements QuranBloc {}
+
+class MockAudioBloc extends MockBloc<AudioEvent, AudioState>
+    implements AudioBloc {}
+
+class MockTasbihBloc extends MockBloc<TasbihEvent, TasbihState>
+    implements TasbihBloc {}
+
+class MockReaderBloc extends MockBloc<ReaderEvent, ReaderState>
+    implements ReaderBloc {}
 
 void main() {
   setUpAll(() {
@@ -67,25 +84,41 @@ void main() {
     getIt.registerSingleton<PrayerTrackerBloc>(mockPrayerTrackerBloc);
     getIt.registerSingleton<PrayerTimeService>(mockPrayerTimeService);
     getIt.registerSingleton<NotificationService>(mockNotificationService);
-    getIt.registerSingleton<GlobalKey<NavigatorState>>(GlobalKey<NavigatorState>());
+    getIt.registerSingleton<GlobalKey<NavigatorState>>(
+      GlobalKey<NavigatorState>(),
+    );
     getIt.registerFactory<QuranBloc>(() => mockQuranBloc);
     getIt.registerFactory<AudioBloc>(() => mockAudioBloc);
     getIt.registerFactory<TasbihBloc>(() => mockTasbihBloc);
     getIt.registerFactory<ReaderBloc>(() => mockReaderBloc);
 
-    when(() => mockNotificationService.canScheduleExactNotifications()).thenAnswer((_) async => true);
-    
-    // Default mocks for PrayerTimeService
-    when(() => mockPrayerTimeService.isUpcoming(any(), 
-        prayerTimes: any(named: 'prayerTimes'), 
-        date: any(named: 'date'))).thenReturn(false);
-    when(() => mockPrayerTimeService.isPassed(any(), 
-        prayerTimes: any(named: 'prayerTimes'), 
-        date: any(named: 'date'))).thenReturn(true);
+    when(
+      () => mockNotificationService.canScheduleExactNotifications(),
+    ).thenAnswer((_) async => true);
 
-    when(() => mockSettingsCubit.state).thenReturn(SettingsState(locale: const Locale('en')));
+    // Default mocks for PrayerTimeService
+    when(
+      () => mockPrayerTimeService.isUpcoming(
+        any(),
+        prayerTimes: any(named: 'prayerTimes'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(false);
+    when(
+      () => mockPrayerTimeService.isPassed(
+        any(),
+        prayerTimes: any(named: 'prayerTimes'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(true);
+
+    when(
+      () => mockSettingsCubit.state,
+    ).thenReturn(SettingsState(locale: const Locale('en')));
     when(() => mockAzkarBloc.state).thenReturn(AzkarState.initial());
-    when(() => mockPrayerTrackerBloc.state).thenReturn(const PrayerTrackerState.loading());
+    when(
+      () => mockPrayerTrackerBloc.state,
+    ).thenReturn(const PrayerTrackerState.loading());
     when(() => mockQuranBloc.state).thenReturn(const QuranState());
     when(() => mockAudioBloc.state).thenReturn(const AudioState());
     when(() => mockTasbihBloc.state).thenReturn(TasbihState.initial());
@@ -111,17 +144,15 @@ void main() {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
-          body: SizedBox(
-            width: 1080,
-            height: 1920,
-            child: RootScreen(),
-          ),
+          body: SizedBox(width: 1080, height: 1920, child: RootScreen()),
         ),
       ),
     );
   }
 
-  testWidgets('RootScreen shows OnboardingScreen when first time', (tester) async {
+  testWidgets('RootScreen shows OnboardingScreen when first time', (
+    tester,
+  ) async {
     when(() => mockPrefs.getBool('onboarding_complete')).thenReturn(false);
 
     await tester.pumpWidget(createWidgetUnderTest());
@@ -130,19 +161,24 @@ void main() {
     expect(find.byType(OnboardingScreen), findsOneWidget);
   });
 
-  testWidgets('RootScreen shows MainNavigationScreen when onboarding complete', (tester) async {
-    when(() => mockPrefs.getBool('onboarding_complete')).thenReturn(true);
-    when(() => mockPrayerTrackerBloc.state).thenReturn(PrayerTrackerState.loaded(
-      selectedDate: DateTime.now(),
-      missedToday: {},
-      qadaStatus: {},
-      monthRecords: {},
-      history: [],
-    ));
+  testWidgets(
+    'RootScreen shows MainNavigationScreen when onboarding complete',
+    (tester) async {
+      when(() => mockPrefs.getBool('onboarding_complete')).thenReturn(true);
+      when(() => mockPrayerTrackerBloc.state).thenReturn(
+        PrayerTrackerState.loaded(
+          selectedDate: DateTime.now(),
+          missedToday: {},
+          qadaStatus: {},
+          monthRecords: {},
+          history: [],
+        ),
+      );
 
-    await tester.pumpWidget(createWidgetUnderTest());
-    await tester.pump();
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pump();
 
-    expect(find.byType(MainNavigationScreen), findsOneWidget);
-  });
+      expect(find.byType(MainNavigationScreen), findsOneWidget);
+    },
+  );
 }

@@ -15,16 +15,16 @@ class HizbList extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final hizbIndices = List.generate(60, (index) => index + 1);
-    
+
     final filteredHizb = hizbIndices.where((hizbNum) {
       if (searchQuery.isEmpty) return true;
       final hizbTitle = 'الحزب $hizbNum';
       final hizbData = QuranHizbProvider.getSurahAndVersesFromHizb(hizbNum);
       final firstSurahNum = hizbData.keys.first;
       final surahName = quran.getSurahNameArabic(firstSurahNum);
-      return hizbTitle.contains(searchQuery) || 
-             hizbNum.toString().contains(searchQuery) ||
-             surahName.contains(searchQuery);
+      return hizbTitle.contains(searchQuery) ||
+          hizbNum.toString().contains(searchQuery) ||
+          surahName.contains(searchQuery);
     }).toList();
 
     if (filteredHizb.isEmpty) {
@@ -34,10 +34,7 @@ class HizbList extends StatelessWidget {
           children: [
             const Icon(Icons.grid_view_rounded, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
-            Text(
-              l10n.noSearchResults,
-              style: GoogleFonts.amiri(fontSize: 20),
-            ),
+            Text(l10n.noSearchResults, style: GoogleFonts.amiri(fontSize: 20)),
           ],
         ),
       );
@@ -90,22 +87,26 @@ class HizbList extends StatelessWidget {
               ),
               subtitle: Text(
                 'يبدأ من $surahName (ص ${pageNum.toArabicIndic()})',
-                style: GoogleFonts.amiri(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: GoogleFonts.amiri(fontSize: 14, color: Colors.grey[600]),
               ),
               children: [
                 const Divider(height: 1, indent: 16, endIndent: 16),
                 ...List.generate(4, (qIndex) {
                   final rubNum = ((hizbNum - 1) * 4) + qIndex + 1;
-                  final rubData = QuranHizbProvider.getSurahAndVersesFromRub(rubNum);
+                  final rubData = QuranHizbProvider.getSurahAndVersesFromRub(
+                    rubNum,
+                  );
                   final rSurah = rubData.keys.first;
                   final rAyah = rubData[rSurah]![0];
                   final rSurahName = quran.getSurahNameArabic(rSurah);
                   final rPage = quran.getPageNumber(rSurah, rAyah);
-                  
-                  final quarterNames = ['الربع الأول', 'الربع الثاني', 'الربع الثالث', 'الربع الأخير'];
+
+                  final quarterNames = [
+                    'الربع الأول',
+                    'الربع الثاني',
+                    'الربع الثالث',
+                    'الربع الأخير',
+                  ];
 
                   return ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 24),
@@ -115,7 +116,10 @@ class HizbList extends StatelessWidget {
                     ),
                     subtitle: Text(
                       'سورة $rSurahName، آية ${rAyah.toArabicIndic()} (ص ${rPage.toArabicIndic()})',
-                      style: GoogleFonts.amiri(fontSize: 13, color: Colors.grey),
+                      style: GoogleFonts.amiri(
+                        fontSize: 13,
+                        color: Colors.grey,
+                      ),
                     ),
                     trailing: const Icon(Icons.chevron_left, size: 18),
                     onTap: () {

@@ -19,10 +19,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class MockAudioBloc extends MockBloc<AudioEvent, AudioState> implements AudioBloc {}
+class MockAudioBloc extends MockBloc<AudioEvent, AudioState>
+    implements AudioBloc {}
+
 class MockWerdBloc extends MockBloc<WerdEvent, WerdState> implements WerdBloc {}
+
 class MockMushafDownloadService extends Mock implements MushafDownloadService {}
+
 class MockSharedPreferences extends Mock implements SharedPreferences {}
+
 class MockFile extends Mock implements File {}
 
 void main() {
@@ -50,15 +55,25 @@ void main() {
     getIt.registerSingleton<SharedPreferences>(mockSharedPreferences);
 
     when(() => mockSharedPreferences.getBool(any())).thenReturn(false);
-    when(() => mockSharedPreferences.setBool(any(), any())).thenAnswer((_) async => true);
+    when(
+      () => mockSharedPreferences.setBool(any(), any()),
+    ).thenAnswer((_) async => true);
 
     when(() => mockAudioBloc.state).thenReturn(const AudioState());
-    when(() => mockAudioBloc.stream).thenAnswer((_) => audioStateController.stream);
+    when(
+      () => mockAudioBloc.stream,
+    ).thenAnswer((_) => audioStateController.stream);
     when(() => mockWerdBloc.state).thenReturn(const WerdState());
 
-    when(() => mockDownloadService.prefetchPages(any())).thenAnswer((_) async {});
-    when(() => mockDownloadService.getLocalFile(any())).thenAnswer((_) async => File('lib/main.dart'));
-    when(() => mockDownloadService.downloadAllPages()).thenAnswer((_) => Stream.fromIterable([0.1, 0.5, 1.0]));
+    when(
+      () => mockDownloadService.prefetchPages(any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockDownloadService.getLocalFile(any()),
+    ).thenAnswer((_) async => File('lib/main.dart'));
+    when(
+      () => mockDownloadService.downloadAllPages(),
+    ).thenAnswer((_) => Stream.fromIterable([0.1, 0.5, 1.0]));
   });
 
   tearDown(() {
@@ -122,15 +137,15 @@ void main() {
   testWidgets('navigation buttons update current page', (tester) async {
     await tester.pumpWidget(createWidgetUnderTest(initialPage: 1));
     await tester.pump(const Duration(seconds: 1));
-    
+
     // In RTL, Icons.chevron_right is "Next" (page 2)
     final nextButton = find.byIcon(Icons.chevron_right);
     await tester.tap(nextButton);
     // Multi-pump for animation
-    for(int i=0; i<10; i++) {
+    for (int i = 0; i < 10; i++) {
       await tester.pump(const Duration(milliseconds: 100));
     }
-    await tester.pump(const Duration(seconds: 1)); 
+    await tester.pump(const Duration(seconds: 1));
 
     expect(findDigit(tester, '2'), isTrue);
   });
@@ -139,10 +154,10 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest(initialPage: 1));
     await tester.pump(const Duration(seconds: 1));
 
-    // In RTL (Arabic), to go to the next page (index 0 -> 1), 
+    // In RTL (Arabic), to go to the next page (index 0 -> 1),
     // we drag from Left to Right (Positive Offset).
     await tester.drag(find.byType(PageView), const Offset(600, 0));
-    for(int i=0; i<10; i++) {
+    for (int i = 0; i < 10; i++) {
       await tester.pump(const Duration(milliseconds: 100));
     }
     await tester.pump(const Duration(seconds: 1));
@@ -159,12 +174,12 @@ void main() {
       currentSurah: 2,
       currentAyah: 1,
     );
-    
+
     audioStateController.add(newState);
     when(() => mockAudioBloc.state).thenReturn(newState);
-    
+
     // Pump many times to allow listener and animation to complete
-    for(int i=0; i<20; i++) {
+    for (int i = 0; i < 20; i++) {
       await tester.pump(const Duration(milliseconds: 100));
     }
     await tester.pump(const Duration(seconds: 1));
@@ -172,7 +187,9 @@ void main() {
     expect(findDigit(tester, '2'), isTrue);
   });
 
-  testWidgets('Dark mode toggle updates UI and saves preference', (tester) async {
+  testWidgets('Dark mode toggle updates UI and saves preference', (
+    tester,
+  ) async {
     await tester.pumpWidget(createWidgetUnderTest(initialPage: 1));
     await tester.pump(const Duration(seconds: 1));
 
@@ -181,15 +198,19 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(find.byIcon(Icons.light_mode_rounded), findsOneWidget);
-    
+
     final pageItem = tester.widget<MushafPageItem>(find.byType(MushafPageItem));
     expect(pageItem.isDarkMode, true);
-    verify(() => mockSharedPreferences.setBool('scanned_mushaf_dark_mode', true)).called(1);
+    verify(
+      () => mockSharedPreferences.setBool('scanned_mushaf_dark_mode', true),
+    ).called(1);
   });
 
   testWidgets('Loads dark mode preference on init', (tester) async {
-    when(() => mockSharedPreferences.getBool('scanned_mushaf_dark_mode')).thenReturn(true);
-    
+    when(
+      () => mockSharedPreferences.getBool('scanned_mushaf_dark_mode'),
+    ).thenReturn(true);
+
     await tester.pumpWidget(createWidgetUnderTest(initialPage: 1));
     await tester.pump(const Duration(seconds: 1));
 
@@ -202,8 +223,12 @@ void main() {
     // 1. Initial failure
     final mockFileFailure = MockFile();
     when(() => mockFileFailure.exists()).thenAnswer((_) async => false);
-    when(() => mockDownloadService.getLocalFile(any())).thenAnswer((_) async => mockFileFailure);
-    when(() => mockDownloadService.downloadPage(any())).thenAnswer((_) async => null);
+    when(
+      () => mockDownloadService.getLocalFile(any()),
+    ).thenAnswer((_) async => mockFileFailure);
+    when(
+      () => mockDownloadService.downloadPage(any()),
+    ).thenAnswer((_) async => null);
 
     await tester.pumpWidget(createWidgetUnderTest(initialPage: 1));
     await tester.pump(const Duration(seconds: 1));
@@ -218,8 +243,10 @@ void main() {
     // 2. Mock success for retry
     // Use a real image file from assets that we know exists
     final successFile = File('assets/pages/1.png');
-    when(() => mockDownloadService.getLocalFile(any())).thenAnswer((_) async => successFile);
-    
+    when(
+      () => mockDownloadService.getLocalFile(any()),
+    ).thenAnswer((_) async => successFile);
+
     await tester.tap(retryButton);
     await tester.runAsync(() async {
       await tester.pump(const Duration(seconds: 1));
