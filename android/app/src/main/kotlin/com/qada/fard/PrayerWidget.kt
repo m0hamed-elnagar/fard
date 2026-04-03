@@ -23,7 +23,6 @@ import androidx.glance.text.TextAlign
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.qada.fard.prayer.CalculationContract
 import com.qada.fard.prayer.SettingsRepository
 import org.json.JSONObject
 import java.util.*
@@ -36,17 +35,9 @@ class PrayerWidget : GlanceAppWidget() {
         val repository = SettingsRepository(context)
         val prayerDataJson = repository.getPrayerDataJson()
         
-        android.util.Log.d("WidgetDebug", "PrayerWidget: Retrieved JSON: $prayerDataJson")
-        
         val widgetData = try {
-            if (prayerDataJson != null) {
-                parseWidgetData(prayerDataJson)
-            } else {
-                android.util.Log.d("WidgetDebug", "PrayerWidget: Data is null")
-                null
-            }
+            if (prayerDataJson != null) parseWidgetData(prayerDataJson) else null
         } catch (e: Exception) {
-            android.util.Log.e("WidgetDebug", "PrayerWidget: Error parsing JSON", e)
             null
         }
 
@@ -65,8 +56,7 @@ class PrayerWidget : GlanceAppWidget() {
             prayers.add(
                 PrayerItem(
                     name = item.getString("name"),
-                    time = item.getString("time"),
-                    minutesFromMidnight = item.getInt("minutesFromMidnight")
+                    time = item.getString("time")
                 )
             )
         }
@@ -96,8 +86,7 @@ class PrayerWidget : GlanceAppWidget() {
 
     data class PrayerItem(
         val name: String,
-        val time: String,
-        val minutesFromMidnight: Int
+        val time: String
     )
 
     @Composable
@@ -107,7 +96,9 @@ class PrayerWidget : GlanceAppWidget() {
         val textPrimary = Color(0xFFF0F6FC)
         val textSecondary = Color(0xFF8B949E)
 
+        val isTiny = size.width < 110.dp || size.height < 110.dp
         val isCompact = size.height < 220.dp
+
         val hPad = if (isCompact) 6.dp else 16.dp
         val vPad = if (isCompact) 4.dp else 14.dp
 
@@ -119,6 +110,7 @@ class PrayerWidget : GlanceAppWidget() {
                 .padding(horizontal = hPad, vertical = vPad),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Check for stale data (> 24h)
             if (data == null || (System.currentTimeMillis() - data.lastUpdated > 24 * 60 * 60 * 1000)) {
                 Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("Open App", style = TextStyle(color = ColorProvider(textPrimary)))
@@ -126,94 +118,164 @@ class PrayerWidget : GlanceAppWidget() {
                 return@Column
             }
 
-            val isRtl = data.isRtl
-            
-            // Header
-            val headerFontSize = when {
-                size.height < 160.dp -> 8.sp
-                size.height < 220.dp -> 9.sp
-                size.height < 320.dp -> 12.sp
-                else -> 15.sp
+            if (isTiny) {
+                TinyLayout(data, size, accentGold, textPrimary)
+            } else {
+                FullLayout(
+                    data,
+                    size,
+                    isCompact,
+                    primaryGreen,
+                    accentGold,
+                    textPrimary,
+                    textSecondary
+                )
             }
-            val rowFontSize = when {
-                size.height < 160.dp -> 8.sp
-                size.height < 220.dp -> 10.sp
-                size.height < 320.dp -> 12.sp
-                else -> 15.sp
-            }
+        }
+    }
 
-            Column(
-                modifier = GlanceModifier
-                    .fillMaxWidth()
-                    .padding(bottom = if (isCompact) 1.dp else 5.dp),
+    @Composable
+    private fun TinyLayout(
+        data: WidgetData, size: DpSize,
+        accentGold: Color, textPrimary: Color
+    ) {
+        val next = data.prayers.find { it.name == data.nextPrayerName } ?: data.prayers.first()
+        val isRtl = data.isRtl
+
+        if (size.width > 150.dp) {
+            Row(
+                modifier = GlanceModifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "${data.dayOfWeek}, ${data.gregorianDate}",
-                    style = TextStyle(
-                        color = ColorProvider(accentGold),
-                        fontSize = headerFontSize,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    modifier = GlanceModifier.fillMaxWidth()
-                )
-                Text(
-                    text = data.hijriDate,
-                    style = TextStyle(
-                        color = ColorProvider(textPrimary),
-                        fontSize = headerFontSize,
-                        textAlign = TextAlign.Center
-                    ),
-                    modifier = GlanceModifier.fillMaxWidth()
-                )
+                if (isRtl) {
+                    Text(text = next.time, style = TextStyle(color = ColorProvider(textPrimary), fontSize = 18.sp, fontWeight = FontWeight.Bold))
+                    Spacer(modifier = GlanceModifier.width(8.dp))
+                    Box(modifier = GlanceModifier.width(1.dp).height(16.dp).background(ColorProvider(accentGold))) {}
+                    Spacer(modifier = GlanceModifier.width(8.dp))
+                    Text(text = next.name, style = TextStyle(color = ColorProvider(accentGold), fontSize = 16.sp, fontWeight = FontWeight.Bold))
+                } else {
+                    Text(text = next.name, style = TextStyle(color = ColorProvider(accentGold), fontSize = 16.sp, fontWeight = FontWeight.Bold))
+                    Spacer(modifier = GlanceModifier.width(8.dp))
+                    Box(modifier = GlanceModifier.width(1.dp).height(16.dp).background(ColorProvider(accentGold))) {}
+                    Spacer(modifier = GlanceModifier.width(8.dp))
+                    Text(text = next.time, style = TextStyle(color = ColorProvider(textPrimary), fontSize = 18.sp, fontWeight = FontWeight.Bold))
+                }
             }
-
-            // Divider
-            Box(modifier = GlanceModifier.fillMaxWidth().height(1.dp).background(ColorProvider(accentGold))) {}
-            Spacer(modifier = GlanceModifier.fillMaxWidth().height(1.dp))
-
-            // Prayers
+        } else {
             Column(
-                modifier = GlanceModifier.fillMaxWidth().defaultWeight(),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = GlanceModifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                data.prayers.forEachIndexed { index, prayer ->
-                    val isNext = prayer.name == data.nextPrayerName
-                    
+                if (isRtl) {
+                    Text(text = next.time, style = TextStyle(color = ColorProvider(textPrimary), fontSize = 16.sp, fontWeight = FontWeight.Bold))
+                    Spacer(modifier = GlanceModifier.height(3.dp))
+                    Box(modifier = GlanceModifier.width(36.dp).height(1.dp).background(ColorProvider(accentGold))) {}
+                    Spacer(modifier = GlanceModifier.height(3.dp))
+                    Text(text = next.name, style = TextStyle(color = ColorProvider(accentGold), fontSize = 12.sp, fontWeight = FontWeight.Bold))
+                } else {
+                    Text(text = next.name, style = TextStyle(color = ColorProvider(accentGold), fontSize = 12.sp, fontWeight = FontWeight.Bold))
+                    Spacer(modifier = GlanceModifier.height(3.dp))
+                    Box(modifier = GlanceModifier.width(36.dp).height(1.dp).background(ColorProvider(accentGold))) {}
+                    Spacer(modifier = GlanceModifier.height(3.dp))
+                    Text(text = next.time, style = TextStyle(color = ColorProvider(textPrimary), fontSize = 16.sp, fontWeight = FontWeight.Bold))
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun ColumnScope.FullLayout(
+        data: WidgetData,
+        size: DpSize,
+        isCompact: Boolean,
+        primaryGreen: Color,
+        accentGold: Color,
+        textPrimary: Color,
+        textSecondary: Color
+    ) {
+        val headerFontSize = when {
+            size.height < 160.dp -> 9.sp
+            size.height < 220.dp -> 11.sp
+            size.height < 320.dp -> 13.sp
+            else -> 15.sp
+        }
+        val rowFontSize = when {
+            size.height < 160.dp -> 11.sp
+            size.height < 220.dp -> 13.sp
+            size.height < 320.dp -> 15.sp
+            else -> 17.sp
+        }
+
+        Column(
+            modifier = GlanceModifier
+                .fillMaxWidth()
+                .padding(bottom = if (isCompact) 1.dp else 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "${data.dayOfWeek}, ${data.gregorianDate}",
+                style = TextStyle(
+                    color = ColorProvider(accentGold),
+                    fontSize = headerFontSize,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold
+                ),
+                modifier = GlanceModifier.fillMaxWidth()
+            )
+            Text(
+                text = data.hijriDate,
+                style = TextStyle(
+                    color = ColorProvider(textPrimary),
+                    fontSize = headerFontSize,
+                    textAlign = TextAlign.Center
+                ),
+                modifier = GlanceModifier.fillMaxWidth()
+            )
+        }
+
+        Box(modifier = GlanceModifier.fillMaxWidth().height(1.dp).background(ColorProvider(accentGold))) {}
+        Spacer(modifier = GlanceModifier.fillMaxWidth().height(2.dp))
+
+        Column(
+            modifier = GlanceModifier.fillMaxWidth().defaultWeight(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            data.prayers.forEachIndexed { index, prayer ->
+                val isNext = prayer.name == data.nextPrayerName
+                
+                Box(
+                    modifier = GlanceModifier.fillMaxWidth().defaultWeight(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    PrayerRow(
+                        name = prayer.name,
+                        time = prayer.time,
+                        isHighlighted = isNext,
+                        primaryGreen = primaryGreen,
+                        textPrimary = textPrimary,
+                        fontSize = rowFontSize,
+                        compact = isCompact,
+                        isRtl = data.isRtl
+                    )
+                }
+
+                if (index == 0) { // After Fajr
                     Box(
                         modifier = GlanceModifier.fillMaxWidth().defaultWeight(),
                         contentAlignment = Alignment.Center
                     ) {
                         PrayerRow(
-                            name = prayer.name,
-                            time = prayer.time,
-                            isHighlighted = isNext,
+                            name = if (data.isRtl) "الشروق" else "Sunrise",
+                            time = data.sunrise,
+                            isHighlighted = false,
                             primaryGreen = primaryGreen,
-                            textPrimary = textPrimary,
+                            textPrimary = textSecondary,
                             fontSize = rowFontSize,
                             compact = isCompact,
-                            isRtl = isRtl
+                            isRtl = data.isRtl
                         )
-                    }
-
-                    // Sunrise after Fajr (first item)
-                    if (index == 0) {
-                        Box(
-                            modifier = GlanceModifier.fillMaxWidth().defaultWeight(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            PrayerRow(
-                                name = if (isRtl) "الشروق" else "Sunrise",
-                                time = data.sunrise,
-                                isHighlighted = false,
-                                primaryGreen = primaryGreen,
-                                textPrimary = textSecondary,
-                                fontSize = rowFontSize,
-                                compact = isCompact,
-                                isRtl = isRtl
-                            )
-                        }
                     }
                 }
             }

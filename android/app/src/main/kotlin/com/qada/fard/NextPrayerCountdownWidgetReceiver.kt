@@ -38,20 +38,18 @@ class NextPrayerCountdownWidgetReceiver : GlanceAppWidgetReceiver() {
             Intent.ACTION_USER_PRESENT,
             "android.intent.action.TIME_SET",
             "android.intent.action.TIMEZONE_CHANGED" -> {
-                updateAndSchedule(context)
-            }
-        }
-    }
-
-    private fun updateAndSchedule(context: Context) {
-        receiverScope.launch {
-            try {
-                glanceAppWidget.updateAll(context)
-                Log.d("CountdownWidgetRec", "Widget updated successfully")
-            } catch (e: Exception) {
-                Log.e("CountdownWidgetRec", "Update failed", e)
-            } finally {
-                scheduleNextMinuteUpdate(context)
+                val pendingResult = goAsync()
+                receiverScope.launch {
+                    try {
+                        glanceAppWidget.updateAll(context)
+                        Log.d("CountdownWidgetRec", "Widget updated successfully")
+                    } catch (e: Exception) {
+                        Log.e("CountdownWidgetRec", "Update failed", e)
+                    } finally {
+                        scheduleNextMinuteUpdate(context)
+                        pendingResult.finish()
+                    }
+                }
             }
         }
     }
