@@ -1,7 +1,6 @@
 package com.qada.fard
 
 import android.content.Context
-import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
@@ -11,12 +10,10 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.ImageProvider
 import androidx.glance.LocalSize
-import androidx.glance.action.ActionParameters
+import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
-import androidx.glance.appwidget.action.ActionCallback
-import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.*
@@ -25,11 +22,9 @@ import androidx.glance.text.TextAlign
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.qada.fard.prayer.CalculationContract
 import com.qada.fard.prayer.SettingsRepository
 import org.json.JSONObject
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 class NextPrayerCountdownWidget : GlanceAppWidget() {
 
@@ -73,14 +68,13 @@ class NextPrayerCountdownWidget : GlanceAppWidget() {
         val accentGold = Color(0xFFFFD54F)
         val textPrimary = Color(0xFFF0F6FC)
 
-        // Granular size detection for responsiveness
         val width = size.width
         val height = size.height
         
-        val isTiny = width < 80.dp || height < 80.dp
-        val isSmall = !isTiny && (width < 120.dp || height < 120.dp)
-        val isWide = width > height * 1.5f && width > 150.dp
-        val isLarge = width >= 180.dp && height >= 180.dp
+        val isTiny = width < 110.dp || height < 110.dp
+        val isWide = width > 150.dp && height < 110.dp
+        val isSmall = !isTiny && (width < 140.dp || height < 140.dp)
+        val isLarge = width >= 200.dp && height >= 200.dp
 
         val padding = when {
             isTiny -> 6.dp
@@ -93,7 +87,7 @@ class NextPrayerCountdownWidget : GlanceAppWidget() {
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(ImageProvider(R.drawable.widget_background))
-                .clickable(actionRunCallback<SafeOpenAppCallback>())
+                .clickable(actionStartActivity<MainActivity>())
                 .padding(padding),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalAlignment = Alignment.CenterVertically
@@ -111,9 +105,6 @@ class NextPrayerCountdownWidget : GlanceAppWidget() {
                 return@Column
             }
 
-            val diff = data.nextPrayerTime - System.currentTimeMillis()
-            val isRtl = data.isRtl
-
             // Calculate display time
             val prayerCal = Calendar.getInstance().apply { timeInMillis = data.nextPrayerTime }
             val nowCal = Calendar.getInstance()
@@ -128,126 +119,160 @@ class NextPrayerCountdownWidget : GlanceAppWidget() {
             val hours = absMinutes / 60
             val minutes = absMinutes % 60
             
-            val timeText = when {
-                hours > 0 -> "${hours}h ${minutes}m"
-                else -> "${minutes}m"
-            }
-            
+            val timeText = if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
             val statusText = when {
                 totalMinutes > 0 -> timeText
                 totalMinutes < 0 -> "+$timeText"
                 else -> "Now"
             }
 
-            // UI Layout starts here
             if (isWide) {
-                // Horizontal layout for wide widgets
-                Row(
-                    modifier = GlanceModifier.fillMaxSize(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Column(modifier = GlanceModifier.defaultWeight()) {
-                        Text(
-                            text = if (isRtl) "الصلاة القادمة" else "Next Prayer",
-                            style = TextStyle(color = ColorProvider(textPrimary), fontSize = 11.sp)
-                        )
-                        Text(
-                            text = data.nextPrayerName,
-                            style = TextStyle(
-                                color = ColorProvider(accentGold), 
-                                fontSize = 18.sp, 
-                                fontWeight = FontWeight.Bold
-                            )
-                        )
-                    }
-                    Text(
-                        text = statusText,
-                        style = TextStyle(
-                            color = ColorProvider(textPrimary), 
-                            fontSize = 24.sp, 
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.End
-                        )
-                    )
-                }
+                WideLayout(data, statusText, accentGold, textPrimary)
+            } else if (isTiny) {
+                TinyLayout(data, statusText, accentGold, textPrimary)
             } else {
-                // Vertical layout for standard/small widgets
-                if (isTiny) {
-                    // Distinct look for 1x1: High contrast between name and time
+                // Standard/Large Vertical layout
+                val label = if (data.isRtl) "الصلاة القادمة" else "Next Prayer"
+                if (!isSmall) {
                     Text(
-                        text = data.nextPrayerName,
-                        style = TextStyle(
-                            color = ColorProvider(accentGold), 
-                            fontSize = 11.sp, 
-                            fontWeight = FontWeight.Normal,
-                            textAlign = TextAlign.Center
-                        )
-                    )
-                    Text(
-                        text = statusText,
-                        style = TextStyle(
-                            color = ColorProvider(textPrimary), 
-                            fontSize = 18.sp, 
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-                    )
-                } else {
-                    // Standard vertical layout
-                    if (!isSmall) {
-                        Text(
-                            text = if (isRtl) "الصلاة القادمة" else "Next Prayer",
-                            style = TextStyle(color = ColorProvider(textPrimary), fontSize = 12.sp)
-                        )
-                    }
-                    
-                    val nameFontSize = if (isSmall) 15.sp else if (isLarge) 22.sp else 18.sp
-                    
-                    Text(
-                        text = data.nextPrayerName,
-                        style = TextStyle(
-                            color = ColorProvider(accentGold), 
-                            fontSize = nameFontSize, 
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-                    )
-                    
-                    Spacer(modifier = GlanceModifier.height(if (isSmall) 2.dp else 4.dp))
-                    
-                    val timeFontSize = if (isSmall) 18.sp else if (isLarge) 32.sp else 24.sp
-
-                    Text(
-                        text = statusText,
-                        style = TextStyle(
-                            color = ColorProvider(textPrimary), 
-                            fontSize = timeFontSize, 
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
+                        text = label,
+                        style = TextStyle(color = ColorProvider(textPrimary), fontSize = 12.sp)
                     )
                 }
+                
+                val nameFontSize = if (isSmall) 16.sp else if (isLarge) 24.sp else 20.sp
+                
+                Text(
+                    text = data.nextPrayerName,
+                    style = TextStyle(
+                        color = ColorProvider(accentGold), 
+                        fontSize = nameFontSize, 
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                )
+                
+                Spacer(modifier = GlanceModifier.height(if (isSmall) 4.dp else 8.dp))
+                
+                val timeFontSize = if (isSmall) 20.sp else if (isLarge) 36.sp else 28.sp
+
+                Text(
+                    text = statusText,
+                    style = TextStyle(
+                        color = ColorProvider(textPrimary), 
+                        fontSize = timeFontSize, 
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                )
             }
         }
     }
-}
 
-class SafeOpenAppCallback : ActionCallback {
-    override suspend fun onAction(
-        context: Context,
-        glanceId: GlanceId,
-        parameters: ActionParameters
+    @Composable
+    private fun TinyLayout(
+        data: CountdownData, 
+        statusText: String,
+        accentGold: Color, 
+        textPrimary: Color
     ) {
-        try {
-            val intent = Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                action = Intent.ACTION_MAIN
-                addCategory(Intent.CATEGORY_LAUNCHER)
+        Column(
+            modifier = GlanceModifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = data.nextPrayerName,
+                style = TextStyle(
+                    color = ColorProvider(accentGold), 
+                    fontSize = 12.sp, 
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            )
+            Spacer(modifier = GlanceModifier.height(4.dp))
+            Box(
+                modifier = GlanceModifier
+                    .width(40.dp)
+                    .height(1.dp)
+                    .background(ColorProvider(accentGold))
+            ) {}
+            Spacer(modifier = GlanceModifier.height(4.dp))
+            Text(
+                text = statusText,
+                style = TextStyle(
+                    color = ColorProvider(textPrimary), 
+                    fontSize = 16.sp, 
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            )
+        }
+    }
+
+    @Composable
+    private fun WideLayout(
+        data: CountdownData, 
+        statusText: String,
+        accentGold: Color, 
+        textPrimary: Color
+    ) {
+        Row(
+            modifier = GlanceModifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (data.isRtl) {
+                Text(
+                    text = statusText,
+                    style = TextStyle(
+                        color = ColorProvider(textPrimary), 
+                        fontSize = 18.sp, 
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+                Spacer(modifier = GlanceModifier.width(12.dp))
+                Box(
+                    modifier = GlanceModifier
+                        .width(1.dp)
+                        .height(20.dp)
+                        .background(ColorProvider(accentGold))
+                ) {}
+                Spacer(modifier = GlanceModifier.width(12.dp))
+                Text(
+                    text = data.nextPrayerName,
+                    style = TextStyle(
+                        color = ColorProvider(accentGold), 
+                        fontSize = 16.sp, 
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+            } else {
+                Text(
+                    text = data.nextPrayerName,
+                    style = TextStyle(
+                        color = ColorProvider(accentGold), 
+                        fontSize = 16.sp, 
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+                Spacer(modifier = GlanceModifier.width(12.dp))
+                Box(
+                    modifier = GlanceModifier
+                        .width(1.dp)
+                        .height(20.dp)
+                        .background(ColorProvider(accentGold))
+                ) {}
+                Spacer(modifier = GlanceModifier.width(12.dp))
+                Text(
+                    text = statusText,
+                    style = TextStyle(
+                        color = ColorProvider(textPrimary), 
+                        fontSize = 18.sp, 
+                        fontWeight = FontWeight.Bold
+                    )
+                )
             }
-            context.startActivity(intent)
-        } catch (e: Exception) {
-            android.util.Log.e("SafeOpenAppCallback", "Failed to start activity", e)
         }
     }
 }

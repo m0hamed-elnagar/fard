@@ -88,7 +88,9 @@
           </intent-filter>
         </receiver>
 
-        <receiver android:name="com.qada.fard.PrayerWidgetReceiver" android:exported="true">
+        <receiver android:name="com.qada.fard.PrayerWidgetReceiver" 
+            android:label="Prayer Schedule"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="android.intent.action.TIME_SET" />
@@ -101,7 +103,9 @@
                 android:resource="@xml/prayer_widget_info" />
         </receiver>
 
-        <receiver android:name="com.qada.fard.NextPrayerCountdownWidgetReceiver" android:exported="true">
+        <receiver android:name="com.qada.fard.NextPrayerCountdownWidgetReceiver" 
+            android:label="Next Prayer Countdown"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
