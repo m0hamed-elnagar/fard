@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:fard/features/azkar/domain/azkar_item.dart';
 import 'package:fard/features/azkar/presentation/screens/azkar_list_screen.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
+import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
+import 'package:fard/core/utils/rtl_text_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -24,6 +24,7 @@ class NotificationService {
   final ChannelManager _channelManager;
   final PrayerNotificationScheduler _prayerScheduler;
   final WidgetUpdateService _widgetUpdateService;
+  final SettingsRepository _settingsProvider;
 
   NotificationService(
     this._soundManager,
@@ -31,6 +32,7 @@ class NotificationService {
     this._prayerScheduler,
     this._notificationsPlugin,
     this._widgetUpdateService,
+    this._settingsProvider,
   );
 
   static const String reminderChannelId = ChannelManager.reminderChannelId;
@@ -39,19 +41,7 @@ class NotificationService {
   static const String groupKey = 'com.nagar.fard.NOTIFICATIONS';
 
   String _applyRtl(String text) {
-    // Use Right-to-Left Mark (U+200F) + Right-to-Left Embedding (U+202B)
-    // to ensure the entire string is treated as RTL and aligned correctly on most devices.
-    try {
-      if (getIt.isRegistered<SettingsCubit>()) {
-        final locale = getIt<SettingsCubit>().state.locale;
-        if (locale.languageCode == 'ar') {
-          return '\u200F\u202B$text\u202C';
-        }
-      }
-    } catch (_) {
-      // Fallback to original text if anything goes wrong with DI
-    }
-    return text;
+    return RtlTextUtil.applyRtlFromSettings(text, _settingsProvider);
   }
 
   Future<void> init() async {
@@ -208,23 +198,14 @@ class NotificationService {
         true;
   }
 
-  Future<void> schedulePrayerNotifications({
-    required SettingsState settings,
-  }) async {
+  Future<void> schedulePrayerNotifications() async {
     // Update widget data
-    await _widgetUpdateService.updateWidget(settings);
+    await _widgetUpdateService.updateWidget();
 
-    await _prayerScheduler.schedulePrayerNotifications(
-      _notificationsPlugin,
-      settings: settings,
-    );
+    await _prayerScheduler.schedulePrayerNotifications(_notificationsPlugin);
   }
 
-  Future<void> testAzan(
-    Salaah salaah,
-    String? sound, {
-    SettingsState? settings,
-  }) async {
+  Future<void> testAzan(Salaah salaah, String? sound) async {
     final String salaahName = _getSalaahName(salaah);
     final String soundPath = sound ?? 'default';
 
@@ -327,6 +308,8 @@ class NotificationService {
   }
 
   String _getSalaahName(Salaah salaah) {
+    // Use Arabic name directly for test notifications (user-facing)
+    // For localized names, use: salaah.localizedName(l10n)
     switch (salaah) {
       case Salaah.fajr:
         return 'الفجر';
@@ -349,7 +332,7 @@ class NotificationService {
     required int maxProgress,
     bool isCompleted = false,
   }) async {
-    final l10n = lookupAppLocalizations(getIt<SettingsCubit>().state.locale);
+    final l10n = lookupAppLocalizations(_settingsProvider.locale);
     final AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
           downloadChannelId,
@@ -427,12 +410,10 @@ ${(results['channels'] as List).map((c) => '    • ${c['id']} (${c['importance'
   }
 
   Future<void> scheduleAzkarReminders({
-    required SettingsState settings,
     required List<AzkarItem> allAzkar,
   }) async {
     await _prayerScheduler.scheduleAzkarReminders(
       _notificationsPlugin,
-      settings: settings,
       allAzkar: allAzkar,
     );
   }

@@ -76,7 +76,7 @@ class NextPrayerCountdownWidgetReceiver : GlanceAppWidgetReceiver() {
         Log.d("CountdownWidgetRec", "Last widget removed — cancelled updates")
     }
 
-    private fun scheduleNextMinuteUpdate(context: Context) {
+    internal fun scheduleNextMinuteUpdate(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, NextPrayerCountdownWidgetReceiver::class.java).apply {
             action = ACTION_MINUTE_UPDATE

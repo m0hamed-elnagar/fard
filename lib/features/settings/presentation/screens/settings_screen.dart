@@ -689,9 +689,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       trailing: ElevatedButton.icon(
                         onPressed: () {
                           HapticFeedback.mediumImpact();
-                          getIt<WidgetUpdateService>().updateWidget(
-                            context.read<SettingsCubit>().state,
-                          );
+                          getIt<WidgetUpdateService>().updateWidget();
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Widget refresh triggered!'),
@@ -940,9 +938,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   : () => getIt<NotificationService>().testAzan(
                                       Salaah.fajr,
                                       selectedVoice,
-                                      settings: context
-                                          .read<SettingsCubit>()
-                                          .state,
                                     ),
                               icon: const Icon(Icons.play_arrow_rounded),
                               label: Text(l10n.testAzan),
@@ -1368,9 +1363,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   : () => getIt<NotificationService>().testAzan(
                                       settings.salaah,
                                       selectedVoice,
-                                      settings: context
-                                          .read<SettingsCubit>()
-                                          .state,
                                     ),
                               icon: const Icon(Icons.play_arrow_rounded),
                               label: Text(l10n.testAzan),

@@ -4,14 +4,20 @@ import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/features/azkar/data/azkar_repository.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
-import 'package:fard/features/azkar/domain/azkar_item.dart';
+import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
+import 'package:fard/features/settings/domain/salaah_settings.dart';
+import 'package:fard/features/settings/domain/usecases/sync_location_settings.dart';
+import 'package:fard/features/settings/domain/usecases/sync_notification_schedule.dart';
+import 'package:fard/features/settings/domain/usecases/toggle_after_salah_azkar_usecase.dart';
+import 'package:fard/features/settings/domain/usecases/update_calculation_method_usecase.dart';
+import 'package:fard/features/prayer_tracking/domain/salaah.dart';
+import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
 
-class MockSharedPreferences extends Mock implements SharedPreferences {}
+class MockSettingsRepository extends Mock implements SettingsRepository {}
 
 class MockLocationService extends Mock implements LocationService {}
 
@@ -21,69 +27,140 @@ class MockAzkarRepository extends Mock implements AzkarRepository {}
 
 class MockWidgetUpdateService extends Mock implements WidgetUpdateService {}
 
+class MockSyncLocationSettings extends Mock implements SyncLocationSettings {}
+
+class MockSyncNotificationSchedule extends Mock
+    implements SyncNotificationSchedule {}
+
+class MockToggleAfterSalahAzkarUseCase extends Mock
+    implements ToggleAfterSalahAzkarUseCase {}
+
+class MockUpdateCalculationMethodUseCase extends Mock
+    implements UpdateCalculationMethodUseCase {}
+
 void main() {
   late SettingsCubit cubit;
-  late MockSharedPreferences mockPrefs;
-  late MockLocationService mockLocationService;
-  late MockNotificationService mockNotificationService;
-  late MockAzkarRepository mockAzkarRepository;
-  late MockWidgetUpdateService mockWidgetUpdateService;
+  late MockSettingsRepository mockSettingsRepo;
+  late MockLocationService mockLocation;
+  late MockSyncLocationSettings mockSyncLoc;
+  late MockSyncNotificationSchedule mockSyncNotif;
+  late MockToggleAfterSalahAzkarUseCase mockToggleAzkar;
+  late MockUpdateCalculationMethodUseCase mockUpdateMethod;
+  late MockWidgetUpdateService mockWidget;
 
   setUp(() {
-    mockPrefs = MockSharedPreferences();
-    mockLocationService = MockLocationService();
-    mockNotificationService = MockNotificationService();
-    mockAzkarRepository = MockAzkarRepository();
-    mockWidgetUpdateService = MockWidgetUpdateService();
+    mockSettingsRepo = MockSettingsRepository();
+    mockLocation = MockLocationService();
+    mockSyncLoc = MockSyncLocationSettings();
+    mockSyncNotif = MockSyncNotificationSchedule();
+    mockToggleAzkar = MockToggleAfterSalahAzkarUseCase();
+    mockUpdateMethod = MockUpdateCalculationMethodUseCase();
+    mockWidget = MockWidgetUpdateService();
 
-    when(() => mockPrefs.getString(any())).thenReturn(null);
-    when(() => mockPrefs.getDouble(any())).thenReturn(null);
-    when(() => mockPrefs.setString(any(), any())).thenAnswer((_) async => true);
-    when(() => mockPrefs.setDouble(any(), any())).thenAnswer((_) async => true);
-    when(() => mockPrefs.setBool(any(), any())).thenAnswer((_) async => true);
-    when(() => mockPrefs.setInt(any(), any())).thenAnswer((_) async => true);
-
-    // Mock notification service
+    // Mock SettingsRepository defaults
+    when(() => mockSettingsRepo.locale).thenReturn(const Locale('ar'));
+    when(() => mockSettingsRepo.latitude).thenReturn(null);
+    when(() => mockSettingsRepo.longitude).thenReturn(null);
+    when(() => mockSettingsRepo.cityName).thenReturn(null);
+    when(() => mockSettingsRepo.calculationMethod).thenReturn('muslim_league');
+    when(() => mockSettingsRepo.madhab).thenReturn('shafi');
+    when(() => mockSettingsRepo.morningAzkarTime).thenReturn('05:00');
+    when(() => mockSettingsRepo.eveningAzkarTime).thenReturn('18:00');
+    when(() => mockSettingsRepo.isAfterSalahAzkarEnabled).thenReturn(false);
+    when(() => mockSettingsRepo.isQadaEnabled).thenReturn(true);
+    when(() => mockSettingsRepo.hijriAdjustment).thenReturn(0);
+    when(() => mockSettingsRepo.reminders).thenReturn([]);
     when(
-      () => mockNotificationService.scheduleAzkarReminders(
-        settings: any(named: 'settings'),
-        allAzkar: any(named: 'allAzkar'),
+      () => mockSettingsRepo.salaahSettings,
+    ).thenReturn(Salaah.values.map((s) => SalaahSettings(salaah: s)).toList());
+    when(() => mockSettingsRepo.updateLocale(any())).thenAnswer((_) async {});
+    when(
+      () => mockSettingsRepo.updateLocation(
+        latitude: any(named: 'latitude'),
+        longitude: any(named: 'longitude'),
+        cityName: any(named: 'cityName'),
       ),
     ).thenAnswer((_) async {});
-
     when(
-      () => mockNotificationService.schedulePrayerNotifications(
-        settings: any(named: 'settings'),
+      () => mockSettingsRepo.updateCalculationMethod(any()),
+    ).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateMadhab(any())).thenAnswer((_) async {});
+    when(
+      () => mockSettingsRepo.updateMorningAzkarTime(any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockSettingsRepo.updateEveningAzkarTime(any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockSettingsRepo.updateSalaahSettings(any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockSettingsRepo.updateHijriAdjustment(any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockSettingsRepo.updateAfterSalahAzkarEnabled(any()),
+    ).thenAnswer((_) async => true);
+    when(
+      () => mockSettingsRepo.toggleQadaEnabled(),
+    ).thenAnswer((_) async => true);
+    when(() => mockSettingsRepo.addReminder(any())).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.removeReminder(any())).thenAnswer((_) async {});
+    when(
+      () => mockSettingsRepo.updateReminder(any(), any()),
+    ).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.toggleReminder(any())).thenAnswer((_) async {});
+    when(
+      () => mockSettingsRepo.updateAllAzanEnabled(any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockSettingsRepo.updateAllReminderEnabled(any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockSettingsRepo.updateAllAzanSound(any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockSettingsRepo.updateAllReminderMinutes(any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockSettingsRepo.updateAllAfterSalahMinutes(any()),
+    ).thenAnswer((_) async {});
+
+    // Mock use cases
+    when(() => mockSyncNotif.execute()).thenAnswer((_) async {});
+    when(() => mockSyncNotif.init()).thenAnswer((_) async {});
+    when(() => mockSyncLoc.execute()).thenAnswer(
+      (_) async => LocationSyncResult(
+        latitude: 30.0444,
+        longitude: 31.2357,
+        cityName: 'Cairo',
+        calculationMethod: 'egyptian',
+        hijriAdjustment: 0,
+        status: LocationStatus.success,
       ),
-    ).thenAnswer((_) async {});
-
+    );
+    when(() => mockToggleAzkar.execute()).thenAnswer((_) async => true);
+    when(() => mockUpdateMethod.execute(any())).thenAnswer((_) async => 0);
+    when(() => mockWidget.updateWidget()).thenAnswer((_) async {});
     when(
-      () => mockWidgetUpdateService.updateWidget(any()),
-    ).thenAnswer((_) async {});
-
-    when(
-      () => mockLocationService.checkLocationStatus(),
-    ).thenAnswer((_) async => LocationStatus.success);
-
-    // Mock Azkar Repository
-    when(() => mockAzkarRepository.getAllAzkar()).thenAnswer((_) async => []);
+      () => mockLocation.openLocationSettings(),
+    ).thenAnswer((_) async => true);
+    when(() => mockLocation.openAppSettings()).thenAnswer((_) async => true);
 
     cubit = SettingsCubit(
-      mockPrefs,
-      mockLocationService,
-      mockNotificationService,
-      mockAzkarRepository,
-      mockWidgetUpdateService,
+      mockSettingsRepo,
+      mockLocation,
+      mockSyncLoc,
+      mockSyncNotif,
+      mockToggleAzkar,
+      mockUpdateMethod,
+      mockWidget,
     );
   });
 
-  // Need to register fallback values for Mocktail if we use any() with complex types
   setUpAll(() {
     registerFallbackValue(const Locale('en'));
-    registerFallbackValue(
-      const SettingsState(locale: Locale('ar'), isAzanVoiceDownloading: false),
-    );
-    registerFallbackValue(<AzkarItem>[]);
+    registerFallbackValue(const SettingsState(locale: Locale('ar')));
+    registerFallbackValue(AzkarReminder(category: '', time: '', title: ''));
   });
 
   group('SettingsCubit', () {
@@ -105,12 +182,8 @@ void main() {
         await Future.delayed(const Duration(milliseconds: 100));
 
         expect(cubit.state.salaahSettings.first.isAzanEnabled, false);
-        verify(() => mockPrefs.setString('salaah_settings', any())).called(1);
-        verify(
-          () => mockNotificationService.schedulePrayerNotifications(
-            settings: any(named: 'settings'),
-          ),
-        ).called(1);
+        verify(() => mockSettingsRepo.updateSalaahSettings(any())).called(1);
+        verify(() => mockSyncNotif.execute()).called(1);
       },
     );
 
@@ -118,7 +191,7 @@ void main() {
       cubit.updateLocale(const Locale('en'));
       await Future.delayed(const Duration(milliseconds: 100));
       expect(cubit.state.locale, const Locale('en'));
-      verify(() => mockPrefs.setString('locale', 'en')).called(1);
+      verify(() => mockSettingsRepo.updateLocale(const Locale('en'))).called(1);
     });
 
     test(
@@ -138,82 +211,167 @@ void main() {
         );
 
         when(
-          () => mockLocationService.getCurrentPosition(),
+          () => mockLocation.getCurrentPosition(),
         ).thenAnswer((_) async => position);
         when(
-          () =>
-              mockLocationService.getLocationDataFromCoordinates(any(), any()),
+          () => mockLocation.getLocationDataFromCoordinates(any(), any()),
         ).thenAnswer((_) async => {'city': 'Cairo', 'countryCode': 'EG'});
 
         await cubit.refreshLocation();
         await Future.delayed(const Duration(milliseconds: 100));
 
         expect(cubit.state.cityName, 'Cairo');
-        expect(
-          cubit.state.calculationMethod,
-          'egyptian',
-        ); // EG maps to egyptian
-        verify(() => mockPrefs.setString('latitude', '30.0444')).called(1);
-        verify(
-          () => mockPrefs.setString('calculation_method', 'egyptian'),
-        ).called(1);
+        expect(cubit.state.calculationMethod, 'egyptian');
+        verify(() => mockSyncLoc.execute()).called(1);
       },
     );
 
     test('mapCountryToMethod returns correct methods', () async {
-      // We can test private method indirectly via refreshLocation or exposing it for test
-      // But let's trust the logic if it works for EG.
-      // Test another one: SA -> umm_al_qura
-
-      final position = Position(
-        latitude: 21.4225,
-        longitude: 39.8262,
-        timestamp: DateTime.now(),
-        accuracy: 0,
-        altitude: 0,
-        heading: 0,
-        speed: 0,
-        speedAccuracy: 0,
-        altitudeAccuracy: 0,
-        headingAccuracy: 0,
+      when(() => mockSyncLoc.execute()).thenAnswer(
+        (_) async => LocationSyncResult(
+          latitude: 21.4225,
+          longitude: 39.8262,
+          cityName: 'Mecca',
+          calculationMethod: 'umm_al_qura',
+          hijriAdjustment: 0,
+          status: LocationStatus.success,
+        ),
       );
-
-      when(
-        () => mockLocationService.getCurrentPosition(),
-      ).thenAnswer((_) async => position);
-      when(
-        () => mockLocationService.getLocationDataFromCoordinates(any(), any()),
-      ).thenAnswer((_) async => {'city': 'Mecca', 'countryCode': 'SA'});
 
       await cubit.refreshLocation();
       await Future.delayed(const Duration(milliseconds: 100));
-
       expect(cubit.state.calculationMethod, 'umm_al_qura');
     });
 
     test('updateMadhab triggers widget update', () async {
       cubit.updateMadhab('hanafi');
       await Future.delayed(const Duration(milliseconds: 100));
-
       expect(cubit.state.madhab, 'hanafi');
-      verify(() => mockWidgetUpdateService.updateWidget(any())).called(1);
+      verify(() => mockWidget.updateWidget()).called(1);
     });
 
     test('updateCalculationMethod triggers widget update', () async {
       cubit.updateCalculationMethod('egyptian');
       await Future.delayed(const Duration(milliseconds: 100));
-
       expect(cubit.state.calculationMethod, 'egyptian');
-      // Called twice: once by updateHijriAdjustment (internal call) and once by updateCalculationMethod itself
-      verify(() => mockWidgetUpdateService.updateWidget(any())).called(2);
+      verify(() => mockWidget.updateWidget()).called(1);
     });
 
     test('updateHijriAdjustment triggers widget update', () async {
       cubit.updateHijriAdjustment(2);
       await Future.delayed(const Duration(milliseconds: 100));
-
       expect(cubit.state.hijriAdjustment, 2);
-      verify(() => mockWidgetUpdateService.updateWidget(any())).called(1);
+      verify(() => mockWidget.updateWidget()).called(1);
+    });
+
+    group('Bulk Updates', () {
+      test('updateAllAzanEnabled updates repo and state', () async {
+        final updatedSettings = Salaah.values
+            .map((s) => SalaahSettings(salaah: s, isAzanEnabled: false))
+            .toList();
+        when(
+          () => mockSettingsRepo.updateAllAzanEnabled(any()),
+        ).thenAnswer((_) async {});
+        when(() => mockSettingsRepo.salaahSettings).thenReturn(updatedSettings);
+
+        cubit.updateAllAzanEnabled(false);
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        expect(cubit.state.salaahSettings.every((s) => !s.isAzanEnabled), true);
+        verify(() => mockSettingsRepo.updateAllAzanEnabled(false)).called(1);
+        verify(() => mockSyncNotif.execute()).called(1);
+      });
+
+      test('updateAllReminderEnabled updates repo and state', () async {
+        final updatedSettings = Salaah.values
+            .map((s) => SalaahSettings(salaah: s, isReminderEnabled: true))
+            .toList();
+        when(
+          () => mockSettingsRepo.updateAllReminderEnabled(any()),
+        ).thenAnswer((_) async {});
+        when(() => mockSettingsRepo.salaahSettings).thenReturn(updatedSettings);
+
+        cubit.updateAllReminderEnabled(true);
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        expect(
+          cubit.state.salaahSettings.every((s) => s.isReminderEnabled),
+          true,
+        );
+        verify(() => mockSettingsRepo.updateAllReminderEnabled(true)).called(1);
+        verify(() => mockSyncNotif.execute()).called(1);
+      });
+
+      test('updateAllAzanSound updates repo and state', () async {
+        const sound = 'custom_azan.mp3';
+        final updatedSettings = Salaah.values
+            .map((s) => SalaahSettings(salaah: s, azanSound: sound))
+            .toList();
+        when(
+          () => mockSettingsRepo.updateAllAzanSound(any()),
+        ).thenAnswer((_) async {});
+        when(() => mockSettingsRepo.salaahSettings).thenReturn(updatedSettings);
+
+        cubit.updateAllAzanSound(sound);
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        expect(
+          cubit.state.salaahSettings.every((s) => s.azanSound == sound),
+          true,
+        );
+        verify(() => mockSettingsRepo.updateAllAzanSound(sound)).called(1);
+        verify(() => mockSyncNotif.execute()).called(1);
+      });
+
+      test('updateAllReminderMinutes updates repo and state', () async {
+        const mins = 10;
+        final updatedSettings = Salaah.values
+            .map((s) => SalaahSettings(salaah: s, reminderMinutesBefore: mins))
+            .toList();
+        when(
+          () => mockSettingsRepo.updateAllReminderMinutes(any()),
+        ).thenAnswer((_) async {});
+        when(() => mockSettingsRepo.salaahSettings).thenReturn(updatedSettings);
+
+        cubit.updateAllReminderMinutes(mins);
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        expect(
+          cubit.state.salaahSettings.every(
+            (s) => s.reminderMinutesBefore == mins,
+          ),
+          true,
+        );
+        verify(() => mockSettingsRepo.updateAllReminderMinutes(mins)).called(1);
+        verify(() => mockSyncNotif.execute()).called(1);
+      });
+
+      test('updateAllAfterSalahMinutes updates repo and state', () async {
+        const mins = 5;
+        final updatedSettings = Salaah.values
+            .map(
+              (s) => SalaahSettings(salaah: s, afterSalaahAzkarMinutes: mins),
+            )
+            .toList();
+        when(
+          () => mockSettingsRepo.updateAllAfterSalahMinutes(any()),
+        ).thenAnswer((_) async {});
+        when(() => mockSettingsRepo.salaahSettings).thenReturn(updatedSettings);
+
+        cubit.updateAllAfterSalahMinutes(mins);
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        expect(
+          cubit.state.salaahSettings.every(
+            (s) => s.afterSalaahAzkarMinutes == mins,
+          ),
+          true,
+        );
+        verify(
+          () => mockSettingsRepo.updateAllAfterSalahMinutes(mins),
+        ).called(1);
+        verify(() => mockSyncNotif.execute()).called(1);
+      });
     });
   });
 }

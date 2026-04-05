@@ -1,6 +1,6 @@
+import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'sound_manager.dart';
 
 @singleton
@@ -24,7 +24,7 @@ class ChannelManager {
 
   Future<void> createNotificationChannels(
     FlutterLocalNotificationsPlugin notificationsPlugin, {
-    SettingsState? settings,
+    SettingsRepository? settings,
   }) async {
     final androidPlugin = notificationsPlugin
         .resolvePlatformSpecificImplementation<

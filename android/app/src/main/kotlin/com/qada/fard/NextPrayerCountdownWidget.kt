@@ -97,7 +97,7 @@ class NextPrayerCountdownWidget : GlanceAppWidget() {
                 Text(
                     text = "Open App",
                     style = TextStyle(
-                        color = ColorProvider(textPrimary), 
+                        color = ColorProvider(textPrimary),
                         fontSize = if (isTiny) 10.sp else 14.sp,
                         textAlign = TextAlign.Center
                     )
@@ -105,25 +105,39 @@ class NextPrayerCountdownWidget : GlanceAppWidget() {
                 return@Column
             }
 
-            // Calculate display time
+            // Calculate display time - ONLY show time to NEXT prayer (no plus/minus)
             val prayerCal = Calendar.getInstance().apply { timeInMillis = data.nextPrayerTime }
             val nowCal = Calendar.getInstance()
-            
+
             prayerCal.set(Calendar.SECOND, 0)
             prayerCal.set(Calendar.MILLISECOND, 0)
             nowCal.set(Calendar.SECOND, 0)
             nowCal.set(Calendar.MILLISECOND, 0)
 
             val totalMinutes = (prayerCal.timeInMillis - nowCal.timeInMillis) / 60000
-            val absMinutes = Math.abs(totalMinutes)
-            val hours = absMinutes / 60
-            val minutes = absMinutes % 60
             
-            val timeText = if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
-            val statusText = when {
-                totalMinutes > 0 -> timeText
-                totalMinutes < 0 -> "+$timeText"
-                else -> "Now"
+            // Only show time if it's in the future (totalMinutes > 0)
+            // If totalMinutes <= 0, the nextPrayerTime should already be for tomorrow's Fajr
+            // (calculated in WidgetUpdateService), so we should rarely see negative values
+            val statusText = if (totalMinutes > 0) {
+                val hours = totalMinutes / 60
+                val minutes = totalMinutes % 60
+                if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
+            } else if (totalMinutes == 0L) {
+                "Now"
+            } else {
+                // Data is stale - next prayer time is in the past
+                // This shouldn't happen if WidgetUpdateService is working correctly
+                // Show a message to prompt user to open the app
+                Text(
+                    text = "Update Required",
+                    style = TextStyle(
+                        color = ColorProvider(textPrimary),
+                        fontSize = if (isTiny) 10.sp else 12.sp,
+                        textAlign = TextAlign.Center
+                    )
+                )
+                return@Column
             }
 
             if (isWide) {

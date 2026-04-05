@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
+import 'package:fard/core/services/widget_update_service.dart';
 
 class MockSettingsCubit extends MockCubit<SettingsState>
     implements SettingsCubit {}
@@ -28,6 +29,8 @@ class MockPrayerTrackerBloc
 class MockSharedPreferences extends Mock implements SharedPreferences {}
 
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
+
+class MockWidgetUpdateService extends Mock implements WidgetUpdateService {}
 
 void main() {
   late MockSettingsCubit mockSettingsCubit;
@@ -50,6 +53,7 @@ void main() {
     getIt.registerSingleton<PrayerTrackerBloc>(mockPrayerTrackerBloc);
     final mockPrayerTimeService = MockPrayerTimeService();
     getIt.registerSingleton<PrayerTimeService>(mockPrayerTimeService);
+    getIt.registerSingleton<WidgetUpdateService>(MockWidgetUpdateService());
 
     // Default mocks for PrayerTimeService
     when(

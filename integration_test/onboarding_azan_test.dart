@@ -45,11 +45,7 @@ void main() {
         () => mockNotificationService.canScheduleExactNotifications(),
       ).thenAnswer((_) async => true);
       when(
-        () => mockNotificationService.testAzan(
-          any(),
-          any(),
-          settings: any(named: 'settings'),
-        ),
+        () => mockNotificationService.testAzan(any(), any()),
       ).thenAnswer((_) async {});
       when(() => mockNotificationService.init()).thenAnswer((_) async {});
 
@@ -125,11 +121,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       await tester.pumpAndSettle();
       verify(
-        () => mockNotificationService.testAzan(
-          Salaah.fajr,
-          any(),
-          settings: any(named: 'settings'),
-        ),
+        () => mockNotificationService.testAzan(Salaah.fajr, any()),
       ).called(1);
 
       // NOW test the toggle (it will hide everything)

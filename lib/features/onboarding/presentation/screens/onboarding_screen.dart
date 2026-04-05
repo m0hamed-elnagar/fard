@@ -372,7 +372,6 @@ class _AzanSelectionPage extends StatelessWidget {
                   : () => getIt<NotificationService>().testAzan(
                       Salaah.fajr,
                       currentSound,
-                      settings: state,
                     ),
               icon: const Icon(Icons.play_circle_filled_rounded),
               label: Text(l10n.testAzan),

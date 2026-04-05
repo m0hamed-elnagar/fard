@@ -12,6 +12,7 @@ import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
+import 'package:fard/core/services/widget_update_service.dart';
 import 'package:adhan/adhan.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/prayer_tracking/domain/missed_counter.dart';
@@ -29,6 +30,8 @@ class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState>
 class MockSharedPreferences extends Mock implements SharedPreferences {}
 
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
+
+class MockWidgetUpdateService extends Mock implements WidgetUpdateService {}
 
 void main() {
   setUpAll(() {
@@ -59,6 +62,7 @@ void main() {
     getIt.registerSingleton<SharedPreferences>(MockSharedPreferences());
     getIt.registerSingleton<PrayerTrackerBloc>(mockPrayerTrackerBloc);
     getIt.registerSingleton<PrayerTimeService>(mockPrayerTimeService);
+    getIt.registerSingleton<WidgetUpdateService>(MockWidgetUpdateService());
 
     // Default mocks for PrayerTimeService
     when(

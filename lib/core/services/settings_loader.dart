@@ -1,55 +1,46 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fard/core/constants/settings_keys.dart';
+import 'package:fard/features/settings/domain/app_settings.dart';
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 
+/// Static utility class for loading settings from SharedPreferences.
+/// This is only used during app initialization to create the initial settings.
 class SettingsLoader {
-  static const String _localeKey = 'locale';
-  static const String _latKey = 'latitude';
-  static const String _lonKey = 'longitude';
-  static const String _cityKey = 'city_name';
-  static const String _methodKey = 'calculation_method';
-  static const String _madhabKey = 'madhab';
-  static const String _morningAzkarKey = 'morning_azkar_time';
-  static const String _eveningAzkarKey = 'evening_azkar_time';
-  static const String _afterSalahAzkarKey = 'is_after_salah_azkar_enabled';
-  static const String _remindersKey = 'azkar_reminders';
-  static const String _salaahSettingsKey = 'salaah_settings';
-  static const String _qadaKey = 'is_qada_enabled';
-  static const String _hijriAdjustmentKey = 'hijri_adjustment';
+  static AppSettings loadSettings(SharedPreferences prefs) {
+    final latStr = prefs.get(SettingsKeys.latitude)?.toString();
+    final lonStr = prefs.get(SettingsKeys.longitude)?.toString();
 
-  static SettingsState loadSettings(SharedPreferences prefs) {
-    // Read lat/lng. Using prefs.get() and toString() makes it resilient to both
-    // the new String standard and any legacy double values.
-    final latStr = prefs.get(_latKey)?.toString();
-    final lonStr = prefs.get(_lonKey)?.toString();
-
-    return SettingsState(
-      locale: Locale(prefs.getString(_localeKey) ?? 'ar'),
+    return AppSettings(
+      locale: Locale(prefs.getString(SettingsKeys.locale) ?? 'ar'),
       latitude: latStr != null ? double.tryParse(latStr) : null,
       longitude: lonStr != null ? double.tryParse(lonStr) : null,
-      cityName: prefs.getString(_cityKey),
-      calculationMethod: prefs.getString(_methodKey) ?? 'muslim_league',
-      madhab: prefs.getString(_madhabKey) ?? 'shafi',
-      morningAzkarTime: prefs.getString(_morningAzkarKey) ?? '05:00',
-      eveningAzkarTime: prefs.getString(_eveningAzkarKey) ?? '18:00',
-      isAfterSalahAzkarEnabled: prefs.getBool(_afterSalahAzkarKey) ?? false,
-      isQadaEnabled: prefs.getBool(_qadaKey) ?? true,
-      hijriAdjustment: prefs.getInt(_hijriAdjustmentKey) ?? 0,
+      cityName: prefs.getString(SettingsKeys.cityName),
+      calculationMethod:
+          prefs.getString(SettingsKeys.calculationMethod) ?? 'muslim_league',
+      madhab: prefs.getString(SettingsKeys.madhab) ?? 'shafi',
+      morningAzkarTime:
+          prefs.getString(SettingsKeys.morningAzkarTime) ?? '05:00',
+      eveningAzkarTime:
+          prefs.getString(SettingsKeys.eveningAzkarTime) ?? '18:00',
+      isAfterSalahAzkarEnabled:
+          prefs.getBool(SettingsKeys.afterSalahAzkarEnabled) ?? false,
+      isQadaEnabled: prefs.getBool(SettingsKeys.qadaEnabled) ?? true,
+      hijriAdjustment: prefs.getInt(SettingsKeys.hijriAdjustment) ?? 0,
       reminders: _loadReminders(
         prefs,
-        prefs.getString(_morningAzkarKey) ?? '05:00',
-        prefs.getString(_eveningAzkarKey) ?? '18:00',
+        prefs.getString(SettingsKeys.morningAzkarTime) ?? '05:00',
+        prefs.getString(SettingsKeys.eveningAzkarTime) ?? '18:00',
       ),
       salaahSettings: _loadSalaahSettings(prefs),
     );
   }
 
   static List<SalaahSettings> _loadSalaahSettings(SharedPreferences prefs) {
-    final String? jsonStr = prefs.getString(_salaahSettingsKey);
+    final String? jsonStr = prefs.getString(SettingsKeys.salaahSettings);
     if (jsonStr == null) {
       return Salaah.values.map((s) => SalaahSettings(salaah: s)).toList();
     }
@@ -66,7 +57,7 @@ class SettingsLoader {
     String morningTime,
     String eveningTime,
   ) {
-    final String? jsonStr = prefs.getString(_remindersKey);
+    final String? jsonStr = prefs.getString(SettingsKeys.azkarReminders);
     if (jsonStr == null) {
       return [
         AzkarReminder(

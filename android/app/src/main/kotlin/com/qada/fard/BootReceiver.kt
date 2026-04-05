@@ -31,14 +31,20 @@ class BootReceiver : BroadcastReceiver() {
     private suspend fun updateAll(context: Context) {
         val repository = SettingsRepository(context)
         val settings = repository.getSettings() ?: return
-        
+
         val prayerTimes = PrayerTimesCalculator.calculateToday(settings)
-        
+
         // Reschedule all alarms because they were cleared on reboot
         PrayerAlarmManager.rescheduleAll(context, prayerTimes)
-        
+
         // Refresh UIs
         PrayerWidget().updateAll(context)
         NextPrayerCountdownWidget().updateAll(context)
+        
+        // IMPORTANT: Restart the countdown widget's minute-by-minute update loop
+        // This was missing after reboot, causing the countdown to stop updating
+        NextPrayerCountdownWidgetReceiver().scheduleNextMinuteUpdate(context)
+        
+        Log.i("BootReceiver", "All widgets and alarms refreshed")
     }
 }

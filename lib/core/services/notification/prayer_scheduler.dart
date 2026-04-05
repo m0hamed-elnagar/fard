@@ -1,5 +1,7 @@
 import 'dart:math';
 import 'package:fard/features/azkar/data/azkar_source.dart';
+import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
+import 'package:fard/core/utils/rtl_text_util.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:injectable/injectable.dart';
@@ -7,9 +9,6 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/features/azkar/domain/azkar_item.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/core/di/injection.dart';
 import 'channel_manager.dart';
 import 'sound_manager.dart';
 
@@ -19,6 +18,7 @@ class PrayerNotificationScheduler {
   final IAzkarSource _azkarSource;
   final ChannelManager _channelManager;
   final SoundManager _soundManager;
+  final SettingsRepository _settingsProvider;
 
   static const String groupKey = 'com.nagar.fard.NOTIFICATIONS';
   static const String widgetTaskKey = 'widget_refresh_task';
@@ -31,15 +31,7 @@ class PrayerNotificationScheduler {
   static const int afterSalahAzkarIdStart = 400;
 
   String _applyRtl(String text) {
-    try {
-      if (getIt.isRegistered<SettingsCubit>()) {
-        final locale = getIt<SettingsCubit>().state.locale;
-        if (locale.languageCode == 'ar') {
-          return '\u200F\u202B$text\u202C';
-        }
-      }
-    } catch (_) {}
-    return text;
+    return RtlTextUtil.applyRtlFromSettings(text, _settingsProvider);
   }
 
   // Max counts for cancellation
@@ -53,18 +45,20 @@ class PrayerNotificationScheduler {
     this._azkarSource,
     this._channelManager,
     this._soundManager,
+    this._settingsProvider,
   );
 
   Future<void> schedulePrayerNotifications(
-    FlutterLocalNotificationsPlugin notificationsPlugin, {
-    required SettingsState settings,
-  }) async {
+    FlutterLocalNotificationsPlugin notificationsPlugin,
+  ) async {
     await _channelManager.createNotificationChannels(
       notificationsPlugin,
-      settings: settings,
+      settings: _settingsProvider,
     );
 
-    if (settings.latitude == null || settings.longitude == null) return;
+    if (_settingsProvider.latitude == null ||
+        _settingsProvider.longitude == null)
+      return;
 
     // Cancel previous prayer notifications in known ranges
     await _cancelNotificationRanges(notificationsPlugin, [
@@ -82,14 +76,14 @@ class PrayerNotificationScheduler {
     for (int day = 0; day < maxScheduledDays; day++) {
       final date = DateTime.now().add(Duration(days: day));
       final prayerTimes = _prayerTimeService.getPrayerTimes(
-        latitude: settings.latitude!,
-        longitude: settings.longitude!,
-        method: settings.calculationMethod,
-        madhab: settings.madhab,
+        latitude: _settingsProvider.latitude!,
+        longitude: _settingsProvider.longitude!,
+        method: _settingsProvider.calculationMethod,
+        madhab: _settingsProvider.madhab,
         date: date,
       );
 
-      for (final salaahSetting in settings.salaahSettings) {
+      for (final salaahSetting in _settingsProvider.salaahSettings) {
         final salaahTime = _prayerTimeService.getTimeForSalaah(
           prayerTimes,
           salaahSetting.salaah,
@@ -152,7 +146,7 @@ class PrayerNotificationScheduler {
         }
 
         // 3. After Salah Azkar Event
-        if (settings.isAfterSalahAzkarEnabled &&
+        if (_settingsProvider.isAfterSalahAzkarEnabled &&
             salaahSetting.isAfterSalahAzkarEnabled) {
           final azkarTime = tzSalaahTime.add(
             Duration(minutes: salaahSetting.afterSalaahAzkarMinutes),
@@ -199,7 +193,6 @@ class PrayerNotificationScheduler {
 
   Future<void> scheduleAzkarReminders(
     FlutterLocalNotificationsPlugin notificationsPlugin, {
-    required SettingsState settings,
     required List<AzkarItem> allAzkar,
   }) async {
     await _cancelNotificationRanges(notificationsPlugin, [
@@ -211,10 +204,10 @@ class PrayerNotificationScheduler {
 
     for (
       int i = 0;
-      i < min(settings.reminders.length, maxAzkarReminders);
+      i < min(_settingsProvider.reminders.length, maxAzkarReminders);
       i++
     ) {
-      final reminder = settings.reminders[i];
+      final reminder = _settingsProvider.reminders[i];
       if (!reminder.isEnabled) continue;
 
       final scheduledDateTime = _parseTime(reminder.time, now);
