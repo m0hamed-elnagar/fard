@@ -2,6 +2,7 @@ import 'package:fard/core/services/notification/channel_manager.dart';
 import 'package:fard/core/services/notification/prayer_scheduler.dart';
 import 'package:adhan/adhan.dart';
 import 'package:fard/core/services/notification/sound_manager.dart';
+import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/features/azkar/domain/azkar_item.dart';
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
@@ -10,11 +11,14 @@ import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+
+class MockSettingsRepository extends Mock implements SettingsRepository {}
 
 class MockFlutterLocalNotificationsPlugin extends Mock
     implements FlutterLocalNotificationsPlugin {}
@@ -33,17 +37,30 @@ class MockAndroidFlutterLocalNotificationsPlugin extends Mock
 class FakePrayerTimes extends Fake implements PrayerTimes {}
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late PrayerNotificationScheduler scheduler;
   late MockFlutterLocalNotificationsPlugin mockNotificationsPlugin;
   late MockPrayerTimeService mockPrayerTimeService;
   late MockAzkarRepository mockAzkarRepository;
   late MockChannelManager mockChannelManager;
   late MockSoundManager mockSoundManager;
+  late MockSettingsRepository mockSettingsRepository;
   late MockAndroidFlutterLocalNotificationsPlugin mockAndroidPlugin;
 
   setUpAll(() {
     tz.initializeTimeZones();
     tz.setLocalLocation(tz.getLocation('UTC'));
+
+    // Mock Workmanager MethodChannel to prevent UnimplementedError
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('be.tramckrijte.workmanager'),
+          (MethodCall methodCall) async {
+            return true;
+          },
+        );
+
     registerFallbackValue(tz.TZDateTime.now(tz.local));
     registerFallbackValue(const NotificationDetails());
     registerFallbackValue(AndroidScheduleMode.exactAllowWhileIdle);
@@ -53,6 +70,7 @@ void main() {
     registerFallbackValue(const SettingsState(locale: Locale('en')));
     registerFallbackValue(MockFlutterLocalNotificationsPlugin());
     registerFallbackValue(FakePrayerTimes());
+    registerFallbackValue(MockSettingsRepository());
   });
 
   setUp(() {
@@ -61,6 +79,7 @@ void main() {
     mockAzkarRepository = MockAzkarRepository();
     mockChannelManager = MockChannelManager();
     mockSoundManager = MockSoundManager();
+    mockSettingsRepository = MockSettingsRepository();
     mockAndroidPlugin = MockAndroidFlutterLocalNotificationsPlugin();
 
     scheduler = PrayerNotificationScheduler(
@@ -68,6 +87,7 @@ void main() {
       mockAzkarRepository,
       mockChannelManager,
       mockSoundManager,
+      mockSettingsRepository,
     );
 
     when(
@@ -114,15 +134,35 @@ void main() {
     ).thenAnswer((_) async {});
 
     when(() => mockAzkarRepository.getAllAzkar()).thenAnswer((_) async => []);
+
+    // Default SettingsRepository stubs
+    when(() => mockSettingsRepository.latitude).thenReturn(30.0);
+    when(() => mockSettingsRepository.longitude).thenReturn(31.0);
+    when(
+      () => mockSettingsRepository.calculationMethod,
+    ).thenReturn('muslim_league');
+    when(() => mockSettingsRepository.madhab).thenReturn('shafi');
+    when(() => mockSettingsRepository.salaahSettings).thenReturn(
+      Salaah.values
+          .map((s) => SalaahSettings(salaah: s, isAzanEnabled: true))
+          .toList(),
+    );
+    when(
+      () => mockSettingsRepository.isAfterSalahAzkarEnabled,
+    ).thenReturn(false);
+    when(() => mockSettingsRepository.reminders).thenReturn([]);
+    when(() => mockSettingsRepository.locale).thenReturn(const Locale('en'));
   });
 
   test('schedulePrayerNotifications schedules all 5 prayers', () async {
-    final settings = SettingsState(
-      locale: const Locale('ar'),
-      latitude: 30.0,
-      longitude: 31.0,
-      isAzanVoiceDownloading: false,
-      salaahSettings: Salaah.values
+    when(() => mockSettingsRepository.latitude).thenReturn(30.0);
+    when(() => mockSettingsRepository.longitude).thenReturn(31.0);
+    when(
+      () => mockSettingsRepository.calculationMethod,
+    ).thenReturn('muslim_league');
+    when(() => mockSettingsRepository.madhab).thenReturn('shafi');
+    when(() => mockSettingsRepository.salaahSettings).thenReturn(
+      Salaah.values
           .map(
             (s) => SalaahSettings(
               salaah: s,
@@ -149,10 +189,7 @@ void main() {
       () => mockPrayerTimeService.getTimeForSalaah(any(), any()),
     ).thenReturn(now.add(const Duration(hours: 1)));
 
-    await scheduler.schedulePrayerNotifications(
-      mockNotificationsPlugin,
-      settings: settings,
-    );
+    await scheduler.schedulePrayerNotifications(mockNotificationsPlugin);
 
     // 5 prayers * 7 days = 35 azan notifications
     verify(
@@ -168,21 +205,10 @@ void main() {
   });
 
   test('scheduleAzkarReminders schedules reminders from settings', () async {
-    final settings = SettingsState(
-      locale: const Locale('en'),
-      reminders: [
-        const AzkarReminder(
-          category: 'morning',
-          time: '08:00',
-          isEnabled: true,
-        ),
-        const AzkarReminder(
-          category: 'evening',
-          time: '18:00',
-          isEnabled: true,
-        ),
-      ],
-    );
+    when(() => mockSettingsRepository.reminders).thenReturn([
+      const AzkarReminder(category: 'morning', time: '08:00', isEnabled: true),
+      const AzkarReminder(category: 'evening', time: '18:00', isEnabled: true),
+    ]);
 
     final azkarList = [
       AzkarItem(
@@ -203,7 +229,6 @@ void main() {
 
     await scheduler.scheduleAzkarReminders(
       mockNotificationsPlugin,
-      settings: settings,
       allAzkar: azkarList,
     );
 

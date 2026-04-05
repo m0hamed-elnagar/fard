@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:fard/core/extensions/hijri_extension.dart';
 import 'package:fard/core/models/widget_data_model.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:home_widget/home_widget.dart';
@@ -17,11 +17,17 @@ class WidgetUpdateService {
   static const platform = MethodChannel(CalculationContract.channelName);
   final PrayerTimeService _prayerTimeService;
   final SharedPreferences _prefs;
+  final SettingsRepository _settingsProvider;
 
-  WidgetUpdateService(this._prayerTimeService, this._prefs);
+  WidgetUpdateService(
+    this._prayerTimeService,
+    this._prefs,
+    this._settingsProvider,
+  );
 
-  Future<void> updateWidget(SettingsState settings) async {
-    if (settings.latitude == null || settings.longitude == null) {
+  Future<void> updateWidget() async {
+    if (_settingsProvider.latitude == null ||
+        _settingsProvider.longitude == null) {
       debugPrint('WidgetUpdateService: Cannot update - missing location');
       return;
     }
@@ -30,10 +36,10 @@ class WidgetUpdateService {
     debugPrint('WidgetUpdateService: Starting update at $now');
 
     final prayerTimes = _prayerTimeService.getPrayerTimes(
-      latitude: settings.latitude!,
-      longitude: settings.longitude!,
-      method: settings.calculationMethod,
-      madhab: settings.madhab,
+      latitude: _settingsProvider.latitude!,
+      longitude: _settingsProvider.longitude!,
+      method: _settingsProvider.calculationMethod,
+      madhab: _settingsProvider.madhab,
       date: now,
     );
 
@@ -43,10 +49,10 @@ class WidgetUpdateService {
 
     // Consistent with app's Hijri adjustment logic
     final hijriDate = HijriCalendar.fromDate(
-      now.add(Duration(days: settings.hijriAdjustment)),
+      now.add(Duration(days: _settingsProvider.hijriAdjustment)),
     );
 
-    final lang = settings.locale.languageCode;
+    final lang = _settingsProvider.locale.languageCode;
     final sunrise = DateFormat.jm(lang).format(prayerTimes.sunrise);
     final dayOfWeek = DateFormat('EEEE', lang).format(now);
     final isRtl = lang == 'ar';
@@ -73,10 +79,10 @@ class WidgetUpdateService {
     } else {
       // After Isha - calculate tomorrow's Fajr
       final tomorrowPrayerTimes = _prayerTimeService.getPrayerTimes(
-        latitude: settings.latitude!,
-        longitude: settings.longitude!,
-        method: settings.calculationMethod,
-        madhab: settings.madhab,
+        latitude: _settingsProvider.latitude!,
+        longitude: _settingsProvider.longitude!,
+        method: _settingsProvider.calculationMethod,
+        madhab: _settingsProvider.madhab,
         date: now.add(const Duration(days: 1)),
       );
       nextPrayerName = _getPrayerName('fajr', lang);
@@ -131,34 +137,33 @@ class WidgetUpdateService {
     // 🚀 CRITICAL FIX: Sync settings to Native BEFORE updating widget
     // This ensures SettingsRepository.getSettings() returns valid data
     // _syncNative also triggers Glance widget update via MainActivity
-    await _syncNative(settings, jsonData);
+    await _syncNative(jsonData);
     debugPrint('WidgetUpdateService: Settings synced to native');
 
     debugPrint('WidgetUpdateService: Update complete!');
   }
 
-  Future<void> _syncNative(
-    SettingsState settings,
-    String prayerDataJson,
-  ) async {
+  Future<void> _syncNative(String prayerDataJson) async {
     try {
       final now = DateTime.now();
       final prayerTimes = _prayerTimeService.getPrayerTimes(
-        latitude: settings.latitude!,
-        longitude: settings.longitude!,
-        method: settings.calculationMethod,
-        madhab: settings.madhab,
+        latitude: _settingsProvider.latitude!,
+        longitude: _settingsProvider.longitude!,
+        method: _settingsProvider.calculationMethod,
+        madhab: _settingsProvider.madhab,
         date: now,
       );
 
       await platform.invokeMethod('settingsChanged', {
-        'calculation_method': _mapMethodToContract(settings.calculationMethod),
-        'latitude': settings.latitude,
-        'longitude': settings.longitude,
-        'madhab': settings.madhab == 'hanafi'
+        'calculation_method': _mapMethodToContract(
+          _settingsProvider.calculationMethod,
+        ),
+        'latitude': _settingsProvider.latitude,
+        'longitude': _settingsProvider.longitude,
+        'madhab': _settingsProvider.madhab == 'hanafi'
             ? CalculationContract.madhabHanafi
             : CalculationContract.madhabShafi,
-        'locale': settings.locale.languageCode,
+        'locale': _settingsProvider.locale.languageCode,
         'prayer_data': prayerDataJson, // Atomic sync of display data
         'prayer_times': {
           'fajr': prayerTimes.fajr.millisecondsSinceEpoch,

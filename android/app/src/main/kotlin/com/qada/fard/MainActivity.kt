@@ -2,7 +2,9 @@ package com.qada.fard
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import androidx.glance.appwidget.updateAll
 import com.qada.fard.prayer.CalculationContract
@@ -20,6 +22,35 @@ import kotlinx.coroutines.withContext
 
 class MainActivity : AudioServiceActivity() {
     private val TAG = "MainActivity"
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // Request exact alarm permission on Android 13+ if needed
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            checkAndRequestExactAlarmPermission()
+        }
+    }
+
+    /**
+     * Check and request exact alarm permission on Android 13+.
+     * This is required for precise countdown widget updates.
+     */
+    private fun checkAndRequestExactAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+            if (!alarmManager.canScheduleExactAlarms()) {
+                Log.w(TAG, "Exact alarm permission not granted - opening settings")
+                // Open the exact alarm permission settings page
+                try {
+                    val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to open exact alarm settings", e)
+                }
+            }
+        }
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)

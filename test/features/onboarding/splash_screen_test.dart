@@ -13,6 +13,7 @@ import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/core/services/notification_service.dart';
+import 'package:fard/core/services/widget_update_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -36,6 +37,8 @@ class MockPrayerTrackerBloc
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
 class MockNotificationService extends Mock implements NotificationService {}
+
+class MockWidgetUpdateService extends Mock implements WidgetUpdateService {}
 
 class MockQuranBloc extends MockBloc<QuranEvent, QuranState>
     implements QuranBloc {}
@@ -84,6 +87,7 @@ void main() {
     getIt.registerSingleton<PrayerTrackerBloc>(mockPrayerTrackerBloc);
     getIt.registerSingleton<PrayerTimeService>(mockPrayerTimeService);
     getIt.registerSingleton<NotificationService>(mockNotificationService);
+    getIt.registerSingleton<WidgetUpdateService>(MockWidgetUpdateService());
     getIt.registerSingleton<GlobalKey<NavigatorState>>(
       GlobalKey<NavigatorState>(),
     );

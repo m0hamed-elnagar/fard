@@ -1,9 +1,8 @@
 import 'package:fard/core/services/notification/channel_manager.dart';
 import 'package:fard/core/services/notification/sound_manager.dart';
+import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -15,6 +14,8 @@ class MockAndroidFlutterLocalNotificationsPlugin extends Mock
     implements AndroidFlutterLocalNotificationsPlugin {}
 
 class MockSoundManager extends Mock implements SoundManager {}
+
+class MockSettingsRepository extends Mock implements SettingsRepository {}
 
 void main() {
   late ChannelManager channelManager;
@@ -88,12 +89,10 @@ void main() {
     });
 
     test('createNotificationChannels creates channels for settings', () async {
-      final settings = SettingsState(
-        locale: const Locale('en'),
-        salaahSettings: [
-          SalaahSettings(salaah: Salaah.fajr, azanSound: 'fajr.mp3'),
-        ],
-      );
+      final mockSettings = MockSettingsRepository();
+      when(() => mockSettings.salaahSettings).thenReturn([
+        SalaahSettings(salaah: Salaah.fajr, azanSound: 'fajr.mp3'),
+      ]);
 
       when(
         () => mockSoundManager.getSoundUriForChannel('fajr.mp3'),
@@ -101,7 +100,7 @@ void main() {
 
       await channelManager.createNotificationChannels(
         mockNotificationsPlugin,
-        settings: settings,
+        settings: mockSettings,
       );
 
       // 1 for Fajr, 1 for Reminder, 1 for Azkar = 3

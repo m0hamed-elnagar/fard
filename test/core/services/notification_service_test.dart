@@ -3,6 +3,7 @@ import 'package:fard/core/services/notification/channel_manager.dart';
 import 'package:fard/core/services/notification/prayer_scheduler.dart';
 import 'package:fard/core/services/notification/sound_manager.dart';
 import 'package:fard/core/services/widget_update_service.dart';
+import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 
@@ -29,6 +30,8 @@ class MockPrayerNotificationScheduler extends Mock
 
 class MockWidgetUpdateService extends Mock implements WidgetUpdateService {}
 
+class MockSettingsRepository extends Mock implements SettingsRepository {}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -48,6 +51,7 @@ void main() {
   late MockChannelManager mockChannelManager;
   late MockPrayerNotificationScheduler mockPrayerScheduler;
   late MockWidgetUpdateService mockWidgetUpdateService;
+  late MockSettingsRepository mockSettingsRepository;
 
   setUpAll(() {
     tz.initializeTimeZones();
@@ -66,6 +70,7 @@ void main() {
     registerFallbackValue((NotificationResponse details) {});
     registerFallbackValue(MockFlutterLocalNotificationsPlugin());
     registerFallbackValue(const SettingsState(locale: Locale('en')));
+    registerFallbackValue(MockSettingsRepository());
   });
 
   setUp(() {
@@ -75,6 +80,7 @@ void main() {
     mockChannelManager = MockChannelManager();
     mockPrayerScheduler = MockPrayerNotificationScheduler();
     mockWidgetUpdateService = MockWidgetUpdateService();
+    mockSettingsRepository = MockSettingsRepository();
 
     when(
       () => mockNotificationsPlugin
@@ -114,9 +120,7 @@ void main() {
         settings: any(named: 'settings'),
       ),
     ).thenAnswer((_) async {});
-    when(
-      () => mockWidgetUpdateService.updateWidget(any()),
-    ).thenAnswer((_) async {});
+    when(() => mockWidgetUpdateService.updateWidget()).thenAnswer((_) async {});
 
     notificationService = NotificationService(
       mockSoundManager,
@@ -124,6 +128,7 @@ void main() {
       mockPrayerScheduler,
       mockNotificationsPlugin,
       mockWidgetUpdateService,
+      mockSettingsRepository,
     );
   });
 
@@ -148,30 +153,16 @@ void main() {
     test(
       'schedulePrayerNotifications delegates to scheduler and updates widget',
       () async {
-        final settings = SettingsState(
-          locale: const Locale('ar'),
-          latitude: 30.0,
-          longitude: 31.0,
-          isAzanVoiceDownloading: false,
-          salaahSettings: [],
-        );
-
         when(
-          () => mockPrayerScheduler.schedulePrayerNotifications(
-            any(),
-            settings: any(named: 'settings'),
-          ),
+          () => mockPrayerScheduler.schedulePrayerNotifications(any()),
         ).thenAnswer((_) async {});
 
-        await notificationService.schedulePrayerNotifications(
-          settings: settings,
-        );
+        await notificationService.schedulePrayerNotifications();
 
-        verify(() => mockWidgetUpdateService.updateWidget(settings)).called(1);
+        verify(() => mockWidgetUpdateService.updateWidget()).called(1);
         verify(
           () => mockPrayerScheduler.schedulePrayerNotifications(
             mockNotificationsPlugin,
-            settings: settings,
           ),
         ).called(1);
       },

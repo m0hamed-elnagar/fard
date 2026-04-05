@@ -7,7 +7,7 @@ import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
 import 'package:fard/features/audio/domain/entities/audio_track.dart';
 import 'package:fard/features/audio/domain/services/audio_download_service.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
+import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:injectable/injectable.dart';
 import 'package:quran/quran.dart' as quran;
 
@@ -19,7 +19,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
   final AudioRepository audioRepository;
   final AudioPlayerService playerService;
   final AudioDownloadService downloadService;
-  final SettingsCubit settingsCubit;
+  final SettingsRepository settingsRepository;
 
   StreamSubscription? _statusSubscription;
   StreamSubscription? _errorSubscription;
@@ -31,7 +31,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
     required this.audioRepository,
     required this.playerService,
     required this.downloadService,
-    required this.settingsCubit,
+    required this.settingsRepository,
   }) : super(const AudioState()) {
     on<AudioEvent>((event, emit) async {
       debugPrint('AudioBloc: Event received: $event');
@@ -276,7 +276,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
           activeReciter.identifier,
         );
 
-    final currentLanguage = settingsCubit.state.locale.languageCode;
+    final currentLanguage = settingsRepository.locale.languageCode;
     final isArabic = currentLanguage == 'ar';
 
     final surahName = isArabic
@@ -406,7 +406,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
           }
         }
 
-        final currentLanguage = settingsCubit.state.locale.languageCode;
+        final currentLanguage = settingsRepository.locale.languageCode;
         final isArabic = currentLanguage == 'ar';
 
         final surahName = isArabic

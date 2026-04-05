@@ -15,6 +15,17 @@ object PrayerTimesCalculator {
 
     fun calculateToday(settings: CalculationSettings): PrayerTimes {
         val calendar = Calendar.getInstance()
+        return calculateForCalendar(settings, calendar)
+    }
+
+    fun calculateTomorrow(settings: CalculationSettings): PrayerTimes {
+        val calendar = Calendar.getInstance().apply {
+            add(Calendar.DAY_OF_YEAR, 1)
+        }
+        return calculateForCalendar(settings, calendar)
+    }
+
+    private fun calculateForCalendar(settings: CalculationSettings, calendar: Calendar): PrayerTimes {
         val currentDay = calendar.get(Calendar.DAY_OF_YEAR)
 
         // Return cached if settings haven't changed and it's still the same day
@@ -27,10 +38,10 @@ object PrayerTimesCalculator {
         val params = getCalculationParameters(settings)
 
         val prayerTimes = PrayerTimes(coordinates, dateComponents, params)
-        
+
         cachedPrayerTimes = prayerTimes
         lastCalculationDay = currentDay
-        
+
         return prayerTimes
     }
 

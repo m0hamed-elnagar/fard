@@ -91,7 +91,7 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
       final settings = getIt<SettingsCubit>().state;
       if (settings.latitude != null && settings.longitude != null) {
         debugPrint('MainActivity: Forcing widget update on app start');
-        await getIt<WidgetUpdateService>().updateWidget(settings);
+        await getIt<WidgetUpdateService>().updateWidget();
       }
     } catch (e) {
       debugPrint('MainActivity: Failed to update widget on start: $e');

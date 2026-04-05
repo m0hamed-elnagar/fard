@@ -81,7 +81,7 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
           debugPrint(
             'HomeScreen: Calling updateWidget with settings - locale: ${settings.locale}, lat: ${settings.latitude}, lng: ${settings.longitude}',
           );
-          getIt<WidgetUpdateService>().updateWidget(settings);
+          getIt<WidgetUpdateService>().updateWidget();
         });
         break;
 
@@ -102,8 +102,7 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
   /// Called when app is about to background to prevent lost updates.
   Future<void> _flushAndUpdateWidget() async {
     try {
-      final settings = context.read<SettingsCubit>().state;
-      await getIt<WidgetUpdateService>().updateWidget(settings);
+      await getIt<WidgetUpdateService>().updateWidget();
     } catch (e) {
       // Silently fail - widget update is not critical
       debugPrint('Failed to update widget on pause: $e');

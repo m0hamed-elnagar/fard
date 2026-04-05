@@ -32,8 +32,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     super.initState();
     // Initial widget update
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final settings = context.read<SettingsCubit>().state;
-      getIt<WidgetUpdateService>().updateWidget(settings);
+      getIt<WidgetUpdateService>().updateWidget();
     });
   }
 
@@ -70,15 +69,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               previous.locale != current.locale ||
               previous.hijriAdjustment != current.hijriAdjustment,
           listener: (context, state) {
-            getIt<WidgetUpdateService>().updateWidget(state);
+            getIt<WidgetUpdateService>().updateWidget();
           },
         ),
         BlocListener<PrayerTrackerBloc, PrayerTrackerState>(
           listenWhen: (previous, current) =>
               current.maybeMap(loaded: (_) => true, orElse: () => false),
           listener: (context, state) {
-            final settings = context.read<SettingsCubit>().state;
-            getIt<WidgetUpdateService>().updateWidget(settings);
+            getIt<WidgetUpdateService>().updateWidget();
           },
         ),
       ],

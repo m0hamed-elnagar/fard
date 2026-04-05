@@ -1,387 +1,213 @@
-import 'dart:convert';
-
-import 'package:fard/core/services/location_service.dart';
-import 'package:fard/core/services/notification_service.dart';
-import 'package:fard/core/services/settings_loader.dart';
-import 'package:fard/core/services/widget_update_service.dart';
-import 'package:fard/features/azkar/data/azkar_source.dart';
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
+import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
+import 'package:fard/features/settings/domain/usecases/sync_location_settings.dart';
+import 'package:fard/features/settings/domain/usecases/sync_notification_schedule.dart';
+import 'package:fard/features/settings/domain/usecases/toggle_after_salah_azkar_usecase.dart';
+import 'package:fard/features/settings/domain/usecases/update_calculation_method_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../core/services/location_service.dart';
+import '../../../../core/services/widget_update_service.dart';
 import 'settings_state.dart';
 
+/// Thin presentation-layer cubit for settings UI state.
+/// Delegates business logic to domain use cases.
 @injectable
 class SettingsCubit extends Cubit<SettingsState> {
-  final SharedPreferences _prefs;
-  final LocationService _locationService;
-  final NotificationService _notificationService;
-  final IAzkarSource _azkarRepository;
-  final WidgetUpdateService _widgetUpdateService;
-
-  static const String _localeKey = 'locale';
-  static const String _latKey = 'latitude';
-  static const String _lonKey = 'longitude';
-  static const String _cityKey = 'city_name';
-  static const String _methodKey = 'calculation_method';
-  static const String _madhabKey = 'madhab';
-  static const String _morningAzkarKey = 'morning_azkar_time';
-  static const String _eveningAzkarKey = 'evening_azkar_time';
-  static const String _afterSalahAzkarKey = 'is_after_salah_azkar_enabled';
-  static const String _remindersKey = 'azkar_reminders';
-  static const String _salaahSettingsKey = 'salaah_settings';
-  static const String _qadaKey = 'is_qada_enabled';
-  static const String _hijriAdjustmentKey = 'hijri_adjustment';
+  final SettingsRepository _repo;
+  final LocationService _location;
+  final SyncLocationSettings _syncLoc;
+  final SyncNotificationSchedule _syncNotif;
+  final ToggleAfterSalahAzkarUseCase _toggleAzkar;
+  final UpdateCalculationMethodUseCase _updateMethod;
+  final WidgetUpdateService _widget;
 
   SettingsCubit(
-    this._prefs,
-    this._locationService,
-    this._notificationService,
-    this._azkarRepository,
-    this._widgetUpdateService,
-  ) : super(SettingsLoader.loadSettings(_prefs));
-
-  void _saveReminders(List<AzkarReminder> reminders) {
-    final String jsonStr = jsonEncode(
-      reminders.map((e) => e.toJson()).toList(),
-    );
-    _prefs.setString(_remindersKey, jsonStr);
-  }
-
-  void addReminder(AzkarReminder reminder) {
-    final newList = List<AzkarReminder>.from(state.reminders)..add(reminder);
-    emit(state.copyWith(reminders: newList));
-    _saveReminders(newList);
-    _updateReminders();
-  }
-
-  void removeReminder(int index) {
-    final newList = List<AzkarReminder>.from(state.reminders)..removeAt(index);
-    emit(state.copyWith(reminders: newList));
-    _saveReminders(newList);
-    _updateReminders();
-  }
-
-  void updateReminder(int index, AzkarReminder reminder) {
-    final newList = List<AzkarReminder>.from(state.reminders);
-    newList[index] = reminder;
-    emit(state.copyWith(reminders: newList));
-    _saveReminders(newList);
-    _updateReminders();
-  }
-
-  void updateSalaahSettings(SalaahSettings settings) {
-    final newList = List<SalaahSettings>.from(state.salaahSettings);
-    final index = newList.indexWhere((e) => e.salaah == settings.salaah);
-    if (index != -1) {
-      newList[index] = settings;
-    } else {
-      newList.add(settings);
-    }
-    emit(state.copyWith(salaahSettings: newList));
-    _saveSalaahSettings(newList);
-    _updateReminders();
-  }
-
-  void _saveSalaahSettings(List<SalaahSettings> settings) {
-    final String jsonStr = jsonEncode(settings.map((e) => e.toJson()).toList());
-    _prefs.setString(_salaahSettingsKey, jsonStr);
-    _syncToHomeWidget();
-  }
-
-  void toggleReminder(int index) {
-    final newList = List<AzkarReminder>.from(state.reminders);
-    newList[index] = newList[index].copyWith(
-      isEnabled: !newList[index].isEnabled,
-    );
-    emit(state.copyWith(reminders: newList));
-    _saveReminders(newList);
-    _updateReminders();
-  }
-
-  void updateLocale(Locale locale) {
-    _prefs.setString(_localeKey, locale.languageCode);
-    emit(state.copyWith(locale: locale));
-    _updateReminders();
-    _syncToHomeWidget();
-  }
-
-  void toggleLocale() {
-    final newLocale = state.locale.languageCode == 'ar'
-        ? const Locale('en')
-        : const Locale('ar');
-    updateLocale(newLocale);
-  }
-
-  Future<void> refreshLocation() async {
-    final status = await _locationService.checkLocationStatus();
-
-    if (status != LocationStatus.success) {
-      emit(state.copyWith(lastLocationStatus: status));
-      // Reset status after a short delay so UI can show/hide dialogs
-      Future.delayed(const Duration(seconds: 1), () {
-        if (!isClosed) emit(state.copyWith(lastLocationStatus: null));
-      });
-      return;
-    }
-
-    final position = await _locationService.getCurrentPosition();
-    if (position != null) {
-      final locationData = await _locationService
-          .getLocationDataFromCoordinates(
-            position.latitude,
-            position.longitude,
-          );
-
-      await _prefs.setString(_latKey, position.latitude.toString());
-      await _prefs.setString(_lonKey, position.longitude.toString());
-
-      String? cityName;
-      String? countryCode;
-      String method = state.calculationMethod;
-
-      if (locationData != null) {
-        cityName = locationData['city'];
-        countryCode = locationData['countryCode'];
-        if (cityName != null) {
-          await _prefs.setString(_cityKey, cityName);
-        }
-
-        if (countryCode != null) {
-          method = _mapCountryToMethod(countryCode);
-          await _prefs.setString(_methodKey, method);
-
-          // Apply Hijri adjustment based on country/region (GPS auto-detect)
-          // The hijri_calendar package uses Umm al-Qura calendar
-          // Users can manually override in Settings
-          final upperCode = countryCode.toUpperCase();
-          if (upperCode == 'SA' ||
-              upperCode == 'AE' ||
-              upperCode == 'QA' ||
-              upperCode == 'KW') {
-            updateHijriAdjustment(0); // Gulf countries (Umm al-Qura based)
-          } else if (upperCode == 'PK' ||
-              upperCode == 'IN' ||
-              upperCode == 'BD') {
-            updateHijriAdjustment(
-              1,
-            ); // South Asia (local moon sighting may be +1)
-          } else {
-            // Egypt, Turkey, Iran, and other regions use 0 as default
-            updateHijriAdjustment(0);
-          }
-        }
-      }
-
-      emit(
-        state.copyWith(
-          latitude: position.latitude,
-          longitude: position.longitude,
-          cityName: cityName,
-          calculationMethod: method,
-          lastLocationStatus: LocationStatus.success,
+    this._repo,
+    this._location,
+    this._syncLoc,
+    this._syncNotif,
+    this._toggleAzkar,
+    this._updateMethod,
+    this._widget,
+  ) : super(
+        SettingsState(
+          locale: _repo.locale,
+          latitude: _repo.latitude,
+          longitude: _repo.longitude,
+          cityName: _repo.cityName,
+          calculationMethod: _repo.calculationMethod,
+          madhab: _repo.madhab,
+          morningAzkarTime: _repo.morningAzkarTime,
+          eveningAzkarTime: _repo.eveningAzkarTime,
+          isAfterSalahAzkarEnabled: _repo.isAfterSalahAzkarEnabled,
+          reminders: _repo.reminders,
+          salaahSettings: _repo.salaahSettings,
+          isQadaEnabled: _repo.isQadaEnabled,
+          hijriAdjustment: _repo.hijriAdjustment,
         ),
       );
 
-      // Reset status
+  void addReminder(AzkarReminder r) async {
+    await _repo.addReminder(r);
+    emit(state.copyWith(reminders: _repo.reminders));
+    _sync();
+  }
+
+  void removeReminder(int i) async {
+    await _repo.removeReminder(i);
+    emit(state.copyWith(reminders: _repo.reminders));
+    _sync();
+  }
+
+  void updateReminder(int i, AzkarReminder r) async {
+    await _repo.updateReminder(i, r);
+    emit(state.copyWith(reminders: _repo.reminders));
+    _sync();
+  }
+
+  void toggleReminder(int i) async {
+    await _repo.toggleReminder(i);
+    emit(state.copyWith(reminders: _repo.reminders));
+    _sync();
+  }
+
+  void updateSalaahSettings(SalaahSettings s) async {
+    final list = List<SalaahSettings>.from(state.salaahSettings);
+    final idx = list.indexWhere((e) => e.salaah == s.salaah);
+    if (idx != -1) {
+      list[idx] = s;
+    } else {
+      list.add(s);
+    }
+    await _repo.updateSalaahSettings(list);
+    emit(state.copyWith(salaahSettings: list));
+    _sync();
+  }
+
+  void updateLocale(Locale loc) async {
+    await _repo.updateLocale(loc);
+    emit(state.copyWith(locale: loc));
+    _sync();
+    _widgetSync();
+  }
+
+  void toggleLocale() => updateLocale(
+    state.locale.languageCode == 'ar' ? const Locale('en') : const Locale('ar'),
+  );
+
+  Future<void> refreshLocation() async {
+    final r = await _syncLoc.execute();
+    emit(
+      state.copyWith(
+        latitude: r.latitude,
+        longitude: r.longitude,
+        cityName: r.cityName,
+        calculationMethod: r.calculationMethod,
+        hijriAdjustment: r.hijriAdjustment,
+        lastLocationStatus: r.status,
+      ),
+    );
+    if (r.status == LocationStatus.success) {
       Future.delayed(const Duration(seconds: 1), () {
         if (!isClosed) emit(state.copyWith(lastLocationStatus: null));
       });
-
-      _updateReminders();
-      _syncToHomeWidget();
     }
+    _sync();
+    _widgetSync();
   }
 
-  Future<void> openLocationSettings() async {
-    await _locationService.openLocationSettings();
+  Future<void> openLocationSettings() => _location.openLocationSettings();
+  Future<void> openAppSettings() => _location.openAppSettings();
+
+  void updateCalculationMethod(String m) async {
+    final adj = await _updateMethod.execute(m);
+    emit(state.copyWith(calculationMethod: m, hijriAdjustment: adj));
+    _sync();
+    _widgetSync();
   }
 
-  Future<void> openAppSettings() async {
-    await _locationService.openAppSettings();
+  void updateMadhab(String v) async {
+    await _repo.updateMadhab(v);
+    emit(state.copyWith(madhab: v));
+    _sync();
+    _widgetSync();
   }
 
-  String _mapCountryToMethod(String countryCode) {
-    switch (countryCode.toUpperCase()) {
-      case 'EG':
-        return 'egyptian';
-      case 'SA':
-        return 'umm_al_qura';
-      case 'AE':
-        return 'dubai';
-      case 'QA':
-        return 'qatar';
-      case 'KW':
-        return 'kuwait';
-      case 'PK':
-      case 'IN':
-      case 'BD':
-        return 'karachi';
-      case 'SG':
-        return 'singapore';
-      case 'TR':
-        return 'turkey';
-      case 'IR':
-        return 'tehran';
-      case 'US':
-      case 'CA':
-        return 'north_america';
-      case 'NG':
-        return 'muslim_league';
-      default:
-        return 'muslim_league';
-    }
+  void updateMorningAzkarTime(String v) async {
+    await _repo.updateMorningAzkarTime(v);
+    emit(state.copyWith(morningAzkarTime: v));
+    _sync();
   }
 
-  void updateCalculationMethod(String method) {
-    _prefs.setString(_methodKey, method);
-
-    // Default Hijri adjustment based on calculation method
-    // The hijri_calendar package uses Umm al-Qura calendar
-    // Users can manually override in Settings
-    if (method == 'umm_al_qura') {
-      updateHijriAdjustment(0); // Saudi Arabia (Umm al-Qura) is baseline
-    } else if (method == 'karachi' || method == 'muslim_world_league') {
-      // South Asia and Muslim World League regions may need +1
-      updateHijriAdjustment(1);
-    } else {
-      // Egyptian, Dubai, Kuwait, Qatar, and others use 0 as default
-      updateHijriAdjustment(0);
-    }
-
-    emit(state.copyWith(calculationMethod: method));
-    _updateReminders();
-    _syncToHomeWidget();
+  void updateEveningAzkarTime(String v) async {
+    await _repo.updateEveningAzkarTime(v);
+    emit(state.copyWith(eveningAzkarTime: v));
+    _sync();
   }
 
-  void updateMadhab(String madhab) {
-    _prefs.setString(_madhabKey, madhab);
-    emit(state.copyWith(madhab: madhab));
-    _updateReminders();
-    _syncToHomeWidget();
-  }
-
-  void updateMorningAzkarTime(String time) {
-    _prefs.setString(_morningAzkarKey, time);
-    emit(state.copyWith(morningAzkarTime: time));
-    _updateReminders();
-  }
-
-  void updateEveningAzkarTime(String time) {
-    _prefs.setString(_eveningAzkarKey, time);
-    emit(state.copyWith(eveningAzkarTime: time));
-    _updateReminders();
-  }
-
-  void toggleAfterSalahAzkar() {
-    final newValue = !state.isAfterSalahAzkarEnabled;
-    _prefs.setBool(_afterSalahAzkarKey, newValue);
-
-    // Update all individual salaah settings to match the global toggle
-    final updatedSalaahSettings = state.salaahSettings
-        .map((s) => s.copyWith(isAfterSalahAzkarEnabled: newValue))
-        .toList();
-
-    _saveSalaahSettings(updatedSalaahSettings);
-
+  void toggleAfterSalahAzkar() async {
+    final v = await _toggleAzkar.execute();
     emit(
       state.copyWith(
-        isAfterSalahAzkarEnabled: newValue,
-        salaahSettings: updatedSalaahSettings,
+        isAfterSalahAzkarEnabled: v,
+        salaahSettings: _repo.salaahSettings,
       ),
     );
-    _updateReminders();
+    _sync();
   }
 
-  void updateAllAzanEnabled(bool enabled) {
-    final updated = state.salaahSettings
-        .map((s) => s.copyWith(isAzanEnabled: enabled))
-        .toList();
-    _saveSalaahSettings(updated);
-    emit(state.copyWith(salaahSettings: updated));
-    _updateReminders();
+  void updateAllAzanEnabled(bool v) async {
+    await _repo.updateAllAzanEnabled(v);
+    emit(state.copyWith(salaahSettings: _repo.salaahSettings));
+    _sync();
   }
 
-  void updateAllReminderEnabled(bool enabled) {
-    final updated = state.salaahSettings
-        .map((s) => s.copyWith(isReminderEnabled: enabled))
-        .toList();
-    _saveSalaahSettings(updated);
-    emit(state.copyWith(salaahSettings: updated));
-    _updateReminders();
+  void updateAllReminderEnabled(bool v) async {
+    await _repo.updateAllReminderEnabled(v);
+    emit(state.copyWith(salaahSettings: _repo.salaahSettings));
+    _sync();
   }
 
-  void updateAllAzanSound(String? sound) {
-    final updated = state.salaahSettings
-        .map((s) => s.copyWith(azanSound: sound))
-        .toList();
-    _saveSalaahSettings(updated);
-    emit(state.copyWith(salaahSettings: updated));
-    _updateReminders();
+  void updateAllAzanSound(String? v) async {
+    await _repo.updateAllAzanSound(v);
+    emit(state.copyWith(salaahSettings: _repo.salaahSettings));
+    _sync();
   }
 
-  void updateAllReminderMinutes(int minutes) {
-    final updated = state.salaahSettings
-        .map((s) => s.copyWith(reminderMinutesBefore: minutes))
-        .toList();
-    _saveSalaahSettings(updated);
-    emit(state.copyWith(salaahSettings: updated));
-    _updateReminders();
+  void updateAllReminderMinutes(int v) async {
+    await _repo.updateAllReminderMinutes(v);
+    emit(state.copyWith(salaahSettings: _repo.salaahSettings));
+    _sync();
   }
 
-  void updateAllAfterSalahMinutes(int minutes) {
-    final updated = state.salaahSettings
-        .map((s) => s.copyWith(afterSalaahAzkarMinutes: minutes))
-        .toList();
-    _saveSalaahSettings(updated);
-    emit(state.copyWith(salaahSettings: updated));
-    _updateReminders();
+  void updateAllAfterSalahMinutes(int v) async {
+    await _repo.updateAllAfterSalahMinutes(v);
+    emit(state.copyWith(salaahSettings: _repo.salaahSettings));
+    _sync();
   }
 
-  void toggleQadaEnabled() {
-    final newValue = !state.isQadaEnabled;
-    _prefs.setBool(_qadaKey, newValue);
-    emit(state.copyWith(isQadaEnabled: newValue));
+  void toggleQadaEnabled() async {
+    await _repo.toggleQadaEnabled();
+    emit(state.copyWith(isQadaEnabled: _repo.isQadaEnabled));
   }
 
-  void updateHijriAdjustment(int adjustment) {
-    _prefs.setInt(_hijriAdjustmentKey, adjustment);
-    emit(state.copyWith(hijriAdjustment: adjustment));
-    _syncToHomeWidget();
+  void updateHijriAdjustment(int v) async {
+    await _repo.updateHijriAdjustment(v);
+    emit(state.copyWith(hijriAdjustment: v));
+    _widgetSync();
   }
 
-  Future<void> _updateReminders() async {
-    // Run after a very short delay and in background to avoid blocking the main thread during UI transition
-    Future.delayed(const Duration(milliseconds: 50), () async {
-      try {
-        final azkar = await _azkarRepository.getAllAzkar();
-        await _notificationService.scheduleAzkarReminders(
-          settings: state,
-          allAzkar: azkar,
-        );
-        await _notificationService.schedulePrayerNotifications(settings: state);
-      } catch (e) {
-        debugPrint('Error updating reminders in background: $e');
-      }
-    });
-  }
-
-  Future<void> initReminders() async {
+  Future<void> initReminders() => _syncNotif.init();
+  void _sync() => Future.microtask(() => _syncNotif.execute());
+  Future<void> _widgetSync() async {
     try {
-      await _updateReminders();
+      await _widget.updateWidget();
     } catch (e) {
-      debugPrint('Error initializing reminders: $e');
-    }
-  }
-
-  Future<void> _syncToHomeWidget() async {
-    try {
-      await _widgetUpdateService.updateWidget(state);
-    } catch (e) {
-      debugPrint('Error syncing to home widget: $e');
+      debugPrint('Widget sync error: $e');
     }
   }
 }

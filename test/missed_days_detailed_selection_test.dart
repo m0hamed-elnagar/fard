@@ -1,6 +1,7 @@
 import 'package:adhan/adhan.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
+import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
 import 'package:fard/features/prayer_tracking/domain/missed_counter.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
@@ -89,6 +90,8 @@ class MockSharedPreferences extends Mock implements SharedPreferences {}
 
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
+class MockWidgetUpdateService extends Mock implements WidgetUpdateService {}
+
 void main() {
   late FakePrayerRepo repo;
   late MockSharedPreferences prefs;
@@ -127,6 +130,7 @@ void main() {
 
     getIt.registerSingleton<SharedPreferences>(prefs);
     getIt.registerSingleton<PrayerTimeService>(prayerTimeService);
+    getIt.registerSingleton<WidgetUpdateService>(MockWidgetUpdateService());
 
     // Default: all prayers passed
     when(

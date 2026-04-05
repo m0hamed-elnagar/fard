@@ -114,7 +114,7 @@ class _HomeContentState extends State<HomeContent> {
 
         // Update widget when critical settings change (locale, location, method, etc.)
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          getIt<WidgetUpdateService>().updateWidget(settings);
+          getIt<WidgetUpdateService>().updateWidget();
         });
 
         return Scaffold(

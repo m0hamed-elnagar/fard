@@ -6,8 +6,7 @@ import 'package:fard/features/audio/domain/repositories/audio_player_service.dar
 import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
 import 'package:fard/features/audio/domain/services/audio_download_service.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -18,13 +17,13 @@ class MockAudioPlayerService extends Mock implements AudioPlayerService {}
 
 class MockAudioDownloadService extends Mock implements AudioDownloadService {}
 
-class MockSettingsCubit extends Mock implements SettingsCubit {}
+class MockSettingsRepository extends Mock implements SettingsRepository {}
 
 void main() {
   late MockAudioRepository mockRepository;
   late MockAudioPlayerService mockPlayerService;
   late MockAudioDownloadService mockDownloadService;
-  late MockSettingsCubit mockSettingsCubit;
+  late MockSettingsRepository mockSettingsRepository;
   late AudioBloc audioBloc;
 
   setUpAll(() {
@@ -33,6 +32,7 @@ void main() {
     registerFallbackValue(
       const AudioTrack(remoteUrl: '', localPath: '', isDownloaded: false),
     );
+    registerFallbackValue(const Locale('en'));
   });
 
   final tReciter = const Reciter(
@@ -46,11 +46,9 @@ void main() {
     mockRepository = MockAudioRepository();
     mockPlayerService = MockAudioPlayerService();
     mockDownloadService = MockAudioDownloadService();
-    mockSettingsCubit = MockSettingsCubit();
+    mockSettingsRepository = MockSettingsRepository();
 
-    when(
-      () => mockSettingsCubit.state,
-    ).thenReturn(const SettingsState(locale: Locale('ar')));
+    when(() => mockSettingsRepository.locale).thenReturn(const Locale('ar'));
 
     when(
       () => mockRepository.getCachedReciters(),
@@ -106,7 +104,7 @@ void main() {
       audioRepository: mockRepository,
       playerService: mockPlayerService,
       downloadService: mockDownloadService,
-      settingsCubit: mockSettingsCubit,
+      settingsRepository: mockSettingsRepository,
     );
   }
 

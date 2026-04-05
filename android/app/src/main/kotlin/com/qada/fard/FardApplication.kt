@@ -31,7 +31,7 @@ class FardApplication : Application() {
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             "widget_safety_net",
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingPeriodicWorkPolicy.REPLACE,  // Always use latest configuration
             workRequest
         )
         Log.d(TAG, "Scheduled 15-min safety net worker")

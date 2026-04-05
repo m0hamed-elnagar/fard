@@ -2,12 +2,13 @@ import 'package:fard/core/services/notification/channel_manager.dart';
 import 'package:fard/core/services/notification/prayer_scheduler.dart';
 import 'package:fard/core/services/notification/sound_manager.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
+import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/features/azkar/data/azkar_repository.dart';
 import 'package:fard/features/azkar/domain/azkar_item.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -23,25 +24,40 @@ class MockChannelManager extends Mock implements ChannelManager {}
 
 class MockSoundManager extends Mock implements SoundManager {}
 
+class MockSettingsRepository extends Mock implements SettingsRepository {}
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late PrayerNotificationScheduler scheduler;
   late MockFlutterLocalNotificationsPlugin mockNotificationsPlugin;
   late PrayerTimeService prayerTimeService;
   late MockAzkarRepository mockAzkarRepository;
   late MockChannelManager mockChannelManager;
   late MockSoundManager mockSoundManager;
+  late MockSettingsRepository mockSettingsProvider;
 
   setUpAll(() {
     tz.initializeTimeZones();
     // Use a fixed location to ensure consistent results
     tz.setLocalLocation(tz.getLocation('Africa/Cairo'));
+
+    // Mock Workmanager MethodChannel to prevent UnimplementedError
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('be.tramckrijte.workmanager'),
+          (MethodCall methodCall) async {
+            return true;
+          },
+        );
+
     registerFallbackValue(tz.TZDateTime.now(tz.local));
     registerFallbackValue(const NotificationDetails());
     registerFallbackValue(AndroidScheduleMode.exactAllowWhileIdle);
     registerFallbackValue(DateTimeComponents.time);
     registerFallbackValue(Salaah.fajr);
-    registerFallbackValue(const SettingsState(locale: Locale('en')));
     registerFallbackValue(MockFlutterLocalNotificationsPlugin());
+    registerFallbackValue(MockSettingsRepository());
   });
 
   setUp(() {
@@ -50,12 +66,14 @@ void main() {
     mockAzkarRepository = MockAzkarRepository();
     mockChannelManager = MockChannelManager();
     mockSoundManager = MockSoundManager();
+    mockSettingsProvider = MockSettingsRepository();
 
     scheduler = PrayerNotificationScheduler(
       prayerTimeService,
       mockAzkarRepository,
       mockChannelManager,
       mockSoundManager,
+      mockSettingsProvider,
     );
 
     when(
@@ -115,26 +133,24 @@ void main() {
       const lat = 30.0444;
       const lon = 31.2357;
 
-      final settings = SettingsState(
-        locale: const Locale('ar'),
-        latitude: lat,
-        longitude: lon,
-        calculationMethod: 'egyptian',
-        madhab: 'shafi',
-        isAzanVoiceDownloading: false,
-        salaahSettings: [
-          SalaahSettings(
-            salaah: Salaah.fajr,
-            isAzanEnabled: true,
-            isReminderEnabled: false,
-          ),
-        ],
-      );
+      when(() => mockSettingsProvider.locale).thenReturn(const Locale('ar'));
+      when(() => mockSettingsProvider.latitude).thenReturn(lat);
+      when(() => mockSettingsProvider.longitude).thenReturn(lon);
+      when(() => mockSettingsProvider.calculationMethod).thenReturn('egyptian');
+      when(() => mockSettingsProvider.madhab).thenReturn('shafi');
+      when(() => mockSettingsProvider.salaahSettings).thenReturn([
+        SalaahSettings(
+          salaah: Salaah.fajr,
+          isAzanEnabled: true,
+          isReminderEnabled: false,
+        ),
+      ]);
+      when(
+        () => mockSettingsProvider.isAfterSalahAzkarEnabled,
+      ).thenReturn(false);
+      when(() => mockSettingsProvider.reminders).thenReturn([]);
 
-      await scheduler.schedulePrayerNotifications(
-        mockNotificationsPlugin,
-        settings: settings,
-      );
+      await scheduler.schedulePrayerNotifications(mockNotificationsPlugin);
 
       final prayerTimes = prayerTimeService.getPrayerTimes(
         latitude: lat,
@@ -169,26 +185,24 @@ void main() {
     const lat = 21.4225;
     const lon = 39.8262;
 
-    final settings = SettingsState(
-      locale: const Locale('ar'),
-      latitude: lat,
-      longitude: lon,
-      calculationMethod: 'umm_al_qura',
-      madhab: 'shafi',
-      isAzanVoiceDownloading: false,
-      salaahSettings: [
-        SalaahSettings(
-          salaah: Salaah.maghrib,
-          isAzanEnabled: true,
-          isReminderEnabled: false,
-        ),
-      ],
-    );
+    when(() => mockSettingsProvider.locale).thenReturn(const Locale('ar'));
+    when(() => mockSettingsProvider.latitude).thenReturn(lat);
+    when(() => mockSettingsProvider.longitude).thenReturn(lon);
+    when(
+      () => mockSettingsProvider.calculationMethod,
+    ).thenReturn('umm_al_qura');
+    when(() => mockSettingsProvider.madhab).thenReturn('shafi');
+    when(() => mockSettingsProvider.salaahSettings).thenReturn([
+      SalaahSettings(
+        salaah: Salaah.maghrib,
+        isAzanEnabled: true,
+        isReminderEnabled: false,
+      ),
+    ]);
+    when(() => mockSettingsProvider.isAfterSalahAzkarEnabled).thenReturn(false);
+    when(() => mockSettingsProvider.reminders).thenReturn([]);
 
-    await scheduler.schedulePrayerNotifications(
-      mockNotificationsPlugin,
-      settings: settings,
-    );
+    await scheduler.schedulePrayerNotifications(mockNotificationsPlugin);
 
     final prayerTimes = prayerTimeService.getPrayerTimes(
       latitude: lat,
@@ -226,27 +240,25 @@ void main() {
       const lon = 31.2357;
       const minutesBefore = 10;
 
-      final settings = SettingsState(
-        locale: const Locale('ar'),
-        latitude: lat,
-        longitude: lon,
-        calculationMethod: 'egyptian',
-        madhab: 'shafi',
-        isAzanVoiceDownloading: false,
-        salaahSettings: [
-          SalaahSettings(
-            salaah: Salaah.dhuhr,
-            isAzanEnabled: false,
-            isReminderEnabled: true,
-            reminderMinutesBefore: minutesBefore,
-          ),
-        ],
-      );
+      when(() => mockSettingsProvider.locale).thenReturn(const Locale('ar'));
+      when(() => mockSettingsProvider.latitude).thenReturn(lat);
+      when(() => mockSettingsProvider.longitude).thenReturn(lon);
+      when(() => mockSettingsProvider.calculationMethod).thenReturn('egyptian');
+      when(() => mockSettingsProvider.madhab).thenReturn('shafi');
+      when(() => mockSettingsProvider.salaahSettings).thenReturn([
+        SalaahSettings(
+          salaah: Salaah.dhuhr,
+          isAzanEnabled: false,
+          isReminderEnabled: true,
+          reminderMinutesBefore: minutesBefore,
+        ),
+      ]);
+      when(
+        () => mockSettingsProvider.isAfterSalahAzkarEnabled,
+      ).thenReturn(false);
+      when(() => mockSettingsProvider.reminders).thenReturn([]);
 
-      await scheduler.schedulePrayerNotifications(
-        mockNotificationsPlugin,
-        settings: settings,
-      );
+      await scheduler.schedulePrayerNotifications(mockNotificationsPlugin);
 
       final prayerTimes = prayerTimeService.getPrayerTimes(
         latitude: lat,
@@ -285,26 +297,25 @@ void main() {
       const lon = 31.2357;
       const minutesAfter = 20;
 
-      final settings = SettingsState(
-        locale: const Locale('ar'),
-        latitude: lat,
-        longitude: lon,
-        isAfterSalahAzkarEnabled: true,
-        isAzanVoiceDownloading: false,
-        salaahSettings: [
-          SalaahSettings(
-            salaah: Salaah.isha,
-            isAzanEnabled: false,
-            isAfterSalahAzkarEnabled: true,
-            afterSalaahAzkarMinutes: minutesAfter,
-          ),
-        ],
-      );
+      when(() => mockSettingsProvider.locale).thenReturn(const Locale('ar'));
+      when(() => mockSettingsProvider.latitude).thenReturn(lat);
+      when(() => mockSettingsProvider.longitude).thenReturn(lon);
+      when(() => mockSettingsProvider.calculationMethod).thenReturn('egyptian');
+      when(() => mockSettingsProvider.madhab).thenReturn('shafi');
+      when(
+        () => mockSettingsProvider.isAfterSalahAzkarEnabled,
+      ).thenReturn(true);
+      when(() => mockSettingsProvider.salaahSettings).thenReturn([
+        SalaahSettings(
+          salaah: Salaah.isha,
+          isAzanEnabled: false,
+          isAfterSalahAzkarEnabled: true,
+          afterSalaahAzkarMinutes: minutesAfter,
+        ),
+      ]);
+      when(() => mockSettingsProvider.reminders).thenReturn([]);
 
-      await scheduler.schedulePrayerNotifications(
-        mockNotificationsPlugin,
-        settings: settings,
-      );
+      await scheduler.schedulePrayerNotifications(mockNotificationsPlugin);
 
       final prayerTimes = prayerTimeService.getPrayerTimes(
         latitude: lat,

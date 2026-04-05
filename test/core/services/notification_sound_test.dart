@@ -3,7 +3,9 @@ import 'package:fard/core/services/notification/channel_manager.dart';
 import 'package:fard/core/services/notification/prayer_scheduler.dart';
 import 'package:fard/core/services/notification/sound_manager.dart';
 import 'package:fard/core/services/widget_update_service.dart';
+import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -23,6 +25,8 @@ class MockPrayerNotificationScheduler extends Mock
 
 class MockWidgetUpdateService extends Mock implements WidgetUpdateService {}
 
+class MockSettingsRepository extends Mock implements SettingsRepository {}
+
 void main() {
   late NotificationService notificationService;
   late MockFlutterLocalNotificationsPlugin mockNotificationsPlugin;
@@ -31,12 +35,14 @@ void main() {
   late MockChannelManager mockChannelManager;
   late MockPrayerNotificationScheduler mockPrayerScheduler;
   late MockWidgetUpdateService mockWidgetUpdateService;
+  late MockSettingsRepository mockSettingsRepository;
 
   setUpAll(() {
     registerFallbackValue(const NotificationDetails());
     registerFallbackValue(const AndroidNotificationChannel('id', 'name'));
     registerFallbackValue(Salaah.fajr);
     registerFallbackValue(MockFlutterLocalNotificationsPlugin());
+    registerFallbackValue(MockSettingsRepository());
   });
 
   setUp(() {
@@ -46,6 +52,7 @@ void main() {
     mockChannelManager = MockChannelManager();
     mockPrayerScheduler = MockPrayerNotificationScheduler();
     mockWidgetUpdateService = MockWidgetUpdateService();
+    mockSettingsRepository = MockSettingsRepository();
 
     when(
       () => mockNotificationsPlugin
@@ -78,12 +85,27 @@ void main() {
       ),
     ).thenAnswer((_) async {});
 
+    // Default SettingsRepository stubs
+    when(() => mockSettingsRepository.latitude).thenReturn(30.0);
+    when(() => mockSettingsRepository.longitude).thenReturn(31.0);
+    when(() => mockSettingsRepository.locale).thenReturn(const Locale('en'));
+    when(
+      () => mockSettingsRepository.calculationMethod,
+    ).thenReturn('muslim_league');
+    when(() => mockSettingsRepository.madhab).thenReturn('shafi');
+    when(
+      () => mockSettingsRepository.isAfterSalahAzkarEnabled,
+    ).thenReturn(false);
+    when(() => mockSettingsRepository.reminders).thenReturn([]);
+    when(() => mockSettingsRepository.salaahSettings).thenReturn([]);
+
     notificationService = NotificationService(
       mockSoundManager,
       mockChannelManager,
       mockPrayerScheduler,
       mockNotificationsPlugin,
       mockWidgetUpdateService,
+      mockSettingsRepository,
     );
   });
 
