@@ -173,16 +173,28 @@ void main() {
     test(
       'updateSalaahSettings updates state, saves to prefs and schedules notifications',
       () async {
-        final initialSettings = cubit.state.salaahSettings.first;
-        final updatedSettings = initialSettings.copyWith(isAzanEnabled: false);
+        final initialSettings = cubit.state.salaahSettings;
+        final target = initialSettings.first;
+        final updatedItem = target.copyWith(isAzanEnabled: false);
 
-        cubit.updateSalaahSettings(updatedSettings);
+        cubit.updateSalaahSettings(updatedItem);
 
-        // Wait for the 50ms delay in SettingsCubit._updateReminders
+        // Wait for async calls
         await Future.delayed(const Duration(milliseconds: 100));
 
+        // 1. Verify State
         expect(cubit.state.salaahSettings.first.isAzanEnabled, false);
-        verify(() => mockSettingsRepo.updateSalaahSettings(any())).called(1);
+        
+        // 2. Verify Repository - This is the crucial check the user likely wants
+        // We want to make sure the list passed to the repo contains our change
+        verify(() => mockSettingsRepo.updateSalaahSettings(
+          any(that: isA<List<SalaahSettings>>().having(
+            (list) => list.firstWhere((s) => s.salaah == updatedItem.salaah).isAzanEnabled,
+            'item isAzanEnabled',
+            false,
+          )),
+        )).called(1);
+        
         verify(() => mockSyncNotif.execute()).called(1);
       },
     );
