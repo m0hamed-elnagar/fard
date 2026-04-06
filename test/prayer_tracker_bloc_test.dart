@@ -351,13 +351,7 @@ void main() {
     });
 
     group('Deletion', () {
-      final loadedStateWithHistory = PrayerTrackerState.loaded(
-        selectedDate: date,
-        missedToday: {},
-        qadaStatus: {for (var s in Salaah.values) s: const MissedCounter(0)},
-        monthRecords: {date: dummyRecord},
-        history: [dummyRecord],
-      );
+      // Test group placeholder - tests to be added
     });
 
     group('Missed Days Flow', () {

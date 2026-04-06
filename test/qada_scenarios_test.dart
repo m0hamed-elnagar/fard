@@ -72,7 +72,6 @@ void main() {
     final now = DateTime.now();
     final todayInBloc = DateTime(now.year, now.month, now.day);
     final yesterdayInBloc = todayInBloc.subtract(const Duration(days: 1));
-    final dbYesterdayInBloc = todayInBloc.subtract(const Duration(days: 2));
 
     test(
       'Scenario 1: Normal carry over from yesterday to today (No double counting)',
