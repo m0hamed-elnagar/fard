@@ -77,9 +77,10 @@ class MainActivity : AudioServiceActivity() {
                 val madhab = (settingsMap?.get("madhab") as? Number)?.toInt()
                 val locale = settingsMap?.get("locale") as? String
                 val prayerData = settingsMap?.get("prayer_data") as? String
+                val hijriDate = settingsMap?.get("hijri_date") as? String
 
                 // Validate required settings
-                if (latitude == null || longitude == null || calculationMethod == null || 
+                if (latitude == null || longitude == null || calculationMethod == null ||
                     madhab == null || locale == null) {
                     Log.e(TAG, "Invalid settings received from Flutter: $settingsMap")
                     return@launch
@@ -93,7 +94,8 @@ class MainActivity : AudioServiceActivity() {
                     calculationMethod = calculationMethod,
                     madhab = madhab,
                     locale = locale,
-                    prayerData = prayerData
+                    prayerData = prayerData,
+                    hijriDate = hijriDate
                 )
                 Log.d(TAG, "Settings saved to SharedPreferences")
 

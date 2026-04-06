@@ -31,7 +31,10 @@ class MockSharedPreferences extends Mock implements SharedPreferences {}
 
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
-class MockWidgetUpdateService extends Mock implements WidgetUpdateService {}
+class MockWidgetUpdateService extends Mock implements WidgetUpdateService {
+  @override
+  Future<void> updateWidget() async {}
+}
 
 void main() {
   setUpAll(() {

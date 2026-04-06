@@ -38,7 +38,10 @@ class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
 class MockNotificationService extends Mock implements NotificationService {}
 
-class MockWidgetUpdateService extends Mock implements WidgetUpdateService {}
+class MockWidgetUpdateService extends Mock implements WidgetUpdateService {
+  @override
+  Future<void> updateWidget() async {}
+}
 
 class MockQuranBloc extends MockBloc<QuranEvent, QuranState>
     implements QuranBloc {}

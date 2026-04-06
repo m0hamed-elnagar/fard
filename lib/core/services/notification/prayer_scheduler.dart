@@ -57,8 +57,9 @@ class PrayerNotificationScheduler {
     );
 
     if (_settingsProvider.latitude == null ||
-        _settingsProvider.longitude == null)
+        _settingsProvider.longitude == null) {
       return;
+    }
 
     // Cancel previous prayer notifications in known ranges
     await _cancelNotificationRanges(notificationsPlugin, [

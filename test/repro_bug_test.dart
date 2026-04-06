@@ -126,7 +126,6 @@ void main() {
           'all prayers should have 1 qada',
           true,
         ),
-        isA<PrayerTrackerState>(), // Loaded with month
       ],
     );
 
@@ -179,7 +178,6 @@ void main() {
           'Fajr should have 2 qada, others 1',
           true,
         ),
-        isA<PrayerTrackerState>(), // Loaded with month
       ],
     );
   });

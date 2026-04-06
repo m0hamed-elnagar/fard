@@ -30,7 +30,10 @@ class MockSharedPreferences extends Mock implements SharedPreferences {}
 
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
-class MockWidgetUpdateService extends Mock implements WidgetUpdateService {}
+class MockWidgetUpdateService extends Mock implements WidgetUpdateService {
+  @override
+  Future<void> updateWidget() async {}
+}
 
 void main() {
   late MockSettingsCubit mockSettingsCubit;
@@ -127,7 +130,8 @@ void main() {
     );
 
     await tester.pumpWidget(createWidgetUnderTest());
-    await tester.pump();
+    // Wait for the dialog to appear (needs time for timer to fire)
+    await tester.pumpAndSettle(const Duration(seconds: 2));
 
     expect(find.textContaining('Morning Azkar'), findsAtLeast(1));
     expect(find.text('Yes'), findsOneWidget);

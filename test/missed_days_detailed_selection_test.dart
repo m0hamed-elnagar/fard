@@ -232,7 +232,7 @@ void main() {
       }
 
       // Now only 2 days should be selected.
-      await tester.tap(find.text('Add to remaining'));
+      await tester.tap(find.text('Done'));
       await tester.pumpAndSettle();
 
       // Wait for BLoC processing
@@ -331,7 +331,7 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.text('Add to remaining'));
+      await tester.tap(find.text('Done'));
       await tester.pumpAndSettle();
 
       await tester.pump(const Duration(milliseconds: 500));

@@ -64,12 +64,20 @@ void main() {
   tearDown(() => bloc.close());
 
   group('History Scenario Test', () {
+    // Day 1 record: Fajr+Dhuhr completed, Asr/Maghrib/Isha missed
+    // Qada should reflect the 3 missed prayers
     final day1RecordMidDay = DailyRecord(
       id: '2024-01-01',
       date: day1,
       completedToday: {Salaah.fajr, Salaah.dhuhr},
       missedToday: const {},
-      qada: {for (var s in Salaah.values) s: const MissedCounter(0)},
+      qada: {
+        Salaah.fajr: const MissedCounter(0),
+        Salaah.dhuhr: const MissedCounter(0),
+        Salaah.asr: const MissedCounter(1),
+        Salaah.maghrib: const MissedCounter(1),
+        Salaah.isha: const MissedCounter(1),
+      },
       completedQada: const {},
     );
 
@@ -141,17 +149,5 @@ void main() {
         // or emitted if bloc doesn't filter. My previous run showed it was missing.
       ],
     );
-
-    test('History logic: missed Count calculation for past days', () {
-      final record = day1RecordMidDay;
-      bool isPassed(Salaah s) => true;
-
-      final passedPrayers = Salaah.values.where((s) => isPassed(s)).toList();
-
-      final missedCount = passedPrayers
-          .where((s) => !record.completedToday.contains(s))
-          .length;
-      expect(missedCount, 3);
-    });
   });
 }

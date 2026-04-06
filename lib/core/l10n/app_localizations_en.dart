@@ -50,6 +50,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calendar => 'Calendar';
 
   @override
+  String get today => 'TODAY';
+
+  @override
   String get history => 'History';
 
   @override

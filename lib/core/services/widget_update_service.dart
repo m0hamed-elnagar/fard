@@ -134,6 +134,16 @@ class WidgetUpdateService {
       debugPrint('WidgetUpdateService: Error saving to SharedPreferences: $e');
     }
 
+    // 🚀 CRITICAL FIX: Cache Hijri date separately for native worker
+    // This prevents the native worker from showing "Loading..." placeholder
+    try {
+      await _prefs.setString('flutter.hijri_date_cache', data.hijriDate);
+      await HomeWidget.saveWidgetData('hijri_date', data.hijriDate);
+      debugPrint('WidgetUpdateService: Cached Hijri date: ${data.hijriDate}');
+    } catch (e) {
+      debugPrint('WidgetUpdateService: Error caching Hijri date: $e');
+    }
+
     // 🚀 CRITICAL FIX: Sync settings to Native BEFORE updating widget
     // This ensures SettingsRepository.getSettings() returns valid data
     // _syncNative also triggers Glance widget update via MainActivity
@@ -165,6 +175,7 @@ class WidgetUpdateService {
             : CalculationContract.madhabShafi,
         'locale': _settingsProvider.locale.languageCode,
         'prayer_data': prayerDataJson, // Atomic sync of display data
+        'hijri_date': _prefs.getString('flutter.hijri_date_cache') ?? '',
         'prayer_times': {
           'fajr': prayerTimes.fajr.millisecondsSinceEpoch,
           'dhuhr': prayerTimes.dhuhr.millisecondsSinceEpoch,

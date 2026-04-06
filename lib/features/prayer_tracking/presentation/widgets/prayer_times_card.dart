@@ -37,6 +37,15 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
   }
 
   @override
+  void didUpdateWidget(PrayerTimesCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Restart countdown when prayer times change (e.g., when location settings update)
+    if (oldWidget.prayerTimes != widget.prayerTimes) {
+      _updateCountdown();
+    }
+  }
+
+  @override
   void dispose() {
     _timer?.cancel();
     super.dispose();
@@ -55,6 +64,16 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
     final now = DateTime.now();
     DateTime? nextTime;
     Salaah? nextSalaah;
+
+    // DEBUG: Log what prayer times are being used
+    debugPrint('╔═══════════════════════════════════════════╗');
+    debugPrint('║ PrayerTimesCard: _updateCountdown()       ║');
+    debugPrint('╠═══════════════════════════════════════════╣');
+    debugPrint('║ Widget.selectedDate: ${widget.selectedDate.toString().substring(0, 10)}');
+    debugPrint('║ widget.prayerTimes!.fajr: ${widget.prayerTimes!.fajr.toString().substring(0, 10)}');
+    debugPrint('║ widget.prayerTimes!.dhuhr: ${widget.prayerTimes!.dhuhr.toString().substring(0, 10)}');
+    debugPrint('║ DateTime.now(): ${now.toString().substring(0, 10)}');
+    debugPrint('╚═══════════════════════════════════════════╝');
 
     for (final salaah in Salaah.values) {
       DateTime? time;

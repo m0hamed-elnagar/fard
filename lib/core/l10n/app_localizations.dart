@@ -176,6 +176,12 @@ abstract class AppLocalizations {
   /// **'Calendar'**
   String get calendar;
 
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'TODAY'**
+  String get today;
+
   /// No description provided for @history.
   ///
   /// In en, this message translates to:

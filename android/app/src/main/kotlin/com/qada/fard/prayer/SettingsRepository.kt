@@ -56,6 +56,7 @@ class SettingsRepository(private val context: Context) {
         madhab: Int,
         locale: String,
         prayerData: String? = null,
+        hijriDate: String? = null,
         highLatitudeRule: Int = CalculationContract.HIGH_LAT_MIDDLE_OF_THE_NIGHT
     ) {
         prefs.edit().apply {
@@ -68,8 +69,19 @@ class SettingsRepository(private val context: Context) {
             if (prayerData != null) {
                 putString(CalculationContract.PREF_PREFIX + "prayer_data", prayerData)
             }
+            if (hijriDate != null) {
+                putString("flutter.hijri_date_cache", hijriDate)
+            }
             commit() // Synchronous write to ensure immediate visibility to widgets
         }
+    }
+
+    /**
+     * Get cached Hijri date from SharedPreferences.
+     * This is used by WidgetUpdateWorker to avoid showing "Loading..."
+     */
+    fun getCachedHijriDate(): String? {
+        return prefs.getString("flutter.hijri_date_cache", null)
     }
 
     private fun mapMethodStringToId(method: String): Int {

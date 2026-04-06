@@ -11,6 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 part 'prayer_tracker_bloc.freezed.dart';
 part 'prayer_tracker_event.dart';
@@ -134,24 +135,21 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
     }
     originalChain.sort((a, b) => a.date.compareTo(b.date));
 
-    final todayDate = DateTime.now();
-    final todayNormalized = DateTime(
-      todayDate.year,
-      todayDate.month,
-      todayDate.day,
-    );
-
-    final futureRecords =
-        allRecords
-            .where(
-              (r) =>
-                  r.date.isAfter(updatedBaseRecord.date) &&
-                  !r.date.isAtSameMomentAs(todayNormalized),
-            )
-            .toList()
-          ..sort((a, b) => a.date.compareTo(b.date));
+    // Get all future records (including today) to cascade updates
+    final futureRecords = allRecords
+        .where((r) => r.date.isAfter(updatedBaseRecord.date))
+        .toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
 
     if (futureRecords.isEmpty) return;
+
+    // Safety check: prevent infinite loops
+    if (futureRecords.length > 1000) {
+      developer.log(
+        'WARNING: Cascade skipped - too many records (${futureRecords.length})',
+      );
+      return;
+    }
 
     DailyRecord runningNewPrev = updatedBaseRecord;
 
@@ -207,8 +205,18 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
 
   Future<void> _onLoad(_Load e, Emitter<PrayerTrackerState> em) async {
     try {
-      em(const PrayerTrackerState.loading());
       final normalizedDate = DateTime(e.date.year, e.date.month, e.date.day);
+      
+      // Check if we already have cached data for this date
+      final existingState = state;
+      final hasCachedData = existingState is _Loaded && 
+                            isSameDay(existingState.selectedDate, normalizedDate);
+      
+      // Only show loading state if we don't have cached data
+      if (!hasCachedData) {
+        em(const PrayerTrackerState.loading());
+      }
+      
       final record = await _repo.loadRecord(normalizedDate);
       final lastSavedBefore = await _repo.loadLastRecordBefore(normalizedDate);
 

@@ -17,6 +17,7 @@ import 'package:fard/features/settings/domain/salaah_settings.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/audio/presentation/screens/offline_audio_screen.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -668,48 +669,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ],
                 ),
-                // Debug: Widget Refresh Section
-                const SizedBox(height: 20),
-                _buildSection(
-                  context,
-                  title: 'Debug: Widget',
-                  icon: Icons.bug_report_rounded,
-                  children: [
-                    Text(
-                      'Force refresh the home screen widget. Use this for testing.',
-                      style: TextStyle(
-                        color: AppTheme.textSecondary,
-                        fontSize: 13,
+                // Debug: Widget Refresh Section (only in debug mode)
+                if (!kReleaseMode) ...[
+                  const SizedBox(height: 20),
+                  _buildSection(
+                    context,
+                    title: 'Debug: Widget',
+                    icon: Icons.bug_report_rounded,
+                    children: [
+                      Text(
+                        'Force refresh the home screen widget. Use this for testing.',
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 13,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Refresh Widget'),
-                      trailing: ElevatedButton.icon(
-                        onPressed: () {
-                          HapticFeedback.mediumImpact();
-                          getIt<WidgetUpdateService>().updateWidget();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Widget refresh triggered!'),
-                              backgroundColor: AppTheme.primaryLight,
-                              duration: Duration(seconds: 2),
+                      const SizedBox(height: 12),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Refresh Widget'),
+                        trailing: ElevatedButton.icon(
+                          onPressed: () {
+                            HapticFeedback.mediumImpact();
+                            getIt<WidgetUpdateService>().updateWidget();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Widget refresh triggered!'),
+                                backgroundColor: AppTheme.primaryLight,
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.refresh, size: 18),
+                          label: const Text('Refresh'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
                             ),
-                          );
-                        },
-                        icon: const Icon(Icons.refresh, size: 18),
-                        label: const Text('Refresh'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 40),
               ],
             );

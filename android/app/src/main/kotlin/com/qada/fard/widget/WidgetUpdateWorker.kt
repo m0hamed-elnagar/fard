@@ -41,6 +41,7 @@ class WidgetUpdateWorker(
                 
                 // Build widget data JSON (same format as Flutter's WidgetUpdateService)
                 val widgetData = buildWidgetData(
+                    repository = repository,
                     prayerTimes = prayerTimes,
                     nextPrayerName = nextPrayerInfo.name,
                     nextPrayerTime = nextPrayerInfo.time,
@@ -110,6 +111,7 @@ class WidgetUpdateWorker(
     }
     
     private fun buildWidgetData(
+        repository: SettingsRepository,
         prayerTimes: PrayerTimes,
         nextPrayerName: String,
         nextPrayerTime: Long,
@@ -139,7 +141,7 @@ class WidgetUpdateWorker(
         // Build complete widget data
         return JSONObject().apply {
             put("gregorianDate", formatDate(now.time, lang))
-            put("hijriDate", "Loading...")  // Would need Hijri library
+            put("hijriDate", repository.getCachedHijriDate() ?: "Loading...")
             put("dayOfWeek", formatDayOfWeek(now, lang))
             put("sunrise", formatTime(prayerTimes.sunrise.time, lang))
             put("isRtl", isRtl)

@@ -187,9 +187,9 @@ void main() {
 
           expect(
             fajrQada,
-            11,
+            10,
             reason:
-                'Should only have today\'s missed prayers added, not the skipped ones',
+                'Should not add any qada when skipping (I was praying)',
           );
         },
         orElse: () => fail('Should be in loaded state, but was ${bloc.state}'),

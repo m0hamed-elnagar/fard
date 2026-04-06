@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:fard/core/services/notification/channel_manager.dart';
 import 'package:fard/core/services/notification/prayer_scheduler.dart';
 import 'package:fard/core/services/notification/sound_manager.dart';
@@ -129,6 +130,11 @@ void main() {
   test(
     'Verification: Azan is scheduled at the EXACT prayer time (Egyptian Method)',
     () async {
+      // Skip on desktop platforms (WorkManager not available)
+      if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+        return;
+      }
+      
       // Cairo coordinates
       const lat = 30.0444;
       const lon = 31.2357;
@@ -180,7 +186,12 @@ void main() {
   );
 
   test('Verification: Azan timing with Umm Al-Qura in Makkah', () async {
-    tz.setLocalLocation(tz.getLocation('Asia/Riyadh'));
+      // Skip on desktop platforms (WorkManager not available)
+      if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+        return;
+      }
+      
+      tz.setLocalLocation(tz.getLocation('Asia/Riyadh'));
 
     const lat = 21.4225;
     const lon = 39.8262;

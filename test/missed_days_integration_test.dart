@@ -213,8 +213,8 @@ void main() {
 
         bloc.state.maybeMap(
           loaded: (l) {
-            // It was Skip. 10 (base) + 1 (today's fajr) = 11.
-            expect(l.qadaStatus[Salaah.fajr]?.value, 11);
+            // It was Skip (I was praying), so no qada added. 10 (base) stays at 10.
+            expect(l.qadaStatus[Salaah.fajr]?.value, 10);
           },
           orElse: () => fail('Should be loaded'),
         );
@@ -222,7 +222,7 @@ void main() {
     );
 
     testWidgets(
-      'Clicking "Add All" (Add to remaining) adds missed days to qada counter',
+      'Clicking "Done" button adds missed days to qada counter',
       (tester) async {
         final lastRecord = DailyRecord(
           id: 'old',
@@ -269,8 +269,8 @@ void main() {
         bloc.add(const PrayerTrackerEvent.checkMissedDays());
         await tester.pumpAndSettle();
 
-        expect(find.text('Add to remaining'), findsOneWidget);
-        await tester.tap(find.text('Add to remaining'));
+        expect(find.text('Done'), findsOneWidget);
+        await tester.tap(find.text('Done'));
         await tester.pumpAndSettle();
 
         await tester.pump(const Duration(milliseconds: 500));
@@ -348,7 +348,7 @@ void main() {
         await tester.pump();
       }
 
-      await tester.tap(find.text('Add to remaining'));
+      await tester.tap(find.text('Done'));
       await tester.pumpAndSettle();
 
       await tester.pump(const Duration(milliseconds: 500));
@@ -421,7 +421,7 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.text('Add to remaining'));
+      await tester.tap(find.text('Done'));
       await tester.pumpAndSettle();
 
       await tester.pump(const Duration(milliseconds: 500));

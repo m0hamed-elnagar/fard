@@ -13,6 +13,7 @@
   "getStarted": "ابدأ الآن",
   "helloWorld": "أهلاً بالعالم!",
   "calendar": "التقويم",
+  "today": "اليوم",
   "history": "سجل الشهر",
   "noHistory": "لا يوجد سجل لهذا الشهر",
   "deleteRecord": "حذف السجل",

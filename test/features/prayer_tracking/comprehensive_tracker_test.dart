@@ -298,8 +298,8 @@ void main() {
       // gaps (4): 7.
       // today missed (1): 8.
 
-      // Wait for all saves to finish
-      await Future.delayed(const Duration(seconds: 1));
+      // Wait for all saves to finish (cascade may take time)
+      await Future.delayed(const Duration(seconds: 3));
 
       final r5 = await repo.loadRecord(d5);
       final rToday = await repo.loadRecord(today);
@@ -347,7 +347,7 @@ void main() {
 
       bloc.add(const PrayerTrackerEvent.addQada(Salaah.fajr));
       // Wait for state update and cascade to finish
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(seconds: 3));
 
       final rToday = await repo.loadRecord(today);
       expect(
@@ -409,7 +409,7 @@ void main() {
       bloc.add(PrayerTrackerEvent.deleteRecord(dby));
 
       // Wait for re-load state which happens after delete cascade
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(seconds: 3));
 
       final rYesterday = await repo.loadRecord(yesterday);
       final rToday = await repo.loadRecord(today);

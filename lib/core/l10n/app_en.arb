@@ -13,6 +13,7 @@
   "getStarted": "Get Started",
   "helloWorld": "Hello World!",
   "calendar": "Calendar",
+  "today": "TODAY",
   "history": "History",
   "noHistory": "No history for this month",
   "deleteRecord": "Delete Record",

@@ -49,6 +49,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get calendar => 'التقويم';
 
   @override
+  String get today => 'اليوم';
+
+  @override
   String get history => 'سجل الشهر';
 
   @override

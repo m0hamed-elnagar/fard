@@ -101,7 +101,20 @@ class _HomeContentState extends State<HomeContent> {
           previous.isQadaEnabled != current.isQadaEnabled ||
           previous.hijriAdjustment != current.hijriAdjustment,
       builder: (context, settings) {
-        final prayerTimes =
+        // Calculate today's prayer times for countdown (always uses DateTime.now())
+        final todayPrayerTimes =
+            (settings.latitude != null && settings.longitude != null)
+            ? getIt<PrayerTimeService>().getPrayerTimes(
+                latitude: settings.latitude!,
+                longitude: settings.longitude!,
+                method: settings.calculationMethod,
+                madhab: settings.madhab,
+                date: DateTime.now(),
+              )
+            : null;
+
+        // Calculate selected date prayer times for display in prayer list
+        final selectedDatePrayerTimes =
             (settings.latitude != null && settings.longitude != null)
             ? getIt<PrayerTimeService>().getPrayerTimes(
                 latitude: settings.latitude!,
@@ -111,6 +124,18 @@ class _HomeContentState extends State<HomeContent> {
                 date: widget.selectedDate,
               )
             : null;
+
+        // DEBUG: Log what we're passing to the widgets
+        debugPrint('╔═══════════════════════════════════════════╗');
+        debugPrint('║ HomeContent: Prayer Times Calculation     ║');
+        debugPrint('╠═══════════════════════════════════════════╣');
+        debugPrint('║ Today: ${DateTime.now().toString().substring(0, 10)}');
+        debugPrint('║ Selected: ${widget.selectedDate.toString().substring(0, 10)}');
+        debugPrint('║ Today Prayer Times: ${todayPrayerTimes != null ? "YES (Fajr: ${todayPrayerTimes!.fajr.toString().substring(0, 10)})" : "NO"}');
+        debugPrint('║ Selected Date Prayer Times: ${selectedDatePrayerTimes != null ? "YES (Fajr: ${selectedDatePrayerTimes!.fajr.toString().substring(0, 10)})" : "NO"}');
+        debugPrint('║ DashboardCarousel gets: TODAY times');
+        debugPrint('║ Prayer list gets: SELECTED DATE times');
+        debugPrint('╚═══════════════════════════════════════════╝');
 
         // Update widget when critical settings change (locale, location, method, etc.)
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -157,7 +182,7 @@ class _HomeContentState extends State<HomeContent> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   sliver: SliverToBoxAdapter(
                     child: DashboardCarousel(
-                      prayerTimes: prayerTimes,
+                      prayerTimes: todayPrayerTimes,
                       selectedDate: widget.selectedDate,
                       cityName: settings.cityName,
                       qadaStatus: widget.qadaStatus,
@@ -305,16 +330,16 @@ class _HomeContentState extends State<HomeContent> {
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final salaah = Salaah.values[index];
-                      final time = prayerTimes != null
+                      final time = selectedDatePrayerTimes != null
                           ? getIt<PrayerTimeService>().getTimeForSalaah(
-                              prayerTimes,
+                              selectedDatePrayerTimes,
                               salaah,
                             )
                           : null;
 
                       final isUpcoming = getIt<PrayerTimeService>().isUpcoming(
                         salaah,
-                        prayerTimes: prayerTimes,
+                        prayerTimes: selectedDatePrayerTimes,
                         date: widget.selectedDate,
                       );
 
