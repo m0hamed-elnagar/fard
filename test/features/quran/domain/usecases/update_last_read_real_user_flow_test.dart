@@ -1,7 +1,6 @@
 import 'package:fard/features/quran/domain/usecases/update_last_read.dart';
 import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
 import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
-import 'package:fard/features/werd/domain/entities/reading_segment.dart';
 import 'package:fard/features/werd/domain/entities/werd_progress.dart';
 import 'package:fard/features/werd/domain/repositories/werd_repository.dart';
 import 'package:fard/core/errors/failure.dart';
@@ -81,9 +80,6 @@ void main() {
       print('4. Click "Mark Last Read" on ayah 3');
       print('5. Leave reader (endSession)');
       print('');
-
-      // Get WerdRepository instance
-      final werdRepo = mockWerdRepo;
 
       // User clicks "Mark Last Read" on ayah 1
       print('=== Mark Last Read: Ayah 1 ===');

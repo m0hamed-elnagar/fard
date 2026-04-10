@@ -33,9 +33,9 @@ void main() {
 
         // Find the ElevatedButton that contains the Text 'Mark All'
         final elevatedButtonFinder = find.byWidgetPredicate(
-          (widget) => widget is ElevatedButton && 
-                     (widget as ElevatedButton).child is Text &&
-                     ((widget as ElevatedButton).child as Text).data == 'Mark All',
+          (widget) => widget is ElevatedButton &&
+                     widget.child is Text &&
+                     (widget.child as Text).data == 'Mark All',
         );
         
         expect(elevatedButtonFinder, findsOneWidget);
@@ -78,9 +78,9 @@ void main() {
 
         // Find the ElevatedButton that contains the Text 'New Session'
         final elevatedButtonFinder = find.byWidgetPredicate(
-          (widget) => widget is ElevatedButton && 
-                     (widget as ElevatedButton).child is Text &&
-                     ((widget as ElevatedButton).child as Text).data == 'New Session',
+          (widget) => widget is ElevatedButton &&
+                     widget.child is Text &&
+                     (widget.child as Text).data == 'New Session',
         );
         
         expect(elevatedButtonFinder, findsOneWidget);

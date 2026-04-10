@@ -77,9 +77,9 @@ class ReadingSegment extends Equatable {
   }
 
   /// Merges adjacent or overlapping segments
-  /// {1,5} + {6,10} → {1,10} (adjacent)
-  /// {1,8} + {5,10} → {1,10} (overlapping)
-  /// {1,5} + {10,15} → stays separate (gap)
+  /// `{1,5}` + `{6,10}` → `{1,10}` (adjacent)
+  /// `{1,8}` + `{5,10}` → `{1,10}` (overlapping)
+  /// `{1,5}` + `{10,15}` → stays separate (gap)
   /// Merges timestamps: earliest startTime, latest endTime
   static List<ReadingSegment> mergeSegments(List<ReadingSegment> segments) {
     if (segments.isEmpty) return [];
@@ -180,8 +180,8 @@ class ReadingSegment extends Equatable {
     return merged;
   }
 
-  /// Convert a Set<int> of individual ayahs to segments
-  /// {1,2,3,100,101} → [{1,3}, {100,101}]
+  /// Convert a `Set<int>` of individual ayahs to segments
+  /// `{1,2,3,100,101}` → `{1,3}`, `{100,101}`
   /// Note: Creates session timestamps for new segments
   static List<ReadingSegment> fromSet(Set<int> ayahs) {
     if (ayahs.isEmpty) return [];

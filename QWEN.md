@@ -257,6 +257,29 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
 
 ---
 
+## Key Architecture Decisions
+
+### Werd Session Tracking
+The Werd (daily Quran reading goal) feature uses **session-based tracking** with the following rules:
+
+1. **"Continue" creates a new session**: Each time the user clicks "Continue" from the home screen, a new `ReadingSegment` is created immediately (not just when reading starts)
+2. **Ghost session cleanup**: If the user clicks "Continue" but reads nothing and clicks "Continue" again within 5 minutes, the empty session (1 ayah, no reading) is automatically removed
+3. **Previous session auto-ended**: If the previous session has real reading (more than 1 ayah or older than 5 minutes), it is properly ended with `endSession()` before the new one is created
+4. **Crash-resilient**: If the app crashes or is force-closed mid-reading, the stale session (with `endTime == null`) is properly handled on the next "Continue" click
+5. **"Current Position" in Werd card footer**: Calculated from the last session's `endAyah + 1`, NOT from `lastReadAbsolute` (which only updates when the user actually reads ayahs)
+
+**Key files:**
+- `lib/features/werd/domain/entities/reading_segment.dart` - Session entity with start/end timestamps
+- `lib/features/werd/presentation/blocs/werd_bloc.dart` - Session creation/management logic
+- `lib/features/prayer_tracking/presentation/widgets/werd_progress_card.dart` - Werd card UI with session display and footer "Current Position" logic
+
+**Why not auto-end on navigation?** We chose explicit session creation on "Continue" instead of auto-ending sessions on page navigation because:
+- It's deterministic and doesn't rely on navigation events
+- Handles app crashes/force-close without stale session cleanup complexity
+- Matches the user's mental model: "I clicked Continue = new session"
+
+---
+
 ## Design System
 
 ### Material 3 (Material You)

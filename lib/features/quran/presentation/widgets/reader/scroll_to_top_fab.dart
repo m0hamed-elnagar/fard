@@ -33,7 +33,6 @@ class _ScrollToTopFABState extends State<ScrollToTopFAB> {
 
   void _onScroll() {
     final offset = widget.scrollController.offset;
-    final maxScroll = widget.scrollController.position.maxScrollExtent;
     
     // Show FAB when scrolled down more than 300px
     final shouldShow = offset > 300;

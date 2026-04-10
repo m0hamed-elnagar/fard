@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // NOTE: Tests for user correction features (undo snackbar + edit button)

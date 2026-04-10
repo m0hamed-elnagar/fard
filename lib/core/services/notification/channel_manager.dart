@@ -1,4 +1,5 @@
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
+import 'package:fard/core/utils/app_identifiers.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 import 'sound_manager.dart';
@@ -59,8 +60,8 @@ class ChannelManager {
 
     await androidPlugin.createNotificationChannel(reminderChannel);
 
-    const azkarChannel = AndroidNotificationChannel(
-      'azkar_reminders',
+    final azkarChannel = AndroidNotificationChannel(
+      AppIdentifiers.azkarChannelId,
       'Azkar Reminders',
       description: 'Daily Azkar notifications',
       importance: Importance.max,

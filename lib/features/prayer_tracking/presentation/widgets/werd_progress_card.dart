@@ -15,7 +15,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:quran/quran.dart' as quran;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class WerdProgressCard extends StatefulWidget {
   final VoidCallback onSetGoalPressed;
@@ -96,11 +95,6 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
             ? (currentAyahs / totalAyahs).clamp(0.0, 1.0)
             : 0.0;
         final isCompleted = currentAyahs >= totalAyahs;
-
-        // Cumulative total including completed cycles
-        // (These values are displayed via progress object in _buildHeader)
-        final _cumulativeTotal = progress?.cumulativeTotalAyahs ?? currentAyahs;
-        final _completedCycles = progress?.completedCycles ?? 0;
 
         final now = DateTime.now();
         final currentMonthKey =
@@ -496,17 +490,10 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                 ...progress.segmentsToday.asMap().entries.map((entry) {
                   final index = entry.key;
                   final segment = entry.value;
-                  
-                  // DEBUG: Log segment data
-                  debugPrint('📊 Segment $index: startAyah=${segment.startAyah}, endAyah=${segment.endAyah}, count=${segment.ayahsCount}');
-                  
+
                   final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(segment.startAyah);
                   final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(segment.endAyah);
-                  
-                  // DEBUG: Log converted positions
-                  debugPrint('📍 Start: Surah ${startPos[0]}, Ayah ${startPos[1]}');
-                  debugPrint('📍 End: Surah ${endPos[0]}, Ayah ${endPos[1]}');
-                  
+
                   final startName = isAr
                       ? quran.getSurahNameArabic(startPos[0])
                       : quran.getSurahName(startPos[0]);
@@ -681,7 +668,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                       ),
                     ),
                   );
-                }).toList(),
+                }),
 
               const Divider(height: 24),
 
@@ -706,81 +693,8 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
           ),
         ),
         actions: [
-          // DEBUG: Show raw SharedPreferences data
-          TextButton.icon(
-            onPressed: () async {
-              debugPrint('🔍 Reading raw SharedPreferences data...');
-              final prefs = await SharedPreferences.getInstance();
-              final werdProgress = prefs.getString('werd_progress_default');
-              final werdGoal = prefs.getString('werd_goal_default');
-              
-              debugPrint('╔══════════════════════════════════════════╗');
-              debugPrint('📊 RAW SHARED PREFERENCES DATA');
-              debugPrint('╠══════════════════════════════════════════╣');
-              debugPrint('werd_progress_default:');
-              debugPrint(werdProgress ?? '(not found)');
-              debugPrint('');
-              debugPrint('werd_goal_default:');
-              debugPrint(werdGoal ?? '(not found)');
-              debugPrint('╚══════════════════════════════════════════╝');
-              
-              if (werdProgress != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(isAr ? 'تم عرض البيانات في السجل' : 'Raw data printed to logs'),
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
-              }
-            },
-            icon: const Icon(Icons.bug_report_rounded, size: 18),
-            label: Text(isAr ? 'عرض البيانات' : 'Show Raw Data'),
-          ),
-          // DEBUG: Clear all today's data button
-          TextButton.icon(
-            onPressed: () async {
-              debugPrint('🗑️ Clearing werd progress data from SharedPreferences...');
-              
-              // Use SharedPreferences since that's where the data is stored
-              final prefs = await SharedPreferences.getInstance();
-              
-              // Find all werd progress keys
-              final allKeys = prefs.getKeys();
-              final werdKeys = allKeys.where((k) => 
-                k.startsWith('werd_progress_') || k.startsWith('werd_goal_')
-              ).toList();
-              
-              debugPrint('📋 Found ${werdKeys.length} werd keys: $werdKeys');
-              
-              for (final key in werdKeys) {
-                await prefs.remove(key);
-                debugPrint('✅ Deleted: $key');
-              }
-              
-              debugPrint('✅ Cleared all werd progress data from SharedPreferences');
-              
-              // Close the dialog first
-              Navigator.of(context).pop();
-              
-              // Force reload the BLoC with empty state
-              context.read<WerdBloc>().add(const WerdEvent.load());
-              
-              debugPrint('🔄 Reloaded WerdBloc with empty state');
-              
-              // Show success message
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(isAr ? 'تم مسح البيانات بنجاح!' : 'Data cleared successfully!'),
-                  backgroundColor: Colors.green,
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            },
-            icon: const Icon(Icons.delete_forever_rounded, size: 18, color: Colors.red),
-            label: Text(isAr ? 'مسح البيانات' : 'Clear All Data', style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-          ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: Text(l10n.werdClose),
           ),
         ],
@@ -827,7 +741,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                   Text(l10n.werdFrom, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<int>(
-                    value: selectedStartSurah,
+                    initialValue: selectedStartSurah,
                     decoration: InputDecoration(labelText: l10n.surah),
                     items: startSurahs.map((s) {
                       final name = isAr ? quran.getSurahNameArabic(s) : quran.getSurahName(s);
@@ -840,7 +754,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<int>(
-                    value: startAyah.clamp(1, startAyahCount),
+                    initialValue: startAyah.clamp(1, startAyahCount),
                     decoration: InputDecoration(labelText: l10n.ayah),
                     items: List.generate(startAyahCount, (i) => i + 1).map((a) {
                       return DropdownMenuItem(value: a, child: Text('$a'));
@@ -852,7 +766,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                   Text(l10n.werdTo, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<int>(
-                    value: selectedEndSurah,
+                    initialValue: selectedEndSurah,
                     decoration: InputDecoration(labelText: l10n.surah),
                     items: endSurahs.map((s) {
                       final name = isAr ? quran.getSurahNameArabic(s) : quran.getSurahName(s);
@@ -865,7 +779,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<int>(
-                    value: endAyah.clamp(1, endAyahCount),
+                    initialValue: endAyah.clamp(1, endAyahCount),
                     decoration: InputDecoration(labelText: l10n.ayah),
                     items: List.generate(endAyahCount, (i) => i + 1).map((a) {
                       return DropdownMenuItem(value: a, child: Text('$a'));
@@ -970,9 +884,9 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppTheme.accent.withOpacity(0.1),
+                      color: AppTheme.accent.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppTheme.accent.withOpacity(0.3)),
+                      border: Border.all(color: AppTheme.accent.withValues(alpha: 0.3)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1021,7 +935,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                   Text(l10n.werdFrom, style: const TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<int>(
-                    value: selectedStartSurah,
+                    initialValue: selectedStartSurah,
                     decoration: InputDecoration(labelText: l10n.surah),
                     items: List.generate(114, (i) => i + 1).map((s) {
                       final name = isAr ? quran.getSurahNameArabic(s) : quran.getSurahName(s);
@@ -1034,7 +948,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<int>(
-                    value: startAyah,
+                    initialValue: startAyah,
                     decoration: InputDecoration(labelText: l10n.ayah),
                     items: List.generate(startAyahCount, (i) => i + 1).map((a) {
                       return DropdownMenuItem(value: a, child: Text('$a'));
@@ -1046,7 +960,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                   Text(l10n.werdTo, style: const TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<int>(
-                    value: selectedEndSurah,
+                    initialValue: selectedEndSurah,
                     decoration: InputDecoration(labelText: l10n.surah),
                     items: List.generate(114, (i) => i + 1).map((s) {
                       final name = isAr ? quran.getSurahNameArabic(s) : quran.getSurahName(s);
@@ -1059,7 +973,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<int>(
-                    value: endAyah,
+                    initialValue: endAyah,
                     decoration: InputDecoration(labelText: l10n.ayah),
                     items: List.generate(endAyahCount, (i) => i + 1).map((a) {
                       return DropdownMenuItem(value: a, child: Text('$a'));
@@ -1078,14 +992,6 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                 onPressed: () {
                   final start = effectiveFrom;
                   final end = effectiveTo;
-
-                  // DEBUG: Log what we're about to save
-                  debugPrint('💾 [Add Range Dialog] Saving:');
-                  debugPrint('   effectiveFrom = $effectiveFrom');
-                  debugPrint('   effectiveTo = $effectiveTo');
-                  debugPrint('   start = $start');
-                  debugPrint('   end = $end');
-                  debugPrint('   Will call: WerdEvent.trackRangeRead($start, $end)');
 
                   context.read<WerdBloc>().add(WerdEvent.trackRangeRead(start, end));
                   
@@ -1366,21 +1272,27 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
     bool isAr,
     bool isShort,
   ) {
-    // NEW Continue Logic (per agreed plan):
-    // 1. If finished Quran (completedCycles > 0 and at ayah 6236) → go to ayah 1
-    // 2. If has lastReadAbsolute → go to NEXT ayah (lastReadAbs + 1)
-    // 3. First time → go to ayah 1
+    // Calculate "Current Position" (next ayah to read):
+    // 1. If finished Quran (completedCycles > 0 and last session ended at 6236) → go to ayah 1
+    // 2. If sessions exist today → last session's endAyah + 1
+    // 3. If sessionStartAbsolute set (clicked Continue but no reading yet) → use it
+    // 4. First time → go to ayah 1
     int targetAbs;
 
     final completedCycles = progress?.completedCycles ?? 0;
-    final lastReadAbs = progress?.lastReadAbsolute;
+    final sessions = progress?.segmentsToday ?? [];
+    final sessionStart = progress?.sessionStartAbsolute;
 
-    if (completedCycles > 0 && lastReadAbs == 6236) {
+    if (completedCycles > 0 && sessions.isNotEmpty && sessions.last.endAyah == 6236) {
       // Just finished Quran, start new cycle
       targetAbs = 1;
-    } else if (lastReadAbs != null) {
-      // Has progress, continue from NEXT position (not the last read ayah itself)
-      targetAbs = (lastReadAbs + 1 > 6236) ? 1 : lastReadAbs + 1;
+    } else if (sessions.isNotEmpty) {
+      // Has sessions today → show next ayah after last session's end
+      final lastEndAyah = sessions.last.endAyah;
+      targetAbs = (lastEndAyah + 1 > 6236) ? 1 : lastEndAyah + 1;
+    } else if (sessionStart != null) {
+      // Clicked Continue but haven't read anything yet
+      targetAbs = sessionStart;
     } else {
       // First time user or no progress
       targetAbs = 1;

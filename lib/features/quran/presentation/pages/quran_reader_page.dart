@@ -10,7 +10,6 @@ import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
 import 'package:fard/features/azkar/presentation/screens/azkar_list_screen.dart';
 import 'package:fard/features/quran/presentation/widgets/cycle_completion_dialog.dart';
-import 'package:fard/core/extensions/quran_extension.dart';
 
 import 'package:fard/features/quran/presentation/widgets/reader/reader_app_bar.dart';
 import 'package:fard/features/quran/presentation/widgets/reader/reader_header.dart';
@@ -204,8 +203,6 @@ class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingOb
                       // Listen to WerdBloc for cycle completion (ayah 6236)
                       BlocListener<WerdBloc, WerdState>(
                         listenWhen: (prev, curr) {
-                          final prevTotal = prev.progress?.totalAmountReadToday ?? 0;
-                          final currTotal = curr.progress?.totalAmountReadToday ?? 0;
                           final prevLast = prev.progress?.lastReadAbsolute ?? 0;
                           final currLast = curr.progress?.lastReadAbsolute ?? 0;
                           // Trigger when lastReadAbsolute reaches 6236

@@ -1,16 +1,11 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:fard/core/utils/app_identifiers.dart';
 import 'package:injectable/injectable.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
 @singleton
 class SoundManager {
-  PackageInfo? _packageInfo;
-
-  Future<void> init() async {
-    _packageInfo = await PackageInfo.fromPlatform();
-  }
 
   Future<String?> getSoundUriForChannel(String sound) async {
     if (sound == 'default') return null;
@@ -54,8 +49,7 @@ class SoundManager {
       await file.copy(destFile.path);
     }
 
-    final String authority =
-        '${_packageInfo?.packageName ?? 'com.qada.fard'}.fileprovider';
+    final String authority = AppIdentifiers.fileProviderAuthority;
     return 'content://$authority/external_azan/$fileName';
   }
 }

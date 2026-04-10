@@ -88,7 +88,7 @@
           </intent-filter>
         </receiver>
 
-        <receiver android:name="com.qada.fard.PrayerWidgetReceiver" 
+        <receiver android:name="com.qada.fard.PrayerWidgetReceiver"
             android:label="Prayer Schedule"
             android:exported="true">
             <intent-filter>
@@ -97,13 +97,13 @@
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.LOCALE_CHANGED" />
-                <action android:name="com.qada.fard.UPDATE_WIDGET" />
+                <action android:name="${applicationId}.UPDATE_WIDGET" />
             </intent-filter>
             <meta-data android:name="android.appwidget.provider"
                 android:resource="@xml/prayer_widget_info" />
         </receiver>
 
-        <receiver android:name="com.qada.fard.NextPrayerCountdownWidgetReceiver" 
+        <receiver android:name="com.qada.fard.NextPrayerCountdownWidgetReceiver"
             android:label="Next Prayer Countdown"
             android:exported="true">
             <intent-filter>
@@ -113,8 +113,8 @@
                 <action android:name="android.intent.action.TIME_SET" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
                 <action android:name="android.intent.action.USER_PRESENT" />
-                <action android:name="com.qada.fard.ACTION_MINUTE_UPDATE" />
-                <action android:name="com.qada.fard.ACTION_FORCE_UPDATE" />
+                <action android:name="${applicationId}.ACTION_MINUTE_UPDATE" />
+                <action android:name="${applicationId}.ACTION_FORCE_UPDATE" />
             </intent-filter>
             <meta-data android:name="android.appwidget.provider"
                 android:resource="@xml/next_prayer_countdown_widget_info" />

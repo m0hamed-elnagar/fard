@@ -4,10 +4,12 @@ import 'package:fard/features/werd/presentation/widgets/set_werd_goal_dialog.dar
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
 import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
+import 'package:fard/features/quran/domain/entities/surah.dart';
+import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
+import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
 import 'package:fard/features/werd/domain/entities/werd_goal.dart';
-import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -41,6 +43,32 @@ void main() {
         startAbsolute: 1,
       ),
     );
+
+    // Mock Quran state with basic surahs for dropdown
+    when(() => mockQuranBloc.state).thenReturn(
+      QuranState(
+        surahs: [
+          Surah(
+            number: SurahNumber.create(1).data!,
+            name: 'Al-Fatihah',
+            englishName: 'The Opener',
+            englishNameTranslation: 'The Opening',
+            numberOfAyahs: 7,
+            revelationType: 'Meccan',
+            ayahs: [],
+          ),
+          Surah(
+            number: SurahNumber.create(2).data!,
+            name: 'Al-Baqarah',
+            englishName: 'The Cow',
+            englishNameTranslation: 'The Cow',
+            numberOfAyahs: 286,
+            revelationType: 'Medinan',
+            ayahs: [],
+          ),
+        ],
+      ),
+    );
   });
 
   Widget createDialogUnderTest({Locale locale = const Locale('en')}) {
@@ -65,7 +93,13 @@ void main() {
                 onPressed: () {
                   showDialog(
                     context: context,
-                    builder: (_) => const SetWerdGoalDialog(),
+                    builder: (dialogContext) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider<WerdBloc>.value(value: mockWerdBloc),
+                        BlocProvider<QuranBloc>.value(value: mockQuranBloc),
+                      ],
+                      child: const SetWerdGoalDialog(),
+                    ),
                   );
                 },
               ),

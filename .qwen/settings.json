@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter *)",
+      "Bash(findstr *)",
+      "Bash(gradlew *)",
+      "Bash(select-string *)",
+      "Bash(select-object *)",
+      "Bash(type *)",
+      "Bash(dart *)",
+      "Bash(powershell *)",
+      "Bash(f *)",
+      "Bash('dir /b lib\\features\\settings\\domain\\usecases\\*.dart lib\\features\\settings\\data\\repositories\\*.dart lib\\core\\constants\\settings_keys.dart lib\\features\\settings\\presentation\\blocs\\settings_cubit.dart')",
+      "Bash(find *)",
+      "Bash(.\\gradlew.bat *)",
+      "Bash(git diff *)",
+      "Bash(git show *)",
+      "Bash(git stash)",
+      "WebSearch",
+      "Bash(dir *)",
+      "Bash(del *)",
+      "Bash(git commit *)",
+      "Bash(git add *)"
+    ]
+  },
+  "$version": 3
+}

@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:fard/features/azkar/data/azkar_source.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/core/utils/rtl_text_util.dart';
+import 'package:fard/core/utils/app_identifiers.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:injectable/injectable.dart';
@@ -20,7 +21,7 @@ class PrayerNotificationScheduler {
   final SoundManager _soundManager;
   final SettingsRepository _settingsProvider;
 
-  static const String groupKey = 'com.nagar.fard.NOTIFICATIONS';
+  static String get groupKey => AppIdentifiers.notificationGroupKey;
   static const String widgetTaskKey = 'widget_refresh_task';
 
   // Notification ID Ranges

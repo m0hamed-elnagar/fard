@@ -71,6 +71,7 @@ android {
         }
         // Build type for generating baseline profiles
         create("benchmark") {
+            applicationIdSuffix = ".benchmark"
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

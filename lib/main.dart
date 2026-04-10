@@ -3,6 +3,7 @@ import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/background_service.dart';
 import 'package:fard/core/services/migration_service.dart';
 import 'package:fard/core/services/widget_update_service.dart';
+import 'package:fard/core/utils/app_identifiers.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/features/onboarding/presentation/screens/splash_screen.dart';
@@ -28,6 +29,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   debugPrint(
       '[STARTUP] WidgetsFlutterBinding initialized (${startupTimer.elapsedMilliseconds}ms)');
+
+  // 0. Initialize app-specific identifiers (for debug/release separation)
+  await AppIdentifiers.initialize();
+  debugPrint(
+      '[STARTUP] App identifiers initialized: ${AppIdentifiers.packageName} (${startupTimer.elapsedMilliseconds}ms)');
 
   // 1. CRITICAL: Configure Dependencies (Hive, GetIt, SharedPreferences)
   // This must finish before runApp because widgets depend on getIt.
@@ -63,7 +69,7 @@ Future<void> _initializeBackgroundServices(Stopwatch timer) async {
       // JustAudio & Workmanager
       if (Platform.isAndroid || Platform.isIOS) ...[
         JustAudioBackground.init(
-          androidNotificationChannelId: 'com.nagar.fard.channel.audio',
+          androidNotificationChannelId: AppIdentifiers.audioNotificationChannelId,
           androidNotificationChannelName: 'Quran Audio Playback',
           androidNotificationOngoing: true,
           androidNotificationIcon: 'mipmap/ic_launcher',

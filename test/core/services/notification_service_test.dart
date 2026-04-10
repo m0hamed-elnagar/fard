@@ -113,7 +113,6 @@ void main() {
       ),
     ).thenAnswer((_) async => true);
 
-    when(() => mockSoundManager.init()).thenAnswer((_) async {});
     when(
       () => mockChannelManager.createNotificationChannels(
         any(),
@@ -134,11 +133,10 @@ void main() {
 
   group('NotificationService', () {
     test(
-      'init initializes plugin, sound manager, and creates channels',
+      'init initializes plugin and creates channels',
       () async {
         await notificationService.init();
 
-        verify(() => mockSoundManager.init()).called(1);
         verify(
           () => mockNotificationsPlugin.initialize(
             settings: any(named: 'settings'),

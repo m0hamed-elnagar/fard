@@ -3,12 +3,12 @@ import 'package:fard/features/werd/domain/entities/reading_segment.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// THIS TEST PROVES THE REAL BUG!
-/// 
+///
 /// The bug is in UpdateLastRead use case:
-/// - It sets readItemsToday (old Set<int> format)
-/// - It does NOT set segmentsToday (new List<ReadingSegment> format)
-/// - Today's Reading dialog shows segmentsToday (which is empty!)
-/// - History shows readItemsToday (which has the data!)
+/// - It sets `readItemsToday` (old `Set<int>` format)
+/// - It does NOT set `segmentsToday` (new `List<ReadingSegment>` format)
+/// - Today's Reading dialog shows `segmentsToday` (which is empty!)
+/// - History shows `readItemsToday` (which has the data!)
 ///
 /// This explains why user sees correct count in history but wrong in Today's Reading!
 void main() {

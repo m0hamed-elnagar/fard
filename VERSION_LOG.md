@@ -142,6 +142,11 @@
 - Fixed startup jank caused by blocking service initialization
 - Fixed splash screen showing wrong background color
 - Fixed session merging logic causing confusing UX
+- **Fixed session tracking**: Each "Continue" click now creates an explicit new session (sessions were merging into one)
+  - Ghost sessions (empty + < 5 min) auto-cleaned on double-Continue
+  - Previous sessions properly ended before new ones created
+  - Crash-resilient: stale sessions handled on next Continue click
+- **Fixed Werd card "Current Position"**: Now shows correct next ayah based on last session's `endAyah + 1` (was showing stale `lastReadAbsolute` when user clicked Continue without reading)
 
 ### ⚠️ Known Issues
 

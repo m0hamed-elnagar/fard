@@ -5,6 +5,7 @@ import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/core/utils/rtl_text_util.dart';
+import 'package:fard/core/utils/app_identifiers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -36,8 +37,8 @@ class NotificationService {
 
   static const String reminderChannelId = ChannelManager.reminderChannelId;
   static const String testAzanChannelId = 'azan_test_channel';
-  static const String downloadChannelId = 'download_channel';
-  static const String groupKey = 'com.nagar.fard.NOTIFICATIONS';
+  static String get downloadChannelId => AppIdentifiers.downloadChannelId;
+  static String get groupKey => AppIdentifiers.notificationGroupKey;
 
   String _applyRtl(String text) {
     return RtlTextUtil.applyRtlFromSettings(text, _settingsProvider);
@@ -45,9 +46,6 @@ class NotificationService {
 
   Future<void> init() async {
     debugPrint('NotificationService: init starting');
-
-    // Initialize delegates
-    await _soundManager.init();
 
     try {
       // Timezone already initialized in configureDependencies(), just get local timezone
@@ -90,19 +88,17 @@ class NotificationService {
           requestSoundPermission: true,
         );
 
-    const WindowsInitializationSettings initializationSettingsWindows =
-        WindowsInitializationSettings(
-          appName: 'Fard',
-          appUserModelId: 'com.nagar.fard',
-          guid: 'f0c0f0f0-0f0f-0f0f-0f0f-0f0f0f0f0f0f',
-        );
+    final initializationSettingsWindows = WindowsInitializationSettings(
+      appName: 'Fard',
+      appUserModelId: AppIdentifiers.windowsAppUserModelId,
+      guid: 'f0c0f0f0-0f0f-0f0f-0f0f-0f0f0f0f0f0f',
+    );
 
-    const InitializationSettings initializationSettings =
-        InitializationSettings(
-          android: initializationSettingsAndroid,
-          iOS: initializationSettingsDarwin,
-          windows: initializationSettingsWindows,
-        );
+    final initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsDarwin,
+      windows: initializationSettingsWindows,
+    );
 
     debugPrint('NotificationService: initializing plugin...');
     await _notificationsPlugin.initialize(

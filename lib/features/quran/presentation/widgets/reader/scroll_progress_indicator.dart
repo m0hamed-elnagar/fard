@@ -99,7 +99,7 @@ class _ScrollProgressIndicatorState extends State<ScrollProgressIndicator> {
           // Progress bar
           LinearProgressIndicator(
             value: progress,
-            backgroundColor: theme.colorScheme.surfaceVariant,
+            backgroundColor: theme.colorScheme.surfaceContainerHighest,
             valueColor: AlwaysStoppedAnimation<Color>(
               theme.primaryColor,
             ),

@@ -14,6 +14,10 @@ void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     sharedPreferences = await SharedPreferences.getInstance();
+    // Force clear all keys
+    for (final key in sharedPreferences.getKeys()) {
+      await sharedPreferences.remove(key);
+    }
     repository = WerdRepositoryImpl(sharedPreferences);
   });
 
@@ -225,13 +229,6 @@ void main() {
     });
 
     test('watchProgress emits stream of progress updates', () async {
-      final progress = WerdProgress(
-        goalId: 'default',
-        totalAmountReadToday: 0,
-        lastUpdated: DateTime.now(),
-        streak: 0,
-      );
-
       final stream = repository.watchProgress(goalId: 'default');
 
       expect(stream, emits(isA<Result<WerdProgress>>()));

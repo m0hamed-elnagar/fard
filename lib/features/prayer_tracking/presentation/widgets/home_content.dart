@@ -125,18 +125,6 @@ class _HomeContentState extends State<HomeContent> {
               )
             : null;
 
-        // DEBUG: Log what we're passing to the widgets
-        debugPrint('╔═══════════════════════════════════════════╗');
-        debugPrint('║ HomeContent: Prayer Times Calculation     ║');
-        debugPrint('╠═══════════════════════════════════════════╣');
-        debugPrint('║ Today: ${DateTime.now().toString().substring(0, 10)}');
-        debugPrint('║ Selected: ${widget.selectedDate.toString().substring(0, 10)}');
-        debugPrint('║ Today Prayer Times: ${todayPrayerTimes != null ? "YES (Fajr: ${todayPrayerTimes.fajr.toString().substring(0, 10)})" : "NO"}');
-        debugPrint('║ Selected Date Prayer Times: ${selectedDatePrayerTimes != null ? "YES (Fajr: ${selectedDatePrayerTimes.fajr.toString().substring(0, 10)})" : "NO"}');
-        debugPrint('║ DashboardCarousel gets: TODAY times');
-        debugPrint('║ Prayer list gets: SELECTED DATE times');
-        debugPrint('╚═══════════════════════════════════════════╝');
-
         // Update widget when critical settings change (locale, location, method, etc.)
         WidgetsBinding.instance.addPostFrameCallback((_) {
           getIt<WidgetUpdateService>().updateWidget();

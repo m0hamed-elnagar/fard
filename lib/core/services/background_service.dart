@@ -6,6 +6,7 @@ import 'package:fard/core/services/notification/sound_manager.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/core/services/settings_loader.dart';
 import 'package:fard/core/services/widget_update_service.dart';
+import 'package:fard/core/utils/app_identifiers.dart';
 import 'package:fard/features/settings/domain/app_settings.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
@@ -130,9 +131,10 @@ class _BackgroundSettingsProvider implements SettingsRepository {
   Future<void> updateAllAfterSalahMinutes(int minutes) => Future.value();
 }
 
-const String _backgroundTaskUniqueName = 'com.nagar.fard.prayer_scheduler_task';
+/// WorkManager task unique names (initialized when needed).
+String get _backgroundTaskUniqueName => AppIdentifiers.prayerSchedulerTaskName;
 const String _backgroundTaskKey = 'prayer_scheduler_task';
-const String _widgetTaskUniqueName = 'com.nagar.fard.widget_refresh_task';
+String get _widgetTaskUniqueName => AppIdentifiers.widgetRefreshTaskName;
 const String _widgetTaskKey = 'widget_refresh_task';
 
 @pragma('vm:entry-point')
@@ -179,7 +181,6 @@ void callbackDispatcher() {
 
         // 4. Initialize Dependencies
         final soundManager = SoundManager();
-        await soundManager.init();
         final channelManager = ChannelManager(soundManager);
         final azkarSource = BackgroundAzkarSource();
         final scheduler = PrayerNotificationScheduler(

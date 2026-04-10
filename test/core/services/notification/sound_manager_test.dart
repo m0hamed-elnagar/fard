@@ -19,7 +19,6 @@ void main() {
 
   setUp(() async {
     soundManager = SoundManager();
-    await soundManager.init();
   });
 
   group('SoundManager', () {

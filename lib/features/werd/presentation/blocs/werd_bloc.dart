@@ -99,8 +99,10 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           }
         },
         startSession: (e) async {
-          // Clicked "Continue": Resume/extend the ONE daily session
-          debugPrint('🎬 [WerdBloc] Continue button - ayah ${e.startAyah}');
+          // Clicked "Continue": Create a new explicit reading session
+          // NOTE: We don't update totalAmountReadToday or lastReadAbsolute here.
+          // Those are only updated when the user actually reads (trackItemRead).
+          debugPrint('🎬 [WerdBloc] Continue button - starting session at ayah ${e.startAyah}');
 
           final goalId = state.goal?.id ?? 'default';
           final progressRes = await _repository.getProgress(goalId: goalId);
@@ -116,45 +118,52 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           );
 
           final segments = List<ReadingSegment>.from(currentProgress.segmentsToday);
-          
-          // Find the active session (should be only one without endTime)
-          int activeSessionIndex = -1;
+
+          // Find the last active session (endTime == null)
+          int? activeIndex;
           for (int i = segments.length - 1; i >= 0; i--) {
             if (segments[i].endTime == null) {
-              activeSessionIndex = i;
+              activeIndex = i;
               break;
             }
           }
 
-          if (activeSessionIndex >= 0) {
-            // Resume the daily session
-            segments[activeSessionIndex] = ReadingSegment(
-              startAyah: segments[activeSessionIndex].startAyah,
-              endAyah: e.startAyah,
-              startTime: segments[activeSessionIndex].startTime,
-              endTime: null,
-            );
-            debugPrint('📖 Resumed daily session: ${segments[activeSessionIndex].startAyah} → ${e.startAyah}');
-          } else {
-            // Create first session for today
-            segments.add(ReadingSegment(
-              startAyah: e.startAyah,
-              endAyah: e.startAyah,
-              startTime: DateTime.now(),
-            ));
-            debugPrint('📖 Started daily session: ayah ${e.startAyah}');
+          if (activeIndex != null) {
+            final activeSeg = segments[activeIndex];
+            final ayahsRead = activeSeg.endAyah - activeSeg.startAyah + 1;
+            final sessionAge = DateTime.now().difference(activeSeg.startTime!);
+
+            // If session is "empty" (just the start point) AND recent (< 5 min)
+            // → Remove it to avoid ghost sessions from accidental double-Continue
+            if (ayahsRead <= 1 && sessionAge.inMinutes < 5) {
+              segments.removeAt(activeIndex);
+              debugPrint('🗑️ Removed empty session at ${activeSeg.startAyah} (${sessionAge.inMinutes} min old)');
+            } else {
+              // User actually read something or it's an older session → end it properly
+              segments[activeIndex] = activeSeg.endSession();
+              debugPrint('✅ Ended previous session: ${activeSeg.startAyah}-${activeSeg.endAyah} (${activeSeg.durationMinutes} min)');
+            }
           }
 
-          // Update segments but DON'T update lastReadAbsolute yet
-          // lastReadAbsolute should only update when user actually reads (scrolls through ayahs)
-          // not when they just click Continue to start a session
+          // Create the NEW session for this Continue click
+          segments.add(ReadingSegment(
+            startAyah: e.startAyah,
+            endAyah: e.startAyah,
+            startTime: DateTime.now(),
+          ));
+
+          debugPrint('📖 Created new session: ayah ${e.startAyah} (Total sessions: ${segments.length})');
+
           final updatedProgress = currentProgress.copyWith(
             segmentsToday: segments,
+            // Don't update totalAmountReadToday - only count when user actually reads
+            sessionStartAbsolute: e.startAyah,
+            // Don't update lastReadAbsolute - only update when user actually reads
             lastUpdated: DateTime.now(),
           );
 
           await _repository.updateProgress(updatedProgress);
-          
+
           // Emit updated state
           await _emitUpdatedState(goalId);
         },
@@ -192,6 +201,9 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           if (activeIndex >= 0) {
             segments[activeIndex] = segments[activeIndex].endSession();
             debugPrint('✅ Daily session ended: ${segments[activeIndex].startAyah} → ${segments[activeIndex].endAyah} (${segments[activeIndex].durationMinutes} min)');
+
+            // Remove empty segments (where no ayahs were actually read)
+            segments.removeWhere((seg) => seg.startAyah == seg.endAyah && seg.endTime != null);
           } else {
             debugPrint('⚠️ No active session to end');
           }
@@ -247,7 +259,6 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           // Normalize the range
           final normalizedStart = e.startAbsolute < e.endAbsolute ? e.startAbsolute : e.endAbsolute;
           final normalizedEnd = e.startAbsolute < e.endAbsolute ? e.endAbsolute : e.startAbsolute;
-          final rangeCount = normalizedEnd - normalizedStart + 1;
 
           // Find or create daily session
           final segments = List<ReadingSegment>.from(currentProgress.segmentsToday);
@@ -482,7 +493,6 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
 
     // Remove the last segment from segmentsToday
     if (currentProgress.segmentsToday.isNotEmpty) {
-      final lastSegment = currentProgress.segmentsToday.last;
       final previousSegments = currentProgress.segmentsToday.sublist(
         0,
         currentProgress.segmentsToday.length - 1,
@@ -642,12 +652,14 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
   /// Helper: Emit updated state after repository update
   Future<void> _emitUpdatedState(String goalId) async {
     final progressRes = await _repository.getProgress(goalId: goalId);
-    progressRes.fold(
-      (_) => null,
-      (progress) {
-        emit(state.copyWith(progress: progress));
-        debugPrint('📡 [WerdBloc] State emitted - Segments: ${progress.segmentsToday.length}, Total: ${progress.totalAmountReadToday}');
-      },
+    final progress = progressRes.fold(
+      (_) => state.progress,
+      (p) => p,
     );
+    if (progress != null) {
+      // ignore: invalid_use_of_visible_for_testing_member
+      emit(state.copyWith(progress: progress));
+      debugPrint('📡 [WerdBloc] State emitted - Segments: ${progress.segmentsToday.length}, Total: ${progress.totalAmountReadToday}');
+    }
   }
 }
