@@ -125,6 +125,7 @@ class WerdRepositoryImpl implements WerdRepository {
           endSurahName: endSurahName,
           endAyahNumber: endPos[1],
           summary: summary,
+          sessions: progress.segmentsToday.isNotEmpty ? progress.segmentsToday : null, // Include sessions
         );
 
         final newHistory = Map<String, WerdHistoryEntry>.from(progress.history);

@@ -258,7 +258,6 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                   isToday: true,
                   goal: state.goal,
                   itemIndex: 0,
-                  segments: progress.segmentsToday,
                 ),
               ..._buildListWithBreaks(
                 context,
@@ -532,6 +531,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
       endAyahNumber: endPos[1],
       segmentCount: progress.segmentsToday.length,
       summary: "Read today ${progress.totalAmountReadToday} ayahs",
+      sessions: progress.segmentsToday.isNotEmpty ? progress.segmentsToday : null,
     );
   }
 
@@ -777,7 +777,6 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
     bool isToday = false,
     WerdGoal? goal,
     int itemIndex = 0,
-    List<dynamic>? segments,
   }) {
     double amount;
     String unitLabel;
@@ -852,7 +851,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
     }
 
     final isExpanded = _expandedItems.contains(itemIndex);
-    final canExpand = entry.segmentCount > 1 && (isToday || segments != null);
+    final canExpand = entry.segmentCount > 1 && entry.sessions != null;
 
     return GestureDetector(
       onTap: canExpand ? () {
@@ -1034,23 +1033,22 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                 ),
               ),
               const SizedBox(height: 8),
-              // Show real session details for today
-              if (isToday && segments != null && segments.isNotEmpty)
-                ...segments.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final segment = entry.value;
-                  
-                  // Assuming segment has startAyah, endAyah, startTime, endTime
+              // Show real session details
+              if (entry.sessions != null && entry.sessions!.isNotEmpty)
+                ...entry.sessions!.asMap().entries.map((segmentEntry) {
+                  final index = segmentEntry.key;
+                  final segment = segmentEntry.value;
+
                   final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(segment.startAyah);
                   final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(segment.endAyah);
-                  
+
                   final startName = isAr
                       ? quran.getSurahNameArabic(startPos[0])
                       : quran.getSurahName(startPos[0]);
                   final endName = isAr
                       ? quran.getSurahNameArabic(endPos[0])
                       : quran.getSurahName(endPos[0]);
-                  
+
                   final isSingleAyah = segment.startAyah == segment.endAyah;
                   final fromText = isAr
                       ? '$startName، ${startPos[1].toArabicIndic()}'
@@ -1060,7 +1058,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                       : (isAr
                           ? '$endName، ${endPos[1].toArabicIndic()}'
                           : '$endName ${endPos[1]}');
-                  
+
                   return Container(
                     margin: const EdgeInsets.only(bottom: 8),
                     padding: const EdgeInsets.all(12),
@@ -1085,7 +1083,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                isAr ? 'جلسة ${index + 1}' : 'Session ${index + 1}',
+                                isAr ? 'جلسة ${(index + 1).toArabicIndic()}' : 'Session ${index + 1}',
                                 style: GoogleFonts.outfit(
                                   fontSize: 11,
                                   color: accentColor,
@@ -1179,36 +1177,6 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                     ),
                   );
                 }),
-              // Message for past days
-              if (!isToday || segments == null || segments.isEmpty)
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surface,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline_rounded,
-                        size: 16,
-                        color: AppTheme.textSecondary,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          isAr
-                              ? 'تتوفر تفاصيل الجلسة للجلسات الحالية فقط'
-                              : 'Detailed session history available for current day only',
-                          style: GoogleFonts.outfit(
-                            fontSize: 12,
-                            color: AppTheme.textSecondary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
             ],
           ],
         ),

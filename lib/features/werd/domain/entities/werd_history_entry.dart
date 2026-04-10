@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'reading_segment.dart';
 
 class WerdHistoryEntry extends Equatable {
   final int totalAyahsRead;
@@ -6,12 +7,13 @@ class WerdHistoryEntry extends Equatable {
   final int endAbsolute;
   final double pagesRead;
   final double juzRead;
-  final int segmentCount; // NEW: Number of reading segments that day
+  final int segmentCount; // Number of reading segments that day
   final String startSurahName;
   final int startAyahNumber;
   final String endSurahName;
   final int endAyahNumber;
   final String summary;
+  final List<ReadingSegment>? sessions; // Actual session data (optional for backward compatibility)
 
   const WerdHistoryEntry({
     required this.totalAyahsRead,
@@ -25,6 +27,7 @@ class WerdHistoryEntry extends Equatable {
     required this.endSurahName,
     required this.endAyahNumber,
     required this.summary,
+    this.sessions,
   });
 
   @override
@@ -40,6 +43,7 @@ class WerdHistoryEntry extends Equatable {
     endSurahName,
     endAyahNumber,
     summary,
+    sessions,
   ];
 
   Map<String, dynamic> toJson() => {
@@ -54,9 +58,13 @@ class WerdHistoryEntry extends Equatable {
     'endSurahName': endSurahName,
     'endAyahNumber': endAyahNumber,
     'summary': summary,
+    if (sessions != null) 'sessions': sessions!.map((s) => s.toJson()).toList(),
   };
 
   factory WerdHistoryEntry.fromJson(Map<String, dynamic> json) {
+    final sessionsJson = json['sessions'] as List<dynamic>?;
+    final sessions = sessionsJson?.map((s) => ReadingSegment.fromJson(s as Map<String, dynamic>)).toList();
+
     return WerdHistoryEntry(
       totalAyahsRead: json['totalAyahsRead'] ?? 0,
       startAbsolute: json['startAbsolute'] ?? 0,
@@ -69,6 +77,7 @@ class WerdHistoryEntry extends Equatable {
       endSurahName: json['endSurahName'] ?? '',
       endAyahNumber: json['endAyahNumber'] ?? 0,
       summary: json['summary'] ?? '',
+      sessions: sessions,
     );
   }
 }
