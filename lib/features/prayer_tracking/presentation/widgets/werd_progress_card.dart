@@ -98,8 +98,9 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
         final isCompleted = currentAyahs >= totalAyahs;
 
         // Cumulative total including completed cycles
-        final cumulativeTotal = progress?.cumulativeTotalAyahs ?? currentAyahs;
-        final completedCycles = progress?.completedCycles ?? 0;
+        // (These values are displayed via progress object in _buildHeader)
+        final _cumulativeTotal = progress?.cumulativeTotalAyahs ?? currentAyahs;
+        final _completedCycles = progress?.completedCycles ?? 0;
 
         final now = DateTime.now();
         final currentMonthKey =
