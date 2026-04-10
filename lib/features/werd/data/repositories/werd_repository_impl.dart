@@ -108,6 +108,7 @@ class WerdRepositoryImpl implements WerdRepository {
           endAbsolute: endAbs,
           pagesRead: pagesRead,
           juzRead: juzRead,
+          segmentCount: progress.segmentsToday.length, // NEW: Store segment count
           startSurahName: startSurahName,
           startAyahNumber: startPos[1],
           endSurahName: endSurahName,

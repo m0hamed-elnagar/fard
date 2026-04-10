@@ -1,10 +1,13 @@
 import 'package:fard/core/extensions/number_extension.dart';
 import 'package:fard/core/extensions/quran_extension.dart';
 import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
 import 'package:fard/features/werd/domain/entities/werd_goal.dart';
 import 'package:fard/features/werd/domain/entities/werd_progress.dart';
+import 'package:fard/features/werd/domain/entities/reading_segment.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
 import 'package:fard/features/werd/presentation/pages/werd_history_page.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +15,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:quran/quran.dart' as quran;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WerdProgressCard extends StatefulWidget {
   final VoidCallback onSetGoalPressed;
@@ -92,6 +96,10 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
             ? (currentAyahs / totalAyahs).clamp(0.0, 1.0)
             : 0.0;
         final isCompleted = currentAyahs >= totalAyahs;
+
+        // Cumulative total including completed cycles
+        final cumulativeTotal = progress?.cumulativeTotalAyahs ?? currentAyahs;
+        final completedCycles = progress?.completedCycles ?? 0;
 
         final now = DateTime.now();
         final currentMonthKey =
@@ -321,6 +329,17 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
+              if ((progress?.completedCycles ?? 0) > 0)
+                Text(
+                  isAr
+                      ? '✅ أتممت القرآن ${(progress!.completedCycles ?? 0).toString().toArabicIndic()} ${progress.completedCycles == 1 ? 'مرة' : 'مرات'}'
+                      : '✅ Completed Quran ${progress!.completedCycles ?? 0} ${progress.completedCycles == 1 ? 'time' : 'times'}',
+                  style: GoogleFonts.amiri(
+                    color: Colors.green,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
             ],
           ),
         ),
@@ -329,6 +348,9 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
           children: [
             if ((progress?.streak ?? 0) > 0)
               _buildStreakBadge(isAr, progress!.streak),
+            const SizedBox(width: 8),
+            if ((progress?.segmentsToday.length ?? 0) > 0)
+              _buildEditButton(context, progress!, isAr),
             const SizedBox(width: 8),
             _buildIconButton(Icons.history_rounded, () {
               Navigator.push(
@@ -436,6 +458,653 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildEditButton(BuildContext context, WerdProgress progress, bool isAr) {
+    return Tooltip(
+      message: isAr ? 'تعديل القراءة' : 'Edit Reading',
+      child: Material(
+        color: Colors.transparent,
+        child: IconButton(
+          onPressed: () => _showEditDialog(context, progress, isAr),
+          icon: Icon(Icons.edit_rounded, size: 20, color: AppTheme.accent),
+          constraints: const BoxConstraints(),
+          padding: const EdgeInsets.all(6),
+          visualDensity: VisualDensity.compact,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showEditDialog(BuildContext context, WerdProgress progress, bool isAr) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.werdTodayReading),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (progress.segmentsToday.isEmpty)
+                Text(l10n.werdNoSessions)
+              else
+                ...progress.segmentsToday.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final segment = entry.value;
+                  
+                  // DEBUG: Log segment data
+                  debugPrint('📊 Segment $index: startAyah=${segment.startAyah}, endAyah=${segment.endAyah}, count=${segment.ayahsCount}');
+                  
+                  final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(segment.startAyah);
+                  final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(segment.endAyah);
+                  
+                  // DEBUG: Log converted positions
+                  debugPrint('📍 Start: Surah ${startPos[0]}, Ayah ${startPos[1]}');
+                  debugPrint('📍 End: Surah ${endPos[0]}, Ayah ${endPos[1]}');
+                  
+                  final startName = isAr
+                      ? quran.getSurahNameArabic(startPos[0])
+                      : quran.getSurahName(startPos[0]);
+                  final endName = isAr
+                      ? quran.getSurahNameArabic(endPos[0])
+                      : quran.getSurahName(endPos[0]);
+
+                  final isSingleAyah = segment.startAyah == segment.endAyah;
+                  final fromText = isAr 
+                      ? '$startName، ${startPos[1].toArabicIndic()}' 
+                      : '$startName ${startPos[1]}';
+                  final toText = isSingleAyah
+                      ? l10n.werdSame
+                      : (isAr 
+                          ? '$endName، ${endPos[1].toArabicIndic()}' 
+                          : '$endName ${endPos[1]}');
+
+                  return Container(
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppTheme.cardBorder, width: 1),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Session badge with ayah count and time
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.accent.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.schedule_rounded, size: 10, color: AppTheme.accent),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      l10n.werdSession(index + 1),
+                                      style: GoogleFonts.outfit(
+                                        color: AppTheme.accent,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Text(
+                                l10n.werdAyahs(segment.ayahsCount),
+                                style: GoogleFonts.outfit(
+                                  color: AppTheme.accent,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          // Session time info
+                          if (segment.startTime != null) ...[
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Icon(Icons.access_time_rounded, color: AppTheme.textSecondary.withValues(alpha: 0.6), size: 14),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${segment.formattedStartTime} - ${segment.formattedEndTime}',
+                                  style: GoogleFonts.outfit(
+                                    color: AppTheme.textSecondary.withValues(alpha: 0.6),
+                                    fontSize: 11,
+                                  ),
+                                ),
+                                if (segment.durationMinutes != null) ...[
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '(${segment.durationMinutes} min)',
+                                    style: GoogleFonts.outfit(
+                                      color: AppTheme.textSecondary.withValues(alpha: 0.6),
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ],
+                          const SizedBox(height: 10),
+                          // From row
+                          Row(
+                            children: [
+                              Icon(Icons.back_hand_rounded, color: AppTheme.accent, size: 18),
+                              const SizedBox(width: 8),
+                              Text(
+                                l10n.werdFrom,
+                                style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  fromText, 
+                                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (!isSingleAyah) ...[
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                Icon(Icons.arrow_forward_rounded, color: AppTheme.accent, size: 16),
+                                const SizedBox(width: 8),
+                                Text(
+                                  l10n.werdTo,
+                                  style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    toText, 
+                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              // EDIT button
+                              IconButton(
+                                icon: const Icon(Icons.edit_rounded, size: 18),
+                                onPressed: () {
+                                  // Pop dialog first then open edit
+                                  Navigator.of(dialogContext).pop();
+                                  _showEditSegmentDialog(context, progress, index, segment, isAr);
+                                },
+                                tooltip: l10n.werdEditSegment,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
+                              const SizedBox(width: 4),
+                              // DELETE button
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                                color: Colors.red[300],
+                                onPressed: () {
+                                  // Perform action BEFORE popping dialog
+                                  context.read<WerdBloc>().add(WerdEvent.removeSegment(index));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(isAr ? 'تم حذف الجلسة' : 'Session removed'),
+                                      duration: const Duration(seconds: 2),
+                                    ),
+                                  );
+                                  // THEN pop the dialog
+                                  Navigator.of(dialogContext).pop();
+                                },
+                                tooltip: l10n.werdDelete,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+
+              const Divider(height: 24),
+
+              // Add range button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    // Pop dialog first then open add range
+                    Navigator.of(dialogContext).pop();
+                    _showAddRangeDialog(context, progress, isAr);
+                  },
+                  icon: const Icon(Icons.add_rounded),
+                  label: Text(l10n.werdAddRange),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.accent,
+                    foregroundColor: AppTheme.onAccent,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          // DEBUG: Show raw SharedPreferences data
+          TextButton.icon(
+            onPressed: () async {
+              debugPrint('🔍 Reading raw SharedPreferences data...');
+              final prefs = await SharedPreferences.getInstance();
+              final werdProgress = prefs.getString('werd_progress_default');
+              final werdGoal = prefs.getString('werd_goal_default');
+              
+              debugPrint('╔══════════════════════════════════════════╗');
+              debugPrint('📊 RAW SHARED PREFERENCES DATA');
+              debugPrint('╠══════════════════════════════════════════╣');
+              debugPrint('werd_progress_default:');
+              debugPrint(werdProgress ?? '(not found)');
+              debugPrint('');
+              debugPrint('werd_goal_default:');
+              debugPrint(werdGoal ?? '(not found)');
+              debugPrint('╚══════════════════════════════════════════╝');
+              
+              if (werdProgress != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(isAr ? 'تم عرض البيانات في السجل' : 'Raw data printed to logs'),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+            icon: const Icon(Icons.bug_report_rounded, size: 18),
+            label: Text(isAr ? 'عرض البيانات' : 'Show Raw Data'),
+          ),
+          // DEBUG: Clear all today's data button
+          TextButton.icon(
+            onPressed: () async {
+              debugPrint('🗑️ Clearing werd progress data from SharedPreferences...');
+              
+              // Use SharedPreferences since that's where the data is stored
+              final prefs = await SharedPreferences.getInstance();
+              
+              // Find all werd progress keys
+              final allKeys = prefs.getKeys();
+              final werdKeys = allKeys.where((k) => 
+                k.startsWith('werd_progress_') || k.startsWith('werd_goal_')
+              ).toList();
+              
+              debugPrint('📋 Found ${werdKeys.length} werd keys: $werdKeys');
+              
+              for (final key in werdKeys) {
+                await prefs.remove(key);
+                debugPrint('✅ Deleted: $key');
+              }
+              
+              debugPrint('✅ Cleared all werd progress data from SharedPreferences');
+              
+              // Close the dialog first
+              Navigator.of(context).pop();
+              
+              // Force reload the BLoC with empty state
+              context.read<WerdBloc>().add(const WerdEvent.load());
+              
+              debugPrint('🔄 Reloaded WerdBloc with empty state');
+              
+              // Show success message
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(isAr ? 'تم مسح البيانات بنجاح!' : 'Data cleared successfully!'),
+                  backgroundColor: Colors.green,
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            },
+            icon: const Icon(Icons.delete_forever_rounded, size: 18, color: Colors.red),
+            label: Text(isAr ? 'مسح البيانات' : 'Clear All Data', style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.werdClose),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showEditSegmentDialog(
+    BuildContext context,
+    WerdProgress progress,
+    int segmentIndex,
+    ReadingSegment segment,
+    bool isAr,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final startSurahs = List.generate(114, (i) => i + 1);
+    final endSurahs = List.generate(114, (i) => i + 1);
+
+    final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(segment.startAyah);
+    final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(segment.endAyah);
+
+    int selectedStartSurah = startPos[0];
+    int startAyah = startPos[1];
+    int selectedEndSurah = endPos[0];
+    int endAyah = endPos[1];
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          final startAyahCount = quran.getVerseCount(selectedStartSurah);
+          final endAyahCount = quran.getVerseCount(selectedEndSurah);
+          final fromAbs = QuranHizbProvider.getAbsoluteAyahNumber(selectedStartSurah, startAyah);
+          final toAbs = QuranHizbProvider.getAbsoluteAyahNumber(selectedEndSurah, endAyah);
+          final isReversed = fromAbs > toAbs;
+
+          return AlertDialog(
+            title: Text(l10n.werdEditSegment),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // FROM section
+                  Text(l10n.werdFrom, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14)),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<int>(
+                    value: selectedStartSurah,
+                    decoration: InputDecoration(labelText: l10n.surah),
+                    items: startSurahs.map((s) {
+                      final name = isAr ? quran.getSurahNameArabic(s) : quran.getSurahName(s);
+                      return DropdownMenuItem(value: s, child: Text('${s.toString().padLeft(3, '0')} | $name', overflow: TextOverflow.ellipsis));
+                    }).toList(),
+                    onChanged: (v) => setDialogState(() {
+                      selectedStartSurah = v!;
+                      startAyah = 1;
+                    }),
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<int>(
+                    value: startAyah.clamp(1, startAyahCount),
+                    decoration: InputDecoration(labelText: l10n.ayah),
+                    items: List.generate(startAyahCount, (i) => i + 1).map((a) {
+                      return DropdownMenuItem(value: a, child: Text('$a'));
+                    }).toList(),
+                    onChanged: (v) => setDialogState(() => startAyah = v!),
+                  ),
+                  const SizedBox(height: 16),
+                  // TO section
+                  Text(l10n.werdTo, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14)),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<int>(
+                    value: selectedEndSurah,
+                    decoration: InputDecoration(labelText: l10n.surah),
+                    items: endSurahs.map((s) {
+                      final name = isAr ? quran.getSurahNameArabic(s) : quran.getSurahName(s);
+                      return DropdownMenuItem(value: s, child: Text('${s.toString().padLeft(3, '0')} | $name', overflow: TextOverflow.ellipsis));
+                    }).toList(),
+                    onChanged: (v) => setDialogState(() {
+                      selectedEndSurah = v!;
+                      endAyah = 1;
+                    }),
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<int>(
+                    value: endAyah.clamp(1, endAyahCount),
+                    decoration: InputDecoration(labelText: l10n.ayah),
+                    items: List.generate(endAyahCount, (i) => i + 1).map((a) {
+                      return DropdownMenuItem(value: a, child: Text('$a'));
+                    }).toList(),
+                    onChanged: (v) => setDialogState(() => endAyah = v!),
+                  ),
+                  if (isReversed) ...[
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Icon(Icons.warning_amber_rounded, size: 16, color: Colors.orange.shade700),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            l10n.werdRangeCorrected,
+                            style: TextStyle(
+                              color: Colors.orange.shade700,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: Text(l10n.werdCancel),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  final newFromAbs = QuranHizbProvider.getAbsoluteAyahNumber(selectedStartSurah, startAyah);
+                  final newToAbs = QuranHizbProvider.getAbsoluteAyahNumber(selectedEndSurah, endAyah);
+
+                  // Remove old segment
+                  context.read<WerdBloc>().add(WerdEvent.removeSegment(segmentIndex));
+
+                  // Add new segment (allow from > to for backward reading)
+                  final start = newFromAbs < newToAbs ? newFromAbs : newToAbs;
+                  final end = newFromAbs < newToAbs ? newToAbs : newFromAbs;
+                  context.read<WerdBloc>().add(WerdEvent.trackRangeRead(start, end));
+
+                  // Show SnackBar BEFORE popping dialog
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(isAr ? 'تم تحديث الجلسة' : 'Segment updated'),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+
+                  // THEN pop the dialog
+                  Navigator.of(dialogContext).pop();
+                },
+                child: Text(l10n.werdUpdate),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _showAddRangeDialog(BuildContext context, WerdProgress progress, bool isAr) async {
+    final l10n = AppLocalizations.of(context)!;
+    int selectedStartSurah = 1;
+    int startAyah = 1;
+    int selectedEndSurah = 1;
+    int endAyah = 1;
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          final startAyahCount = quran.getVerseCount(selectedStartSurah);
+          final endAyahCount = quran.getVerseCount(selectedEndSurah);
+          final fromAbs = QuranHizbProvider.getAbsoluteAyahNumber(selectedStartSurah, startAyah);
+          final toAbs = QuranHizbProvider.getAbsoluteAyahNumber(selectedEndSurah, endAyah);
+          final isReversed = fromAbs > toAbs;
+          final effectiveFrom = isReversed ? toAbs : fromAbs;
+          final effectiveTo = isReversed ? fromAbs : toAbs;
+          final ayahCount = (toAbs - fromAbs).abs() + 1;
+
+          final fromSurahName = isAr
+              ? quran.getSurahNameArabic(isReversed ? selectedEndSurah : selectedStartSurah)
+              : quran.getSurahName(isReversed ? selectedEndSurah : selectedStartSurah);
+          final toSurahName = isAr
+              ? quran.getSurahNameArabic(isReversed ? selectedStartSurah : selectedEndSurah)
+              : quran.getSurahName(isReversed ? selectedStartSurah : selectedEndSurah);
+
+          return AlertDialog(
+            title: Text(l10n.werdAddRange),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Range preview card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.accent.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppTheme.accent.withOpacity(0.3)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.werdRangePreview(fromSurahName, startAyah, toSurahName, endAyah),
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.accent,
+                            fontSize: 14,
+                          ),
+                        ),
+                        if (isReversed) ...[
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(Icons.warning_amber_rounded, size: 16, color: Colors.orange.shade700),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  l10n.werdRangeCorrected,
+                                  style: TextStyle(
+                                    color: Colors.orange.shade700,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        const SizedBox(height: 8),
+                        Text(
+                          l10n.werdWillAdd(ayahCount),
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.accent,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // FROM section
+                  Text(l10n.werdFrom, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<int>(
+                    value: selectedStartSurah,
+                    decoration: InputDecoration(labelText: l10n.surah),
+                    items: List.generate(114, (i) => i + 1).map((s) {
+                      final name = isAr ? quran.getSurahNameArabic(s) : quran.getSurahName(s);
+                      return DropdownMenuItem(value: s, child: Text('${s.toString().padLeft(3, '0')} | $name', overflow: TextOverflow.ellipsis));
+                    }).toList(),
+                    onChanged: (v) => setDialogState(() {
+                      selectedStartSurah = v!;
+                      startAyah = 1;
+                    }),
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<int>(
+                    value: startAyah,
+                    decoration: InputDecoration(labelText: l10n.ayah),
+                    items: List.generate(startAyahCount, (i) => i + 1).map((a) {
+                      return DropdownMenuItem(value: a, child: Text('$a'));
+                    }).toList(),
+                    onChanged: (v) => setDialogState(() => startAyah = v!),
+                  ),
+                  const SizedBox(height: 16),
+                  // TO section
+                  Text(l10n.werdTo, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<int>(
+                    value: selectedEndSurah,
+                    decoration: InputDecoration(labelText: l10n.surah),
+                    items: List.generate(114, (i) => i + 1).map((s) {
+                      final name = isAr ? quran.getSurahNameArabic(s) : quran.getSurahName(s);
+                      return DropdownMenuItem(value: s, child: Text('${s.toString().padLeft(3, '0')} | $name', overflow: TextOverflow.ellipsis));
+                    }).toList(),
+                    onChanged: (v) => setDialogState(() {
+                      selectedEndSurah = v!;
+                      endAyah = 1;
+                    }),
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<int>(
+                    value: endAyah,
+                    decoration: InputDecoration(labelText: l10n.ayah),
+                    items: List.generate(endAyahCount, (i) => i + 1).map((a) {
+                      return DropdownMenuItem(value: a, child: Text('$a'));
+                    }).toList(),
+                    onChanged: (v) => setDialogState(() => endAyah = v!),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: Text(l10n.werdCancel),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  final start = effectiveFrom;
+                  final end = effectiveTo;
+
+                  // DEBUG: Log what we're about to save
+                  debugPrint('💾 [Add Range Dialog] Saving:');
+                  debugPrint('   effectiveFrom = $effectiveFrom');
+                  debugPrint('   effectiveTo = $effectiveTo');
+                  debugPrint('   start = $start');
+                  debugPrint('   end = $end');
+                  debugPrint('   Will call: WerdEvent.trackRangeRead($start, $end)');
+
+                  context.read<WerdBloc>().add(WerdEvent.trackRangeRead(start, end));
+                  
+                  // Show SnackBar BEFORE popping dialog
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        isAr ? 'تمت إضافة $ayahCount آية' : 'Added $ayahCount ayahs',
+                      ),
+                    ),
+                  );
+                  
+                  // THEN pop the dialog
+                  Navigator.of(dialogContext).pop();
+                },
+                child: Text(l10n.werdAdd),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -692,17 +1361,28 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
 
   Widget _buildFooter(
     BuildContext context,
-    dynamic progress,
+    WerdProgress? progress,
     bool isAr,
     bool isShort,
   ) {
-    // Correct Continue Logic:
-    // If we have not read anything today, start from the sessionStartAbsolute.
-    // If we have read something today, continue from the lastReadAbsolute.
-    int targetAbs = progress?.sessionStartAbsolute ?? 1;
-    if ((progress?.totalAmountReadToday ?? 0) > 0 &&
-        progress?.lastReadAbsolute != null) {
-      targetAbs = progress!.lastReadAbsolute!;
+    // NEW Continue Logic (per agreed plan):
+    // 1. If finished Quran (completedCycles > 0 and at ayah 6236) → go to ayah 1
+    // 2. If has lastReadAbsolute → go to NEXT ayah (lastReadAbs + 1)
+    // 3. First time → go to ayah 1
+    int targetAbs;
+
+    final completedCycles = progress?.completedCycles ?? 0;
+    final lastReadAbs = progress?.lastReadAbsolute;
+
+    if (completedCycles > 0 && lastReadAbs == 6236) {
+      // Just finished Quran, start new cycle
+      targetAbs = 1;
+    } else if (lastReadAbs != null) {
+      // Has progress, continue from NEXT position (not the last read ayah itself)
+      targetAbs = (lastReadAbs + 1 > 6236) ? 1 : lastReadAbs + 1;
+    } else {
+      // First time user or no progress
+      targetAbs = 1;
     }
 
     return Row(
@@ -739,6 +1419,10 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
               final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(
                 targetAbs,
               );
+              
+              // Start a new session when clicking Continue
+              context.read<WerdBloc>().add(WerdEvent.startSession(targetAbs));
+              
               Navigator.push(
                 context,
                 QuranReaderPage.route(surahNumber: pos[0], ayahNumber: pos[1]),
@@ -782,62 +1466,64 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppTheme.cardBorder, width: 1.5),
       ),
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppTheme.accent.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.auto_awesome_rounded,
-              color: AppTheme.accent,
-              size: 48,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            isAr ? 'ابدأ رحلتك مع القرآن' : 'Start Your Quran Journey',
-            style: GoogleFonts.amiri(
-              color: AppTheme.textPrimary,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            isAr
-                ? 'حدد وردك اليومي وتابع تقدمك بسهولة'
-                : 'Set your daily werd and track your progress easily',
-            style: GoogleFonts.amiri(
-              color: AppTheme.textSecondary,
-              fontSize: 14,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 32),
-          ElevatedButton(
-            onPressed: widget.onSetGoalPressed,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.accent,
-              foregroundColor: AppTheme.onAccent,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppTheme.accent.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-              elevation: 4,
+              child: const Icon(
+                Icons.auto_awesome_rounded,
+                color: AppTheme.accent,
+                size: 48,
+              ),
             ),
-            child: Text(
-              isAr ? 'تحديد ورد الآن' : 'Set Goal Now',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            const SizedBox(height: 24),
+            Text(
+              isAr ? 'ابدأ رحلتك مع القرآن' : 'Start Your Quran Journey',
+              style: GoogleFonts.amiri(
+                color: AppTheme.textPrimary,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            Text(
+              isAr
+                  ? 'حدد وردك اليومي وتابع تقدمك بسهولة'
+                  : 'Set your daily werd and track your progress easily',
+              style: GoogleFonts.amiri(
+                color: AppTheme.textSecondary,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: widget.onSetGoalPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.accent,
+                foregroundColor: AppTheme.onAccent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                elevation: 4,
+              ),
+              child: Text(
+                isAr ? 'تحديد ورد الآن' : 'Set Goal Now',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -6,6 +6,7 @@ class WerdHistoryEntry extends Equatable {
   final int endAbsolute;
   final double pagesRead;
   final double juzRead;
+  final int segmentCount; // NEW: Number of reading segments that day
   final String startSurahName;
   final int startAyahNumber;
   final String endSurahName;
@@ -18,6 +19,7 @@ class WerdHistoryEntry extends Equatable {
     required this.endAbsolute,
     required this.pagesRead,
     required this.juzRead,
+    this.segmentCount = 1,
     required this.startSurahName,
     required this.startAyahNumber,
     required this.endSurahName,
@@ -32,6 +34,7 @@ class WerdHistoryEntry extends Equatable {
     endAbsolute,
     pagesRead,
     juzRead,
+    segmentCount,
     startSurahName,
     startAyahNumber,
     endSurahName,
@@ -45,6 +48,7 @@ class WerdHistoryEntry extends Equatable {
     'endAbsolute': endAbsolute,
     'pagesRead': pagesRead,
     'juzRead': juzRead,
+    'segmentCount': segmentCount,
     'startSurahName': startSurahName,
     'startAyahNumber': startAyahNumber,
     'endSurahName': endSurahName,
@@ -59,6 +63,7 @@ class WerdHistoryEntry extends Equatable {
       endAbsolute: json['endAbsolute'] ?? 0,
       pagesRead: (json['pagesRead'] as num?)?.toDouble() ?? 0.0,
       juzRead: (json['juzRead'] as num?)?.toDouble() ?? 0.0,
+      segmentCount: json['segmentCount'] ?? 1,
       startSurahName: json['startSurahName'] ?? '',
       startAyahNumber: json['startAyahNumber'] ?? 0,
       endSurahName: json['endSurahName'] ?? '',

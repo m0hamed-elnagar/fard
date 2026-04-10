@@ -84,4 +84,24 @@ class WerdGoal extends Equatable {
 
     return QuranHizbProvider.getGoalRequiredAyahs(startAbs, unit, value);
   }
+
+  WerdGoal copyWith({
+    String? id,
+    WerdCategory? category,
+    WerdGoalType? type,
+    int? value,
+    WerdUnit? unit,
+    DateTime? startDate,
+    int? startAbsolute,
+  }) {
+    return WerdGoal(
+      id: id ?? this.id,
+      category: category ?? this.category,
+      type: type ?? this.type,
+      value: value ?? this.value,
+      unit: unit ?? this.unit,
+      startDate: startDate ?? this.startDate,
+      startAbsolute: startAbsolute ?? this.startAbsolute,
+    );
+  }
 }

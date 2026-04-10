@@ -29,25 +29,48 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
   void initState() {
     super.initState();
     final currentGoal = context.read<WerdBloc>().state.goal;
+    final werdBlocState = context.read<WerdBloc>().state;
+    final progress = werdBlocState.progress;
     int initialValue = 10;
+
     if (currentGoal != null) {
       _type = currentGoal.type;
       _unit = currentGoal.unit;
       initialValue = currentGoal.value;
+    }
 
-      if (currentGoal.startAbsolute != null) {
-        if (currentGoal.startAbsolute == 1) {
-          _startPointType = 0;
-        } else {
-          _startPointType = 2;
-          final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(
-            currentGoal.startAbsolute!,
-          );
-          _selectedSurah = pos[0];
-          _selectedAyah = pos[1];
-        }
+    // If user has progress, pre-populate the specific place selector with current position
+    if (progress?.lastReadAbsolute != null) {
+      final currentPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(
+        progress!.lastReadAbsolute!,
+      );
+      _selectedSurah = currentPos[0];
+      _selectedAyah = currentPos[1];
+    }
+
+    // PRIORITY 1: If user has been reading, show "from where stopped"
+    // Check both lastReadAbsolute and that they've actually read something (totalAmountReadToday > 0)
+    if (progress?.lastReadAbsolute != null && progress!.totalAmountReadToday > 0) {
+      _startPointType = 1; // "From last read" - shows current position
+    }
+    // PRIORITY 2: Check if there's a saved goal with specific start
+    else if (currentGoal?.startAbsolute != null) {
+      if (currentGoal!.startAbsolute == 1) {
+        _startPointType = 0; // "From beginning"
+      } else {
+        _startPointType = 2; // "Specific place"
+        final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(
+          currentGoal.startAbsolute!,
+        );
+        _selectedSurah = pos[0];
+        _selectedAyah = pos[1];
       }
     }
+    // Default: No progress, no goal - start from beginning
+    else {
+      _startPointType = 0;
+    }
+
     _valueController = TextEditingController(text: initialValue.toString());
   }
 
@@ -282,15 +305,15 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
           items: [
             DropdownMenuItem(
               value: 0,
-              child: Text(isAr ? 'من البداية' : 'From beginning'),
+              child: Text(isAr ? 'من البداية (الفاتحة)' : 'Start from Al-Fatihah (beginning)'),
             ),
             DropdownMenuItem(
               value: 1,
-              child: Text(isAr ? 'من حيث توقفت' : 'From last read'),
+              child: Text(isAr ? 'متابعة من حيث توقفت' : 'Continue where I stopped'),
             ),
             DropdownMenuItem(
               value: 2,
-              child: Text(isAr ? 'مكان محدد' : 'Specific place'),
+              child: Text(isAr ? 'اختيار سورة وآية محددة' : 'Choose specific surah/ayah'),
             ),
           ],
           onChanged: (v) => setState(() => _startPointType = v ?? 0),

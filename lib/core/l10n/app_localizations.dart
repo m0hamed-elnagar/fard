@@ -1544,6 +1544,66 @@ abstract class AppLocalizations {
   /// **'Next Surah'**
   String get nextSurah;
 
+  /// No description provided for @completionDoaa.
+  ///
+  /// In en, this message translates to:
+  /// **'Completion Doaa'**
+  String get completionDoaa;
+
+  /// No description provided for @completionDoaaArabic.
+  ///
+  /// In en, this message translates to:
+  /// **'دعاء ختم القرآن'**
+  String get completionDoaaArabic;
+
+  /// No description provided for @cycleCompletionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quran Completion'**
+  String get cycleCompletionTitle;
+
+  /// No description provided for @cycleCompletionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve completed reading the entire Quran'**
+  String get cycleCompletionSubtitle;
+
+  /// No description provided for @cycleCompletionReadDoaa.
+  ///
+  /// In en, this message translates to:
+  /// **'Read completion doaa'**
+  String get cycleCompletionReadDoaa;
+
+  /// No description provided for @cycleCompletionReadDoaaDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigate to completion supplications'**
+  String get cycleCompletionReadDoaaDesc;
+
+  /// No description provided for @cycleCompletionRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start new cycle'**
+  String get cycleCompletionRestart;
+
+  /// No description provided for @cycleCompletionRestartDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to Surah Al-Fatihah (Ayah 1)'**
+  String get cycleCompletionRestartDesc;
+
+  /// No description provided for @cycleCompletionStay.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay here'**
+  String get cycleCompletionStay;
+
+  /// No description provided for @cycleCompletionStayDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep current position at Surah An-Nas'**
+  String get cycleCompletionStayDesc;
+
   /// No description provided for @downloadCenterBtn.
   ///
   /// In en, this message translates to:
@@ -1832,6 +1892,78 @@ abstract class AppLocalizations {
   /// **'Did you really finish from {start} to {end} ({pages} pages)?'**
   String jumpConfirmMessage(String start, String end, String pages);
 
+  /// No description provided for @jumpDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Significant Jump Detected'**
+  String get jumpDialogTitle;
+
+  /// No description provided for @jumpFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Current position'**
+  String get jumpFrom;
+
+  /// No description provided for @jumpTo.
+  ///
+  /// In en, this message translates to:
+  /// **'You tapped'**
+  String get jumpTo;
+
+  /// No description provided for @jumpGapInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Gap: {gap} ayahs ({pages} pages)'**
+  String jumpGapInfo(String gap, String pages);
+
+  /// No description provided for @jumpWhatToDo.
+  ///
+  /// In en, this message translates to:
+  /// **'What would you like to do?'**
+  String get jumpWhatToDo;
+
+  /// No description provided for @jumpOptionDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get jumpOptionDismiss;
+
+  /// No description provided for @jumpDismissDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t mark anything as read, keep your current progress unchanged'**
+  String get jumpDismissDesc;
+
+  /// No description provided for @jumpOptionNewSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Start new session'**
+  String get jumpOptionNewSession;
+
+  /// No description provided for @jumpNewSessionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark only this ayah as read (+1 ayah, total today: {current} → {newTotal})'**
+  String jumpNewSessionDesc(String current, String newTotal);
+
+  /// No description provided for @jumpOptionMarkAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all as read'**
+  String get jumpOptionMarkAll;
+
+  /// No description provided for @jumpMarkAllDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark ALL {gap} ayahs ({pages} pages) from your last position to here as read'**
+  String jumpMarkAllDesc(String gap, String pages);
+
+  /// No description provided for @jumpTotalToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Total today: {count} ayahs'**
+  String jumpTotalToday(String count);
+
   /// No description provided for @goToPlayingAyah.
   ///
   /// In en, this message translates to:
@@ -2047,6 +2179,185 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stopping...'**
   String get stopping;
+
+  /// No description provided for @werdEditDialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Reading'**
+  String get werdEditDialog;
+
+  /// No description provided for @werdTodayReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Reading'**
+  String get werdTodayReading;
+
+  /// No description provided for @werdNoSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'No reading sessions today'**
+  String get werdNoSessions;
+
+  /// No description provided for @werdSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Session {number}'**
+  String werdSession(int number);
+
+  /// No description provided for @werdFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get werdFrom;
+
+  /// No description provided for @werdTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get werdTo;
+
+  /// No description provided for @werdEditSegment.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Segment'**
+  String get werdEditSegment;
+
+  /// No description provided for @werdAddRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Reading Range'**
+  String get werdAddRange;
+
+  /// No description provided for @werdRangePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'From: {fromSurah} {fromAyah}\nTo: {toSurah} {toAyah}'**
+  String werdRangePreview(
+    String fromSurah,
+    int fromAyah,
+    String toSurah,
+    int toAyah,
+  );
+
+  /// No description provided for @werdWillAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Will add: {count} ayahs'**
+  String werdWillAdd(int count);
+
+  /// No description provided for @werdUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get werdUpdate;
+
+  /// No description provided for @werdDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get werdDelete;
+
+  /// No description provided for @werdClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get werdClose;
+
+  /// No description provided for @werdCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get werdCancel;
+
+  /// No description provided for @werdAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get werdAdd;
+
+  /// No description provided for @werdSame.
+  ///
+  /// In en, this message translates to:
+  /// **'same'**
+  String get werdSame;
+
+  /// No description provided for @werdAyahs.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} ayahs'**
+  String werdAyahs(int count);
+
+  /// No description provided for @werdRangeCorrected.
+  ///
+  /// In en, this message translates to:
+  /// **'Range automatically corrected'**
+  String get werdRangeCorrected;
+
+  /// No description provided for @werdUndoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo Last Read?'**
+  String get werdUndoTitle;
+
+  /// No description provided for @werdUndoMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove the last reading session ({count} ayahs from {fromSurah} to {toSurah})'**
+  String werdUndoMessage(int count, String fromSurah, String toSurah);
+
+  /// No description provided for @werdUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get werdUndo;
+
+  /// No description provided for @werdNothingToUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to undo'**
+  String get werdNothingToUndo;
+
+  /// No description provided for @werdNoSessionToRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'No reading session to remove'**
+  String get werdNoSessionToRemove;
+
+  /// No description provided for @jumpToAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump to Ayah'**
+  String get jumpToAyah;
+
+  /// No description provided for @quickSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Select'**
+  String get quickSelect;
+
+  /// No description provided for @go.
+  ///
+  /// In en, this message translates to:
+  /// **'Go'**
+  String get go;
+
+  /// No description provided for @ayahs.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayahs'**
+  String get ayahs;
+
+  /// No description provided for @scrollToTop.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll to Top'**
+  String get scrollToTop;
+
+  /// No description provided for @juz.
+  ///
+  /// In en, this message translates to:
+  /// **'Juz'**
+  String get juz;
 }
 
 class _AppLocalizationsDelegate

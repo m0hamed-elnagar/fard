@@ -290,6 +290,16 @@
   "rotatePhoneForQibla": "قم بتدوير الهاتف حتى يشير السهم للأعلى",
   "previousSurah": "السورة السابقة",
   "nextSurah": "السورة التالية",
+  "completionDoaa": "دعاء ختم القرآن",
+  "completionDoaaArabic": "دعاء ختم القرآن",
+  "cycleCompletionTitle": "إتمام القرآن الكريم",
+  "cycleCompletionSubtitle": "لقد أتممت قراءة القرآن الكريم بالكامل",
+  "cycleCompletionReadDoaa": "قراءة دعاء الختم",
+  "cycleCompletionReadDoaaDesc": "الانتقال إلى صفحة الأذكار",
+  "cycleCompletionRestart": "بدء دورة جديدة",
+  "cycleCompletionRestartDesc": "العودة إلى سورة الفاتحة (الآية 1)",
+  "cycleCompletionStay": "البقاء هنا",
+  "cycleCompletionStayDesc": "الإبقاء على الموضع الحالي عند سورة الناس",
   "downloadCenterBtn": "مركز التحميل",
   "switchLanguage": "تغيير اللغة",
   "meccan": "مكية",
@@ -358,6 +368,55 @@
       }
     }
   },
+  "jumpDialogTitle": "تم اكتشاف قفزة كبيرة",
+  "jumpFrom": "الموقع الحالي",
+  "jumpTo": "لقد نقرت",
+  "jumpGapInfo": "الفجوة: {gap} آية ({pages} صفحات)",
+  "@jumpGapInfo": {
+    "placeholders": {
+      "gap": {
+        "type": "String"
+      },
+      "pages": {
+        "type": "String"
+      }
+    }
+  },
+  "jumpWhatToDo": "ماذا تريد أن تفعل؟",
+  "jumpOptionDismiss": "تجاهل",
+  "jumpDismissDesc": "لا تعلم شيئاً كمقروء، ابقِ تقدمك الحالي كما هو",
+  "jumpOptionNewSession": "ابدأ جلسة جديدة",
+  "jumpNewSessionDesc": "علّم هذه الآية فقط كمقروءة (+1 آية، الإجمالي اليوم: {current} → {newTotal})",
+  "@jumpNewSessionDesc": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "newTotal": {
+        "type": "String"
+      }
+    }
+  },
+  "jumpOptionMarkAll": "تحديد الكل كمقروء",
+  "jumpMarkAllDesc": "علّم جميع {gap} آية ({pages} صفحات) من موقعك الأخير إلى هنا كمقروءة",
+  "@jumpMarkAllDesc": {
+    "placeholders": {
+      "gap": {
+        "type": "String"
+      },
+      "pages": {
+        "type": "String"
+      }
+    }
+  },
+  "jumpTotalToday": "الإجمالي اليوم: {count} آية",
+  "@jumpTotalToday": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "goToPlayingAyah": "الذهاب إلى الآية الحالية",
   "repeatAyah": "تكرار الآية",
   "dataBackup": "البيانات والنسخ الاحتياطي",
@@ -393,5 +452,64 @@
   "downloadsChannelName": "التحميلات",
   "downloadsChannelDesc": "تحميلات الملفات الجارية",
   "starting": "جاري البدء...",
-  "stopping": "جاري الإيقاف..."
+  "stopping": "جاري الإيقاف...",
+  "werdEditDialog": "تعديل القراءة",
+  "werdTodayReading": "قراءة اليوم",
+  "werdNoSessions": "لا توجد قراءة اليوم",
+  "werdSession": "الجلسة {number}",
+  "@werdSession": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "werdFrom": "من",
+  "werdTo": "إلى",
+  "werdEditSegment": "تعديل الجلسة",
+  "werdAddRange": "إضافة نطاق قراءة",
+  "werdRangePreview": "من: {fromSurah} {fromAyah}\nإلى: {toSurah} {toAyah}",
+  "@werdRangePreview": {
+    "placeholders": {
+      "fromSurah": { "type": "String" },
+      "fromAyah": { "type": "int" },
+      "toSurah": { "type": "String" },
+      "toAyah": { "type": "int" }
+    }
+  },
+  "werdWillAdd": "إضافة: {count} آية",
+  "@werdWillAdd": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "werdUpdate": "تحديث",
+  "werdDelete": "حذف",
+  "werdClose": "إغلاق",
+  "werdCancel": "إلغاء",
+  "werdAdd": "إضافة",
+  "werdSame": "نفسها",
+  "werdAyahs": "{count} آية",
+  "@werdAyahs": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "werdRangeCorrected": "تم تصحيح النطاق تلقائياً",
+  "werdUndoTitle": "تراجع عن آخر قراءة؟",
+  "werdUndoMessage": "سيتم إزالة آخر جلسة قراءة ({count} آية من {fromSurah} إلى {toSurah})",
+  "@werdUndoMessage": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "fromSurah": { "type": "String" },
+      "toSurah": { "type": "String" }
+    }
+  },
+  "werdUndo": "تراجع",
+  "werdNothingToUndo": "لا شيء للتراجع عنه",
+  "werdNoSessionToRemove": "لا توجد جلسة قراءة لإزالتها",
+  "jumpToAyah": "الانتقال إلى آية",
+  "quickSelect": "اختيار سريع",
+  "go": "انتقل",
+  "ayahs": "آيات",
+  "scrollToTop": "العودة للأعلى",
+  "juz": "الجزء"
 }

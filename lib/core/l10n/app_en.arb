@@ -290,6 +290,16 @@
   "rotatePhoneForQibla": "Rotate phone until the arrow points up",
   "previousSurah": "Previous Surah",
   "nextSurah": "Next Surah",
+  "completionDoaa": "Completion Doaa",
+  "completionDoaaArabic": "دعاء ختم القرآن",
+  "cycleCompletionTitle": "Quran Completion",
+  "cycleCompletionSubtitle": "You've completed reading the entire Quran",
+  "cycleCompletionReadDoaa": "Read completion doaa",
+  "cycleCompletionReadDoaaDesc": "Navigate to completion supplications",
+  "cycleCompletionRestart": "Start new cycle",
+  "cycleCompletionRestartDesc": "Reset to Surah Al-Fatihah (Ayah 1)",
+  "cycleCompletionStay": "Stay here",
+  "cycleCompletionStayDesc": "Keep current position at Surah An-Nas",
   "downloadCenterBtn": "Download Center",
   "switchLanguage": "Switch Language",
   "meccan": "Meccan",
@@ -358,6 +368,55 @@
       }
     }
   },
+  "jumpDialogTitle": "Significant Jump Detected",
+  "jumpFrom": "Current position",
+  "jumpTo": "You tapped",
+  "jumpGapInfo": "Gap: {gap} ayahs ({pages} pages)",
+  "@jumpGapInfo": {
+    "placeholders": {
+      "gap": {
+        "type": "String"
+      },
+      "pages": {
+        "type": "String"
+      }
+    }
+  },
+  "jumpWhatToDo": "What would you like to do?",
+  "jumpOptionDismiss": "Dismiss",
+  "jumpDismissDesc": "Don't mark anything as read, keep your current progress unchanged",
+  "jumpOptionNewSession": "Start new session",
+  "jumpNewSessionDesc": "Mark only this ayah as read (+1 ayah, total today: {current} → {newTotal})",
+  "@jumpNewSessionDesc": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "newTotal": {
+        "type": "String"
+      }
+    }
+  },
+  "jumpOptionMarkAll": "Mark all as read",
+  "jumpMarkAllDesc": "Mark ALL {gap} ayahs ({pages} pages) from your last position to here as read",
+  "@jumpMarkAllDesc": {
+    "placeholders": {
+      "gap": {
+        "type": "String"
+      },
+      "pages": {
+        "type": "String"
+      }
+    }
+  },
+  "jumpTotalToday": "Total today: {count} ayahs",
+  "@jumpTotalToday": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "goToPlayingAyah": "Go to playing Ayah",
   "repeatAyah": "Repeat Ayah",
   "dataBackup": "Data & Backup",
@@ -393,5 +452,64 @@
   "downloadsChannelName": "Downloads",
   "downloadsChannelDesc": "Ongoing file downloads",
   "starting": "Starting...",
-  "stopping": "Stopping..."
+  "stopping": "Stopping...",
+  "werdEditDialog": "Edit Reading",
+  "werdTodayReading": "Today's Reading",
+  "werdNoSessions": "No reading sessions today",
+  "werdSession": "Session {number}",
+  "@werdSession": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "werdFrom": "From",
+  "werdTo": "To",
+  "werdEditSegment": "Edit Segment",
+  "werdAddRange": "Add Reading Range",
+  "werdRangePreview": "From: {fromSurah} {fromAyah}\nTo: {toSurah} {toAyah}",
+  "@werdRangePreview": {
+    "placeholders": {
+      "fromSurah": { "type": "String" },
+      "fromAyah": { "type": "int" },
+      "toSurah": { "type": "String" },
+      "toAyah": { "type": "int" }
+    }
+  },
+  "werdWillAdd": "Will add: {count} ayahs",
+  "@werdWillAdd": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "werdUpdate": "Update",
+  "werdDelete": "Delete",
+  "werdClose": "Close",
+  "werdCancel": "Cancel",
+  "werdAdd": "Add",
+  "werdSame": "same",
+  "werdAyahs": "{count} ayahs",
+  "@werdAyahs": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "werdRangeCorrected": "Range automatically corrected",
+  "werdUndoTitle": "Undo Last Read?",
+  "werdUndoMessage": "This will remove the last reading session ({count} ayahs from {fromSurah} to {toSurah})",
+  "@werdUndoMessage": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "fromSurah": { "type": "String" },
+      "toSurah": { "type": "String" }
+    }
+  },
+  "werdUndo": "Undo",
+  "werdNothingToUndo": "Nothing to undo",
+  "werdNoSessionToRemove": "No reading session to remove",
+  "jumpToAyah": "Jump to Ayah",
+  "quickSelect": "Quick Select",
+  "go": "Go",
+  "ayahs": "Ayahs",
+  "scrollToTop": "Scroll to Top",
+  "juz": "Juz"
 }

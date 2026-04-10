@@ -66,6 +66,9 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
   }
 
   Widget _buildProgressBar(List<AzkarItem> azkar) {
+    final completedCount = azkar.where((item) => item.currentCount >= item.count).length;
+    final progressValue = azkar.isNotEmpty ? completedCount.toDouble() / azkar.length : 0.0;
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       child: Row(
@@ -74,9 +77,7 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
-                value: (azkar.isNotEmpty)
-                    ? (_currentPage + 1) / azkar.length
-                    : 0,
+                value: progressValue,
                 backgroundColor: AppTheme.surfaceLight,
                 valueColor: const AlwaysStoppedAnimation<Color>(
                   AppTheme.accent,
@@ -87,7 +88,7 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
           ),
           const SizedBox(width: 12),
           Text(
-            '${_currentPage + 1} / ${azkar.length}',
+            '$completedCount / ${azkar.length}',
             style: GoogleFonts.outfit(
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -300,166 +301,163 @@ class _ZekrCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final isCompleted = item.currentCount >= item.count;
 
-    return GestureDetector(
-      onTap: isCompleted ? null : onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        constraints: BoxConstraints(
-          minHeight: MediaQuery.of(context).size.height * 0.4,
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      constraints: BoxConstraints(
+        minHeight: MediaQuery.of(context).size.height * 0.4,
+      ),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isCompleted
+            ? AppTheme.saved.withValues(alpha: 0.1)
+            : AppTheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isCompleted ? AppTheme.saved : AppTheme.cardBorder,
+          width: isCompleted ? 2 : 1,
         ),
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: isCompleted
-              ? AppTheme.saved.withValues(alpha: 0.1)
-              : AppTheme.surface,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: isCompleted ? AppTheme.saved : AppTheme.cardBorder,
-            width: isCompleted ? 2 : 1,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            QuranTextUtils.isQuranicText(item.reference)
+                ? QuranTextUtils.formatWithQuranSymbols(item.zekr)
+                : item.zekr,
+            style: GoogleFonts.amiri(
+              fontSize: 24,
+              height: 1.8,
+              color: AppTheme.textPrimary,
+              fontWeight: FontWeight.w500,
             ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+            textAlign: TextAlign.center,
+            textDirection: TextDirection.rtl,
+          ),
+          const SizedBox(height: 24),
+          if (item.description.isNotEmpty) ...[
             Text(
-              QuranTextUtils.isQuranicText(item.reference)
-                  ? QuranTextUtils.formatWithQuranSymbols(item.zekr)
-                  : item.zekr,
+              item.description,
               style: GoogleFonts.amiri(
-                fontSize: 24,
-                height: 1.8,
-                color: AppTheme.textPrimary,
-                fontWeight: FontWeight.w500,
+                fontSize: 16,
+                color: AppTheme.textSecondary,
+                fontStyle: FontStyle.italic,
               ),
               textAlign: TextAlign.center,
-              textDirection: TextDirection.rtl,
             ),
             const SizedBox(height: 24),
-            if (item.description.isNotEmpty) ...[
-              Text(
-                item.description,
-                style: GoogleFonts.amiri(
-                  fontSize: 16,
-                  color: AppTheme.textSecondary,
-                  fontStyle: FontStyle.italic,
+          ],
+          const Divider(height: 1),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  item.reference,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.textSecondary,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(width: 8),
+              if (item.currentCount > 0)
+                IconButton(
+                  onPressed: onReset,
+                  icon: const Icon(
+                    Icons.history_rounded,
+                    size: 24,
+                    color: AppTheme.textSecondary,
+                  ),
+                  tooltip: l10n.resetItem,
+                ),
             ],
-            const Divider(height: 1),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    item.reference,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppTheme.textSecondary,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                if (item.currentCount > 0)
-                  IconButton(
-                    onPressed: onReset,
-                    icon: const Icon(
-                      Icons.history_rounded,
-                      size: 24,
-                      color: AppTheme.textSecondary,
-                    ),
-                    tooltip: l10n.resetItem,
-                  ),
-              ],
-            ),
-            const SizedBox(height: 32),
-            // Large Counter Button
-            GestureDetector(
-              onTap: isCompleted ? null : onTap,
-              child: Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: isCompleted ? AppTheme.saved : AppTheme.accent,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: (isCompleted ? AppTheme.saved : AppTheme.accent)
-                          .withValues(alpha: 0.3),
-                      blurRadius: 15,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        '${item.currentCount}',
-                        style: GoogleFonts.outfit(
-                          color: isCompleted
-                              ? AppTheme.onSaved
-                              : AppTheme.onAccent,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Container(
-                        width: 40,
-                        height: 2,
-                        color:
-                            (isCompleted ? AppTheme.onSaved : AppTheme.onAccent)
-                                .withValues(alpha: 0.5),
-                        margin: const EdgeInsets.symmetric(vertical: 4),
-                      ),
-                      Text(
-                        '${item.count}',
-                        style: GoogleFonts.outfit(
-                          color:
-                              (isCompleted
-                                      ? AppTheme.onSaved
-                                      : AppTheme.onAccent)
-                                  .withValues(alpha: 0.8),
-                          fontSize: 18,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            if (isCompleted) ...[
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.check_circle_rounded, color: AppTheme.saved),
-                  const SizedBox(width: 8),
-                  Text(
-                    l10n.localeName == 'ar' ? 'تم بنجاح' : 'Completed',
-                    style: GoogleFonts.outfit(
-                      color: AppTheme.saved,
-                      fontWeight: FontWeight.bold,
-                    ),
+          ),
+          const SizedBox(height: 32),
+          // Large Counter Button - Only tappable area to mark as read
+          GestureDetector(
+            onTap: isCompleted ? null : onTap,
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: isCompleted ? AppTheme.saved : AppTheme.accent,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: (isCompleted ? AppTheme.saved : AppTheme.accent)
+                        .withValues(alpha: 0.3),
+                    blurRadius: 15,
+                    spreadRadius: 2,
                   ),
                 ],
               ),
-            ],
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '${item.currentCount}',
+                      style: GoogleFonts.outfit(
+                        color: isCompleted
+                            ? AppTheme.onSaved
+                            : AppTheme.onAccent,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Container(
+                      width: 40,
+                      height: 2,
+                      color:
+                          (isCompleted ? AppTheme.onSaved : AppTheme.onAccent)
+                              .withValues(alpha: 0.5),
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                    ),
+                    Text(
+                      '${item.count}',
+                      style: GoogleFonts.outfit(
+                        color:
+                            (isCompleted
+                                    ? AppTheme.onSaved
+                                    : AppTheme.onAccent)
+                                .withValues(alpha: 0.8),
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          if (isCompleted) ...[
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.check_circle_rounded, color: AppTheme.saved),
+                const SizedBox(width: 8),
+                Text(
+                  l10n.localeName == 'ar' ? 'تم بنجاح' : 'Completed',
+                  style: GoogleFonts.outfit(
+                    color: AppTheme.saved,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }

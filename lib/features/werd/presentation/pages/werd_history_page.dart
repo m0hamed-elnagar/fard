@@ -581,6 +581,37 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
+                      // Segment count badge
+                      if (entry.segmentCount > 1)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppTheme.accent.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.timeline_rounded,
+                                size: 10,
+                                color: AppTheme.accent,
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                isAr
+                                    ? '${entry.segmentCount.toArabicIndic()} جلسات'
+                                    : '${entry.segmentCount} session${entry.segmentCount > 1 ? 's' : ''}',
+                                style: GoogleFonts.amiri(
+                                  fontSize: 10,
+                                  color: AppTheme.accent,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      if (entry.segmentCount > 1) const SizedBox(width: 8),
                       if (_displayUnit != WerdUnit.page) ...[
                         Icon(
                           Icons.pages_rounded,

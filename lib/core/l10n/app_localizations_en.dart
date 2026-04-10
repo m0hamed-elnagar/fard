@@ -787,6 +787,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nextSurah => 'Next Surah';
 
   @override
+  String get completionDoaa => 'Completion Doaa';
+
+  @override
+  String get completionDoaaArabic => 'دعاء ختم القرآن';
+
+  @override
+  String get cycleCompletionTitle => 'Quran Completion';
+
+  @override
+  String get cycleCompletionSubtitle =>
+      'You\'ve completed reading the entire Quran';
+
+  @override
+  String get cycleCompletionReadDoaa => 'Read completion doaa';
+
+  @override
+  String get cycleCompletionReadDoaaDesc =>
+      'Navigate to completion supplications';
+
+  @override
+  String get cycleCompletionRestart => 'Start new cycle';
+
+  @override
+  String get cycleCompletionRestartDesc => 'Reset to Surah Al-Fatihah (Ayah 1)';
+
+  @override
+  String get cycleCompletionStay => 'Stay here';
+
+  @override
+  String get cycleCompletionStayDesc => 'Keep current position at Surah An-Nas';
+
+  @override
   String get downloadCenterBtn => 'Download Center';
 
   @override
@@ -944,6 +976,51 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get jumpDialogTitle => 'Significant Jump Detected';
+
+  @override
+  String get jumpFrom => 'Current position';
+
+  @override
+  String get jumpTo => 'You tapped';
+
+  @override
+  String jumpGapInfo(String gap, String pages) {
+    return 'Gap: $gap ayahs ($pages pages)';
+  }
+
+  @override
+  String get jumpWhatToDo => 'What would you like to do?';
+
+  @override
+  String get jumpOptionDismiss => 'Dismiss';
+
+  @override
+  String get jumpDismissDesc =>
+      'Don\'t mark anything as read, keep your current progress unchanged';
+
+  @override
+  String get jumpOptionNewSession => 'Start new session';
+
+  @override
+  String jumpNewSessionDesc(String current, String newTotal) {
+    return 'Mark only this ayah as read (+1 ayah, total today: $current → $newTotal)';
+  }
+
+  @override
+  String get jumpOptionMarkAll => 'Mark all as read';
+
+  @override
+  String jumpMarkAllDesc(String gap, String pages) {
+    return 'Mark ALL $gap ayahs ($pages pages) from your last position to here as read';
+  }
+
+  @override
+  String jumpTotalToday(String count) {
+    return 'Total today: $count ayahs';
+  }
+
+  @override
   String get goToPlayingAyah => 'Go to playing Ayah';
 
   @override
@@ -1069,4 +1146,106 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stopping => 'Stopping...';
+
+  @override
+  String get werdEditDialog => 'Edit Reading';
+
+  @override
+  String get werdTodayReading => 'Today\'s Reading';
+
+  @override
+  String get werdNoSessions => 'No reading sessions today';
+
+  @override
+  String werdSession(int number) {
+    return 'Session $number';
+  }
+
+  @override
+  String get werdFrom => 'From';
+
+  @override
+  String get werdTo => 'To';
+
+  @override
+  String get werdEditSegment => 'Edit Segment';
+
+  @override
+  String get werdAddRange => 'Add Reading Range';
+
+  @override
+  String werdRangePreview(
+    String fromSurah,
+    int fromAyah,
+    String toSurah,
+    int toAyah,
+  ) {
+    return 'From: $fromSurah $fromAyah\nTo: $toSurah $toAyah';
+  }
+
+  @override
+  String werdWillAdd(int count) {
+    return 'Will add: $count ayahs';
+  }
+
+  @override
+  String get werdUpdate => 'Update';
+
+  @override
+  String get werdDelete => 'Delete';
+
+  @override
+  String get werdClose => 'Close';
+
+  @override
+  String get werdCancel => 'Cancel';
+
+  @override
+  String get werdAdd => 'Add';
+
+  @override
+  String get werdSame => 'same';
+
+  @override
+  String werdAyahs(int count) {
+    return '$count ayahs';
+  }
+
+  @override
+  String get werdRangeCorrected => 'Range automatically corrected';
+
+  @override
+  String get werdUndoTitle => 'Undo Last Read?';
+
+  @override
+  String werdUndoMessage(int count, String fromSurah, String toSurah) {
+    return 'This will remove the last reading session ($count ayahs from $fromSurah to $toSurah)';
+  }
+
+  @override
+  String get werdUndo => 'Undo';
+
+  @override
+  String get werdNothingToUndo => 'Nothing to undo';
+
+  @override
+  String get werdNoSessionToRemove => 'No reading session to remove';
+
+  @override
+  String get jumpToAyah => 'Jump to Ayah';
+
+  @override
+  String get quickSelect => 'Quick Select';
+
+  @override
+  String get go => 'Go';
+
+  @override
+  String get ayahs => 'Ayahs';
+
+  @override
+  String get scrollToTop => 'Scroll to Top';
+
+  @override
+  String get juz => 'Juz';
 }

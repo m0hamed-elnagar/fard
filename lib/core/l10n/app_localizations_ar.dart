@@ -785,6 +785,37 @@ class AppLocalizationsAr extends AppLocalizations {
   String get nextSurah => 'السورة التالية';
 
   @override
+  String get completionDoaa => 'دعاء ختم القرآن';
+
+  @override
+  String get completionDoaaArabic => 'دعاء ختم القرآن';
+
+  @override
+  String get cycleCompletionTitle => 'إتمام القرآن الكريم';
+
+  @override
+  String get cycleCompletionSubtitle => 'لقد أتممت قراءة القرآن الكريم بالكامل';
+
+  @override
+  String get cycleCompletionReadDoaa => 'قراءة دعاء الختم';
+
+  @override
+  String get cycleCompletionReadDoaaDesc => 'الانتقال إلى صفحة الأذكار';
+
+  @override
+  String get cycleCompletionRestart => 'بدء دورة جديدة';
+
+  @override
+  String get cycleCompletionRestartDesc => 'العودة إلى سورة الفاتحة (الآية 1)';
+
+  @override
+  String get cycleCompletionStay => 'البقاء هنا';
+
+  @override
+  String get cycleCompletionStayDesc =>
+      'الإبقاء على الموضع الحالي عند سورة الناس';
+
+  @override
   String get downloadCenterBtn => 'مركز التحميل';
 
   @override
@@ -941,6 +972,51 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get jumpDialogTitle => 'تم اكتشاف قفزة كبيرة';
+
+  @override
+  String get jumpFrom => 'الموقع الحالي';
+
+  @override
+  String get jumpTo => 'لقد نقرت';
+
+  @override
+  String jumpGapInfo(String gap, String pages) {
+    return 'الفجوة: $gap آية ($pages صفحات)';
+  }
+
+  @override
+  String get jumpWhatToDo => 'ماذا تريد أن تفعل؟';
+
+  @override
+  String get jumpOptionDismiss => 'تجاهل';
+
+  @override
+  String get jumpDismissDesc =>
+      'لا تعلم شيئاً كمقروء، ابقِ تقدمك الحالي كما هو';
+
+  @override
+  String get jumpOptionNewSession => 'ابدأ جلسة جديدة';
+
+  @override
+  String jumpNewSessionDesc(String current, String newTotal) {
+    return 'علّم هذه الآية فقط كمقروءة (+1 آية، الإجمالي اليوم: $current → $newTotal)';
+  }
+
+  @override
+  String get jumpOptionMarkAll => 'تحديد الكل كمقروء';
+
+  @override
+  String jumpMarkAllDesc(String gap, String pages) {
+    return 'علّم جميع $gap آية ($pages صفحات) من موقعك الأخير إلى هنا كمقروءة';
+  }
+
+  @override
+  String jumpTotalToday(String count) {
+    return 'الإجمالي اليوم: $count آية';
+  }
+
+  @override
   String get goToPlayingAyah => 'الذهاب إلى الآية الحالية';
 
   @override
@@ -1063,4 +1139,106 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get stopping => 'جاري الإيقاف...';
+
+  @override
+  String get werdEditDialog => 'تعديل القراءة';
+
+  @override
+  String get werdTodayReading => 'قراءة اليوم';
+
+  @override
+  String get werdNoSessions => 'لا توجد قراءة اليوم';
+
+  @override
+  String werdSession(int number) {
+    return 'الجلسة $number';
+  }
+
+  @override
+  String get werdFrom => 'من';
+
+  @override
+  String get werdTo => 'إلى';
+
+  @override
+  String get werdEditSegment => 'تعديل الجلسة';
+
+  @override
+  String get werdAddRange => 'إضافة نطاق قراءة';
+
+  @override
+  String werdRangePreview(
+    String fromSurah,
+    int fromAyah,
+    String toSurah,
+    int toAyah,
+  ) {
+    return 'من: $fromSurah $fromAyah\nإلى: $toSurah $toAyah';
+  }
+
+  @override
+  String werdWillAdd(int count) {
+    return 'إضافة: $count آية';
+  }
+
+  @override
+  String get werdUpdate => 'تحديث';
+
+  @override
+  String get werdDelete => 'حذف';
+
+  @override
+  String get werdClose => 'إغلاق';
+
+  @override
+  String get werdCancel => 'إلغاء';
+
+  @override
+  String get werdAdd => 'إضافة';
+
+  @override
+  String get werdSame => 'نفسها';
+
+  @override
+  String werdAyahs(int count) {
+    return '$count آية';
+  }
+
+  @override
+  String get werdRangeCorrected => 'تم تصحيح النطاق تلقائياً';
+
+  @override
+  String get werdUndoTitle => 'تراجع عن آخر قراءة؟';
+
+  @override
+  String werdUndoMessage(int count, String fromSurah, String toSurah) {
+    return 'سيتم إزالة آخر جلسة قراءة ($count آية من $fromSurah إلى $toSurah)';
+  }
+
+  @override
+  String get werdUndo => 'تراجع';
+
+  @override
+  String get werdNothingToUndo => 'لا شيء للتراجع عنه';
+
+  @override
+  String get werdNoSessionToRemove => 'لا توجد جلسة قراءة لإزالتها';
+
+  @override
+  String get jumpToAyah => 'الانتقال إلى آية';
+
+  @override
+  String get quickSelect => 'اختيار سريع';
+
+  @override
+  String get go => 'انتقل';
+
+  @override
+  String get ayahs => 'آيات';
+
+  @override
+  String get scrollToTop => 'العودة للأعلى';
+
+  @override
+  String get juz => 'الجزء';
 }

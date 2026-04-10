@@ -123,7 +123,8 @@ class AzkarRepository implements IAzkarSource {
         if (item.category == category) {
           final progressKey = _getStableKey(category, item.zekr);
           keysToDelete.add(progressKey);
-          _cachedAzkar![i] = item.copyWith(currentCount: 0);
+          final resetItem = item.copyWith(currentCount: 0);
+          _cachedAzkar![i] = resetItem;
         }
       }
     }
