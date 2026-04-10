@@ -125,7 +125,7 @@ class MushafDownloadService {
       // If user says KSU page 1 is a cover, then KFC page 1 is KSU page 2 or 3
       // For now, we try to match page numbers directly or with +1/+2
       // But let's try direct first as KSU is very high quality
-      final url = 'http://quran.ksu.edu.sa/png_big/$pageNumber.png';
+      final url = 'https://quran.ksu.edu.sa/png_big/$pageNumber.png';
       final response = await http
           .get(Uri.parse(url))
           .timeout(const Duration(seconds: 30));

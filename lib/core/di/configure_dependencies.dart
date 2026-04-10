@@ -24,7 +24,8 @@ Future<void> configureDependencies({String? hivePath}) async {
 
   // Initialize timezones
   tz.initializeTimeZones();
-  tz.setLocalLocation(tz.getLocation('UTC'));
+  // In timezone 0.11.0, UTC is accessed as 'Etc/UTC' or 'GMT'
+  tz.setLocalLocation(tz.getLocation('Etc/UTC'));
   debugPrint('configureDependencies: Timezones initialized');
 
   // Initialize Hive

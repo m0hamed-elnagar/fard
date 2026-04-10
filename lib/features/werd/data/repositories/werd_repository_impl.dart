@@ -18,6 +18,17 @@ class WerdRepositoryImpl implements WerdRepository {
 
   WerdRepositoryImpl(this.sharedPreferences);
 
+  /// Dispose all active stream controllers to prevent memory leaks
+  @override
+  void dispose() {
+    for (final controller in _progressControllers.values) {
+      if (!controller.isClosed) {
+        controller.close();
+      }
+    }
+    _progressControllers.clear();
+  }
+
   String _getGoalKey(String id) => 'werd_goal_$id';
   String _getProgressKey(String goalId) => 'werd_progress_$goalId';
 

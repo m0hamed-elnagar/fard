@@ -1,4 +1,14 @@
-        //add the azan of each sallah with the settings of it to handle the alarm before it
+// WERD HISTORY UI BUGS (Added 2026-04-10)
+// BUG: When switching from Pages to Ayahs in werd history, the count may be incorrect for multi-session days
+// Root Cause: Page/Juz fractional calculations don't map cleanly to ayah count across separate reading sessions
+// Details: If user has two sessions in different parts of Quran (e.g., morning + evening), 
+//          the ayah count shows correctly but pages/juz are calculated separately per unit
+//          When switching display units, the conversion between units loses precision
+// Impact: Edge case - only affects users with multiple sessions in different Quran locations
+// Fix: Need to recalculate base ayah ranges for each unit conversion, or store session ranges per unit
+// Priority: Low (edge case, ayahs count correctly)
+
+// EXISTING TASKS:
 add  after salah azkar after 15 minutes of the azan  disabled by default it should have one general with the azkar one
 lso add  btn in the azkar to add it to the alarm list in the settings so he can add them from the  settings or the azkar screen
     and one in the azan dialog if the user want to add it to some of the sallahs not all of them

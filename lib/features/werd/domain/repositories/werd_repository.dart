@@ -14,4 +14,7 @@ abstract class WerdRepository {
   Future<Result<List<WerdProgress>>> getAllProgress();
   Future<Result<void>> importGoals(List<WerdGoal> goals);
   Future<Result<void>> importProgress(List<WerdProgress> progress);
+
+  /// Dispose resources (stream controllers)
+  void dispose();
 }

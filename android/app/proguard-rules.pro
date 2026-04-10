@@ -9,8 +9,13 @@
 -keepattributes *Annotation*,Signature,EnclosingMethod,InnerClasses
 -keepattributes SourceFile,LineNumberTable
 
-# Keep public classes
--keep public class * { public protected *; }
+# Keep specific application classes (replaces overly permissive `-keep public class *`)
+-keep class com.qada.fard.FardApplication { *; }
+-keep class com.qada.fard.MainActivity { *; }
+-keep class com.qada.fard.**_HiveAdapter
+-keep class com.qada.fard.**_HiveAdapterCreator
+-keep class com.qada.fard.**_HiveEnumAdapter
+-keep class com.qada.fard.di.** { *; }
 
 # Keep native methods
 -keepclasseswithmembernames,includedescriptorclasses class * {

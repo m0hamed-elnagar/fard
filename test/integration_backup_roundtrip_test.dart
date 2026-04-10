@@ -48,6 +48,8 @@ class FakeWerdRepository implements WerdRepository {
   @override
   Future<Result<void>> updateProgress(WerdProgress progress) async =>
       Result.success(null);
+  @override
+  void dispose() {}
 }
 
 class FakePrayerRepo implements PrayerRepo {

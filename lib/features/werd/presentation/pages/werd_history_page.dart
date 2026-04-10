@@ -24,6 +24,7 @@ class WerdHistoryPage extends StatefulWidget {
 class _WerdHistoryPageState extends State<WerdHistoryPage> {
   WerdUnit _displayUnit = WerdUnit.page;
   DateTime _focusedDate = DateTime.now();
+  final Set<int> _expandedItems = {};
 
   @override
   Widget build(BuildContext context) {
@@ -106,6 +107,83 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
             if (progress.totalAmountReadToday > 0) periodDays++;
           }
 
+          // Check if we have any data to show
+          final hasData = (todayMatches && progress.totalAmountReadToday > 0) ||
+              filteredHistory.isNotEmpty;
+
+          // Check if focused month is the current month
+          final now = DateTime.now();
+          final isCurrentMonth =
+              _focusedDate.year == now.year && _focusedDate.month == now.month;
+
+          if (!hasData) {
+            return Column(
+              children: [
+                _buildMonthNavigator(isAr),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(32),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.menu_book_rounded,
+                            size: 80,
+                            color: Colors.grey.withValues(alpha: 0.3),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            isAr ? 'لا يوجد قراءة في هذا الشهر' : 'No reading this month',
+                            style: GoogleFonts.amiri(
+                              fontSize: 20,
+                              color: Colors.grey,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            isAr
+                                ? 'ابدأ بقراءة القرآن لتتبع تقدمك هنا'
+                                : 'Start reading Quran to track your progress here',
+                            style: GoogleFonts.amiri(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          // Only show "Start Reading" button for the current month
+                          if (isCurrentMonth) ...[
+                            const SizedBox(height: 32),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              icon: const Icon(Icons.play_arrow_rounded),
+                              label: Text(isAr ? 'ابدأ القراءة' : 'Start Reading'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.accent,
+                                foregroundColor: AppTheme.onAccent,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 32,
+                                  vertical: 16,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }
+
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -120,14 +198,56 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                 periodDays,
               ),
               const SizedBox(height: 24),
-              Text(
-                isAr ? 'التفاصيل' : 'Details',
-                style: GoogleFonts.amiri(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+              // Section header with yellow accent
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 4,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: AppTheme.accent,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        isAr ? 'التفاصيل' : 'Details',
+                        style: GoogleFonts.outfit(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (filteredHistory.isNotEmpty || (todayMatches && progress.totalAmountReadToday > 0))
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surfaceLight,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppTheme.cardBorder.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Text(
+                        isAr
+                            ? '${periodDays.toArabicIndic()} ${isAr ? 'أيام' : 'days'}'
+                            : '$periodDays days',
+                        style: GoogleFonts.outfit(
+                          fontSize: 13,
+                          color: AppTheme.neutral,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               // Today Item
               if (todayMatches && progress.totalAmountReadToday > 0)
                 _buildHistoryItem(
@@ -137,6 +257,8 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                   todayEntry,
                   isToday: true,
                   goal: state.goal,
+                  itemIndex: 0,
+                  segments: progress.segmentsToday,
                 ),
               ..._buildListWithBreaks(
                 context,
@@ -163,6 +285,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
   ) {
     final widgets = <Widget>[];
     DateTime? prevDate = lastItemDate;
+    int itemIndex = 0;
 
     for (int i = 0; i < items.length; i++) {
       final entry = items[i];
@@ -180,8 +303,16 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
       }
 
       widgets.add(
-        _buildHistoryItem(context, isAr, currentDate, entry.value, goal: goal),
+        _buildHistoryItem(
+          context,
+          isAr,
+          currentDate,
+          entry.value,
+          goal: goal,
+          itemIndex: itemIndex,
+        ),
       );
+      itemIndex++;
 
       prevDate = currentDate;
     }
@@ -190,62 +321,172 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
 
   Widget _buildStreakBreak(bool isAr) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
-          const Expanded(child: Divider(indent: 20, endIndent: 10)),
+          Expanded(
+            child: Container(
+              height: 1,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.transparent,
+                    AppTheme.missed.withValues(alpha: 0.3),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.red.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
+              color: AppTheme.missed.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppTheme.missed.withValues(alpha: 0.3),
+                width: 1,
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   Icons.flash_off_rounded,
                   size: 14,
-                  color: Colors.red,
+                  color: AppTheme.missed,
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  isAr ? 'انقطاع' : 'Streak Break',
-                  style: GoogleFonts.amiri(
+                  isAr ? 'انقطاع' : 'Missed',
+                  style: GoogleFonts.outfit(
                     fontSize: 12,
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
+                    color: AppTheme.missed,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
           ),
-          const Expanded(child: Divider(indent: 10, endIndent: 20)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Container(
+              height: 1,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppTheme.missed.withValues(alpha: 0.3),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buildMonthNavigator(bool isAr) {
+    final now = DateTime.now();
+    final isCurrentMonth = _focusedDate.year == now.year &&
+        _focusedDate.month == now.month;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppTheme.cardBorder.withValues(alpha: 0.5),
+          width: 1.5,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Previous month button
+          _buildMonthButton(
+            icon: isAr ? Icons.chevron_left : Icons.chevron_right,
+            onPressed: () => _navigateMonth(-1),
+            isEnabled: true,
+          ),
+          const SizedBox(width: 16),
+          // Month label
+          Expanded(
+            child: Text(
+              DateFormat('MMMM yyyy', isAr ? 'ar' : 'en').format(_focusedDate),
+              style: GoogleFonts.outfit(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(width: 16),
+          // Next month button
+          _buildMonthButton(
+            icon: isAr ? Icons.chevron_right : Icons.chevron_left,
+            onPressed: _canNavigateNext() ? () => _navigateMonth(1) : null,
+            isEnabled: _canNavigateNext(),
+          ),
+          // Current month indicator
+          if (isCurrentMonth) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryLight.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppTheme.primaryLight.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Text(
+                isAr ? 'الحالي' : 'Current',
+                style: GoogleFonts.outfit(
+                  fontSize: 10,
+                  color: AppTheme.primaryLight,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildMonthNavigator(bool isAr) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        IconButton(
-          onPressed: () => _navigateMonth(-1),
-          icon: Icon(isAr ? Icons.chevron_left : Icons.chevron_right),
+  Widget _buildMonthButton({
+    required IconData icon,
+    required VoidCallback? onPressed,
+    bool isEnabled = true,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: isEnabled ? AppTheme.surfaceLight : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isEnabled
+                  ? AppTheme.cardBorder.withValues(alpha: 0.5)
+                  : Colors.transparent,
+              width: 1.5,
+            ),
+          ),
+          child: Icon(
+            icon,
+            size: 20,
+            color: isEnabled ? AppTheme.textPrimary : AppTheme.neutral.withValues(alpha: 0.5),
+          ),
         ),
-        const SizedBox(width: 16),
-        Text(
-          DateFormat('MMMM yyyy', isAr ? 'ar' : 'en').format(_focusedDate),
-          style: GoogleFonts.amiri(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(width: 16),
-        IconButton(
-          onPressed: _canNavigateNext() ? () => _navigateMonth(1) : null,
-          icon: Icon(isAr ? Icons.chevron_right : Icons.chevron_left),
-        ),
-      ],
+      ),
     );
   }
 
@@ -289,6 +530,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
       startAyahNumber: startPos[1],
       endSurahName: endSurahName,
       endAyahNumber: endPos[1],
+      segmentCount: progress.segmentsToday.length,
       summary: "Read today ${progress.totalAmountReadToday} ayahs",
     );
   }
@@ -333,130 +575,193 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
         break;
     }
 
-    return Card(
-      elevation: 0,
-      color: Theme.of(
-        context,
-      ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+    // Hero card with subtle yellow/green accent based on completion
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppTheme.cardBorder.withValues(alpha: 0.4),
+          width: 1.5,
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Text(
-              isAr ? 'ملخص الشهر' : 'Monthly Summary',
-              style: GoogleFonts.amiri(
-                fontSize: 16,
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.bold,
+      child: Column(
+        children: [
+          // Header
+          Row(
+            children: [
+              Icon(
+                Icons.analytics_rounded,
+                color: AppTheme.accent,
+                size: 16,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                isAr ? 'ملخص الشهر' : 'Monthly Summary',
+                style: GoogleFonts.outfit(
+                  fontSize: 14,
+                  color: AppTheme.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          // Stat items with responsive layout
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isNarrow = constraints.maxWidth < 300;
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  SizedBox(
+                    width: isNarrow
+                        ? constraints.maxWidth
+                        : (constraints.maxWidth - 24) / 3,
+                    child: _buildHeroStatItem(
+                      context,
+                      isAr ? 'الآيات' : 'Ayahs',
+                      totalAyahs.toArabicIndic(),
+                      Icons.auto_stories_rounded,
+                      isSelected: _displayUnit == WerdUnit.ayah,
+                      onTap: () => setState(() => _displayUnit = WerdUnit.ayah),
+                    ),
+                  ),
+                  SizedBox(
+                    width: isNarrow
+                        ? constraints.maxWidth
+                        : (constraints.maxWidth - 24) / 3,
+                    child: _buildHeroStatItem(
+                      context,
+                      isAr ? 'الصفحات' : 'Pages',
+                      _formatDecimal(totalPages, isAr, 1),
+                      Icons.pages_rounded,
+                      isSelected: _displayUnit == WerdUnit.page,
+                      onTap: () => setState(() => _displayUnit = WerdUnit.page),
+                    ),
+                  ),
+                  SizedBox(
+                    width: isNarrow
+                        ? constraints.maxWidth
+                        : (constraints.maxWidth - 24) / 3,
+                    child: _buildHeroStatItem(
+                      context,
+                      isAr ? 'الأجزاء' : 'Juz',
+                      _formatDecimal(totalJuz, isAr, 2),
+                      Icons.grid_view_rounded,
+                      isSelected: _displayUnit == WerdUnit.juz,
+                      onTap: () => setState(() => _displayUnit = WerdUnit.juz),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+          // Average daily progress
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceLight,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppTheme.cardBorder.withValues(alpha: 0.2),
               ),
             ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatItem(
-                    context,
-                    isAr ? 'الآيات' : 'Ayahs',
-                    totalAyahs.toArabicIndic(),
-                    Icons.auto_stories_rounded,
-                    isHighlighted: _displayUnit == WerdUnit.ayah,
-                    onTap: () => setState(() => _displayUnit = WerdUnit.ayah),
-                  ),
-                ),
-                Expanded(
-                  child: _buildStatItem(
-                    context,
-                    isAr ? 'الصفحات' : 'Pages',
-                    _formatDecimal(totalPages, isAr, 1),
-                    Icons.pages_rounded,
-                    isHighlighted: _displayUnit == WerdUnit.page,
-                    onTap: () => setState(() => _displayUnit = WerdUnit.page),
-                  ),
-                ),
-                Expanded(
-                  child: _buildStatItem(
-                    context,
-                    isAr ? 'الأجزاء' : 'Juz',
-                    _formatDecimal(totalJuz, isAr, 2),
-                    Icons.grid_view_rounded,
-                    isHighlighted: _displayUnit == WerdUnit.juz,
-                    onTap: () => setState(() => _displayUnit = WerdUnit.juz),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Divider(),
-            const SizedBox(height: 8),
-            Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.show_chart_rounded,
-                  size: 16,
-                  color: Theme.of(context).colorScheme.primary,
+                  Icons.trending_up_rounded,
+                  size: 14,
+                  color: AppTheme.neutral,
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  isAr
-                      ? "المتوسط اليومي: ${_formatDecimal(avgValue, isAr, _displayUnit == WerdUnit.ayah ? 0 : 2)} $unitLabel"
-                      : "Daily Average: ${_displayUnit == WerdUnit.ayah ? avgValue.round() : avgValue.toStringAsFixed(2)} $unitLabel",
-                  style: GoogleFonts.amiri(
-                    fontSize: 14,
-                    color: Colors.grey[700],
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    isAr
+                        ? "المتوسط اليومي: ${_displayUnit == WerdUnit.ayah ? avgValue.round().toArabicIndic() : _formatDecimal(avgValue, isAr, 2)} $unitLabel"
+                        : "Daily Avg: ${_displayUnit == WerdUnit.ayah ? avgValue.round() : _formatDecimal(avgValue, isAr, 2)} $unitLabel",
+                    style: GoogleFonts.outfit(
+                      fontSize: 12,
+                      color: AppTheme.neutral,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildStatItem(
+  Widget _buildHeroStatItem(
     BuildContext context,
     String label,
     String value,
     IconData icon, {
-    bool isHighlighted = false,
+    bool isSelected = false,
     VoidCallback? onTap,
   }) {
-    final color = isHighlighted
-        ? Theme.of(context).colorScheme.primary
-        : Colors.grey[600];
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppTheme.accent.withValues(alpha: 0.08)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected
+                ? AppTheme.accent.withValues(alpha: 0.3)
+                : Colors.transparent,
+            width: 1.5,
+          ),
+        ),
         child: Column(
           children: [
-            Icon(icon, color: color, size: isHighlighted ? 24 : 20),
+            Icon(
+              icon,
+              color: isSelected ? AppTheme.accent : AppTheme.neutral,
+              size: isSelected ? 26 : 22,
+            ),
             const SizedBox(height: 8),
-            Text(
-              value,
-              style: GoogleFonts.outfit(
-                fontSize: isHighlighted ? 26 : 22,
-                fontWeight: isHighlighted ? FontWeight.w900 : FontWeight.bold,
-                color: isHighlighted
-                    ? Theme.of(context).colorScheme.primary
-                    : null,
+            // Big number in yellow
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                value,
+                style: GoogleFonts.outfit(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900,
+                  color: isSelected ? AppTheme.accent : AppTheme.textPrimary,
+                  letterSpacing: -0.5,
+                ),
               ),
             ),
+            const SizedBox(height: 4),
+            // Label in gray
             Text(
               label,
-              style: GoogleFonts.amiri(
-                fontSize: 14,
-                color: color,
-                fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                color: AppTheme.neutral,
+                fontWeight: FontWeight.w400,
               ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -471,6 +776,8 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
     WerdHistoryEntry entry, {
     bool isToday = false,
     WerdGoal? goal,
+    int itemIndex = 0,
+    List<dynamic>? segments,
   }) {
     double amount;
     String unitLabel;
@@ -510,6 +817,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
     }
 
     final isCompleted = goalValue > 0 && amount >= (goalValue - 0.01);
+    final progressPercent = goalValue > 0 ? (amount / goalValue).clamp(0.0, 1.0) : 0.0;
     final startSurah = _getLocalizedSurahName(
       entry.startSurahName,
       entry.startAbsolute,
@@ -521,186 +829,420 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
       isAr,
     );
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: (isCompleted ? Colors.amber : AppTheme.primaryLight)
-                  .withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              isCompleted
-                  ? Icons.check_circle_rounded
-                  : Icons.menu_book_rounded,
-              color: isCompleted ? Colors.amber : AppTheme.primaryLight,
-              size: 20,
-            ),
+    // SWAPPED: Green = completed, Yellow = in-progress
+    Color accentColor;
+    Color backgroundColor;
+    Color borderColor;
+    
+    if (isCompleted) {
+      // Completed: GREEN (success)
+      accentColor = const Color(0xFF4CAF50);
+      backgroundColor = const Color(0xFF4CAF50).withValues(alpha: 0.08);
+      borderColor = const Color(0xFF4CAF50).withValues(alpha: 0.4);
+    } else if (progressPercent > 0) {
+      // In-progress: YELLOW (encouraging)
+      accentColor = AppTheme.accent;
+      backgroundColor = AppTheme.accent.withValues(alpha: 0.06);
+      borderColor = AppTheme.accent.withValues(alpha: 0.25);
+    } else {
+      // No progress: Gray
+      accentColor = AppTheme.neutral;
+      backgroundColor = Colors.transparent;
+      borderColor = AppTheme.cardBorder.withValues(alpha: 0.2);
+    }
+
+    final isExpanded = _expandedItems.contains(itemIndex);
+    final canExpand = entry.segmentCount > 1 && (isToday || segments != null);
+
+    return GestureDetector(
+      onTap: canExpand ? () {
+        setState(() {
+          if (isExpanded) {
+            _expandedItems.remove(itemIndex);
+          } else {
+            _expandedItems.add(itemIndex);
+          }
+        });
+      } : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: borderColor,
+            width: isCompleted ? 2 : 1.5,
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  isToday
-                      ? (isAr ? 'اليوم' : 'Today')
-                      : DateFormat('EEEE', isAr ? 'ar' : 'en').format(date),
-                  style: GoogleFonts.amiri(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    isCompleted
+                        ? Icons.check_circle_rounded
+                        : Icons.menu_book_rounded,
+                    color: accentColor,
+                    size: 20,
                   ),
                 ),
-                Text(
-                  DateFormat('d MMMM', isAr ? 'ar' : 'en').format(date),
-                  style: GoogleFonts.amiri(fontSize: 13, color: Colors.grey),
-                ),
-                if (entry.totalAyahsRead > 0) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    isAr
-                        ? "من $startSurah ${entry.startAyahNumber.toArabicIndic()} إلى $endSurah ${entry.endAyahNumber.toArabicIndic()}"
-                        : "From $startSurah ${entry.startAyahNumber} to $endSurah ${entry.endAyahNumber}",
-                    style: GoogleFonts.amiri(
-                      fontSize: 13,
-                      color: Colors.grey[700],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Segment count badge
-                      if (entry.segmentCount > 1)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppTheme.accent.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.timeline_rounded,
-                                size: 10,
-                                color: AppTheme.accent,
-                              ),
-                              const SizedBox(width: 2),
-                              Text(
-                                isAr
-                                    ? '${entry.segmentCount.toArabicIndic()} جلسات'
-                                    : '${entry.segmentCount} session${entry.segmentCount > 1 ? 's' : ''}',
-                                style: GoogleFonts.amiri(
-                                  fontSize: 10,
-                                  color: AppTheme.accent,
-                                  fontWeight: FontWeight.w500,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  isToday
+                                      ? (isAr ? 'اليوم' : 'Today')
+                                      : DateFormat('EEEE', isAr ? 'ar' : 'en').format(date),
+                                  style: GoogleFonts.amiri(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              ),
-                            ],
+                                Text(
+                                  DateFormat('d MMMM', isAr ? 'ar' : 'en').format(date),
+                                  style: GoogleFonts.amiri(fontSize: 13, color: Colors.grey),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      if (entry.segmentCount > 1) const SizedBox(width: 8),
-                      if (_displayUnit != WerdUnit.page) ...[
-                        Icon(
-                          Icons.pages_rounded,
-                          size: 12,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(width: 4),
+                        ],
+                      ),
+                      if (entry.totalAyahsRead > 0) ...[
+                        const SizedBox(height: 8),
                         Text(
                           isAr
-                              ? "${_formatDecimal(entry.pagesRead, isAr, 1)} صفحات"
-                              : "${entry.pagesRead.toStringAsFixed(1)} pages",
+                              ? "من $startSurah ${entry.startAyahNumber.toArabicIndic()} إلى $endSurah ${entry.endAyahNumber.toArabicIndic()}"
+                              : "From $startSurah ${entry.startAyahNumber} to $endSurah ${entry.endAyahNumber}",
                           style: GoogleFonts.amiri(
-                            fontSize: 11,
-                            color: Colors.grey,
+                            fontSize: 13,
+                            color: Colors.grey[700],
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                      ],
-                      if (_displayUnit != WerdUnit.juz) ...[
-                        Icon(
-                          Icons.grid_view_rounded,
-                          size: 12,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          isAr
-                              ? "${_formatDecimal(entry.juzRead, isAr, 2)} جزء"
-                              : "${entry.juzRead.toStringAsFixed(2)} juz",
-                          style: GoogleFonts.amiri(
-                            fontSize: 11,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                      ],
-                      if (_displayUnit != WerdUnit.ayah) ...[
-                        Icon(
-                          Icons.auto_stories_rounded,
-                          size: 12,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          isAr
-                              ? "${entry.totalAyahsRead.toArabicIndic()} آية"
-                              : "${entry.totalAyahsRead} ayahs",
-                          style: GoogleFonts.amiri(
-                            fontSize: 11,
-                            color: Colors.grey,
-                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ],
                   ),
-                ],
-                if (entry.summary.isNotEmpty && !isToday) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    entry.summary,
-                    style: GoogleFonts.amiri(
-                      fontSize: 10,
-                      color: Colors.grey[400],
-                      fontStyle: FontStyle.italic,
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${_formatDecimal(amount, isAr, decimals)} $unitLabel',
+                      style: GoogleFonts.amiri(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: accentColor,
+                      ),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                    if (goalValue > 0)
+                      Text(
+                        '${(progressPercent * 100).round().toArabicIndic()}%',
+                        style: GoogleFonts.outfit(fontSize: 12, color: accentColor.withValues(alpha: 0.7)),
+                      ),
+                  ],
+                ),
               ],
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${_formatDecimal(amount, isAr, decimals)} $unitLabel',
-                style: GoogleFonts.amiri(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: isCompleted ? Colors.amber[800] : null,
+            // Progress bar for goal completion
+            if (goalValue > 0) ...[
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: LinearProgressIndicator(
+                  value: progressPercent,
+                  minHeight: 6,
+                  backgroundColor: AppTheme.cardBorder.withValues(alpha: 0.15),
+                  valueColor: AlwaysStoppedAnimation<Color>(accentColor),
                 ),
               ),
-              if (goalValue > 0)
-                Text(
-                  '${(amount / goalValue * 100).round().toArabicIndic()}%',
-                  style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
+            ],
+            // Additional stats badges - using Wrap to prevent overflow
+            if (entry.totalAyahsRead > 0) ...[
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  if (entry.segmentCount > 1)
+                    _buildCompactBadge(
+                      icon: Icons.timeline_rounded,
+                      label: isAr
+                          ? '${entry.segmentCount.toArabicIndic()} جلسات'
+                          : '${entry.segmentCount} sessions',
+                      color: accentColor,
+                    ),
+                  if (_displayUnit != WerdUnit.page)
+                    _buildCompactBadge(
+                      icon: Icons.pages_rounded,
+                      label: isAr
+                          ? "${_formatDecimal(entry.pagesRead, isAr, 1)} صفحات"
+                          : "${entry.pagesRead.toStringAsFixed(1)} pages",
+                      color: accentColor.withValues(alpha: 0.7),
+                    ),
+                  if (_displayUnit != WerdUnit.juz)
+                    _buildCompactBadge(
+                      icon: Icons.grid_view_rounded,
+                      label: isAr
+                          ? "${_formatDecimal(entry.juzRead, isAr, 2)} جزء"
+                          : "${entry.juzRead.toStringAsFixed(2)} juz",
+                      color: accentColor.withValues(alpha: 0.7),
+                    ),
+                  if (_displayUnit != WerdUnit.ayah)
+                    _buildCompactBadge(
+                      icon: Icons.auto_stories_rounded,
+                      label: isAr
+                          ? "${entry.totalAyahsRead.toArabicIndic()} آية"
+                          : "${entry.totalAyahsRead} ayahs",
+                      color: accentColor.withValues(alpha: 0.7),
+                    ),
+                ],
+              ),
+            ],
+            // Expandable session details
+            if (isExpanded && entry.segmentCount > 1) ...[
+              const SizedBox(height: 12),
+              const Divider(height: 1),
+              const SizedBox(height: 8),
+              Text(
+                isAr ? 'تفاصيل الجلسات' : 'Session Details',
+                style: GoogleFonts.amiri(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.accent,
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Show real session details for today
+              if (isToday && segments != null && segments.isNotEmpty)
+                ...segments.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final segment = entry.value;
+                  
+                  // Assuming segment has startAyah, endAyah, startTime, endTime
+                  final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(segment.startAyah);
+                  final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(segment.endAyah);
+                  
+                  final startName = isAr
+                      ? quran.getSurahNameArabic(startPos[0])
+                      : quran.getSurahName(startPos[0]);
+                  final endName = isAr
+                      ? quran.getSurahNameArabic(endPos[0])
+                      : quran.getSurahName(endPos[0]);
+                  
+                  final isSingleAyah = segment.startAyah == segment.endAyah;
+                  final fromText = isAr
+                      ? '$startName، ${startPos[1].toArabicIndic()}'
+                      : '$startName ${startPos[1]}';
+                  final toText = isSingleAyah
+                      ? (isAr ? 'نفس الآية' : 'Same ayah')
+                      : (isAr
+                          ? '$endName، ${endPos[1].toArabicIndic()}'
+                          : '$endName ${endPos[1]}');
+                  
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: accentColor.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: accentColor.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Session header
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: accentColor.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                isAr ? 'جلسة ${index + 1}' : 'Session ${index + 1}',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 11,
+                                  color: accentColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              isAr
+                                  ? '${(segment.endAyah - segment.startAyah + 1).toString().toArabicIndic()} آية'
+                                  : '${segment.endAyah - segment.startAyah + 1} ayahs',
+                              style: GoogleFonts.outfit(
+                                fontSize: 12,
+                                color: accentColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        // Time info
+                        if (segment.startTime != null) ...[
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.access_time_rounded,
+                                size: 14,
+                                color: AppTheme.textSecondary.withValues(alpha: 0.6),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${segment.formattedStartTime} - ${segment.formattedEndTime}',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 11,
+                                  color: AppTheme.textSecondary.withValues(alpha: 0.6),
+                                ),
+                              ),
+                              if (segment.durationMinutes != null) ...[
+                                const SizedBox(width: 4),
+                                Text(
+                                  '(${segment.durationMinutes} min)',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 11,
+                                    color: AppTheme.textSecondary.withValues(alpha: 0.6),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ],
+                        // From/To
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Icon(Icons.back_hand_rounded, size: 14, color: accentColor),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                fromText,
+                                style: GoogleFonts.amiri(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (!isSingleAyah) ...[
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(Icons.arrow_forward_rounded, size: 12, color: accentColor),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  toText,
+                                  style: GoogleFonts.amiri(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  );
+                }),
+              // Message for past days
+              if (!isToday || segments == null || segments.isEmpty)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surface,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline_rounded,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          isAr
+                              ? 'تتوفر تفاصيل الجلسة للجلسات الحالية فقط'
+                              : 'Detailed session history available for current day only',
+                          style: GoogleFonts.outfit(
+                            fontSize: 12,
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompactBadge({
+    required IconData icon,
+    required String label,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              label,
+              style: GoogleFonts.amiri(
+                fontSize: 11,
+                color: color,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),

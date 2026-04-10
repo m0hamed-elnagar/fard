@@ -41,7 +41,7 @@ class Result<T> extends Equatable {
   factory Result.success(T data) => Result._(data: data);
   factory Result.failure(Failure failure) => Result._(failure: failure);
 
-  bool get isSuccess => data != null;
+  bool get isSuccess => failure == null;
   bool get isFailure => failure != null;
 
   R fold<R>(R Function(Failure failure) onError, R Function(T data) onSuccess) {
