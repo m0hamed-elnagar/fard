@@ -202,6 +202,37 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
 - **Supported Locales**: English (`en`), Arabic (`ar`)
 - **Generation**: `flutter gen-l10n` (configured in `l10n.yaml`)
 
+### Version Logging Rule
+**Every feature addition, bug fix, or version update MUST be logged in `VERSION_LOG.md`**:
+1. **Increment version number** following semantic versioning: `MAJOR.MINOR.PATCH+BUILD`
+   - MAJOR: Breaking changes
+   - MINOR: New features (backward compatible)
+   - PATCH: Bug fixes only
+   - BUILD: Build number (increment each release)
+2. **Add entry with date** under the version header
+3. **Include sections** (as applicable):
+   - 🎯 Features (new user-facing features)
+   - ✨ Improvements (UX/performance enhancements)
+   - 🐛 Bug Fixes (issues resolved)
+   - 🧪 Tests (tests added/removed)
+   - 🔧 Technical Details (new files, modified files, dependencies)
+   - ⚠️ Known Issues (outstanding problems)
+   - 📦 Dependencies Added (new packages)
+   - 🔗 Related Commits (commit messages)
+4. **Reference related commits and PRs** in the Related Commits section
+5. **Note any breaking changes** prominently at the top of the entry
+6. **Review before committing** - ensure the log accurately reflects changes
+
+**Template**: See `VERSION_LOG.md` for the format template at the bottom of the file.
+
+**Example**:
+```markdown
+## v1.4.0+6 (2026-04-10)
+### 🎯 Features
+- Session-based werd tracking with ReadingSegment
+- Jump dialog for long-distance navigation
+```
+
 ---
 
 ## Key Services
