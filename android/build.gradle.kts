@@ -1,5 +1,9 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
+plugins {
+    id("androidx.baselineprofile") apply false
+}
+
 allprojects {
     repositories {
         google()

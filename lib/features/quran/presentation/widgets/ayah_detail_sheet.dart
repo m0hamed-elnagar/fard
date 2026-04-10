@@ -6,7 +6,9 @@ import 'package:fard/features/quran/domain/usecases/get_tafsir.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
 import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
+import 'package:fard/features/quran/presentation/widgets/jump_dialog.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:fard/core/extensions/quran_extension.dart';
 import 'package:quran/quran.dart' as quran;
 import 'package:google_fonts/google_fonts.dart';
@@ -22,14 +24,6 @@ class AyahDetailSheet extends StatelessWidget {
   final int? surahAyahCount;
 
   const AyahDetailSheet({super.key, required this.ayah, this.surahAyahCount});
-
-  String _formatAyah(int absoluteAyah, String locale) {
-    final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(absoluteAyah);
-    final surahName = locale == 'ar'
-        ? quran.getSurahNameArabic(pos[0])
-        : quran.getSurahName(pos[0]);
-    return "$surahName ${pos[1]}";
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +137,7 @@ class AyahDetailSheet extends StatelessWidget {
                                                           TextAlign.right,
                                                     ),
                                                     content: Text(
-                                                      'هل أنت متأكد من حذف هذه الإشارة المرجعية؟', // Using Arabic since it's most common in this app's Quran feature
+                                                      'هل أنت متأكد من حذف هذه الإشارة المرجعية؟',
                                                       style:
                                                           GoogleFonts.amiri(),
                                                       textAlign:
@@ -211,135 +205,9 @@ class AyahDetailSheet extends StatelessWidget {
                                               }
                                             },
                                           ),
-                                          IconButton(
-                                            icon: Icon(
-                                              isLastRead
-                                                  ? Icons.menu_book_rounded
-                                                  : Icons.menu_book_outlined,
-                                              color: isLastRead
-                                                  ? Theme.of(
-                                                      context,
-                                                    ).colorScheme.primary
-                                                  : null,
-                                            ),
-                                            tooltip: l10n.markAsLastRead,
-                                            onPressed: () async {
-                                              bool shouldProceed = true;
-                                              if (!isLastRead) {
-                                                final werdState = context
-                                                    .read<WerdBloc>()
-                                                    .state;
-                                                final progress =
-                                                    werdState.progress;
-                                                // Reference for jump check should be current position (lastRead)
-                                                // if not available, use start of today's werd.
-                                                final referenceAbs =
-                                                    progress
-                                                        ?.lastReadAbsolute ??
-                                                    progress
-                                                        ?.sessionStartAbsolute;
-                                                final targetAbs =
-                                                    QuranHizbProvider.getAbsoluteAyahNumber(
-                                                      ayah.number.surahNumber,
-                                                      ayah
-                                                          .number
-                                                          .ayahNumberInSurah,
-                                                    );
-
-                                                if (referenceAbs != null &&
-                                                    (targetAbs - referenceAbs)
-                                                            .abs() >
-                                                        50) {
-                                                  final startPos =
-                                                      QuranHizbProvider.getSurahAndAyahFromAbsolute(
-                                                        referenceAbs,
-                                                      );
-                                                  final startPage = quran
-                                                      .getPageNumber(
-                                                        startPos[0],
-                                                        startPos[1],
-                                                      );
-                                                  final endPage = quran
-                                                      .getPageNumber(
-                                                        ayah.number.surahNumber,
-                                                        ayah
-                                                            .number
-                                                            .ayahNumberInSurah,
-                                                      );
-                                                  final pagesCount =
-                                                      (endPage - startPage)
-                                                          .abs();
-
-                                                  final confirmed = await showDialog<bool>(
-                                                    context: context,
-                                                    builder: (dialogContext) => AlertDialog(
-                                                      title: Text(
-                                                        l10n.jumpConfirmTitle,
-                                                      ),
-                                                      content: Text(
-                                                        l10n.jumpConfirmMessage(
-                                                          _formatAyah(
-                                                            referenceAbs,
-                                                            l10n.localeName,
-                                                          ),
-                                                          _formatAyah(
-                                                            targetAbs,
-                                                            l10n.localeName,
-                                                          ),
-                                                          l10n.localeName ==
-                                                                  'ar'
-                                                              ? pagesCount
-                                                                    .toArabicIndic()
-                                                              : pagesCount
-                                                                    .toString(),
-                                                        ),
-                                                      ),
-                                                      actions: [
-                                                        TextButton(
-                                                          onPressed: () =>
-                                                              Navigator.pop(
-                                                                dialogContext,
-                                                                false,
-                                                              ),
-                                                          child: Text(l10n.no),
-                                                        ),
-                                                        TextButton(
-                                                          onPressed: () =>
-                                                              Navigator.pop(
-                                                                dialogContext,
-                                                                true,
-                                                              ),
-                                                          child: Text(l10n.yes),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  );
-                                                  shouldProceed =
-                                                      confirmed ?? false;
-                                                }
-                                              }
-
-                                              if (shouldProceed &&
-                                                  context.mounted) {
-                                                context.read<ReaderBloc>().add(
-                                                  ReaderEvent.saveLastRead(
-                                                    ayah,
-                                                  ),
-                                                );
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      l10n.markAsLastReadSuccess,
-                                                    ),
-                                                    duration: const Duration(
-                                                      seconds: 1,
-                                                    ),
-                                                  ),
-                                                );
-                                              }
-                                            },
+                                          _MarkAsLastReadButton(
+                                            ayah: ayah,
+                                            isLastRead: isLastRead,
                                           ),
                                         ],
                                       );
@@ -368,7 +236,7 @@ class AyahDetailSheet extends StatelessWidget {
                                         .withValues(alpha: 0.5),
                                   ),
                                 ),
-                                child: Text(
+                                child: SelectableText(
                                   ayah.uthmaniText,
                                   style: GoogleFonts.amiri(
                                     fontSize: 22,
@@ -555,66 +423,63 @@ class _TafsirTab extends StatelessWidget {
           orElse: () => TafsirInfo.availableTafsirs.first,
         );
 
-        return Column(
-          children: [
-            ListTile(
-              dense: true,
-              leading: const Icon(Icons.translate, size: 20),
-              title: Text(
-                l10n.tafsirWithVal(selectedTafsir.name),
-                style: const TextStyle(fontWeight: FontWeight.bold),
+        return FutureBuilder<String>(
+          key: ValueKey(tafsirId),
+          future: getIt<GetTafsir>()
+              .call(
+                GetTafsirParams(
+                  surahNumber: ayah.number.surahNumber,
+                  ayahNumber: ayah.number.ayahNumberInSurah,
+                  tafsirId: tafsirId,
+                ),
+              )
+              .then(
+                (res) => res.fold(
+                  (f) => l10n.errorLoadingTafsir(f.message),
+                  (d) => d,
+                ),
               ),
-              trailing: const Icon(Icons.edit_outlined, size: 20),
-              onTap: () => _showTafsirSelector(context, tafsirId),
-            ),
-            const Divider(height: 1),
-            Expanded(
-              child: FutureBuilder<String>(
-                key: ValueKey(tafsirId), // Re-fetch when tafsirId changes
-                future: getIt<GetTafsir>()
-                    .call(
-                      GetTafsirParams(
-                        surahNumber: ayah.number.surahNumber,
-                        ayahNumber: ayah.number.ayahNumberInSurah,
-                        tafsirId: tafsirId,
-                      ),
-                    )
-                    .then(
-                      (res) => res.fold(
-                        (f) => l10n.errorLoadingTafsir(f.message),
-                        (d) => d,
-                      ),
-                    ),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-                  final tafsir = snapshot.data ?? l10n.noTafsirAvailable;
+            final tafsir = snapshot.data ?? l10n.noTafsirAvailable;
 
-                  return ListView(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 16,
+            return ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                ListTile(
+                  dense: true,
+                  leading: const Icon(Icons.translate, size: 20),
+                  title: Text(
+                    l10n.tafsirWithVal(selectedTafsir.name),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  trailing: const Icon(Icons.edit_outlined, size: 20),
+                  onTap: () => _showTafsirSelector(context, tafsirId),
+                ),
+                const Divider(height: 1, thickness: 1),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
+                  child: SelectableText(
+                    _cleanHtml(tafsir),
+                    style: GoogleFonts.amiri(
+                      fontSize: 20,
+                      height: 2.2,
+                      wordSpacing: 2,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
-                    children: [
-                      Text(
-                        _cleanHtml(tafsir),
-                        style: GoogleFonts.amiri(
-                          fontSize: 20,
-                          height: 2.2,
-                          wordSpacing: 2,
-                          color: Theme.of(context).textTheme.bodyLarge?.color,
-                        ),
-                        textDirection: TextDirection.rtl,
-                        textAlign: TextAlign.justify,
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ],
+                    textDirection: TextDirection.rtl,
+                    textAlign: TextAlign.justify,
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -844,6 +709,221 @@ class _AudioButton extends StatelessWidget {
           style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
         ),
       ],
+    );
+  }
+}
+
+class _MarkAsLastReadButton extends StatefulWidget {
+  final Ayah ayah;
+  final bool isLastRead;
+
+  const _MarkAsLastReadButton({required this.ayah, required this.isLastRead});
+
+  @override
+  State<_MarkAsLastReadButton> createState() => _MarkAsLastReadButtonState();
+}
+
+class _MarkAsLastReadButtonState extends State<_MarkAsLastReadButton> {
+  DateTime? _lastMarkTapTime;
+
+  Future<void> _showUndoConfirmationDialog() async {
+    final l10n = AppLocalizations.of(context)!;
+    final werdBloc = context.read<WerdBloc>();
+    final progress = werdBloc.state.progress;
+    final segments = progress?.segmentsToday;
+    final lastSegment = segments?.isNotEmpty == true ? segments!.last : null;
+
+    if (lastSegment == null) {
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(l10n.werdNothingToUndo),
+            content: Text(l10n.werdNoSessionToRemove),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text(l10n.werdClose),
+              ),
+            ],
+          ),
+        );
+      }
+      return;
+    }
+
+    final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(
+      lastSegment.startAyah,
+    );
+    final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(
+      lastSegment.endAyah,
+    );
+    final isAr = l10n.localeName == 'ar';
+    final startSurah = isAr
+        ? quran.getSurahNameArabic(startPos[0])
+        : quran.getSurahName(startPos[0]);
+    final endSurah = isAr
+        ? quran.getSurahNameArabic(endPos[0])
+        : quran.getSurahName(endPos[0]);
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.werdUndoTitle),
+        content: Text(l10n.werdUndoMessage(
+          lastSegment.ayahsCount,
+          startSurah,
+          endSurah,
+        )),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.werdCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              l10n.werdUndo,
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      werdBloc.add(const WerdEvent.undoLastAction());
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    }
+  }
+
+  Future<void> _markAsRead() async {
+    final l10n = AppLocalizations.of(context)!;
+
+    if (!mounted) return;
+
+    // Get current progress to check for jumps
+    final werdState = context.read<WerdBloc>().state;
+    final currentProgress = werdState.progress;
+    final lastReadAbs = currentProgress?.lastReadAbsolute;
+
+    // Calculate absolute ayah number for the ayah we're trying to mark
+    final absAyah = QuranHizbProvider.getAbsoluteAyahNumber(
+      widget.ayah.number.surahNumber,
+      widget.ayah.number.ayahNumberInSurah,
+    );
+
+    debugPrint('📖 [MarkAsRead] Attempting to mark ayah $absAyah as last read');
+    debugPrint('   Last read position: $lastReadAbs');
+
+    // Show jump dialog only if gap is at least 50 ayahs
+    if (lastReadAbs != null) {
+      final gap = (absAyah - lastReadAbs).abs();
+      const jumpThreshold = 50;
+
+      debugPrint('📖 [MarkAsRead] Gap: $gap ayahs (threshold: $jumpThreshold)');
+
+      if (gap >= jumpThreshold) {
+        // Show jump dialog BEFORE saving
+        debugPrint('📖 [MarkAsRead] Showing jump dialog');
+        final choice = await JumpDialog.show(
+          context,
+          lastReadAyah: lastReadAbs,
+          targetAyah: absAyah,
+          currentTotalToday: currentProgress?.totalAmountReadToday ?? 0,
+        );
+
+        debugPrint('📖 [MarkAsRead] Jump dialog result: $choice');
+
+        // User dismissed - don't mark as read
+        if (choice == null || choice == 0) {
+          debugPrint('📖 [MarkAsRead] Dismissed - no changes saved');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Jump dismissed - ayah not marked'),
+                duration: Duration(seconds: 1),
+              ),
+            );
+          }
+          return;
+        }
+
+        // User chose "Mark All" - save the ayah and track the range
+        if (choice == 1 && mounted) {
+          debugPrint('📖 [MarkAsRead] Mark All - saving ayah $absAyah');
+          context.read<ReaderBloc>().add(
+            ReaderEvent.saveLastRead(widget.ayah),
+          );
+
+          context.read<WerdBloc>().add(
+            WerdEvent.trackItemReadMarkAll(
+              startAbsolute: lastReadAbs,
+              endAbsolute: absAyah,
+            ),
+          );
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.markAsLastReadSuccess),
+              duration: const Duration(seconds: 1),
+            ),
+          );
+          _lastMarkTapTime = DateTime.now();
+        }
+      } else {
+        // Gap is small (< 50 ayahs) - save normally without jump dialog
+        debugPrint('📖 [MarkAsRead] Gap too small ($gap < $jumpThreshold) - saving normally');
+        context.read<ReaderBloc>().add(
+          ReaderEvent.saveLastRead(widget.ayah),
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.markAsLastReadSuccess),
+            duration: const Duration(seconds: 1),
+          ),
+        );
+        _lastMarkTapTime = DateTime.now();
+      }
+    } else {
+      // No previous position - save normally
+      debugPrint('📖 [MarkAsRead] No previous position - saving ayah $absAyah');
+      context.read<ReaderBloc>().add(
+        ReaderEvent.saveLastRead(widget.ayah),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.markAsLastReadSuccess),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+      _lastMarkTapTime = DateTime.now();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(
+        widget.isLastRead
+            ? Icons.menu_book_rounded
+            : Icons.menu_book_outlined,
+        color: widget.isLastRead
+            ? Theme.of(context).colorScheme.primary
+            : null,
+      ),
+      tooltip: AppLocalizations.of(context)!.markAsLastRead,
+      onPressed: () {
+        if (_lastMarkTapTime != null) {
+          _showUndoConfirmationDialog();
+        } else {
+          _markAsRead();
+        }
+      },
     );
   }
 }

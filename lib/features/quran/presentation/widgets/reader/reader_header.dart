@@ -2,17 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
 import 'package:fard/features/quran/presentation/widgets/surah_header.dart';
+import 'package:fard/features/quran/domain/entities/surah.dart';
 
 class QuranReaderHeader extends StatelessWidget {
   final int surahNumber;
+  final List<Surah> allSurahs;
+  final int? currentAyahNumber;
   final VoidCallback? onNextSurah;
   final VoidCallback? onPreviousSurah;
+  final VoidCallback? onCompletionDoaa;
 
   const QuranReaderHeader({
     super.key,
     required this.surahNumber,
+    required this.allSurahs,
+    this.currentAyahNumber,
     this.onNextSurah,
     this.onPreviousSurah,
+    this.onCompletionDoaa,
   });
 
   @override
@@ -38,8 +45,11 @@ class QuranReaderHeader extends StatelessWidget {
               return state.maybeMap(
                 loaded: (s) => SurahHeader(
                   surah: s.surah,
+                  allSurahs: allSurahs,
+                  currentAyahNumber: currentAyahNumber,
                   onNext: onNextSurah,
                   onPrevious: onPreviousSurah,
+                  onCompletionDoaa: surahNumber == 114 ? onCompletionDoaa : null,
                 ),
                 orElse: () => const SizedBox.shrink(),
               );

@@ -1,6 +1,7 @@
 import 'package:fard/core/errors/failure.dart';
 import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
 import 'package:fard/features/werd/domain/repositories/werd_repository.dart';
+import 'package:fard/features/werd/domain/entities/reading_segment.dart';
 import 'package:fard/core/extensions/quran_extension.dart';
 import 'package:injectable/injectable.dart';
 
@@ -42,20 +43,46 @@ class UpdateLastRead {
       // Progress is direct distance from session start to current position
       int newTotal = 0;
       Set<int> newItems = {};
+      List<ReadingSegment> newSegments = [];
+      
       if (newAbs >= startAbs) {
         newTotal = newAbs - startAbs + 1;
         // In "reading flow", we assume user read everything from start to current
         newItems = Set.from(List.generate(newTotal, (i) => startAbs + i));
+        // Create segments from the set of ayahs
+        // Check if there's already an active session
+        if (currentProgress.segmentsToday.isNotEmpty) {
+          final lastSegment = currentProgress.segmentsToday.last;
+          if (lastSegment.endTime == null) {
+            // Extend the active session
+            newSegments = List.from(currentProgress.segmentsToday);
+            newSegments[newSegments.length - 1] = lastSegment.extend(newAbs);
+          } else {
+            // Previous session ended, create new one
+            newSegments = ReadingSegment.fromSet(newItems);
+            if (newSegments.isNotEmpty) {
+              newSegments[0] = newSegments[0].copyWith(startTime: DateTime.now());
+            }
+          }
+        } else {
+          // No existing segments, create new session
+          newSegments = ReadingSegment.fromSet(newItems);
+          if (newSegments.isNotEmpty) {
+            newSegments[0] = newSegments[0].copyWith(startTime: DateTime.now());
+          }
+        }
       } else {
         // If user jumps BACKWARDS from start, we don't count it towards progress for now
         // to keep the simplified "session start" logic.
         newTotal = currentProgress.totalAmountReadToday;
         newItems = currentProgress.readItemsToday;
+        newSegments = currentProgress.segmentsToday;
       }
 
       final newProgress = currentProgress.copyWith(
         totalAmountReadToday: newTotal,
         readItemsToday: newItems,
+        segmentsToday: newSegments, // FIX: Set BOTH formats!
         lastReadAbsolute: newAbs,
         sessionStartAbsolute: startAbs,
         lastUpdated: now,

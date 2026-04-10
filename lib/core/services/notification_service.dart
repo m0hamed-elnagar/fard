@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:injectable/injectable.dart';
 import '../di/injection.dart';
 import 'notification/channel_manager.dart';
@@ -51,7 +50,7 @@ class NotificationService {
     await _soundManager.init();
 
     try {
-      tz.initializeTimeZones();
+      // Timezone already initialized in configureDependencies(), just get local timezone
       debugPrint('NotificationService: getting local timezone...');
       final rawTimeZone = await FlutterTimezone.getLocalTimezone().timeout(
         const Duration(seconds: 5),
@@ -255,7 +254,6 @@ class NotificationService {
           channelDescription: _applyRtl('Temporary channel for Azan testing'),
           importance: Importance.max,
           priority: Priority.high,
-          fullScreenIntent: true,
           category: AndroidNotificationCategory.alarm,
           audioAttributesUsage: AudioAttributesUsage.alarm,
           playSound: true,
@@ -292,7 +290,6 @@ class NotificationService {
           channelDescription: _applyRtl('Notifications before prayer time'),
           importance: Importance.max,
           priority: Priority.high,
-          fullScreenIntent: true,
           category: AndroidNotificationCategory.alarm,
           audioAttributesUsage: AudioAttributesUsage.alarm,
           visibility: NotificationVisibility.public,

@@ -72,9 +72,9 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
                       orElse: () => s.surah.ayahs.first,
                     );
 
-                    // CRITICAL FIX: Only update if lastReadAyah is null (initial load)
+                    // Only highlight, DON'T auto-save - let user explicitly choose
                     if (s.lastReadAyah == null) {
-                      add(ReaderEvent.saveLastRead(ayah));
+                      add(ReaderEvent.selectAyah(ayah));
                     }
                   }
                 },

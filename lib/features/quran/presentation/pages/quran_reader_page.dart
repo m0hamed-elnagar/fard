@@ -3,39 +3,49 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/quran/domain/entities/surah.dart';
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
+import 'package:fard/features/azkar/presentation/screens/azkar_list_screen.dart';
+import 'package:fard/features/quran/presentation/widgets/cycle_completion_dialog.dart';
 import 'package:fard/core/extensions/quran_extension.dart';
 
 import 'package:fard/features/quran/presentation/widgets/reader/reader_app_bar.dart';
 import 'package:fard/features/quran/presentation/widgets/reader/reader_header.dart';
 import 'package:fard/features/quran/presentation/widgets/reader/reader_body.dart';
 import 'package:fard/features/quran/presentation/widgets/reader/reader_bottom_bar.dart';
+import 'package:fard/features/quran/presentation/widgets/reader/scroll_to_top_fab.dart';
 import 'package:fard/features/quran/presentation/controllers/reader_scroll_controller.dart';
+import 'package:fard/core/widgets/fast_scroll_scrollbar.dart';
 
 class QuranReaderPage extends StatefulWidget {
   final int surahNumber;
   final int? initialAyahNumber;
   final bool playOnLoad;
+  final List<Surah>? allSurahs;
 
   const QuranReaderPage({
     super.key,
     required this.surahNumber,
     this.initialAyahNumber,
     this.playOnLoad = false,
+    this.allSurahs,
   });
 
   static Route route({
     required int surahNumber,
     int? ayahNumber,
     bool playOnLoad = false,
+    List<Surah>? allSurahs,
   }) {
     return MaterialPageRoute(
       builder: (_) => QuranReaderPage(
         surahNumber: surahNumber,
         initialAyahNumber: ayahNumber,
         playOnLoad: playOnLoad,
+        allSurahs: allSurahs,
       ),
     );
   }
@@ -44,20 +54,49 @@ class QuranReaderPage extends StatefulWidget {
   State<QuranReaderPage> createState() => _QuranReaderPageState();
 }
 
-class _QuranReaderPageState extends State<QuranReaderPage> {
+class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingObserver {
   late final ReaderScrollController _scrollController;
   bool _hasHandledInitialAyah = false;
   bool _hasHandledPlayOnLoad = false;
+  bool _hasShownCycleCompletionDialog = false;
+
+  // Save WerdBloc reference early to use in dispose()
+  late final WerdBloc _werdBloc;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ReaderScrollController();
+    WidgetsBinding.instance.addObserver(this);
+    // Get WerdBloc reference while context is still valid
+    _werdBloc = getIt<WerdBloc>();
+  }
+
+  @override
+  void didUpdateWidget(QuranReaderPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reset the flag when navigating to a different surah
+    if (oldWidget.surahNumber != widget.surahNumber) {
+      _hasShownCycleCompletionDialog = false;
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // End session when app goes to background
+    if (state == AppLifecycleState.paused || 
+        state == AppLifecycleState.detached) {
+      _werdBloc.add(const WerdEvent.endSession());
+    }
   }
 
   @override
   void dispose() {
+    // End session when leaving Quran reader (use saved reference)
+    _werdBloc.add(const WerdEvent.endSession());
     _scrollController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -162,33 +201,57 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                           );
                         },
                       ),
-                      BlocListener<ReaderBloc, ReaderState>(
+                      // Listen to WerdBloc for cycle completion (ayah 6236)
+                      BlocListener<WerdBloc, WerdState>(
                         listenWhen: (prev, curr) {
-                          final prevLast = prev.maybeMap(
-                            loaded: (s) => s.lastReadAyah,
-                            orElse: () => null,
-                          );
-                          final currLast = curr.maybeMap(
-                            loaded: (s) => s.lastReadAyah,
-                            orElse: () => null,
-                          );
-                          return currLast != null && currLast != prevLast;
+                          final prevTotal = prev.progress?.totalAmountReadToday ?? 0;
+                          final currTotal = curr.progress?.totalAmountReadToday ?? 0;
+                          final prevLast = prev.progress?.lastReadAbsolute ?? 0;
+                          final currLast = curr.progress?.lastReadAbsolute ?? 0;
+                          // Trigger when lastReadAbsolute reaches 6236
+                          return currLast == 6236 && prevLast != 6236;
                         },
-                        listener: (context, state) {
-                          state.mapOrNull(
-                            loaded: (s) {
-                              if (s.lastReadAyah != null) {
-                                final abs =
-                                    QuranHizbProvider.getAbsoluteAyahNumber(
-                                      s.surah.number.value,
-                                      s.lastReadAyah!.number.ayahNumberInSurah,
-                                    );
-                                context.read<WerdBloc>().add(
-                                  WerdEvent.trackItemRead(abs),
+                        listener: (context, state) async {
+                          if (!_hasShownCycleCompletionDialog) {
+                            _hasShownCycleCompletionDialog = true;
+                            final choice = await CycleCompletionDialog.show(context);
+
+                            if (!context.mounted) return;
+
+                            final werdBloc = context.read<WerdBloc>();
+                            if (choice == 'restart') {
+                              werdBloc.add(WerdEvent.completeCycleAndRestart());
+                              final werdGoalId = werdBloc.state.goal?.id ?? 'default';
+                              werdBloc.add(WerdEvent.load(id: werdGoalId));
+
+                              if (context.mounted) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  QuranReaderPage.route(
+                                    surahNumber: 1,
+                                    ayahNumber: 1,
+                                    allSurahs: widget.allSurahs,
+                                  ),
                                 );
                               }
-                            },
-                          );
+                            } else if (choice == 'stay') {
+                              werdBloc.add(WerdEvent.completeCycleStayHere());
+                              final werdGoalId = werdBloc.state.goal?.id ?? 'default';
+                              werdBloc.add(WerdEvent.load(id: werdGoalId));
+                            } else if (choice == 'doaa') {
+                              werdBloc.add(const WerdEvent.completeCycle());
+                              final werdGoalId = werdBloc.state.goal?.id ?? 'default';
+                              werdBloc.add(WerdEvent.load(id: werdGoalId));
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const AzkarListScreen(
+                                    category: 'دعاء ختم القران',
+                                  ),
+                                ),
+                              );
+                            }
+                          }
                         },
                       ),
                       BlocListener<AudioBloc, AudioState>(
@@ -204,30 +267,85 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                         },
                       ),
                     ],
-                    child: CustomScrollView(
-                      controller: _scrollController.scrollController,
-                      slivers: [
-                        const SliverToBoxAdapter(child: SizedBox(height: 16)),
-                        QuranReaderHeader(
-                          surahNumber: widget.surahNumber,
-                          onNextSurah: widget.surahNumber < 114
-                              ? () => Navigator.pushReplacement(
-                                  context,
-                                  QuranReaderPage.route(
-                                    surahNumber: widget.surahNumber + 1,
-                                  ),
-                                )
-                              : null,
-                          onPreviousSurah: widget.surahNumber > 1
-                              ? () => Navigator.pushReplacement(
-                                  context,
-                                  QuranReaderPage.route(
-                                    surahNumber: widget.surahNumber - 1,
-                                  ),
-                                )
-                              : null,
+                    child: Stack(
+                      children: [
+                        CustomScrollView(
+                          controller: _scrollController.scrollController,
+                          slivers: [
+                            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                            QuranReaderHeader(
+                              surahNumber: widget.surahNumber,
+                              allSurahs: widget.allSurahs ?? [],
+                              currentAyahNumber: widget.initialAyahNumber,
+                              onNextSurah: widget.surahNumber < 114
+                                  ? () => Navigator.pushReplacement(
+                                      context,
+                                      QuranReaderPage.route(
+                                        surahNumber: widget.surahNumber + 1,
+                                        allSurahs: widget.allSurahs,
+                                      ),
+                                    )
+                                  : null,
+                              onPreviousSurah: widget.surahNumber > 1
+                                  ? () => Navigator.pushReplacement(
+                                      context,
+                                      QuranReaderPage.route(
+                                        surahNumber: widget.surahNumber - 1,
+                                        allSurahs: widget.allSurahs,
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                            ValueListenableBuilder<int?>(
+                              valueListenable: _scrollController.currentVisibleAyah,
+                              builder: (context, visibleAyah, child) {
+                                return QuranReaderBody(
+                                  scrollController: _scrollController,
+                                  currentVisibleAyah: visibleAyah,
+                                  onCompletionDoaa: widget.surahNumber == 114
+                                      ? () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => const AzkarListScreen(
+                                                category: 'دعاء ختم القران',
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      : null,
+                                );
+                              },
+                            ),
+                          ],
                         ),
-                        QuranReaderBody(scrollController: _scrollController),
+                        // Fast scroll scrollbar for reader
+                        BlocBuilder<ReaderBloc, ReaderState>(
+                          builder: (context, state) {
+                            return state.maybeMap(
+                              loaded: (s) => FastScrollScrollbar(
+                                scrollController: _scrollController.scrollController,
+                                itemCount: s.surah.numberOfAyahs,
+                                labelBuilder: (context, index) {
+                                  final ayahNum = index + 1;
+                                  return Text(
+                                    'Ayah $ayahNum',
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                  );
+                                },
+                              ),
+                              orElse: () => const SizedBox.shrink(),
+                            );
+                          },
+                        ),
+                        // Scroll-to-top FAB
+                        Positioned(
+                          right: 16,
+                          bottom: 100,
+                          child: ScrollToTopFAB(
+                            scrollController: _scrollController.scrollController,
+                          ),
+                        ),
                       ],
                     ),
                   ),

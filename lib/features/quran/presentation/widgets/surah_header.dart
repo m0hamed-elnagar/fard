@@ -7,17 +7,24 @@ import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/extensions/number_extension.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
 
 class SurahHeader extends StatelessWidget {
   final Surah surah;
+  final List<Surah> allSurahs;
   final VoidCallback? onNext;
   final VoidCallback? onPrevious;
+  final VoidCallback? onCompletionDoaa;
+  final int? currentAyahNumber;
 
   const SurahHeader({
     super.key,
     required this.surah,
+    required this.allSurahs,
     this.onNext,
     this.onPrevious,
+    this.onCompletionDoaa,
+    this.currentAyahNumber,
   });
 
   @override

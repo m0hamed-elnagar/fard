@@ -7,6 +7,7 @@ plugins {
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("androidx.baselineprofile")
 }
 
 
@@ -68,7 +69,25 @@ android {
             applicationIdSuffix = ".debug1"
             manifestPlaceholders["appLabel"] = "fard (Debug)"
         }
+        // Build type for generating baseline profiles
+        create("benchmark") {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("release")
+            matchingFallbacks += listOf("release")
+            manifestPlaceholders["appLabel"] = "fard (Benchmark)"
+        }
     }
+}
+
+baselineProfile {
+    // Don't auto-generate during normal builds (requires connected device)
+    // Run manually with: ./gradlew :app:generateBaselineProfile
+    automaticGenerationDuringBuild = false
 }
 
 kotlin {
@@ -84,6 +103,8 @@ dependencies {
     implementation("com.batoulapps.adhan:adhan:1.2.1")
     implementation("androidx.work:work-runtime-ktx:2.11.2")
     implementation("androidx.preference:preference-ktx:1.2.1")
+    // Baseline profile dependency
+    "baselineProfile"(project(":baselineprofile"))
 }
 
 flutter {

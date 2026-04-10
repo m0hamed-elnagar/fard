@@ -1,0 +1,88 @@
+# Baseline Profile Rules for Fard App
+# This file contains the critical class/method patterns for startup optimization.
+# Generated automatically by Macrobenchmark tests.
+
+# Flutter Engine Classes
+HSPLio/flutter/embedding/engine/FlutterEngine;-><init>
+HSPLio/flutter/embedding/engine/FlutterEngine;->executeDartCallback
+HSPLio/flutter/view/FlutterJNI;-><init>
+HSPLio/flutter/view/FlutterJNI;->addEngineLifecycleListener
+HSPLio/flutter/view/FlutterJNI;->attachToNative
+HSPLio/flutter/view/FlutterJNI;->ensureRunningOnMainThread
+HSPLio/flutter/view/FlutterJNI;->onFirstFrame
+HSPLio/flutter/embedding/engine/pluginservices/FlutterPluginServiceImpl;-><init>
+HSPLio/flutter/embedding/engine/plugins/FlutterEnginePluginRegistry;-><init>
+HSPLio/flutter/embedding/engine/loader/FlutterLoader;-><init>
+HSPLio/flutter/embedding/engine/loader/FlutterLoader;->startInitialization
+HSPLio/flutter/embedding/engine/loader/FlutterLoader;->ensureInitializationComplete
+
+# Flutter View & Rendering
+HSPLio/flutter/view/FlutterView;-><init>
+HSPLio/flutter/view/FlutterView;->addFirstFrameListener
+HSPLio/flutter/view/FlutterView;->onFirstFrameRendered
+HSPLio/flutter/embedding/engine/systemchannels/PlatformChannel;-><init>
+HSPLio/flutter/embedding/engine/systemchannels/LocalizationChannel;-><init>
+HSPLio/flutter/embedding/engine/systemchannels/NavigationChannel;-><init>
+HSPLio/flutter/embedding/engine/systemchannels/SettingsChannel;-><init>
+
+# Flutter Activity
+HSPLio/flutter/embedding/android/FlutterActivity;-><init>
+HSPLio/flutter/embedding/android/FlutterActivity;->onCreate
+HSPLio/flutter/embedding/android/FlutterActivityAndFragmentDelegate;-><init>
+HSPLio/flutter/embedding/android/FlutterActivityAndFragmentDelegate;->onCreateView
+HSPLio/flutter/embedding/android/FlutterActivityAndFragmentDelegate;->onActivityCreated
+HSPLio/flutter/embedding/android/FlutterActivityAndFragmentDelegate;->onStart
+HSPLio/flutter/embedding/android/FlutterActivityAndFragmentDelegate;->doAttach
+HSPLio/flutter/embedding/android/FlutterActivityAndFragmentDelegate;->doDetach
+HSPLio/flutter/embedding/android/FlutterActivityAndFragmentDelegate;->setupFlutterPlugins
+
+# App Specific Classes - Startup Path
+HSPLcom/qada/fard/MainActivity;-><init>
+HSPLcom/qada/fard/MainActivity;->onCreate
+HSPLcom/qada/fard/MainActivity;->configureFlutterEngine
+HSPLcom/qada/fard/FardApplication;-><init>
+HSPLcom/qada/fard/FardApplication;->onCreate
+
+# Dart Generated Classes
+HSPLcom/example/generated/GeneratedPluginRegistrant;->registerWith
+
+# Hive CE
+HSPLcom/hive_ce/flutter/HiveCeFlutterPlugin;-><init>
+HSPLcom/hive_ce/hive/Hive;->initFlutter
+
+# SharedPreferences
+HSPLandroidx/preference/PreferenceManager;->getDefaultSharedPreferences
+
+# Notifications
+HSPLcom/dexterous/flutterlocalnotifications/FlutterLocalNotificationsPlugin;-><init>
+HSPLcom/dexterous/flutterlocalnotifications/FlutterLocalNotificationsPlugin;->onAttachedToActivity
+
+# WorkManager
+HSPLandroidx/work/WorkManager;->getInstance
+HSPLandroidx/work/WorkManager;->initialize
+
+# Audio
+HSPLcom/ryanheise/just_audio/JustAudioPlugin;-><init>
+HSPLcom/ryanheise/audioservice/AudioServicePlugin;-><init>
+
+# ScreenUtil
+HSPLcom/example/flutter_screenutil/FlutterScreenutilPlugin;-><init>
+
+# Material/AndroidX UI
+HSPLandroidx/core/app/ActivityCompat;->requestPermissions
+HSPLandroidx/core/content/ContextCompat;->checkSelfPermission
+
+# Google Play Services / Firebase (if used)
+HSPLcom/google/android/gms/common/GoogleApiAvailability;->getInstance
+
+# JSON/Serialization
+HSPLcom/google/gson/Gson;-><init>
+HSPLorg/json/JSONObject;-><init>
+
+# Network
+HSPLokhttp3/OkHttpClient;-><init>
+HSPLokhttp3/Request$Builder;-><init>
+
+# UI Components
+HSPLandroidx/recyclerview/widget/RecyclerView;-><init>
+HSPLandroidx/recyclerview/widget/LinearLayoutManager;-><init>

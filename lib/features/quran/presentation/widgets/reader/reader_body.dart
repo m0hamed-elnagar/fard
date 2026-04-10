@@ -1,4 +1,6 @@
 import 'package:fard/core/extensions/quran_extension.dart';
+import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/quran/domain/entities/ayah.dart';
 import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
@@ -13,8 +15,15 @@ import 'package:google_fonts/google_fonts.dart';
 
 class QuranReaderBody extends StatefulWidget {
   final ReaderScrollController scrollController;
+  final int? currentVisibleAyah;
+  final VoidCallback? onCompletionDoaa;
 
-  const QuranReaderBody({super.key, required this.scrollController});
+  const QuranReaderBody({
+    super.key,
+    required this.scrollController,
+    this.currentVisibleAyah,
+    this.onCompletionDoaa,
+  });
 
   @override
   State<QuranReaderBody> createState() => _QuranReaderBodyState();
@@ -52,6 +61,7 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return BlocBuilder<ReaderBloc, ReaderState>(
       builder: (context, state) {
         return state.map(
@@ -178,31 +188,78 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
                                 ),
                               );
                             },
-                            child: AyahText(
-                              ayahs: s.surah.ayahs,
-                              highlightedAyah: playingAyah ?? s.highlightedAyah,
-                              dayStartAyah: dayStartAyah,
-                              lastReadAyah:
-                                  (werdState.progress?.totalAmountReadToday ??
-                                          0) >
-                                      0
-                                  ? lastReadAyah
-                                  : null,
-                              bookmarks: s.bookmarks,
-                              textScale: s.textScale,
-                              ayahKeys: widget.scrollController.ayahKeys,
-                              separator: s.separator,
-                              onAyahTap: (ayah) {
-                                context.read<ReaderBloc>().add(
-                                  ReaderEvent.selectAyah(ayah),
-                                );
-                              },
-                              onAyahLongPress: (ayah) {
-                                _showAyahDetail(context, ayah);
-                              },
-                              onAyahDoubleTap: (ayah) {
-                                _showAyahDetail(context, ayah);
-                              },
+                            child: Column(
+                              children: [
+                                AyahText(
+                                  ayahs: s.surah.ayahs,
+                                  highlightedAyah: playingAyah ?? s.highlightedAyah,
+                                  dayStartAyah: dayStartAyah,
+                                  lastReadAyah:
+                                      (werdState.progress?.totalAmountReadToday ??
+                                              0) >
+                                          0
+                                      ? lastReadAyah
+                                      : null,
+                                  bookmarks: s.bookmarks,
+                                  textScale: s.textScale,
+                                  ayahKeys: widget.scrollController.ayahKeys,
+                                  separator: s.separator,
+                                  onAyahTap: (ayah) {
+                                    context.read<ReaderBloc>().add(
+                                      ReaderEvent.selectAyah(ayah),
+                                    );
+                                  },
+                                  onAyahLongPress: (ayah) {
+                                    _showAyahDetail(context, ayah);
+                                  },
+                                  onAyahDoubleTap: (ayah) {
+                                    _showAyahDetail(context, ayah);
+                                  },
+                                ),
+
+                                // Completion Doaa Button (only for An-Nas - Surah 114)
+                                if (s.surah.number.value == 114 && widget.onCompletionDoaa != null)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24.0,
+                                      vertical: 32.0,
+                                    ),
+                                    child: ElevatedButton.icon(
+                                      onPressed: widget.onCompletionDoaa,
+                                      icon: SvgPicture.asset(
+                                        'assets/icons/praying_hands.svg',
+                                        width: 24,
+                                        height: 24,
+                                        colorFilter: const ColorFilter.mode(
+                                          Colors.amber,
+                                          BlendMode.srcIn,
+                                        ),
+                                      ),
+                                      label: Text(
+                                        Localizations.localeOf(context).languageCode == 'ar'
+                                            ? l10n.completionDoaaArabic
+                                            : l10n.completionDoaa,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 28,
+                                          vertical: 16,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(30),
+                                        ),
+                                        backgroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .surfaceContainerHigh,
+                                        foregroundColor: Colors.amber,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                           );
                         },

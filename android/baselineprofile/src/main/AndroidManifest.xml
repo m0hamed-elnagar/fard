@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Required for running benchmark tests -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application>
+        <!-- Required for running macrobenchmark tests -->
+        <uses-library android:name="android.test.runner" />
+    </application>
+
+</manifest>

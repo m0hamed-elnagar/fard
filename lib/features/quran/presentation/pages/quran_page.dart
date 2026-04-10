@@ -5,7 +5,8 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/quran/domain/entities/surah.dart';
 import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/core/extensions/number_extension.dart';
-import 'quran_reader_page.dart';
+import 'package:fard/core/widgets/fast_scroll_scrollbar.dart';
+import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
 import '../widgets/juz_list.dart';
 import '../widgets/hizb_list.dart';
 import '../widgets/bookmark_list.dart';
@@ -22,12 +23,14 @@ class QuranPage extends StatefulWidget {
 
 class _QuranPageState extends State<QuranPage> {
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _surahScrollController = ScrollController();
   String _searchQuery = '';
   bool _isSearching = false;
 
   @override
   void dispose() {
     _searchController.dispose();
+    _surahScrollController.dispose();
     super.dispose();
   }
 
@@ -201,118 +204,152 @@ class _QuranPageState extends State<QuranPage> {
                 // Surah Tab
                 filteredSurahs.isEmpty && !state.isLoading
                     ? Center(child: Text(l10n.noSearchResults))
-                    : ListView.separated(
-                        key: const Key('surah_list_view'),
-                        padding: const EdgeInsets.all(16),
-                        itemCount:
-                            filteredSurahs.length +
-                            (hasLastRead && _searchQuery.isEmpty ? 1 : 0),
-                        separatorBuilder: (context, index) =>
-                            const Divider(height: 1),
-                        itemBuilder: (context, index) {
-                          if (hasLastRead &&
-                              _searchQuery.isEmpty &&
-                              index == 0) {
-                            return _ContinueReadingCard(
-                              surah: lastReadSurah!,
-                              ayahNumber: lastRead.ayahNumber.ayahNumberInSurah,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  QuranReaderPage.route(
-                                    surahNumber: lastReadSurah!.number.value,
-                                    ayahNumber:
-                                        lastRead.ayahNumber.ayahNumberInSurah,
-                                    playOnLoad: true,
-                                  ),
-                                );
-                              },
-                            );
-                          }
-
-                          final surahIndex = hasLastRead && _searchQuery.isEmpty
-                              ? index - 1
-                              : index;
-                          final surah = filteredSurahs[surahIndex];
-                          return ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            leading: CircleAvatar(
-                              backgroundColor: Theme.of(
-                                context,
-                              ).primaryColor.withValues(alpha: 0.1),
-                              child: Text(
-                                surah.number.value.toArabicIndic(),
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            title: Align(
-                              alignment: Alignment.centerRight,
-                              child: Text(
-                                surah.name,
-                                style: GoogleFonts.amiri(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  height: 1.4,
-                                  wordSpacing: 2,
-                                ),
-                                textAlign: TextAlign.right,
-                              ),
-                            ),
-                            subtitle: Align(
-                              alignment: Alignment.centerRight,
-                              child: Text(
-                                '${surah.numberOfAyahs.toArabicIndic()} ${l10n.ayah}',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                                textAlign: TextAlign.right,
-                              ),
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.play_circle_outline,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                  onPressed: () {
-                                    final startAyah =
-                                        (lastRead?.ayahNumber.surahNumber ==
-                                            surah.number.value)
-                                        ? lastRead?.ayahNumber.ayahNumberInSurah
-                                        : 1;
+                    : Stack(
+                        children: [
+                          ListView.separated(
+                            key: const Key('surah_list_view'),
+                            padding: const EdgeInsets.all(16),
+                            controller: _surahScrollController,
+                            physics: const ScrollPhysics(),
+                            itemCount:
+                                filteredSurahs.length +
+                                (hasLastRead && _searchQuery.isEmpty ? 1 : 0),
+                            separatorBuilder: (context, index) =>
+                                const Divider(height: 1),
+                            itemBuilder: (context, index) {
+                              if (hasLastRead &&
+                                  _searchQuery.isEmpty &&
+                                  index == 0) {
+                                return _ContinueReadingCard(
+                                  surah: lastReadSurah!,
+                                  ayahNumber: lastRead.ayahNumber.ayahNumberInSurah,
+                                  onTap: () {
                                     Navigator.push(
                                       context,
                                       QuranReaderPage.route(
-                                        surahNumber: surah.number.value,
-                                        ayahNumber: startAyah,
+                                        surahNumber: lastReadSurah!.number.value,
+                                        ayahNumber:
+                                            lastRead.ayahNumber.ayahNumberInSurah,
                                         playOnLoad: true,
+                                        allSurahs: state.surahs,
                                       ),
                                     );
                                   },
+                                );
+                              }
+
+                              final surahIndex = hasLastRead && _searchQuery.isEmpty
+                                  ? index - 1
+                                  : index;
+                              final surah = filteredSurahs[surahIndex];
+                              return ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
                                 ),
-                                // Arabic RTL: Disclosure arrow points Left. DO NOT CHANGE.
-                                const Icon(Icons.arrow_forward_ios, size: 14),
-                              ],
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                QuranReaderPage.route(
-                                  surahNumber: surah.number.value,
+                                leading: CircleAvatar(
+                                  backgroundColor: Theme.of(
+                                    context,
+                                  ).primaryColor.withValues(alpha: 0.1),
+                                  child: Text(
+                                    surah.number.value.toArabicIndic(),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
+                                title: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text(
+                                    surah.name,
+                                    style: GoogleFonts.amiri(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      height: 1.4,
+                                      wordSpacing: 2,
+                                    ),
+                                    textAlign: TextAlign.right,
+                                  ),
+                                ),
+                                subtitle: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text(
+                                    '${surah.numberOfAyahs.toArabicIndic()} ${l10n.ayah}',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                    textAlign: TextAlign.right,
+                                  ),
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.play_circle_outline,
+                                        color: Theme.of(context).primaryColor,
+                                      ),
+                                      onPressed: () {
+                                        final startAyah =
+                                            (lastRead?.ayahNumber.surahNumber ==
+                                                surah.number.value)
+                                            ? lastRead?.ayahNumber.ayahNumberInSurah
+                                            : 1;
+                                        Navigator.push(
+                                          context,
+                                          QuranReaderPage.route(
+                                            surahNumber: surah.number.value,
+                                            ayahNumber: startAyah,
+                                            playOnLoad: true,
+                                            allSurahs: state.surahs,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    // Arabic RTL: Disclosure arrow points Left. DO NOT CHANGE.
+                                    const Icon(Icons.arrow_forward_ios, size: 14),
+                                  ],
+                                ),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    QuranReaderPage.route(
+                                      surahNumber: surah.number.value,
+                                      allSurahs: state.surahs,
+                                    ),
+                                  );
+                                },
                               );
                             },
-                          );
-                        },
+                          ),
+                          // Fast scroll scrollbar
+                          FastScrollScrollbar(
+                            scrollController: _surahScrollController,
+                            itemCount: filteredSurahs.length +
+                                (hasLastRead && _searchQuery.isEmpty ? 1 : 0),
+                            labelBuilder: (context, index) {
+                              if (hasLastRead && _searchQuery.isEmpty && index == 0) {
+                                return Text(
+                                  'Continue',
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                );
+                              }
+                              final surahIndex = hasLastRead && _searchQuery.isEmpty
+                                  ? index - 1
+                                  : index;
+                              if (surahIndex >= 0 && surahIndex < filteredSurahs.length) {
+                                final surah = filteredSurahs[surahIndex];
+                                return Text(
+                                  '${surah.number.value}. ${surah.name}',
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          ),
+                        ],
                       ),
 
                 // Juz Tab

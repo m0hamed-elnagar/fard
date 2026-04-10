@@ -370,36 +370,37 @@ class _AyahTextState extends State<AyahText> {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Directionality(
             textDirection: TextDirection.rtl,
-            child: Listener(
-              behavior: HitTestBehavior.opaque,
-              onPointerDown: (event) =>
-                  _handleGesture(event.localPosition, 'tap', blockKey, ranges),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onLongPressStart: (details) => _handleGesture(
-                  details.localPosition,
-                  'longPress',
-                  blockKey,
-                  ranges,
-                ),
-                onDoubleTapDown: (details) => _handleGesture(
-                  details.localPosition,
-                  'doubleTap',
-                  blockKey,
-                  ranges,
-                ),
-                child: Text.rich(
-                  key: blockKey,
-                  TextSpan(children: spans),
-                  textAlign: TextAlign.justify,
-                  softWrap: true,
-                  strutStyle: StrutStyle(
-                    fontFamily: GoogleFonts.amiri().fontFamily,
-                    fontSize: baseFontSize,
-                    height: lineHeight,
-                    forceStrutHeight: true,
-                    leadingDistribution: TextLeadingDistribution.even,
-                  ),
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTapDown: (details) => _handleGesture(
+                details.localPosition,
+                'tap',
+                blockKey,
+                ranges,
+              ),
+              onLongPressStart: (details) => _handleGesture(
+                details.localPosition,
+                'longPress',
+                blockKey,
+                ranges,
+              ),
+              onDoubleTapDown: (details) => _handleGesture(
+                details.localPosition,
+                'doubleTap',
+                blockKey,
+                ranges,
+              ),
+              child: Text.rich(
+                key: blockKey,
+                TextSpan(children: spans),
+                textAlign: TextAlign.justify,
+                softWrap: true,
+                strutStyle: StrutStyle(
+                  fontFamily: GoogleFonts.amiri().fontFamily,
+                  fontSize: baseFontSize,
+                  height: lineHeight,
+                  forceStrutHeight: true,
+                  leadingDistribution: TextLeadingDistribution.even,
                 ),
               ),
             ),

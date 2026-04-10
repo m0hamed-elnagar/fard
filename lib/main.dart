@@ -22,47 +22,60 @@ import 'package:just_audio_background/just_audio_background.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 void main() async {
-  debugPrint('App starting...');
+  final startupTimer = Stopwatch()..start();
+
+  debugPrint('[STARTUP] App starting...');
   WidgetsFlutterBinding.ensureInitialized();
-  debugPrint('WidgetsFlutterBinding initialized');
+  debugPrint(
+      '[STARTUP] WidgetsFlutterBinding initialized (${startupTimer.elapsedMilliseconds}ms)');
 
-  debugPrint('Starting asset migration check...');
-  try {
-    await MigrationService.migrateAssets();
-    debugPrint('Asset migration check completed');
-  } catch (e) {
-    debugPrint('Asset migration failed: $e');
-  }
-
-  if (Platform.isAndroid || Platform.isIOS) {
-    debugPrint('Initializing JustAudioBackground...');
-    await JustAudioBackground.init(
-      androidNotificationChannelId: 'com.nagar.fard.channel.audio',
-      androidNotificationChannelName: 'Quran Audio Playback',
-      androidNotificationOngoing: true,
-      androidNotificationIcon: 'mipmap/ic_launcher',
-    );
-    debugPrint('JustAudioBackground initialized');
-
-    debugPrint('Initializing BackgroundService...');
-    await BackgroundService.initialize();
-    debugPrint('BackgroundService initialized');
-  }
-
-  debugPrint('Configuring dependencies...');
+  // 1. CRITICAL: Configure Dependencies (Hive, GetIt, SharedPreferences)
+  // This must finish before runApp because widgets depend on getIt.
   await configureDependencies();
-  debugPrint('Dependencies configured');
+  debugPrint(
+      '[STARTUP] Dependencies configured (${startupTimer.elapsedMilliseconds}ms)');
 
-  final notificationService = getIt<NotificationService>();
-  debugPrint('Initializing NotificationService...');
-  await notificationService.init();
-  debugPrint('NotificationService initialized');
+  // 2. NON-CRITICAL: Launch non-blocking services in parallel
+  // We don't 'await' this so the app can start immediately.
+  _initializeBackgroundServices(startupTimer);
 
-  debugPrint('Running app...');
+  debugPrint('[STARTUP] Running app...');
   runApp(const QadaTrackerApp());
+  debugPrint('[STARTUP] runApp called (${startupTimer.elapsedMilliseconds}ms)');
 
-  // Handle notification that launched the app
-  notificationService.handleInitialNotification();
+  startupTimer.stop();
+  debugPrint(
+      '[STARTUP] ===== Critical startup path finished: ${startupTimer.elapsedMilliseconds}ms =====');
+}
+
+/// Initializes services that don't need to block the initial UI frame.
+Future<void> _initializeBackgroundServices(Stopwatch timer) async {
+  try {
+    await Future.wait([
+      // Asset migration (now optimized with flags)
+      MigrationService.migrateAssets(),
+
+      // Notification Service
+      getIt<NotificationService>().init().then((_) {
+        getIt<NotificationService>().handleInitialNotification();
+      }),
+
+      // JustAudio & Workmanager
+      if (Platform.isAndroid || Platform.isIOS) ...[
+        JustAudioBackground.init(
+          androidNotificationChannelId: 'com.nagar.fard.channel.audio',
+          androidNotificationChannelName: 'Quran Audio Playback',
+          androidNotificationOngoing: true,
+          androidNotificationIcon: 'mipmap/ic_launcher',
+        ),
+        BackgroundService.initialize(),
+      ],
+    ]);
+    debugPrint(
+        '[STARTUP] All background services initialized (${timer.elapsedMilliseconds}ms)');
+  } catch (e) {
+    debugPrint('[STARTUP] Background initialization error: $e');
+  }
 }
 
 class QadaTrackerApp extends StatefulWidget {
@@ -104,20 +117,43 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
       providers: [
         BlocProvider(create: (_) => getIt<SettingsCubit>()),
         BlocProvider(
-          create: (_) =>
-              getIt<AzkarBloc>()..add(const AzkarEvent.loadCategories()),
+          create: (_) {
+            final bloc = getIt<AzkarBloc>();
+            // Delay event to after first frame to reduce startup jank
+            Future.delayed(Duration.zero, () {
+              bloc.add(const AzkarEvent.loadCategories());
+            });
+            return bloc;
+          },
         ),
         BlocProvider(create: (_) => getIt<AudioBloc>()),
         BlocProvider(
-          create: (_) => getIt<QuranBloc>()..add(const QuranEvent.loadSurahs()),
+          create: (_) {
+            final bloc = getIt<QuranBloc>();
+            // Delay event to after first frame to reduce startup jank
+            Future.delayed(Duration.zero, () {
+              bloc.add(const QuranEvent.loadSurahs());
+            });
+            return bloc;
+          },
         ),
         BlocProvider(
-          create: (_) => getIt<WerdBloc>()..add(const WerdEvent.load()),
+          create: (_) {
+            final bloc = getIt<WerdBloc>();
+            // Delay event to after first frame to reduce startup jank
+            Future.delayed(Duration.zero, () {
+              bloc.add(const WerdEvent.load());
+            });
+            return bloc;
+          },
         ),
         BlocProvider(
           create: (_) {
             final bloc = getIt<PrayerTrackerBloc>();
-            bloc.add(const PrayerTrackerEvent.checkMissedDays());
+            // Delay event to after first frame to reduce startup jank
+            Future.delayed(Duration.zero, () {
+              bloc.add(const PrayerTrackerEvent.checkMissedDays());
+            });
             return bloc;
           },
         ),
