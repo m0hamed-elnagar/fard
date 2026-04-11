@@ -9,6 +9,7 @@ class ReaderState with _$ReaderState {
     Ayah? highlightedAyah,
     Ayah? lastReadAyah,
     @Default(1.0) double textScale,
+    @Default('Amiri') String fontFamily,
     @Default(ReaderSeparator.none) ReaderSeparator separator,
     @Default(16) int selectedTafsirId,
     @Default([]) List<Bookmark> bookmarks,

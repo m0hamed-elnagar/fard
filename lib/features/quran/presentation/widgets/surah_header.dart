@@ -4,7 +4,7 @@ import 'package:fard/features/quran/domain/entities/surah.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/audio/domain/repositories/audio_player_service.dart';
 import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:fard/features/quran/presentation/utils/quran_fonts.dart';
 import 'package:fard/core/extensions/number_extension.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 
@@ -15,6 +15,8 @@ class SurahHeader extends StatelessWidget {
   final VoidCallback? onPrevious;
   final VoidCallback? onCompletionDoaa;
   final int? currentAyahNumber;
+  final double textScale;
+  final String fontFamily;
 
   const SurahHeader({
     super.key,
@@ -24,6 +26,8 @@ class SurahHeader extends StatelessWidget {
     this.onPrevious,
     this.onCompletionDoaa,
     this.currentAyahNumber,
+    this.textScale = 1.0,
+    this.fontFamily = 'Amiri',
   });
 
   @override
@@ -58,8 +62,9 @@ class SurahHeader extends StatelessWidget {
                 child: Text(
                   surah.name,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.amiri(
-                    fontSize: 32,
+                  style: QuranFonts.getFontStyle(
+                    fontFamily: fontFamily,
+                    fontSize: 32 * textScale,
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.primary,
                   ),

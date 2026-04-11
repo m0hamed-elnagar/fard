@@ -17,6 +17,10 @@ abstract interface class QuranRepository {
   Future<Result<void>> updateLastReadPosition(LastReadPosition position);
   Future<int> getReaderSeparator();
   Future<void> updateReaderSeparator(int separatorIndex);
+  Future<double> getTextScale();
+  Future<void> updateTextScale(double scale);
+  Future<String> getFontFamily();
+  Future<void> updateFontFamily(String fontFamily);
   Future<Result<String>> getTafsir(
     int surahNumber,
     int ayahNumber, {

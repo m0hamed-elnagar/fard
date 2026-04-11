@@ -3,6 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:fard/features/quran/domain/entities/ayah.dart';
 import 'package:fard/features/quran/domain/entities/reader_settings.dart';
 import 'package:fard/core/extensions/quran_extension.dart';
+import 'package:fard/features/quran/presentation/utils/quran_fonts.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/extensions/number_extension.dart';
 import 'package:fard/features/quran/presentation/widgets/sajdah_indicator.dart';
@@ -19,6 +20,7 @@ class AyahText extends StatefulWidget {
   final ValueChanged<Ayah>? onAyahLongPress;
   final ValueChanged<Ayah>? onAyahDoubleTap;
   final double textScale;
+  final String fontFamily;
   final Map<int, GlobalKey>? ayahKeys;
   final ReaderSeparator separator;
 
@@ -33,6 +35,7 @@ class AyahText extends StatefulWidget {
     this.onAyahLongPress,
     this.onAyahDoubleTap,
     this.textScale = 1.0,
+    this.fontFamily = 'Amiri',
     this.ayahKeys,
     this.separator = ReaderSeparator.none,
   });
@@ -57,6 +60,24 @@ class _AyahTextState extends State<AyahText> {
         oldWidget.separator != widget.separator) {
       _calculateBlocks();
     }
+  }
+
+  /// Helper to get the font family as a TextStyle
+  TextStyle _getFontStyle({
+    required double fontSize,
+    double? height,
+    FontWeight? fontWeight,
+    Color? color,
+    double? wordSpacing,
+  }) {
+    return QuranFonts.getFontStyle(
+      fontFamily: widget.fontFamily,
+      fontSize: fontSize,
+      height: height,
+      fontWeight: fontWeight,
+      color: color,
+      wordSpacing: wordSpacing,
+    );
   }
 
   @override
@@ -242,7 +263,7 @@ class _AyahTextState extends State<AyahText> {
 
       spans.add(
         TextSpan(
-          style: GoogleFonts.amiri(fontSize: baseFontSize, height: lineHeight),
+          style: _getFontStyle(fontSize: baseFontSize, height: lineHeight),
           children: [
             // 0. SCROLL ANCHOR
             WidgetSpan(
@@ -278,16 +299,16 @@ class _AyahTextState extends State<AyahText> {
               ),
             ),
 
-            // 4. MARKER
+            // 4. MARKER (always Amiri for verse end symbols)
             TextSpan(
               text: '\u2009$markerText',
-              style: TextStyle(
+              style: QuranFonts.getFontStyle(
+                fontFamily: 'Amiri',
+                fontSize: baseFontSize,
+                height: lineHeight,
                 color: isHighlighted
                     ? colorScheme.primary
                     : textTheme.bodyLarge?.color?.withValues(alpha: 0.7),
-                backgroundColor: isHighlighted
-                    ? colorScheme.primary.withValues(alpha: 0.2)
-                    : null,
               ),
             ),
 
@@ -396,7 +417,7 @@ class _AyahTextState extends State<AyahText> {
                 textAlign: TextAlign.justify,
                 softWrap: true,
                 strutStyle: StrutStyle(
-                  fontFamily: GoogleFonts.amiri().fontFamily,
+                  fontFamily: QuranFonts.getFontFamilyName(widget.fontFamily),
                   fontSize: baseFontSize,
                   height: lineHeight,
                   forceStrutHeight: true,

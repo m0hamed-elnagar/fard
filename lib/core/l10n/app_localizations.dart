@@ -1406,6 +1406,12 @@ abstract class AppLocalizations {
   /// **'Reader Settings'**
   String get readerSettings;
 
+  /// No description provided for @fontFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Font Family'**
+  String get fontFamily;
+
   /// No description provided for @removeFromBookmarks.
   ///
   /// In en, this message translates to:

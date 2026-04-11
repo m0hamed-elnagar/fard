@@ -45,7 +45,10 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
     }
 
     if (isCurrent) {
-      final readItems = progress?.readItemsToday ?? {};
+      // FIX #1: Use segments if readItemsToday is empty (modern session tracking)
+      final readItems = progress?.readItemsToday.isNotEmpty == true
+          ? progress!.readItemsToday
+          : _segmentsToReadItems(progress?.segmentsToday ?? []);
       return QuranHizbProvider.calculateFractionalProgress(readItems, unit);
     } else {
       // For total value, we calculate how many fractional units are in the REQUIRED range
@@ -56,6 +59,17 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
       );
       return QuranHizbProvider.calculateFractionalProgress(targetItems, unit);
     }
+  }
+
+  /// Helper: Convert segments to a Set of individual ayah numbers
+  Set<int> _segmentsToReadItems(List<ReadingSegment> segments) {
+    final items = <int>{};
+    for (final seg in segments) {
+      for (int i = seg.startAyah; i <= seg.endAyah; i++) {
+        items.add(i);
+      }
+    }
+    return items;
   }
 
   String _formatValue(double value, WerdUnit unit, bool isAr) {
@@ -106,8 +120,12 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                 .where((e) => e.key.startsWith(currentMonthKey))
                 .fold(0.0, (sum, e) => sum! + e.value.pagesRead) ??
             0.0;
+        // FIX #1: Use segments if readItemsToday is empty
+        final todayReadItems = progress?.readItemsToday.isNotEmpty == true
+            ? progress!.readItemsToday
+            : _segmentsToReadItems(progress?.segmentsToday ?? []);
         monthTotalPages += QuranHizbProvider.calculateFractionalProgress(
-          progress?.readItemsToday ?? {},
+          todayReadItems,
           WerdUnit.page,
         );
 
@@ -117,7 +135,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                 .fold(0.0, (sum, e) => sum! + e.value.juzRead) ??
             0.0;
         monthTotalJuz += QuranHizbProvider.calculateFractionalProgress(
-          progress?.readItemsToday ?? {},
+          todayReadItems,
           WerdUnit.juz,
         );
 
@@ -1379,64 +1397,80 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppTheme.cardBorder, width: 1.5),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppTheme.accent.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.auto_awesome_rounded,
-                color: AppTheme.accent,
-                size: 48,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              isAr ? 'ابدأ رحلتك مع القرآن' : 'Start Your Quran Journey',
-              style: GoogleFonts.amiri(
-                color: AppTheme.textPrimary,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              isAr
-                  ? 'حدد وردك اليومي وتابع تقدمك بسهولة'
-                  : 'Set your daily werd and track your progress easily',
-              style: GoogleFonts.amiri(
-                color: AppTheme.textSecondary,
-                fontSize: 14,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: widget.onSetGoalPressed,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accent,
-                foregroundColor: AppTheme.onAccent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
+      padding: const EdgeInsets.all(20),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isSmall = constraints.maxWidth < 350;
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Icon with flexible sizing
+              Container(
+                padding: EdgeInsets.all(isSmall ? 16 : 20),
+                decoration: BoxDecoration(
+                  color: AppTheme.accent.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-                elevation: 4,
+                child: Icon(
+                  Icons.auto_awesome_rounded,
+                  color: AppTheme.accent,
+                  size: isSmall ? 36 : 48,
+                ),
               ),
-              child: Text(
-                isAr ? 'تحديد ورد الآن' : 'Set Goal Now',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              SizedBox(height: isSmall ? 16 : 24),
+              // Title
+              Text(
+                isAr ? 'ابدأ رحلتك مع القرآن' : 'Start Your Quran Journey',
+                style: GoogleFonts.amiri(
+                  color: AppTheme.textPrimary,
+                  fontSize: isSmall ? 18 : 22,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-          ],
-        ),
+              SizedBox(height: isSmall ? 8 : 12),
+              // Description
+              Text(
+                isAr
+                    ? 'حدد وردك اليومي وتابع تقدمك بسهولة'
+                    : 'Set your daily werd and track your progress easily',
+                style: GoogleFonts.amiri(
+                  color: AppTheme.textSecondary,
+                  fontSize: isSmall ? 12 : 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: isSmall ? 16 : 24),
+              // Button - responsive width
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: widget.onSetGoalPressed,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.accent,
+                    foregroundColor: AppTheme.onAccent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isSmall ? 24 : 40,
+                      vertical: isSmall ? 12 : 16,
+                    ),
+                    elevation: 4,
+                  ),
+                  child: Text(
+                    isAr ? 'تحديد ورد الآن' : 'Set Goal Now',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: isSmall ? 14 : 16,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

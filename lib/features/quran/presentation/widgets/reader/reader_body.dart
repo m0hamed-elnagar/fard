@@ -5,13 +5,13 @@ import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/quran/domain/entities/ayah.dart';
 import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
 import 'package:fard/features/quran/presentation/controllers/reader_scroll_controller.dart';
+import 'package:fard/features/quran/presentation/utils/quran_fonts.dart';
 import 'package:fard/features/quran/presentation/widgets/ayah_detail_sheet.dart';
 import 'package:fard/features/quran/presentation/widgets/ayah_text.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class QuranReaderBody extends StatefulWidget {
   final ReaderScrollController scrollController;
@@ -119,7 +119,8 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
                       padding: const EdgeInsets.only(bottom: 32.0),
                       child: Text(
                         'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ',
-                        style: GoogleFonts.amiri(
+                        style: QuranFonts.getFontStyle(
+                          fontFamily: s.fontFamily,
                           fontSize: 32 * s.textScale,
                           fontWeight: FontWeight.bold,
                           height: 2.2,
@@ -202,6 +203,7 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
                                       : null,
                                   bookmarks: s.bookmarks,
                                   textScale: s.textScale,
+                                  fontFamily: s.fontFamily,
                                   ayahKeys: widget.scrollController.ayahKeys,
                                   separator: s.separator,
                                   onAyahTap: (ayah) {

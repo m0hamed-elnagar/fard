@@ -7,6 +7,8 @@ class ReaderEvent with _$ReaderEvent {
   const factory ReaderEvent.selectAyah(Ayah ayah) = _SelectAyah;
   const factory ReaderEvent.saveLastRead(Ayah ayah) = _SaveLastRead;
   const factory ReaderEvent.updateScale(double scale) = _UpdateScale;
+  const factory ReaderEvent.updateFontFamily(String fontFamily) =
+      _UpdateFontFamily;
   const factory ReaderEvent.updateSeparator(ReaderSeparator separator) =
       _UpdateSeparator;
   const factory ReaderEvent.toggleBookmark(Ayah ayah) = _ToggleBookmark;

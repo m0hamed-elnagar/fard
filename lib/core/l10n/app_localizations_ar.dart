@@ -708,6 +708,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get readerSettings => 'إعدادات القارئ';
 
   @override
+  String get fontFamily => 'نوع الخط';
+
+  @override
   String get removeFromBookmarks => 'إزالة من الإشارات';
 
   @override

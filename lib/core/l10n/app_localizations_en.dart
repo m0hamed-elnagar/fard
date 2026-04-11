@@ -709,6 +709,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get readerSettings => 'Reader Settings';
 
   @override
+  String get fontFamily => 'Font Family';
+
+  @override
   String get removeFromBookmarks => 'Remove from Bookmarks';
 
   @override

@@ -44,6 +44,8 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
       );
       final separatorIndex = await quranRepository.getReaderSeparator();
       final separator = ReaderSeparator.values[separatorIndex];
+      final textScale = await quranRepository.getTextScale();
+      final fontFamily = await quranRepository.getFontFamily();
 
       await result.fold(
         (failure) async => emit(ReaderState.error(failure.message)),
@@ -55,6 +57,8 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
             ReaderState.loaded(
               surah: surah,
               separator: separator,
+              textScale: textScale,
+              fontFamily: fontFamily,
               bookmarks: bookmarks,
             ),
           );
@@ -130,12 +134,22 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
       );
     });
 
-    on<_UpdateScale>((event, emit) {
+    on<_UpdateScale>((event, emit) async {
       state.mapOrNull(
         loaded: (s) {
           emit(s.copyWith(textScale: event.scale.clamp(0.5, 3.0)));
         },
       );
+      await quranRepository.updateTextScale(event.scale.clamp(0.5, 3.0));
+    });
+
+    on<_UpdateFontFamily>((event, emit) async {
+      state.mapOrNull(
+        loaded: (s) {
+          emit(s.copyWith(fontFamily: event.fontFamily));
+        },
+      );
+      await quranRepository.updateFontFamily(event.fontFamily);
     });
 
     on<_UpdateSeparator>((event, emit) async {

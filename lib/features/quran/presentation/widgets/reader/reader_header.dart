@@ -50,6 +50,8 @@ class QuranReaderHeader extends StatelessWidget {
                   onNext: onNextSurah,
                   onPrevious: onPreviousSurah,
                   onCompletionDoaa: surahNumber == 114 ? onCompletionDoaa : null,
+                  textScale: s.textScale,
+                  fontFamily: s.fontFamily,
                 ),
                 orElse: () => const SizedBox.shrink(),
               );

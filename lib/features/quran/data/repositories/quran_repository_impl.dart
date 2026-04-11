@@ -7,6 +7,7 @@ import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
 import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
 import 'package:fard/features/quran/data/datasources/remote/quran_remote_source.dart';
 import 'package:fard/features/quran/data/datasources/local/quran_local_source.dart';
+import 'package:fard/features/quran/presentation/utils/quran_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -22,6 +23,8 @@ class QuranRepositoryImpl implements QuranRepository {
       StreamController<Result<LastReadPosition>>.broadcast();
   static const String _lastReadKey = 'last_read_position';
   static const String _separatorKey = 'reader_separator_choice';
+  static const String _textScaleKey = 'reader_text_scale';
+  static const String _fontFamilyKey = 'reader_font_family';
 
   QuranRepositoryImpl({
     required this.remoteSource,
@@ -159,6 +162,28 @@ class QuranRepositoryImpl implements QuranRepository {
   @override
   Future<void> updateReaderSeparator(int separatorIndex) async {
     await sharedPreferences.setInt(_separatorKey, separatorIndex);
+  }
+
+  @override
+  Future<double> getTextScale() async {
+    return sharedPreferences.getDouble(_textScaleKey) ?? 1.0;
+  }
+
+  @override
+  Future<void> updateTextScale(double scale) async {
+    await sharedPreferences.setDouble(_textScaleKey, scale);
+  }
+
+  @override
+  Future<String> getFontFamily() async {
+    final saved = sharedPreferences.getString(_fontFamilyKey) ?? QuranFonts.defaultFont;
+    // Validate against whitelist - auto-fix any invalid stored values
+    return QuranFonts.safeFont(saved);
+  }
+
+  @override
+  Future<void> updateFontFamily(String fontFamily) async {
+    await sharedPreferences.setString(_fontFamilyKey, fontFamily);
   }
 
   @override

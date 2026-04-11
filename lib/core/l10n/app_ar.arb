@@ -267,6 +267,7 @@
   "quranText": "نصوص القرآن الكريم",
   "quranTextDesc": "جميع السور والآيات مع المعلومات الأساسية",
   "readerSettings": "إعدادات القارئ",
+  "fontFamily": "نوع الخط",
   "removeFromBookmarks": "إزالة من الإشارات",
   "addToBookmarks": "إضافة إلى الإشارات",
   "removedFromBookmarks": "تمت الإزالة من الإشارات",
