@@ -2,11 +2,16 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/features/werd/domain/entities/werd_progress.dart';
+import 'package:fard/features/werd/domain/entities/werd_history_entry.dart';
 import 'package:fard/features/werd/domain/entities/reading_segment.dart';
 import 'package:fard/features/werd/domain/repositories/werd_repository.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
+import 'package:fard/core/extensions/quran_extension.dart';
 import 'package:injectable/injectable.dart';
+import 'package:quran/quran.dart' as quran;
+
+import '../../domain/entities/werd_goal.dart';
 
 @injectable
 class WerdBloc extends Bloc<WerdEvent, WerdState> {
@@ -62,7 +67,7 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           emit(state.copyWith(isLoading: true));
           await _repository.setGoal(e.goal);
 
-          // Reset progress for the new goal starting point
+          // Get current progress before resetting
           final currentProgressRes = await _repository.getProgress(
             goalId: e.goal.id,
           );
@@ -76,17 +81,93 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
             (p) => p,
           );
 
-          final updatedProgress = currentProgress.copyWith(
+          // FIX #4: Save today's sessions to history BEFORE resetting
+          // This prevents data loss when changing goals
+          var progressToSave = currentProgress;
+          
+          debugPrint('🔍 [Goal Change] Before saving to history:');
+          debugPrint('   totalAmountReadToday: ${currentProgress.totalAmountReadToday}');
+          debugPrint('   segmentsToday: ${currentProgress.segmentsToday.length}');
+          debugPrint('   history entries: ${currentProgress.history.length}');
+          
+          if (currentProgress.totalAmountReadToday > 0 || currentProgress.segmentsToday.isNotEmpty) {
+            final dateKey = DateTime.now().toIso8601String().split('T')[0];
+            
+            debugPrint('💾 [Goal Change] Saving to history with key: $dateKey');
+            
+            // Calculate history entry from current segments
+            final startAbs = currentProgress.sessionStartAbsolute ?? 
+                             (currentProgress.segmentsToday.isNotEmpty ? currentProgress.segmentsToday.first.startAyah : 1);
+            final endAbs = currentProgress.lastReadAbsolute ?? 
+                           (currentProgress.segmentsToday.isNotEmpty ? currentProgress.segmentsToday.last.endAyah : startAbs);
+            
+            final pagesRead = QuranHizbProvider.calculateFractionalProgressFromSegments(
+              currentProgress.segmentsToday,
+              WerdUnit.page,
+            );
+            final juzRead = QuranHizbProvider.calculateFractionalProgressFromSegments(
+              currentProgress.segmentsToday,
+              WerdUnit.juz,
+            );
+            
+            final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(startAbs);
+            final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(endAbs);
+            final startSurahName = quran.getSurahName(startPos[0]);
+            final endSurahName = quran.getSurahName(endPos[0]);
+            
+            final summary = "Read ${currentProgress.totalAmountReadToday} ayahs (${pagesRead.toStringAsFixed(1)} pages) from $startSurahName ${startPos[1]} to $endSurahName ${endPos[1]}";
+            
+            final historyEntry = WerdHistoryEntry(
+              totalAyahsRead: currentProgress.totalAmountReadToday,
+              startAbsolute: startAbs,
+              endAbsolute: endAbs,
+              pagesRead: pagesRead,
+              juzRead: juzRead,
+              segmentCount: currentProgress.segmentsToday.length,
+              startSurahName: startSurahName,
+              startAyahNumber: startPos[1],
+              endSurahName: endSurahName,
+              endAyahNumber: endPos[1],
+              summary: summary,
+              sessions: currentProgress.segmentsToday.isNotEmpty ? currentProgress.segmentsToday : null,
+            );
+            
+            // Add to history
+            final newHistory = Map<String, WerdHistoryEntry>.from(currentProgress.history);
+            newHistory[dateKey] = historyEntry;
+            
+            debugPrint('💾 [Goal Change] Saved today\'s sessions to history: $dateKey - ${currentProgress.totalAmountReadToday} ayahs');
+            debugPrint('   History entries now: ${newHistory.length}');
+            
+            progressToSave = currentProgress.copyWith(
+              history: newHistory,
+            );
+          } else {
+            debugPrint('⚠️ [Goal Change] No sessions to save (totalAmountReadToday=0, segmentsToday=0)');
+          }
+
+          // NOW reset progress for the new goal
+          final updatedProgress = progressToSave.copyWith(
             lastReadAbsolute: e.goal.startAbsolute != null
                 ? e.goal.startAbsolute! - 1
                 : null,
             sessionStartAbsolute: e.goal.startAbsolute,
             totalAmountReadToday: 0,
-            readItemsToday: const {},
+            segmentsToday: const [], // ✅ Reset segments
+            readItemsToday: const {}, // ✅ Reset read items
+            lastUpdated: DateTime.now(),
           );
+          
+          debugPrint('📊 [Goal Change] After reset:');
+          debugPrint('   totalAmountReadToday: ${updatedProgress.totalAmountReadToday}');
+          debugPrint('   segmentsToday: ${updatedProgress.segmentsToday.length}');
+          debugPrint('   history entries: ${updatedProgress.history.length}');
+          
           await _repository.updateProgress(updatedProgress);
+          debugPrint('✅ [Goal Change] Progress reset for new goal');
 
           if (state.goal?.id != e.goal.id) {
+            debugPrint('🔄 [Goal Change] Loading progress for new goal: ${e.goal.id}');
             add(WerdEvent.load(id: e.goal.id));
           } else {
             emit(
@@ -293,10 +374,14 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           }
 
           final newTotal = segments.fold(0, (sum, seg) => sum + seg.ayahsCount);
+          
+          // FIX #1: Populate readItemsToday from segments for fractional calculations
+          final readItems = _segmentsToReadItems(segments);
 
           final newProgress = currentProgress.copyWith(
             totalAmountReadToday: newTotal,
             segmentsToday: segments,
+            readItemsToday: readItems,  // ✅ FIX: Populate from segments
             lastReadAbsolute: normalizedEnd,
             lastUpdated: DateTime.now(),
           );
@@ -382,10 +467,14 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
 
     // Calculate total from all segments
     final newTotal = segments.fold(0, (sum, seg) => sum + seg.ayahsCount);
+    
+    // FIX #1: Populate readItemsToday from segments for fractional calculations
+    final readItems = _segmentsToReadItems(segments);
 
     final newProgress = currentProgress.copyWith(
       totalAmountReadToday: newTotal,
       segmentsToday: segments,
+      readItemsToday: readItems,  // ✅ FIX: Populate from segments
       lastReadAbsolute: bookmarkAbs,
       lastUpdated: DateTime.now(),
     );
@@ -434,10 +523,14 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
     final finalSegments = [...endedSegments, newSegment];
 
     final newTotal = currentProgress.totalAmountReadToday + rangeCount;
+    
+    // FIX #1: Populate readItemsToday from segments for fractional calculations
+    final readItems = _segmentsToReadItems(finalSegments);
 
     final newProgress = currentProgress.copyWith(
       totalAmountReadToday: newTotal,
       segmentsToday: finalSegments,
+      readItemsToday: readItems,  // ✅ FIX: Populate from segments
       lastReadAbsolute: normalizedEnd,
       lastUpdated: DateTime.now(),
     );
@@ -463,8 +556,64 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
       (p) => p,
     );
 
-    final newProgress = currentProgress.copyWith(
-      completedCycles: currentProgress.completedCycles + 1,
+    // FIX #3: Save current sessions to history BEFORE clearing
+    // This prevents data loss when completing a cycle
+    var progressToSave = currentProgress;
+    
+    if (currentProgress.totalAmountReadToday > 0 || currentProgress.segmentsToday.isNotEmpty) {
+      final dateKey = DateTime.now().toIso8601String().split('T')[0];
+      
+      // Calculate history entry from segments
+      final startAbs = currentProgress.sessionStartAbsolute ?? 
+                       (currentProgress.segmentsToday.isNotEmpty ? currentProgress.segmentsToday.first.startAyah : 1);
+      final endAbs = currentProgress.lastReadAbsolute ?? 
+                     (currentProgress.segmentsToday.isNotEmpty ? currentProgress.segmentsToday.last.endAyah : startAbs);
+      
+      final pagesRead = QuranHizbProvider.calculateFractionalProgressFromSegments(
+        currentProgress.segmentsToday,
+        WerdUnit.page,
+      );
+      final juzRead = QuranHizbProvider.calculateFractionalProgressFromSegments(
+        currentProgress.segmentsToday,
+        WerdUnit.juz,
+      );
+      
+      final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(startAbs);
+      final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(endAbs);
+      final startSurahName = quran.getSurahName(startPos[0]);
+      final endSurahName = quran.getSurahName(endPos[0]);
+      
+      final summary = "Read ${currentProgress.totalAmountReadToday} ayahs (${pagesRead.toStringAsFixed(1)} pages) from $startSurahName ${startPos[1]} to $endSurahName ${endPos[1]}";
+      
+      final historyEntry = WerdHistoryEntry(
+        totalAyahsRead: currentProgress.totalAmountReadToday,
+        startAbsolute: startAbs,
+        endAbsolute: endAbs,
+        pagesRead: pagesRead,
+        juzRead: juzRead,
+        segmentCount: currentProgress.segmentsToday.length,
+        startSurahName: startSurahName,
+        startAyahNumber: startPos[1],
+        endSurahName: endSurahName,
+        endAyahNumber: endPos[1],
+        summary: summary,
+        sessions: currentProgress.segmentsToday.isNotEmpty ? currentProgress.segmentsToday : null,
+      );
+      
+      // Add to history
+      final newHistory = Map<String, WerdHistoryEntry>.from(currentProgress.history);
+      newHistory[dateKey] = historyEntry;
+      
+      debugPrint('💾 [Cycle Completion] Saved session to history: $dateKey - ${currentProgress.totalAmountReadToday} ayahs');
+      
+      progressToSave = currentProgress.copyWith(
+        history: newHistory,
+      );
+    }
+
+    // NOW complete the cycle
+    final newProgress = progressToSave.copyWith(
+      completedCycles: progressToSave.completedCycles + 1,
       totalAmountReadToday: 0,
       segmentsToday: [],
       readItemsToday: {},
@@ -473,7 +622,8 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
     );
 
     await _repository.updateProgress(newProgress);
-    
+    debugPrint('✅ [Cycle Completion] Cycle completed: ${newProgress.completedCycles} total cycles');
+
     // Emit updated state
     await _emitUpdatedState(goalId);
   }
@@ -589,12 +739,16 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
     final mergedSegments = ReadingSegment.mergeSegments(segments);
     final newTotal = mergedSegments.fold(0, (sum, seg) => sum + seg.ayahsCount);
     
+    // FIX #1: Populate readItemsToday from segments for fractional calculations
+    final readItems = _segmentsToReadItems(mergedSegments);
+
     // Update lastReadAbsolute to last marked ayah
     final newLastRead = mergedSegments.isNotEmpty ? mergedSegments.last.endAyah : null;
-    
+
     final newProgress = currentProgress.copyWith(
       segmentsToday: mergedSegments,
       totalAmountReadToday: newTotal,
+      readItemsToday: readItems,  // ✅ FIX: Populate from segments
       lastReadAbsolute: newLastRead,
       lastUpdated: DateTime.now(),
     );
@@ -622,16 +776,20 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
     if (index >= 0 && index < currentProgress.segmentsToday.length) {
       final segments = List<ReadingSegment>.from(currentProgress.segmentsToday);
       segments.removeAt(index);
-      
+
       // Recalculate total
       final newTotal = segments.fold(0, (sum, seg) => sum + seg.ayahsCount);
       
+      // FIX #1: Populate readItemsToday from segments for fractional calculations
+      final readItems = _segmentsToReadItems(segments);
+
       // Update lastReadAbsolute
       final newLastRead = segments.isNotEmpty ? segments.last.endAyah : currentProgress.sessionStartAbsolute;
-      
+
       final newProgress = currentProgress.copyWith(
         segmentsToday: segments,
         totalAmountReadToday: newTotal,
+        readItemsToday: readItems,  // ✅ FIX: Populate from segments
         lastReadAbsolute: newLastRead,
         lastUpdated: DateTime.now(),
       );
@@ -647,6 +805,18 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
   Future<void> close() {
     _progressSubscription?.cancel();
     return super.close();
+  }
+
+  /// Helper: Convert segments to a Set of individual ayah numbers
+  /// This bridges the gap between modern session tracking and legacy fractional calculations
+  Set<int> _segmentsToReadItems(List<ReadingSegment> segments) {
+    final items = <int>{};
+    for (final seg in segments) {
+      for (int i = seg.startAyah; i <= seg.endAyah; i++) {
+        items.add(i);
+      }
+    }
+    return items;
   }
 
   /// Helper: Emit updated state after repository update

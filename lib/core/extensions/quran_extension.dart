@@ -1,6 +1,7 @@
 // ignore_for_file: unused_import
 import 'package:quran/quran.dart' as quran;
 import 'package:fard/features/werd/domain/entities/werd_goal.dart';
+import 'package:fard/features/werd/domain/entities/reading_segment.dart';
 
 class QuranHizbProvider {
   static const List<List<int>> _hizbStarts = [
@@ -506,6 +507,31 @@ class QuranHizbProvider {
     return unit == WerdUnit.page
         ? totalProgress.clamp(0.0, 604.0)
         : totalProgress.clamp(0.0, 30.0);
+  }
+
+  /// FIX #2: Calculate fractional progress directly from segments
+  /// This bypasses the need for readItemsToday and works with modern session tracking
+  static double calculateFractionalProgressFromSegments(
+    List<ReadingSegment> segments,
+    WerdUnit unit,
+  ) {
+    if (segments.isEmpty) return 0.0;
+    
+    // Convert segments to readItems Set first (handles overlaps/deduplication)
+    final readItems = <int>{};
+    for (final seg in segments) {
+      for (int i = seg.startAyah; i <= seg.endAyah; i++) {
+        readItems.add(i);
+      }
+    }
+    
+    // Now calculate based on unit
+    if (unit == WerdUnit.ayah) {
+      return readItems.length.toDouble();
+    }
+    
+    // Reuse existing calculation for other units
+    return calculateFractionalProgress(readItems, unit);
   }
 
   static int getVerseCountInHizb(int hizb) {

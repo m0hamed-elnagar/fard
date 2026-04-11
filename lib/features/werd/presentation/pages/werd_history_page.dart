@@ -6,10 +6,11 @@ import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
 import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/core/extensions/number_extension.dart';
+import 'package:fard/core/extensions/quran_extension.dart';
 import 'package:fard/features/werd/domain/entities/werd_history_entry.dart';
 import 'package:fard/features/werd/domain/entities/werd_progress.dart';
+import 'package:fard/features/werd/domain/entities/reading_segment.dart';
 import 'package:fard/features/werd/domain/entities/werd_goal.dart';
-import 'package:fard/core/extensions/quran_extension.dart';
 import 'package:quran/quran.dart' as quran;
 
 enum HistoryPeriod { month }
@@ -503,12 +504,17 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
     final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(startAbs);
     final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(endAbs);
 
+    // FIX #1: Use segments if readItemsToday is empty (modern session tracking)
+    final readItems = progress.readItemsToday.isNotEmpty == true
+        ? progress.readItemsToday
+        : _segmentsToReadItems(progress.segmentsToday);
+    
     final pagesRead = QuranHizbProvider.calculateFractionalProgress(
-      progress.readItemsToday,
+      readItems,
       WerdUnit.page,
     );
     final juzRead = QuranHizbProvider.calculateFractionalProgress(
-      progress.readItemsToday,
+      readItems,
       WerdUnit.juz,
     );
 
@@ -529,6 +535,17 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
       summary: "Read today ${progress.totalAmountReadToday} ayahs",
       sessions: progress.segmentsToday.isNotEmpty ? progress.segmentsToday : null,
     );
+  }
+
+  /// Helper: Convert segments to a Set of individual ayah numbers
+  Set<int> _segmentsToReadItems(List<ReadingSegment> segments) {
+    final items = <int>{};
+    for (final seg in segments) {
+      for (int i = seg.startAyah; i <= seg.endAyah; i++) {
+        items.add(i);
+      }
+    }
+    return items;
   }
 
   String _formatDecimal(double value, bool isAr, int decimalPlaces) {

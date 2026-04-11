@@ -20,7 +20,8 @@
       "Bash(dir *)",
       "Bash(del *)",
       "Bash(git commit *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "WebFetch(fluttergems.dev)"
     ]
   },
   "$version": 3
