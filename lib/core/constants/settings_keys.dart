@@ -16,4 +16,16 @@ abstract final class SettingsKeys {
   static const String salaahSettings = 'salaah_settings';
   static const String qadaEnabled = 'is_qada_enabled';
   static const String hijriAdjustment = 'hijri_adjustment';
+  static const String themePresetId = 'theme_preset_id';
+  static const String customPrimaryColor = 'custom_primary_color';
+  static const String customAccentColor = 'custom_accent_color';
+  static const String customBackgroundColor = 'custom_background_color';
+  static const String customSurfaceColor = 'custom_surface_color';
+  static const String customTextColor = 'custom_text_color';
+  static const String customTextSecondaryColor =
+      'custom_text_secondary_color';
+  static const String customCardBorderColor = 'custom_card_border_color';
+  static const String customSurfaceLightColor = 'custom_surface_light_color';
+  static const String savedCustomThemes = 'saved_custom_themes';
+  static const String activeCustomThemeId = 'active_custom_theme_id';
 }

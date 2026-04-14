@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:intl/intl.dart';
 
@@ -77,19 +77,19 @@ class _CalendarWidgetState extends State<CalendarWidget> {
     final primaryStyle = _hijriFocused
         ? GoogleFonts.amiri(
             color: isSelected
-                ? Colors.black87
+                ? context.onSurfaceColor
                 : isTodayDate && !isSelected
-                    ? AppTheme.primary
-                    : AppTheme.textPrimary.withValues(alpha: cellOpacity),
+                    ? context.primaryColor
+                    : context.onSurfaceColor.withValues(alpha: cellOpacity),
             fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
             fontSize: isSelected ? 18.0 : 16.0,
           )
         : GoogleFonts.outfit(
             color: isSelected
-                ? Colors.black87
+                ? context.onSurfaceColor
                 : isTodayDate && !isSelected
-                    ? AppTheme.primary
-                    : AppTheme.textPrimary.withValues(alpha: cellOpacity),
+                    ? context.primaryColor
+                    : context.onSurfaceColor.withValues(alpha: cellOpacity),
             fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
             fontSize: isSelected ? 16.0 : 14.0,
           );
@@ -97,10 +97,10 @@ class _CalendarWidgetState extends State<CalendarWidget> {
     final secondaryStyle = _hijriFocused
         ? GoogleFonts.outfit(
             color: isSelected
-                ? Colors.black54
+                ? context.onSurfaceVariantColor
                 : isTodayDate && !isSelected
-                    ? AppTheme.primary.withValues(alpha: 0.7)
-                    : AppTheme.textSecondary.withValues(
+                    ? context.primaryColor.withValues(alpha: 0.7)
+                    : context.onSurfaceVariantColor.withValues(
                         alpha: 0.7 * cellOpacity,
                       ),
             fontWeight: FontWeight.bold,
@@ -109,10 +109,10 @@ class _CalendarWidgetState extends State<CalendarWidget> {
           )
         : GoogleFonts.amiri(
             color: isSelected
-                ? Colors.black54
+                ? context.onSurfaceVariantColor
                 : isTodayDate && !isSelected
-                    ? AppTheme.primary.withValues(alpha: 0.7)
-                    : AppTheme.textSecondary.withValues(
+                    ? context.primaryColor.withValues(alpha: 0.7)
+                    : context.onSurfaceVariantColor.withValues(
                         alpha: 0.7 * cellOpacity,
                       ),
             fontWeight: FontWeight.bold,
@@ -121,31 +121,40 @@ class _CalendarWidgetState extends State<CalendarWidget> {
           );
 
     return Container(
-      margin: const EdgeInsets.all(5.0),
+      margin: const EdgeInsets.all(2.0),
       decoration: BoxDecoration(
         color: isSelected
-            ? AppTheme.accent
-            : (isTodayDate && !isSelected ? AppTheme.primary.withValues(alpha: 0.1) : null),
+            ? context.primaryColor.withValues(alpha: 0.15)
+            : (isTodayDate && !isSelected ? context.primaryColor.withValues(alpha: 0.1) : null),
         shape: BoxShape.circle,
         border: isTodayDate && !isSelected
             ? Border.all(
-                color: AppTheme.primary.withValues(alpha: 0.8),
+                color: context.primaryColor.withValues(alpha: 0.8),
                 width: 2.5,
               )
             : isSelected
-            ? Border.all(color: Colors.black.withValues(alpha: 0.1), width: 1.0)
+            ? Border.all(
+                color: context.primaryColor.withValues(alpha: 0.5),
+                width: 2.0,
+              )
             : null,
-        boxShadow: [
-          BoxShadow(
-            color: isSelected
-                ? AppTheme.accent.withValues(alpha: 0.3)
-                : isTodayDate && !isSelected
-                    ? AppTheme.primary.withValues(alpha: 0.3)
-                    : Colors.transparent,
-            blurRadius: (isSelected ? 8 : 4),
-            offset: (isSelected ? const Offset(0, 2) : Offset.zero),
-          ),
-        ],
+        boxShadow: isSelected
+            ? [
+                BoxShadow(
+                  color: context.primaryColor.withValues(alpha: 0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : isTodayDate && !isSelected
+            ? [
+                BoxShadow(
+                  color: context.primaryColor.withValues(alpha: 0.15),
+                  blurRadius: 4,
+                  offset: Offset.zero,
+                ),
+              ]
+            : [],
       ),
       child: Center(
         child: FittedBox(
@@ -185,12 +194,12 @@ class _CalendarWidgetState extends State<CalendarWidget> {
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: context.surfaceContainerColor,
         borderRadius: BorderRadius.circular(20.0),
-        border: Border.all(color: AppTheme.cardBorder, width: 1.0),
+        border: Border.all(color: context.outlineColor, width: 1.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: context.outlineColor,
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -217,14 +226,14 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                     duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppTheme.accent.withValues(alpha: 0.1),
+                      color: context.secondaryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
                       _hijriFocused
                           ? Icons.nightlight_round
                           : Icons.calendar_month_rounded,
-                      color: AppTheme.accent,
+                      color: context.secondaryColor,
                       size: 18.0,
                     ),
                   ),
@@ -239,7 +248,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                               ? AppLocalizations.of(context)!.calendar
                               : focusedMonthText,
                           style: GoogleFonts.amiri(
-                            color: AppTheme.textPrimary,
+                            color: context.onSurfaceColor,
                             fontSize: 18.0,
                             fontWeight: FontWeight.bold,
                           ),
@@ -250,7 +259,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                                 ? '$gregMonth $gregYear'
                                 : '$hijriMonth $hijriYear هـ',
                             style: GoogleFonts.outfit(
-                              color: AppTheme.textSecondary.withValues(
+                              color: context.onSurfaceVariantColor.withValues(
                                 alpha: 0.7,
                               ),
                               fontSize: 11.0,
@@ -261,7 +270,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                           Text(
                             focusedMonthText,
                             style: GoogleFonts.outfit(
-                              color: AppTheme.textSecondary,
+                              color: context.onSurfaceVariantColor,
                               fontSize: 12.0,
                               fontWeight: FontWeight.w500,
                             ),
@@ -271,7 +280,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                   ),
                   // Focus Switcher - Always visible in header for discoverability
                   Material(
-                    color: Colors.transparent,
+                    color: context.surfaceContainerColor,
                     child: InkWell(
                       onTap: () {
                         HapticFeedback.mediumImpact();
@@ -284,19 +293,19 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: AppTheme.accent.withValues(alpha: 0.05),
+                          color: context.secondaryColor.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: AppTheme.accent.withValues(alpha: 0.1),
+                            color: context.secondaryColor.withValues(alpha: 0.1),
                           ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.swap_horiz_rounded,
                               size: 16,
-                              color: AppTheme.accent,
+                              color: context.secondaryColor,
                             ),
                             const SizedBox(width: 4),
                             Text(
@@ -306,7 +315,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                                       context,
                                     )!.gregorianCalendar,
                               style: GoogleFonts.outfit(
-                                color: AppTheme.accent,
+                                color: context.secondaryColor,
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -320,9 +329,9 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                   AnimatedRotation(
                     turns: _isExpanded ? 0.5 : 0.0,
                     duration: const Duration(milliseconds: 150),
-                    child: const Icon(
+                    child: Icon(
                       Icons.keyboard_arrow_down_rounded,
-                      color: AppTheme.textSecondary,
+                      color: context.onSurfaceVariantColor,
                       size: 24.0,
                     ),
                   ),
@@ -373,44 +382,65 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                 setState(() => _focusedDay = focusedDay);
                 widget.onMonthChanged(focusedDay.year, focusedDay.month);
               },
-              calendarStyle: const CalendarStyle(
-                todayTextStyle: TextStyle(color: AppTheme.textPrimary),
-                selectedTextStyle: TextStyle(
-                  color: Colors.black87,
+              calendarStyle: CalendarStyle(
+                // Today: ring highlight with primary color text
+                todayTextStyle: TextStyle(
+                  color: context.primaryColor,
                   fontWeight: FontWeight.w700,
                 ),
-                defaultTextStyle: TextStyle(color: AppTheme.textPrimary),
-                weekendTextStyle: TextStyle(color: AppTheme.textSecondary),
-                cellMargin: EdgeInsets.all(5),
+                todayDecoration: BoxDecoration(
+                  color: Colors.transparent,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: context.primaryColor,
+                    width: 2.0,
+                  ),
+                ),
+                // Selected: primary color tint with onSurface text
+                selectedTextStyle: TextStyle(
+                  color: context.onSurfaceColor,
+                  fontWeight: FontWeight.w800,
+                ),
+                selectedDecoration: BoxDecoration(
+                  color: context.primaryColor.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: context.primaryColor.withValues(alpha: 0.5),
+                    width: 2.0,
+                  ),
+                ),
+                defaultTextStyle: TextStyle(color: context.onSurfaceColor),
+                weekendTextStyle: TextStyle(color: context.onSurfaceVariantColor),
+                cellMargin: const EdgeInsets.all(2),
                 markersMaxCount: 1,
               ),
               headerStyle: HeaderStyle(
                 formatButtonVisible: false,
                 titleCentered: true,
                 titleTextStyle: GoogleFonts.outfit(
-                  color: AppTheme.textPrimary,
+                  color: context.onSurfaceColor,
                   fontSize: 16.0,
                   fontWeight: FontWeight.w600,
                 ),
-                leftChevronIcon: const Icon(
+                leftChevronIcon: Icon(
                   Icons.chevron_left_rounded,
-                  color: AppTheme.textSecondary,
+                  color: context.onSurfaceVariantColor,
                   size: 24.0,
                 ),
-                rightChevronIcon: const Icon(
+                rightChevronIcon: Icon(
                   Icons.chevron_right_rounded,
-                  color: AppTheme.textSecondary,
+                  color: context.onSurfaceVariantColor,
                   size: 24.0,
                 ),
               ),
               daysOfWeekStyle: DaysOfWeekStyle(
                 weekdayStyle: GoogleFonts.outfit(
-                  color: AppTheme.textSecondary.withValues(alpha: 0.8),
+                  color: context.onSurfaceVariantColor.withValues(alpha: 0.8),
                   fontSize: 12.0,
                   fontWeight: FontWeight.w600,
                 ),
                 weekendStyle: GoogleFonts.outfit(
-                  color: AppTheme.textSecondary.withValues(alpha: 0.8),
+                  color: context.onSurfaceVariantColor.withValues(alpha: 0.8),
                   fontSize: 12.0,
                   fontWeight: FontWeight.w600,
                 ),
@@ -436,24 +466,24 @@ class _CalendarWidgetState extends State<CalendarWidget> {
 
                   final primaryStyle = _hijriFocused
                       ? GoogleFonts.amiri(
-                          color: AppTheme.textPrimary,
+                          color: context.onSurfaceColor,
                           fontSize: 18.0,
                           fontWeight: FontWeight.bold,
                         )
                       : GoogleFonts.outfit(
-                          color: AppTheme.textPrimary,
+                          color: context.onSurfaceColor,
                           fontSize: 16.0,
                           fontWeight: FontWeight.w700,
                         );
 
                   final secondaryStyle = _hijriFocused
                       ? GoogleFonts.outfit(
-                          color: AppTheme.textSecondary,
+                          color: context.onSurfaceVariantColor,
                           fontSize: 12.0,
                           fontWeight: FontWeight.w500,
                         )
                       : GoogleFonts.amiri(
-                          color: AppTheme.textSecondary,
+                          color: context.onSurfaceVariantColor,
                           fontSize: 14.0,
                           fontWeight: FontWeight.w500,
                         );
@@ -494,11 +524,11 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                         height: 6.0,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: hasMissed ? AppTheme.missed : AppTheme.saved,
+                          color: hasMissed ? context.errorColor : context.primaryColor,
                           boxShadow: [
                             BoxShadow(
                               color:
-                                  (hasMissed ? AppTheme.missed : AppTheme.saved)
+                                  (hasMissed ? context.errorColor : context.primaryColor)
                                       .withValues(alpha: 0.4),
                               blurRadius: 4.0,
                             ),

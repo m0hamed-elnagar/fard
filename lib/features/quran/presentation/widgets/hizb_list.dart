@@ -5,6 +5,7 @@ import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
 import 'package:fard/core/extensions/number_extension.dart';
 import 'package:fard/core/extensions/quran_extension.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/core/theme/app_colors.dart';
 
 class HizbList extends StatelessWidget {
   final String searchQuery;
@@ -32,7 +33,7 @@ class HizbList extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.grid_view_rounded, size: 64, color: Colors.grey),
+            Icon(Icons.grid_view_rounded, size: 64, color: context.onSurfaceVariantColor),
             const SizedBox(height: 16),
             Text(l10n.noSearchResults, style: GoogleFonts.amiri(fontSize: 20)),
           ],
@@ -56,7 +57,7 @@ class HizbList extends StatelessWidget {
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
+            side: BorderSide(color: context.outlineColor),
           ),
           child: Theme(
             data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -87,7 +88,7 @@ class HizbList extends StatelessWidget {
               ),
               subtitle: Text(
                 'يبدأ من $surahName (ص ${pageNum.toArabicIndic()})',
-                style: GoogleFonts.amiri(fontSize: 14, color: Colors.grey[600]),
+                style: GoogleFonts.amiri(fontSize: 14, color: context.onSurfaceVariantColor),
               ),
               children: [
                 const Divider(height: 1, indent: 16, endIndent: 16),
@@ -118,7 +119,7 @@ class HizbList extends StatelessWidget {
                       'سورة $rSurahName، آية ${rAyah.toArabicIndic()} (ص ${rPage.toArabicIndic()})',
                       style: GoogleFonts.amiri(
                         fontSize: 13,
-                        color: Colors.grey,
+                        color: context.onSurfaceVariantColor,
                       ),
                     ),
                     trailing: const Icon(Icons.chevron_left, size: 18),

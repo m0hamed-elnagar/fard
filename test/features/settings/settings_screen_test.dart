@@ -1,6 +1,7 @@
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/voice_download_service.dart';
+import 'package:fard/core/theme/theme_presets.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
@@ -42,6 +43,7 @@ void main() {
       () => mockNotificationService.canScheduleExactNotifications(),
     ).thenAnswer((_) async => true);
 
+    when(() => mockSettingsCubit.getAvailablePresets()).thenReturn(ThemePresets.all);
     when(() => mockSettingsCubit.state).thenReturn(
       const SettingsState(
         locale: Locale('en'),
@@ -49,6 +51,9 @@ void main() {
         calculationMethod: 'muslim_league',
         madhab: 'shafi',
         isAzanVoiceDownloading: false,
+        themePresetId: 'emerald',
+        latitude: 51.5074,
+        longitude: -0.1278,
         salaahSettings: [
           SalaahSettings(salaah: Salaah.fajr),
           SalaahSettings(salaah: Salaah.dhuhr),

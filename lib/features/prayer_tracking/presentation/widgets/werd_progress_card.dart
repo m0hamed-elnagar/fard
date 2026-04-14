@@ -1,6 +1,6 @@
 import 'package:fard/core/extensions/number_extension.dart';
 import 'package:fard/core/extensions/quran_extension.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
 import 'package:fard/features/werd/domain/entities/werd_goal.dart';
@@ -224,12 +224,12 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
 
         return Container(
           decoration: BoxDecoration(
-            color: AppTheme.surface,
+            color: context.surfaceContainerColor,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppTheme.cardBorder, width: 1.5),
+            border: Border.all(color: context.outlineColor, width: 1.5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
+                color: context.backgroundColor.withValues(alpha: 0.2),
                 blurRadius: 15,
                 offset: const Offset(0, 6),
               ),
@@ -248,7 +248,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                     child: Icon(
                       Icons.menu_book_rounded,
                       size: 200,
-                      color: AppTheme.accent,
+                      color: context.secondaryColor,
                     ),
                   ),
                 ),
@@ -300,7 +300,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                             ],
                           ),
                           const Flexible(flex: 2, child: SizedBox(height: 8)),
-                          const Divider(height: 1, color: AppTheme.cardBorder),
+                          Divider(height: 1, color: context.outlineColor),
                           const Flexible(flex: 1, child: SizedBox(height: 4)),
                           _buildFooter(context, progress, isAr, isShort),
                         ],
@@ -328,7 +328,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
               Text(
                 isAr ? 'الورد اليومي' : 'Daily Werd',
                 style: GoogleFonts.amiri(
-                  color: AppTheme.textPrimary,
+                  color: context.onSurfaceColor,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -337,7 +337,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                 Text(
                   remainingDays,
                   style: GoogleFonts.amiri(
-                    color: AppTheme.accent,
+                    color: context.secondaryColor,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -348,7 +348,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                       ? '✅ أتممت القرآن ${(progress!.completedCycles ?? 0).toString().toArabicIndic()} ${progress.completedCycles == 1 ? 'مرة' : 'مرات'}'
                       : '✅ Completed Quran ${progress!.completedCycles ?? 0} ${progress.completedCycles == 1 ? 'time' : 'times'}',
                   style: GoogleFonts.amiri(
-                    color: Colors.green,
+                    color: context.primaryColor,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -385,7 +385,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
   Widget _buildUnitSelector(bool isAr, bool isShort) {
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.cardBorder.withValues(alpha: 0.2),
+        color: context.outlineColor.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(2),
@@ -411,13 +411,13 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
           vertical: isShort ? 2 : 4,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.accent : Colors.transparent,
+          color: isSelected ? context.secondaryColor : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Text(
           label,
           style: GoogleFonts.amiri(
-            color: isSelected ? AppTheme.onAccent : AppTheme.textSecondary,
+            color: isSelected ? context.onAccentColor : context.onSurfaceVariantColor,
             fontSize: isShort ? 10 : 11,
             fontWeight: FontWeight.bold,
           ),
@@ -437,7 +437,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
         color: Colors.transparent,
         child: IconButton(
           onPressed: onPressed,
-          icon: Icon(icon, size: 20, color: AppTheme.textSecondary),
+          icon: Icon(icon, size: 20, color: context.onSurfaceVariantColor),
           constraints: const BoxConstraints(),
           padding: const EdgeInsets.all(6),
           visualDensity: VisualDensity.compact,
@@ -450,22 +450,22 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.orange.withValues(alpha: 0.15),
+        color: context.secondaryColor.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+        border: Border.all(color: context.secondaryColor.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          const Icon(
+          Icon(
             Icons.local_fire_department_rounded,
-            color: Colors.orange,
+            color: context.secondaryColor,
             size: 14,
           ),
           const SizedBox(width: 4),
           Text(
             isAr ? streak.toArabicIndic() : streak.toString(),
             style: GoogleFonts.outfit(
-              color: Colors.orange,
+              color: context.secondaryColor,
               fontSize: 12,
               fontWeight: FontWeight.bold,
             ),
@@ -482,7 +482,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
         color: Colors.transparent,
         child: IconButton(
           onPressed: () => _showEditDialog(context, progress, isAr),
-          icon: Icon(Icons.edit_rounded, size: 20, color: AppTheme.accent),
+          icon: Icon(Icons.edit_rounded, size: 20, color: context.secondaryColor),
           constraints: const BoxConstraints(),
           padding: const EdgeInsets.all(6),
           visualDensity: VisualDensity.compact,
@@ -532,9 +532,9 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                   return Container(
                     margin: const EdgeInsets.symmetric(vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppTheme.surface,
+                      color: context.surfaceContainerColor,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppTheme.cardBorder, width: 1),
+                      border: Border.all(color: context.outlineColor, width: 1),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -548,18 +548,18 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.accent.withValues(alpha: 0.15),
+                                  color: context.secondaryColor.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(Icons.schedule_rounded, size: 10, color: AppTheme.accent),
+                                    Icon(Icons.schedule_rounded, size: 10, color: context.secondaryColor),
                                     const SizedBox(width: 4),
                                     Text(
                                       l10n.werdSession(index + 1),
                                       style: GoogleFonts.outfit(
-                                        color: AppTheme.accent,
+                                        color: context.secondaryColor,
                                         fontSize: 11,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -570,7 +570,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                               Text(
                                 l10n.werdAyahs(segment.ayahsCount),
                                 style: GoogleFonts.outfit(
-                                  color: AppTheme.accent,
+                                  color: context.secondaryColor,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 12,
                                 ),
@@ -582,12 +582,12 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                Icon(Icons.access_time_rounded, color: AppTheme.textSecondary.withValues(alpha: 0.6), size: 14),
+                                Icon(Icons.access_time_rounded, color: context.onSurfaceVariantColor.withValues(alpha: 0.6), size: 14),
                                 const SizedBox(width: 4),
                                 Text(
                                   '${segment.formattedStartTime} - ${segment.formattedEndTime}',
                                   style: GoogleFonts.outfit(
-                                    color: AppTheme.textSecondary.withValues(alpha: 0.6),
+                                    color: context.onSurfaceVariantColor.withValues(alpha: 0.6),
                                     fontSize: 11,
                                   ),
                                 ),
@@ -596,7 +596,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                                   Text(
                                     '(${segment.durationMinutes} min)',
                                     style: GoogleFonts.outfit(
-                                      color: AppTheme.textSecondary.withValues(alpha: 0.6),
+                                      color: context.onSurfaceVariantColor.withValues(alpha: 0.6),
                                       fontSize: 11,
                                     ),
                                   ),
@@ -608,11 +608,11 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                           // From row
                           Row(
                             children: [
-                              Icon(Icons.back_hand_rounded, color: AppTheme.accent, size: 18),
+                              Icon(Icons.back_hand_rounded, color: context.secondaryColor, size: 18),
                               const SizedBox(width: 8),
                               Text(
                                 l10n.werdFrom,
-                                style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold),
+                                style: TextStyle(fontSize: 11, color: context.onSurfaceVariantColor, fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(width: 8),
                               Expanded(
@@ -627,11 +627,11 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                             const SizedBox(height: 6),
                             Row(
                               children: [
-                                Icon(Icons.arrow_forward_rounded, color: AppTheme.accent, size: 16),
+                                Icon(Icons.arrow_forward_rounded, color: context.secondaryColor, size: 16),
                                 const SizedBox(width: 8),
                                 Text(
                                   l10n.werdTo,
-                                  style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold),
+                                  style: TextStyle(fontSize: 11, color: context.onSurfaceVariantColor, fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
@@ -663,7 +663,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                               // DELETE button
                               IconButton(
                                 icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                                color: Colors.red[300],
+                                color: context.missedColor,
                                 onPressed: () {
                                   // Perform action BEFORE popping dialog
                                   context.read<WerdBloc>().add(WerdEvent.removeSegment(index));
@@ -702,8 +702,8 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                   icon: const Icon(Icons.add_rounded),
                   label: Text(l10n.werdAddRange),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.accent,
-                    foregroundColor: AppTheme.onAccent,
+                    backgroundColor: context.secondaryColor,
+                    foregroundColor: context.onAccentColor,
                   ),
                 ),
               ),
@@ -808,13 +808,13 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        Icon(Icons.warning_amber_rounded, size: 16, color: Colors.orange.shade700),
+                        Icon(Icons.warning_amber_rounded, size: 16, color: context.secondaryColor),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
                             l10n.werdRangeCorrected,
                             style: TextStyle(
-                              color: Colors.orange.shade700,
+                              color: context.secondaryColor,
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
@@ -902,9 +902,9 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppTheme.accent.withValues(alpha: 0.1),
+                      color: context.secondaryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppTheme.accent.withValues(alpha: 0.3)),
+                      border: Border.all(color: context.secondaryColor.withValues(alpha: 0.3)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -913,7 +913,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                           l10n.werdRangePreview(fromSurahName, startAyah, toSurahName, endAyah),
                           style: GoogleFonts.outfit(
                             fontWeight: FontWeight.w600,
-                            color: AppTheme.accent,
+                            color: context.secondaryColor,
                             fontSize: 14,
                           ),
                         ),
@@ -921,13 +921,13 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                           const SizedBox(height: 8),
                           Row(
                             children: [
-                              Icon(Icons.warning_amber_rounded, size: 16, color: Colors.orange.shade700),
+                              Icon(Icons.warning_amber_rounded, size: 16, color: context.secondaryColor),
                               const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
                                   l10n.werdRangeCorrected,
                                   style: TextStyle(
-                                    color: Colors.orange.shade700,
+                                    color: context.secondaryColor,
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -941,7 +941,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                           l10n.werdWillAdd(ayahCount),
                           style: GoogleFonts.outfit(
                             fontWeight: FontWeight.bold,
-                            color: AppTheme.accent,
+                            color: context.secondaryColor,
                             fontSize: 14,
                           ),
                         ),
@@ -1060,7 +1060,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                     Text(
                       current,
                       style: GoogleFonts.outfit(
-                        color: AppTheme.textPrimary,
+                        color: context.onSurfaceColor,
                         fontSize: isShort ? 32 : 42,
                         fontWeight: FontWeight.w900,
                       ),
@@ -1069,7 +1069,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                     Text(
                       '/ $total $label',
                       style: GoogleFonts.amiri(
-                        color: AppTheme.textSecondary.withValues(alpha: 0.6),
+                        color: context.onSurfaceVariantColor.withValues(alpha: 0.6),
                         fontSize: isShort ? 14 : 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1088,7 +1088,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
               ? 'الهدف اليوم: $targetLocation'
               : 'Target today: $targetLocation',
           style: GoogleFonts.amiri(
-            color: AppTheme.accent.withValues(alpha: 0.8),
+            color: context.secondaryColor.withValues(alpha: 0.8),
             fontSize: isShort ? 12 : 14,
             fontWeight: FontWeight.w500,
           ),
@@ -1107,9 +1107,9 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
           child: LinearProgressIndicator(
             value: percent,
             minHeight: isShort ? 8 : 10,
-            backgroundColor: AppTheme.cardBorder.withValues(alpha: 0.3),
+            backgroundColor: context.outlineColor.withValues(alpha: 0.3),
             valueColor: AlwaysStoppedAnimation<Color>(
-              isCompleted ? Colors.amber : AppTheme.accent,
+              isCompleted ? context.secondaryColor : context.secondaryColor,
             ),
           ),
         ),
@@ -1121,7 +1121,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
             child: Icon(
               Icons.check_circle,
               size: isShort ? 6 : 8,
-              color: Colors.white.withValues(alpha: 0.8),
+              color: context.onSurfaceColor.withValues(alpha: 0.8),
             ),
           ),
       ],
@@ -1141,7 +1141,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
         Text(
           isAr ? 'إحصائيات الشهر' : 'Month Stats',
           style: GoogleFonts.amiri(
-            color: AppTheme.textSecondary.withValues(alpha: 0.7),
+            color: context.onSurfaceVariantColor.withValues(alpha: 0.7),
             fontSize: isShort ? 10 : 12,
             fontWeight: FontWeight.w500,
           ),
@@ -1156,7 +1156,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
               Text(
                 '$total $label',
                 style: GoogleFonts.outfit(
-                  color: AppTheme.textPrimary,
+                  color: context.onSurfaceColor,
                   fontSize: isShort ? 14 : 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -1165,7 +1165,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
               Text(
                 isAr ? '(الهدف: $dailyTarget)' : '(Goal: $dailyTarget)',
                 style: GoogleFonts.amiri(
-                  color: AppTheme.textSecondary.withValues(alpha: 0.5),
+                  color: context.onSurfaceVariantColor.withValues(alpha: 0.5),
                   fontSize: isShort ? 10 : 12,
                 ),
               ),
@@ -1189,7 +1189,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
         vertical: isShort ? 4 : 8,
       ),
       decoration: BoxDecoration(
-        color: AppTheme.cardBorder.withValues(alpha: 0.1),
+        color: context.outlineColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -1219,7 +1219,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                         width: isShort ? 8 : 10,
                         height: maxH,
                         decoration: BoxDecoration(
-                          color: AppTheme.cardBorder.withValues(alpha: 0.2),
+                          color: context.outlineColor.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(5),
                         ),
                       ),
@@ -1232,17 +1232,17 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: isToday
-                                ? [Colors.amber, Colors.orange]
+                                ? [context.secondaryColor, context.secondaryColor]
                                 : [
-                                    AppTheme.accent,
-                                    AppTheme.accent.withValues(alpha: 0.7),
+                                    context.secondaryColor,
+                                    context.secondaryColor.withValues(alpha: 0.7),
                                   ],
                           ),
                           borderRadius: BorderRadius.circular(5),
                           boxShadow: isToday
                               ? [
                                   BoxShadow(
-                                    color: Colors.amber.withValues(alpha: 0.3),
+                                    color: context.secondaryColor.withValues(alpha: 0.3),
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
                                   ),
@@ -1263,8 +1263,8 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                         ).format(e.key).substring(0, 1),
                         style: GoogleFonts.outfit(
                           color: isToday
-                              ? AppTheme.textPrimary
-                              : AppTheme.textSecondary.withValues(alpha: 0.6),
+                              ? context.onSurfaceColor
+                              : context.onSurfaceVariantColor.withValues(alpha: 0.6),
                           fontSize: 10,
                           fontWeight: isToday
                               ? FontWeight.bold
@@ -1325,14 +1325,14 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
               Text(
                 isAr ? 'المكان الحالي' : 'Current Position',
                 style: GoogleFonts.amiri(
-                  color: AppTheme.textSecondary.withValues(alpha: 0.6),
+                  color: context.onSurfaceVariantColor.withValues(alpha: 0.6),
                   fontSize: isShort ? 10 : 12,
                 ),
               ),
               Text(
                 _getAyahInfo(targetAbs, isAr),
                 style: GoogleFonts.amiri(
-                  color: AppTheme.textPrimary,
+                  color: context.onSurfaceColor,
                   fontSize: isShort ? 13 : 15,
                   fontWeight: FontWeight.bold,
                 ),
@@ -1365,8 +1365,8 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
               style: TextStyle(fontSize: isShort ? 12 : 14),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.accent,
-              foregroundColor: AppTheme.onAccent,
+              backgroundColor: context.secondaryColor,
+              foregroundColor: context.onAccentColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -1393,9 +1393,9 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
   Widget _buildNoGoalCard(BuildContext context, bool isAr) {
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: context.surfaceContainerColor,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppTheme.cardBorder, width: 1.5),
+        border: Border.all(color: context.outlineColor, width: 1.5),
       ),
       padding: const EdgeInsets.all(20),
       child: LayoutBuilder(
@@ -1408,12 +1408,12 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
               Container(
                 padding: EdgeInsets.all(isSmall ? 16 : 20),
                 decoration: BoxDecoration(
-                  color: AppTheme.accent.withValues(alpha: 0.1),
+                  color: context.secondaryColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.auto_awesome_rounded,
-                  color: AppTheme.accent,
+                  color: context.secondaryColor,
                   size: isSmall ? 36 : 48,
                 ),
               ),
@@ -1422,7 +1422,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
               Text(
                 isAr ? 'ابدأ رحلتك مع القرآن' : 'Start Your Quran Journey',
                 style: GoogleFonts.amiri(
-                  color: AppTheme.textPrimary,
+                  color: context.onSurfaceColor,
                   fontSize: isSmall ? 18 : 22,
                   fontWeight: FontWeight.bold,
                 ),
@@ -1435,7 +1435,7 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                     ? 'حدد وردك اليومي وتابع تقدمك بسهولة'
                     : 'Set your daily werd and track your progress easily',
                 style: GoogleFonts.amiri(
-                  color: AppTheme.textSecondary,
+                  color: context.onSurfaceVariantColor,
                   fontSize: isSmall ? 12 : 14,
                 ),
                 textAlign: TextAlign.center,
@@ -1447,8 +1447,8 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                 child: ElevatedButton(
                   onPressed: widget.onSetGoalPressed,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.accent,
-                    foregroundColor: AppTheme.onAccent,
+                    backgroundColor: context.secondaryColor,
+                    foregroundColor: context.onAccentColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),
                     ),

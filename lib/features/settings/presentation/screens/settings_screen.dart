@@ -3,8 +3,9 @@ import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
+import 'package:fard/features/settings/presentation/widgets/theme_editor_widget.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/location_service.dart';
 import 'package:fard/core/services/notification_service.dart';
@@ -13,6 +14,8 @@ import 'package:fard/core/widgets/custom_toggle.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
+import 'package:fard/features/settings/domain/entities/custom_theme.dart';
+import 'package:fard/features/settings/domain/entities/theme_preset.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
@@ -122,62 +125,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: AppTheme.textPrimary,
+        foregroundColor: context.onSurfaceColor,
         centerTitle: true,
-        actions: [
-          BlocBuilder<SettingsCubit, SettingsState>(
-            buildWhen: (previous, current) => previous.locale != current.locale,
-            builder: (context, state) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surfaceLight,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppTheme.cardBorder),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: state.locale.languageCode,
-                      icon: const Icon(
-                        Icons.language_rounded,
-                        size: 20,
-                        color: AppTheme.accent,
-                      ),
-                      onChanged: (String? newValue) {
-                        if (newValue != null) {
-                          HapticFeedback.selectionClick();
-                          context.read<SettingsCubit>().updateLocale(
-                            Locale(newValue),
-                          );
-                        }
-                      },
-                      items: [
-                        const DropdownMenuItem(
-                          value: 'ar',
-                          child: Text(
-                            'العربية',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ),
-                        const DropdownMenuItem(
-                          value: 'en',
-                          child: Text(
-                            'English',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ),
-                      ],
-                      dropdownColor: AppTheme.surfaceLight,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
       ),
       body: BlocListener<SettingsCubit, SettingsState>(
         listenWhen: (prev, curr) =>
@@ -215,7 +164,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Text(
                       l10n.locationDesc,
                       style: TextStyle(
-                        color: AppTheme.textSecondary,
+                        color: context.onSurfaceVariantColor,
                         fontSize: 13,
                       ),
                     ),
@@ -227,8 +176,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         state.cityName ?? l10n.locationNotSet,
                         style: TextStyle(
                           color: state.cityName != null
-                              ? AppTheme.accent
-                              : AppTheme.missed,
+                              ? context.secondaryColor
+                              : context.errorColor,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -237,7 +186,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           HapticFeedback.mediumImpact();
                           context.read<SettingsCubit>().refreshLocation();
                         },
-                        icon: const Icon(Icons.my_location, size: 18),
+                        icon: Icon(Icons.my_location, size: 18),
                         label: Text(l10n.refreshLocation),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
@@ -249,6 +198,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 20),
+                _buildThemeSection(context, state, l10n),
                 const SizedBox(height: 20),
                 _buildSection(
                   context,
@@ -377,59 +328,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(height: 20),
                 _buildSection(
                   context,
-                  title: l10n.globalSettings,
-                  icon: Icons.settings_suggest_rounded,
+                  title: l10n.azanNotifications,
+                  icon: Icons.notifications_active_rounded,
                   children: [
                     Text(
-                      l10n.globalSettingsDesc,
+                      l10n.azanSettingsDesc,
                       style: TextStyle(
-                        color: AppTheme.textSecondary,
+                        color: context.onSurfaceVariantColor,
                         fontSize: 13,
                       ),
                     ),
                     const SizedBox(height: 12),
+                    // Global settings row
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: Text(l10n.applyToAll),
+                      title: Text(l10n.globalSettings),
+                      subtitle: Text(
+                        l10n.globalSettingsDesc,
+                        style: TextStyle(fontSize: 12),
+                      ),
                       trailing: ElevatedButton.icon(
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           _showGlobalSettingsDialog(context, state, l10n);
                         },
-                        icon: const Icon(Icons.tune_rounded, size: 18),
+                        icon: Icon(Icons.tune_rounded, size: 18),
                         label: Text(l10n.edit),
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                _buildSection(
-                  context,
-                  title: l10n.individualSettings,
-                  icon: Icons.notifications_active_rounded,
-                  children: [
-                    Theme(
-                      data: Theme.of(
-                        context,
-                      ).copyWith(dividerColor: Colors.transparent),
-                      child: ExpansionTile(
-                        tilePadding: EdgeInsets.zero,
-                        title: Text(
-                          l10n.editEachPrayer,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        children: state.salaahSettings.map((salaahSetting) {
-                          return _buildSalaahSettingItem(
-                            context: context,
-                            settings: salaahSetting,
-                            l10n: l10n,
-                          );
-                        }).toList(),
+                    const Divider(height: 24),
+                    // Per-prayer settings
+                    Text(
+                      l10n.editEachPrayer,
+                      style: TextStyle(
+                        color: context.onSurfaceVariantColor,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    ...state.salaahSettings.map((salaahSetting) {
+                      return _buildSalaahSettingItem(
+                        context: context,
+                        settings: salaahSetting,
+                        l10n: l10n,
+                      );
+                    }),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -445,7 +389,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           child: Text(
                             l10n.azkarSettingsDesc,
                             style: TextStyle(
-                              color: AppTheme.textSecondary,
+                              color: context.onSurfaceVariantColor,
                               fontSize: 13,
                             ),
                           ),
@@ -456,10 +400,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             HapticFeedback.lightImpact();
                             _showAddReminderDialog(context);
                           },
-                          icon: const Icon(Icons.add, size: 20),
+                          icon: Icon(Icons.add, size: 20),
                           label: Text(l10n.add),
                           style: TextButton.styleFrom(
-                            foregroundColor: AppTheme.accent,
+                            foregroundColor: context.secondaryColor,
                           ),
                         ),
                       ],
@@ -473,7 +417,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             children: [
                               Icon(
                                 Icons.notifications_none_rounded,
-                                color: AppTheme.textSecondary.withValues(
+                                color: context.onSurfaceVariantColor.withValues(
                                   alpha: 0.3,
                                 ),
                                 size: 40,
@@ -481,8 +425,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               const SizedBox(height: 8),
                               Text(
                                 l10n.noRemindersSet,
-                                style: const TextStyle(
-                                  color: AppTheme.textSecondary,
+                                style: TextStyle(
+                                  color: context.onSurfaceVariantColor,
                                 ),
                               ),
                             ],
@@ -516,10 +460,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _buildSettingItem(
                       title: l10n.manageDownloads,
                       description: l10n.downloadRecitersOffline,
-                      trailing: const Icon(
+                      trailing: Icon(
                         Icons.arrow_forward_ios_rounded,
                         size: 16,
-                        color: AppTheme.textSecondary,
+                        color: context.onSurfaceVariantColor,
                       ),
                       onTap: () {
                         Navigator.push(
@@ -601,10 +545,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           }
                         }
                       },
-                      trailing: const Icon(
+                      trailing: Icon(
                         Icons.share_rounded,
                         size: 20,
-                        color: AppTheme.accent,
+                        color: context.secondaryColor,
                       ),
                     ),
                     const Divider(height: 32),
@@ -661,10 +605,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           }
                         }
                       },
-                      trailing: const Icon(
+                      trailing: Icon(
                         Icons.file_upload_rounded,
                         size: 20,
-                        color: AppTheme.accent,
+                        color: context.secondaryColor,
                       ),
                     ),
                   ],
@@ -680,7 +624,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Text(
                         'Force refresh the home screen widget. Use this for testing.',
                         style: TextStyle(
-                          color: AppTheme.textSecondary,
+                          color: context.onSurfaceVariantColor,
                           fontSize: 13,
                         ),
                       ),
@@ -693,14 +637,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             HapticFeedback.mediumImpact();
                             getIt<WidgetUpdateService>().updateWidget();
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text('Widget refresh triggered!'),
-                                backgroundColor: AppTheme.primaryLight,
+                                backgroundColor: context.primaryContainerColor,
                                 duration: Duration(seconds: 2),
                               ),
                             );
                           },
-                          icon: const Icon(Icons.refresh, size: 18),
+                          icon: Icon(Icons.refresh, size: 18),
                           label: const Text('Refresh'),
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
@@ -732,16 +676,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppTheme.missed.withValues(alpha: 0.1),
+        color: context.errorColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.missed.withValues(alpha: 0.2)),
+        border: Border.all(color: context.errorColor.withValues(alpha: 0.2)),
       ),
       child: Row(
         crossAxisAlignment: isSmall
             ? CrossAxisAlignment.center
             : CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: AppTheme.missed, size: isSmall ? 20 : 24),
+          Icon(icon, color: context.errorColor, size: isSmall ? 20 : 24),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -750,9 +694,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 if (title.isNotEmpty)
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.missed,
+                      color: context.errorColor,
                     ),
                   ),
                 Text(desc, style: TextStyle(fontSize: isSmall ? 12 : 13)),
@@ -772,9 +716,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceLight,
+        color: context.surfaceContainerHighestColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.cardBorder),
+        border: Border.all(color: context.outlineColor),
       ),
       child: DropdownButton<T>(
         value: value,
@@ -784,8 +728,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           onChanged(val);
         },
         underline: const SizedBox(),
-        icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 20),
-        dropdownColor: AppTheme.surfaceLight,
+        icon: Icon(Icons.keyboard_arrow_down_rounded, size: 20),
+        dropdownColor: context.surfaceContainerHighestColor,
         borderRadius: BorderRadius.circular(12),
       ),
     );
@@ -842,7 +786,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 filled: true,
-                                fillColor: AppTheme.surfaceLight,
+                                fillColor: context.surfaceContainerHighestColor,
                               ),
                               initialValue: () {
                                 if (selectedVoice == null) {
@@ -929,10 +873,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               },
                             ),
                             if (isDownloading)
-                              const Padding(
+                              Padding(
                                 padding: EdgeInsets.all(8.0),
                                 child: LinearProgressIndicator(
-                                  color: AppTheme.accent,
+                                  color: context.secondaryColor,
                                 ),
                               ),
                             TextButton.icon(
@@ -942,10 +886,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       Salaah.fajr,
                                       selectedVoice,
                                     ),
-                              icon: const Icon(Icons.play_arrow_rounded),
+                              icon: Icon(Icons.play_arrow_rounded),
                               label: Text(l10n.testAzan),
                               style: TextButton.styleFrom(
-                                foregroundColor: AppTheme.accent,
+                                foregroundColor: context.secondaryColor,
                               ),
                             ),
                           ],
@@ -971,9 +915,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.remove_circle_outline,
-                                    color: AppTheme.missed,
+                                    color: context.errorColor,
                                   ),
                                   onPressed: reminderMinutes > 1
                                       ? () {
@@ -990,7 +934,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppTheme.surfaceLight,
+                                    color: context.surfaceContainerHighestColor,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
@@ -1001,9 +945,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.add_circle_outline,
-                                    color: AppTheme.primaryLight,
+                                    color: context.primaryContainerColor,
                                   ),
                                   onPressed: reminderMinutes < 60
                                       ? () {
@@ -1019,12 +963,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             TextButton.icon(
                               onPressed: () => getIt<NotificationService>()
                                   .testReminder(Salaah.fajr, reminderMinutes),
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.notification_important_rounded,
                               ),
                               label: Text(l10n.testReminder),
                               style: TextButton.styleFrom(
-                                foregroundColor: AppTheme.accent,
+                                foregroundColor: context.secondaryColor,
                               ),
                             ),
                           ],
@@ -1046,9 +990,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               child: Text(l10n.minutesAfter(afterSalahMinutes)),
                             ),
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.remove_circle_outline,
-                                color: AppTheme.missed,
+                                color: context.errorColor,
                               ),
                               onPressed: afterSalahMinutes > 0
                                   ? () {
@@ -1063,7 +1007,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: AppTheme.surfaceLight,
+                                color: context.surfaceContainerHighestColor,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -1074,9 +1018,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.add_circle_outline,
-                                color: AppTheme.primaryLight,
+                                color: context.primaryContainerColor,
                               ),
                               onPressed: afterSalahMinutes < 60
                                   ? () {
@@ -1096,7 +1040,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onPressed: () => Navigator.pop(context),
                   child: Text(
                     l10n.cancel,
-                    style: const TextStyle(color: AppTheme.textSecondary),
+                    style: TextStyle(color: context.onSurfaceVariantColor),
                   ),
                 ),
                 ElevatedButton(
@@ -1177,12 +1121,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       subtitle: Text(
         '${settings.isAzanEnabled ? "${l10n.azan}$voiceDisplayName" : ""} ${settings.isAzanEnabled && settings.isReminderEnabled ? "&" : ""} ${settings.isReminderEnabled ? "${l10n.reminder} (${l10n.minutesBefore(settings.reminderMinutesBefore)})" : ""}',
-        style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+        style: TextStyle(fontSize: 12, color: context.onSurfaceVariantColor),
       ),
-      trailing: const Icon(
+      trailing: Icon(
         Icons.arrow_forward_ios_rounded,
         size: 14,
-        color: AppTheme.textSecondary,
+        color: context.onSurfaceVariantColor,
       ),
       onTap: () {
         HapticFeedback.lightImpact();
@@ -1255,7 +1199,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 filled: true,
-                                fillColor: AppTheme.surfaceLight,
+                                fillColor: context.surfaceContainerHighestColor,
                               ),
                               initialValue: () {
                                 if (selectedVoice == null) {
@@ -1336,7 +1280,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                             content: Text(
                                               l10n.azanDownloadError,
                                             ),
-                                            backgroundColor: AppTheme.missed,
+                                            backgroundColor: context.errorColor,
                                           ),
                                         );
                                       }
@@ -1354,10 +1298,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               },
                             ),
                             if (isDownloading)
-                              const Padding(
+                              Padding(
                                 padding: EdgeInsets.all(8.0),
                                 child: LinearProgressIndicator(
-                                  color: AppTheme.accent,
+                                  color: context.secondaryColor,
                                 ),
                               ),
                             TextButton.icon(
@@ -1367,10 +1311,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       settings.salaah,
                                       selectedVoice,
                                     ),
-                              icon: const Icon(Icons.play_arrow_rounded),
+                              icon: Icon(Icons.play_arrow_rounded),
                               label: Text(l10n.testAzan),
                               style: TextButton.styleFrom(
-                                foregroundColor: AppTheme.accent,
+                                foregroundColor: context.secondaryColor,
                               ),
                             ),
                           ],
@@ -1396,9 +1340,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.remove_circle_outline,
-                                    color: AppTheme.missed,
+                                    color: context.errorColor,
                                   ),
                                   onPressed: reminderMinutes > 1
                                       ? () {
@@ -1415,7 +1359,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppTheme.surfaceLight,
+                                    color: context.surfaceContainerHighestColor,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
@@ -1426,9 +1370,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.add_circle_outline,
-                                    color: AppTheme.primaryLight,
+                                    color: context.primaryContainerColor,
                                   ),
                                   onPressed: reminderMinutes < 60
                                       ? () {
@@ -1447,12 +1391,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     settings.salaah,
                                     reminderMinutes,
                                   ),
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.notification_important_rounded,
                               ),
                               label: Text(l10n.testReminder),
                               style: TextButton.styleFrom(
-                                foregroundColor: AppTheme.accent,
+                                foregroundColor: context.secondaryColor,
                               ),
                             ),
                           ],
@@ -1478,9 +1422,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.remove_circle_outline,
-                                    color: AppTheme.missed,
+                                    color: context.errorColor,
                                   ),
                                   onPressed: afterSalahMinutes > 0
                                       ? () {
@@ -1497,7 +1441,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppTheme.surfaceLight,
+                                    color: context.surfaceContainerHighestColor,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
@@ -1508,9 +1452,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.add_circle_outline,
-                                    color: AppTheme.primaryLight,
+                                    color: context.primaryContainerColor,
                                   ),
                                   onPressed: afterSalahMinutes < 60
                                       ? () {
@@ -1534,7 +1478,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onPressed: () => Navigator.pop(context),
                   child: Text(
                     l10n.cancel,
-                    style: const TextStyle(color: AppTheme.textSecondary),
+                    style: TextStyle(color: context.onSurfaceVariantColor),
                   ),
                 ),
                 ElevatedButton(
@@ -1575,14 +1519,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         style: TextStyle(
           fontWeight: FontWeight.w500,
           color: reminder.isEnabled
-              ? AppTheme.textPrimary
-              : AppTheme.textSecondary,
+              ? context.onSurfaceColor
+              : context.onSurfaceVariantColor,
         ),
       ),
       subtitle: Text(
         reminder.time,
-        style: const TextStyle(
-          color: AppTheme.accent,
+        style: TextStyle(
+          color: context.secondaryColor,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -1594,10 +1538,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onChanged: (val) => cubit.toggleReminder(index),
           ),
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.edit_outlined,
               size: 20,
-              color: AppTheme.textSecondary,
+              color: context.onSurfaceVariantColor,
             ),
             onPressed: () {
               HapticFeedback.lightImpact();
@@ -1605,10 +1549,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.delete_outline,
               size: 20,
-              color: AppTheme.missed,
+              color: context.errorColor,
             ),
             onPressed: () {
               HapticFeedback.mediumImpact();
@@ -1677,9 +1621,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              suffixIcon: const Icon(Icons.search),
+                              suffixIcon: Icon(Icons.search),
                               filled: true,
-                              fillColor: AppTheme.surfaceLight,
+                              fillColor: context.surfaceContainerHighestColor,
                             ),
                             child: Text(
                               selectedCategory.isEmpty
@@ -1699,7 +1643,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             filled: true,
-                            fillColor: AppTheme.surfaceLight,
+                            fillColor: context.surfaceContainerHighestColor,
                           ),
                           initialValue: customTitle,
                           onChanged: (val) => customTitle = val,
@@ -1729,7 +1673,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onPressed: () => Navigator.pop(context),
                       child: Text(
                         l10n.cancel,
-                        style: const TextStyle(color: AppTheme.textSecondary),
+                        style: TextStyle(color: context.onSurfaceVariantColor),
                       ),
                     ),
                     ElevatedButton(
@@ -1775,7 +1719,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppTheme.surface,
+      backgroundColor: context.surfaceContainerColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -1805,7 +1749,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     height: 4,
                     margin: const EdgeInsets.only(bottom: 20),
                     decoration: BoxDecoration(
-                      color: AppTheme.cardBorder,
+                      color: context.outlineColor,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -1813,12 +1757,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     autofocus: true,
                     decoration: InputDecoration(
                       hintText: l10n.searchCategory,
-                      prefixIcon: const Icon(Icons.search),
+                      prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
                       filled: true,
-                      fillColor: AppTheme.surfaceLight,
+                      fillColor: context.surfaceContainerHighestColor,
                     ),
                     onChanged: (val) {
                       setSheetState(() {
@@ -1861,6 +1805,465 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  // ==================== THEME SECTION ====================
+
+  Widget _buildThemeSection(
+    BuildContext context,
+    SettingsState state,
+    AppLocalizations l10n,
+  ) {
+    final cubit = context.read<SettingsCubit>();
+    final presets = cubit.getAvailablePresets();
+    final currentPresetId = state.themePresetId;
+    final localeCode = state.locale.languageCode;
+    final savedThemes = state.savedCustomThemes;
+    final activeThemeId = state.activeCustomThemeId;
+
+    return _buildSection(
+      context,
+      title: l10n.theme,
+      icon: Icons.palette_rounded,
+      children: [
+        // Built-in presets horizontal scroll
+        SizedBox(
+          height: 160,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: presets.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final preset = presets[index];
+              final isSelected = preset.id == currentPresetId;
+              return _buildThemeCard(
+                preset: preset,
+                isSelected: isSelected,
+                localeCode: localeCode,
+                onTap: () => cubit.selectThemePreset(preset.id),
+              );
+            },
+          ),
+        ),
+        // "Create New Theme" button
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => _showThemeEditorSheet(context, state, l10n, null),
+            icon: const Icon(Icons.add_circle_outline_rounded),
+            label: Text(l10n.createNewTheme),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: context.secondaryColor,
+              side: BorderSide(color: context.secondaryColor),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ),
+        ),
+        // Saved custom themes list
+        if (savedThemes.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          Text(
+            l10n.savedThemes,
+            style: GoogleFonts.amiri(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: context.onSurfaceColor,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...savedThemes.map((theme) {
+            final isActive = currentPresetId == 'custom' && activeThemeId == theme.id;
+            return _buildSavedThemeCard(
+              theme: theme,
+              isActive: isActive,
+              l10n: l10n,
+              onTap: () => cubit.activateCustomTheme(theme.id),
+              onEdit: () => _showThemeEditorSheet(context, state, l10n, theme),
+              onDelete: () => _confirmDeleteTheme(context, theme, l10n),
+            );
+          }),
+        ],
+        if (currentPresetId != 'emerald') ...[
+          const SizedBox(height: 12),
+          Center(
+            child: TextButton.icon(
+              icon: Icon(Icons.restore, size: 18),
+              label: Text(l10n.resetToDefault),
+              onPressed: () => cubit.selectThemePreset('emerald'),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildThemeCard({
+    required ThemePreset preset,
+    required bool isSelected,
+    required String localeCode,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 150,
+        decoration: BoxDecoration(
+          color: preset.backgroundColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? preset.primaryColor : preset.cardBorderColor,
+            width: isSelected ? 3 : 1.5,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: preset.primaryColor.withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
+        ),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      preset.primaryColor.withValues(alpha: 0.2),
+                      preset.accentColor.withValues(alpha: 0.1),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(preset.icon, color: preset.primaryColor, size: 36),
+                  const Spacer(),
+                  Text(
+                    localeCode == 'ar' ? preset.nameAr : preset.name,
+                    style: GoogleFonts.outfit(
+                      color: preset.textColor,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      CircleAvatar(radius: 6, backgroundColor: preset.primaryColor),
+                      const SizedBox(width: 4),
+                      CircleAvatar(radius: 6, backgroundColor: preset.accentColor),
+                    ],
+                  ),
+                  const Spacer(),
+                  if (isSelected)
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Icon(Icons.check_circle_rounded, color: preset.primaryColor, size: 24),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSavedThemeCard({
+    required CustomTheme theme,
+    required bool isActive,
+    required AppLocalizations l10n,
+    required VoidCallback onTap,
+    required VoidCallback onEdit,
+    required VoidCallback onDelete,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: context.surfaceContainerColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isActive ? context.secondaryColor : context.outlineColor,
+          width: isActive ? 3 : 1.5,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                // Color swatches
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(int.parse(theme.primary.replaceFirst('#', '0xFF'))),
+                        Color(int.parse(theme.accent.replaceFirst('#', '0xFF'))),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Name + subtitle
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              theme.name,
+                              style: GoogleFonts.outfit(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15,
+                                color: context.onSurfaceColor,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (isActive)
+                            Icon(
+                              Icons.check_circle_rounded,
+                              color: context.secondaryColor,
+                              size: 20,
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          _colorDot(theme.primary),
+                          const SizedBox(width: 4),
+                          _colorDot(theme.accent),
+                          const SizedBox(width: 4),
+                          _colorDot(theme.background),
+                          const SizedBox(width: 4),
+                          _colorDot(theme.surface),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Edit button
+                IconButton(
+                  icon: Icon(Icons.edit_rounded, size: 20),
+                  onPressed: onEdit,
+                  color: context.onSurfaceVariantColor,
+                  tooltip: l10n.edit,
+                ),
+                // Delete button
+                IconButton(
+                  icon: Icon(Icons.delete_outline_rounded, size: 20),
+                  onPressed: onDelete,
+                  color: context.errorColor,
+                  tooltip: l10n.delete,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _colorDot(String hex) {
+    return Container(
+      width: 14,
+      height: 14,
+      decoration: BoxDecoration(
+        color: Color(int.parse(hex.replaceFirst('#', '0xFF'))),
+        shape: BoxShape.circle,
+        border: Border.all(color: context.outlineColor, width: 0.5),
+      ),
+    );
+  }
+
+  Future<void> _showThemeEditorSheet(
+    BuildContext context,
+    SettingsState state,
+    AppLocalizations l10n,
+    CustomTheme? existingTheme,
+  ) async {
+    final cubit = context.read<SettingsCubit>();
+    final isEditing = existingTheme != null;
+
+    final colors = isEditing
+        ? existingTheme.toColorMap()
+        : {
+            'primary': '#2E7D32',
+            'accent': '#FFD54F',
+            'background': '#0D1117',
+            'surface': '#161B22',
+            'text': '#E6EDF3',
+            'textSecondary': '#8B949E',
+            'cardBorder': '#30363D',
+            'surfaceLight': '#21262D',
+          };
+
+    final labels = {
+      'primary': 'Primary',
+      'accent': 'Accent',
+      'background': 'Background',
+      'surface': 'Surface',
+      'text': 'Text',
+      'textSecondary': 'Text Secondary',
+      'cardBorder': 'Card Border',
+      'surfaceLight': 'Surface Light',
+    };
+
+    final result = await showModalBottomSheet<Map<String, String>>(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return ThemeEditorWidget(
+          colors: colors,
+          labels: labels,
+          l10n: l10n,
+          isEditing: isEditing,
+        );
+      },
+    );
+
+    if (result == null) return;
+
+    if (isEditing) {
+      cubit.updateCustomTheme(existingTheme.id, result);
+    } else {
+      if (!context.mounted) return;
+      final name = await _showThemeNameDialog(context, l10n, state.savedCustomThemes);
+      if (name == null) return;
+      
+      final theme = CustomTheme(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        name: name,
+        primary: result['primary']!,
+        accent: result['accent']!,
+        background: result['background']!,
+        surface: result['surface']!,
+        text: result['text']!,
+        textSecondary: result['textSecondary']!,
+        cardBorder: result['cardBorder']!,
+        surfaceLight: result['surfaceLight']!,
+      );
+      cubit.addCustomTheme(theme);
+    }
+  }
+
+  Future<String?> _showThemeNameDialog(
+    BuildContext context,
+    AppLocalizations l10n,
+    List<CustomTheme> existingThemes,
+  ) async {
+    // Generate a unique default name by incrementing if duplicates exist
+    String defaultName = 'My Theme';
+    int counter = 2;
+    while (existingThemes.any((t) => t.name == defaultName)) {
+      defaultName = 'My Theme $counter';
+      counter++;
+    }
+
+    final controller = TextEditingController(text: defaultName);
+    final focusNode = FocusNode();
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        // Select all text when dialog opens for easy editing
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          focusNode.requestFocus();
+          controller.selection = TextSelection(
+            baseOffset: 0,
+            extentOffset: controller.text.length,
+          );
+        });
+
+        return AlertDialog(
+          title: Text(l10n.nameYourTheme),
+          content: TextField(
+            controller: controller,
+            focusNode: focusNode,
+            autofocus: true,
+            textCapitalization: TextCapitalization.words,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              hintText: l10n.themeNameHint,
+              helperText: 'You can edit this name',
+            ),
+            onSubmitted: (val) {
+              if (val.trim().isNotEmpty) Navigator.pop(dialogContext, val.trim());
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(l10n.cancel),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (controller.text.trim().isNotEmpty) {
+                  Navigator.pop(dialogContext, controller.text.trim());
+                }
+              },
+              child: Text(l10n.saveTheme),
+            ),
+          ],
+        );
+      },
+    );
+    controller.dispose();
+    focusNode.dispose();
+    return result;
+  }
+
+  Future<void> _confirmDeleteTheme(
+    BuildContext context,
+    CustomTheme theme,
+    AppLocalizations l10n,
+  ) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: Text(l10n.deleteTheme),
+        content: Text(l10n.deleteThemeConfirm(theme.name)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(d), child: Text(l10n.cancel)),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(d, true),
+            style: ElevatedButton.styleFrom(backgroundColor: context.errorColor),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true && context.mounted) {
+      context.read<SettingsCubit>().deleteCustomTheme(theme.id);
+    }
+  }
+
   Widget _buildSection(
     BuildContext context, {
     required String title,
@@ -1870,12 +2273,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: context.surfaceContainerColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.cardBorder),
+        border: Border.all(color: context.outlineColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: context.outlineColor,
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1889,10 +2292,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryLight.withValues(alpha: 0.1),
+                  color: context.primaryContainerColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, color: AppTheme.primaryLight, size: 20),
+                child: Icon(icon, color: context.primaryContainerColor, size: 20),
               ),
               const SizedBox(width: 12),
               Text(
@@ -1900,7 +2303,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 style: GoogleFonts.amiri(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
+                  color: context.onSurfaceColor,
                 ),
               ),
             ],
@@ -1943,8 +2346,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       const SizedBox(height: 4),
                       Text(
                         description,
-                        style: const TextStyle(
-                          color: AppTheme.textSecondary,
+                        style: TextStyle(
+                          color: context.onSurfaceVariantColor,
                           fontSize: 13,
                         ),
                       ),
@@ -1979,14 +2382,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: AppTheme.accent.withValues(alpha: 0.1),
+            color: context.secondaryColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: AppTheme.accent.withValues(alpha: 0.3)),
+            border: Border.all(color: context.secondaryColor.withValues(alpha: 0.3)),
           ),
           child: Text(
             time,
-            style: const TextStyle(
-              color: AppTheme.accent,
+            style: TextStyle(
+              color: context.secondaryColor,
               fontWeight: FontWeight.bold,
               fontSize: 14,
             ),
@@ -2010,21 +2413,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppTheme.accent,
-              onPrimary: Colors.black,
-              surface: AppTheme.surfaceLight,
-              onSurface: AppTheme.textPrimary,
-              secondary: AppTheme.accent,
+            colorScheme: ColorScheme.dark(
+              primary: context.secondaryColor,
+              onPrimary: context.onSurfaceColor,
+              surface: context.surfaceContainerHighestColor,
+              onSurface: context.onSurfaceColor,
+              secondary: context.secondaryColor,
             ),
             dialogTheme: DialogThemeData(
-              backgroundColor: AppTheme.surface,
+              backgroundColor: context.surfaceContainerColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
               ),
             ),
             textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(foregroundColor: AppTheme.accent),
+              style: TextButton.styleFrom(foregroundColor: context.secondaryColor),
             ),
           ),
           child: child!,

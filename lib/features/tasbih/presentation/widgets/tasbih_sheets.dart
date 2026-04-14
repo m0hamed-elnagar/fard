@@ -1,4 +1,4 @@
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/widgets/custom_toggle.dart';
 import 'package:fard/features/tasbih/presentation/bloc/tasbih_bloc.dart';
@@ -30,7 +30,7 @@ class CategorySelectionSheet extends StatelessWidget {
           width: 40,
           height: 4,
           decoration: BoxDecoration(
-            color: AppTheme.surfaceLight,
+            color: context.surfaceContainerHighestColor,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -56,13 +56,13 @@ class CategorySelectionSheet extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 8),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppTheme.primaryLight.withValues(alpha: 0.1)
+                      ? context.primaryContainerColor.withValues(alpha: 0.1)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: isSelected
-                        ? AppTheme.primaryLight
-                        : AppTheme.cardBorder,
+                        ? context.primaryContainerColor
+                        : context.outlineColor,
                   ),
                 ),
                 child: ListTile(
@@ -74,15 +74,15 @@ class CategorySelectionSheet extends StatelessWidget {
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? AppTheme.primaryLight
-                          : AppTheme.surfaceLight,
+                          ? context.primaryContainerColor
+                          : context.surfaceContainerHighestColor,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       isSelected ? Icons.check_rounded : Icons.category_rounded,
                       color: isSelected
-                          ? AppTheme.onPrimary
-                          : AppTheme.textSecondary,
+                          ? context.theme.colorScheme.onPrimary
+                          : context.onSurfaceVariantColor,
                       size: 20,
                     ),
                   ),
@@ -134,7 +134,7 @@ class TasbihSettingsSheet extends StatelessWidget {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 20),
                 decoration: BoxDecoration(
-                  color: AppTheme.surfaceLight,
+                  color: context.surfaceContainerHighestColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -191,15 +191,15 @@ class TasbihSettingsSheet extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceLight,
+        color: context.surfaceContainerHighestColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.cardBorder),
+        border: Border.all(color: context.outlineColor),
       ),
       child: Row(
         children: [
           Icon(
             icon,
-            color: value ? AppTheme.accent : AppTheme.textSecondary,
+            color: value ? context.secondaryColor : context.onSurfaceVariantColor,
             size: 22,
           ),
           const SizedBox(width: 16),
@@ -254,8 +254,8 @@ class DuaSelectionSheet extends StatelessWidget {
                         ? Icons.check_circle_rounded
                         : Icons.circle_outlined,
                     color: isSelected
-                        ? AppTheme.accent
-                        : AppTheme.textSecondary,
+                        ? context.secondaryColor
+                        : context.onSurfaceVariantColor,
                   ),
                   title: Text(
                     dua.title,

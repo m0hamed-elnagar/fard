@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:intl/intl.dart';
 
 class SalaahTile extends StatefulWidget {
@@ -80,41 +80,41 @@ class _SalaahTileState extends State<SalaahTile> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: widget.isUpcoming
-                  ? [AppTheme.surface, AppTheme.surface]
+                  ? [context.surfaceContainerColor, context.surfaceContainerColor]
                   : widget.isCompletedToday
                   ? [
-                      AppTheme.primaryLight.withValues(alpha: 0.15),
-                      AppTheme.primaryLight.withValues(alpha: 0.05),
+                      context.primaryLight.withValues(alpha: 0.15),
+                      context.primaryLight.withValues(alpha: 0.05),
                     ]
                   : [
-                      AppTheme.missed.withValues(alpha: 0.15),
-                      AppTheme.missed.withValues(alpha: 0.05),
+                      context.missedColor.withValues(alpha: 0.15),
+                      context.missedColor.withValues(alpha: 0.05),
                     ],
             ),
             borderRadius: BorderRadius.circular(20.0),
             border: Border.all(
               color: widget.isUpcoming
-                  ? AppTheme.cardBorder.withValues(alpha: 0.5)
+                  ? context.outlineColor.withValues(alpha: 0.5)
                   : widget.isCompletedToday
-                  ? AppTheme.primaryLight.withValues(alpha: 0.4)
-                  : AppTheme.missed.withValues(alpha: 0.4),
+                  ? context.primaryLight.withValues(alpha: 0.4)
+                  : context.missedColor.withValues(alpha: 0.4),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
                 color: !widget.isUpcoming
                     ? (widget.isCompletedToday
-                              ? AppTheme.primaryLight
-                              : AppTheme.missed)
+                              ? context.primaryLight
+                              : context.missedColor)
                           .withValues(alpha: 0.1)
-                    : Colors.transparent,
+                    : context.surfaceContainerColor,
                 blurRadius: !widget.isUpcoming ? 10 : 0,
                 offset: !widget.isUpcoming ? const Offset(0, 4) : Offset.zero,
               ),
             ],
           ),
           child: Material(
-            color: Colors.transparent,
+            color: context.surfaceContainerColor,
             child: InkWell(
               borderRadius: BorderRadius.circular(20.0),
               onTap: widget.isUpcoming
@@ -161,9 +161,9 @@ class _SalaahTileState extends State<SalaahTile> {
                       if (widget.isQadaEnabled && !isVeryNarrow)
                         Container(
                           decoration: BoxDecoration(
-                            color: AppTheme.surfaceLight,
+                            color: context.surfaceLightColor,
                             borderRadius: BorderRadius.circular(10.0),
-                            border: Border.all(color: AppTheme.cardBorder),
+                            border: Border.all(color: context.outlineColor),
                           ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -205,7 +205,7 @@ class _SalaahTileState extends State<SalaahTile> {
                                                     child: Text(
                                                       l10n.useAddQadaToNewPrayers,
                                                       style: GoogleFonts.outfit(
-                                                        color: Colors.white,
+                                                        color: context.onSurfaceColor,
                                                         fontWeight:
                                                             FontWeight.w500,
                                                       ),
@@ -213,7 +213,7 @@ class _SalaahTileState extends State<SalaahTile> {
                                                   ),
                                                 ],
                                               ),
-                                              backgroundColor: AppTheme.accent,
+                                              backgroundColor: context.secondaryColor,
                                               behavior:
                                                   SnackBarBehavior.floating,
                                               margin: const EdgeInsets.all(16),
@@ -232,13 +232,13 @@ class _SalaahTileState extends State<SalaahTile> {
                                 color:
                                     (_removedInSession > 0 &&
                                         !widget.isUpcoming)
-                                    ? AppTheme.primaryLight
-                                    : AppTheme.neutral.withValues(alpha: 0.5),
+                                    ? context.primaryLight
+                                    : context.neutralColor.withValues(alpha: 0.5),
                               ),
                               Container(
                                 width: 16,
                                 height: 1,
-                                color: AppTheme.cardBorder,
+                                color: context.outlineColor,
                               ),
                               _CounterButton(
                                 icon: Icons.remove_rounded,
@@ -254,7 +254,7 @@ class _SalaahTileState extends State<SalaahTile> {
                                         });
                                       }
                                     : null,
-                                color: AppTheme.missed,
+                                color: context.missedColor,
                               ),
                             ],
                           ),
@@ -272,7 +272,7 @@ class _SalaahTileState extends State<SalaahTile> {
                             Text(
                               widget.salaah.localizedName(l10n),
                               style: GoogleFonts.amiri(
-                                color: AppTheme.textPrimary,
+                                color: context.onSurfaceColor,
                                 fontSize: isNarrow ? 18.0 : 22.0,
                                 fontWeight: FontWeight.w700,
                                 height: 1.2,
@@ -286,13 +286,13 @@ class _SalaahTileState extends State<SalaahTile> {
                                     Icon(
                                       Icons.access_time_rounded,
                                       size: isNarrow ? 12 : 14,
-                                      color: AppTheme.accent,
+                                      color: context.secondaryColor,
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
                                       timeFormat.format(widget.time!),
                                       style: GoogleFonts.outfit(
-                                        color: AppTheme.accent,
+                                        color: context.secondaryColor,
                                         fontSize: isNarrow ? 11.0 : 13.0,
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -317,12 +317,12 @@ class _SalaahTileState extends State<SalaahTile> {
                                   vertical: 4.0,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.primaryLight.withValues(
+                                  color: context.primaryLight.withValues(
                                     alpha: 0.1,
                                   ),
                                   borderRadius: BorderRadius.circular(10.0),
                                   border: Border.all(
-                                    color: AppTheme.primaryLight.withValues(
+                                    color: context.primaryLight.withValues(
                                       alpha: 0.3,
                                     ),
                                   ),
@@ -333,7 +333,7 @@ class _SalaahTileState extends State<SalaahTile> {
                                     Text(
                                       '${widget.completedQadaCount}',
                                       style: GoogleFonts.outfit(
-                                        color: AppTheme.primaryLight,
+                                        color: context.primaryLight,
                                         fontSize: isNarrow ? 14.0 : 18.0,
                                         fontWeight: FontWeight.w800,
                                       ),
@@ -341,7 +341,7 @@ class _SalaahTileState extends State<SalaahTile> {
                                     Text(
                                       l10n.done,
                                       style: GoogleFonts.outfit(
-                                        color: AppTheme.primaryLight.withValues(
+                                        color: context.primaryLight.withValues(
                                           alpha: 0.7,
                                         ),
                                         fontSize: isNarrow ? 7.0 : 9.0,
@@ -358,13 +358,13 @@ class _SalaahTileState extends State<SalaahTile> {
                               ),
                               decoration: BoxDecoration(
                                 color: widget.qadaCount > 0
-                                    ? AppTheme.accent.withValues(alpha: 0.1)
-                                    : Colors.transparent,
+                                    ? context.secondaryColor.withValues(alpha: 0.1)
+                                    : context.surfaceContainerColor,
                                 borderRadius: BorderRadius.circular(12.0),
                                 border: Border.all(
                                   color: widget.qadaCount > 0
-                                      ? AppTheme.accent.withValues(alpha: 0.3)
-                                      : Colors.transparent,
+                                      ? context.secondaryColor.withValues(alpha: 0.3)
+                                      : context.outlineColor,
                                 ),
                               ),
                               child: Column(
@@ -374,8 +374,8 @@ class _SalaahTileState extends State<SalaahTile> {
                                     '${widget.qadaCount}',
                                     style: GoogleFonts.outfit(
                                       color: widget.qadaCount > 0
-                                          ? AppTheme.accent
-                                          : AppTheme.textSecondary,
+                                          ? context.secondaryColor
+                                          : context.onSurfaceVariantColor,
                                       fontSize: isNarrow ? 18.0 : 24.0,
                                       fontWeight: FontWeight.w800,
                                     ),
@@ -386,10 +386,10 @@ class _SalaahTileState extends State<SalaahTile> {
                                         : l10n.remaining.toLowerCase(),
                                     style: GoogleFonts.outfit(
                                       color: widget.qadaCount > 0
-                                          ? AppTheme.accent.withValues(
+                                          ? context.secondaryColor.withValues(
                                               alpha: 0.7,
                                             )
-                                          : AppTheme.neutral,
+                                          : context.neutralColor,
                                       fontSize: isNarrow ? 7.0 : 10.0,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -439,29 +439,29 @@ class _StatusIndicator extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           color: isUpcoming
-              ? Colors.transparent
+              ? context.surfaceContainerColor
               : isCompleted
-              ? AppTheme.primaryLight
+              ? context.primaryLight
               : isMissed
-              ? AppTheme.missed
-              : AppTheme.surfaceLight,
+              ? context.missedColor
+              : context.surfaceLightColor,
           shape: BoxShape.circle,
           border: Border.all(
             color: isUpcoming
-                ? AppTheme.neutral.withValues(alpha: 0.3)
+                ? context.neutralColor.withValues(alpha: 0.3)
                 : isCompleted
-                ? AppTheme.primaryLight
+                ? context.primaryLight
                 : isMissed
-                ? AppTheme.missed
-                : AppTheme.neutral.withValues(alpha: 0.5),
+                ? context.missedColor
+                : context.neutralColor.withValues(alpha: 0.5),
             width: 2.0,
           ),
           boxShadow: [
             BoxShadow(
               color: ((isMissed || isCompleted) && !isUpcoming)
-                  ? (isCompleted ? AppTheme.primaryLight : AppTheme.missed)
+                  ? (isCompleted ? context.primaryLight : context.missedColor)
                         .withValues(alpha: 0.3)
-                  : Colors.transparent,
+                  : context.surfaceContainerColor,
               blurRadius: ((isMissed || isCompleted) && !isUpcoming) ? 10 : 0,
               spreadRadius: ((isMissed || isCompleted) && !isUpcoming) ? 1 : 0,
             ),
@@ -472,8 +472,8 @@ class _StatusIndicator extends StatelessWidget {
               ? icon
               : (isCompleted ? Icons.check_rounded : Icons.close_rounded),
           color: isUpcoming
-              ? AppTheme.neutral.withValues(alpha: 0.5)
-              : Colors.white,
+              ? context.neutralColor.withValues(alpha: 0.5)
+              : context.onSurfaceColor,
           size: size * (isUpcoming ? 0.45 : 0.54),
         ),
       ),
@@ -510,7 +510,7 @@ class _CounterButton extends StatelessWidget {
           icon,
           color: onPressed != null
               ? color
-              : AppTheme.neutral.withValues(alpha: 0.5),
+              : context.neutralColor.withValues(alpha: 0.5),
           size: size,
         ),
       ),

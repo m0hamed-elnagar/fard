@@ -539,7 +539,49 @@ class AppLocalizationsEn extends AppLocalizations {
       'Apply these settings to all five prayers at once.';
 
   @override
+  String get azanNotifications => 'Azan & Notifications';
+
+  @override
+  String get azanSettingsDesc =>
+      'Manage azan voices, reminders, and after-salah azkar for all prayers.';
+
+  @override
   String get individualSettings => 'Individual Prayer Settings';
+
+  @override
+  String get createNewTheme => 'Create New Theme';
+
+  @override
+  String get savedThemes => 'Saved Themes';
+
+  @override
+  String get editTheme => 'Edit Theme';
+
+  @override
+  String get autoDerive => 'Auto';
+
+  @override
+  String get select => 'Select';
+
+  @override
+  String get updateTheme => 'Update Theme';
+
+  @override
+  String get saveTheme => 'Save Theme';
+
+  @override
+  String get nameYourTheme => 'Name Your Theme';
+
+  @override
+  String get themeNameHint => 'e.g. My Dark Gold';
+
+  @override
+  String get deleteTheme => 'Delete Theme';
+
+  @override
+  String deleteThemeConfirm(Object themeName) {
+    return 'Are you sure you want to delete \"$themeName\"? This cannot be undone.';
+  }
 
   @override
   String get applyToAll => 'Apply to all';
@@ -1251,4 +1293,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get juz => 'Juz';
+
+  @override
+  String get theme => 'Theme';
+
+  @override
+  String get emeraldTheme => 'Emerald';
+
+  @override
+  String get parchmentTheme => 'Parchment';
+
+  @override
+  String get roseTheme => 'Rose';
+
+  @override
+  String get midnightTheme => 'Midnight';
+
+  @override
+  String get customTheme => 'Custom';
+
+  @override
+  String get pickPrimaryColor => 'Pick Primary Color';
+
+  @override
+  String get pickAccentColor => 'Pick Accent Color';
+
+  @override
+  String get resetToDefault => 'Reset to Default';
+
+  @override
+  String get applyTheme => 'Apply Theme';
+
+  @override
+  String get tapToCustomize => 'Tap to customize';
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/azkar_reminder.dart';
+import '../../domain/entities/custom_theme.dart';
 import '../../domain/salaah_settings.dart';
 
 /// Repository interface for managing app settings persistence.
@@ -52,6 +53,18 @@ abstract interface class SettingsRepository {
 
   /// Hijri calendar adjustment in days
   int get hijriAdjustment;
+
+  /// Selected theme preset ID
+  String get themePresetId;
+
+  /// Custom theme colors (if using custom theme)
+  Map<String, String>? get customThemeColors;
+
+  /// List of user-saved custom themes
+  List<CustomTheme> get savedCustomThemes;
+
+  /// Currently active custom theme ID (null if using a preset)
+  String? get activeCustomThemeId;
 
   // ==================== WRITE OPERATIONS ====================
 
@@ -115,4 +128,22 @@ abstract interface class SettingsRepository {
 
   /// Bulk update all prayer after-salah azkar minutes
   Future<void> updateAllAfterSalahMinutes(int minutes);
+
+  /// Update theme preset
+  Future<void> updateThemePreset(String presetId);
+
+  /// Save custom theme colors
+  Future<void> saveCustomTheme(Map<String, String> colors);
+
+  /// Add a new custom theme to the saved list
+  Future<void> addCustomTheme(CustomTheme theme);
+
+  /// Update an existing custom theme
+  Future<void> updateCustomTheme(String themeId, Map<String, String> colors);
+
+  /// Delete a custom theme by ID
+  Future<void> deleteCustomTheme(String themeId);
+
+  /// Set the active custom theme ID
+  Future<void> setActiveCustomTheme(String? themeId);
 }

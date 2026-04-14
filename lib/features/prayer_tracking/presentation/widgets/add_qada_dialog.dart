@@ -3,7 +3,7 @@ import 'package:fard/core/extensions/salaah_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 
 class AddQadaDialog extends StatefulWidget {
   final void Function(Map<Salaah, int> counts) onConfirm;
@@ -67,12 +67,12 @@ class _AddQadaDialogState extends State<AddQadaDialog>
         ),
         padding: const EdgeInsets.all(20.0),
         decoration: BoxDecoration(
-          color: AppTheme.surface,
+          color: context.surfaceContainerColor,
           borderRadius: BorderRadius.circular(24.0),
-          border: Border.all(color: AppTheme.cardBorder, width: 1.5),
+          border: Border.all(color: context.outlineColor, width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
+              color: context.outlineColor.withValues(alpha: 0.2),
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),
@@ -85,7 +85,7 @@ class _AddQadaDialogState extends State<AddQadaDialog>
             Text(
               widget.title ?? l10n.addQada,
               style: GoogleFonts.amiri(
-                color: AppTheme.textPrimary,
+                color: context.onSurfaceColor,
                 fontSize: 22.0,
                 fontWeight: FontWeight.w700,
               ),
@@ -95,26 +95,26 @@ class _AddQadaDialogState extends State<AddQadaDialog>
             if (widget.initialCounts == null)
               Container(
                 decoration: BoxDecoration(
-                  color: AppTheme.surfaceLight,
+                  color: context.surfaceLightColor,
                   borderRadius: BorderRadius.circular(14.0),
                   border: Border.all(
-                    color: AppTheme.cardBorder.withValues(alpha: 0.5),
+                    color: context.outlineColor.withValues(alpha: 0.5),
                   ),
                 ),
                 child: TabBar(
                   controller: _tabController,
                   indicator: BoxDecoration(
-                    color: AppTheme.accent.withValues(alpha: 0.1),
+                    color: context.secondaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12.0),
                     border: Border.all(
-                      color: AppTheme.accent.withValues(alpha: 0.3),
+                      color: context.secondaryColor.withValues(alpha: 0.3),
                       width: 1.0,
                     ),
                   ),
                   indicatorSize: TabBarIndicatorSize.tab,
                   dividerColor: Colors.transparent,
-                  labelColor: AppTheme.accent,
-                  unselectedLabelColor: AppTheme.textSecondary,
+                  labelColor: context.secondaryColor,
+                  unselectedLabelColor: context.onSurfaceVariantColor,
                   labelStyle: GoogleFonts.amiri(
                     fontWeight: FontWeight.bold,
                     fontSize: 14.0,
@@ -156,7 +156,7 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                   child: Text(
                     l10n.cancel,
                     style: GoogleFonts.amiri(
-                      color: AppTheme.textSecondary,
+                      color: context.onSurfaceVariantColor,
                       fontSize: 15.0,
                     ),
                   ),
@@ -165,8 +165,8 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                 ElevatedButton(
                   onPressed: _onConfirm,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.accent,
-                    foregroundColor: AppTheme.onAccent,
+                    backgroundColor: context.secondaryColor,
+                    foregroundColor: context.onAccentColor,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24.0,
                       vertical: 10.0,
@@ -206,7 +206,7 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                   child: Text(
                     salaah.localizedName(l10n),
                     style: GoogleFonts.amiri(
-                      color: AppTheme.textPrimary,
+                      color: context.onSurfaceColor,
                       fontSize: isNarrow ? 14.0 : 16.0,
                       fontWeight: FontWeight.w600,
                     ),
@@ -216,9 +216,9 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: AppTheme.surfaceLight,
+                      color: context.surfaceContainerHighestColor,
                       borderRadius: BorderRadius.circular(12.0),
-                      border: Border.all(color: AppTheme.cardBorder),
+                      border: Border.all(color: context.outlineColor),
                     ),
                     child: Row(
                       children: [
@@ -239,7 +239,7 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                             textAlign: TextAlign.center,
                             keyboardType: TextInputType.number,
                             style: GoogleFonts.outfit(
-                              color: AppTheme.accent,
+                              color: context.secondaryColor,
                               fontSize: isNarrow ? 16.0 : 18.0,
                               fontWeight: FontWeight.w700,
                             ),
@@ -280,7 +280,7 @@ class _AddQadaDialogState extends State<AddQadaDialog>
           Text(
             l10n.selectPeriod,
             style: GoogleFonts.amiri(
-              color: AppTheme.textSecondary,
+              color: context.onSurfaceVariantColor,
               fontSize: 14.0,
             ),
             textAlign: TextAlign.center,
@@ -299,8 +299,8 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                 builder: (context, child) => Theme(
                   data: Theme.of(context).copyWith(
                     colorScheme: Theme.of(context).colorScheme.copyWith(
-                      primary: AppTheme.primaryLight,
-                      surface: AppTheme.surface,
+                      primary: context.primaryColor,
+                      surface: context.surfaceContainerColor,
                     ),
                   ),
                   child: child!,
@@ -323,8 +323,8 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                 builder: (context, child) => Theme(
                   data: Theme.of(context).copyWith(
                     colorScheme: Theme.of(context).colorScheme.copyWith(
-                      primary: AppTheme.primaryLight,
-                      surface: AppTheme.surface,
+                      primary: context.primaryColor,
+                      surface: context.surfaceContainerColor,
                     ),
                   ),
                   child: child!,
@@ -338,10 +338,10 @@ class _AddQadaDialogState extends State<AddQadaDialog>
             Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: AppTheme.accent.withValues(alpha: 0.10),
+                color: context.secondaryColor.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(12.0),
                 border: Border.all(
-                  color: AppTheme.accent.withValues(alpha: 0.30),
+                  color: context.secondaryColor.withValues(alpha: 0.30),
                   width: 1.0,
                 ),
               ),
@@ -350,14 +350,14 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                   Text(
                     l10n.daysCount,
                     style: GoogleFonts.amiri(
-                      color: AppTheme.textSecondary,
+                      color: context.onSurfaceVariantColor,
                       fontSize: 13.0,
                     ),
                   ),
                   Text(
                     '${_toDate!.difference(_fromDate!).inDays.abs() + 1}',
                     style: GoogleFonts.outfit(
-                      color: AppTheme.accent,
+                      color: context.secondaryColor,
                       fontSize: 28.0,
                       fontWeight: FontWeight.w700,
                     ),
@@ -365,7 +365,7 @@ class _AddQadaDialogState extends State<AddQadaDialog>
                   Text(
                     l10n.prayersPerFard,
                     style: GoogleFonts.amiri(
-                      color: AppTheme.textSecondary,
+                      color: context.onSurfaceVariantColor,
                       fontSize: 13.0,
                     ),
                   ),
@@ -412,7 +412,7 @@ class _AdjustButton extends StatelessWidget {
     return IconButton(
       onPressed: onPressed,
       icon: Icon(icon, size: 20.0),
-      color: AppTheme.textSecondary,
+      color: context.onSurfaceVariantColor,
       splashRadius: 20,
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
@@ -440,16 +440,16 @@ class _DatePickerRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         decoration: BoxDecoration(
-          color: AppTheme.surfaceLight,
+          color: context.surfaceContainerHighestColor,
           borderRadius: BorderRadius.circular(12.0),
-          border: Border.all(color: AppTheme.cardBorder, width: 1.0),
+          border: Border.all(color: context.outlineColor, width: 1.0),
         ),
         child: Row(
           children: [
             Text(
               label,
               style: GoogleFonts.amiri(
-                color: AppTheme.textSecondary,
+                color: context.onSurfaceVariantColor,
                 fontSize: 15.0,
               ),
             ),
@@ -460,15 +460,14 @@ class _DatePickerRow extends StatelessWidget {
                   : l10n.selectDate,
               style: GoogleFonts.outfit(
                 color: date != null
-                    ? AppTheme.textPrimary
-                    : AppTheme.textSecondary,
+                    ? context.onSurfaceColor
+                    : context.onSurfaceVariantColor,
                 fontSize: 14.0,
               ),
             ),
             const SizedBox(width: 8.0),
             const Icon(
               Icons.calendar_today_rounded,
-              color: AppTheme.textSecondary,
               size: 18.0,
             ),
           ],

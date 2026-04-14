@@ -4,6 +4,7 @@ import 'package:fard/core/services/background_service.dart';
 import 'package:fard/core/services/migration_service.dart';
 import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/core/utils/app_identifiers.dart';
+import 'package:fard/core/navigation/theme_update_observer.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/features/onboarding/presentation/screens/splash_screen.dart';
@@ -12,7 +13,7 @@ import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/theme_presets.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
@@ -169,41 +170,102 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
         minTextAdapt: true,
         splitScreenMode: true,
         builder: (context, child) {
-          return BlocBuilder<SettingsCubit, SettingsState>(
-            buildWhen: (previous, current) => previous.locale != current.locale,
-            builder: (context, state) {
-              return MaterialApp(
-                navigatorKey: getIt<GlobalKey<NavigatorState>>(),
-                locale: state.locale,
-                onGenerateTitle: (context) => 'Fard',
-                debugShowCheckedModeBanner: false,
-                theme: AppTheme.darkTheme,
-                home: const RootScreen(),
-                supportedLocales: AppLocalizations.supportedLocales,
-                localizationsDelegates: const [
-                  AppLocalizations.delegate,
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                ],
-                builder: (context, child) {
-                  final textDirection = state.locale.languageCode == 'ar'
-                      ? TextDirection.rtl
-                      : TextDirection.ltr;
-                  return Localizations.override(
-                    context: context,
-                    locale: state.locale,
-                    child: Directionality(
-                      textDirection: textDirection,
-                      child: child!,
-                    ),
-                  );
-                },
-              );
-            },
-          );
+          return const _MaterialAppWithReactiveTheme();
         },
       ),
+    );
+  }
+}
+
+/// A StatefulWidget that manages the reactive theme and locale.
+/// 
+/// Listens to SettingsCubit and updates the theme/locale via setState.
+/// MaterialApp.theme changes trigger smooth AnimatedTheme transitions.
+class _MaterialAppWithReactiveTheme extends StatefulWidget {
+  const _MaterialAppWithReactiveTheme();
+
+  @override
+  State<_MaterialAppWithReactiveTheme> createState() =>
+      _MaterialAppWithReactiveThemeState();
+}
+
+class _MaterialAppWithReactiveThemeState
+    extends State<_MaterialAppWithReactiveTheme> {
+  final _themeObserver = ThemeUpdateObserver();
+  ThemeData _theme = ThemePresets.buildThemeData(ThemePresets.emerald);
+  Locale _locale = const Locale('en');
+  SettingsState? _pendingThemeState;
+
+  @override
+  void initState() {
+    super.initState();
+    _initFromCurrentState();
+    _themeObserver.onAllRoutesSettled = _applyPendingTheme;
+    context.read<SettingsCubit>().stream.listen(_onSettingsChanged);
+  }
+
+  void _initFromCurrentState() {
+    final state = context.read<SettingsCubit>().state;
+    _theme = _buildTheme(state);
+    _locale = state.locale;
+  }
+
+  void _onSettingsChanged(SettingsState state) {
+    if (!mounted) return;
+
+    _pendingThemeState = state;
+
+    if (!_themeObserver.hasActiveAnimations) {
+      _applyPendingTheme();
+    }
+    // If animations are active, onAllRoutesSettled will fire automatically
+  }
+
+  void _applyPendingTheme() {
+    final state = _pendingThemeState;
+    if (state == null || !mounted) return;
+    _pendingThemeState = null;
+    setState(() {
+      _theme = _buildTheme(state);
+      _locale = state.locale;
+    });
+  }
+
+  ThemeData _buildTheme(SettingsState state) {
+    return state.themePresetId == 'custom' && state.customThemeColors != null
+        ? ThemePresets.buildCustomThemeData(
+            state.customThemeColors!.map(
+              (key, value) => MapEntry(
+                key,
+                Color(
+                  int.parse(
+                    'FF${value.replaceFirst('#', '')}',
+                    radix: 16,
+                  ),
+                ),
+              ),
+            ),
+          )
+        : ThemePresets.buildThemeData(ThemePresets.getById(state.themePresetId));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      navigatorKey: getIt<GlobalKey<NavigatorState>>(),
+      navigatorObservers: [_themeObserver],
+      locale: _locale,
+      onGenerateTitle: (context) => 'Fard',
+      debugShowCheckedModeBanner: false,
+      theme: _theme,
+      home: const RootScreen(),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
     );
   }
 }

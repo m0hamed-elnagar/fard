@@ -3,7 +3,7 @@ import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/core/extensions/salaah_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 
 class CounterCard extends StatefulWidget {
@@ -41,12 +41,12 @@ class _CounterCardState extends State<CounterCard>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppTheme.surface,
-            AppTheme.primaryDark.withValues(alpha: 0.15),
+            context.surfaceContainerColor,
+            context.primaryColor.withValues(alpha: 0.15),
           ],
         ),
         borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(color: AppTheme.cardBorder),
+        border: Border.all(color: context.outlineColor),
       ),
       child: Column(
         children: [
@@ -66,7 +66,7 @@ class _CounterCardState extends State<CounterCard>
                         Text(
                           l10n.remaining,
                           style: GoogleFonts.amiri(
-                            color: AppTheme.textSecondary,
+                            color: context.onSurfaceVariantColor,
                             fontSize: 14.0,
                           ),
                         ),
@@ -78,7 +78,7 @@ class _CounterCardState extends State<CounterCard>
                             Text(
                               '$_totalRemaining',
                               style: GoogleFonts.outfit(
-                                color: AppTheme.accent,
+                                color: context.secondaryColor,
                                 fontSize: 36.0,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -91,12 +91,12 @@ class _CounterCardState extends State<CounterCard>
                                   vertical: 2.0,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.missed.withValues(
+                                  color: context.errorColor.withValues(
                                     alpha: 0.15,
                                   ),
                                   borderRadius: BorderRadius.circular(8.0),
                                   border: Border.all(
-                                    color: AppTheme.missed.withValues(
+                                    color: context.errorColor.withValues(
                                       alpha: 0.30,
                                     ),
                                   ),
@@ -104,7 +104,7 @@ class _CounterCardState extends State<CounterCard>
                                 child: Text(
                                   '+${widget.todayMissedCount}',
                                   style: GoogleFonts.outfit(
-                                    color: AppTheme.missed,
+                                    color: context.errorColor,
                                     fontSize: 14.0,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -119,17 +119,17 @@ class _CounterCardState extends State<CounterCard>
                   // Add button
                   Container(
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryLight.withValues(alpha: 0.15),
+                      color: context.primaryContainerColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12.0),
                       border: Border.all(
-                        color: AppTheme.primaryLight.withValues(alpha: 0.30),
+                        color: context.primaryContainerColor.withValues(alpha: 0.30),
                       ),
                     ),
                     child: IconButton(
                       onPressed: widget.onAddPressed,
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.add_rounded,
-                        color: AppTheme.primaryLight,
+                        color: context.primaryContainerColor,
                         size: 28.0,
                       ),
                     ),
@@ -139,9 +139,9 @@ class _CounterCardState extends State<CounterCard>
                   AnimatedRotation(
                     turns: _expanded ? 0.5 : 0.0,
                     duration: const Duration(milliseconds: 200),
-                    child: const Icon(
+                    child: Icon(
                       Icons.keyboard_arrow_down_rounded,
-                      color: AppTheme.textSecondary,
+                      color: context.onSurfaceVariantColor,
                     ),
                   ),
                 ],
@@ -166,7 +166,7 @@ class _CounterCardState extends State<CounterCard>
                       Text(
                         l10n.dailyPrayers,
                         style: GoogleFonts.amiri(
-                          color: AppTheme.textSecondary,
+                          color: context.onSurfaceVariantColor,
                           fontSize: 14.0,
                           fontWeight: FontWeight.w600,
                         ),
@@ -182,7 +182,7 @@ class _CounterCardState extends State<CounterCard>
                           ),
                         ),
                         style: TextButton.styleFrom(
-                          foregroundColor: AppTheme.primaryLight,
+                          foregroundColor: context.primaryContainerColor,
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           visualDensity: VisualDensity.compact,
                         ),
@@ -204,8 +204,8 @@ class _CounterCardState extends State<CounterCard>
                               height: 20.0,
                               decoration: BoxDecoration(
                                 color: count > 0
-                                    ? AppTheme.accent
-                                    : AppTheme.neutral,
+                                    ? context.secondaryColor
+                                    : context.outlineVariantColor,
                                 borderRadius: BorderRadius.circular(2.0),
                               ),
                             ),
@@ -213,7 +213,7 @@ class _CounterCardState extends State<CounterCard>
                             Text(
                               salaah.localizedName(l10n),
                               style: GoogleFonts.amiri(
-                                color: AppTheme.textPrimary,
+                                color: context.onSurfaceColor,
                                 fontSize: 16.0,
                               ),
                             ),
@@ -222,8 +222,8 @@ class _CounterCardState extends State<CounterCard>
                               '$count',
                               style: GoogleFonts.outfit(
                                 color: count > 0
-                                    ? AppTheme.accent
-                                    : AppTheme.textSecondary,
+                                    ? context.secondaryColor
+                                    : context.onSurfaceVariantColor,
                                 fontSize: 18.0,
                                 fontWeight: FontWeight.w600,
                               ),

@@ -21,6 +21,8 @@ class AppSettings {
   final List<SalaahSettings> salaahSettings;
   final bool isQadaEnabled;
   final int hijriAdjustment;
+  final String themePresetId;
+  final Map<String, String>? customThemeColors;
 
   const AppSettings({
     required this.locale,
@@ -36,5 +38,7 @@ class AppSettings {
     this.salaahSettings = const [],
     this.isQadaEnabled = true,
     this.hijriAdjustment = 0,
+    this.themePresetId = 'emerald',
+    this.customThemeColors,
   });
 }

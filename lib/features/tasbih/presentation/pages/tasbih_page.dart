@@ -1,5 +1,5 @@
 import 'package:fard/core/di/injection.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/tasbih/presentation/bloc/tasbih_bloc.dart';
 import 'package:fard/features/tasbih/presentation/widgets/tasbih_widgets.dart';
@@ -157,12 +157,11 @@ class _TasbihViewState extends State<TasbihView> {
                                     right: 0,
                                     top: 0,
                                     child: Material(
-                                      color: AppTheme.surfaceLight,
+                                      color: context.surfaceContainerHighestColor,
                                       shape: const CircleBorder(),
                                       child: IconButton(
                                         icon: const Icon(
                                           Icons.edit_note_rounded,
-                                          color: AppTheme.accent,
                                         ),
                                         onPressed: () =>
                                             _showCustomTargetDialog(
@@ -204,7 +203,7 @@ class _TasbihViewState extends State<TasbihView> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, color: AppTheme.missed, size: 48),
+              Icon(Icons.error_outline, color: context.errorColor, size: 48),
               const SizedBox(height: 16),
               Text(
                 l10n.errorLoadingTasbih,
@@ -217,7 +216,7 @@ class _TasbihViewState extends State<TasbihView> {
               Text(
                 error,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(color: AppTheme.textSecondary),
+                style: GoogleFonts.outfit(color: context.onSurfaceVariantColor),
               ),
               const SizedBox(height: 24),
               ElevatedButton(
@@ -244,7 +243,7 @@ class _TasbihViewState extends State<TasbihView> {
         IconButton(
           icon: const Icon(Icons.refresh_rounded, size: 36),
           onPressed: () => _confirmReset(context),
-          color: AppTheme.textSecondary,
+          color: context.onSurfaceVariantColor,
         ),
         TasbihButton(
           size: buttonSize,
@@ -262,8 +261,8 @@ class _TasbihViewState extends State<TasbihView> {
             const TasbihEvent.toggleVibration(),
           ),
           color: state.data.settings.hapticFeedback
-              ? AppTheme.accent
-              : AppTheme.textSecondary,
+              ? context.secondaryColor
+              : context.onSurfaceVariantColor,
         ),
       ],
     );
@@ -330,7 +329,7 @@ class _TasbihViewState extends State<TasbihView> {
             },
             child: Text(
               l10n.delete,
-              style: const TextStyle(color: AppTheme.missed),
+              style: TextStyle(color: context.errorColor),
             ),
           ),
         ],
@@ -349,16 +348,15 @@ class _TasbihViewState extends State<TasbihView> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: AppTheme.surfaceLight,
+          color: context.surfaceContainerHighestColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.cardBorder),
+          border: Border.all(color: context.outlineColor),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(
               Icons.collections_bookmark_rounded,
-              color: AppTheme.accent,
               size: 20,
             ),
             const SizedBox(width: 12),
@@ -369,15 +367,15 @@ class _TasbihViewState extends State<TasbihView> {
                 style: GoogleFonts.outfit(
                   fontWeight: FontWeight.w600,
                   fontSize: 15,
-                  color: AppTheme.textPrimary,
+                  color: context.onSurfaceColor,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(
+            Icon(
               Icons.unfold_more_rounded,
-              color: AppTheme.textSecondary,
+              color: context.onSurfaceVariantColor,
               size: 18,
             ),
           ],
@@ -415,7 +413,7 @@ class _TasbihViewState extends State<TasbihView> {
             },
             child: Text(
               l10n.resetItem,
-              style: const TextStyle(color: AppTheme.missed),
+              style: TextStyle(color: context.errorColor),
             ),
           ),
           TextButton(
@@ -443,7 +441,7 @@ class _TasbihViewState extends State<TasbihView> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppTheme.surface,
+      backgroundColor: context.surfaceContainerColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -473,7 +471,7 @@ class _TasbihViewState extends State<TasbihView> {
     final tasbihBloc = context.read<TasbihBloc>();
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppTheme.surface,
+      backgroundColor: context.surfaceContainerColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),

@@ -1094,11 +1094,89 @@ abstract class AppLocalizations {
   /// **'Apply these settings to all five prayers at once.'**
   String get globalSettingsDesc;
 
+  /// No description provided for @azanNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Azan & Notifications'**
+  String get azanNotifications;
+
+  /// No description provided for @azanSettingsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage azan voices, reminders, and after-salah azkar for all prayers.'**
+  String get azanSettingsDesc;
+
   /// No description provided for @individualSettings.
   ///
   /// In en, this message translates to:
   /// **'Individual Prayer Settings'**
   String get individualSettings;
+
+  /// No description provided for @createNewTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Theme'**
+  String get createNewTheme;
+
+  /// No description provided for @savedThemes.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Themes'**
+  String get savedThemes;
+
+  /// No description provided for @editTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Theme'**
+  String get editTheme;
+
+  /// No description provided for @autoDerive.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get autoDerive;
+
+  /// No description provided for @select.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get select;
+
+  /// No description provided for @updateTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Theme'**
+  String get updateTheme;
+
+  /// No description provided for @saveTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Theme'**
+  String get saveTheme;
+
+  /// No description provided for @nameYourTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Name Your Theme'**
+  String get nameYourTheme;
+
+  /// No description provided for @themeNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. My Dark Gold'**
+  String get themeNameHint;
+
+  /// No description provided for @deleteTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Theme'**
+  String get deleteTheme;
+
+  /// No description provided for @deleteThemeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{themeName}\"? This cannot be undone.'**
+  String deleteThemeConfirm(Object themeName);
 
   /// No description provided for @applyToAll.
   ///
@@ -2364,6 +2442,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Juz'**
   String get juz;
+
+  /// No description provided for @theme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get theme;
+
+  /// No description provided for @emeraldTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Emerald'**
+  String get emeraldTheme;
+
+  /// No description provided for @parchmentTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Parchment'**
+  String get parchmentTheme;
+
+  /// No description provided for @roseTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Rose'**
+  String get roseTheme;
+
+  /// No description provided for @midnightTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Midnight'**
+  String get midnightTheme;
+
+  /// No description provided for @customTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get customTheme;
+
+  /// No description provided for @pickPrimaryColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Primary Color'**
+  String get pickPrimaryColor;
+
+  /// No description provided for @pickAccentColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Accent Color'**
+  String get pickAccentColor;
+
+  /// No description provided for @resetToDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to Default'**
+  String get resetToDefault;
+
+  /// No description provided for @applyTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Theme'**
+  String get applyTheme;
+
+  /// No description provided for @tapToCustomize.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to customize'**
+  String get tapToCustomize;
 }
 
 class _AppLocalizationsDelegate

@@ -1,6 +1,11 @@
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
+import 'package:fard/features/settings/domain/entities/custom_theme.dart';
+import 'package:fard/features/settings/domain/entities/theme_preset.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
+import 'package:fard/features/settings/domain/usecases/apply_theme_preset.dart';
+import 'package:fard/features/settings/domain/usecases/get_available_theme_presets.dart';
+import 'package:fard/features/settings/domain/usecases/save_custom_theme.dart';
 import 'package:fard/features/settings/domain/usecases/sync_location_settings.dart';
 import 'package:fard/features/settings/domain/usecases/sync_notification_schedule.dart';
 import 'package:fard/features/settings/domain/usecases/toggle_after_salah_azkar_usecase.dart';
@@ -11,6 +16,8 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/services/location_service.dart';
 import '../../../../core/services/widget_update_service.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/theme_presets.dart';
 import 'settings_state.dart';
 
 /// Thin presentation-layer cubit for settings UI state.
@@ -23,6 +30,9 @@ class SettingsCubit extends Cubit<SettingsState> {
   final SyncNotificationSchedule _syncNotif;
   final ToggleAfterSalahAzkarUseCase _toggleAzkar;
   final UpdateCalculationMethodUseCase _updateMethod;
+  final ApplyThemePreset _applyTheme;
+  final SaveCustomTheme _saveCustomTheme;
+  final GetAvailableThemePresets _getPresets;
   final WidgetUpdateService _widget;
 
   SettingsCubit(
@@ -32,6 +42,9 @@ class SettingsCubit extends Cubit<SettingsState> {
     this._syncNotif,
     this._toggleAzkar,
     this._updateMethod,
+    this._applyTheme,
+    this._saveCustomTheme,
+    this._getPresets,
     this._widget,
   ) : super(
         SettingsState(
@@ -48,6 +61,10 @@ class SettingsCubit extends Cubit<SettingsState> {
           salaahSettings: _repo.salaahSettings,
           isQadaEnabled: _repo.isQadaEnabled,
           hijriAdjustment: _repo.hijriAdjustment,
+          themePresetId: _repo.themePresetId,
+          customThemeColors: _repo.customThemeColors,
+          savedCustomThemes: _repo.savedCustomThemes,
+          activeCustomThemeId: _repo.activeCustomThemeId,
         ),
       );
 
@@ -346,7 +363,144 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   Future<void> initReminders() => _syncNotif.init();
-  
+
+  // ==================== THEME MANAGEMENT ====================
+
+  /// Get all available theme presets
+  List<ThemePreset> getAvailablePresets() {
+    return _getPresets.execute();
+  }
+
+  /// Get current theme preset
+  ThemePreset getCurrentThemePreset() {
+    if (state.themePresetId == 'custom') {
+      // Return a custom preset placeholder
+      return const ThemePreset(
+        id: 'custom',
+        name: 'Custom',
+        nameAr: 'مخصص',
+        primaryColor: AppTheme.primary,
+        accentColor: AppTheme.accent,
+        backgroundColor: Color(0xFF0D1117),
+        surfaceColor: Color(0xFF161B22),
+        surfaceLightColor: Color(0xFF21262D),
+        cardBorderColor: Color(0xFF3D444D),
+        textColor: Color(0xFFF0F6FC),
+        textSecondaryColor: Color(0xFFD1D5DA),
+        icon: Icons.palette,
+        isDark: true,
+      );
+    }
+    return ThemePresets.getById(state.themePresetId);
+  }
+
+  /// Apply a theme preset
+  Future<void> selectThemePreset(String presetId) async {
+    try {
+      await _applyTheme.execute(presetId);
+      emit(
+        state.copyWith(
+          themePresetId: presetId,
+          customThemeColors: null,
+        ),
+      );
+      _widgetSync();
+    } catch (e) {
+      debugPrint('SettingsCubit: Error selecting theme preset: $e');
+    }
+  }
+
+  /// Save custom theme
+  Future<void> saveCustomTheme(Map<String, String> colors) async {
+    try {
+      await _saveCustomTheme.execute(colors);
+      emit(
+        state.copyWith(
+          themePresetId: 'custom',
+          customThemeColors: colors,
+        ),
+      );
+      _widgetSync();
+    } catch (e) {
+      debugPrint('SettingsCubit: Error saving custom theme: $e');
+    }
+  }
+
+  /// Add a new custom theme to the saved list
+  Future<void> addCustomTheme(CustomTheme theme) async {
+    try {
+      await _repo.addCustomTheme(theme);
+      emit(
+        state.copyWith(
+          savedCustomThemes: [...state.savedCustomThemes, theme],
+          themePresetId: 'custom',
+          activeCustomThemeId: theme.id,
+          customThemeColors: theme.toColorMap(),
+        ),
+      );
+      _widgetSync();
+    } catch (e) {
+      debugPrint('SettingsCubit: Error adding custom theme: $e');
+    }
+  }
+
+  /// Update an existing custom theme
+  Future<void> updateCustomTheme(String themeId, Map<String, String> colors) async {
+    try {
+      await _repo.updateCustomTheme(themeId, colors);
+      final updated = state.savedCustomThemes.map((t) {
+        return t.id == themeId ? t.copyWithColors(colors) : t;
+      }).toList();
+      emit(
+        state.copyWith(
+          savedCustomThemes: updated,
+          customThemeColors: state.activeCustomThemeId == themeId ? colors : state.customThemeColors,
+        ),
+      );
+      _widgetSync();
+    } catch (e) {
+      debugPrint('SettingsCubit: Error updating custom theme: $e');
+    }
+  }
+
+  /// Delete a custom theme
+  Future<void> deleteCustomTheme(String themeId) async {
+    try {
+      await _repo.deleteCustomTheme(themeId);
+      final updated = state.savedCustomThemes.where((t) => t.id != themeId).toList();
+      emit(
+        state.copyWith(
+          savedCustomThemes: updated,
+          activeCustomThemeId: state.activeCustomThemeId == themeId ? null : state.activeCustomThemeId,
+        ),
+      );
+      _widgetSync();
+    } catch (e) {
+      debugPrint('SettingsCubit: Error deleting custom theme: $e');
+    }
+  }
+
+  /// Activate a saved custom theme
+  Future<void> activateCustomTheme(String themeId) async {
+    try {
+      await _repo.setActiveCustomTheme(themeId);
+      final theme = state.savedCustomThemes.firstWhere(
+        (t) => t.id == themeId,
+        orElse: () => CustomTheme.defaultPalette(id: themeId, name: 'Unknown'),
+      );
+      emit(
+        state.copyWith(
+          themePresetId: 'custom',
+          activeCustomThemeId: themeId,
+          customThemeColors: theme.toColorMap(),
+        ),
+      );
+      _widgetSync();
+    } catch (e) {
+      debugPrint('SettingsCubit: Error activating custom theme: $e');
+    }
+  }
+
   void _sync() => Future.microtask(() async {
     try {
       await _syncNotif.execute();

@@ -8,7 +8,7 @@ import 'package:fard/core/extensions/salaah_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui' as ui;
 
@@ -47,9 +47,9 @@ class HistoryList extends StatelessWidget {
         return Container(
           margin: const EdgeInsets.only(bottom: 12.0),
           decoration: BoxDecoration(
-            color: AppTheme.surface,
+            color: context.surfaceContainerColor,
             borderRadius: BorderRadius.circular(16.0),
-            border: Border.all(color: AppTheme.cardBorder),
+            border: Border.all(color: context.outlineColor),
           ),
           child: ExpansionTile(
             key: PageStorageKey('history_$monthKey'),
@@ -63,16 +63,16 @@ class HistoryList extends StatelessWidget {
             tilePadding: const EdgeInsets.fromLTRB(16.0, 8.0, 12.0, 8.0),
             title: Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.history_rounded,
-                  color: AppTheme.accent,
+                  color: context.secondaryColor,
                   size: 20.0,
                 ),
                 const SizedBox(width: 12.0),
                 Text(
                   monthKey,
                   style: GoogleFonts.amiri(
-                    color: AppTheme.textPrimary,
+                    color: context.onSurfaceColor,
                     fontSize: 18.0,
                     fontWeight: FontWeight.w700,
                   ),
@@ -84,14 +84,14 @@ class HistoryList extends StatelessWidget {
                     vertical: 2.0,
                   ),
                   decoration: BoxDecoration(
-                    color: AppTheme.surfaceLight,
+                    color: context.surfaceContainerHighestColor,
                     borderRadius: BorderRadius.circular(12.0),
-                    border: Border.all(color: AppTheme.cardBorder),
+                    border: Border.all(color: context.outlineColor),
                   ),
                   child: Text(
                     '${monthRecords.length}',
                     style: GoogleFonts.outfit(
-                      color: AppTheme.textSecondary,
+                      color: context.onSurfaceVariantColor,
                       fontSize: 12.0,
                       fontWeight: FontWeight.w600,
                     ),
@@ -100,7 +100,7 @@ class HistoryList extends StatelessWidget {
               ],
             ),
             children: [
-              const Divider(height: 1.0, color: AppTheme.cardBorder),
+              const Divider(height: 1.0),
               Column(
                 children: [
                   for (int i = 0; i < monthRecords.length; i++) ...[
@@ -114,7 +114,7 @@ class HistoryList extends StatelessWidget {
                       ),
                     ),
                     if (i < monthRecords.length - 1)
-                      const Divider(height: 1.0, color: AppTheme.cardBorder),
+                      const Divider(height: 1.0),
                   ],
                 ],
               ),
@@ -187,12 +187,12 @@ class HistoryList extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 6.0),
             decoration: BoxDecoration(
               color: isToday
-                  ? AppTheme.primaryLight.withValues(alpha: 0.15)
-                  : AppTheme.surfaceLight,
+                  ? context.primaryContainerColor.withValues(alpha: 0.15)
+                  : context.surfaceContainerHighestColor,
               borderRadius: BorderRadius.circular(10.0),
               border: isToday
                   ? Border.all(
-                      color: AppTheme.primaryLight.withValues(alpha: 0.40),
+                      color: context.primaryContainerColor.withValues(alpha: 0.40),
                     )
                   : Border.all(color: Colors.transparent, width: 0.0),
             ),
@@ -202,8 +202,8 @@ class HistoryList extends StatelessWidget {
                   '${record.date.day}',
                   style: GoogleFonts.outfit(
                     color: isToday
-                        ? AppTheme.primaryLight
-                        : AppTheme.textPrimary,
+                        ? context.primaryContainerColor
+                        : context.onSurfaceColor,
                     fontSize: 16.0,
                     fontWeight: FontWeight.w700,
                   ),
@@ -211,7 +211,7 @@ class HistoryList extends StatelessWidget {
                 Text(
                   '${record.date.month}/${record.date.year % 100}',
                   style: GoogleFonts.outfit(
-                    color: AppTheme.textSecondary,
+                    color: context.onSurfaceVariantColor,
                     fontSize: 10.0,
                   ),
                 ),
@@ -236,13 +236,13 @@ class HistoryList extends StatelessWidget {
                         vertical: 2.0,
                       ),
                       decoration: BoxDecoration(
-                        color: AppTheme.saved.withValues(alpha: 0.15),
+                        color: context.primaryColor.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(6.0),
                       ),
                       child: Text(
                         '${l10n.localeName == 'ar' ? 'تم' : 'Done'} $performedToday',
                         style: GoogleFonts.amiri(
-                          color: AppTheme.saved,
+                          color: context.primaryColor,
                           fontSize: 11.0,
                           fontWeight: FontWeight.bold,
                         ),
@@ -255,13 +255,13 @@ class HistoryList extends StatelessWidget {
                           vertical: 2.0,
                         ),
                         decoration: BoxDecoration(
-                          color: AppTheme.primaryLight.withValues(alpha: 0.15),
+                          color: context.primaryContainerColor.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6.0),
                         ),
                         child: Text(
                           '${l10n.localeName == 'ar' ? 'قضاء' : 'Qada'} $qadaCompletedToday',
                           style: GoogleFonts.amiri(
-                            color: AppTheme.primaryLight,
+                            color: context.primaryContainerColor,
                             fontSize: 11.0,
                             fontWeight: FontWeight.bold,
                           ),
@@ -274,13 +274,13 @@ class HistoryList extends StatelessWidget {
                           vertical: 2.0,
                         ),
                         decoration: BoxDecoration(
-                          color: AppTheme.missed.withValues(alpha: 0.15),
+                          color: context.errorColor.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6.0),
                         ),
                         child: Text(
                           l10n.missedCount(actualMissedCount),
                           style: GoogleFonts.amiri(
-                            color: AppTheme.missed,
+                            color: context.errorColor,
                             fontSize: 11.0,
                           ),
                         ),
@@ -292,7 +292,7 @@ class HistoryList extends StatelessWidget {
                         child: Text(
                           '${l10n.remaining}: $totalQada',
                           style: GoogleFonts.outfit(
-                            color: AppTheme.textSecondary,
+                            color: context.onSurfaceVariantColor,
                             fontSize: 12.0,
                             fontWeight: FontWeight.w500,
                           ),
@@ -316,13 +316,13 @@ class HistoryList extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: wasMissed
-                            ? AppTheme.missed.withValues(alpha: 0.08)
-                            : AppTheme.saved.withValues(alpha: 0.08),
+                            ? context.errorColor.withValues(alpha: 0.08)
+                            : context.primaryColor.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(8.0),
                         border: Border.all(
                           color: wasMissed
-                              ? AppTheme.missed.withValues(alpha: 0.20)
-                              : AppTheme.saved.withValues(alpha: 0.20),
+                              ? context.errorColor.withValues(alpha: 0.20)
+                              : context.primaryColor.withValues(alpha: 0.20),
                         ),
                       ),
                       child: Row(
@@ -332,7 +332,7 @@ class HistoryList extends StatelessWidget {
                             wasMissed
                                 ? Icons.close_rounded
                                 : Icons.check_circle_rounded,
-                            color: wasMissed ? AppTheme.missed : AppTheme.saved,
+                            color: wasMissed ? context.errorColor : context.primaryColor,
                             size: 14.0,
                           ),
                           const SizedBox(width: 4.0),
@@ -340,8 +340,8 @@ class HistoryList extends StatelessWidget {
                             s.localizedName(l10n),
                             style: GoogleFonts.amiri(
                               color: wasMissed
-                                  ? AppTheme.missed
-                                  : AppTheme.saved,
+                                  ? context.errorColor
+                                  : context.primaryColor,
                               fontSize: 12.0,
                               fontWeight: FontWeight.bold,
                             ),
@@ -368,24 +368,24 @@ class HistoryList extends StatelessWidget {
             ? ui.TextDirection.rtl
             : ui.TextDirection.ltr,
         child: AlertDialog(
-          backgroundColor: AppTheme.surface,
+          backgroundColor: context.surfaceContainerColor,
           title: Text(
             l10n.deleteRecord,
             style: GoogleFonts.amiri(
-              color: AppTheme.textPrimary,
+              color: context.onSurfaceColor,
               fontWeight: FontWeight.w700,
             ),
           ),
           content: Text(
             l10n.deleteConfirm('${record.date.day}/${record.date.month}'),
-            style: GoogleFonts.amiri(color: AppTheme.textSecondary),
+            style: GoogleFonts.amiri(color: context.onSurfaceVariantColor),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
                 l10n.cancel,
-                style: GoogleFonts.amiri(color: AppTheme.textSecondary),
+                style: GoogleFonts.amiri(color: context.onSurfaceVariantColor),
               ),
             ),
             TextButton(
@@ -396,7 +396,7 @@ class HistoryList extends StatelessWidget {
               child: Text(
                 l10n.delete,
                 style: GoogleFonts.amiri(
-                  color: AppTheme.missed,
+                  color: context.errorColor,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -412,23 +412,23 @@ class HistoryList extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: context.surfaceContainerColor,
         borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(color: AppTheme.cardBorder),
+        border: Border.all(color: context.outlineColor),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             Icons.history_rounded,
-            color: AppTheme.textSecondary.withValues(alpha: 0.40),
+            color: context.onSurfaceVariantColor.withValues(alpha: 0.40),
             size: 20.0,
           ),
           const SizedBox(width: 8.0),
           Text(
             l10n.noHistory,
             style: GoogleFonts.amiri(
-              color: AppTheme.textSecondary,
+              color: context.onSurfaceVariantColor,
               fontSize: 15.0,
             ),
           ),

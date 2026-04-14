@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/extensions/number_extension.dart';
 import 'package:fard/features/quran/presentation/widgets/sajdah_indicator.dart';
 import 'package:fard/features/quran/domain/entities/bookmark.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:quran/quran.dart' as quran;
 
 class AyahText extends StatefulWidget {
@@ -276,10 +277,10 @@ class _AyahTextState extends State<AyahText> {
 
             // 1. START FLAG (Werd session start)
             if (isDayStart)
-              const TextSpan(
+              TextSpan(
                 text: ' \u2691\u2009', // Black flag + thin space
                 style: TextStyle(
-                  color: Colors.green,
+                  color: context.primaryColor,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -314,19 +315,19 @@ class _AyahTextState extends State<AyahText> {
 
             // 5. PROGRESS MARKER
             if (isLastRead)
-              const TextSpan(
+              TextSpan(
                 text: ' \u27A4', // Arrow
                 style: TextStyle(
-                  color: Colors.green,
+                  color: context.primaryColor,
                   fontWeight: FontWeight.bold,
                 ),
               ),
 
             // 6. BOOKMARK
             if (isBookmarked)
-              const TextSpan(
+              TextSpan(
                 text: ' \u{1F516}', // Bookmark emoji
-                style: TextStyle(color: Colors.green),
+                style: TextStyle(color: context.primaryColor),
               ),
 
             if (ayah.isSajdah && ayah.sajdahType != null) ...[

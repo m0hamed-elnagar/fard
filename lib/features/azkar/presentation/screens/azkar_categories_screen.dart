@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import '../blocs/azkar_bloc.dart';
 import 'azkar_list_screen.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
@@ -68,9 +68,14 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                 decoration: InputDecoration(
                   hintText: l10n.search,
                   border: InputBorder.none,
-                  hintStyle: const TextStyle(color: Colors.white70),
+                  hintStyle: TextStyle(
+                    color: context.onSurfaceColor,
+                  ),
                 ),
-                style: const TextStyle(color: Colors.white, fontSize: 18),
+                style: TextStyle(
+                  color: context.onSurfaceColor,
+                  fontSize: 18,
+                ),
               )
             : Text(
                 l10n.azkar,
@@ -110,14 +115,14 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                       onPressed: () => Navigator.pop(context, false),
                       child: Text(
                         l10n.cancel,
-                        style: const TextStyle(color: AppTheme.textSecondary),
+                        style: TextStyle(color: context.onSurfaceVariantColor),
                       ),
                     ),
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context, true),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.missed,
-                        foregroundColor: Colors.white,
+                        backgroundColor: context.errorColor,
+                        foregroundColor: context.onSurfaceColor,
                       ),
                       child: Text(l10n.delete),
                     ),
@@ -158,7 +163,6 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                   children: [
                     const Icon(
                       Icons.error_outline,
-                      color: Colors.red,
                       size: 64,
                     ),
                     const SizedBox(height: 16),
@@ -167,14 +171,14 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                       style: GoogleFonts.amiri(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Colors.red,
+                        color: context.errorColor,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       state.error!,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.grey),
+                      style: TextStyle(color: context.onSurfaceVariantColor),
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton.icon(
@@ -202,7 +206,6 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                   const Icon(
                     Icons.inventory_2_outlined,
                     size: 64,
-                    color: Colors.grey,
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -358,13 +361,13 @@ void _showAddReminderDialog(BuildContext context, String category) {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: AppTheme.accent.withValues(alpha: 0.1),
+                        color: context.secondaryColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         selectedTime,
-                        style: const TextStyle(
-                          color: AppTheme.accent,
+                        style: TextStyle(
+                          color: context.secondaryColor,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -378,7 +381,7 @@ void _showAddReminderDialog(BuildContext context, String category) {
                 onPressed: () => Navigator.pop(context),
                 child: Text(
                   l10n.cancel,
-                  style: const TextStyle(color: AppTheme.textSecondary),
+                  style: TextStyle(color: context.onSurfaceVariantColor),
                 ),
               ),
               ElevatedButton(
@@ -395,7 +398,7 @@ void _showAddReminderDialog(BuildContext context, String category) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(l10n.alarmAdded),
-                      backgroundColor: AppTheme.accent,
+                      backgroundColor: context.secondaryColor,
                     ),
                   );
                 },
@@ -449,10 +452,10 @@ class _CategoryCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: isRecommended
-            ? const BorderSide(color: AppTheme.accent, width: 2)
-            : BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
+            ? BorderSide(color: context.secondaryColor, width: 2)
+            : const BorderSide(color: Colors.transparent),
       ),
-      color: isRecommended ? AppTheme.accent.withValues(alpha: 0.05) : null,
+      color: isRecommended ? context.secondaryColor.withValues(alpha: 0.05) : null,
       child: Stack(
         children: [
           ListTile(
@@ -465,7 +468,7 @@ class _CategoryCard extends StatelessWidget {
               style: GoogleFonts.amiri(
                 fontSize: 18,
                 fontWeight: isRecommended ? FontWeight.bold : FontWeight.w600,
-                color: isRecommended ? AppTheme.accent : null,
+                color: isRecommended ? context.secondaryColor : null,
               ),
               textAlign: TextAlign.right,
             ),
@@ -474,16 +477,16 @@ class _CategoryCard extends StatelessWidget {
               children: [
                 TextButton.icon(
                   onPressed: () => _showAddReminderDialog(context, category),
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.alarm_add_rounded,
                     size: 16,
-                    color: AppTheme.accent,
+                    color: context.secondaryColor,
                   ),
                   label: Text(
                     l10n.addAlarm,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: AppTheme.accent,
+                      color: context.secondaryColor,
                     ),
                   ),
                 ),
@@ -492,7 +495,7 @@ class _CategoryCard extends StatelessWidget {
             trailing: Icon(
               Icons.arrow_forward_ios,
               size: 16,
-              color: isRecommended ? AppTheme.accent : null,
+              color: isRecommended ? context.secondaryColor : null,
             ),
             onTap: () {
               Navigator.push(
@@ -515,24 +518,24 @@ class _CategoryCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppTheme.accent,
+                    color: context.secondaryColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text(
+                      Text(
                         '★',
                         style: TextStyle(
-                          color: AppTheme.onAccent,
+                          color: context.theme.colorScheme.onSecondary,
                           fontSize: 10,
                         ),
                       ),
                       const SizedBox(width: 4),
                       Text(
                         AppLocalizations.of(context)!.recommended,
-                        style: const TextStyle(
-                          color: AppTheme.onAccent,
+                        style: TextStyle(
+                          color: context.theme.colorScheme.onSecondary,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),

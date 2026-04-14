@@ -3,6 +3,8 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/extensions/number_extension.dart';
 import 'package:quran/quran.dart' as quran;
 
+import 'package:fard/core/theme/app_colors.dart';
+
 class ScrollProgressIndicator extends StatefulWidget {
   final ScrollController scrollController;
   final int currentAyahNumber;
@@ -87,7 +89,7 @@ class _ScrollProgressIndicatorState extends State<ScrollProgressIndicator> {
         color: theme.colorScheme.surfaceContainer,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: context.outlineColor,
             blurRadius: 4,
             offset: const Offset(0, -2),
           ),

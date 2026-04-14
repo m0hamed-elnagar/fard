@@ -157,7 +157,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               height: 24,
                               width: 24,
                               child: CircularProgressIndicator(
-                                color: Colors.white,
+                                color: AppTheme.textPrimary,
                                 strokeWidth: 2,
                               ),
                             )

@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 
 class SuggestedAzkarSection extends StatelessWidget {
   final SettingsState settings;
@@ -100,7 +101,7 @@ class SuggestedAzkarSection extends StatelessWidget {
               child: Container(
                 clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
-                  color: AppTheme.surface,
+                  color: context.surfaceContainerColor,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
                     color: mainColor.withValues(alpha: 0.2),
@@ -149,7 +150,7 @@ class SuggestedAzkarSection extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            child: Icon(icon, color: Colors.white, size: 28),
+                            child: Icon(icon, color: context.onSurfaceColor, size: 28),
                           ),
                           const SizedBox(width: 20),
                           Expanded(
@@ -169,7 +170,7 @@ class SuggestedAzkarSection extends StatelessWidget {
                                 Text(
                                   displayTitle,
                                   style: GoogleFonts.amiri(
-                                    color: AppTheme.textPrimary,
+                                    color: context.onSurfaceColor,
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
                                     height: 1.2,
@@ -195,8 +196,8 @@ class SuggestedAzkarSection extends StatelessWidget {
                                       onPressed: () => Navigator.pop(context),
                                       child: Text(
                                         l10n.cancel,
-                                        style: const TextStyle(
-                                          color: AppTheme.textSecondary,
+                                        style: TextStyle(
+                                          color: context.onSurfaceVariantColor,
                                         ),
                                       ),
                                     ),

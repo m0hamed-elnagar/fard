@@ -127,10 +127,10 @@ class _CustomToggleState extends State<CustomToggle>
                         margin: const EdgeInsets.symmetric(horizontal: 3),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white,
+                          color: AppTheme.textPrimary,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
+                              color: AppTheme.cardBorder.withValues(alpha: 0.1),
                               blurRadius: 2,
                               offset: const Offset(0, 1),
                             ),

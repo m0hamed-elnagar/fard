@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/constants/settings_keys.dart';
 import '../../../prayer_tracking/domain/salaah.dart';
 import '../../domain/azkar_reminder.dart';
+import '../../domain/entities/custom_theme.dart';
 import '../../domain/repositories/settings_repository.dart';
 import '../../domain/salaah_settings.dart';
 import 'settings_storage.dart';
@@ -101,6 +102,53 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   int get hijriAdjustment => _storage.readInt(SettingsKeys.hijriAdjustment);
+
+  @override
+  String get themePresetId => _storage.readString(
+    SettingsKeys.themePresetId,
+    defaultValue: 'emerald',
+  )!;
+
+  @override
+  Map<String, String>? get customThemeColors {
+    final colors = <String, String>{};
+    final primary = _storage.readString(SettingsKeys.customPrimaryColor);
+    final accent = _storage.readString(SettingsKeys.customAccentColor);
+    final background = _storage.readString(SettingsKeys.customBackgroundColor);
+    final surface = _storage.readString(SettingsKeys.customSurfaceColor);
+    final text = _storage.readString(SettingsKeys.customTextColor);
+    final textSecondary = _storage.readString(
+      SettingsKeys.customTextSecondaryColor,
+    );
+    final cardBorder = _storage.readString(SettingsKeys.customCardBorderColor);
+    final surfaceLight = _storage.readString(
+      SettingsKeys.customSurfaceLightColor,
+    );
+
+    if (primary != null) colors['primary'] = primary;
+    if (accent != null) colors['accent'] = accent;
+    if (background != null) colors['background'] = background;
+    if (surface != null) colors['surface'] = surface;
+    if (text != null) colors['text'] = text;
+    if (textSecondary != null) colors['textSecondary'] = textSecondary;
+    if (cardBorder != null) colors['cardBorder'] = cardBorder;
+    if (surfaceLight != null) colors['surfaceLight'] = surfaceLight;
+
+    return colors.isEmpty ? null : colors;
+  }
+
+  @override
+  List<CustomTheme> get savedCustomThemes {
+    final list = _storage.readJsonList<CustomTheme>(
+      SettingsKeys.savedCustomThemes,
+      (json) => CustomTheme.fromJson(json),
+    );
+    return list;
+  }
+
+  @override
+  String? get activeCustomThemeId =>
+      _storage.readString(SettingsKeys.activeCustomThemeId);
 
   // ==================== WRITE OPERATIONS ====================
 
@@ -238,4 +286,109 @@ class SettingsRepositoryImpl implements SettingsRepository {
     list,
     (s) => s.toJson(),
   );
+
+  @override
+  Future<void> updateThemePreset(String presetId) async {
+    await _storage.writeString(SettingsKeys.themePresetId, presetId);
+  }
+
+  @override
+  Future<void> saveCustomTheme(Map<String, String> colors) async {
+    if (colors.containsKey('primary')) {
+      await _storage.writeString(
+        SettingsKeys.customPrimaryColor,
+        colors['primary']!,
+      );
+    }
+    if (colors.containsKey('accent')) {
+      await _storage.writeString(
+        SettingsKeys.customAccentColor,
+        colors['accent']!,
+      );
+    }
+    if (colors.containsKey('background')) {
+      await _storage.writeString(
+        SettingsKeys.customBackgroundColor,
+        colors['background']!,
+      );
+    }
+    if (colors.containsKey('surface')) {
+      await _storage.writeString(
+        SettingsKeys.customSurfaceColor,
+        colors['surface']!,
+      );
+    }
+    if (colors.containsKey('text')) {
+      await _storage.writeString(
+        SettingsKeys.customTextColor,
+        colors['text']!,
+      );
+    }
+    if (colors.containsKey('textSecondary')) {
+      await _storage.writeString(
+        SettingsKeys.customTextSecondaryColor,
+        colors['textSecondary']!,
+      );
+    }
+    if (colors.containsKey('cardBorder')) {
+      await _storage.writeString(
+        SettingsKeys.customCardBorderColor,
+        colors['cardBorder']!,
+      );
+    }
+    if (colors.containsKey('surfaceLight')) {
+      await _storage.writeString(
+        SettingsKeys.customSurfaceLightColor,
+        colors['surfaceLight']!,
+      );
+    }
+  }
+
+  @override
+  Future<void> addCustomTheme(CustomTheme theme) async {
+    final current = savedCustomThemes;
+    final updated = [...current, theme];
+    await _storage.writeJsonList<CustomTheme>(
+      SettingsKeys.savedCustomThemes,
+      updated,
+      (t) => t.toJson(),
+    );
+  }
+
+  @override
+  Future<void> updateCustomTheme(String themeId, Map<String, String> colors) async {
+    final current = savedCustomThemes;
+    final index = current.indexWhere((t) => t.id == themeId);
+    if (index == -1) return;
+    final updated = [...current];
+    updated[index] = updated[index].copyWithColors(colors);
+    await _storage.writeJsonList<CustomTheme>(
+      SettingsKeys.savedCustomThemes,
+      updated,
+      (t) => t.toJson(),
+    );
+  }
+
+  @override
+  Future<void> deleteCustomTheme(String themeId) async {
+    final current = savedCustomThemes;
+    final updated = current.where((t) => t.id != themeId).toList();
+    await _storage.writeJsonList<CustomTheme>(
+      SettingsKeys.savedCustomThemes,
+      updated,
+      (t) => t.toJson(),
+    );
+    // If the deleted theme was active, clear it
+    if (activeCustomThemeId == themeId) {
+      await _storage.writeString(SettingsKeys.activeCustomThemeId, '');
+    }
+  }
+
+  @override
+  Future<void> setActiveCustomTheme(String? themeId) async {
+    await _storage.writeString(
+      SettingsKeys.activeCustomThemeId,
+      themeId ?? '',
+    );
+  }
 }

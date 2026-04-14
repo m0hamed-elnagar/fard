@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/core/di/injection.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/features/quran/domain/entities/ayah.dart';
 import 'package:fard/features/quran/domain/usecases/get_tafsir.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
@@ -115,7 +116,7 @@ class AyahDetailSheet extends StatelessWidget {
                                                   : Icons
                                                         .bookmark_border_rounded,
                                               color: isBookmarked
-                                                  ? Colors.amber
+                                                  ? context.secondaryColor
                                                   : null,
                                             ),
                                             tooltip: isBookmarked
@@ -155,7 +156,7 @@ class AyahDetailSheet extends StatelessWidget {
                                                           style:
                                                               GoogleFonts.amiri(
                                                                 color:
-                                                                    Colors.grey,
+                                                                    context.onSurfaceVariantColor,
                                                               ),
                                                         ),
                                                       ),
@@ -170,7 +171,7 @@ class AyahDetailSheet extends StatelessWidget {
                                                           style:
                                                               GoogleFonts.amiri(
                                                                 color:
-                                                                    Colors.red,
+                                                                    context.errorColor,
                                                               ),
                                                         ),
                                                       ),
@@ -388,10 +389,10 @@ class _TafsirTab extends StatelessWidget {
                         textAlign: isArabic ? TextAlign.right : TextAlign.left,
                       ),
                       leading: !isArabic && tafsir.id == currentId
-                          ? const Icon(Icons.check, color: Colors.green)
+                          ? Icon(Icons.check, color: context.primaryColor)
                           : null,
                       trailing: isArabic && tafsir.id == currentId
-                          ? const Icon(Icons.check, color: Colors.green)
+                          ? Icon(Icons.check, color: context.primaryColor)
                           : null,
                       onTap: () {
                         readerBloc.add(ReaderEvent.updateTafsir(tafsir.id));
@@ -535,7 +536,7 @@ class _AudioTab extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: isError ? Colors.red : null,
+                color: isError ? context.errorColor : null,
               ),
             ),
             const SizedBox(height: 32),
@@ -566,14 +567,14 @@ class _AudioTab extends StatelessWidget {
                       height: 72,
                       decoration: BoxDecoration(
                         color: isError
-                            ? Colors.red
+                            ? context.errorColor
                             : Theme.of(context).colorScheme.primary,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
                             color:
                                 (isError
-                                        ? Colors.red
+                                        ? context.errorColor
                                         : Theme.of(context).colorScheme.primary)
                                     .withValues(alpha: 0.3),
                             blurRadius: 10,
@@ -582,10 +583,10 @@ class _AudioTab extends StatelessWidget {
                         ],
                       ),
                       child: isLoading
-                          ? const Padding(
+                          ? Padding(
                               padding: EdgeInsets.all(18.0),
                               child: CircularProgressIndicator(
-                                color: Colors.white,
+                                color: context.onSurfaceColor,
                                 strokeWidth: 3,
                               ),
                             )
@@ -597,7 +598,7 @@ class _AudioTab extends StatelessWidget {
                                           ? Icons.pause_rounded
                                           : Icons.play_arrow_rounded),
                                 size: 40,
-                                color: Colors.white,
+                                color: context.onSurfaceColor,
                               ),
                               onPressed: () {
                                 if (isPlaying) {
@@ -784,7 +785,7 @@ class _MarkAsLastReadButtonState extends State<_MarkAsLastReadButton> {
             onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(
               l10n.werdUndo,
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: context.errorColor),
             ),
           ),
         ],

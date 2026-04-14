@@ -7,6 +7,8 @@ import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quran/quran.dart' as quran;
 
+import '../../../../core/theme/app_colors.dart';
+
 class ReaderInfoBar extends StatelessWidget {
   final int surahNumber;
   final int ayahNumber;
@@ -44,7 +46,7 @@ class ReaderInfoBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
+                color: context.outlineColor,
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -69,9 +71,9 @@ class ReaderInfoBar extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.flag_rounded,
-                              color: Colors.green,
+                              color: context.primaryColor,
                               size: 18,
                             ),
                             const SizedBox(width: 4),
@@ -86,7 +88,7 @@ class ReaderInfoBar extends StatelessWidget {
                                   style: GoogleFonts.amiri(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.green,
+                                    color: context.primaryColor,
                                   ),
                                 );
                               },
@@ -164,9 +166,9 @@ class ReaderInfoBar extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.bookmark_rounded,
-                              color: Colors.orange,
+                              color: context.secondaryColor,
                               size: 18,
                             ),
                             const SizedBox(width: 4),
@@ -192,7 +194,7 @@ class ReaderInfoBar extends StatelessWidget {
                                   style: GoogleFonts.amiri(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.orange,
+                                    color: context.secondaryColor,
                                   ),
                                 );
                               },
@@ -284,18 +286,18 @@ class ReaderInfoBar extends StatelessWidget {
             const Divider(),
             Text(
               'بداية ورد اليوم:',
-              style: GoogleFonts.amiri(fontSize: 14, color: Colors.grey),
+              style: GoogleFonts.amiri(fontSize: 14, color: context.onSurfaceVariantColor),
               textAlign: TextAlign.right,
             ),
             Text(
               todayStartInfo,
-              style: GoogleFonts.amiri(fontSize: 16, color: Colors.green),
+              style: GoogleFonts.amiri(fontSize: 16, color: context.primaryColor),
               textAlign: TextAlign.right,
             ),
             const SizedBox(height: 8),
             Text(
               'بداية الورد القادمة:',
-              style: GoogleFonts.amiri(fontSize: 14, color: Colors.grey),
+              style: GoogleFonts.amiri(fontSize: 14, color: context.onSurfaceVariantColor),
               textAlign: TextAlign.right,
             ),
             Text(

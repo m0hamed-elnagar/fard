@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:adhan/adhan.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
-import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/core/extensions/salaah_extension.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/extensions/number_extension.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -140,12 +140,12 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: context.surfaceContainerColor,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppTheme.cardBorder, width: 1.5),
+        border: Border.all(color: context.outlineColor, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
+            color: context.outlineColor.withValues(alpha: 0.2),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -161,7 +161,7 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
               top: -30,
               child: Opacity(
                 opacity: 0.03,
-                child: const Icon(Icons.mosque, size: 180, color: Colors.white),
+                child: Icon(Icons.mosque, size: 180, color: context.onSurfaceColor),
               ),
             ),
             LayoutBuilder(
@@ -183,7 +183,7 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                                 Text(
                                   l10n.nextPrayer,
                                   style: GoogleFonts.amiri(
-                                    color: AppTheme.textSecondary,
+                                    color: context.onSurfaceVariantColor,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -192,7 +192,7 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                                   Text(
                                     _nextSalaah!.localizedName(l10n),
                                     style: GoogleFonts.amiri(
-                                      color: AppTheme.accent,
+                                      color: context.secondaryColor,
                                       fontSize: isShort ? 18 : 22,
                                       fontWeight: FontWeight.bold,
                                       height: 1.2,
@@ -208,7 +208,7 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: AppTheme.cardBorder.withValues(
+                                color: context.outlineColor.withValues(
                                   alpha: 0.5,
                                 ),
                                 borderRadius: BorderRadius.circular(12),
@@ -216,17 +216,17 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.location_on,
                                     size: 12,
-                                    color: AppTheme.accent,
+                                    color: context.secondaryColor,
                                   ),
                                   const SizedBox(width: 4),
                                   Flexible(
                                     child: Text(
                                       widget.cityName!,
-                                      style: const TextStyle(
-                                        color: AppTheme.textPrimary,
+                                      style: TextStyle(
+                                        color: context.onSurfaceColor,
                                         fontSize: 11,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -248,7 +248,7 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                               child: Text(
                                 isAr ? _countdown.toArabicIndic() : _countdown,
                                 style: GoogleFonts.outfit(
-                                  color: AppTheme.textPrimary,
+                                  color: context.onSurfaceColor,
                                   fontSize: isShort ? 36 : 42,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 1,
@@ -262,7 +262,7 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                               child: Text(
                                 l10n.remainingTime,
                                 style: GoogleFonts.amiri(
-                                  color: AppTheme.textSecondary.withValues(
+                                  color: context.onSurfaceVariantColor.withValues(
                                     alpha: 0.7,
                                   ),
                                   fontSize: 13,
@@ -273,7 +273,7 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                         ),
                       ),
                       const Spacer(flex: 2),
-                      const Divider(height: 1, color: AppTheme.cardBorder),
+                      Divider(height: 1, color: context.outlineColor.withValues(alpha: 0.12)),
                       const Spacer(flex: 1),
                       LayoutBuilder(
                         builder: (context, gridConstraints) {
@@ -320,15 +320,15 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: isNext
-                                      ? AppTheme.accent.withValues(alpha: 0.1)
-                                      : AppTheme.cardBorder.withValues(
+                                      ? context.secondaryColor.withValues(alpha: 0.1)
+                                      : context.outlineColor.withValues(
                                           alpha: 0.3,
                                         ),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
                                     color: isNext
-                                        ? AppTheme.accent.withValues(alpha: 0.4)
-                                        : AppTheme.cardBorder.withValues(
+                                        ? context.secondaryColor.withValues(alpha: 0.4)
+                                        : context.outlineColor.withValues(
                                             alpha: 0.5,
                                           ),
                                     width: 1,
@@ -343,8 +343,8 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                                         name,
                                         style: GoogleFonts.amiri(
                                           color: isNext
-                                              ? AppTheme.accent
-                                              : AppTheme.textSecondary,
+                                              ? context.secondaryColor
+                                              : context.onSurfaceVariantColor,
                                           fontSize: isVeryNarrow ? 10 : 12,
                                           fontWeight: isNext
                                               ? FontWeight.bold
@@ -363,8 +363,8 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                                             : '--:--',
                                         style: GoogleFonts.outfit(
                                           color: isNext
-                                              ? AppTheme.textPrimary
-                                              : AppTheme.textPrimary.withValues(
+                                              ? context.onSurfaceColor
+                                              : context.onSurfaceColor.withValues(
                                                   alpha: 0.9,
                                                 ),
                                           fontSize: isVeryNarrow ? 11 : 13,

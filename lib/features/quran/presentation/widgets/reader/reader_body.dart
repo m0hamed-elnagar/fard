@@ -13,6 +13,8 @@ import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:fard/core/theme/app_colors.dart';
+
 class QuranReaderBody extends StatefulWidget {
   final ReaderScrollController scrollController;
   final int? currentVisibleAyah;
@@ -78,10 +80,10 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.error_outline,
                       size: 48,
-                      color: Colors.red,
+                      color: context.errorColor,
                     ),
                     const SizedBox(height: 16),
                     Text(e.message, textAlign: TextAlign.center),
@@ -232,8 +234,8 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
                                         'assets/icons/praying_hands.svg',
                                         width: 24,
                                         height: 24,
-                                        colorFilter: const ColorFilter.mode(
-                                          Colors.amber,
+                                        colorFilter: ColorFilter.mode(
+                                          context.secondaryColor,
                                           BlendMode.srcIn,
                                         ),
                                       ),
@@ -257,7 +259,7 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
                                         backgroundColor: Theme.of(context)
                                             .colorScheme
                                             .surfaceContainerHigh,
-                                        foregroundColor: Colors.amber,
+                                        foregroundColor: context.secondaryColor,
                                       ),
                                     ),
                                   ),

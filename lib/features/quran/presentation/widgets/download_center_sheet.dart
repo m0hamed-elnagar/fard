@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/mushaf_download_service.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
 import 'package:fard/features/audio/presentation/screens/offline_audio_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -92,8 +93,8 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
     final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(24),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: context.surfaceContainerColor,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -105,7 +106,7 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: context.outlineVariantColor,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -116,7 +117,7 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
             style: GoogleFonts.amiri(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF2D5D40),
+              color: context.primaryColor,
             ),
             textAlign: TextAlign.center,
           ),
@@ -124,20 +125,20 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
           Text(
             l10n.downloadCenterDesc,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.grey),
+            style: TextStyle(color: context.onSurfaceVariantColor),
           ),
           if (_errorMessage != null) ...[
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.red[50],
+                color: context.errorColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 _errorMessage!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.red, fontSize: 12),
+                style: TextStyle(color: context.errorColor, fontSize: 12),
               ),
             ),
           ],
@@ -178,7 +179,7 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2D5D40),
+              backgroundColor: context.primaryColor,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -186,8 +187,8 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
             ),
             child: Text(
               l10n.close,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: context.onSurfaceColor,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -233,14 +234,14 @@ class _AudioDownloadItem extends StatelessWidget {
                   ),
                   Text(
                     subtitle,
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    style: TextStyle(fontSize: 12, color: context.onSurfaceVariantColor),
                   ),
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.arrow_forward_ios_rounded,
-              color: Color(0xFF2D5D40),
+              color: context.primaryColor,
               size: 20,
             ),
           ],
@@ -286,29 +287,29 @@ class _DownloadItem extends StatelessWidget {
                   ),
                   Text(
                     subtitle,
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    style: TextStyle(fontSize: 12, color: context.onSurfaceVariantColor),
                   ),
                 ],
               ),
             ),
             if (progress < 1.0 && !isDownloading)
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.download_for_offline_rounded,
-                  color: Color(0xFF2D5D40),
+                  color: context.primaryColor,
                   size: 32,
                 ),
                 onPressed: onDownload,
               )
             else if (progress >= 1.0)
-              const Icon(Icons.check_circle, color: Colors.green, size: 32)
+              Icon(Icons.check_circle, color: context.primaryColor, size: 32)
             else
-              const SizedBox(
+              SizedBox(
                 width: 24,
                 height: 24,
                 child: CircularProgressIndicator(
                   strokeWidth: 3,
-                  color: Color(0xFF2D5D40),
+                  color: context.primaryColor,
                 ),
               ),
           ],
@@ -318,8 +319,8 @@ class _DownloadItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
             value: progress,
-            backgroundColor: Colors.grey[200],
-            color: progress >= 1.0 ? Colors.green : const Color(0xFF2D5D40),
+            backgroundColor: context.outlineVariantColor,
+            color: progress >= 1.0 ? context.primaryColor : context.primaryColor,
             minHeight: 8,
           ),
         ),

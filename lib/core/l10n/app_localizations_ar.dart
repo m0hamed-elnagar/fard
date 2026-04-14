@@ -537,7 +537,49 @@ class AppLocalizationsAr extends AppLocalizations {
       'تطبيق هذه الإعدادات على جميع الصلوات الخمس معاً.';
 
   @override
+  String get azanNotifications => 'الأذان والإشعارات';
+
+  @override
+  String get azanSettingsDesc =>
+      'إدارة أصوات الأذان، التذكيرات، وأذكار ما بعد الصلاة لجميع الصلوات.';
+
+  @override
   String get individualSettings => 'إعدادات كل صلاة على حدة';
+
+  @override
+  String get createNewTheme => 'إنشاء سمة جديدة';
+
+  @override
+  String get savedThemes => 'السمات المحفوظة';
+
+  @override
+  String get editTheme => 'تعديل السمة';
+
+  @override
+  String get autoDerive => 'تلقائي';
+
+  @override
+  String get select => 'اختيار';
+
+  @override
+  String get updateTheme => 'تحديث السمة';
+
+  @override
+  String get saveTheme => 'حفظ السمة';
+
+  @override
+  String get nameYourTheme => 'اسم سمتك';
+
+  @override
+  String get themeNameHint => 'مثال: ذهبي داكن';
+
+  @override
+  String get deleteTheme => 'حذف السمة';
+
+  @override
+  String deleteThemeConfirm(Object themeName) {
+    return 'هل أنت متأكد من حذف \"$themeName\"؟ لا يمكن التراجع عن هذا.';
+  }
 
   @override
   String get applyToAll => 'تطبيق على الكل';
@@ -1244,4 +1286,37 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get juz => 'الجزء';
+
+  @override
+  String get theme => 'المظهر';
+
+  @override
+  String get emeraldTheme => 'الزمرد';
+
+  @override
+  String get parchmentTheme => 'الرق';
+
+  @override
+  String get roseTheme => 'الوردة';
+
+  @override
+  String get midnightTheme => 'منتصف الليل';
+
+  @override
+  String get customTheme => 'مخصص';
+
+  @override
+  String get pickPrimaryColor => 'اختر اللون الأساسي';
+
+  @override
+  String get pickAccentColor => 'اختر لون التمييز';
+
+  @override
+  String get resetToDefault => 'إعادة إلى الافتراضي';
+
+  @override
+  String get applyTheme => 'تطبيق المظهر';
+
+  @override
+  String get tapToCustomize => 'اضغط للتخصيص';
 }

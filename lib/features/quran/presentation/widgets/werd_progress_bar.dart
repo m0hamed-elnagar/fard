@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
 import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/core/extensions/number_extension.dart';
 import 'package:fard/core/extensions/quran_extension.dart';
 import 'package:quran/quran.dart' as quran;
@@ -129,12 +129,12 @@ class WerdProgressBar extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryLight.withValues(alpha: 0.1),
+                    color: context.primaryContainerColor.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.track_changes_rounded,
-                    color: AppTheme.primaryLight,
+                    color: context.primaryContainerColor,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -155,7 +155,7 @@ class WerdProgressBar extends StatelessWidget {
                             : 'Track your Quran progress',
                         style: GoogleFonts.amiri(
                           fontSize: 14,
-                          color: Colors.grey,
+                          color: context.onSurfaceVariantColor,
                         ),
                       ),
                     ],
@@ -164,8 +164,8 @@ class WerdProgressBar extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () => _showSetGoalDialog(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryLight,
-                    foregroundColor: Colors.white,
+                    backgroundColor: context.primaryContainerColor,
+                    foregroundColor: context.onSurfaceColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -213,8 +213,8 @@ class WerdProgressBar extends StatelessWidget {
                                 ? Icons.stars_rounded
                                 : Icons.menu_book_rounded,
                             color: isCompleted
-                                ? Colors.amber
-                                : AppTheme.primaryLight,
+                                ? context.secondaryColor
+                                : context.primaryContainerColor,
                             size: 20,
                           ),
                           const SizedBox(width: 8),
@@ -241,7 +241,7 @@ class WerdProgressBar extends StatelessWidget {
                                 ),
                                 style: GoogleFonts.amiri(
                                   fontSize: 12,
-                                  color: Colors.grey,
+                                  color: context.onSurfaceVariantColor,
                                 ),
                               ),
                             ),
@@ -254,10 +254,10 @@ class WerdProgressBar extends StatelessWidget {
                                 ),
                               );
                             },
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.history_rounded,
                               size: 20,
-                              color: Colors.grey,
+                              color: context.onSurfaceVariantColor,
                             ),
                             tooltip: isAr ? 'السجل' : 'History',
                             constraints: const BoxConstraints(),
@@ -265,10 +265,10 @@ class WerdProgressBar extends StatelessWidget {
                           ),
                           IconButton(
                             onPressed: () => _showSetGoalDialog(context),
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.edit_rounded,
                               size: 20,
-                              color: Colors.grey,
+                              color: context.onSurfaceVariantColor,
                             ),
                             tooltip: isAr ? 'تعديل الهدف' : 'Edit Goal',
                             constraints: const BoxConstraints(),
@@ -307,7 +307,7 @@ class WerdProgressBar extends StatelessWidget {
                               label: Text(isAr ? 'متابعة' : 'Continue'),
                               style: TextButton.styleFrom(
                                 visualDensity: VisualDensity.compact,
-                                foregroundColor: AppTheme.primaryLight,
+                                foregroundColor: context.primaryContainerColor,
                               ),
                             ),
                         ],
@@ -324,7 +324,7 @@ class WerdProgressBar extends StatelessWidget {
                         context,
                       ).dividerColor.withValues(alpha: 0.1),
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        isCompleted ? Colors.amber : AppTheme.primaryLight,
+                        isCompleted ? context.secondaryColor : context.primaryContainerColor,
                       ),
                     ),
                   ),
@@ -336,15 +336,15 @@ class WerdProgressBar extends StatelessWidget {
                         _getProgressText(current, total, goal, progress, isAr),
                         style: GoogleFonts.amiri(
                           fontSize: 14,
-                          color: Colors.grey[600],
+                          color: context.onSurfaceVariantColor,
                         ),
                       ),
                       if ((progress?.streak ?? 0) > 0)
                         Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.local_fire_department_rounded,
-                              color: Colors.orange,
+                              color: context.secondaryColor,
                               size: 16,
                             ),
                             const SizedBox(width: 4),
@@ -355,7 +355,7 @@ class WerdProgressBar extends StatelessWidget {
                               style: GoogleFonts.outfit(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.orange,
+                                color: context.secondaryColor,
                               ),
                             ),
                             const SizedBox(width: 2),
@@ -363,7 +363,7 @@ class WerdProgressBar extends StatelessWidget {
                               isAr ? 'يوم' : 'd',
                               style: GoogleFonts.amiri(
                                 fontSize: 12,
-                                color: Colors.orange,
+                                color: context.secondaryColor,
                               ),
                             ),
                           ],

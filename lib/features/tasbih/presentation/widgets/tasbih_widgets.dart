@@ -1,33 +1,39 @@
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class CounterCircle extends StatelessWidget {
+class CounterCircle extends StatefulWidget {
   final int count;
   final int targetCount;
-  final Color color;
+  final Color? color;
   final double size;
 
   const CounterCircle({
     super.key,
     required this.count,
     required this.targetCount,
-    this.color = AppTheme.primaryLight,
+    this.color,
     this.size = 240,
   });
 
   @override
+  State<CounterCircle> createState() => _CounterCircleState();
+}
+
+class _CounterCircleState extends State<CounterCircle> {
+  @override
   Widget build(BuildContext context) {
+    final color = widget.color ?? context.primaryContainerColor;
     return Stack(
       alignment: Alignment.center,
       children: [
         SizedBox(
-          width: size,
-          height: size,
+          width: widget.size,
+          height: widget.size,
           child: CircularProgressIndicator(
-            value: targetCount > 0 ? count / targetCount : 0,
-            strokeWidth: size * 0.05, // Dynamic stroke width
-            backgroundColor: AppTheme.surfaceLight,
+            value: widget.targetCount > 0 ? widget.count / widget.targetCount : 0,
+            strokeWidth: widget.size * 0.05,
+            backgroundColor: context.surfaceContainerHighestColor,
             color: color,
             strokeCap: StrokeCap.round,
           ),
@@ -36,19 +42,19 @@ class CounterCircle extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '$count',
+              '${widget.count}',
               style: GoogleFonts.outfit(
-                fontSize: size * 0.3, // Dynamic font size
+                fontSize: widget.size * 0.3,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
+                color: context.onSurfaceColor,
               ),
             ),
-            if (targetCount > 0)
+            if (widget.targetCount > 0)
               Text(
-                '/ $targetCount',
+                '/ ${widget.targetCount}',
                 style: GoogleFonts.outfit(
-                  fontSize: size * 0.075,
-                  color: AppTheme.textSecondary,
+                  fontSize: widget.size * 0.075,
+                  color: context.onSurfaceVariantColor,
                 ),
               ),
           ],
@@ -91,7 +97,7 @@ class DhikrDisplayCard extends StatelessWidget {
               style: GoogleFonts.amiri(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.accent,
+                color: context.secondaryColor,
                 height: 1.6,
               ),
             ),
@@ -103,7 +109,7 @@ class DhikrDisplayCard extends StatelessWidget {
                 style: GoogleFonts.outfit(
                   fontSize: 16,
                   fontStyle: FontStyle.italic,
-                  color: AppTheme.textPrimary,
+                  color: context.onSurfaceColor,
                   height: 1.4,
                 ),
               ),
@@ -115,7 +121,7 @@ class DhikrDisplayCard extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.outfit(
                   fontSize: 15,
-                  color: AppTheme.textSecondary,
+                  color: context.onSurfaceVariantColor,
                   height: 1.4,
                 ),
               ),
@@ -127,41 +133,47 @@ class DhikrDisplayCard extends StatelessWidget {
   }
 }
 
-class TasbihButton extends StatelessWidget {
+class TasbihButton extends StatefulWidget {
   final VoidCallback onTap;
-  final Color color;
+  final Color? color;
   final double size;
 
   const TasbihButton({
     super.key,
     required this.onTap,
-    this.color = AppTheme.primaryLight,
+    this.color,
     this.size = 100,
   });
 
   @override
+  State<TasbihButton> createState() => _TasbihButtonState();
+}
+
+class _TasbihButtonState extends State<TasbihButton> {
+  @override
   Widget build(BuildContext context) {
+    final color = widget.color ?? context.primaryContainerColor;
     return GestureDetector(
       onTapDown: (_) => _vibrate(context),
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Container(
-        width: size,
-        height: size,
+        width: widget.size,
+        height: widget.size,
         decoration: BoxDecoration(
           color: color,
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
               color: color.withValues(alpha: 0.3),
-              blurRadius: size * 0.15,
-              spreadRadius: size * 0.05,
+              blurRadius: widget.size * 0.15,
+              spreadRadius: widget.size * 0.05,
             ),
           ],
         ),
         child: Icon(
           Icons.touch_app_rounded,
-          size: size * 0.5,
-          color: AppTheme.onPrimary,
+          size: widget.size * 0.5,
+          color: context.theme.colorScheme.onPrimary,
         ),
       ),
     );
@@ -195,8 +207,8 @@ class CycleProgressIndicator extends StatelessWidget {
           height: 6,
           decoration: BoxDecoration(
             color: isCompleted
-                ? AppTheme.primaryLight
-                : (isActive ? AppTheme.accent : AppTheme.surfaceLight),
+                ? context.primaryContainerColor
+                : (isActive ? context.secondaryColor : context.surfaceContainerHighestColor),
             borderRadius: BorderRadius.circular(3),
           ),
         );

@@ -3,7 +3,7 @@ import 'package:fard/core/extensions/hijri_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/prayer_tracking/domain/missed_counter.dart';
 import 'package:fard/core/extensions/salaah_extension.dart';
@@ -43,7 +43,7 @@ class HomeHero extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      color: AppTheme.background,
+      color: context.backgroundColor,
       child: Stack(
         children: [
           // 1. Authentic Islamic Background with Dome & Minarets
@@ -56,9 +56,9 @@ class HomeHero extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Color(0xFF064E3B), // Emerald Green Dark
-                      Color(0xFF065F46), // Emerald Green Medium
-                      Color(0xFF047857), // Emerald Green Light
+                      Color(0xFF1B5E20),
+                      Color(0xFF2E7D32),
+                      Color(0xFF4CAF50),
                     ],
                   ),
                 ),
@@ -86,12 +86,12 @@ class HomeHero extends StatelessWidget {
                       Text(
                         l10n.appName,
                         style: GoogleFonts.amiri(
-                          color: Colors.white,
+                          color: context.onSurfaceColor,
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
                           shadows: [
                             Shadow(
-                              color: Colors.black.withValues(alpha: 0.3),
+                              color: context.backgroundColor.withValues(alpha: 0.3),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -111,9 +111,9 @@ class HomeHero extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 // Crescent Icon at top of Dome
-                const Icon(
+                Icon(
                   Icons.nightlight_round,
-                  color: AppTheme.accent,
+                  color: context.secondaryColor,
                   size: 28,
                 ),
                 const SizedBox(height: 8),
@@ -123,7 +123,7 @@ class HomeHero extends StatelessWidget {
                   Text(
                     l10n.totalQada,
                     style: GoogleFonts.amiri(
-                      color: Colors.white.withValues(alpha: 0.8),
+                      color: context.onSurfaceColor.withValues(alpha: 0.8),
                       fontSize: 22,
                       fontWeight: FontWeight.w500,
                     ),
@@ -134,13 +134,13 @@ class HomeHero extends StatelessWidget {
                       (Match m) => '${m[1]},',
                     ),
                     style: GoogleFonts.outfit(
-                      color: Colors.white,
+                      color: context.onSurfaceColor,
                       fontSize: 64,
                       fontWeight: FontWeight.w900,
                       letterSpacing: -2,
                       shadows: [
                         Shadow(
-                          color: AppTheme.accent.withValues(alpha: 0.5),
+                          color: context.secondaryColor.withValues(alpha: 0.5),
                           blurRadius: 20,
                         ),
                       ],
@@ -151,7 +151,7 @@ class HomeHero extends StatelessWidget {
                         ? 'صلوات مفروضة لإكمالها'
                         : 'Fard Prayers to Complete',
                     style: GoogleFonts.outfit(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: context.onSurfaceColor.withValues(alpha: 0.7),
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
                     ),
@@ -185,7 +185,7 @@ class HomeHero extends StatelessWidget {
                   Text(
                     l10n.appName,
                     style: GoogleFonts.amiri(
-                      color: Colors.white,
+                      color: context.onSurfaceColor,
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
                     ),
@@ -203,14 +203,14 @@ class HomeHero extends StatelessWidget {
                     vertical: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.3),
+                    color: context.backgroundColor.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.1),
+                      color: context.outlineColor.withValues(alpha: 0.1),
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
+                        color: context.outlineColor.withValues(alpha: 0.2),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -222,7 +222,7 @@ class HomeHero extends StatelessWidget {
                       Text(
                         DateFormat.yMMMMEEEEd(locale).format(selectedDate),
                         style: GoogleFonts.outfit(
-                          color: Colors.white.withValues(alpha: 0.9),
+                          color: context.onSurfaceColor.withValues(alpha: 0.9),
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -231,7 +231,7 @@ class HomeHero extends StatelessWidget {
                       Text(
                         hijriDate,
                         style: GoogleFonts.amiri(
-                          color: AppTheme.accent,
+                          color: context.secondaryColor,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -281,12 +281,12 @@ class _LocationChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.15),
+          color: context.onSurfaceColor.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: hasLocation
-                ? Colors.white.withValues(alpha: 0.2)
-                : AppTheme.missed.withValues(alpha: 0.4),
+                ? context.onSurfaceColor.withValues(alpha: 0.2)
+                : context.missedColor.withValues(alpha: 0.4),
           ),
         ),
         child: Row(
@@ -297,13 +297,13 @@ class _LocationChip extends StatelessWidget {
                   ? Icons.location_on_rounded
                   : Icons.location_off_rounded,
               size: 14,
-              color: hasLocation ? AppTheme.accent : AppTheme.missed,
+              color: hasLocation ? context.secondaryColor : context.missedColor,
             ),
             const SizedBox(width: 6),
             Text(
               cityName ?? l10n.locationNotSet,
               style: TextStyle(
-                color: hasLocation ? Colors.white : AppTheme.missed,
+                color: hasLocation ? context.onSurfaceColor : context.missedColor,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
@@ -336,12 +336,12 @@ class _ModernActionButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: context.onSurfaceColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            border: Border.all(color: context.onSurfaceColor.withValues(alpha: 0.2)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
+                color: context.outlineColor.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -349,12 +349,12 @@ class _ModernActionButton extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(icon, size: 18, color: Colors.white),
+              Icon(icon, size: 18, color: context.onSurfaceColor),
               const SizedBox(width: 8),
               Text(
                 label,
                 style: GoogleFonts.outfit(
-                  color: Colors.white,
+                  color: context.onSurfaceColor,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -380,12 +380,12 @@ class _TraditionalPrayerCard extends StatelessWidget {
       width: (MediaQuery.of(context).size.width - 64) / 5.2,
       padding: const EdgeInsets.symmetric(vertical: 14),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: context.surfaceContainerColor,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppTheme.cardBorder),
+        border: Border.all(color: context.outlineColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.4),
+            color: context.backgroundColor.withValues(alpha: 0.4),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -398,7 +398,7 @@ class _TraditionalPrayerCard extends StatelessWidget {
             style: GoogleFonts.amiri(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: AppTheme.accent,
+              color: context.secondaryColor,
             ),
           ),
           const SizedBox(height: 4),
@@ -407,7 +407,7 @@ class _TraditionalPrayerCard extends StatelessWidget {
             style: GoogleFonts.outfit(
               fontSize: 18,
               fontWeight: FontWeight.w800,
-              color: AppTheme.textPrimary,
+              color: context.onSurfaceColor,
             ),
           ),
         ],

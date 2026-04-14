@@ -1,4 +1,4 @@
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/tasbih/presentation/bloc/tasbih_bloc.dart';
 import 'package:fard/features/tasbih/presentation/widgets/tasbih_sheets.dart';
@@ -17,7 +17,7 @@ class CompletionDuaCard extends StatelessWidget {
     final dua = state.currentCompletionDua!;
 
     return Card(
-      color: AppTheme.primaryDark.withValues(alpha: 0.1),
+      color: context.primaryColor.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -33,7 +33,7 @@ class CompletionDuaCard extends StatelessWidget {
                     l10n.changeDua,
                     style: GoogleFonts.outfit(fontSize: 12),
                   ),
-                  style: TextButton.styleFrom(foregroundColor: AppTheme.accent),
+                  style: TextButton.styleFrom(foregroundColor: context.secondaryColor),
                 ),
                 if (!state.duaRemembered)
                   TextButton.icon(
@@ -45,7 +45,7 @@ class CompletionDuaCard extends StatelessWidget {
                         SnackBar(
                           content: Text(l10n.duaSaved),
                           duration: const Duration(seconds: 2),
-                          backgroundColor: AppTheme.saved,
+                          backgroundColor: context.primaryColor,
                         ),
                       );
                     },
@@ -55,7 +55,7 @@ class CompletionDuaCard extends StatelessWidget {
                       style: GoogleFonts.outfit(fontSize: 12),
                     ),
                     style: TextButton.styleFrom(
-                      foregroundColor: AppTheme.accent,
+                      foregroundColor: context.secondaryColor,
                     ),
                   )
                 else
@@ -63,7 +63,6 @@ class CompletionDuaCard extends StatelessWidget {
                     children: [
                       const Icon(
                         Icons.check_circle_outline_rounded,
-                        color: AppTheme.saved,
                         size: 16,
                       ),
                       const SizedBox(width: 4),
@@ -71,7 +70,6 @@ class CompletionDuaCard extends StatelessWidget {
                         l10n.duaSaved,
                         style: GoogleFonts.outfit(
                           fontSize: 12,
-                          color: AppTheme.saved,
                         ),
                       ),
                     ],
@@ -82,7 +80,7 @@ class CompletionDuaCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: AppTheme.accent.withValues(alpha: 0.2),
+                color: context.secondaryColor.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
@@ -90,7 +88,7 @@ class CompletionDuaCard extends StatelessWidget {
                 style: GoogleFonts.outfit(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.accent,
+                  color: context.secondaryColor,
                 ),
               ),
             ),
@@ -101,7 +99,7 @@ class CompletionDuaCard extends StatelessWidget {
               style: GoogleFonts.amiri(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
+                color: context.onSurfaceColor,
                 height: 1.6,
               ),
             ),
@@ -112,7 +110,7 @@ class CompletionDuaCard extends StatelessWidget {
               style: GoogleFonts.outfit(
                 fontSize: 14,
                 fontStyle: FontStyle.italic,
-                color: AppTheme.textSecondary,
+                color: context.onSurfaceVariantColor,
               ),
             ),
             const SizedBox(height: 16),
@@ -122,8 +120,8 @@ class CompletionDuaCard extends StatelessWidget {
                 onPressed: () =>
                     context.read<TasbihBloc>().add(const TasbihEvent.reset()),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.accent,
-                  foregroundColor: AppTheme.onAccent,
+                  backgroundColor: context.secondaryColor,
+                  foregroundColor: context.theme.colorScheme.onSecondary,
                 ),
                 child: Text(l10n.finishAndReset),
               ),
@@ -138,7 +136,7 @@ class CompletionDuaCard extends StatelessWidget {
     final tasbihBloc = context.read<TasbihBloc>();
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppTheme.surface,
+      backgroundColor: context.surfaceContainerColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),

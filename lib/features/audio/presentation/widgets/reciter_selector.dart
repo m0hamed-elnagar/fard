@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
 
@@ -55,7 +56,7 @@ class _ReciterSelectorState extends State<ReciterSelector> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: context.surfaceContainerHighestColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -183,7 +184,7 @@ class _ReciterSelectorState extends State<ReciterSelector> {
                       leading: CircleAvatar(
                         backgroundColor: isSelected
                             ? Theme.of(context).colorScheme.primaryContainer
-                            : Colors.grey[200],
+                            : context.outlineVariantColor,
                         child: Text(
                           reciter.name.isNotEmpty
                               ? reciter.name.substring(0, 1)
@@ -191,7 +192,7 @@ class _ReciterSelectorState extends State<ReciterSelector> {
                           style: TextStyle(
                             color: isSelected
                                 ? Theme.of(context).colorScheme.primary
-                                : Colors.grey[600],
+                                : context.onSurfaceVariantColor,
                           ),
                         ),
                       ),
@@ -255,7 +256,7 @@ class _PopularReciterCard extends StatelessWidget {
               child: Text(
                 reciter.name.isNotEmpty ? reciter.name.substring(0, 1) : 'A',
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.grey[600],
+                  color: isSelected ? context.onSurfaceColor : context.onSurfaceVariantColor,
                   fontSize: 24,
                 ),
               ),

@@ -10,6 +10,7 @@ import 'package:fard/core/utils/app_identifiers.dart';
 import 'package:fard/features/settings/domain/app_settings.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
+import 'package:fard/features/settings/domain/entities/custom_theme.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -65,6 +66,18 @@ class _BackgroundSettingsProvider implements SettingsRepository {
 
   @override
   int get hijriAdjustment => _settings.hijriAdjustment;
+
+  @override
+  String get themePresetId => _settings.themePresetId;
+
+  @override
+  Map<String, String>? get customThemeColors => _settings.customThemeColors;
+
+  @override
+  List<CustomTheme> get savedCustomThemes => const [];
+
+  @override
+  String? get activeCustomThemeId => null;
 
   // Write operations are not supported in background isolate
   @override
@@ -129,6 +142,24 @@ class _BackgroundSettingsProvider implements SettingsRepository {
 
   @override
   Future<void> updateAllAfterSalahMinutes(int minutes) => Future.value();
+
+  @override
+  Future<void> updateThemePreset(String presetId) => Future.value();
+
+  @override
+  Future<void> saveCustomTheme(Map<String, String> colors) => Future.value();
+
+  @override
+  Future<void> addCustomTheme(CustomTheme theme) => Future.value();
+
+  @override
+  Future<void> updateCustomTheme(String themeId, Map<String, String> colors) => Future.value();
+
+  @override
+  Future<void> deleteCustomTheme(String themeId) => Future.value();
+
+  @override
+  Future<void> setActiveCustomTheme(String? themeId) => Future.value();
 }
 
 /// WorkManager task unique names (initialized when needed).

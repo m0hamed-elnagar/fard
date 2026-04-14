@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fard/core/theme/app_theme.dart';
 
 class FastScrollScrollbar extends StatefulWidget {
   final ScrollController scrollController;
@@ -99,9 +100,9 @@ class _FastScrollScrollbarState extends State<FastScrollScrollbar> {
     final isLight = theme.brightness == Brightness.light;
     
     // Use more vibrant colors for better visibility
-    final trackColor = isLight 
-        ? Colors.grey.withValues(alpha: 0.3) 
-        : Colors.grey.withValues(alpha: 0.2);
+    final trackColor = isLight
+        ? AppTheme.textSecondary.withValues(alpha: 0.3)
+        : AppTheme.textSecondary.withValues(alpha: 0.2);
     final thumbColor = _isDragging 
         ? theme.primaryColor 
         : theme.primaryColor.withValues(alpha: 0.85);
@@ -147,7 +148,7 @@ class _FastScrollScrollbarState extends State<FastScrollScrollbar> {
                       color: thumbColor,
                       borderRadius: BorderRadius.circular(5),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.3),
+                        color: AppTheme.textPrimary.withValues(alpha: 0.3),
                         width: 1.5,
                       ),
                       boxShadow: [

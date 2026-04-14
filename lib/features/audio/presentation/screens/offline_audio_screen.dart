@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/audio/presentation/screens/reciter_download_screen.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +56,7 @@ class OfflineAudioScreen extends StatelessWidget {
                   children: [
                     CircularProgressIndicator(
                       value: progress,
-                      backgroundColor: Colors.grey[200],
+                      backgroundColor: context.outlineVariantColor,
                       strokeWidth: 3,
                     ),
                     Text(

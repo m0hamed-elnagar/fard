@@ -3,6 +3,8 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/services/mushaf_download_service.dart';
 import 'package:fard/features/quran/presentation/pages/scanned_mushaf_reader_page.dart';
 
+import 'package:fard/core/theme/app_colors.dart';
+
 class DownloadAllDialog extends StatefulWidget {
   final MushafDownloadService downloadService;
   final int currentPage;
@@ -53,8 +55,8 @@ class _DownloadAllDialogState extends State<DownloadAllDialog> {
           if (_isDownloading) ...[
             LinearProgressIndicator(
               value: _progress,
-              color: const Color(0xFF2D5D40),
-              backgroundColor: Colors.grey[200],
+              color: context.primaryColor,
+              backgroundColor: context.outlineVariantColor,
             ),
             const SizedBox(height: 10),
             Text('${(_progress * 100).toStringAsFixed(1)}%'),
@@ -78,10 +80,10 @@ class _DownloadAllDialogState extends State<DownloadAllDialog> {
                   SnackBar(content: Text(l10n.cacheClearedReloading)),
                 );
               },
-              icon: const Icon(Icons.delete_sweep_rounded, color: Colors.red),
+              icon: Icon(Icons.delete_sweep_rounded, color: context.errorColor),
               label: Text(
                 l10n.clearCache,
-                style: const TextStyle(color: Colors.red),
+                style: TextStyle(color: context.errorColor),
               ),
             ),
           ],
@@ -97,11 +99,11 @@ class _DownloadAllDialogState extends State<DownloadAllDialog> {
           ElevatedButton(
             onPressed: () => _startDownload(l10n),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2D5D40),
+              backgroundColor: context.primaryColor,
             ),
             child: Text(
               l10n.startDownload,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: context.onSurfaceColor),
             ),
           ),
       ],

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:quran/quran.dart' as quran;
 import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
 import 'package:fard/core/extensions/number_extension.dart';
+import 'package:fard/core/theme/app_colors.dart';
 
 class JuzList extends StatelessWidget {
   final String searchQuery;
@@ -29,7 +30,7 @@ class JuzList extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.grid_view_rounded, size: 64, color: Colors.grey),
+            Icon(Icons.grid_view_rounded, size: 64, color: context.onSurfaceVariantColor),
             const SizedBox(height: 16),
             Text('لا توجد نتائج', style: GoogleFonts.amiri(fontSize: 20)),
           ],
@@ -59,7 +60,7 @@ class JuzList extends StatelessWidget {
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
+                side: BorderSide(color: context.outlineColor),
               ),
               child: InkWell(
                 onTap: () {
@@ -113,7 +114,7 @@ class JuzList extends StatelessWidget {
                               'يبدأ من سورة $surahName (صفحة ${pageNum.toArabicIndic()})',
                               style: GoogleFonts.amiri(
                                 fontSize: isWide ? 16 : 14,
-                                color: Colors.grey[600],
+                                color: context.onSurfaceVariantColor,
                                 height: 1.4,
                                 wordSpacing: 2,
                               ),

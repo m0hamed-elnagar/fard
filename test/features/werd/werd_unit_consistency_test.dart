@@ -326,11 +326,7 @@ void main() {
     
     test('U007 - Boundary conditions: Single ayah', () {
       // Test reading just 1 ayah
-      
-      final segments = [
-        ReadingSegment(startAyah: 1, endAyah: 1, startTime: DateTime.now()),
-      ];
-      
+
       final readItems = <int>{1};
       
       final ayahProgress = QuranHizbProvider.calculateFractionalProgress(

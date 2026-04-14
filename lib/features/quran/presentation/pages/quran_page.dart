@@ -7,6 +7,7 @@ import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/core/extensions/number_extension.dart';
 import 'package:fard/core/widgets/fast_scroll_scrollbar.dart';
 import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import '../widgets/juz_list.dart';
 import '../widgets/hizb_list.dart';
 import '../widgets/bookmark_list.dart';
@@ -61,9 +62,9 @@ class _QuranPageState extends State<QuranPage> {
                   decoration: InputDecoration(
                     hintText: l10n.searchSurah,
                     border: InputBorder.none,
-                    hintStyle: const TextStyle(color: Colors.white70),
+                    hintStyle: TextStyle(color: context.onSurfaceColor).copyWith(fontSize: 14, color: context.onSurfaceColor.withValues(alpha: 0.7)),
                   ),
-                  style: const TextStyle(color: Colors.white, fontSize: 18),
+                  style: TextStyle(color: context.onSurfaceColor, fontSize: 18),
                   onChanged: (value) {
                     setState(() {
                       _searchQuery = value.toLowerCase();
@@ -149,9 +150,9 @@ class _QuranPageState extends State<QuranPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.error_outline,
-                        color: Colors.red,
+                        color: context.errorColor,
                         size: 64,
                       ),
                       const SizedBox(height: 16),
@@ -160,14 +161,14 @@ class _QuranPageState extends State<QuranPage> {
                         style: GoogleFonts.amiri(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: Colors.red,
+                          color: context.errorColor,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         state.error!,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.grey),
+                        style: TextStyle(color: context.onSurfaceVariantColor),
                       ),
                       const SizedBox(height: 24),
                       ElevatedButton.icon(
@@ -276,9 +277,9 @@ class _QuranPageState extends State<QuranPage> {
                                   alignment: Alignment.centerRight,
                                   child: Text(
                                     '${surah.numberOfAyahs.toArabicIndic()} ${l10n.ayah}',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 12,
-                                      color: Colors.grey,
+                                      color: context.onSurfaceVariantColor,
                                     ),
                                     textAlign: TextAlign.right,
                                   ),
@@ -409,16 +410,16 @@ class _ContinueReadingCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.menu_book,
-                        color: Colors.white,
+                        color: context.onSurfaceColor,
                         size: 18,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         l10n.continueReading,
                         style: GoogleFonts.amiri(
-                          color: Colors.white.withValues(alpha: 0.9),
+                          color: context.onSurfaceColor.withValues(alpha: 0.9),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -428,7 +429,7 @@ class _ContinueReadingCard extends StatelessWidget {
                   Text(
                     surah.name,
                     style: GoogleFonts.amiri(
-                      color: Colors.white,
+                      color: context.onSurfaceColor,
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       height: 1.4,
@@ -438,7 +439,7 @@ class _ContinueReadingCard extends StatelessWidget {
                   Text(
                     l10n.ayahNumberWithVal(ayahNumber.toArabicIndic()),
                     style: GoogleFonts.amiri(
-                      color: Colors.white.withValues(alpha: 0.8),
+                      color: context.onSurfaceColor.withValues(alpha: 0.8),
                     ),
                   ),
                 ],
@@ -447,12 +448,12 @@ class _ContinueReadingCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: context.onSurfaceColor.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.play_arrow_rounded,
-                  color: Colors.white,
+                  color: context.onSurfaceColor,
                   size: 32,
                 ),
               ),

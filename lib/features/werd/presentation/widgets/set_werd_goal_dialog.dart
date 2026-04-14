@@ -7,7 +7,7 @@ import 'package:fard/features/werd/domain/entities/werd_goal.dart';
 import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/core/extensions/quran_extension.dart';
 import 'package:fard/core/extensions/number_extension.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:quran/quran.dart' as quran;
 
 class SetWerdGoalDialog extends StatefulWidget {
@@ -127,7 +127,7 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
           borderRadius: BorderRadius.circular(28),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: context.backgroundColor.withValues(alpha: 0.3),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -192,7 +192,7 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
                             : 'Remaining Quran will be divided over the selected days.',
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppTheme.textSecondary.withValues(alpha: 0.7),
+                          color: context.onSurfaceVariantColor.withValues(alpha: 0.7),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -216,12 +216,12 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppTheme.accent.withValues(alpha: 0.1),
+              color: context.secondaryColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.auto_awesome_rounded,
-              color: AppTheme.accent,
+              color: context.secondaryColor,
             ),
           ),
           const SizedBox(width: 16),
@@ -230,7 +230,7 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
             style: GoogleFonts.amiri(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimary,
+              color: context.onSurfaceColor,
             ),
           ),
           const Spacer(),
@@ -238,7 +238,7 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.close_rounded),
             style: IconButton.styleFrom(
-              backgroundColor: AppTheme.cardBorder.withValues(alpha: 0.1),
+              backgroundColor: context.outlineColor.withValues(alpha: 0.1),
             ),
           ),
         ],
@@ -249,14 +249,14 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
   Widget _buildSectionTitle(String title, IconData icon) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: AppTheme.accent),
+        Icon(icon, size: 16, color: context.secondaryColor),
         const SizedBox(width: 8),
         Text(
           title,
           style: GoogleFonts.amiri(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: AppTheme.textPrimary,
+            color: context.onSurfaceColor,
           ),
         ),
       ],
@@ -266,10 +266,10 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
   Widget _buildGoalTypeToggle(bool isAr) {
     return SegmentedButton<WerdGoalType>(
       style: SegmentedButton.styleFrom(
-        backgroundColor: AppTheme.cardBorder.withValues(alpha: 0.1),
-        selectedBackgroundColor: AppTheme.accent,
-        selectedForegroundColor: AppTheme.onAccent,
-        side: BorderSide(color: AppTheme.cardBorder.withValues(alpha: 0.2)),
+        backgroundColor: context.outlineColor.withValues(alpha: 0.1),
+        selectedBackgroundColor: context.secondaryColor,
+        selectedForegroundColor: context.theme.colorScheme.onSecondary,
+        side: BorderSide(color: context.outlineColor.withValues(alpha: 0.2)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       segments: [
@@ -292,9 +292,9 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
   Widget _buildStartPointSelector(bool isAr) {
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.cardBorder.withValues(alpha: 0.05),
+        color: context.outlineColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.cardBorder.withValues(alpha: 0.2)),
+        border: Border.all(color: context.outlineColor.withValues(alpha: 0.2)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: DropdownButtonHideUnderline(
@@ -329,10 +329,10 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
           flex: 2,
           child: Container(
             decoration: BoxDecoration(
-              color: AppTheme.cardBorder.withValues(alpha: 0.05),
+              color: context.outlineColor.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AppTheme.cardBorder.withValues(alpha: 0.2),
+                color: context.outlineColor.withValues(alpha: 0.2),
               ),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -364,10 +364,10 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
         Expanded(
           child: Container(
             decoration: BoxDecoration(
-              color: AppTheme.cardBorder.withValues(alpha: 0.05),
+              color: context.outlineColor.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AppTheme.cardBorder.withValues(alpha: 0.2),
+                color: context.outlineColor.withValues(alpha: 0.2),
               ),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -412,9 +412,9 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
           onSelected: (selected) {
             if (selected) setState(() => _unit = u);
           },
-          selectedColor: AppTheme.accent,
+          selectedColor: context.secondaryColor,
           labelStyle: TextStyle(
-            color: isSelected ? AppTheme.onAccent : AppTheme.textPrimary,
+            color: isSelected ? context.theme.colorScheme.onSecondary : context.onSurfaceColor,
             fontWeight: FontWeight.bold,
           ),
           shape: RoundedRectangleBorder(
@@ -428,9 +428,9 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
   Widget _buildValueInput(bool isAr) {
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.cardBorder.withValues(alpha: 0.05),
+        color: context.outlineColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.cardBorder.withValues(alpha: 0.2)),
+        border: Border.all(color: context.outlineColor.withValues(alpha: 0.2)),
       ),
       padding: const EdgeInsets.all(8),
       child: Row(
@@ -498,14 +498,14 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
 
   Widget _buildStepButton(IconData icon, VoidCallback onPressed) {
     return Material(
-      color: AppTheme.accent.withValues(alpha: 0.1),
+      color: context.secondaryColor.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(12),
-          child: Icon(icon, color: AppTheme.accent, size: 28),
+          child: Icon(icon, color: context.secondaryColor, size: 28),
         ),
       ),
     );
@@ -554,8 +554,8 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
                 Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accent,
-                foregroundColor: AppTheme.onAccent,
+                backgroundColor: context.secondaryColor,
+                foregroundColor: context.theme.colorScheme.onSecondary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),

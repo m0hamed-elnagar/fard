@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 
 class PageNavButton extends StatelessWidget {
   final IconData icon;
@@ -15,12 +15,12 @@ class PageNavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isDarkMode ? AppTheme.textPrimary : const Color(0xFF2D5D40);
+    final color = isDarkMode ? context.onSurfaceColor : context.primaryColor;
     return Container(
       decoration: BoxDecoration(
         color: isDarkMode
-            ? AppTheme.surfaceLight.withValues(alpha: 0.5)
-            : Colors.black.withValues(alpha: 0.05),
+            ? context.surfaceContainerHighestColor.withValues(alpha: 0.5)
+            : context.surfaceContainerColor.withValues(alpha: 0.05),
         shape: BoxShape.circle,
         border: Border.all(color: color.withValues(alpha: 0.2)),
       ),

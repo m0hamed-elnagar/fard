@@ -10,6 +10,9 @@ import 'package:fard/features/settings/domain/usecases/sync_location_settings.da
 import 'package:fard/features/settings/domain/usecases/sync_notification_schedule.dart';
 import 'package:fard/features/settings/domain/usecases/toggle_after_salah_azkar_usecase.dart';
 import 'package:fard/features/settings/domain/usecases/update_calculation_method_usecase.dart';
+import 'package:fard/features/settings/domain/usecases/apply_theme_preset.dart';
+import 'package:fard/features/settings/domain/usecases/save_custom_theme.dart';
+import 'package:fard/features/settings/domain/usecases/get_available_theme_presets.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +41,13 @@ class MockToggleAfterSalahAzkarUseCase extends Mock
 class MockUpdateCalculationMethodUseCase extends Mock
     implements UpdateCalculationMethodUseCase {}
 
+class MockApplyThemePreset extends Mock implements ApplyThemePreset {}
+
+class MockSaveCustomTheme extends Mock implements SaveCustomTheme {}
+
+class MockGetAvailableThemePresets extends Mock
+    implements GetAvailableThemePresets {}
+
 void main() {
   late SettingsCubit cubit;
   late MockSettingsRepository mockSettingsRepo;
@@ -46,6 +56,9 @@ void main() {
   late MockSyncNotificationSchedule mockSyncNotif;
   late MockToggleAfterSalahAzkarUseCase mockToggleAzkar;
   late MockUpdateCalculationMethodUseCase mockUpdateMethod;
+  late MockApplyThemePreset mockApplyTheme;
+  late MockSaveCustomTheme mockSaveCustomTheme;
+  late MockGetAvailableThemePresets mockGetPresets;
   late MockWidgetUpdateService mockWidget;
 
   setUp(() {
@@ -55,6 +68,9 @@ void main() {
     mockSyncNotif = MockSyncNotificationSchedule();
     mockToggleAzkar = MockToggleAfterSalahAzkarUseCase();
     mockUpdateMethod = MockUpdateCalculationMethodUseCase();
+    mockApplyTheme = MockApplyThemePreset();
+    mockSaveCustomTheme = MockSaveCustomTheme();
+    mockGetPresets = MockGetAvailableThemePresets();
     mockWidget = MockWidgetUpdateService();
 
     // Mock SettingsRepository defaults
@@ -69,6 +85,10 @@ void main() {
     when(() => mockSettingsRepo.isAfterSalahAzkarEnabled).thenReturn(false);
     when(() => mockSettingsRepo.isQadaEnabled).thenReturn(true);
     when(() => mockSettingsRepo.hijriAdjustment).thenReturn(0);
+    when(() => mockSettingsRepo.themePresetId).thenReturn('emerald_gold');
+    when(() => mockSettingsRepo.customThemeColors).thenReturn(null);
+    when(() => mockSettingsRepo.savedCustomThemes).thenReturn([]);
+    when(() => mockSettingsRepo.activeCustomThemeId).thenReturn(null);
     when(() => mockSettingsRepo.reminders).thenReturn([]);
     when(
       () => mockSettingsRepo.salaahSettings,
@@ -153,6 +173,9 @@ void main() {
       mockSyncNotif,
       mockToggleAzkar,
       mockUpdateMethod,
+      mockApplyTheme,
+      mockSaveCustomTheme,
+      mockGetPresets,
       mockWidget,
     );
   });

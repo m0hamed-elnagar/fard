@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
 
 import 'package:fard/core/extensions/number_extension.dart';
+import 'package:fard/core/theme/app_colors.dart';
 
 class BookmarkList extends StatefulWidget {
   final String searchQuery;
@@ -77,12 +78,12 @@ class _BookmarkListState extends State<BookmarkList>
                 onPressed: () => Navigator.pop(context, false),
                 child: Text(
                   'إلغاء',
-                  style: GoogleFonts.amiri(color: Colors.grey),
+                  style: GoogleFonts.amiri(color: context.onSurfaceVariantColor),
                 ),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: Text('حذف', style: GoogleFonts.amiri(color: Colors.red)),
+                child: Text('حذف', style: GoogleFonts.amiri(color: context.errorColor)),
               ),
             ],
           ),
@@ -133,10 +134,10 @@ class _BookmarkListState extends State<BookmarkList>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                Icon(
                   Icons.bookmark_border_rounded,
                   size: 64,
-                  color: Colors.grey,
+                  color: context.onSurfaceVariantColor,
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -160,7 +161,7 @@ class _BookmarkListState extends State<BookmarkList>
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.delete_outline, color: Colors.red),
+                      icon: Icon(Icons.delete_outline, color: context.errorColor),
                       onPressed: () async {
                         if (await _confirmDelete(
                           context,
@@ -218,7 +219,7 @@ class _BookmarkListState extends State<BookmarkList>
                       side: BorderSide(
                         color: isSelected
                             ? Theme.of(context).primaryColor
-                            : Colors.grey.withValues(alpha: 0.2),
+                            : context.outlineColor,
                         width: isSelected ? 2 : 1,
                       ),
                     ),
@@ -235,9 +236,9 @@ class _BookmarkListState extends State<BookmarkList>
                                   _toggleSelection(bookmark.ayahNumber),
                             )
                           : IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.delete_outline,
-                                color: Colors.red,
+                                color: context.errorColor,
                                 size: 20,
                               ),
                               onPressed: () async {
@@ -273,7 +274,7 @@ class _BookmarkListState extends State<BookmarkList>
                               'الآية ${bookmark.ayahNumber.ayahNumberInSurah.toArabicIndic()} | صفحة ${page.toArabicIndic()}',
                               style: GoogleFonts.amiri(
                                 fontSize: 14,
-                                color: Colors.grey[600],
+                                color: context.onSurfaceVariantColor,
                                 height: 1.4,
                                 wordSpacing: 2,
                               ),
@@ -282,9 +283,9 @@ class _BookmarkListState extends State<BookmarkList>
                               DateFormat(
                                 'yyyy/MM/dd HH:mm',
                               ).format(bookmark.createdAt),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 10,
-                                color: Colors.grey,
+                                color: context.onSurfaceVariantColor,
                               ),
                             ),
                           ],
@@ -308,12 +309,12 @@ class _BookmarkListState extends State<BookmarkList>
                           ? Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.amber.withValues(alpha: 0.1),
+                                color: context.secondaryColor.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.bookmark_rounded,
-                                color: Colors.amber,
+                                color: context.secondaryColor,
                               ),
                             )
                           : null,

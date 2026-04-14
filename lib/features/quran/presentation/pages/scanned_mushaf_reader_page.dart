@@ -9,6 +9,7 @@ import 'package:quran/quran.dart' as quran;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
@@ -119,16 +120,10 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
       juzNumber = quran.getJuzNumber(surahNum, pageData.first['start'] as int);
     }
 
-    final bgColor = _isDarkMode ? AppTheme.background : const Color(0xFFFBF9F1);
-    final appBarColor = _isDarkMode
-        ? AppTheme.surface
-        : const Color(0xFF2D5D40);
-    final navBarColor = _isDarkMode
-        ? AppTheme.surface
-        : const Color(0xFFFBF9F1);
-    final primaryTextColor = _isDarkMode
-        ? AppTheme.textPrimary
-        : const Color(0xFF2D5D40);
+    final bgColor = _isDarkMode ? context.backgroundColor : context.surfaceContainerColor;
+    final appBarColor = _isDarkMode ? context.surfaceContainerColor : context.primaryColor;
+    final navBarColor = _isDarkMode ? context.surfaceContainerColor : context.surfaceContainerHighestColor;
+    final primaryTextColor = _isDarkMode ? context.onSurfaceColor : context.primaryColor;
 
     return Theme(
       data: _isDarkMode ? AppTheme.darkTheme : Theme.of(context),
@@ -139,7 +134,7 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
           backgroundColor: appBarColor,
           // Deep Islamic green
           elevation: 4,
-          foregroundColor: Colors.white,
+          foregroundColor: context.onSurfaceColor,
           centerTitle: true,
           title: Column(
             children: [
@@ -150,14 +145,14 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
                 style: GoogleFonts.amiri(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: context.onSurfaceColor,
                 ),
               ),
               Text(
                 '${l10n.juzWithVal(juzNumber.toString())} - ${l10n.pageWithVal(_currentPage.toString())}',
                 style: GoogleFonts.amiri(
                   fontSize: 14,
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: _isDarkMode ? context.onSurfaceColor : context.primaryColor,
                 ),
               ),
             ],
@@ -168,7 +163,7 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
                 _isDarkMode
                     ? Icons.light_mode_rounded
                     : Icons.dark_mode_rounded,
-                color: Colors.white,
+                color: context.onSurfaceColor,
               ),
               tooltip: _isDarkMode ? l10n.lightMode : l10n.darkMode,
               onPressed: () {
@@ -179,7 +174,7 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
               },
             ),
             IconButton(
-              icon: const Icon(Icons.text_format_rounded, color: Colors.white),
+              icon: Icon(Icons.text_format_rounded, color: context.onSurfaceColor),
               tooltip: l10n.textMushaf,
               onPressed: () {
                 if (pageData.isNotEmpty) {
@@ -197,7 +192,7 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
               },
             ),
             IconButton(
-              icon: const Icon(Icons.download_rounded, color: Colors.white),
+              icon: Icon(Icons.download_rounded, color: context.onSurfaceColor),
               tooltip: l10n.downloadAll,
               onPressed: _showDownloadAllDialog,
             ),
@@ -262,7 +257,7 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
                     color: navBarColor,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
+                        color: context.surfaceContainerColor.withValues(alpha: 0.05),
                         blurRadius: 4,
                         offset: const Offset(0, -2),
                       ),

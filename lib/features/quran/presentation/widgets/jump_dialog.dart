@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/core/extensions/number_extension.dart';
 import 'package:fard/core/extensions/quran_extension.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:quran/quran.dart' as quran;
 
 /// Jump dialog shown when user taps an ayah far from their last read position
@@ -52,12 +52,12 @@ class JumpDialog extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 400.0),
         padding: const EdgeInsets.all(20.0),
         decoration: BoxDecoration(
-          color: AppTheme.surface,
+          color: context.surfaceContainerColor,
           borderRadius: BorderRadius.circular(24.0),
-          border: Border.all(color: AppTheme.cardBorder, width: 1.5),
+          border: Border.all(color: context.outlineColor, width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: context.backgroundColor.withValues(alpha: 0.3),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -75,13 +75,13 @@ class JumpDialog extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    AppTheme.primaryLight.withValues(alpha: 0.15),
-                    AppTheme.primaryLight.withValues(alpha: 0.05),
+                    context.primaryContainerColor.withValues(alpha: 0.15),
+                    context.primaryContainerColor.withValues(alpha: 0.05),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(16.0),
                 border: Border.all(
-                  color: AppTheme.primaryLight.withValues(alpha: 0.3),
+                  color: context.primaryContainerColor.withValues(alpha: 0.3),
                   width: 1.0,
                 ),
               ),
@@ -91,16 +91,16 @@ class JumpDialog extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryLight.withValues(alpha: 0.2),
+                      color: context.primaryContainerColor.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: AppTheme.primaryLight.withValues(alpha: 0.4),
+                        color: context.primaryContainerColor.withValues(alpha: 0.4),
                         width: 2.0,
                       ),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.swap_vert_rounded,
-                      color: AppTheme.primaryLight,
+                      color: context.primaryContainerColor,
                       size: 28,
                     ),
                   ),
@@ -110,7 +110,7 @@ class JumpDialog extends StatelessWidget {
                     style: GoogleFonts.amiri(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary,
+                      color: context.onSurfaceColor,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -120,10 +120,10 @@ class JumpDialog extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: AppTheme.textSecondary.withValues(alpha: 0.08),
+                      color: context.onSurfaceVariantColor.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(10.0),
                       border: Border.all(
-                        color: AppTheme.textSecondary.withValues(alpha: 0.2),
+                        color: context.onSurfaceVariantColor.withValues(alpha: 0.2),
                         width: 1.0,
                       ),
                     ),
@@ -134,7 +134,7 @@ class JumpDialog extends StatelessWidget {
                           isAr ? "من:" : "From:",
                           style: GoogleFonts.outfit(
                             fontSize: 13,
-                            color: AppTheme.textSecondary,
+                            color: context.onSurfaceVariantColor,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -146,7 +146,7 @@ class JumpDialog extends StatelessWidget {
                             style: GoogleFonts.amiri(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: AppTheme.textPrimary,
+                              color: context.onSurfaceColor,
                             ),
                             textAlign: isAr ? TextAlign.right : TextAlign.left,
                           ),
@@ -160,10 +160,10 @@ class JumpDialog extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: AppTheme.textSecondary.withValues(alpha: 0.08),
+                      color: context.onSurfaceVariantColor.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(10.0),
                       border: Border.all(
-                        color: AppTheme.textSecondary.withValues(alpha: 0.2),
+                        color: context.onSurfaceVariantColor.withValues(alpha: 0.2),
                         width: 1.0,
                       ),
                     ),
@@ -174,7 +174,7 @@ class JumpDialog extends StatelessWidget {
                           isAr ? "إلى:" : "To:",
                           style: GoogleFonts.outfit(
                             fontSize: 13,
-                            color: AppTheme.textSecondary,
+                            color: context.onSurfaceVariantColor,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -186,7 +186,7 @@ class JumpDialog extends StatelessWidget {
                             style: GoogleFonts.amiri(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: AppTheme.textPrimary,
+                              color: context.onSurfaceColor,
                             ),
                             textAlign: isAr ? TextAlign.right : TextAlign.left,
                           ),
@@ -202,7 +202,7 @@ class JumpDialog extends StatelessWidget {
                     ),
                     style: GoogleFonts.outfit(
                       fontSize: 14,
-                      color: AppTheme.textSecondary,
+                      color: context.onSurfaceVariantColor,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -220,7 +220,7 @@ class JumpDialog extends StatelessWidget {
                 isAr ? gap.toArabicIndic() : gap.toString(),
                 isAr ? pages.toArabicIndic() : pages.toString(),
               ),
-              color: AppTheme.primaryLight, // GREEN
+              color: context.primaryContainerColor, // GREEN
               highlighted: true,
               onTap: () => Navigator.of(context).pop(1), // Mark all = 1
             ),
@@ -232,7 +232,7 @@ class JumpDialog extends StatelessWidget {
               icon: Icons.close_rounded,
               label: l10n.jumpOptionDismiss,
               description: l10n.jumpDismissDesc,
-              color: AppTheme.neutral,
+              color: context.outlineVariantColor,
               onTap: () => Navigator.of(context).pop(0), // Dismiss = 0
             ),
           ],
@@ -265,7 +265,7 @@ class JumpDialog extends StatelessWidget {
             border: Border.all(
               color: highlighted
                   ? color.withValues(alpha: 0.4)
-                  : AppTheme.cardBorder.withValues(alpha: 0.4),
+                  : context.outlineVariantColor.withValues(alpha: 0.4),
               width: highlighted ? 1.5 : 1.0,
             ),
           ),
@@ -301,7 +301,7 @@ class JumpDialog extends StatelessWidget {
                       description,
                       style: GoogleFonts.outfit(
                         fontSize: 12,
-                        color: AppTheme.textSecondary,
+                        color: context.onSurfaceVariantColor,
                       ),
                     ),
                   ],

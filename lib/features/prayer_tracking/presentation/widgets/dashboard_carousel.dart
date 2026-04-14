@@ -4,7 +4,7 @@ import 'package:fard/features/prayer_tracking/domain/missed_counter.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/prayer_times_card.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/prayer_tracking_card.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/werd_progress_card.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class DashboardCarousel extends StatefulWidget {
@@ -117,13 +117,13 @@ class _DashboardCarouselState extends State<DashboardCarousel> {
               width: isSelected ? 24 : 6,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppTheme.accent
-                    : AppTheme.cardBorder.withValues(alpha: 0.5),
+                    ? context.secondaryColor
+                    : context.outlineColor.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(3),
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
-                          color: AppTheme.accent.withValues(alpha: 0.3),
+                          color: context.secondaryColor.withValues(alpha: 0.3),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),

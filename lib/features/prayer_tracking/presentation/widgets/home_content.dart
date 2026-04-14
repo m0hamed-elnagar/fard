@@ -20,7 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 
 class HomeContent extends StatefulWidget {
   final DateTime selectedDate;
@@ -131,7 +131,7 @@ class _HomeContentState extends State<HomeContent> {
         });
 
         return Scaffold(
-          backgroundColor: AppTheme.background,
+          backgroundColor: context.backgroundColor,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -139,16 +139,16 @@ class _HomeContentState extends State<HomeContent> {
             title: Text(
               l10n.appName,
               style: GoogleFonts.amiri(
-                color: AppTheme.textPrimary,
+                color: context.onSurfaceColor,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
             actions: [
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.settings_outlined,
-                  color: AppTheme.textPrimary,
+                  color: context.onSurfaceColor,
                 ),
                 onPressed: () {
                   Navigator.push(
@@ -233,19 +233,19 @@ class _HomeContentState extends State<HomeContent> {
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppTheme.missed.withValues(alpha: 0.1),
+                          color: context.errorColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: AppTheme.missed.withValues(alpha: 0.3),
+                            color: context.errorColor.withValues(alpha: 0.3),
                           ),
                         ),
                         child: Column(
                           children: [
                             Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.location_off_rounded,
-                                  color: AppTheme.missed,
+                                  color: context.errorColor,
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -269,8 +269,8 @@ class _HomeContentState extends State<HomeContent> {
                                 icon: const Icon(Icons.my_location, size: 18),
                                 label: Text(l10n.givePermission),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppTheme.missed,
-                                  foregroundColor: Colors.white,
+                                  backgroundColor: context.errorColor,
+                                  foregroundColor: context.onSurfaceColor,
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 8,
                                   ),
@@ -292,9 +292,9 @@ class _HomeContentState extends State<HomeContent> {
                   sliver: SliverToBoxAdapter(
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.today_rounded,
-                          color: AppTheme.accent,
+                          color: context.secondaryColor,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
@@ -302,7 +302,7 @@ class _HomeContentState extends State<HomeContent> {
                           l10n.dailyPrayers,
                           key: const Key('daily_prayers_header'),
                           style: GoogleFonts.amiri(
-                            color: AppTheme.textPrimary,
+                            color: context.onSurfaceColor,
                             fontSize: 20.0,
                             fontWeight: FontWeight.w700,
                           ),

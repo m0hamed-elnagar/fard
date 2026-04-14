@@ -1,5 +1,6 @@
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_download/audio_download_cubit.dart';
@@ -56,7 +57,7 @@ class ReciterDownloadScreen extends StatelessWidget {
                               },
                               child: Text(
                                 l10n.delete,
-                                style: const TextStyle(color: Colors.red),
+                                style: TextStyle(color: context.errorColor),
                               ),
                             ),
                           ],
@@ -135,14 +136,14 @@ class ReciterDownloadScreen extends StatelessWidget {
                 ElevatedButton.icon(
                   onPressed: null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey.withValues(alpha: 0.1),
+                    backgroundColor: context.surfaceContainerHighestColor,
                   ),
-                  icon: const SizedBox(
+                  icon: SizedBox(
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+                      valueColor: AlwaysStoppedAnimation<Color>(context.onSurfaceVariantColor),
                     ),
                   ),
                   label: Text(l10n.stopping),
@@ -153,8 +154,8 @@ class ReciterDownloadScreen extends StatelessWidget {
                     context.read<AudioDownloadCubit>().cancelDownload(reciter);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange.withValues(alpha: 0.1),
-                    foregroundColor: Colors.orange[900],
+                    backgroundColor: context.errorColor.withValues(alpha: 0.05),
+                    foregroundColor: context.secondaryColor,
                   ),
                   icon: const Icon(Icons.stop_circle_outlined),
                   label: Text(l10n.stopAll),
@@ -231,9 +232,9 @@ class ReciterDownloadScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 LinearProgressIndicator(
                   value: isStopping ? null : progress,
-                  backgroundColor: Colors.grey[200],
+                  backgroundColor: context.outlineVariantColor,
                   valueColor: isStopping
-                      ? const AlwaysStoppedAnimation<Color>(Colors.grey)
+                      ? AlwaysStoppedAnimation<Color>(context.onSurfaceVariantColor)
                       : null,
                 ),
                 const SizedBox(height: 2),
@@ -245,14 +246,14 @@ class ReciterDownloadScreen extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (isDownloaded)
-            const Icon(Icons.check_circle, color: Colors.green)
+            Icon(Icons.check_circle, color: context.primaryColor)
           else if (isStopping)
-            const SizedBox(
+            SizedBox(
               width: 20,
               height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+                valueColor: AlwaysStoppedAnimation<Color>(context.onSurfaceVariantColor),
               ),
             )
           else if (isDownloading)
@@ -262,9 +263,9 @@ class ReciterDownloadScreen extends StatelessWidget {
                 Text('${(progress * 100).toInt()}%'),
                 const SizedBox(width: 4),
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.stop_circle_outlined,
-                    color: Colors.orange,
+                    color: context.secondaryColor,
                     size: 20,
                   ),
                   padding: EdgeInsets.zero,
@@ -292,7 +293,7 @@ class ReciterDownloadScreen extends StatelessWidget {
 
           if (isDownloaded || isDownloading || hasPartial || isStopping)
             IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              icon: Icon(Icons.delete_outline, color: context.errorColor),
               onPressed: isStopping
                   ? null
                   : () {
@@ -316,7 +317,7 @@ class ReciterDownloadScreen extends StatelessWidget {
                               },
                               child: Text(
                                 l10n.delete,
-                                style: const TextStyle(color: Colors.red),
+                                style: TextStyle(color: context.errorColor),
                               ),
                             ),
                           ],

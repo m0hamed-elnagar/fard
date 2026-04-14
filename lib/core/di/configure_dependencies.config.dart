@@ -75,6 +75,12 @@ import '../../features/settings/data/repositories/settings_storage.dart'
     as _i307;
 import '../../features/settings/domain/repositories/settings_repository.dart'
     as _i674;
+import '../../features/settings/domain/usecases/apply_theme_preset.dart'
+    as _i808;
+import '../../features/settings/domain/usecases/get_available_theme_presets.dart'
+    as _i494;
+import '../../features/settings/domain/usecases/save_custom_theme.dart'
+    as _i1036;
 import '../../features/settings/domain/usecases/sync_location_settings.dart'
     as _i47;
 import '../../features/settings/domain/usecases/sync_notification_schedule.dart'
@@ -115,6 +121,9 @@ extension GetItInjectableX on _i174.GetIt {
     await gh.factoryAsync<_i460.SharedPreferences>(
       () => registerModule.prefs,
       preResolve: true,
+    );
+    gh.factory<_i494.GetAvailableThemePresets>(
+      () => _i494.GetAvailableThemePresets(),
     );
     gh.singleton<_i409.GlobalKey<_i409.NavigatorState>>(
       () => registerModule.navigatorKey,
@@ -194,6 +203,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i451.AudioRepository>(
       () => _i757.AudioRepositoryImpl(client: gh<_i519.Client>()),
+    );
+    gh.factory<_i808.ApplyThemePreset>(
+      () => _i808.ApplyThemePreset(gh<_i674.SettingsRepository>()),
+    );
+    gh.factory<_i1036.SaveCustomTheme>(
+      () => _i1036.SaveCustomTheme(gh<_i674.SettingsRepository>()),
     );
     gh.factory<_i769.ToggleAfterSalahAzkarUseCase>(
       () => _i769.ToggleAfterSalahAzkarUseCase(gh<_i674.SettingsRepository>()),
@@ -299,9 +314,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i724.WerdRepository>(),
       ),
     );
-    gh.factory<_i1037.AzkarBloc>(
-      () => _i1037.AzkarBloc(gh<_i1027.IAzkarSource>()),
-    );
     gh.factory<_i573.SettingsCubit>(
       () => _i573.SettingsCubit(
         gh<_i674.SettingsRepository>(),
@@ -310,8 +322,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i760.SyncNotificationSchedule>(),
         gh<_i769.ToggleAfterSalahAzkarUseCase>(),
         gh<_i6.UpdateCalculationMethodUseCase>(),
+        gh<_i808.ApplyThemePreset>(),
+        gh<_i1036.SaveCustomTheme>(),
+        gh<_i494.GetAvailableThemePresets>(),
         gh<_i682.WidgetUpdateService>(),
       ),
+    );
+    gh.factory<_i1037.AzkarBloc>(
+      () => _i1037.AzkarBloc(gh<_i1027.IAzkarSource>()),
     );
     gh.factory<_i809.TasbihBloc>(
       () => _i809.TasbihBloc(gh<_i352.TasbihRepository>()),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 
 class MissedDaysDialog extends StatefulWidget {
   final List<DateTime> missedDates;
@@ -93,9 +93,9 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
         constraints: const BoxConstraints(maxWidth: 450.0, maxHeight: 750.0),
         padding: const EdgeInsets.all(20.0),
         decoration: BoxDecoration(
-          color: AppTheme.surface,
+          color: context.surfaceContainerColor,
           borderRadius: BorderRadius.circular(24.0),
-          border: Border.all(color: AppTheme.cardBorder),
+          border: Border.all(color: context.outlineColor),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -103,7 +103,7 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
             Text(
               l10n.missedDaysTitle,
               style: GoogleFonts.amiri(
-                color: AppTheme.textPrimary,
+                color: context.onSurfaceColor,
                 fontSize: 24.0,
                 fontWeight: FontWeight.w700,
               ),
@@ -112,7 +112,7 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
             Text(
               l10n.missedDaysMessage(widget.missedDates.length),
               style: GoogleFonts.amiri(
-                color: AppTheme.textSecondary,
+                color: context.onSurfaceVariantColor,
                 fontSize: 15.0,
               ),
               textAlign: TextAlign.center,
@@ -125,7 +125,7 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
                   child: Text(
                     "Toggle dates you missed",
                     style: GoogleFonts.amiri(
-                      color: AppTheme.accent,
+                      color: context.secondaryColor,
                       fontSize: 13.0,
                       fontStyle: FontStyle.italic,
                     ),
@@ -136,12 +136,12 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
                   icon: Icon(
                     allSelected ? Icons.deselect : Icons.select_all,
                     size: 18,
-                    color: AppTheme.accent,
+                    color: context.secondaryColor,
                   ),
                   label: Text(
                     allSelected ? "Deselect All" : "Select All",
                     style: GoogleFonts.amiri(
-                      color: AppTheme.accent,
+                      color: context.secondaryColor,
                       fontSize: 13.0,
                     ),
                   ),
@@ -204,10 +204,10 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
                       Navigator.pop(context);
                     },
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.textSecondary,
+                      foregroundColor: context.onSurfaceVariantColor,
                       padding: const EdgeInsets.symmetric(vertical: 14.0),
-                      side: const BorderSide(
-                        color: AppTheme.cardBorder,
+                      side: BorderSide(
+                        color: context.outlineColor,
                         width: 1.5,
                       ),
                       shape: RoundedRectangleBorder(
@@ -232,8 +232,8 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
                       Navigator.pop(context);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.accent,
-                      foregroundColor: AppTheme.onAccent,
+                      backgroundColor: context.secondaryColor,
+                      foregroundColor: context.theme.colorScheme.onSecondary,
                       padding: const EdgeInsets.symmetric(vertical: 14.0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.0),
@@ -267,7 +267,7 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
               d,
               style: GoogleFonts.outfit(
                 fontSize: 12,
-                color: AppTheme.textSecondary,
+                color: context.onSurfaceVariantColor,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -300,19 +300,19 @@ class _CalendarDayItem extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           margin: const EdgeInsets.all(4.0),
           decoration: BoxDecoration(
-            color: isSelected ? AppTheme.missed : AppTheme.surfaceLight,
+            color: isSelected ? context.errorColor : context.surfaceContainerHighestColor,
             borderRadius: BorderRadius.circular(12.0),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: AppTheme.missed.withValues(alpha: 0.3),
+                      color: context.errorColor.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
                   ]
                 : [],
             border: Border.all(
-              color: isSelected ? AppTheme.missed : AppTheme.cardBorder,
+              color: isSelected ? context.errorColor : context.outlineColor,
               width: 1.5,
             ),
           ),
@@ -322,7 +322,7 @@ class _CalendarDayItem extends StatelessWidget {
               Text(
                 '${date.day}',
                 style: GoogleFonts.outfit(
-                  color: isSelected ? Colors.white : AppTheme.textPrimary,
+                  color: context.onSurfaceColor,
                   fontSize: 16.0,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 ),
@@ -331,8 +331,8 @@ class _CalendarDayItem extends StatelessWidget {
                 _getMonthName(date.month),
                 style: GoogleFonts.outfit(
                   color: isSelected
-                      ? Colors.white.withValues(alpha: 0.8)
-                      : AppTheme.textSecondary,
+                      ? context.onSurfaceColor.withValues(alpha: 0.8)
+                      : context.onSurfaceVariantColor,
                   fontSize: 10.0,
                 ),
               ),

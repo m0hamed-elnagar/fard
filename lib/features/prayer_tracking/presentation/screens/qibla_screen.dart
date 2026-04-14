@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:adhan/adhan.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:flutter/material.dart';
@@ -35,10 +35,10 @@ class _QiblaScreenState extends State<QiblaScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.compass_calibration_rounded,
                 size: 64,
-                color: AppTheme.missed,
+                color: context.errorColor,
               ),
               const SizedBox(height: 16),
               Text(
@@ -48,7 +48,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
               const SizedBox(height: 8),
               Text(
                 l10n.useMobileForQibla,
-                style: const TextStyle(color: AppTheme.textSecondary),
+                style: TextStyle(color: context.onSurfaceVariantColor),
               ),
             ],
           ),
@@ -71,10 +71,10 @@ class _QiblaScreenState extends State<QiblaScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.location_off_rounded,
                     size: 64,
-                    color: AppTheme.missed,
+                    color: context.errorColor,
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -140,10 +140,10 @@ class _QiblaScreenState extends State<QiblaScreen> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: AppTheme.cardBorder,
+                                color: context.outlineColor,
                                 width: 2,
                               ),
-                              color: AppTheme.surface,
+                              color: context.surfaceContainerColor,
                             ),
                             child: Stack(
                               children: [
@@ -160,8 +160,8 @@ class _QiblaScreenState extends State<QiblaScreen> {
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,
                                           color: i == 0
-                                              ? Colors.red
-                                              : AppTheme.textSecondary,
+                                              ? context.errorColor
+                                              : context.onSurfaceVariantColor,
                                         ),
                                       ),
                                     ),
@@ -175,20 +175,20 @@ class _QiblaScreenState extends State<QiblaScreen> {
                           angle: (qiblaAngle * (pi / 180)),
                           child: Column(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.keyboard_double_arrow_up_rounded,
                                 size: 60,
-                                color: AppTheme.accent,
+                                color: context.secondaryColor,
                               ),
                               const SizedBox(height: 100),
                             ],
                           ),
                         ),
                         // Kaaba Icon at the center
-                        const Icon(
+                        Icon(
                           Icons.mosque,
                           size: 40,
-                          color: AppTheme.primaryLight,
+                          color: context.primaryContainerColor,
                         ),
                       ],
                     ),
@@ -205,7 +205,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
                     const SizedBox(height: 8),
                     Text(
                       l10n.rotatePhoneForQibla,
-                      style: const TextStyle(color: AppTheme.textSecondary),
+                      style: TextStyle(color: context.onSurfaceVariantColor),
                     ),
                   ],
                 ),

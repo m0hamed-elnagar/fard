@@ -14,6 +14,9 @@ import 'package:fard/features/settings/domain/usecases/sync_location_settings.da
 import 'package:fard/features/settings/domain/usecases/sync_notification_schedule.dart';
 import 'package:fard/features/settings/domain/usecases/toggle_after_salah_azkar_usecase.dart';
 import 'package:fard/features/settings/domain/usecases/update_calculation_method_usecase.dart';
+import 'package:fard/features/settings/domain/usecases/apply_theme_preset.dart';
+import 'package:fard/features/settings/domain/usecases/save_custom_theme.dart';
+import 'package:fard/features/settings/domain/usecases/get_available_theme_presets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -44,6 +47,13 @@ class MockToggleAfterSalahAzkar extends Mock
 class MockUpdateCalcMethod extends Mock
     implements UpdateCalculationMethodUseCase {}
 
+class MockApplyThemePreset extends Mock implements ApplyThemePreset {}
+
+class MockSaveCustomTheme extends Mock implements SaveCustomTheme {}
+
+class MockGetAvailableThemePresets extends Mock
+    implements GetAvailableThemePresets {}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -56,6 +66,9 @@ void main() {
   late MockSyncNotificationSchedule mockSyncNotif;
   late MockToggleAfterSalahAzkar mockToggle;
   late MockUpdateCalcMethod mockUpdateMethod;
+  late MockApplyThemePreset mockApplyTheme;
+  late MockSaveCustomTheme mockSaveCustomTheme;
+  late MockGetAvailableThemePresets mockGetPresets;
 
   final List<MethodCall> methodCalls = <MethodCall>[];
 
@@ -76,6 +89,9 @@ void main() {
     mockSyncNotif = MockSyncNotificationSchedule();
     mockToggle = MockToggleAfterSalahAzkar();
     mockUpdateMethod = MockUpdateCalcMethod();
+    mockApplyTheme = MockApplyThemePreset();
+    mockSaveCustomTheme = MockSaveCustomTheme();
+    mockGetPresets = MockGetAvailableThemePresets();
     methodCalls.clear();
 
     // Setup Calculation MethodChannel mock
@@ -124,6 +140,10 @@ void main() {
     when(() => mockRepo.isAfterSalahAzkarEnabled).thenReturn(false);
     when(() => mockRepo.isQadaEnabled).thenReturn(true);
     when(() => mockRepo.hijriAdjustment).thenReturn(0);
+    when(() => mockRepo.themePresetId).thenReturn('emerald_gold');
+    when(() => mockRepo.customThemeColors).thenReturn(null);
+    when(() => mockRepo.savedCustomThemes).thenReturn([]);
+    when(() => mockRepo.activeCustomThemeId).thenReturn(null);
     when(() => mockRepo.reminders).thenReturn([]);
     when(() => mockRepo.salaahSettings).thenReturn(
       Salaah.values
@@ -191,6 +211,9 @@ void main() {
       mockSyncNotif,
       mockToggle,
       mockUpdateMethod,
+      mockApplyTheme,
+      mockSaveCustomTheme,
+      mockGetPresets,
       mockWidget,
     );
 

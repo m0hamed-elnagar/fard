@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/services/mushaf_download_service.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 
 class MushafPageItem extends StatefulWidget {
   final int pageNumber;
@@ -67,8 +67,8 @@ class _MushafPageItemState extends State<MushafPageItem> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final primaryColor = widget.isDarkMode
-        ? AppTheme.textPrimary
-        : const Color(0xFF2D5D40);
+        ? context.onSurfaceColor
+        : context.primaryColor;
 
     return FutureBuilder<File?>(
       future: _pageFileFuture,
@@ -92,7 +92,7 @@ class _MushafPageItemState extends State<MushafPageItem> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                Icon(Icons.error_outline, size: 64, color: context.errorColor),
                 const SizedBox(height: 16),
                 Text(
                   l10n.pageNotAvailable(widget.pageNumber),
@@ -107,7 +107,7 @@ class _MushafPageItemState extends State<MushafPageItem> {
                   child: Text(
                     l10n.retry,
                     style: TextStyle(
-                      color: widget.isDarkMode ? Colors.black : Colors.white,
+                      color: context.onSurfaceColor,
                     ),
                   ),
                 ),

@@ -5,6 +5,7 @@ import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
 import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/extensions/number_extension.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:quran/quran.dart' as quran;
 
 class AudioPlayerBar extends StatelessWidget {
@@ -41,7 +42,7 @@ class AudioPlayerBar extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: context.outlineVariantColor,
                     blurRadius: 10,
                     spreadRadius: 1,
                     offset: const Offset(0, -3),
@@ -212,14 +213,14 @@ class AudioPlayerBar extends StatelessWidget {
                                   ? Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: CircularProgressIndicator(
-                                        color: Colors.white,
+                                        color: context.onSurfaceColor,
                                         strokeWidth: isNarrow ? 1.5 : 2,
                                       ),
                                     )
                                   : IconButton(
                                       padding: EdgeInsets.zero,
                                       iconSize: isNarrow ? 22 : 24,
-                                      color: Colors.white,
+                                      color: context.onSurfaceColor,
                                       icon: Icon(
                                         state.isPlaying
                                             ? Icons.pause_rounded
@@ -355,16 +356,16 @@ class AudioPlayerBar extends StatelessWidget {
                   if (state.hasError)
                     Container(
                       width: double.infinity,
-                      color: Colors.red.withValues(alpha: 0.1),
+                      color: context.errorColor.withValues(alpha: 0.1),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 2,
                       ),
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.error_outline,
-                            color: Colors.red,
+                            color: context.errorColor,
                             size: 12,
                           ),
                           const SizedBox(width: 6),
@@ -373,8 +374,8 @@ class AudioPlayerBar extends StatelessWidget {
                               state.lastErrorMessage ??
                                   state.error ??
                                   l10n.errorOccurred,
-                              style: const TextStyle(
-                                color: Colors.red,
+                              style: TextStyle(
+                                color: context.errorColor,
                                 fontSize: 9,
                               ),
                               maxLines: 1,

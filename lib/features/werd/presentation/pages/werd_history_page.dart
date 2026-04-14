@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
-import 'package:fard/core/theme/app_theme.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/core/extensions/number_extension.dart';
 import 'package:fard/core/extensions/quran_extension.dart';
 import 'package:fard/features/werd/domain/entities/werd_history_entry.dart';
@@ -49,15 +49,15 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.history_rounded,
                     size: 64,
-                    color: Colors.grey,
+                    color: context.onSurfaceVariantColor,
                   ),
                   const SizedBox(height: 16),
                   Text(
                     isAr ? 'لا يوجد سجل حتى الآن' : 'No history yet',
-                    style: GoogleFonts.amiri(fontSize: 18, color: Colors.grey),
+                    style: GoogleFonts.amiri(fontSize: 18, color: context.onSurfaceVariantColor),
                   ),
                 ],
               ),
@@ -132,14 +132,14 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                           Icon(
                             Icons.menu_book_rounded,
                             size: 80,
-                            color: Colors.grey.withValues(alpha: 0.3),
+                            color: context.outlineColor,
                           ),
                           const SizedBox(height: 24),
                           Text(
                             isAr ? 'لا يوجد قراءة في هذا الشهر' : 'No reading this month',
                             style: GoogleFonts.amiri(
                               fontSize: 20,
-                              color: Colors.grey,
+                              color: context.onSurfaceVariantColor,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -150,7 +150,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                                 : 'Start reading Quran to track your progress here',
                             style: GoogleFonts.amiri(
                               fontSize: 14,
-                              color: Colors.grey[600],
+                              color: context.onSurfaceVariantColor,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -164,8 +164,8 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                               icon: const Icon(Icons.play_arrow_rounded),
                               label: Text(isAr ? 'ابدأ القراءة' : 'Start Reading'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppTheme.accent,
-                                foregroundColor: AppTheme.onAccent,
+                                backgroundColor: context.secondaryColor,
+                                foregroundColor: context.theme.colorScheme.onSecondary,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 32,
                                   vertical: 16,
@@ -210,7 +210,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                         width: 4,
                         height: 20,
                         decoration: BoxDecoration(
-                          color: AppTheme.accent,
+                          color: context.secondaryColor,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -220,7 +220,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                         style: GoogleFonts.outfit(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: AppTheme.textPrimary,
+                          color: context.onSurfaceColor,
                         ),
                       ),
                     ],
@@ -229,10 +229,10 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
-                        color: AppTheme.surfaceLight,
+                        color: context.surfaceContainerHighestColor,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: AppTheme.cardBorder.withValues(alpha: 0.3),
+                          color: context.outlineColor.withValues(alpha: 0.3),
                         ),
                       ),
                       child: Text(
@@ -241,7 +241,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                             : '$periodDays days',
                         style: GoogleFonts.outfit(
                           fontSize: 13,
-                          color: AppTheme.neutral,
+                          color: context.outlineVariantColor,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -326,8 +326,8 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Colors.transparent,
-                    AppTheme.missed.withValues(alpha: 0.3),
+                    context.surfaceContainerColor,
+                    context.errorColor.withValues(alpha: 0.3),
                   ],
                 ),
               ),
@@ -337,10 +337,10 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             decoration: BoxDecoration(
-              color: AppTheme.missed.withValues(alpha: 0.12),
+              color: context.errorColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AppTheme.missed.withValues(alpha: 0.3),
+                color: context.errorColor.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -350,14 +350,14 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                 Icon(
                   Icons.flash_off_rounded,
                   size: 14,
-                  color: AppTheme.missed,
+                  color: context.errorColor,
                 ),
                 const SizedBox(width: 6),
                 Text(
                   isAr ? 'انقطاع' : 'Missed',
                   style: GoogleFonts.outfit(
                     fontSize: 12,
-                    color: AppTheme.missed,
+                    color: context.errorColor,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -371,8 +371,8 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    AppTheme.missed.withValues(alpha: 0.3),
-                    Colors.transparent,
+                    context.errorColor.withValues(alpha: 0.3),
+                    context.surfaceContainerColor,
                   ],
                 ),
               ),
@@ -390,10 +390,10 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: context.surfaceContainerColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.cardBorder.withValues(alpha: 0.5),
+          color: context.outlineColor.withValues(alpha: 0.5),
           width: 1.5,
         ),
       ),
@@ -414,7 +414,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
               style: GoogleFonts.outfit(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimary,
+                color: context.onSurfaceColor,
               ),
               textAlign: TextAlign.center,
             ),
@@ -432,17 +432,17 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: AppTheme.primaryLight.withValues(alpha: 0.15),
+                color: context.primaryContainerColor.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: AppTheme.primaryLight.withValues(alpha: 0.3),
+                  color: context.primaryContainerColor.withValues(alpha: 0.3),
                 ),
               ),
               child: Text(
                 isAr ? 'الحالي' : 'Current',
                 style: GoogleFonts.outfit(
                   fontSize: 10,
-                  color: AppTheme.primaryLight,
+                  color: context.primaryContainerColor,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -459,7 +459,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
     bool isEnabled = true,
   }) {
     return Material(
-      color: Colors.transparent,
+      color: context.surfaceContainerColor,
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(20),
@@ -467,19 +467,19 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: isEnabled ? AppTheme.surfaceLight : Colors.transparent,
+            color: isEnabled ? context.surfaceContainerHighestColor : context.surfaceContainerColor,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isEnabled
-                  ? AppTheme.cardBorder.withValues(alpha: 0.5)
-                  : Colors.transparent,
+                  ? context.outlineColor.withValues(alpha: 0.5)
+                  : context.surfaceContainerColor,
               width: 1.5,
             ),
           ),
           child: Icon(
             icon,
             size: 20,
-            color: isEnabled ? AppTheme.textPrimary : AppTheme.neutral.withValues(alpha: 0.5),
+            color: isEnabled ? context.onSurfaceColor : context.outlineVariantColor.withValues(alpha: 0.5),
           ),
         ),
       ),
@@ -592,10 +592,10 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: context.surfaceContainerColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.cardBorder.withValues(alpha: 0.4),
+          color: context.outlineColor.withValues(alpha: 0.4),
           width: 1.5,
         ),
       ),
@@ -606,7 +606,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
             children: [
               Icon(
                 Icons.analytics_rounded,
-                color: AppTheme.accent,
+                color: context.secondaryColor,
                 size: 16,
               ),
               const SizedBox(width: 6),
@@ -614,7 +614,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                 isAr ? 'ملخص الشهر' : 'Monthly Summary',
                 style: GoogleFonts.outfit(
                   fontSize: 14,
-                  color: AppTheme.textPrimary,
+                  color: context.onSurfaceColor,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -677,10 +677,10 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: AppTheme.surfaceLight,
+              color: context.surfaceContainerHighestColor,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: AppTheme.cardBorder.withValues(alpha: 0.2),
+                color: context.outlineColor.withValues(alpha: 0.2),
               ),
             ),
             child: Row(
@@ -690,7 +690,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                 Icon(
                   Icons.trending_up_rounded,
                   size: 14,
-                  color: AppTheme.neutral,
+                  color: context.outlineVariantColor,
                 ),
                 const SizedBox(width: 6),
                 Flexible(
@@ -700,7 +700,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                         : "Daily Avg: ${_displayUnit == WerdUnit.ayah ? avgValue.round() : _formatDecimal(avgValue, isAr, 2)} $unitLabel",
                     style: GoogleFonts.outfit(
                       fontSize: 12,
-                      color: AppTheme.neutral,
+                      color: context.outlineVariantColor,
                       fontWeight: FontWeight.w500,
                     ),
                     textAlign: TextAlign.center,
@@ -732,13 +732,13 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppTheme.accent.withValues(alpha: 0.08)
-              : Colors.transparent,
+              ? context.secondaryColor.withValues(alpha: 0.08)
+              : context.surfaceContainerColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected
-                ? AppTheme.accent.withValues(alpha: 0.3)
-                : Colors.transparent,
+                ? context.secondaryColor.withValues(alpha: 0.3)
+                : context.surfaceContainerColor,
             width: 1.5,
           ),
         ),
@@ -746,7 +746,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
           children: [
             Icon(
               icon,
-              color: isSelected ? AppTheme.accent : AppTheme.neutral,
+              color: isSelected ? context.secondaryColor : context.outlineVariantColor,
               size: isSelected ? 26 : 22,
             ),
             const SizedBox(height: 8),
@@ -758,7 +758,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                 style: GoogleFonts.outfit(
                   fontSize: 30,
                   fontWeight: FontWeight.w900,
-                  color: isSelected ? AppTheme.accent : AppTheme.textPrimary,
+                  color: isSelected ? context.secondaryColor : context.onSurfaceColor,
                   letterSpacing: -0.5,
                 ),
               ),
@@ -769,7 +769,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
               label,
               style: GoogleFonts.outfit(
                 fontSize: 12,
-                color: AppTheme.neutral,
+                color: context.outlineVariantColor,
                 fontWeight: FontWeight.w400,
               ),
               textAlign: TextAlign.center,
@@ -849,19 +849,19 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
     
     if (isCompleted) {
       // Completed: GREEN (success)
-      accentColor = const Color(0xFF4CAF50);
-      backgroundColor = const Color(0xFF4CAF50).withValues(alpha: 0.08);
-      borderColor = const Color(0xFF4CAF50).withValues(alpha: 0.4);
+      accentColor = context.primaryColor;
+      backgroundColor = context.primaryColor.withValues(alpha: 0.08);
+      borderColor = context.primaryColor.withValues(alpha: 0.4);
     } else if (progressPercent > 0) {
       // In-progress: YELLOW (encouraging)
-      accentColor = AppTheme.accent;
-      backgroundColor = AppTheme.accent.withValues(alpha: 0.06);
-      borderColor = AppTheme.accent.withValues(alpha: 0.25);
+      accentColor = context.secondaryColor;
+      backgroundColor = context.secondaryColor.withValues(alpha: 0.06);
+      borderColor = context.secondaryColor.withValues(alpha: 0.25);
     } else {
       // No progress: Gray
-      accentColor = AppTheme.neutral;
-      backgroundColor = Colors.transparent;
-      borderColor = AppTheme.cardBorder.withValues(alpha: 0.2);
+      accentColor = context.outlineVariantColor;
+      backgroundColor = context.surfaceContainerColor;
+      borderColor = context.outlineColor.withValues(alpha: 0.2);
     }
 
     final isExpanded = _expandedItems.contains(dateKey);
@@ -931,7 +931,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                       ),
                       Text(
                         DateFormat('d MMMM', isAr ? 'ar' : 'en').format(date),
-                        style: GoogleFonts.amiri(fontSize: 13, color: Colors.grey),
+                        style: GoogleFonts.amiri(fontSize: 13, color: context.onSurfaceVariantColor),
                       ),
                       if (entry.totalAyahsRead > 0) ...[
                         const SizedBox(height: 8),
@@ -941,7 +941,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                               : "From $startSurah ${entry.startAyahNumber} to $endSurah ${entry.endAyahNumber}",
                           style: GoogleFonts.amiri(
                             fontSize: 13,
-                            color: Colors.grey[700],
+                            color: context.onSurfaceVariantColor,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -979,7 +979,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                 child: LinearProgressIndicator(
                   value: progressPercent,
                   minHeight: 6,
-                  backgroundColor: AppTheme.cardBorder.withValues(alpha: 0.15),
+                  backgroundColor: context.outlineColor.withValues(alpha: 0.15),
                   valueColor: AlwaysStoppedAnimation<Color>(accentColor),
                 ),
               ),
@@ -1063,7 +1063,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                         style: GoogleFonts.amiri(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.accent,
+                          color: context.secondaryColor,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -1115,12 +1115,12 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                                 const SizedBox(height: 8),
                                 Row(
                                   children: [
-                                    Icon(Icons.access_time_rounded, size: 14, color: AppTheme.textSecondary.withValues(alpha: 0.6)),
+                                    Icon(Icons.access_time_rounded, size: 14, color: context.onSurfaceVariantColor.withValues(alpha: 0.6)),
                                     const SizedBox(width: 4),
-                                    Text('${segment.formattedStartTime} - ${segment.formattedEndTime}', style: GoogleFonts.outfit(fontSize: 11, color: AppTheme.textSecondary.withValues(alpha: 0.6))),
+                                    Text('${segment.formattedStartTime} - ${segment.formattedEndTime}', style: GoogleFonts.outfit(fontSize: 11, color: context.onSurfaceVariantColor.withValues(alpha: 0.6))),
                                     if (segment.durationMinutes != null) ...[
                                       const SizedBox(width: 4),
-                                      Text('(${segment.durationMinutes} min)', style: GoogleFonts.outfit(fontSize: 11, color: AppTheme.textSecondary.withValues(alpha: 0.6))),
+                                      Text('(${segment.durationMinutes} min)', style: GoogleFonts.outfit(fontSize: 11, color: context.onSurfaceVariantColor.withValues(alpha: 0.6))),
                                     ],
                                   ],
                                 ),
@@ -1146,23 +1146,23 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                             ],
                           ),
                         );
-                      }).toList(),
+                      }),
                     ] else ...[
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppTheme.neutral.withValues(alpha: 0.05),
+                          color: context.outlineVariantColor.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppTheme.neutral.withValues(alpha: 0.15)),
+                          border: Border.all(color: context.outlineVariantColor.withValues(alpha: 0.15)),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.history_rounded, size: 16, color: AppTheme.neutral),
+                            Icon(Icons.history_rounded, size: 16, color: context.outlineVariantColor),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 isAr ? 'تفاصيل الجلسة غير متوفرة لهذا اليوم (بيانات قديمة)' : 'Session details not available for this day (older entry)',
-                                style: GoogleFonts.outfit(fontSize: 12, color: AppTheme.neutral),
+                                style: GoogleFonts.outfit(fontSize: 12, color: context.outlineVariantColor),
                               ),
                             ),
                           ],

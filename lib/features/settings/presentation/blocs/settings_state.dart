@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../../core/services/location_service.dart';
 import '../../domain/azkar_reminder.dart';
+import '../../domain/entities/custom_theme.dart';
 import '../../domain/salaah_settings.dart';
 
 part 'settings_state.freezed.dart';
@@ -23,6 +24,10 @@ sealed class SettingsState with _$SettingsState {
     @Default(false) bool isAzanVoiceDownloading,
     @Default(true) bool isQadaEnabled,
     @Default(0) int hijriAdjustment,
+    @Default('emerald') String themePresetId,
+    Map<String, String>? customThemeColors,
+    @Default([]) List<CustomTheme> savedCustomThemes,
+    String? activeCustomThemeId,
     LocationStatus? lastLocationStatus,
   }) = _SettingsState;
 }

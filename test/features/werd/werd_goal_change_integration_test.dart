@@ -221,29 +221,24 @@ void main() {
     
     // Filter by current month
     final now = DateTime.now();
-    final currentMonthKey = "${now.year}-${now.month.toString().padLeft(2, '0')}";
-    
+
     int periodTotalAyahs = 0;
     double periodTotalPages = 0;
-    double periodTotalJuz = 0;
-    int periodDays = 0;
     final filteredHistory = <MapEntry<String, WerdHistoryEntry>>[];
-    
+
     for (final entry in historyList) {
       final date = DateTime.parse(entry.key);
       bool include = date.year == now.year && date.month == now.month;
-      
+
       print('\n🔍 Checking entry: ${entry.key}');
       print('   Year match: ${date.year == now.year}');
       print('   Month match: ${date.month == now.month}');
       print('   Include: $include');
-      
+
       if (include) {
         periodTotalAyahs += entry.value.totalAyahsRead;
         periodTotalPages += entry.value.pagesRead;
-        periodTotalJuz += entry.value.juzRead;
         if (entry.value.totalAyahsRead > 0) {
-          periodDays++;
           filteredHistory.add(entry);
           print('   ✅ Added to filtered list');
         }
