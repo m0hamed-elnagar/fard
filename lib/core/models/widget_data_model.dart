@@ -13,6 +13,14 @@ class WidgetDataModel {
   final String? nextPrayerName;
   final int? nextPrayerTime; // Timestamp in milliseconds
   final int lastUpdated; // Timestamp in milliseconds
+  
+  // Theme-related fields
+  final String primaryColorHex;
+  final String accentColorHex;
+  final String backgroundColorHex;
+  final String surfaceColorHex;
+  final String textColorHex;
+  final String textSecondaryColorHex;
 
   WidgetDataModel({
     required this.gregorianDate,
@@ -24,6 +32,12 @@ class WidgetDataModel {
     this.nextPrayerName,
     this.nextPrayerTime,
     required this.lastUpdated,
+    this.primaryColorHex = '#2E7D32',
+    this.accentColorHex = '#FFD54F',
+    this.backgroundColorHex = '#0D1117',
+    this.surfaceColorHex = '#161B22',
+    this.textColorHex = '#FFFFFF',
+    this.textSecondaryColorHex = '#8B949E',
   });
 
   factory WidgetDataModel.fromJson(Map<String, dynamic> json) =>

@@ -2508,6 +2508,331 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap to customize'**
   String get tapToCustomize;
+
+  /// No description provided for @werdHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Werd History'**
+  String get werdHistory;
+
+  /// No description provided for @werdNoHistoryYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No history yet'**
+  String get werdNoHistoryYet;
+
+  /// No description provided for @werdNoReadingThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'No reading this month'**
+  String get werdNoReadingThisMonth;
+
+  /// No description provided for @werdStartReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Reading'**
+  String get werdStartReading;
+
+  /// No description provided for @werdStartReadingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Start reading Quran to track your progress here'**
+  String get werdStartReadingDesc;
+
+  /// No description provided for @werdDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get werdDetails;
+
+  /// No description provided for @werdDays.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get werdDays;
+
+  /// No description provided for @werdMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed'**
+  String get werdMissed;
+
+  /// No description provided for @werdCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get werdCurrent;
+
+  /// No description provided for @werdMonthlySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Summary'**
+  String get werdMonthlySummary;
+
+  /// No description provided for @werdAyahsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayahs'**
+  String get werdAyahsLabel;
+
+  /// No description provided for @werdPagesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages'**
+  String get werdPagesLabel;
+
+  /// No description provided for @werdJuzLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Juz'**
+  String get werdJuzLabel;
+
+  /// No description provided for @werdDailyAvg.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Avg'**
+  String get werdDailyAvg;
+
+  /// No description provided for @werdSessionDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Session Details'**
+  String get werdSessionDetails;
+
+  /// No description provided for @werdSameAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Same ayah'**
+  String get werdSameAyah;
+
+  /// No description provided for @werdSessionNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Session {number}'**
+  String werdSessionNumber(int number);
+
+  /// No description provided for @werdMinSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' min'**
+  String get werdMinSuffix;
+
+  /// No description provided for @werdOlderEntryNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Session details not available for this day (older entry)'**
+  String get werdOlderEntryNote;
+
+  /// No description provided for @werdToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get werdToday;
+
+  /// No description provided for @werdSummaryRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Read {ayahs} ayahs ({pages} pages) from {startSurah} {startAyah} to {endSurah} {endAyah}'**
+  String werdSummaryRead(
+    String ayahs,
+    String pages,
+    String startSurah,
+    String startAyah,
+    String endSurah,
+    String endAyah,
+  );
+
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// No description provided for @prayerAndAzan.
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer & Azan'**
+  String get prayerAndAzan;
+
+  /// No description provided for @azkarSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Azkar'**
+  String get azkarSection;
+
+  /// No description provided for @dataAndLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Data & Location'**
+  String get dataAndLocation;
+
+  /// No description provided for @widgetThemeMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Widget Theme'**
+  String get widgetThemeMode;
+
+  /// No description provided for @widgetThemeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get widgetThemeDark;
+
+  /// No description provided for @widgetThemeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get widgetThemeLight;
+
+  /// No description provided for @widgetThemeFollowApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow App'**
+  String get widgetThemeFollowApp;
+
+  /// No description provided for @showSavedThemes.
+  ///
+  /// In en, this message translates to:
+  /// **'Show saved themes ({count})'**
+  String showSavedThemes(Object count);
+
+  /// No description provided for @hideSavedThemes.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide saved themes'**
+  String get hideSavedThemes;
+
+  /// No description provided for @languageDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch between English and Arabic'**
+  String get languageDesc;
+
+  /// No description provided for @widgetPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Widget Preview'**
+  String get widgetPreviewTitle;
+
+  /// No description provided for @prayerSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer Schedule'**
+  String get prayerSchedule;
+
+  /// No description provided for @countdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Countdown'**
+  String get countdown;
+
+  /// No description provided for @widgetColorsIndependent.
+  ///
+  /// In en, this message translates to:
+  /// **'Widget Colors (Independent from App Theme)'**
+  String get widgetColorsIndependent;
+
+  /// No description provided for @widgetPrimaryColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary Color'**
+  String get widgetPrimaryColor;
+
+  /// No description provided for @widgetAccentColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Accent Color'**
+  String get widgetAccentColor;
+
+  /// No description provided for @widgetBackgroundColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Background Color'**
+  String get widgetBackgroundColor;
+
+  /// No description provided for @widgetTextColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Text Color'**
+  String get widgetTextColor;
+
+  /// No description provided for @widgetSecondaryTextColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Secondary Text Color'**
+  String get widgetSecondaryTextColor;
+
+  /// No description provided for @widgetThemeApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Widget theme applied!'**
+  String get widgetThemeApplied;
+
+  /// No description provided for @widgetThemeApplyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to apply widget theme: {error}'**
+  String widgetThemeApplyFailed(String error);
+
+  /// No description provided for @applyToWidget.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply to Widget'**
+  String get applyToWidget;
+
+  /// No description provided for @pickColorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick {label} Color'**
+  String pickColorTitle(String label);
+
+  /// No description provided for @presetColors.
+  ///
+  /// In en, this message translates to:
+  /// **'Preset Colors'**
+  String get presetColors;
+
+  /// No description provided for @customColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Color'**
+  String get customColor;
+
+  /// No description provided for @customColorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom {label}'**
+  String customColorTitle(String label);
+
+  /// No description provided for @hexColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Hex Color'**
+  String get hexColor;
+
+  /// No description provided for @pickAColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a color:'**
+  String get pickAColor;
+
+  /// No description provided for @widgetPreviewDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuesday, Apr 14, 2026'**
+  String get widgetPreviewDate;
+
+  /// No description provided for @widgetPreviewHijriDate.
+  ///
+  /// In en, this message translates to:
+  /// **'26 Shawwal 1447'**
+  String get widgetPreviewHijriDate;
+
+  /// No description provided for @widgetPreviewCountdown.
+  ///
+  /// In en, this message translates to:
+  /// **'3h 45m'**
+  String get widgetPreviewCountdown;
 }
 
 class _AppLocalizationsDelegate

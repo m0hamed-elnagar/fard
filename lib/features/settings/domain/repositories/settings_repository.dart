@@ -144,6 +144,6 @@ abstract interface class SettingsRepository {
   /// Delete a custom theme by ID
   Future<void> deleteCustomTheme(String themeId);
 
-  /// Set the active custom theme ID
+  /// Set active custom theme ID
   Future<void> setActiveCustomTheme(String? themeId);
-}
+  }

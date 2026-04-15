@@ -28,6 +28,6 @@ sealed class SettingsState with _$SettingsState {
     Map<String, String>? customThemeColors,
     @Default([]) List<CustomTheme> savedCustomThemes,
     String? activeCustomThemeId,
-    LocationStatus? lastLocationStatus,
-  }) = _SettingsState;
-}
+    @Default(null) LocationStatus? lastLocationStatus,
+    }) = _SettingsState;
+    }

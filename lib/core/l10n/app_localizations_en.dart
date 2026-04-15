@@ -1326,4 +1326,185 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tapToCustomize => 'Tap to customize';
+
+  @override
+  String get werdHistory => 'Werd History';
+
+  @override
+  String get werdNoHistoryYet => 'No history yet';
+
+  @override
+  String get werdNoReadingThisMonth => 'No reading this month';
+
+  @override
+  String get werdStartReading => 'Start Reading';
+
+  @override
+  String get werdStartReadingDesc =>
+      'Start reading Quran to track your progress here';
+
+  @override
+  String get werdDetails => 'Details';
+
+  @override
+  String get werdDays => 'days';
+
+  @override
+  String get werdMissed => 'Missed';
+
+  @override
+  String get werdCurrent => 'Current';
+
+  @override
+  String get werdMonthlySummary => 'Monthly Summary';
+
+  @override
+  String get werdAyahsLabel => 'Ayahs';
+
+  @override
+  String get werdPagesLabel => 'Pages';
+
+  @override
+  String get werdJuzLabel => 'Juz';
+
+  @override
+  String get werdDailyAvg => 'Daily Avg';
+
+  @override
+  String get werdSessionDetails => 'Session Details';
+
+  @override
+  String get werdSameAyah => 'Same ayah';
+
+  @override
+  String werdSessionNumber(int number) {
+    return 'Session $number';
+  }
+
+  @override
+  String get werdMinSuffix => ' min';
+
+  @override
+  String get werdOlderEntryNote =>
+      'Session details not available for this day (older entry)';
+
+  @override
+  String get werdToday => 'Today';
+
+  @override
+  String werdSummaryRead(
+    String ayahs,
+    String pages,
+    String startSurah,
+    String startAyah,
+    String endSurah,
+    String endAyah,
+  ) {
+    return 'Read $ayahs ayahs ($pages pages) from $startSurah $startAyah to $endSurah $endAyah';
+  }
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get prayerAndAzan => 'Prayer & Azan';
+
+  @override
+  String get azkarSection => 'Azkar';
+
+  @override
+  String get dataAndLocation => 'Data & Location';
+
+  @override
+  String get widgetThemeMode => 'Widget Theme';
+
+  @override
+  String get widgetThemeDark => 'Dark';
+
+  @override
+  String get widgetThemeLight => 'Light';
+
+  @override
+  String get widgetThemeFollowApp => 'Follow App';
+
+  @override
+  String showSavedThemes(Object count) {
+    return 'Show saved themes ($count)';
+  }
+
+  @override
+  String get hideSavedThemes => 'Hide saved themes';
+
+  @override
+  String get languageDesc => 'Switch between English and Arabic';
+
+  @override
+  String get widgetPreviewTitle => 'Widget Preview';
+
+  @override
+  String get prayerSchedule => 'Prayer Schedule';
+
+  @override
+  String get countdown => 'Countdown';
+
+  @override
+  String get widgetColorsIndependent =>
+      'Widget Colors (Independent from App Theme)';
+
+  @override
+  String get widgetPrimaryColor => 'Primary Color';
+
+  @override
+  String get widgetAccentColor => 'Accent Color';
+
+  @override
+  String get widgetBackgroundColor => 'Background Color';
+
+  @override
+  String get widgetTextColor => 'Text Color';
+
+  @override
+  String get widgetSecondaryTextColor => 'Secondary Text Color';
+
+  @override
+  String get widgetThemeApplied => 'Widget theme applied!';
+
+  @override
+  String widgetThemeApplyFailed(String error) {
+    return 'Failed to apply widget theme: $error';
+  }
+
+  @override
+  String get applyToWidget => 'Apply to Widget';
+
+  @override
+  String pickColorTitle(String label) {
+    return 'Pick $label Color';
+  }
+
+  @override
+  String get presetColors => 'Preset Colors';
+
+  @override
+  String get customColor => 'Custom Color';
+
+  @override
+  String customColorTitle(String label) {
+    return 'Custom $label';
+  }
+
+  @override
+  String get hexColor => 'Hex Color';
+
+  @override
+  String get pickAColor => 'Pick a color:';
+
+  @override
+  String get widgetPreviewDate => 'Tuesday, Apr 14, 2026';
+
+  @override
+  String get widgetPreviewHijriDate => '26 Shawwal 1447';
+
+  @override
+  String get widgetPreviewCountdown => '3h 45m';
 }

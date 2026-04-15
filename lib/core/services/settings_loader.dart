@@ -30,6 +30,8 @@ class SettingsLoader {
           prefs.getBool(SettingsKeys.afterSalahAzkarEnabled) ?? false,
       isQadaEnabled: prefs.getBool(SettingsKeys.qadaEnabled) ?? true,
       hijriAdjustment: prefs.getInt(SettingsKeys.hijriAdjustment) ?? 0,
+      themePresetId: prefs.getString(SettingsKeys.themePresetId) ?? 'emerald',
+      customThemeColors: _loadCustomThemeColors(prefs),
       reminders: _loadReminders(
         prefs,
         prefs.getString(SettingsKeys.morningAzkarTime) ?? '05:00',
@@ -89,5 +91,28 @@ class SettingsLoader {
         ),
       ];
     }
+  }
+
+  static Map<String, String>? _loadCustomThemeColors(SharedPreferences prefs) {
+    final primary = prefs.getString(SettingsKeys.customPrimaryColor);
+    final accent = prefs.getString(SettingsKeys.customAccentColor);
+    final background = prefs.getString(SettingsKeys.customBackgroundColor);
+    final surface = prefs.getString(SettingsKeys.customSurfaceColor);
+    final text = prefs.getString(SettingsKeys.customTextColor);
+    final textSecondary = prefs.getString(SettingsKeys.customTextSecondaryColor);
+    final cardBorder = prefs.getString(SettingsKeys.customCardBorderColor);
+    final surfaceLight = prefs.getString(SettingsKeys.customSurfaceLightColor);
+
+    final colors = <String, String>{};
+    if (primary != null) colors['primary'] = primary;
+    if (accent != null) colors['accent'] = accent;
+    if (background != null) colors['background'] = background;
+    if (surface != null) colors['surface'] = surface;
+    if (text != null) colors['text'] = text;
+    if (textSecondary != null) colors['textSecondary'] = textSecondary;
+    if (cardBorder != null) colors['cardBorder'] = cardBorder;
+    if (surfaceLight != null) colors['surfaceLight'] = surfaceLight;
+
+    return colors.isEmpty ? null : colors;
   }
 }

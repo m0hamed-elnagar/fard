@@ -1,30 +1,15 @@
 package com.qada.fard
 
 import android.content.Context
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
-import androidx.glance.GlanceModifier
-import androidx.glance.ImageProvider
-import androidx.glance.LocalSize
-import androidx.glance.action.actionStartActivity
-import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.provideContent
-import androidx.glance.background
-import androidx.glance.layout.*
-import androidx.glance.text.FontWeight
-import androidx.glance.text.TextAlign
-import androidx.glance.text.Text
-import androidx.glance.text.TextStyle
-import androidx.glance.unit.ColorProvider
 import com.qada.fard.prayer.SettingsRepository
+import com.qada.fard.widget.CountdownContent
+import com.qada.fard.widget.CountdownData
+import com.qada.fard.widget.WidgetTheme
 import org.json.JSONObject
-import java.util.*
 
 class NextPrayerCountdownWidget : GlanceAppWidget() {
 
@@ -33,7 +18,7 @@ class NextPrayerCountdownWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val repository = SettingsRepository(context)
         val prayerDataJson = repository.getPrayerDataJson()
-        
+
         val widgetData = try {
             if (prayerDataJson != null) parseWidgetData(prayerDataJson) else null
         } catch (e: Exception) {
@@ -41,252 +26,95 @@ class NextPrayerCountdownWidget : GlanceAppWidget() {
         }
 
         provideContent {
-            val size = LocalSize.current
-            CountdownWidgetRoot(widgetData, size)
+            if (widgetData != null) {
+                // Check for widget theme override from SharedPreferences
+                val widgetTheme = repository.getWidgetTheme()
+                
+                // Get default values for comparison
+                val defaults = mapOf(
+                    "primaryColorHex" to "#2E7D32",
+                    "accentColorHex" to "#FFD54F",
+                    "backgroundColorHex" to "#0D1117",
+                    "surfaceColorHex" to "#161B22",
+                    "textColorHex" to "#FFFFFF",
+                    "textSecondaryColorHex" to "#8B949E"
+                )
+                
+                // Check if ANY color differs from its default
+                val hasThemeOverride = widgetTheme.any { (key, value) ->
+                    value.isNotEmpty() && value != defaults[key]
+                }
+                
+                android.util.Log.d("WidgetDebug", "CountdownWidget Theme override detection: hasThemeOverride=$hasThemeOverride")
+                
+                val themeToUse = if (hasThemeOverride) {
+                    android.util.Log.d("WidgetDebug", "CountdownWidget: Using OVERRIDE theme")
+                    com.qada.fard.widget.WidgetTheme(
+                        primaryColorHex = widgetTheme["primaryColorHex"] ?: widgetData.primaryColorHex,
+                        accentColorHex = widgetTheme["accentColorHex"] ?: widgetData.accentColorHex,
+                        backgroundColorHex = widgetTheme["backgroundColorHex"] ?: widgetData.backgroundColorHex,
+                        surfaceColorHex = widgetTheme["surfaceColorHex"] ?: widgetData.surfaceColorHex,
+                        textColorHex = widgetTheme["textColorHex"] ?: widgetData.textColorHex,
+                        textSecondaryColorHex = widgetTheme["textSecondaryColorHex"] ?: widgetData.textSecondaryColorHex
+                    )
+                } else {
+                    android.util.Log.d("WidgetDebug", "CountdownWidget: Using FALLBACK theme")
+                    widgetData.toWidgetTheme()
+                }
+                
+                android.util.Log.d("WidgetDebug", "CountdownWidget final primary color hex: ${themeToUse.primaryColorHex}")
+                
+                CountdownContent(
+                    data = widgetData.toCountdownData(),
+                    theme = themeToUse,
+                    isPreview = false
+                )
+            }
         }
     }
 
-    private fun parseWidgetData(jsonString: String): CountdownData {
+    private fun parseWidgetData(jsonString: String): WidgetData {
         val json = JSONObject(jsonString)
-        return CountdownData(
+        return WidgetData(
             nextPrayerName = json.optString("nextPrayerName", ""),
             nextPrayerTime = json.optLong("nextPrayerTime", 0L),
             isRtl = json.getBoolean("isRtl"),
-            lastUpdated = json.getLong("lastUpdated")
+            lastUpdated = json.getLong("lastUpdated"),
+            primaryColorHex = json.optString("primaryColorHex", "#2E7D32"),
+            accentColorHex = json.optString("accentColorHex", "#FFD54F"),
+            backgroundColorHex = json.optString("backgroundColorHex", "#0D1117"),
+            surfaceColorHex = json.optString("surfaceColorHex", "#161B22"),
+            textColorHex = json.optString("textColorHex", "#FFFFFF"),
+            textSecondaryColorHex = json.optString("textSecondaryColorHex", "#8B949E")
         )
     }
 
-    data class CountdownData(
+    data class WidgetData(
         val nextPrayerName: String,
         val nextPrayerTime: Long,
         val isRtl: Boolean,
-        val lastUpdated: Long
-    )
-
-    @Composable
-    private fun CountdownWidgetRoot(data: CountdownData?, size: DpSize) {
-        val accentGold = Color(0xFFFFD54F)
-        val textPrimary = Color(0xFFF0F6FC)
-
-        val width = size.width
-        val height = size.height
-        
-        val isTiny = width < 110.dp || height < 110.dp
-        val isWide = width > 150.dp && height < 110.dp
-        val isSmall = !isTiny && (width < 140.dp || height < 140.dp)
-        val isLarge = width >= 200.dp && height >= 200.dp
-
-        val padding = when {
-            isTiny -> 6.dp
-            isSmall -> 12.dp
-            isLarge -> 24.dp
-            else -> 18.dp
-        }
-
-        Column(
-            modifier = GlanceModifier
-                .fillMaxSize()
-                .background(ImageProvider(R.drawable.widget_background))
-                .clickable(actionStartActivity<MainActivity>())
-                .padding(padding),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Check for stale data (> 24h) or missing data
-            if (data == null || data.nextPrayerTime == 0L || (System.currentTimeMillis() - data.lastUpdated > 24 * 60 * 60 * 1000)) {
-                Text(
-                    text = "Open App",
-                    style = TextStyle(
-                        color = ColorProvider(textPrimary),
-                        fontSize = if (isTiny) 10.sp else 14.sp,
-                        textAlign = TextAlign.Center
-                    )
-                )
-                return@Column
-            }
-
-            // Calculate display time - ONLY show time to NEXT prayer (no plus/minus)
-            val prayerCal = Calendar.getInstance().apply { timeInMillis = data.nextPrayerTime }
-            val nowCal = Calendar.getInstance()
-
-            prayerCal.set(Calendar.SECOND, 0)
-            prayerCal.set(Calendar.MILLISECOND, 0)
-            nowCal.set(Calendar.SECOND, 0)
-            nowCal.set(Calendar.MILLISECOND, 0)
-
-            val totalMinutes = (prayerCal.timeInMillis - nowCal.timeInMillis) / 60000
-            
-            // Only show time if it's in the future (totalMinutes > 0)
-            // If totalMinutes <= 0, the nextPrayerTime should already be for tomorrow's Fajr
-            // (calculated in WidgetUpdateService), so we should rarely see negative values
-            val statusText = if (totalMinutes > 0) {
-                val hours = totalMinutes / 60
-                val minutes = totalMinutes % 60
-                if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
-            } else if (totalMinutes == 0L) {
-                "Now"
-            } else {
-                // Data is stale - next prayer time is in the past
-                // This shouldn't happen if WidgetUpdateService is working correctly
-                // Show a message to prompt user to open the app
-                Text(
-                    text = "Update Required",
-                    style = TextStyle(
-                        color = ColorProvider(textPrimary),
-                        fontSize = if (isTiny) 10.sp else 12.sp,
-                        textAlign = TextAlign.Center
-                    )
-                )
-                return@Column
-            }
-
-            if (isWide) {
-                WideLayout(data, statusText, accentGold, textPrimary)
-            } else if (isTiny) {
-                TinyLayout(data, statusText, accentGold, textPrimary)
-            } else {
-                // Standard/Large Vertical layout
-                val label = if (data.isRtl) "الصلاة القادمة" else "Next Prayer"
-                if (!isSmall) {
-                    Text(
-                        text = label,
-                        style = TextStyle(color = ColorProvider(textPrimary), fontSize = 12.sp)
-                    )
-                }
-                
-                val nameFontSize = if (isSmall) 16.sp else if (isLarge) 24.sp else 20.sp
-                
-                Text(
-                    text = data.nextPrayerName,
-                    style = TextStyle(
-                        color = ColorProvider(accentGold), 
-                        fontSize = nameFontSize, 
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
-                )
-                
-                Spacer(modifier = GlanceModifier.height(if (isSmall) 4.dp else 8.dp))
-                
-                val timeFontSize = if (isSmall) 20.sp else if (isLarge) 36.sp else 28.sp
-
-                Text(
-                    text = statusText,
-                    style = TextStyle(
-                        color = ColorProvider(textPrimary), 
-                        fontSize = timeFontSize, 
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
-                )
-            }
-        }
-    }
-
-    @Composable
-    private fun TinyLayout(
-        data: CountdownData, 
-        statusText: String,
-        accentGold: Color, 
-        textPrimary: Color
+        val lastUpdated: Long,
+        val primaryColorHex: String = "#2E7D32",
+        val accentColorHex: String = "#FFD54F",
+        val backgroundColorHex: String = "#0D1117",
+        val surfaceColorHex: String = "#161B22",
+        val textColorHex: String = "#FFFFFF",
+        val textSecondaryColorHex: String = "#8B949E"
     ) {
-        Column(
-            modifier = GlanceModifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = data.nextPrayerName,
-                style = TextStyle(
-                    color = ColorProvider(accentGold), 
-                    fontSize = 12.sp, 
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-            )
-            Spacer(modifier = GlanceModifier.height(4.dp))
-            Box(
-                modifier = GlanceModifier
-                    .width(40.dp)
-                    .height(1.dp)
-                    .background(ColorProvider(accentGold))
-            ) {}
-            Spacer(modifier = GlanceModifier.height(4.dp))
-            Text(
-                text = statusText,
-                style = TextStyle(
-                    color = ColorProvider(textPrimary), 
-                    fontSize = 16.sp, 
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-            )
-        }
-    }
+        fun toCountdownData(): CountdownData = CountdownData(
+            nextPrayerName = nextPrayerName,
+            nextPrayerTime = nextPrayerTime,
+            isRtl = isRtl,
+            lastUpdated = lastUpdated
+        )
 
-    @Composable
-    private fun WideLayout(
-        data: CountdownData, 
-        statusText: String,
-        accentGold: Color, 
-        textPrimary: Color
-    ) {
-        Row(
-            modifier = GlanceModifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (data.isRtl) {
-                Text(
-                    text = statusText,
-                    style = TextStyle(
-                        color = ColorProvider(textPrimary), 
-                        fontSize = 18.sp, 
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-                Spacer(modifier = GlanceModifier.width(12.dp))
-                Box(
-                    modifier = GlanceModifier
-                        .width(1.dp)
-                        .height(20.dp)
-                        .background(ColorProvider(accentGold))
-                ) {}
-                Spacer(modifier = GlanceModifier.width(12.dp))
-                Text(
-                    text = data.nextPrayerName,
-                    style = TextStyle(
-                        color = ColorProvider(accentGold), 
-                        fontSize = 16.sp, 
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-            } else {
-                Text(
-                    text = data.nextPrayerName,
-                    style = TextStyle(
-                        color = ColorProvider(accentGold), 
-                        fontSize = 16.sp, 
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-                Spacer(modifier = GlanceModifier.width(12.dp))
-                Box(
-                    modifier = GlanceModifier
-                        .width(1.dp)
-                        .height(20.dp)
-                        .background(ColorProvider(accentGold))
-                ) {}
-                Spacer(modifier = GlanceModifier.width(12.dp))
-                Text(
-                    text = statusText,
-                    style = TextStyle(
-                        color = ColorProvider(textPrimary), 
-                        fontSize = 18.sp, 
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-            }
-        }
+        fun toWidgetTheme(): WidgetTheme = WidgetTheme(
+            primaryColorHex = primaryColorHex,
+            accentColorHex = accentColorHex,
+            backgroundColorHex = backgroundColorHex,
+            surfaceColorHex = surfaceColorHex,
+            textColorHex = textColorHex,
+            textSecondaryColorHex = textSecondaryColorHex
+        )
     }
 }

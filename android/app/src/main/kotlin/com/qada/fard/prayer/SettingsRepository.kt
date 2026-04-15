@@ -84,6 +84,55 @@ class SettingsRepository(private val context: Context) {
         return prefs.getString("flutter.hijri_date_cache", null)
     }
 
+    /**
+     * Save widget theme to SharedPreferences.
+     * This allows widgets to read independent theme colors.
+     */
+    fun saveWidgetTheme(themeData: Map<String, Any>) {
+        prefs.edit().apply {
+            putString("flutter.widget_theme_primary", themeData["primaryColorHex"] as? String ?: "#2E7D32")
+            putString("flutter.widget_theme_accent", themeData["accentColorHex"] as? String ?: "#FFD54F")
+            putString("flutter.widget_theme_background", themeData["backgroundColorHex"] as? String ?: "#0D1117")
+            putString("flutter.widget_theme_surface", themeData["surfaceColorHex"] as? String ?: "#161B22")
+            putString("flutter.widget_theme_text", themeData["textColorHex"] as? String ?: "#FFFFFF")
+            putString("flutter.widget_theme_text_secondary", themeData["textSecondaryColorHex"] as? String ?: "#8B949E")
+            putLong("flutter/widget_theme_timestamp", System.currentTimeMillis())
+            commit()
+        }
+    }
+
+    /**
+     * Get widget theme from SharedPreferences.
+     * Returns map with 6 color hex strings.
+     */
+    fun getWidgetTheme(): Map<String, String> {
+        return mapOf(
+            "primaryColorHex" to (prefs.getString("flutter.widget_theme_primary", "#2E7D32") ?: "#2E7D32"),
+            "accentColorHex" to (prefs.getString("flutter.widget_theme_accent", "#FFD54F") ?: "#FFD54F"),
+            "backgroundColorHex" to (prefs.getString("flutter.widget_theme_background", "#0D1117") ?: "#0D1117"),
+            "surfaceColorHex" to (prefs.getString("flutter.widget_theme_surface", "#161B22") ?: "#161B22"),
+            "textColorHex" to (prefs.getString("flutter.widget_theme_text", "#FFFFFF") ?: "#FFFFFF"),
+            "textSecondaryColorHex" to (prefs.getString("flutter.widget_theme_text_secondary", "#8B949E") ?: "#8B949E")
+        )
+    }
+
+    /**
+     * Clear widget theme from SharedPreferences.
+     * Widgets will fall back to app theme colors.
+     */
+    fun clearWidgetTheme() {
+        prefs.edit().apply {
+            remove("flutter.widget_theme_primary")
+            remove("flutter.widget_theme_accent")
+            remove("flutter.widget_theme_background")
+            remove("flutter.widget_theme_surface")
+            remove("flutter.widget_theme_text")
+            remove("flutter.widget_theme_text_secondary")
+            remove("flutter.widget_theme_timestamp")
+            commit()
+        }
+    }
+
     private fun mapMethodStringToId(method: String): Int {
         return when (method) {
             "muslim_league" -> CalculationContract.METHOD_MUSLIM_WORLD_LEAGUE

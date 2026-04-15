@@ -19,6 +19,13 @@ WidgetDataModel _$WidgetDataModelFromJson(Map<String, dynamic> json) =>
       nextPrayerName: json['nextPrayerName'] as String?,
       nextPrayerTime: (json['nextPrayerTime'] as num?)?.toInt(),
       lastUpdated: (json['lastUpdated'] as num).toInt(),
+      primaryColorHex: json['primaryColorHex'] as String? ?? '#2E7D32',
+      accentColorHex: json['accentColorHex'] as String? ?? '#FFD54F',
+      backgroundColorHex: json['backgroundColorHex'] as String? ?? '#0D1117',
+      surfaceColorHex: json['surfaceColorHex'] as String? ?? '#161B22',
+      textColorHex: json['textColorHex'] as String? ?? '#FFFFFF',
+      textSecondaryColorHex:
+          json['textSecondaryColorHex'] as String? ?? '#8B949E',
     );
 
 Map<String, dynamic> _$WidgetDataModelToJson(WidgetDataModel instance) =>
@@ -32,6 +39,12 @@ Map<String, dynamic> _$WidgetDataModelToJson(WidgetDataModel instance) =>
       'nextPrayerName': instance.nextPrayerName,
       'nextPrayerTime': instance.nextPrayerTime,
       'lastUpdated': instance.lastUpdated,
+      'primaryColorHex': instance.primaryColorHex,
+      'accentColorHex': instance.accentColorHex,
+      'backgroundColorHex': instance.backgroundColorHex,
+      'surfaceColorHex': instance.surfaceColorHex,
+      'textColorHex': instance.textColorHex,
+      'textSecondaryColorHex': instance.textSecondaryColorHex,
     };
 
 PrayerTimeItem _$PrayerTimeItemFromJson(Map<String, dynamic> json) =>

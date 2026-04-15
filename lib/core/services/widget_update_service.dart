@@ -1,13 +1,15 @@
 import 'dart:convert';
+
+import 'package:fard/core/constants/calculation_contract.dart';
 import 'package:fard/core/extensions/hijri_extension.dart';
 import 'package:fard/core/models/widget_data_model.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
+import 'package:fard/core/theme/theme_presets.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:home_widget/home_widget.dart';
-import 'package:fard/core/constants/calculation_contract.dart';
-import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -89,6 +91,36 @@ class WidgetUpdateService {
       nextPrayerTime = tomorrowPrayerTimes.fajr;
     }
 
+    // The widget follows system brightness for a seamless zero-config experience
+    final targetBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+
+    // Get current theme colors
+    Color seedColor = const Color(0xFF2E7D32);
+    
+    final themePresetId = _settingsProvider.themePresetId;
+    if (themePresetId == 'custom') {
+      final customColors = _settingsProvider.customThemeColors;
+      if (customColors != null && customColors['primary'] != null) {
+        seedColor = _hexToColor(customColors['primary']!);
+      }
+    } else {
+      final preset = ThemePresets.getById(themePresetId);
+      seedColor = preset.primaryColor;
+    }
+
+    // Use ColorScheme.fromSeed to derive a harmonious and high-contrast palette
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: seedColor,
+      brightness: targetBrightness,
+    );
+
+    final primaryColor = _colorToHex(colorScheme.primary);
+    final accentColor = _colorToHex(colorScheme.secondary); // Using secondary as Accent
+    final backgroundColor = _colorToHex(colorScheme.surface); // Use surface as background for consistency
+    final surfaceColor = _colorToHex(colorScheme.surfaceContainerHighest);
+    final textColor = _colorToHex(colorScheme.onSurface); 
+    final textSecondaryColor = _colorToHex(colorScheme.onSurfaceVariant);
+
     final data = WidgetDataModel(
       gregorianDate: DateFormat('d MMMM yyyy', lang).format(now),
       hijriDate: hijriDate.toVisualString(lang),
@@ -98,6 +130,12 @@ class WidgetUpdateService {
       nextPrayerName: nextPrayerName,
       nextPrayerTime: nextPrayerTime.millisecondsSinceEpoch,
       lastUpdated: now.millisecondsSinceEpoch,
+      primaryColorHex: primaryColor,
+      accentColorHex: accentColor,
+      backgroundColorHex: backgroundColor,
+      surfaceColorHex: surfaceColor,
+      textColorHex: textColor,
+      textSecondaryColorHex: textSecondaryColor,
       prayers: [
         _createItem('fajr', prayerTimes.fajr, lang),
         _createItem('dhuhr', prayerTimes.dhuhr, lang),
@@ -113,13 +151,25 @@ class WidgetUpdateService {
     debugPrint(
       'WidgetUpdateService: Next prayer: $nextPrayerName at $nextPrayerTime',
     );
+    debugPrint(
+      'WidgetUpdateService: Target brightness: $targetBrightness',
+    );
+    debugPrint(
+      'WidgetUpdateService: Primary color: $primaryColor, Background: $backgroundColor',
+    );
 
     final jsonData = jsonEncode(data.toJson());
-    const key = 'prayer_data';
+    final key = '${CalculationContract.prefPrefix}prayer_data';
+
+    // DEBUG: Print the actual JSON being saved
+    final jsonForDebug = jsonDecode(jsonData) as Map<String, dynamic>;
+    debugPrint(
+      'WidgetUpdateService: JSON primaryColorHex=${jsonForDebug['primaryColorHex']}, backgroundColorHex=${jsonForDebug['backgroundColorHex']}',
+    );
 
     // Save to HomeWidget (for native background refresh if needed)
     try {
-      await HomeWidget.saveWidgetData('prayer_data', jsonData);
+      await HomeWidget.saveWidgetData(key, jsonData);
     } catch (e) {
       debugPrint('WidgetUpdateService: Error saving to HomeWidget: $e');
     }
@@ -136,9 +186,10 @@ class WidgetUpdateService {
 
     // 🚀 CRITICAL FIX: Cache Hijri date separately for native worker
     // This prevents the native worker from showing "Loading..." placeholder
+    final hijriKey = '${CalculationContract.prefPrefix}hijri_date_cache';
     try {
-      await _prefs.setString('flutter.hijri_date_cache', data.hijriDate);
-      await HomeWidget.saveWidgetData('hijri_date', data.hijriDate);
+      await _prefs.setString(hijriKey, data.hijriDate);
+      await HomeWidget.saveWidgetData('${CalculationContract.prefPrefix}hijri_date', data.hijriDate);
       debugPrint('WidgetUpdateService: Cached Hijri date: ${data.hijriDate}');
     } catch (e) {
       debugPrint('WidgetUpdateService: Error caching Hijri date: $e');
@@ -150,7 +201,52 @@ class WidgetUpdateService {
     await _syncNative(jsonData);
     debugPrint('WidgetUpdateService: Settings synced to native');
 
+    // 🚀 CRITICAL FIX: Explicitly request Glance widget update
+    // This ensures Android calls provideGlance() again with new theme data
+    try {
+      await HomeWidget.updateWidget(
+        name: 'PrayerWidget',
+        androidName: 'PrayerWidget',
+      );
+      debugPrint('WidgetUpdateService: Requested PrayerWidget update');
+    } catch (e) {
+      debugPrint('WidgetUpdateService: Error updating PrayerWidget: $e');
+    }
+
+    try {
+      await HomeWidget.updateWidget(
+        name: 'NextPrayerCountdownWidget',
+        androidName: 'NextPrayerCountdownWidget',
+      );
+      debugPrint('WidgetUpdateService: Requested CountdownWidget update');
+    } catch (e) {
+      debugPrint('WidgetUpdateService: Error updating CountdownWidget: $e');
+    }
+
     debugPrint('WidgetUpdateService: Update complete!');
+  }
+
+  /// Get saved widget theme from native SharedPreferences
+  Future<Map<String, String>?> getWidgetTheme() async {
+    try {
+      const channel = MethodChannel('com.qada.fard/widget_theme');
+      final result = await channel.invokeMapMethod<String, String>('getWidgetTheme');
+      return result;
+    } catch (e) {
+      debugPrint('WidgetUpdateService: Error getting widget theme: $e');
+      return null;
+    }
+  }
+
+  /// Save widget theme to native SharedPreferences and apply
+  Future<void> applyWidgetTheme(Map<String, String> themeMap) async {
+    try {
+      const channel = MethodChannel('com.qada.fard/widget_theme');
+      await channel.invokeMethod('applyWidgetTheme', themeMap);
+    } catch (e) {
+      debugPrint('WidgetUpdateService: Error applying widget theme: $e');
+      rethrow;
+    }
   }
 
   Future<void> _syncNative(String prayerDataJson) async {
@@ -260,5 +356,18 @@ class WidgetUpdateService {
           return id;
       }
     }
+  }
+
+  /// Convert hex string to Color
+  Color _hexToColor(String hex) {
+    final buffer = StringBuffer();
+    if (hex.length == 6 || hex.length == 7) buffer.write('ff');
+    buffer.write(hex.replaceFirst('#', ''));
+    return Color(int.parse(buffer.toString(), radix: 16));
+  }
+
+  /// Convert Color to hex string
+  String _colorToHex(Color color) {
+    return '#${(color.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
   }
 }

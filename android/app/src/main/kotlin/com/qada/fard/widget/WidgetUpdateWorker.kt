@@ -14,6 +14,7 @@ import com.qada.fard.prayer.PrayerTimesCalculator
 import com.batoulapps.adhan.PrayerTimes
 import org.json.JSONObject
 import java.util.Calendar
+import java.util.Locale
 
 class WidgetUpdateWorker(
     appContext: Context,
@@ -52,7 +53,7 @@ class WidgetUpdateWorker(
                 // Save to SharedPreferences (this is what the widgets read from)
                 // Use the Flutter SharedPreferences with the correct key prefix
                 val prefs = applicationContext.getSharedPreferences(
-                    "FlutterSharedPreferences", 
+                    "FlutterSharedPreferences",
                     Context.MODE_PRIVATE
                 )
                 prefs.edit().putString("flutter.prayer_data", widgetData).apply()
@@ -182,9 +183,9 @@ class WidgetUpdateWorker(
         return if (lang == "en") {
             val period = if (hour < 12) "AM" else "PM"
             val h = if (hour == 0 || hour == 12) 12 else hour % 12
-            String.format("%d:%02d %s", h, minute, period)
+            String.format(Locale.US, "%d:%02d %s", h, minute, period)
         } else {
-            String.format("%02d:%02d", hour, minute)
+            String.format(Locale.US, "%02d:%02d", hour, minute)
         }
     }
     

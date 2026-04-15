@@ -1319,4 +1319,184 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get tapToCustomize => 'اضغط للتخصيص';
+
+  @override
+  String get werdHistory => 'سجل الورد';
+
+  @override
+  String get werdNoHistoryYet => 'لا يوجد سجل حتى الآن';
+
+  @override
+  String get werdNoReadingThisMonth => 'لا يوجد قراءة في هذا الشهر';
+
+  @override
+  String get werdStartReading => 'ابدأ القراءة';
+
+  @override
+  String get werdStartReadingDesc => 'ابدأ بقراءة القرآن لتتبع تقدمك هنا';
+
+  @override
+  String get werdDetails => 'التفاصيل';
+
+  @override
+  String get werdDays => 'أيام';
+
+  @override
+  String get werdMissed => 'فات';
+
+  @override
+  String get werdCurrent => 'الحالي';
+
+  @override
+  String get werdMonthlySummary => 'ملخص الشهر';
+
+  @override
+  String get werdAyahsLabel => 'آيات';
+
+  @override
+  String get werdPagesLabel => 'صفحات';
+
+  @override
+  String get werdJuzLabel => 'أجزاء';
+
+  @override
+  String get werdDailyAvg => 'المتوسط اليومي';
+
+  @override
+  String get werdSessionDetails => 'تفاصيل الجلسة';
+
+  @override
+  String get werdSameAyah => 'نفس الآية';
+
+  @override
+  String werdSessionNumber(int number) {
+    return 'الجلسة $number';
+  }
+
+  @override
+  String get werdMinSuffix => ' دقيقة';
+
+  @override
+  String get werdOlderEntryNote =>
+      'تفاصيل الجلسة غير متاحة لهذا اليوم (إدخال قديم)';
+
+  @override
+  String get werdToday => 'اليوم';
+
+  @override
+  String werdSummaryRead(
+    String ayahs,
+    String pages,
+    String startSurah,
+    String startAyah,
+    String endSurah,
+    String endAyah,
+  ) {
+    return 'قراءة $ayahs آية ($pages صفحة) من $startSurah $startAyah إلى $endSurah $endAyah';
+  }
+
+  @override
+  String get appearance => 'المظهر';
+
+  @override
+  String get prayerAndAzan => 'الصلاة والأذان';
+
+  @override
+  String get azkarSection => 'الأذكار';
+
+  @override
+  String get dataAndLocation => 'البيانات والموقع';
+
+  @override
+  String get widgetThemeMode => 'مظهر الويدجت';
+
+  @override
+  String get widgetThemeDark => 'داكن';
+
+  @override
+  String get widgetThemeLight => 'فاتح';
+
+  @override
+  String get widgetThemeFollowApp => 'متبع للتطبيق';
+
+  @override
+  String showSavedThemes(Object count) {
+    return 'إظهار المحفوظات ($count)';
+  }
+
+  @override
+  String get hideSavedThemes => 'إخفاء المحفوظات';
+
+  @override
+  String get languageDesc => 'التبديل بين الإنجليزية والعربية';
+
+  @override
+  String get widgetPreviewTitle => 'معاينة الويدجت';
+
+  @override
+  String get prayerSchedule => 'مواقيت الصلاة';
+
+  @override
+  String get countdown => 'العد التنازلي';
+
+  @override
+  String get widgetColorsIndependent =>
+      'ألوان الويدجت (مستقلة عن مظهر التطبيق)';
+
+  @override
+  String get widgetPrimaryColor => 'اللون الأساسي';
+
+  @override
+  String get widgetAccentColor => 'اللون المميز';
+
+  @override
+  String get widgetBackgroundColor => 'لون خلفية الويدجت';
+
+  @override
+  String get widgetTextColor => 'لون النص';
+
+  @override
+  String get widgetSecondaryTextColor => 'لون النص الثانوي';
+
+  @override
+  String get widgetThemeApplied => 'تم تطبيق مظهر الويدجت!';
+
+  @override
+  String widgetThemeApplyFailed(String error) {
+    return 'فشل تطبيق مظهر الويدجت: $error';
+  }
+
+  @override
+  String get applyToWidget => 'تطبيق على الويدجت';
+
+  @override
+  String pickColorTitle(String label) {
+    return 'اختر لون $label';
+  }
+
+  @override
+  String get presetColors => 'ألوان جاهزة';
+
+  @override
+  String get customColor => 'لون مخصص';
+
+  @override
+  String customColorTitle(String label) {
+    return '$label مخصص';
+  }
+
+  @override
+  String get hexColor => 'رمز اللون (Hex)';
+
+  @override
+  String get pickAColor => 'اختر لوناً:';
+
+  @override
+  String get widgetPreviewDate => 'الثلاثاء، ١٤ أبريل ٢٠٢٦';
+
+  @override
+  String get widgetPreviewHijriDate => '٢٦ شوال ١٤٤٧';
+
+  @override
+  String get widgetPreviewCountdown => '٣س ٤٥د';
 }

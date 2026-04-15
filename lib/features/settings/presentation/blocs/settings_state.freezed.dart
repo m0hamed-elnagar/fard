@@ -218,7 +218,7 @@ return $default(_that.locale,_that.latitude,_that.longitude,_that.cityName,_that
 
 
 class _SettingsState implements SettingsState {
-  const _SettingsState({required this.locale, this.latitude, this.longitude, this.cityName, this.calculationMethod = 'muslim_league', this.madhab = 'shafi', this.morningAzkarTime = '05:00', this.eveningAzkarTime = '18:00', this.isAfterSalahAzkarEnabled = false, final  List<AzkarReminder> reminders = const [], final  List<SalaahSettings> salaahSettings = const [], this.isAzanVoiceDownloading = false, this.isQadaEnabled = true, this.hijriAdjustment = 0, this.themePresetId = 'emerald', final  Map<String, String>? customThemeColors, final  List<CustomTheme> savedCustomThemes = const [], this.activeCustomThemeId, this.lastLocationStatus}): _reminders = reminders,_salaahSettings = salaahSettings,_customThemeColors = customThemeColors,_savedCustomThemes = savedCustomThemes;
+  const _SettingsState({required this.locale, this.latitude, this.longitude, this.cityName, this.calculationMethod = 'muslim_league', this.madhab = 'shafi', this.morningAzkarTime = '05:00', this.eveningAzkarTime = '18:00', this.isAfterSalahAzkarEnabled = false, final  List<AzkarReminder> reminders = const [], final  List<SalaahSettings> salaahSettings = const [], this.isAzanVoiceDownloading = false, this.isQadaEnabled = true, this.hijriAdjustment = 0, this.themePresetId = 'emerald', final  Map<String, String>? customThemeColors, final  List<CustomTheme> savedCustomThemes = const [], this.activeCustomThemeId, this.lastLocationStatus = null}): _reminders = reminders,_salaahSettings = salaahSettings,_customThemeColors = customThemeColors,_savedCustomThemes = savedCustomThemes;
   
 
 @override final  Locale locale;
@@ -265,7 +265,7 @@ class _SettingsState implements SettingsState {
 }
 
 @override final  String? activeCustomThemeId;
-@override final  LocationStatus? lastLocationStatus;
+@override@JsonKey() final  LocationStatus? lastLocationStatus;
 
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.

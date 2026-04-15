@@ -537,5 +537,95 @@
   "pickAccentColor": "Pick Accent Color",
   "resetToDefault": "Reset to Default",
   "applyTheme": "Apply Theme",
-  "tapToCustomize": "Tap to customize"
+  "tapToCustomize": "Tap to customize",
+  "werdHistory": "Werd History",
+  "werdNoHistoryYet": "No history yet",
+  "werdNoReadingThisMonth": "No reading this month",
+  "werdStartReading": "Start Reading",
+  "werdStartReadingDesc": "Start reading Quran to track your progress here",
+  "werdDetails": "Details",
+  "werdDays": "days",
+  "werdMissed": "Missed",
+  "werdCurrent": "Current",
+  "werdMonthlySummary": "Monthly Summary",
+  "werdAyahsLabel": "Ayahs",
+  "werdPagesLabel": "Pages",
+  "werdJuzLabel": "Juz",
+  "werdDailyAvg": "Daily Avg",
+  "werdSessionDetails": "Session Details",
+  "werdSameAyah": "Same ayah",
+  "werdSessionNumber": "Session {number}",
+  "@werdSessionNumber": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "werdMinSuffix": " min",
+  "werdOlderEntryNote": "Session details not available for this day (older entry)",
+  "werdToday": "Today",
+  "werdSummaryRead": "Read {ayahs} ayahs ({pages} pages) from {startSurah} {startAyah} to {endSurah} {endAyah}",
+  "@werdSummaryRead": {
+    "placeholders": {
+      "ayahs": { "type": "String" },
+      "pages": { "type": "String" },
+      "startSurah": { "type": "String" },
+      "startAyah": { "type": "String" },
+      "endSurah": { "type": "String" },
+      "endAyah": { "type": "String" }
+    }
+  },
+  "appearance": "Appearance",
+  "prayerAndAzan": "Prayer & Azan",
+  "azkarSection": "Azkar",
+  "dataAndLocation": "Data & Location",
+  "widgetThemeMode": "Widget Theme",
+  "widgetThemeDark": "Dark",
+  "widgetThemeLight": "Light",
+  "widgetThemeFollowApp": "Follow App",
+  "showSavedThemes": "Show saved themes ({count})",
+  "hideSavedThemes": "Hide saved themes",
+  "language": "Language",
+  "languageDesc": "Switch between English and Arabic",
+  "widgetPreviewTitle": "Widget Preview",
+  "prayerSchedule": "Prayer Schedule",
+  "countdown": "Countdown",
+  "widgetColorsIndependent": "Widget Colors (Independent from App Theme)",
+  "widgetPrimaryColor": "Primary Color",
+  "widgetAccentColor": "Accent Color",
+  "widgetBackgroundColor": "Background Color",
+  "widgetTextColor": "Text Color",
+  "widgetSecondaryTextColor": "Secondary Text Color",
+  "widgetThemeApplied": "Widget theme applied!",
+  "widgetThemeApplyFailed": "Failed to apply widget theme: {error}",
+  "@widgetThemeApplyFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "applyToWidget": "Apply to Widget",
+  "pickColorTitle": "Pick {label} Color",
+  "@pickColorTitle": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "presetColors": "Preset Colors",
+  "customColor": "Custom Color",
+  "customColorTitle": "Custom {label}",
+  "@customColorTitle": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "hexColor": "Hex Color",
+  "pickAColor": "Pick a color:",
+  "widgetPreviewDate": "Tuesday, Apr 14, 2026",
+  "widgetPreviewHijriDate": "26 Shawwal 1447",
+  "widgetPreviewCountdown": "3h 45m"
 }

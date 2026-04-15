@@ -7,6 +7,7 @@ import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
 import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/core/extensions/number_extension.dart';
 import 'package:fard/core/extensions/quran_extension.dart';
+import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/werd/domain/entities/werd_history_entry.dart';
 import 'package:fard/features/werd/domain/entities/werd_progress.dart';
 import 'package:fard/features/werd/domain/entities/reading_segment.dart';
@@ -30,11 +31,12 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
   @override
   Widget build(BuildContext context) {
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          isAr ? 'سجل الورد' : 'Werd History',
+          l10n.werdHistory,
           style: GoogleFonts.amiri(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -56,7 +58,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    isAr ? 'لا يوجد سجل حتى الآن' : 'No history yet',
+                    l10n.werdNoHistoryYet,
                     style: GoogleFonts.amiri(fontSize: 18, color: context.onSurfaceVariantColor),
                   ),
                 ],
@@ -120,7 +122,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
           if (!hasData) {
             return Column(
               children: [
-                _buildMonthNavigator(isAr),
+                _buildMonthNavigator(l10n, isAr),
                 const SizedBox(height: 16),
                 Expanded(
                   child: Center(
@@ -136,7 +138,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                           ),
                           const SizedBox(height: 24),
                           Text(
-                            isAr ? 'لا يوجد قراءة في هذا الشهر' : 'No reading this month',
+                            l10n.werdNoReadingThisMonth,
                             style: GoogleFonts.amiri(
                               fontSize: 20,
                               color: context.onSurfaceVariantColor,
@@ -145,9 +147,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            isAr
-                                ? 'ابدأ بقراءة القرآن لتتبع تقدمك هنا'
-                                : 'Start reading Quran to track your progress here',
+                            l10n.werdStartReadingDesc,
                             style: GoogleFonts.amiri(
                               fontSize: 14,
                               color: context.onSurfaceVariantColor,
@@ -162,7 +162,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                                 Navigator.of(context).pop();
                               },
                               icon: const Icon(Icons.play_arrow_rounded),
-                              label: Text(isAr ? 'ابدأ القراءة' : 'Start Reading'),
+                              label: Text(l10n.werdStartReading),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: context.secondaryColor,
                                 foregroundColor: context.theme.colorScheme.onSecondary,
@@ -188,9 +188,10 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              _buildMonthNavigator(isAr),
+              _buildMonthNavigator(l10n, isAr),
               const SizedBox(height: 16),
               _buildSummaryCard(
+                l10n,
                 context,
                 isAr,
                 periodTotalAyahs,
@@ -216,7 +217,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        isAr ? 'التفاصيل' : 'Details',
+                        l10n.werdDetails,
                         style: GoogleFonts.outfit(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
@@ -237,8 +238,8 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                       ),
                       child: Text(
                         isAr
-                            ? '${periodDays.toArabicIndic()} ${isAr ? 'أيام' : 'days'}'
-                            : '$periodDays days',
+                            ? '${periodDays.toArabicIndic()} ${l10n.werdDays}'
+                            : '$periodDays ${l10n.werdDays}',
                         style: GoogleFonts.outfit(
                           fontSize: 13,
                           color: context.outlineVariantColor,
@@ -252,6 +253,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
               // Today Item
               if (todayMatches && progress.totalAmountReadToday > 0)
                 _buildHistoryItem(
+                  l10n,
                   context,
                   isAr,
                   today,
@@ -260,6 +262,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                   goal: state.goal,
                 ),
               ..._buildListWithBreaks(
+                l10n,
                 context,
                 isAr,
                 filteredHistory,
@@ -276,6 +279,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
   }
 
   List<Widget> _buildListWithBreaks(
+    AppLocalizations l10n,
     BuildContext context,
     bool isAr,
     List<MapEntry<String, WerdHistoryEntry>> items,
@@ -296,12 +300,13 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
             )
             .inDays;
         if (diff > 1) {
-          widgets.add(_buildStreakBreak(isAr));
+          widgets.add(_buildStreakBreak(l10n, isAr));
         }
       }
 
       widgets.add(
         _buildHistoryItem(
+          l10n,
           context,
           isAr,
           currentDate,
@@ -315,7 +320,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
     return widgets;
   }
 
-  Widget _buildStreakBreak(bool isAr) {
+  Widget _buildStreakBreak(AppLocalizations l10n, bool isAr) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
@@ -354,7 +359,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  isAr ? 'انقطاع' : 'Missed',
+                  l10n.werdMissed,
                   style: GoogleFonts.outfit(
                     fontSize: 12,
                     color: context.errorColor,
@@ -382,7 +387,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
       ),
     );
   }
-  Widget _buildMonthNavigator(bool isAr) {
+  Widget _buildMonthNavigator(AppLocalizations l10n, bool isAr) {
     final now = DateTime.now();
     final isCurrentMonth = _focusedDate.year == now.year &&
         _focusedDate.month == now.month;
@@ -439,7 +444,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                 ),
               ),
               child: Text(
-                isAr ? 'الحالي' : 'Current',
+                l10n.werdCurrent,
                 style: GoogleFonts.outfit(
                   fontSize: 10,
                   color: context.primaryContainerColor,
@@ -562,6 +567,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
   }
 
   Widget _buildSummaryCard(
+    AppLocalizations l10n,
     BuildContext context,
     bool isAr,
     int totalAyahs,
@@ -611,7 +617,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
               ),
               const SizedBox(width: 6),
               Text(
-                isAr ? 'ملخص الشهر' : 'Monthly Summary',
+                l10n.werdMonthlySummary,
                 style: GoogleFonts.outfit(
                   fontSize: 14,
                   color: context.onSurfaceColor,
@@ -635,7 +641,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                         : (constraints.maxWidth - 24) / 3,
                     child: _buildHeroStatItem(
                       context,
-                      isAr ? 'الآيات' : 'Ayahs',
+                      l10n.werdAyahsLabel,
                       totalAyahs.toArabicIndic(),
                       Icons.auto_stories_rounded,
                       isSelected: _displayUnit == WerdUnit.ayah,
@@ -648,7 +654,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                         : (constraints.maxWidth - 24) / 3,
                     child: _buildHeroStatItem(
                       context,
-                      isAr ? 'الصفحات' : 'Pages',
+                      l10n.werdPagesLabel,
                       _formatDecimal(totalPages, isAr, 1),
                       Icons.pages_rounded,
                       isSelected: _displayUnit == WerdUnit.page,
@@ -661,7 +667,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                         : (constraints.maxWidth - 24) / 3,
                     child: _buildHeroStatItem(
                       context,
-                      isAr ? 'الأجزاء' : 'Juz',
+                      l10n.werdJuzLabel,
                       _formatDecimal(totalJuz, isAr, 2),
                       Icons.grid_view_rounded,
                       isSelected: _displayUnit == WerdUnit.juz,
@@ -696,8 +702,8 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                 Flexible(
                   child: Text(
                     isAr
-                        ? "المتوسط اليومي: ${_displayUnit == WerdUnit.ayah ? avgValue.round().toArabicIndic() : _formatDecimal(avgValue, isAr, 2)} $unitLabel"
-                        : "Daily Avg: ${_displayUnit == WerdUnit.ayah ? avgValue.round() : _formatDecimal(avgValue, isAr, 2)} $unitLabel",
+                        ? "${l10n.werdDailyAvg}: ${_displayUnit == WerdUnit.ayah ? avgValue.round().toArabicIndic() : _formatDecimal(avgValue, isAr, 2)} $unitLabel"
+                        : "${l10n.werdDailyAvg}: ${_displayUnit == WerdUnit.ayah ? avgValue.round() : _formatDecimal(avgValue, isAr, 2)} $unitLabel",
                     style: GoogleFonts.outfit(
                       fontSize: 12,
                       color: context.outlineVariantColor,
@@ -783,6 +789,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
   }
 
   Widget _buildHistoryItem(
+    AppLocalizations l10n,
     BuildContext context,
     bool isAr,
     DateTime date,
@@ -800,7 +807,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
     switch (_displayUnit) {
       case WerdUnit.page:
         amount = entry.pagesRead;
-        unitLabel = isAr ? 'صفحة' : 'Page';
+        unitLabel = l10n.werdPagesLabel;
         decimals = 1;
         if (goal != null) {
           goalValue = QuranHizbProvider.calculateFractionalProgress(
@@ -811,7 +818,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
         break;
       case WerdUnit.juz:
         amount = entry.juzRead;
-        unitLabel = isAr ? 'جزء' : 'Juz';
+        unitLabel = l10n.werdJuzLabel;
         decimals = 2;
         if (goal != null) {
           goalValue = QuranHizbProvider.calculateFractionalProgress(
@@ -823,7 +830,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
       case WerdUnit.ayah:
       default:
         amount = entry.totalAyahsRead.toDouble();
-        unitLabel = isAr ? 'آية' : 'Ayah';
+        unitLabel = l10n.werdAyahsLabel;
         decimals = 0;
         goalValue = goal?.valueInAyahs.toDouble() ?? 0;
         break;
@@ -920,7 +927,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                     children: [
                       Text(
                         isToday
-                            ? (isAr ? 'اليوم' : 'Today')
+                            ? l10n.werdToday
                             : DateFormat('EEEE', isAr ? 'ar' : 'en').format(date),
                         style: GoogleFonts.amiri(
                           fontSize: 16,
@@ -1059,7 +1066,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                     const SizedBox(height: 8),
                     if (entry.sessions != null && entry.sessions!.isNotEmpty) ...[
                       Text(
-                        isAr ? 'تفاصيل الجلسات' : 'Session Details',
+                        l10n.werdSessionDetails,
                         style: GoogleFonts.amiri(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -1077,7 +1084,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                         final isSingleAyah = segment.startAyah == segment.endAyah;
                         final fromText = isAr ? '$startName، ${startPos[1].toArabicIndic()}' : '$startName ${startPos[1]}';
                         final toText = isSingleAyah
-                            ? (isAr ? 'نفس الآية' : 'Same ayah')
+                            ? l10n.werdSameAyah
                             : (isAr ? '$endName، ${endPos[1].toArabicIndic()}' : '$endName ${endPos[1]}');
 
                         return Container(
@@ -1101,12 +1108,14 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
-                                      isAr ? 'جلسة ${(index + 1).toArabicIndic()}' : 'Session ${index + 1}',
+                                      l10n.werdSessionNumber(index + 1),
                                       style: GoogleFonts.outfit(fontSize: 11, color: accentColor, fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                   Text(
-                                    isAr ? '${(segment.endAyah - segment.startAyah + 1).toString().toArabicIndic()} آية' : '${segment.endAyah - segment.startAyah + 1} ayahs',
+                                    isAr 
+                                        ? '${(segment.endAyah - segment.startAyah + 1).toString().toArabicIndic()} ${l10n.werdAyahsLabel}' 
+                                        : '${segment.endAyah - segment.startAyah + 1} ${l10n.werdAyahsLabel}',
                                     style: GoogleFonts.outfit(fontSize: 12, color: accentColor, fontWeight: FontWeight.bold),
                                   ),
                                 ],
@@ -1120,7 +1129,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                                     Text('${segment.formattedStartTime} - ${segment.formattedEndTime}', style: GoogleFonts.outfit(fontSize: 11, color: context.onSurfaceVariantColor.withValues(alpha: 0.6))),
                                     if (segment.durationMinutes != null) ...[
                                       const SizedBox(width: 4),
-                                      Text('(${segment.durationMinutes} min)', style: GoogleFonts.outfit(fontSize: 11, color: context.onSurfaceVariantColor.withValues(alpha: 0.6))),
+                                      Text('(${segment.durationMinutes}${l10n.werdMinSuffix})', style: GoogleFonts.outfit(fontSize: 11, color: context.onSurfaceVariantColor.withValues(alpha: 0.6))),
                                     ],
                                   ],
                                 ),
@@ -1161,7 +1170,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                isAr ? 'تفاصيل الجلسة غير متوفرة لهذا اليوم (بيانات قديمة)' : 'Session details not available for this day (older entry)',
+                                l10n.werdOlderEntryNote,
                                 style: GoogleFonts.outfit(fontSize: 12, color: context.outlineVariantColor),
                               ),
                             ),

@@ -22,10 +22,13 @@ import kotlinx.coroutines.withContext
 
 class MainActivity : AudioServiceActivity() {
     private val TAG = "MainActivity"
+    
+    // MethodChannel for widget theme persistence
+    private val WIDGET_THEME_CHANNEL = "com.qada.fard/widget_theme"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         // Request exact alarm permission on Android 13+ if needed
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             checkAndRequestExactAlarmPermission()
@@ -55,14 +58,116 @@ class MainActivity : AudioServiceActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
+        // Original settings channel
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CalculationContract.CHANNEL_NAME).setMethodCallHandler { call, result ->
             if (call.method == "settingsChanged") {
                 val settings = call.arguments as? Map<String, Any>
-                Log.d(TAG, "Settings changed via MethodChannel: $settings")
+                Log.d(TAG, "=== SETTINGS CHANGED VIA METHOD CHANNEL ===")
+                Log.d(TAG, "Settings payload: $settings")
+                Log.d(TAG, "Prayer data present: ${settings?.containsKey("prayer_data")}")
                 handleInstantSettingsUpdate(settings)
                 result.success(true)
             } else {
                 result.notImplemented()
+            }
+        }
+            
+        // Widget theme persistence channel
+        val widgetThemeChannel = MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            WIDGET_THEME_CHANNEL
+        )
+        widgetThemeChannel.setMethodCallHandler { call, result ->
+            when (call.method) {
+                "saveWidgetTheme" -> {
+                    val args = call.arguments<Map<String, Any>>()
+                    if (args != null) {
+                        try {
+                            val repository = SettingsRepository(this)
+                            repository.saveWidgetTheme(args)
+                            result.success(null)
+                        } catch (e: Exception) {
+                            result.error("SAVE_FAILED", e.message, null)
+                        }
+                    } else {
+                        result.error("INVALID_ARGS", "Arguments are null", null)
+                    }
+                }
+                "getWidgetTheme" -> {
+                    try {
+                        val repository = SettingsRepository(this)
+                        val theme = repository.getWidgetTheme()
+                        result.success(theme)
+                    } catch (e: Exception) {
+                        result.error("GET_FAILED", e.message, null)
+                    }
+                }
+                "applyWidgetTheme" -> {
+                    // Save theme and trigger widget update
+                    val args = call.arguments<Map<String, Any>>()
+                    if (args != null) {
+                        Log.d(TAG, "=== APPLY WIDGET THEME CALLED ===")
+                        Log.d(TAG, "Received theme: $args")
+                        
+                        CoroutineScope(Dispatchers.Main).launch {
+                            try {
+                                val repository = SettingsRepository(this@MainActivity)
+                                repository.saveWidgetTheme(args)
+                                
+                                // Verify saved theme
+                                val savedTheme = repository.getWidgetTheme()
+                                Log.d(TAG, "Saved theme from SharedPreferences: $savedTheme")
+                                
+                                // Small delay to ensure commit has settled
+                                kotlinx.coroutines.delay(100)
+
+                                // Refresh 1: Immediate update
+                                Log.d(TAG, "First update attempt - PrayerWidget & CountdownWidget...")
+                                PrayerWidget().updateAll(this@MainActivity)
+                                NextPrayerCountdownWidget().updateAll(this@MainActivity)
+                                
+                                // Android 15+ Picker Preview synchronization
+                                if (Build.VERSION.SDK_INT >= 35) { // Build.VERSION_CODES.VANILLA_ICE_CREAM
+                                    try {
+                                        val manager = androidx.glance.appwidget.GlanceAppWidgetManager(this@MainActivity)
+                                        
+                                        // Update PrayerWidget picker preview
+                                        manager.setWidgetPreviews(
+                                            receiver = PrayerWidgetReceiver::class,
+                                        )
+                                        Log.d(TAG, "Android 15+ PrayerWidget preview synchronized")
+                                        
+                                        // Update CountdownWidget picker preview
+                                        manager.setWidgetPreviews(
+                                            receiver = NextPrayerCountdownWidgetReceiver::class,
+                                        )
+                                        Log.d(TAG, "Android 15+ NextPrayerCountdownWidget preview synchronized")
+                                    } catch (e: Exception) {
+                                        Log.e(TAG, "Failed to synchronize widget previews", e)
+                                    }
+                                }
+                                
+                                // Delay slightly (300ms as requested) to force recomputation
+                                kotlinx.coroutines.delay(300)
+                                
+                                // Refresh 2: Force secondary update to ensure persistence is picked up
+                                Log.d(TAG, "Second update attempt - PrayerWidget & CountdownWidget...")
+                                PrayerWidget().updateAll(this@MainActivity)
+                                NextPrayerCountdownWidget().updateAll(this@MainActivity)
+                                
+                                result.success(null)
+                            } catch (e: Exception) {
+                                Log.e(TAG, "APPLY_FAILED", e)
+                                result.error("APPLY_FAILED", e.message, null)
+                            }
+                        }
+                    } else {
+                        result.error("INVALID_ARGS", "Arguments are null", null)
+                    }
+                }
+                else -> {
+                    result.notImplemented()
+                }
             }
         }
     }
@@ -123,15 +228,20 @@ class MainActivity : AudioServiceActivity() {
                 // 8. Update UI on Main thread and send broadcasts
                 withContext(Dispatchers.Main) {
                     // Refresh 1: Immediate re-render attempt
+                    Log.d(TAG, "Updating PrayerWidget...")
                     PrayerWidget().updateAll(this@MainActivity)
+                    Log.d(TAG, "Updating NextPrayerCountdownWidget...")
                     NextPrayerCountdownWidget().updateAll(this@MainActivity)
 
                     // Delay slightly to let SharedPreferences commit settle
                     kotlinx.coroutines.delay(100)
 
                     // Refresh 2: Picking up fresh data from disk
+                    Log.d(TAG, "Second update attempt - PrayerWidget...")
                     PrayerWidget().updateAll(this@MainActivity)
+                    Log.d(TAG, "Second update attempt - NextPrayerCountdownWidget...")
                     NextPrayerCountdownWidget().updateAll(this@MainActivity)
+                    Log.d(TAG, "All widget updates completed")
 
                     // Robust update via Receivers (handles alarms, etc)
                     val prayerIntent = Intent(this@MainActivity, PrayerWidgetReceiver::class.java).apply {

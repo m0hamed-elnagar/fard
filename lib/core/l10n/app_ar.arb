@@ -537,5 +537,95 @@
   "pickAccentColor": "اختر لون التمييز",
   "resetToDefault": "إعادة إلى الافتراضي",
   "applyTheme": "تطبيق المظهر",
-  "tapToCustomize": "اضغط للتخصيص"
+  "tapToCustomize": "اضغط للتخصيص",
+  "werdHistory": "سجل الورد",
+  "werdNoHistoryYet": "لا يوجد سجل حتى الآن",
+  "werdNoReadingThisMonth": "لا يوجد قراءة في هذا الشهر",
+  "werdStartReading": "ابدأ القراءة",
+  "werdStartReadingDesc": "ابدأ بقراءة القرآن لتتبع تقدمك هنا",
+  "werdDetails": "التفاصيل",
+  "werdDays": "أيام",
+  "werdMissed": "فات",
+  "werdCurrent": "الحالي",
+  "werdMonthlySummary": "ملخص الشهر",
+  "werdAyahsLabel": "آيات",
+  "werdPagesLabel": "صفحات",
+  "werdJuzLabel": "أجزاء",
+  "werdDailyAvg": "المتوسط اليومي",
+  "werdSessionDetails": "تفاصيل الجلسة",
+  "werdSameAyah": "نفس الآية",
+  "werdSessionNumber": "الجلسة {number}",
+  "@werdSessionNumber": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "werdMinSuffix": " دقيقة",
+  "werdOlderEntryNote": "تفاصيل الجلسة غير متاحة لهذا اليوم (إدخال قديم)",
+  "werdToday": "اليوم",
+  "werdSummaryRead": "قراءة {ayahs} آية ({pages} صفحة) من {startSurah} {startAyah} إلى {endSurah} {endAyah}",
+  "@werdSummaryRead": {
+    "placeholders": {
+      "ayahs": { "type": "String" },
+      "pages": { "type": "String" },
+      "startSurah": { "type": "String" },
+      "startAyah": { "type": "String" },
+      "endSurah": { "type": "String" },
+      "endAyah": { "type": "String" }
+    }
+  },
+  "appearance": "المظهر",
+  "prayerAndAzan": "الصلاة والأذان",
+  "azkarSection": "الأذكار",
+  "dataAndLocation": "البيانات والموقع",
+  "widgetThemeMode": "مظهر الويدجت",
+  "widgetThemeDark": "داكن",
+  "widgetThemeLight": "فاتح",
+  "widgetThemeFollowApp": "متبع للتطبيق",
+  "showSavedThemes": "إظهار المحفوظات ({count})",
+  "hideSavedThemes": "إخفاء المحفوظات",
+  "language": "اللغة",
+  "languageDesc": "التبديل بين الإنجليزية والعربية",
+  "widgetPreviewTitle": "معاينة الويدجت",
+  "prayerSchedule": "مواقيت الصلاة",
+  "countdown": "العد التنازلي",
+  "widgetColorsIndependent": "ألوان الويدجت (مستقلة عن مظهر التطبيق)",
+  "widgetPrimaryColor": "اللون الأساسي",
+  "widgetAccentColor": "اللون المميز",
+  "widgetBackgroundColor": "لون خلفية الويدجت",
+  "widgetTextColor": "لون النص",
+  "widgetSecondaryTextColor": "لون النص الثانوي",
+  "widgetThemeApplied": "تم تطبيق مظهر الويدجت!",
+  "widgetThemeApplyFailed": "فشل تطبيق مظهر الويدجت: {error}",
+  "@widgetThemeApplyFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "applyToWidget": "تطبيق على الويدجت",
+  "pickColorTitle": "اختر لون {label}",
+  "@pickColorTitle": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "presetColors": "ألوان جاهزة",
+  "customColor": "لون مخصص",
+  "customColorTitle": "{label} مخصص",
+  "@customColorTitle": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "hexColor": "رمز اللون (Hex)",
+  "pickAColor": "اختر لوناً:",
+  "widgetPreviewDate": "الثلاثاء، ١٤ أبريل ٢٠٢٦",
+  "widgetPreviewHijriDate": "٢٦ شوال ١٤٤٧",
+  "widgetPreviewCountdown": "٣س ٤٥د"
 }
