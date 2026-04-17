@@ -17,11 +17,14 @@ import 'package:fard/core/theme/theme_presets.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import 'core/blocs/connectivity/connectivity_bloc.dart';
 
 void main() async {
   final startupTimer = Stopwatch()..start();
@@ -61,6 +64,10 @@ Future<void> _initializeBackgroundServices(Stopwatch timer) async {
     await Future.wait([
       // Asset migration (now optimized with flags)
       MigrationService.migrateAssets(),
+      MigrationService.migrateToSupport(),
+
+      // Cleanup orphaned temp files from failed downloads
+      _cleanupTempFiles(),
 
       // Notification Service
       getIt<NotificationService>().init().then((_) {
@@ -122,6 +129,9 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider(
+          create: (_) => getIt<ConnectivityBloc>(),
+        ),
         BlocProvider(create: (_) => getIt<SettingsCubit>()),
         BlocProvider(
           create: (_) {
@@ -267,5 +277,29 @@ class _MaterialAppWithReactiveThemeState
         GlobalCupertinoLocalizations.delegate,
       ],
     );
+  }
+}
+
+/// Removes orphaned .tmp files from audio and mushaf directories.
+Future<void> _cleanupTempFiles() async {
+  try {
+    final directory = await getApplicationSupportDirectory();
+    final dirs = [
+      Directory('${directory.path}/audio'),
+      Directory('${directory.path}/mushaf_pages'),
+    ];
+
+    for (final dir in dirs) {
+      if (await dir.exists()) {
+        await for (final entity in dir.list(recursive: true)) {
+          if (entity is File && entity.path.endsWith('.tmp')) {
+            debugPrint('[CLEANUP] Removing orphaned temp file: ${entity.path}');
+            await entity.delete();
+          }
+        }
+      }
+    }
+  } catch (e) {
+    debugPrint('[CLEANUP] Error cleaning up temp files: $e');
   }
 }

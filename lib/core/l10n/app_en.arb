@@ -280,6 +280,8 @@
   "mushafImagesDesc": "604 high-quality pages (~80 MB)",
   "quranText": "Quran Text",
   "quranTextDesc": "All Surahs and Ayahs with basic info",
+  "downloadQuranTextConfirm": "All Quran text will be downloaded for offline use.",
+  "confirmDownload": "Confirm Download",
   "readerSettings": "Reader Settings",
   "fontFamily": "Font Family",
   "removeFromBookmarks": "Remove from Bookmarks",

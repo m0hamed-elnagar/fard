@@ -27,6 +27,7 @@ abstract interface class QuranRepository {
     int? tafsirId,
   });
   Stream<double> downloadAllSurahs();
+  Future<void> cancelTextDownload();
   Future<double> getTextDownloadProgress();
 }
 

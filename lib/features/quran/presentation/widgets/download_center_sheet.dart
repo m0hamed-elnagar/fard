@@ -56,6 +56,75 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
     }
   }
 
+  void _confirmMushafDownload() {
+    final l10n = AppLocalizations.of(context)!;
+    _showConfirmDownloadDialog(
+      title: l10n.mushafImagesPNG,
+      message: l10n.downloadMushafDesc,
+      onConfirm: _startMushafDownload,
+    );
+  }
+
+  void _confirmTextDownload() {
+    final l10n = AppLocalizations.of(context)!;
+    _showConfirmDownloadDialog(
+      title: l10n.quranText,
+      message: l10n.downloadQuranTextConfirm,
+      onConfirm: _startTextDownload,
+    );
+  }
+
+  void _showConfirmDownloadDialog({
+    required String title,
+    required String message,
+    required VoidCallback onConfirm,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: context.surfaceContainerColor,
+        title: Text(
+          title,
+          style: GoogleFonts.amiri(
+            color: context.primaryColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          message,
+          style: TextStyle(color: context.onSurfaceVariantColor),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              l10n.cancel,
+              style: TextStyle(color: context.onSurfaceVariantColor),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              onConfirm();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: context.primaryColor,
+              foregroundColor: context.onSurfaceColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              l10n.startDownload,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _startMushafDownload() {
     setState(() {
       _isMushafDownloading = true;
@@ -65,10 +134,19 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
         setState(() {
           _mushafProgress = progress;
         });
-        if (progress >= 1.0) {
-          _isMushafDownloading = false;
+        if (progress >= 1.0 || _mushafProgress == progress && !_isMushafDownloading) {
+          setState(() {
+            _isMushafDownloading = false;
+          });
         }
       }
+    });
+  }
+
+  void _cancelMushafDownload() {
+    _mushafService.cancelDownload();
+    setState(() {
+      _isMushafDownloading = false;
     });
   }
 
@@ -82,9 +160,18 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
           _textProgress = progress;
         });
         if (progress >= 1.0) {
-          _isTextDownloading = false;
+          setState(() {
+            _isTextDownloading = false;
+          });
         }
       }
+    });
+  }
+
+  void _cancelTextDownload() {
+    _quranRepository.cancelTextDownload();
+    setState(() {
+      _isTextDownloading = false;
     });
   }
 
@@ -149,7 +236,8 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
             subtitle: l10n.mushafImagesDesc,
             progress: _mushafProgress,
             isDownloading: _isMushafDownloading,
-            onDownload: _startMushafDownload,
+            onDownload: _confirmMushafDownload,
+            onCancel: _cancelMushafDownload,
           ),
 
           const Divider(height: 48),
@@ -159,7 +247,8 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
             subtitle: l10n.quranTextDesc,
             progress: _textProgress,
             isDownloading: _isTextDownloading,
-            onDownload: _startTextDownload,
+            onDownload: _confirmTextDownload,
+            onCancel: _cancelTextDownload,
           ),
 
           const Divider(height: 48),
@@ -257,6 +346,7 @@ class _DownloadItem extends StatelessWidget {
   final double progress;
   final bool isDownloading;
   final VoidCallback onDownload;
+  final VoidCallback onCancel;
 
   const _DownloadItem({
     required this.title,
@@ -264,6 +354,7 @@ class _DownloadItem extends StatelessWidget {
     required this.progress,
     required this.isDownloading,
     required this.onDownload,
+    required this.onCancel,
   });
 
   @override
@@ -304,13 +395,13 @@ class _DownloadItem extends StatelessWidget {
             else if (progress >= 1.0)
               Icon(Icons.check_circle, color: context.primaryColor, size: 32)
             else
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 3,
-                  color: context.primaryColor,
+              IconButton(
+                icon: Icon(
+                  Icons.stop_circle_rounded,
+                  color: context.errorColor,
+                  size: 32,
                 ),
+                onPressed: onCancel,
               ),
           ],
         ),

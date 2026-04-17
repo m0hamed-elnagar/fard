@@ -7,6 +7,7 @@ import 'package:fard/features/audio/presentation/blocs/audio_download/audio_down
 import 'package:fard/features/audio/presentation/blocs/audio_download/audio_download_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:quran/quran.dart' as quran;
 
 class ReciterDownloadScreen extends StatelessWidget {
@@ -163,7 +164,46 @@ class ReciterDownloadScreen extends StatelessWidget {
               else
                 ElevatedButton.icon(
                   onPressed: () {
-                    context.read<AudioDownloadCubit>().downloadReciter(reciter);
+                    showDialog(
+                      context: context,
+                      builder: (c) => AlertDialog(
+                        backgroundColor: context.surfaceContainerColor,
+                        title: Text(
+                          l10n.downloadAll,
+                          style: GoogleFonts.amiri(
+                            color: context.primaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        content: Text(
+                          l10n.manageRecitersDesc, // Reuse description or use a better one
+                          style: TextStyle(color: context.onSurfaceVariantColor),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(c),
+                            child: Text(
+                              l10n.cancel,
+                              style: TextStyle(color: context.onSurfaceVariantColor),
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(c);
+                              context.read<AudioDownloadCubit>().downloadReciter(reciter);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: context.primaryColor,
+                              foregroundColor: context.onSurfaceColor,
+                            ),
+                            child: Text(
+                              l10n.startDownload,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
                   },
                   icon: const Icon(Icons.download),
                   label: Text(l10n.downloadAll),

@@ -65,6 +65,34 @@ class _DownloadAllDialogState extends State<DownloadAllDialog> {
             const SizedBox(height: 10),
             TextButton.icon(
               onPressed: () async {
+                final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text(l10n.clearCache),
+                    content: Text(
+                      isArabic
+                          ? 'هل أنت متأكد من مسح جميع صفحات المصحف المحملة؟ ستحتاج للاتصال بالإنترنت لقراءتها مرة أخرى.'
+                          : 'Are you sure you want to clear all downloaded Mushaf pages? You will need an internet connection to read them again.',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: Text(l10n.cancel),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: Text(
+                          l10n.delete,
+                          style: TextStyle(color: context.errorColor),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirm != true) return;
+
                 await widget.downloadService.clearCache();
                 if (!context.mounted) return;
 

@@ -23,7 +23,7 @@ abstract interface class AudioRepository {
     required String reciterId,
     required int surahNumber,
     required int ayahNumber,
-    AudioQuality quality = AudioQuality.medium128,
+    AudioQuality quality = AudioQuality.low64,
   });
 
   /// Get list of tracks for full surah playback
@@ -31,7 +31,13 @@ abstract interface class AudioRepository {
     required String reciterId,
     required int surahNumber,
     int? ayahCount,
-    AudioQuality quality = AudioQuality.medium128,
+    AudioQuality quality = AudioQuality.low64,
+  });
+
+  /// Get the shared Bismillah track (Surah 1, Ayah 1) for a reciter
+  Future<AudioTrack> getBismillahTrack({
+    required String reciterId,
+    required AudioQuality quality,
   });
 
   bool shouldPrependBismillah(int surahNumber, String reciterId);

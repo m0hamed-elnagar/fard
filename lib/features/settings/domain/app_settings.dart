@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'azkar_reminder.dart';
 import 'salaah_settings.dart';
+import '../../audio/domain/repositories/audio_repository.dart';
 
 /// Immutable domain-level settings object.
 ///
@@ -23,6 +24,7 @@ class AppSettings {
   final int hijriAdjustment;
   final String themePresetId;
   final Map<String, String>? customThemeColors;
+  final AudioQuality audioQuality;
 
   const AppSettings({
     required this.locale,
@@ -40,5 +42,6 @@ class AppSettings {
     this.hijriAdjustment = 0,
     this.themePresetId = 'emerald',
     this.customThemeColors,
+    this.audioQuality = AudioQuality.low64,
   });
 }

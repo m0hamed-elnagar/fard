@@ -748,6 +748,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get quranTextDesc => 'All Surahs and Ayahs with basic info';
 
   @override
+  String get downloadQuranTextConfirm =>
+      'All Quran text will be downloaded for offline use.';
+
+  @override
+  String get confirmDownload => 'Confirm Download';
+
+  @override
   String get readerSettings => 'Reader Settings';
 
   @override

@@ -1,12 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fard/features/quran/domain/entities/surah.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
-import 'package:fard/features/audio/domain/repositories/audio_player_service.dart';
-import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
-import 'package:fard/features/quran/presentation/utils/quran_fonts.dart';
 import 'package:fard/core/extensions/number_extension.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
+import 'package:fard/features/quran/domain/entities/surah.dart';
+import 'package:fard/features/quran/presentation/utils/quran_fonts.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../audio/presentation/utils/offline_audio_helper.dart';
 
 class SurahHeader extends StatelessWidget {
   final Surah surah;
@@ -115,20 +116,12 @@ class SurahHeader extends StatelessWidget {
                 children: [
                   ElevatedButton.icon(
                     onPressed: () {
-                      if (isPlaying && isThisSurah) {
-                        context.read<AudioBloc>().add(AudioEvent.pause());
-                      } else if (state.status == AudioStatus.paused &&
-                          isThisSurah) {
-                        context.read<AudioBloc>().add(AudioEvent.resume());
-                      } else {
-                        context.read<AudioBloc>().add(
-                          AudioEvent.playSurah(
-                            surahNumber: surah.number.value,
-                            ayahCount: surah.numberOfAyahs,
-                            reciter: state.currentReciter,
-                          ),
-                        );
-                      }
+                      OfflineAudioHelper.handlePlayRequest(
+                        context: context,
+                        surahNumber: surah.number.value,
+                        startAyah: currentAyahNumber ?? 1,
+                        isDownloaded: false, // Will be checked inside if needed
+                      );
                     },
                     icon: isLoading && isThisSurah
                         ? const SizedBox(

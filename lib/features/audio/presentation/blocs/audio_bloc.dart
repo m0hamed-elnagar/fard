@@ -391,19 +391,27 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
       (failure) async => emit(
         state.copyWith(error: failure.message, status: AudioStatus.error),
       ),
-      (tracks) async {
+      (verses) async {
         final bool isPrependActive = audioRepository.shouldPrependBismillah(
           surahNumber,
           activeReciter.identifier,
         );
 
+        final tracks = <AudioTrack>[];
+        if (isPrependActive) {
+          final bismillah = await audioRepository.getBismillahTrack(
+            reciterId: activeReciter.identifier,
+            quality: state.quality,
+          );
+          tracks.add(bismillah);
+        }
+        tracks.addAll(verses);
+
         int initialIndex = (startAyah ?? 1) - 1;
         if (isPrependActive) {
-          if (startAyah == null || startAyah == 1) {
-            initialIndex = 0;
-          } else {
-            initialIndex = startAyah;
-          }
+          // If starting from Ayah 1, start at Bismillah (index 0).
+          // If starting from Ayah N, start at index N.
+          initialIndex = (startAyah == null || startAyah == 1) ? 0 : startAyah;
         }
 
         final currentLanguage = settingsRepository.locale.languageCode;
@@ -430,6 +438,8 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
               'album': surahName,
             });
           } else {
+            // If Bismillah is prepended, the ayah number is the index itself.
+            // If not prepended, the ayah number is index + 1.
             final displayAyah = isPrependActive ? i : i + 1;
             metadataList.add({
               'title': '$surahLabel $surahName: $ayahLabel $displayAyah',

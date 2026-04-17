@@ -81,13 +81,22 @@ Future<void> _createNotificationChannels({SettingsState? settings}) async {
 2. **Battery Optimization**: Users on some Android devices may need to manually disable battery optimization for reliable "exact alarms". A UI prompt for this could be added.
 3. **Download Progress**: The UI could show a progress bar during voice download instead of just a loading state.
 
-## 6. Recent Fixes (Reminder & Timezone)
+## 6. Offline-First Library & Download Management
+Recent updates have significantly improved the reliability and user experience for offline content:
+
+- **Connectivity Awareness:** The app now automatically detects network status and shows an "Offline Mode" banner in the Quran section.
+- **Bulk Download Confirmation:** Users must now confirm before starting bulk downloads (Mushaf images, Quran text, or full Reciter audio) to prevent accidental data usage.
+- **Cancellation ("Stop") Support:** Long-running downloads can now be stopped at any time via "Stop" buttons in the UI.
+- **Partial File Pruning:** When a download is cancelled or fails, the app automatically prunes temporary `.tmp` files to save storage and ensure integrity.
+- **Default Quality Control:** Audio downloads now default to **Low (64kbps)** to minimize download time and storage impact, while still allowing users to change this in settings.
+
+## 7. Recent Fixes (Reminder & Timezone)
 - **Timezone Support**: Added `flutter_timezone` to ensure notifications are scheduled according to the device's local time, not UTC.
 - **Reminder Channel**: Updated prayer reminders to use `AudioAttributesUsage.alarm` and `AndroidNotificationCategory.alarm` for better reliability.
 - **Full Screen Intent**: Added full-screen intent permission and capability for reminders to ensure they are seen.
 - **Test Functionality**: Added a dedicated "Test Reminder" button in the Salah settings dialog.
 
-## 7. Full Service Code for Analysis
+## 8. Full Service Code for Analysis
 
 ### PrayerTimeService
 ```dart

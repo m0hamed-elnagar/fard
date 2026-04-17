@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../domain/azkar_reminder.dart';
 import '../../domain/entities/custom_theme.dart';
 import '../../domain/salaah_settings.dart';
+import '../../../audio/domain/repositories/audio_repository.dart';
 
 /// Repository interface for managing app settings persistence.
 ///
@@ -65,6 +66,9 @@ abstract interface class SettingsRepository {
 
   /// Currently active custom theme ID (null if using a preset)
   String? get activeCustomThemeId;
+
+  /// Preferred audio quality
+  AudioQuality get audioQuality;
 
   // ==================== WRITE OPERATIONS ====================
 
@@ -146,4 +150,8 @@ abstract interface class SettingsRepository {
 
   /// Set active custom theme ID
   Future<void> setActiveCustomTheme(String? themeId);
-  }
+
+  /// Update preferred audio quality
+  Future<void> updateAudioQuality(AudioQuality quality);
+}
+

@@ -98,6 +98,7 @@ import '../../features/werd/data/repositories/werd_repository_impl.dart'
     as _i472;
 import '../../features/werd/domain/repositories/werd_repository.dart' as _i724;
 import '../../features/werd/presentation/blocs/werd_bloc.dart' as _i1037;
+import '../services/download/download_manifest_service.dart' as _i188;
 import '../services/export_import_service.dart' as _i1068;
 import '../services/location_service.dart' as _i669;
 import '../services/mushaf_download_service.dart' as _i700;
@@ -129,14 +130,8 @@ extension GetItInjectableX on _i174.GetIt {
       () => registerModule.navigatorKey,
     );
     gh.singleton<_i669.LocationService>(() => _i669.LocationService());
-    gh.singleton<_i700.MushafDownloadService>(
-      () => _i700.MushafDownloadService(),
-    );
     gh.singleton<_i1055.SoundManager>(() => _i1055.SoundManager());
     gh.singleton<_i552.PrayerTimeService>(() => _i552.PrayerTimeService());
-    gh.singleton<_i492.VoiceDownloadService>(
-      () => _i492.VoiceDownloadService(),
-    );
     gh.lazySingleton<_i519.Client>(() => registerModule.httpClient);
     gh.lazySingleton<_i163.FlutterLocalNotificationsPlugin>(
       () => registerModule.flutterLocalNotificationsPlugin,
@@ -187,6 +182,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i720.AudioPlayerService>(
       () => _i241.AudioPlayerServiceImpl(),
     );
+    gh.lazySingleton<_i188.DownloadManifestService>(
+      () => _i188.DownloadManifestServiceImpl(),
+    );
     await gh.factoryAsync<_i1055.Box<_i800.BookmarkEntity>>(
       () => registerModule.bookmarkBox,
       instanceName: 'bookmarkBox',
@@ -194,6 +192,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i307.SettingsStorage>(
       () => _i307.SettingsStorage(gh<_i460.SharedPreferences>()),
+    );
+    gh.singleton<_i700.MushafDownloadService>(
+      () => _i700.MushafDownloadService(gh<_i188.DownloadManifestService>()),
+    );
+    gh.singleton<_i492.VoiceDownloadService>(
+      () => _i492.VoiceDownloadService(gh<_i188.DownloadManifestService>()),
     );
     gh.lazySingleton<_i331.QuranRemoteSource>(
       () => _i331.QuranRemoteSourceImpl(client: gh<_i519.Client>()),
@@ -296,6 +300,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i218.WatchBookmarks>(
       () => _i218.WatchBookmarks(gh<_i33.BookmarkRepository>()),
     );
+    gh.lazySingleton<_i224.AudioDownloadService>(
+      () => _i779.AudioDownloadServiceImpl(
+        gh<_i451.AudioRepository>(),
+        gh<_i519.Client>(),
+        gh<_i941.NotificationService>(),
+        gh<_i674.SettingsRepository>(),
+        gh<_i188.DownloadManifestService>(),
+      ),
+    );
     gh.factory<_i760.SyncNotificationSchedule>(
       () => _i760.SyncNotificationSchedule(
         gh<_i941.NotificationService>(),
@@ -331,8 +344,19 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i1037.AzkarBloc>(
       () => _i1037.AzkarBloc(gh<_i1027.IAzkarSource>()),
     );
+    gh.factory<_i352.AudioDownloadCubit>(
+      () => _i352.AudioDownloadCubit(gh<_i224.AudioDownloadService>()),
+    );
     gh.factory<_i809.TasbihBloc>(
       () => _i809.TasbihBloc(gh<_i352.TasbihRepository>()),
+    );
+    gh.factory<_i9.AudioBloc>(
+      () => _i9.AudioBloc(
+        audioRepository: gh<_i451.AudioRepository>(),
+        playerService: gh<_i720.AudioPlayerService>(),
+        downloadService: gh<_i224.AudioDownloadService>(),
+        settingsRepository: gh<_i674.SettingsRepository>(),
+      ),
     );
     gh.factory<_i177.GetAllSurahs>(
       () => _i177.GetAllSurahs(gh<_i498.QuranRepository>()),
@@ -350,13 +374,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i358.WatchLastRead>(
       () => _i358.WatchLastRead(gh<_i498.QuranRepository>()),
     );
-    gh.lazySingleton<_i224.AudioDownloadService>(
-      () => _i779.AudioDownloadServiceImpl(
-        gh<_i451.AudioRepository>(),
-        gh<_i519.Client>(),
-        gh<_i941.NotificationService>(),
-      ),
-    );
     gh.factory<_i1060.ReaderBloc>(
       () => _i1060.ReaderBloc(
         getSurah: gh<_i941.GetSurah>(),
@@ -372,17 +389,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i498.QuranRepository>(),
         gh<_i358.WatchLastRead>(),
         gh<_i33.BookmarkRepository>(),
-      ),
-    );
-    gh.factory<_i352.AudioDownloadCubit>(
-      () => _i352.AudioDownloadCubit(gh<_i224.AudioDownloadService>()),
-    );
-    gh.factory<_i9.AudioBloc>(
-      () => _i9.AudioBloc(
-        audioRepository: gh<_i451.AudioRepository>(),
-        playerService: gh<_i720.AudioPlayerService>(),
-        downloadService: gh<_i224.AudioDownloadService>(),
-        settingsRepository: gh<_i674.SettingsRepository>(),
       ),
     );
     return this;

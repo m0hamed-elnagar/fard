@@ -204,8 +204,11 @@ class QuranRepositoryImpl implements QuranRepository {
     }
   }
 
+  bool _isTextDownloadCancelled = false;
+
   @override
   Stream<double> downloadAllSurahs() async* {
+    _isTextDownloadCancelled = false;
     try {
       // Step 1: Ensure we have the basic list of surahs
       final surahsResult = await getSurahs();
@@ -238,6 +241,10 @@ class QuranRepositoryImpl implements QuranRepository {
 
       // Step 3: Download missing surahs
       for (int i = 1; i <= totalSurahs; i++) {
+        if (_isTextDownloadCancelled) {
+          yield downloaded / totalSurahs;
+          return;
+        }
         if (isDownloaded[i]) continue;
 
         final surahNum = SurahNumber.create(i).data!;
@@ -252,6 +259,11 @@ class QuranRepositoryImpl implements QuranRepository {
     } catch (_) {
       yield 0.0;
     }
+  }
+
+  @override
+  Future<void> cancelTextDownload() async {
+    _isTextDownloadCancelled = true;
   }
 
   @override

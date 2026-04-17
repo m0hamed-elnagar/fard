@@ -4,6 +4,7 @@ import '../../../../core/services/location_service.dart';
 import '../../domain/azkar_reminder.dart';
 import '../../domain/entities/custom_theme.dart';
 import '../../domain/salaah_settings.dart';
+import '../../../audio/domain/repositories/audio_repository.dart';
 
 part 'settings_state.freezed.dart';
 
@@ -29,5 +30,6 @@ sealed class SettingsState with _$SettingsState {
     @Default([]) List<CustomTheme> savedCustomThemes,
     String? activeCustomThemeId,
     @Default(null) LocationStatus? lastLocationStatus,
+    @Default(AudioQuality.low64) AudioQuality audioQuality,
     }) = _SettingsState;
     }

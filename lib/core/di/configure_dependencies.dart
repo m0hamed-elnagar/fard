@@ -4,7 +4,10 @@ import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter/foundation.dart';
+import 'package:fard/core/services/connectivity_service.dart';
+import 'package:fard/core/blocs/connectivity/connectivity_bloc.dart';
 
+import 'package:fard/core/models/download_entry.dart';
 import 'package:fard/features/prayer_tracking/data/daily_record_entity.dart';
 import 'package:fard/features/quran/data/datasources/local/entities/surah_entity.dart';
 import 'package:fard/features/quran/data/datasources/local/entities/ayah_entity.dart';
@@ -47,9 +50,22 @@ Future<void> configureDependencies({String? hivePath}) async {
     Hive.registerAdapter(SurahEntityAdapter());
     Hive.registerAdapter(AyahEntityAdapter());
     Hive.registerAdapter(BookmarkEntityAdapter());
+    Hive.registerAdapter(DownloadStatusAdapter());
+    Hive.registerAdapter(DownloadEntryAdapter());
   } catch (e) {
     debugPrint('Adapter registration warning: $e');
   }
+
+  // Open Boxes
+  try {
+    await Hive.openBox<DownloadEntry>('download_manifest_box');
+  } catch (e) {
+    debugPrint('Box opening warning: $e');
+  }
+
+  // Register Services
+  getIt.registerLazySingleton(() => ConnectivityService());
+  getIt.registerLazySingleton(() => ConnectivityBloc(connectivityService: getIt<ConnectivityService>()));
 
   // Initialize GetIt
   await getIt.init();

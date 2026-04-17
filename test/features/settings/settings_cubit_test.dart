@@ -1,3 +1,4 @@
+import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
 import 'package:fard/core/services/location_service.dart';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/widget_update_service.dart';
@@ -89,6 +90,7 @@ void main() {
     when(() => mockSettingsRepo.customThemeColors).thenReturn(null);
     when(() => mockSettingsRepo.savedCustomThemes).thenReturn([]);
     when(() => mockSettingsRepo.activeCustomThemeId).thenReturn(null);
+    when(() => mockSettingsRepo.audioQuality).thenReturn(AudioQuality.low64);
     when(() => mockSettingsRepo.reminders).thenReturn([]);
     when(
       () => mockSettingsRepo.salaahSettings,

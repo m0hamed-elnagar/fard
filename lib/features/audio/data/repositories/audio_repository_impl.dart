@@ -306,8 +306,25 @@ class AudioRepositoryImpl implements AudioRepository {
     required String reciterId,
     required int surahNumber,
     required int ayahNumber,
-    AudioQuality quality = AudioQuality.medium128,
+    AudioQuality quality = AudioQuality.low64,
   }) async {
+    final localPath = await _getLocalPath(reciterId, surahNumber, ayahNumber);
+    final localFile = File(localPath);
+
+    // OFFLINE FIRST: If already downloaded, we MUST use it.
+    // We don't care about 'quality' parameter if we have it locally.
+    if (localFile.existsSync()) {
+      return AudioTrack(
+        remoteUrl: _getRemoteAyahUrl(
+          reciterId: reciterId,
+          surahNumber: surahNumber,
+          ayahNumber: ayahNumber,
+          quality: quality, // Still provide the URL as fallback
+        ),
+        localPath: localPath,
+      );
+    }
+
     final remoteUrl = _getRemoteAyahUrl(
       reciterId: reciterId,
       surahNumber: surahNumber,
@@ -315,14 +332,9 @@ class AudioRepositoryImpl implements AudioRepository {
       quality: quality,
     );
 
-    final localPath = await _getLocalPath(reciterId, surahNumber, ayahNumber);
-
-    final isDownloaded = await File(localPath).exists();
-
     return AudioTrack(
       remoteUrl: remoteUrl,
       localPath: localPath,
-      isDownloaded: isDownloaded,
     );
   }
 
@@ -331,41 +343,17 @@ class AudioRepositoryImpl implements AudioRepository {
     required String reciterId,
     required int surahNumber,
     int? ayahCount,
-    AudioQuality quality = AudioQuality.medium128,
+    AudioQuality quality = AudioQuality.low64,
   }) async {
-    int count = ayahCount ?? 0;
+    int count = ayahCount ?? getAyahCount(surahNumber);
 
     if (count == 0) {
-      try {
-        final response = await client.get(
-          Uri.parse('$_apiBaseUrl/surah/$surahNumber'),
-        );
-        if (response.statusCode == 200) {
-          final data = json.decode(response.body);
-          count = data['data']['numberOfAyahs'] as int;
-        } else {
-          return Result.failure(
-            ServerFailure('Failed to fetch surah info: ${response.statusCode}'),
-          );
-        }
-      } catch (e) {
-        return Result.failure(UnknownFailure(e.toString()));
-      }
+      return Result.failure(
+        const UnknownFailure('Surah number must be between 1 and 114'),
+      );
     }
 
     final tracks = <Future<AudioTrack>>[];
-
-    // Prepend Bismillah (1:1) if needed for this surah and reciter
-    if (_needsBismillahPrepend(surahNumber, reciterId)) {
-      tracks.add(
-        getAyahAudioTrack(
-          reciterId: reciterId,
-          surahNumber: 1,
-          ayahNumber: 1,
-          quality: quality,
-        ),
-      );
-    }
 
     tracks.addAll(
       List.generate(
@@ -385,6 +373,19 @@ class AudioRepositoryImpl implements AudioRepository {
     } catch (e) {
       return Result.failure(UnknownFailure(e.toString()));
     }
+  }
+
+  @override
+  Future<AudioTrack> getBismillahTrack({
+    required String reciterId,
+    required AudioQuality quality,
+  }) {
+    return getAyahAudioTrack(
+      reciterId: reciterId,
+      surahNumber: 1,
+      ayahNumber: 1,
+      quality: quality,
+    );
   }
 
   @override
@@ -571,7 +572,7 @@ class AudioRepositoryImpl implements AudioRepository {
   }
 
   Future<String> _getLocalPath(String reciterId, int surah, int ayah) async {
-    final directory = await getApplicationDocumentsDirectory();
+    final directory = await getApplicationSupportDirectory();
     final surahStr = surah.toString().padLeft(3, '0');
     final ayahStr = ayah.toString().padLeft(3, '0');
     return '${directory.path}/audio/$reciterId/$surahStr$ayahStr.mp3';

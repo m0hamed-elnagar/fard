@@ -1,18 +1,27 @@
+import 'dart:async';
+
+import 'package:fard/core/blocs/connectivity/connectivity_bloc.dart';
+import 'package:fard/core/di/injection.dart';
+import 'package:fard/core/extensions/number_extension.dart';
+import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/core/theme/app_colors.dart';
+import 'package:fard/core/widgets/fast_scroll_scrollbar.dart';
+import 'package:fard/features/audio/domain/services/audio_download_service.dart';
+import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/utils/offline_audio_helper.dart';
+import 'package:fard/features/quran/domain/entities/surah.dart';
+import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
+import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/features/quran/domain/entities/surah.dart';
-import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
-import 'package:fard/core/extensions/number_extension.dart';
-import 'package:fard/core/widgets/fast_scroll_scrollbar.dart';
-import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
-import 'package:fard/core/theme/app_colors.dart';
-import '../widgets/juz_list.dart';
-import '../widgets/hizb_list.dart';
-import '../widgets/bookmark_list.dart';
-import '../widgets/download_center_sheet.dart';
 
+import '../widgets/bookmark_list.dart';
+
+
+import '../widgets/download_center_sheet.dart';
+import '../widgets/hizb_list.dart';
+import '../widgets/juz_list.dart';
 import 'scanned_mushaf_reader_page.dart';
 
 class QuranPage extends StatefulWidget {
@@ -28,10 +37,90 @@ class _QuranPageState extends State<QuranPage> {
   String _searchQuery = '';
   bool _isSearching = false;
 
+  Set<int> _downloadedSurahIds = {};
+  final Map<int, double> _downloadingSurahs = {};
+  StreamSubscription? _downloadSubscription;
+  String? _lastReciterId;
+
+  @override
+  void initState() {
+    super.initState();
+    _initDownloadTracking();
+  }
+
+  void _initDownloadTracking() {
+    _updateDownloadedSurahs();
+    _downloadSubscription = getIt<AudioDownloadService>().progressStream.listen((progress) {
+      if (!mounted) return;
+      
+      final currentReciter = context.read<AudioBloc>().state.currentReciter;
+      if (progress.reciterId != currentReciter?.identifier) return;
+
+      if (progress.isCompleted && progress.surahNumber != null) {
+        if (mounted) {
+          setState(() {
+            _downloadedSurahIds.add(progress.surahNumber!);
+            _downloadingSurahs.remove(progress.surahNumber);
+          });
+        }
+      } else if (progress.surahNumber != null) {
+        if (mounted) {
+          setState(() {
+            _downloadingSurahs[progress.surahNumber!] = progress.percentage;
+          });
+        }
+      }
+    });
+  }
+
+  Future<void> _downloadSurah(int surahNumber) async {
+    final reciter = context.read<AudioBloc>().state.currentReciter;
+    if (reciter == null) return;
+
+    setState(() {
+      _downloadingSurahs[surahNumber] = 0.0;
+    });
+
+    try {
+      await getIt<AudioDownloadService>().downloadSurah(
+        reciter: reciter,
+        surahNumber: surahNumber,
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _downloadingSurahs.remove(surahNumber);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
+    }
+  }
+
+  Future<void> _updateDownloadedSurahs() async {
+    final audioBloc = context.read<AudioBloc>();
+    final reciter = audioBloc.state.currentReciter;
+    if (reciter == null) return;
+
+    if (_lastReciterId == reciter.identifier && _downloadedSurahIds.isNotEmpty) return;
+
+    final downloaded = await getIt<AudioDownloadService>()
+        .getDownloadedSurahIdsForReciter(reciter.identifier);
+    
+    if (mounted) {
+      setState(() {
+        _downloadedSurahIds = downloaded;
+        _lastReciterId = reciter.identifier;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
     _surahScrollController.dispose();
+    _downloadSubscription?.cancel();
     super.dispose();
   }
 
@@ -128,239 +217,326 @@ class _QuranPageState extends State<QuranPage> {
             ],
           ),
         ),
-        body: BlocBuilder<QuranBloc, QuranState>(
-          builder: (context, state) {
-            if (state.isLoading && state.surahs.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const CircularProgressIndicator(),
-                    const SizedBox(height: 16),
-                    Text(l10n.loadingQuran, style: GoogleFonts.amiri()),
-                  ],
-                ),
-              );
-            }
+        body: BlocBuilder<ConnectivityBloc, ConnectivityState>(
+          builder: (context, connState) {
+            final isConnected = connState is ConnectivityStatus ? connState.isConnected : true;
 
-            if (state.error != null && state.surahs.isEmpty) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: context.errorColor,
-                        size: 64,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        l10n.errorLoadingQuran,
-                        style: GoogleFonts.amiri(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: context.errorColor,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        state.error!,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: context.onSurfaceVariantColor),
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton.icon(
-                        onPressed: () => context.read<QuranBloc>().add(
-                          const QuranEvent.loadSurahs(),
-                        ),
-                        icon: const Icon(Icons.refresh),
-                        label: Text(l10n.retry),
+            return Column(
+              children: [
+                if (!isConnected)
+                  Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    color: Colors.amber.shade700,
+                child:
+                Text(
+                    l10n.downloadCenter, // Using downloadCenter as it contains "Offline Mode"
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                    ),
+                  ),
+
+                Expanded(
+                  child: MultiBlocListener(
+                    listeners: [
+                      BlocListener<AudioBloc, AudioState>(
+                        listenWhen: (prev, curr) => prev.currentReciter?.identifier != curr.currentReciter?.identifier,
+                        listener: (context, state) => _updateDownloadedSurahs(),
                       ),
                     ],
-                  ),
-                ),
-              );
-            }
+                    child: BlocBuilder<QuranBloc, QuranState>(
+                      builder: (context, state) {
+                        if (state.isLoading && state.surahs.isEmpty) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const CircularProgressIndicator(),
+                                const SizedBox(height: 16),
+                                Text(l10n.loadingQuran, style: GoogleFonts.amiri()),
+                              ],
+                            ),
+                          );
+                        }
 
-            final filteredSurahs = state.surahs.where((surah) {
-              return surah.name.contains(_searchQuery) ||
-                  surah.number.value.toString().contains(_searchQuery);
-            }).toList();
-
-            final lastRead = state.lastReadPosition;
-            final hasLastRead = lastRead != null && state.surahs.isNotEmpty;
-            Surah? lastReadSurah;
-            if (hasLastRead) {
-              try {
-                lastReadSurah = state.surahs.firstWhere(
-                  (s) => s.number.value == lastRead.ayahNumber.surahNumber,
-                );
-              } catch (_) {}
-            }
-
-            return TabBarView(
-              children: [
-                // Surah Tab
-                filteredSurahs.isEmpty && !state.isLoading
-                    ? Center(child: Text(l10n.noSearchResults))
-                    : Stack(
-                        children: [
-                          ListView.separated(
-                            key: const Key('surah_list_view'),
-                            padding: const EdgeInsets.all(16),
-                            controller: _surahScrollController,
-                            physics: const ScrollPhysics(),
-                            itemCount:
-                                filteredSurahs.length +
-                                (hasLastRead && _searchQuery.isEmpty ? 1 : 0),
-                            separatorBuilder: (context, index) =>
-                                const Divider(height: 1),
-                            itemBuilder: (context, index) {
-                              if (hasLastRead &&
-                                  _searchQuery.isEmpty &&
-                                  index == 0) {
-                                return _ContinueReadingCard(
-                                  surah: lastReadSurah!,
-                                  ayahNumber: lastRead.ayahNumber.ayahNumberInSurah,
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      QuranReaderPage.route(
-                                        surahNumber: lastReadSurah!.number.value,
-                                        ayahNumber:
-                                            lastRead.ayahNumber.ayahNumberInSurah,
-                                        playOnLoad: true,
-                                        allSurahs: state.surahs,
-                                      ),
-                                    );
-                                  },
-                                );
-                              }
-
-                              final surahIndex = hasLastRead && _searchQuery.isEmpty
-                                  ? index - 1
-                                  : index;
-                              final surah = filteredSurahs[surahIndex];
-                              return ListTile(
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                leading: CircleAvatar(
-                                  backgroundColor: Theme.of(
-                                    context,
-                                  ).primaryColor.withValues(alpha: 0.1),
-                                  child: Text(
-                                    surah.number.value.toArabicIndic(),
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                        if (state.error != null && state.surahs.isEmpty) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(32.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
+                                    color: context.errorColor,
+                                    size: 64,
                                   ),
-                                ),
-                                title: Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Text(
-                                    surah.name,
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    l10n.errorLoadingQuran,
                                     style: GoogleFonts.amiri(
-                                      fontSize: 20,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.bold,
-                                      height: 1.4,
-                                      wordSpacing: 2,
+                                      color: context.errorColor,
                                     ),
-                                    textAlign: TextAlign.right,
                                   ),
-                                ),
-                                subtitle: Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Text(
-                                    '${surah.numberOfAyahs.toArabicIndic()} ${l10n.ayah}',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: context.onSurfaceVariantColor,
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    state.error!,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: context.onSurfaceVariantColor),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  ElevatedButton.icon(
+                                    onPressed: () => context.read<QuranBloc>().add(
+                                      const QuranEvent.loadSurahs(),
                                     ),
-                                    textAlign: TextAlign.right,
+                                    icon: const Icon(Icons.refresh),
+                                    label: Text(l10n.retry),
                                   ),
-                                ),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.play_circle_outline,
-                                        color: Theme.of(context).primaryColor,
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+
+                        final filteredSurahs = state.surahs.where((surah) {
+                          return surah.name.contains(_searchQuery) ||
+                              surah.number.value.toString().contains(_searchQuery);
+                        }).toList();
+
+                        final lastRead = state.lastReadPosition;
+                        final hasLastRead = lastRead != null && state.surahs.isNotEmpty;
+                        Surah? lastReadSurah;
+                        if (hasLastRead) {
+                          try {
+                            lastReadSurah = state.surahs.firstWhere(
+                              (s) => s.number.value == lastRead.ayahNumber.surahNumber,
+                            );
+                          } catch (_) {}
+                        }
+
+                        return TabBarView(
+                          children: [
+                            // Surah Tab
+                            filteredSurahs.isEmpty && !state.isLoading
+                                ? Center(child: Text(l10n.noSearchResults))
+                                : Stack(
+                                    children: [
+                                      ListView.separated(
+                                        key: const Key('surah_list_view'),
+                                        padding: const EdgeInsets.all(16),
+                                        controller: _surahScrollController,
+                                        physics: const ScrollPhysics(),
+                                        itemCount:
+                                            filteredSurahs.length +
+                                            (hasLastRead && _searchQuery.isEmpty ? 1 : 0),
+                                        separatorBuilder: (context, index) =>
+                                            const Divider(height: 1),
+                                        itemBuilder: (context, index) {
+                                          if (hasLastRead &&
+                                              _searchQuery.isEmpty &&
+                                              index == 0) {
+                                            return _ContinueReadingCard(
+                                              surah: lastReadSurah!,
+                                              ayahNumber: lastRead.ayahNumber.ayahNumberInSurah,
+                                              isDownloaded: _downloadedSurahIds.contains(lastReadSurah.number.value),
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  QuranReaderPage.route(
+                                                    surahNumber: lastReadSurah!.number.value,
+                                                    ayahNumber:
+                                                        lastRead.ayahNumber.ayahNumberInSurah,
+                                                    allSurahs: state.surahs,
+                                                  ),
+                                                );
+                                              },
+                                              onPlayTap: () {
+                                                OfflineAudioHelper.handlePlayRequest(
+                                                  context: context,
+                                                  surahNumber: lastReadSurah!.number.value,
+                                                  startAyah: lastRead.ayahNumber.ayahNumberInSurah,
+                                                  isDownloaded: _downloadedSurahIds.contains(lastReadSurah.number.value),
+                                                );
+                                              },
+                                            );
+                                          }
+
+                                          final surahIndex = hasLastRead && _searchQuery.isEmpty
+                                              ? index - 1
+                                              : index;
+                                          final surah = filteredSurahs[surahIndex];
+                                          final isDownloaded = _downloadedSurahIds.contains(surah.number.value);
+
+                                          return ListTile(
+                                            contentPadding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
+                                            leading: CircleAvatar(
+                                              backgroundColor: Theme.of(
+                                                context,
+                                              ).primaryColor.withValues(alpha: 0.1),
+                                              child: Text(
+                                                surah.number.value.toArabicIndic(),
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                            title: Row(
+                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              children: [
+                                                if (isDownloaded)
+                                                  Padding(
+                                                    padding: const EdgeInsets.only(left: 4.0),
+                                                    child: Icon(
+                                                      Icons.check_circle_outline,
+                                                      size: 14,
+                                                      color: Theme.of(context).primaryColor.withValues(alpha: 0.8),
+                                                    ),
+                                                  ),
+                                                Expanded(
+                                                  child: Text(
+                                                    surah.name,
+                                                    style: GoogleFonts.amiri(
+                                                      fontSize: 20,
+                                                      fontWeight: FontWeight.bold,
+                                                      height: 1.4,
+                                                      wordSpacing: 2,
+                                                    ),
+                                                    textAlign: TextAlign.right,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            subtitle: Align(
+                                              alignment: Alignment.centerRight,
+                                              child: Text(
+                                                '${surah.numberOfAyahs.toArabicIndic()} ${l10n.ayah}',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: context.onSurfaceVariantColor,
+                                                ),
+                                                textAlign: TextAlign.right,
+                                              ),
+                                            ),
+                                            trailing: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                // Download / Progress Button
+                                                if (!isDownloaded)
+                                                  _downloadingSurahs.containsKey(surah.number.value)
+                                                      ? SizedBox(
+                                                          width: 24,
+                                                          height: 24,
+                                                          child: CircularProgressIndicator(
+                                                            value: _downloadingSurahs[surah.number.value],
+                                                            strokeWidth: 2,
+                                                          ),
+                                                        )
+                                                      : IconButton(
+                                                          icon: const Icon(Icons.download_for_offline_outlined, size: 20),
+                                                          onPressed: () => _downloadSurah(surah.number.value),
+                                                          tooltip: l10n.startDownload,
+                                                        ),
+                                                
+                                                // Play / Pause Button
+                                                BlocBuilder<AudioBloc, AudioState>(
+                                                  builder: (context, audioState) {
+                                                    final isThisSurah = audioState.currentSurah == surah.number.value;
+                                                    final isPlaying = audioState.isPlaying && isThisSurah;
+                                                    final isLoading = audioState.isLoading && isThisSurah;
+
+                                                    if (isLoading) {
+                                                      return const Padding(
+                                                        padding: EdgeInsets.all(12.0),
+                                                        child: SizedBox(
+                                                          width: 20,
+                                                          height: 20,
+                                                          child: CircularProgressIndicator(strokeWidth: 2),
+                                                        ),
+                                                      );
+                                                    }
+
+                                                    return IconButton(
+                                                      icon: Icon(
+                                                        isPlaying
+                                                            ? Icons.pause_circle_filled
+                                                            : Icons.play_circle_outline,
+                                                        color: Theme.of(context).primaryColor,
+                                                      ),
+                                                      onPressed: () => OfflineAudioHelper.handlePlayRequest(
+                                                        context: context,
+                                                        surahNumber: surah.number.value,
+                                                        startAyah: (lastRead?.ayahNumber.surahNumber == surah.number.value)
+                                                            ? lastRead?.ayahNumber.ayahNumberInSurah ?? 1
+                                                            : 1,
+                                                        isDownloaded: isDownloaded,
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                                // Arabic RTL: Disclosure arrow points Left. DO NOT CHANGE.
+                                                const Icon(Icons.arrow_forward_ios, size: 14),
+                                              ],
+                                            ),
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                QuranReaderPage.route(
+                                                  surahNumber: surah.number.value,
+                                                  allSurahs: state.surahs,
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        },
                                       ),
-                                      onPressed: () {
-                                        final startAyah =
-                                            (lastRead?.ayahNumber.surahNumber ==
-                                                surah.number.value)
-                                            ? lastRead?.ayahNumber.ayahNumberInSurah
-                                            : 1;
-                                        Navigator.push(
-                                          context,
-                                          QuranReaderPage.route(
-                                            surahNumber: surah.number.value,
-                                            ayahNumber: startAyah,
-                                            playOnLoad: true,
-                                            allSurahs: state.surahs,
-                                          ),
-                                        );
+                                    // Fast scroll scrollbar
+                                    FastScrollScrollbar(
+                                      scrollController: _surahScrollController,
+                                      itemCount: filteredSurahs.length +
+                                          (hasLastRead && _searchQuery.isEmpty ? 1 : 0),
+                                      labelBuilder: (context, index) {
+                                        if (hasLastRead && _searchQuery.isEmpty && index == 0) {
+                                          return Text(
+                                            'Continue',
+                                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                          );
+                                        }
+                                        final surahIndex = hasLastRead && _searchQuery.isEmpty
+                                            ? index - 1
+                                            : index;
+                                        if (surahIndex >= 0 && surahIndex < filteredSurahs.length) {
+                                          final surah = filteredSurahs[surahIndex];
+                                          return Text(
+                                            '${surah.number.value}. ${surah.name}',
+                                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                          );
+                                        }
+                                        return const SizedBox.shrink();
                                       },
                                     ),
-                                    // Arabic RTL: Disclosure arrow points Left. DO NOT CHANGE.
-                                    const Icon(Icons.arrow_forward_ios, size: 14),
                                   ],
                                 ),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    QuranReaderPage.route(
-                                      surahNumber: surah.number.value,
-                                      allSurahs: state.surahs,
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                          // Fast scroll scrollbar
-                          FastScrollScrollbar(
-                            scrollController: _surahScrollController,
-                            itemCount: filteredSurahs.length +
-                                (hasLastRead && _searchQuery.isEmpty ? 1 : 0),
-                            labelBuilder: (context, index) {
-                              if (hasLastRead && _searchQuery.isEmpty && index == 0) {
-                                return Text(
-                                  'Continue',
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                                );
-                              }
-                              final surahIndex = hasLastRead && _searchQuery.isEmpty
-                                  ? index - 1
-                                  : index;
-                              if (surahIndex >= 0 && surahIndex < filteredSurahs.length) {
-                                final surah = filteredSurahs[surahIndex];
-                                return Text(
-                                  '${surah.number.value}. ${surah.name}',
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                                );
-                              }
-                              return const SizedBox.shrink();
-                            },
-                          ),
+
+                          // Juz Tab
+                          JuzList(searchQuery: _searchQuery),
+
+                          // Hizb Tab
+                          HizbList(searchQuery: _searchQuery),
+
+                          // Bookmarks Tab
+                          BookmarkList(searchQuery: _searchQuery),
                         ],
-                      ),
-
-                // Juz Tab
-                JuzList(searchQuery: _searchQuery),
-
-                // Hizb Tab
-                HizbList(searchQuery: _searchQuery),
-
-                // Bookmarks Tab
-                BookmarkList(searchQuery: _searchQuery),
+                      );
+                    },
+                  ),
+                ),
+                ),
               ],
             );
           },
@@ -374,11 +550,15 @@ class _ContinueReadingCard extends StatelessWidget {
   final Surah surah;
   final int ayahNumber;
   final VoidCallback onTap;
+  final VoidCallback onPlayTap;
+  final bool isDownloaded;
 
   const _ContinueReadingCard({
     required this.surah,
     required this.ayahNumber,
     required this.onTap,
+    required this.onPlayTap,
+    this.isDownloaded = false,
   });
 
   @override
@@ -389,7 +569,6 @@ class _ContinueReadingCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: const EdgeInsets.only(bottom: 24),
       child: Container(
-        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           gradient: LinearGradient(
@@ -403,61 +582,86 @@ class _ContinueReadingCard extends StatelessWidget {
         ),
         child: InkWell(
           onTap: onTap,
-          child: Row(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.menu_book,
-                        color: context.onSurfaceColor,
-                        size: 18,
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.menu_book,
+                            color: context.onSurfaceColor,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            l10n.continueReading,
+                            style: GoogleFonts.amiri(
+                              color: context.onSurfaceColor.withValues(alpha: 0.9),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(height: 12),
                       Text(
-                        l10n.continueReading,
+                        surah.name,
                         style: GoogleFonts.amiri(
-                          color: context.onSurfaceColor.withValues(alpha: 0.9),
-                          fontWeight: FontWeight.w500,
+                          color: context.onSurfaceColor,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          height: 1.4,
+                          wordSpacing: 2,
+                        ),
+                      ),
+                      Text(
+                        l10n.ayahNumberWithVal(ayahNumber.toArabicIndic()),
+                        style: GoogleFonts.amiri(
+                          color: context.onSurfaceColor.withValues(alpha: 0.8),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    surah.name,
-                    style: GoogleFonts.amiri(
-                      color: context.onSurfaceColor,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      height: 1.4,
-                      wordSpacing: 2,
-                    ),
-                  ),
-                  Text(
-                    l10n.ayahNumberWithVal(ayahNumber.toArabicIndic()),
-                    style: GoogleFonts.amiri(
-                      color: context.onSurfaceColor.withValues(alpha: 0.8),
-                    ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: context.onSurfaceColor.withValues(alpha: 0.2),
-                  shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  Icons.play_arrow_rounded,
-                  color: context.onSurfaceColor,
-                  size: 32,
+                BlocBuilder<AudioBloc, AudioState>(
+                  builder: (context, audioState) {
+                    final isThisSurah = audioState.currentSurah == surah.number.value;
+                    final isPlaying = audioState.isPlaying && isThisSurah;
+                    final isLoading = audioState.isLoading && isThisSurah;
+
+                    return IconButton(
+                      onPressed: onPlayTap,
+                      icon: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: context.onSurfaceColor.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: isLoading
+                            ? SizedBox(
+                                width: 32,
+                                height: 32,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 3,
+                                  valueColor: AlwaysStoppedAnimation<Color>(context.onSurfaceColor),
+                                ),
+                              )
+                            : Icon(
+                                isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                                color: context.onSurfaceColor,
+                                size: 32,
+                              ),
+                      ),
+                    );
+                  },
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

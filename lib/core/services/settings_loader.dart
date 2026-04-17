@@ -6,6 +6,7 @@ import 'package:fard/features/settings/domain/app_settings.dart';
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
+import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
 
 /// Static utility class for loading settings from SharedPreferences.
 /// This is only used during app initialization to create the initial settings.
@@ -13,6 +14,12 @@ class SettingsLoader {
   static AppSettings loadSettings(SharedPreferences prefs) {
     final latStr = prefs.get(SettingsKeys.latitude)?.toString();
     final lonStr = prefs.get(SettingsKeys.longitude)?.toString();
+
+    final audioQualityStr = prefs.getString(SettingsKeys.audioQuality);
+    final audioQuality = AudioQuality.values.firstWhere(
+      (e) => e.name == audioQualityStr,
+      orElse: () => AudioQuality.low64,
+    );
 
     return AppSettings(
       locale: Locale(prefs.getString(SettingsKeys.locale) ?? 'ar'),
@@ -38,6 +45,7 @@ class SettingsLoader {
         prefs.getString(SettingsKeys.eveningAzkarTime) ?? '18:00',
       ),
       salaahSettings: _loadSalaahSettings(prefs),
+      audioQuality: audioQuality,
     );
   }
 

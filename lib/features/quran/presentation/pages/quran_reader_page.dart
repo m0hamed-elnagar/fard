@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/domain/services/audio_download_service.dart';
+import 'package:fard/features/audio/presentation/utils/offline_audio_helper.dart';
 import 'package:fard/features/quran/domain/entities/surah.dart';
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
@@ -92,6 +94,8 @@ class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingOb
 
   @override
   void dispose() {
+    // Cancel any ongoing downloads to prevent background corruption/leaks
+    getIt<AudioDownloadService>().cancelAllDownloads();
     // End session when leaving Quran reader (use saved reference)
     _werdBloc.add(const WerdEvent.endSession());
     _scrollController.dispose();
@@ -174,11 +178,10 @@ class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingOb
                               // Play on load logic
                               if (!_hasHandledPlayOnLoad && widget.playOnLoad) {
                                 _hasHandledPlayOnLoad = true;
-                                context.read<AudioBloc>().add(
-                                  AudioEvent.playSurah(
-                                    surahNumber: widget.surahNumber,
-                                    startAyah: widget.initialAyahNumber ?? 1,
-                                  ),
+                                OfflineAudioHelper.handlePlayRequest(
+                                  context: context,
+                                  surahNumber: widget.surahNumber,
+                                  startAyah: widget.initialAyahNumber ?? 1,
                                 );
                               }
 

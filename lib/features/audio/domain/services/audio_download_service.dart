@@ -16,6 +16,9 @@ abstract interface class AudioDownloadService {
   /// Cancel ongoing downloads for a reciter
   Future<void> cancelDownload(String reciterId);
 
+  /// Cancel all ongoing downloads
+  Future<void> cancelAllDownloads();
+
   /// Delete downloaded files for a Surah
   Future<void> deleteSurah({
     required String reciterId,
@@ -39,6 +42,12 @@ abstract interface class AudioDownloadService {
 
   /// Get total size in bytes of downloaded audio for a reciter
   Future<int> getReciterDownloadedSize(String reciterId);
+
+  /// Get all reciters that have a specific surah fully downloaded
+  Future<List<Reciter>> getRecitersWithDownloadedSurah(int surahNumber);
+
+  /// Get IDs of all surahs fully downloaded for a specific reciter
+  Future<Set<int>> getDownloadedSurahIdsForReciter(String reciterId);
 }
 
 class DownloadProgress {

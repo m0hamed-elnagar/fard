@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'package:fard/core/models/download_entry.dart';
+import 'package:fard/core/services/download/download_manifest_service.dart';
+import 'package:fard/core/utils/file_download_utils.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/foundation.dart';
@@ -6,6 +9,10 @@ import 'package:injectable/injectable.dart';
 
 @singleton
 class MushafDownloadService {
+  final DownloadManifestService _manifestService;
+  
+  MushafDownloadService(this._manifestService);
+
   // Reliable GitHub Raw Source
   static const String baseUrl =
       'https://raw.githubusercontent.com/BetimShala/quran-images-api/master/quran-images/';
@@ -14,7 +21,7 @@ class MushafDownloadService {
   final Map<int, Future<String?>> _activeDownloads = {};
 
   Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
+    final directory = await getApplicationSupportDirectory();
     final path = '${directory.path}/mushaf_pages';
     final dir = Directory(path);
     if (!await dir.exists()) {
@@ -37,18 +44,46 @@ class MushafDownloadService {
         await directory.delete(recursive: true);
         await directory.create(recursive: true);
       }
+      
+      // Clear manifest entries for mushaf_page
+      await _manifestService.deleteEntriesByContentType('mushaf_page');
     } catch (e) {
       debugPrint('Error clearing mushaf cache: $e');
     }
   }
 
   Future<bool> isPageDownloaded(int pageNumber) async {
+    final fileId = 'mushaf_page_$pageNumber';
+    final entry = await _manifestService.getEntry(fileId);
+
+    if (entry != null) {
+      return entry.status == DownloadStatus.completed;
+    }
+
+    // Lazy sync if entry doesn't exist
+    return _syncManifestForPage(pageNumber);
+  }
+
+  Future<bool> _syncManifestForPage(int pageNumber) async {
     try {
       final file = await getLocalFile(pageNumber);
-      if (!await file.exists()) return false;
-      // Ensure file is not empty
-      final length = await file.length();
-      return length > 512; // GitHub images for page 1/2 are around 40-50KB
+      final exists = await file.exists();
+      final length = exists ? await file.length() : 0;
+      final isValid = exists && length > 512;
+
+      final entry = DownloadEntry(
+        fileId: 'mushaf_page_$pageNumber',
+        relativePath: 'mushaf_pages/$pageNumber.png',
+        contentType: 'mushaf_page',
+        url: '$baseUrl$pageNumber.png',
+        expectedSize: isValid ? length : 50 * 1024, // Estimate
+        downloadedBytes: isValid ? length : 0,
+        status: isValid ? DownloadStatus.completed : DownloadStatus.pending,
+        updatedAt: DateTime.now(),
+      );
+
+      await _manifestService.upsertEntry(entry);
+      return isValid;
     } catch (e) {
       return false;
     }
@@ -92,11 +127,25 @@ class MushafDownloadService {
   }
 
   Future<String?> _performDownload(int pageNumber) async {
+    final fileId = 'mushaf_page_$pageNumber';
+    final url = '$baseUrl$pageNumber.png';
+    
     try {
       final file = await getLocalFile(pageNumber);
 
+      // Update status to downloading
+      final currentEntry = await _manifestService.getEntry(fileId);
+      await _manifestService.upsertEntry((currentEntry ?? DownloadEntry(
+        fileId: fileId,
+        relativePath: 'mushaf_pages/$pageNumber.png',
+        contentType: 'mushaf_page',
+        url: url,
+        expectedSize: 50 * 1024,
+        status: DownloadStatus.downloading,
+        updatedAt: DateTime.now(),
+      )).copyWith(status: DownloadStatus.downloading, updatedAt: DateTime.now()));
+
       // Try primary API (GitHub)
-      final url = '$baseUrl$pageNumber.png';
       debugPrint('Downloading page $pageNumber from $url');
 
       final response = await http
@@ -104,7 +153,23 @@ class MushafDownloadService {
           .timeout(const Duration(seconds: 45));
 
       if (response.statusCode == 200 && response.bodyBytes.length > 1024) {
-        await file.writeAsBytes(response.bodyBytes);
+        await FileDownloadUtils.atomicWriteFile(
+          bytes: response.bodyBytes,
+          finalPath: file.path,
+          fileType: 'image',
+        );
+        
+        // Update manifest to completed
+        final entry = await _manifestService.getEntry(fileId);
+        if (entry != null) {
+          await _manifestService.upsertEntry(entry.copyWith(
+            status: DownloadStatus.completed,
+            downloadedBytes: response.bodyBytes.length,
+            expectedSize: response.bodyBytes.length,
+            updatedAt: DateTime.now(),
+          ));
+        }
+
         debugPrint('Successfully downloaded page $pageNumber from GitHub');
         return file.path;
       } else {
@@ -115,6 +180,18 @@ class MushafDownloadService {
       }
     } catch (e) {
       debugPrint('Error downloading page $pageNumber: $e');
+      
+      // Update manifest to failed
+      final entry = await _manifestService.getEntry(fileId);
+      if (entry != null) {
+        await _manifestService.upsertEntry(entry.copyWith(
+          status: DownloadStatus.failed,
+          errorMessage: e.toString(),
+          updatedAt: DateTime.now(),
+          attemptCount: entry.attemptCount + 1,
+        ));
+      }
+      
       return await _downloadFromFallback(pageNumber);
     }
   }
@@ -131,7 +208,11 @@ class MushafDownloadService {
           .timeout(const Duration(seconds: 30));
       if (response.statusCode == 200 && response.bodyBytes.length > 5000) {
         final file = await getLocalFile(pageNumber);
-        await file.writeAsBytes(response.bodyBytes);
+        await FileDownloadUtils.atomicWriteFile(
+          bytes: response.bodyBytes,
+          finalPath: file.path,
+          fileType: 'image',
+        );
         return file.path;
       }
     } catch (_) {}
@@ -162,43 +243,57 @@ class MushafDownloadService {
     }
   }
 
+  bool _isCancelled = false;
+
+  void cancelDownload() {
+    _isCancelled = true;
+  }
+
   Stream<double> downloadAllPages() async* {
+    _isCancelled = false;
     const int totalPages = 604;
     int downloadedCount = 0;
 
-    // Initial count
-    for (int i = 1; i <= totalPages; i++) {
-      if (await isPageDownloaded(i)) downloadedCount++;
-    }
-    yield downloadedCount / totalPages;
+    try {
+      // Initial count
+      for (int i = 1; i <= totalPages; i++) {
+        if (await isPageDownloaded(i)) downloadedCount++;
+      }
+      yield downloadedCount / totalPages;
 
-    // Download in chunks to be faster but not overwhelm the system
-    const int chunkSize = 5;
-    for (int i = 1; i <= totalPages; i += chunkSize) {
-      final List<Future<String?>> chunkFutures = [];
+      // Download in chunks to be faster but not overwhelm the system
+      const int chunkSize = 5;
+      for (int i = 1; i <= totalPages; i += chunkSize) {
+        if (_isCancelled) return;
 
-      for (int j = 0; j < chunkSize && (i + j) <= totalPages; j++) {
-        final pageNum = i + j;
-        if (!(await isPageDownloaded(pageNum))) {
-          chunkFutures.add(downloadPage(pageNum, retryCount: 3));
-        } else {
-          // Already counted, but we need to keep the progress yielding logic consistent
+        final List<Future<String?>> chunkFutures = [];
+
+        for (int j = 0; j < chunkSize && (i + j) <= totalPages; j++) {
+          final pageNum = i + j;
+          if (!(await isPageDownloaded(pageNum))) {
+            chunkFutures.add(downloadPage(pageNum, retryCount: 3));
+          }
+        }
+
+        if (chunkFutures.isNotEmpty) {
+          await Future.wait(chunkFutures);
+
+          // Recalculate downloaded count
+          int currentCount = 0;
+          for (int k = 1; k <= totalPages; k++) {
+            if (await isPageDownloaded(k)) currentCount++;
+          }
+          downloadedCount = currentCount;
+          yield downloadedCount / totalPages;
         }
       }
 
-      if (chunkFutures.isNotEmpty) {
-        await Future.wait(chunkFutures);
-
-        // Recalculate downloaded count
-        int currentCount = 0;
-        for (int k = 1; k <= totalPages; k++) {
-          if (await isPageDownloaded(k)) currentCount++;
-        }
-        downloadedCount = currentCount;
-        yield downloadedCount / totalPages;
+      yield 1.0;
+    } finally {
+      if (_isCancelled) {
+        final path = await _localPath;
+        await FileDownloadUtils.pruneTempFiles(path);
       }
     }
-
-    yield 1.0;
   }
 }

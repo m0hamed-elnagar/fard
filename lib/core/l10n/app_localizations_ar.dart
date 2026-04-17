@@ -193,7 +193,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get madhab => 'المذهب';
 
   @override
-  String get language => 'اللغة';
+  String get language => 'الغة';
 
   @override
   String get locationDesc =>
@@ -745,6 +745,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get quranTextDesc => 'جميع السور والآيات مع المعلومات الأساسية';
+
+  @override
+  String get downloadQuranTextConfirm =>
+      'سيتم تحميل نص القرآن الكريم بالكامل للاستخدام بدون إنترنت.';
+
+  @override
+  String get confirmDownload => 'تأكيد التحميل';
 
   @override
   String get readerSettings => 'إعدادات القارئ';

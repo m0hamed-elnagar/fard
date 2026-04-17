@@ -12,6 +12,7 @@ import 'package:fard/features/settings/domain/repositories/settings_repository.d
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:fard/features/settings/domain/entities/custom_theme.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
+import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -78,6 +79,9 @@ class _BackgroundSettingsProvider implements SettingsRepository {
 
   @override
   String? get activeCustomThemeId => null;
+
+  @override
+  AudioQuality get audioQuality => _settings.audioQuality;
 
   // Write operations are not supported in background isolate
   @override
@@ -160,6 +164,9 @@ class _BackgroundSettingsProvider implements SettingsRepository {
 
   @override
   Future<void> setActiveCustomTheme(String? themeId) => Future.value();
+
+  @override
+  Future<void> updateAudioQuality(AudioQuality quality) => Future.value();
 }
 
 /// WorkManager task unique names (initialized when needed).

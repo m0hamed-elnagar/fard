@@ -30,7 +30,9 @@ void main() {
     registerFallbackValue(AudioPlayMode.ayah);
     registerFallbackValue(AudioQuality.medium128);
     registerFallbackValue(
-      const AudioTrack(remoteUrl: '', localPath: '', isDownloaded: false),
+      const AudioTrack(remoteUrl: '', localPath: '',
+          // isDownloaded: false
+        ),
     );
     registerFallbackValue(const Locale('en'));
   });
@@ -121,12 +123,12 @@ void main() {
         const track128 = AudioTrack(
           remoteUrl: 'url_128',
           localPath: 'path_128',
-          isDownloaded: false,
+          // isDownloaded: false,
         );
         const track64 = AudioTrack(
           remoteUrl: 'url_64',
           localPath: 'path_64',
-          isDownloaded: false,
+          // isDownloaded: false,
         );
 
         when(
@@ -189,7 +191,7 @@ void main() {
         const track64 = AudioTrack(
           remoteUrl: 'url_64',
           localPath: 'path_64',
-          isDownloaded: false,
+          // isDownloaded: false,
         );
 
         when(

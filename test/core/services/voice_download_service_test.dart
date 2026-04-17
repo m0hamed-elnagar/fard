@@ -1,11 +1,14 @@
+import 'package:fard/core/models/download_entry.dart';
+import 'package:fard/core/services/download/download_manifest_service.dart';
 import 'package:fard/core/services/voice_download_service.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:http/http.dart' as http;
+import 'package:mocktail/mocktail.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 class MockHttpClient extends Mock implements http.Client {}
+class MockDownloadManifestService extends Mock implements DownloadManifestService {}
 
 class FakePathProviderPlatform extends Fake
     with MockPlatformInterfaceMixin
@@ -20,10 +23,31 @@ class FakePathProviderPlatform extends Fake
 
 void main() {
   late VoiceDownloadService service;
+  late MockDownloadManifestService mockManifestService;
+
+  setUpAll(() {
+    registerFallbackValue(DownloadEntry(
+      fileId: 'fallback',
+      relativePath: 'path',
+      contentType: 'audio',
+      url: 'url',
+      expectedSize: 0,
+      status: DownloadStatus.pending,
+      updatedAt: DateTime.now(),
+    ));
+  });
 
   setUp(() {
     PathProviderPlatform.instance = FakePathProviderPlatform();
-    service = VoiceDownloadService();
+    mockManifestService = MockDownloadManifestService();
+    
+    // Default mocks
+    when(() => mockManifestService.getEntry(any()))
+        .thenAnswer((_) async => null);
+    when(() => mockManifestService.upsertEntry(any()))
+        .thenAnswer((_) async => {});
+
+    service = VoiceDownloadService(mockManifestService);
   });
 
   group('VoiceDownloadService', () {

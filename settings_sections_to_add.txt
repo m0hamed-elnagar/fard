@@ -1,0 +1,615 @@
+// Add these methods to _SettingsScreenState class in settings_screen.dart
+// Insert them before the closing brace of the class (around line 2447)
+
+  // ==================== APPEARANCE SECTION ====================
+
+  Widget _buildAppearanceSection(
+    BuildContext context,
+    SettingsState state,
+    AppLocalizations l10n,
+  ) {
+    final cubit = context.read<SettingsCubit>();
+    final presets = cubit.getAvailablePresets();
+    final currentPresetId = state.themePresetId;
+    final localeCode = state.locale.languageCode;
+    final savedThemes = state.savedCustomThemes;
+
+    return _buildSection(
+      context,
+      title: l10n.appearance,
+      icon: Icons.palette_rounded,
+      children: [
+        // Built-in presets horizontal scroll
+        SizedBox(
+          height: 160,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: presets.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final preset = presets[index];
+              final isSelected = preset.id == currentPresetId;
+              return _buildThemeCard(
+                preset: preset,
+                isSelected: isSelected,
+                localeCode: localeCode,
+                onTap: () => cubit.selectThemePreset(preset.id),
+              );
+            },
+          ),
+        ),
+        // "Create New Theme" button
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => _showThemeEditorSheet(context, state, l10n, null),
+            icon: const Icon(Icons.add_circle_outline_rounded),
+            label: Text(l10n.createNewTheme),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: context.secondaryColor,
+              side: BorderSide(color: context.secondaryColor),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ),
+        ),
+        // Saved custom themes list (EXPANDABLE)
+        if (savedThemes.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          InkWell(
+            onTap: () {
+              setState(() {
+                _isThemeListExpanded = !_isThemeListExpanded;
+              });
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    _isThemeListExpanded
+                        ? l10n.hideSavedThemes
+                        : l10n.showSavedThemes(savedThemes.length),
+                    style: GoogleFonts.amiri(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: context.onSurfaceColor,
+                    ),
+                  ),
+                  AnimatedRotation(
+                    turns: _isThemeListExpanded ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: context.onSurfaceVariantColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          AnimatedCrossFade(
+            firstChild: const SizedBox.shrink(),
+            secondChild: Column(
+              children: savedThemes.map((theme) {
+                final isActive =
+                    currentPresetId == 'custom' &&
+                    state.activeCustomThemeId == theme.id;
+                return _buildSavedThemeCard(
+                  theme: theme,
+                  isActive: isActive,
+                  l10n: l10n,
+                  onTap: () => cubit.activateCustomTheme(theme.id),
+                  onEdit: () =>
+                      _showThemeEditorSheet(context, state, l10n, theme),
+                  onDelete: () => _confirmDeleteTheme(context, theme, l10n),
+                );
+              }).toList(),
+            ),
+            crossFadeState: _isThemeListExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.hideSecond,
+            duration: const Duration(milliseconds: 200),
+          ),
+        ],
+        if (currentPresetId != 'emerald') ...[
+          const SizedBox(height: 12),
+          Center(
+            child: TextButton.icon(
+              icon: Icon(Icons.restore, size: 18),
+              label: Text(l10n.resetToDefault),
+              onPressed: () => cubit.selectThemePreset('emerald'),
+            ),
+          ),
+        ],
+        const SizedBox(height: 16),
+        const Divider(height: 1),
+        const SizedBox(height: 16),
+        // Widget Theme Mode
+        _buildSettingItem(
+          title: l10n.widgetThemeMode,
+          description: '',
+          trailing: _buildDropdown<String>(
+            value: state.widgetThemeMode,
+            items: [
+              DropdownMenuItem(
+                value: 'dark',
+                child: Text(l10n.widgetThemeDark),
+              ),
+              DropdownMenuItem(
+                value: 'light',
+                child: Text(l10n.widgetThemeLight),
+              ),
+              DropdownMenuItem(
+                value: 'follow_app',
+                child: Text(l10n.widgetThemeFollowApp),
+              ),
+            ],
+            onChanged: (value) {
+              if (value != null) {
+                cubit.updateWidgetThemeMode(value);
+              }
+            },
+          ),
+        ),
+        const SizedBox(height: 16),
+        const Divider(height: 1),
+        const SizedBox(height: 16),
+        // Language Toggle
+        _buildSettingItem(
+          title: l10n.language,
+          description: l10n.languageDesc,
+          trailing: TextButton(
+            onPressed: () => cubit.toggleLocale(),
+            child: Text(
+              state.locale.languageCode == 'ar' ? 'العربية' : 'English',
+              style: TextStyle(
+                color: context.secondaryColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ==================== PRAYER & AZAN SECTION ====================
+
+  Widget _buildPrayerAndAzanSection(
+    BuildContext context,
+    SettingsState state,
+    AppLocalizations l10n,
+  ) {
+    return _buildSection(
+      context,
+      title: l10n.prayerAndAzan,
+      icon: Icons.access_time_filled_rounded,
+      children: [
+        // Calculation Method
+        _buildSettingItem(
+          title: l10n.calculationMethod,
+          description: l10n.calculationMethodDesc,
+          trailing: _buildDropdown<String>(
+            value: state.calculationMethod,
+            items: [
+              'muslim_league',
+              'egyptian',
+              'karachi',
+              'umm_al_qura',
+              'dubai',
+              'moonsighting_committee',
+              'north_america',
+              'kuwait',
+              'qatar',
+              'singapore',
+              'tehran',
+              'turkey',
+            ].map((method) {
+              String displayName;
+              switch (method) {
+                case 'muslim_league':
+                  displayName = l10n.muslimWorldLeague;
+                  break;
+                case 'egyptian':
+                  displayName = l10n.egyptianGeneralAuthority;
+                  break;
+                case 'karachi':
+                  displayName = l10n.universityOfIslamicSciencesKarachi;
+                  break;
+                case 'umm_al_qura':
+                  displayName = l10n.ummAlQuraUniversityMakkah;
+                  break;
+                case 'dubai':
+                  displayName = l10n.dubai;
+                  break;
+                case 'moonsighting_committee':
+                  displayName = l10n.moonsightingCommittee;
+                  break;
+                case 'north_america':
+                  displayName = l10n.isnaNorthAmerica;
+                  break;
+                case 'kuwait':
+                  displayName = l10n.kuwait;
+                  break;
+                case 'qatar':
+                  displayName = l10n.qatar;
+                  break;
+                case 'singapore':
+                  displayName = l10n.singapore;
+                  break;
+                case 'tehran':
+                  displayName = l10n.instituteOfGeophysicsTehran;
+                  break;
+                case 'turkey':
+                  displayName = l10n.turkey;
+                  break;
+                default:
+                  displayName = method
+                      .replaceAll('_', ' ')
+                      .split(' ')
+                      .map(
+                        (str) => str[0].toUpperCase() + str.substring(1),
+                      )
+                      .join(' ');
+              }
+              return DropdownMenuItem(
+                value: method,
+                child: Text(displayName, style: const TextStyle(fontSize: 13)),
+              );
+            }).toList(),
+            onChanged: (value) {
+              if (value != null) {
+                context.read<SettingsCubit>().updateCalculationMethod(value);
+              }
+            },
+          ),
+        ),
+        const Divider(height: 32),
+        // Madhab
+        _buildSettingItem(
+          title: l10n.madhab,
+          description: l10n.madhabDesc,
+          trailing: _buildDropdown<String>(
+            value: state.madhab,
+            items: [
+              DropdownMenuItem(
+                value: 'shafi',
+                child: Text(l10n.shafiMadhab, style: const TextStyle(fontSize: 13)),
+              ),
+              DropdownMenuItem(
+                value: 'hanafi',
+                child: Text(l10n.hanafiMadhab, style: const TextStyle(fontSize: 13)),
+              ),
+            ],
+            onChanged: (value) {
+              if (value != null) {
+                context.read<SettingsCubit>().updateMadhab(value);
+              }
+            },
+          ),
+        ),
+        const Divider(height: 32),
+        // Azan Notifications
+        Text(
+          l10n.azanSettingsDesc,
+          style: TextStyle(color: context.onSurfaceVariantColor, fontSize: 13),
+        ),
+        const SizedBox(height: 12),
+        // Global settings button
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(l10n.globalSettings),
+          subtitle: Text(l10n.globalSettingsDesc, style: TextStyle(fontSize: 12)),
+          trailing: ElevatedButton.icon(
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              _showGlobalSettingsDialog(context, state, l10n);
+            },
+            icon: Icon(Icons.tune_rounded, size: 18),
+            label: Text(l10n.edit),
+          ),
+        ),
+        const Divider(height: 24),
+        // Per-prayer settings
+        Text(
+          l10n.editEachPrayer,
+          style: TextStyle(
+            color: context.onSurfaceVariantColor,
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ...state.salaahSettings.map((salaahSetting) {
+          return _buildSalaahSettingItem(
+            context: context,
+            settings: salaahSetting,
+            l10n: l10n,
+          );
+        }),
+      ],
+    );
+  }
+
+  // ==================== AZKAR SECTION ====================
+
+  Widget _buildAzkarSection(
+    BuildContext context,
+    SettingsState state,
+    AppLocalizations l10n,
+  ) {
+    return _buildSection(
+      context,
+      title: l10n.azkarSection,
+      icon: Icons.auto_stories_rounded,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                l10n.azkarSettingsDesc,
+                style: TextStyle(
+                  color: context.onSurfaceVariantColor,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+            TextButton.icon(
+              key: const Key('add_reminder_button'),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                _showAddReminderDialog(context);
+              },
+              icon: Icon(Icons.add, size: 20),
+              label: Text(l10n.add),
+              style: TextButton.styleFrom(
+                foregroundColor: context.secondaryColor,
+              ),
+            ),
+          ],
+        ),
+        const Divider(height: 12),
+        if (state.reminders.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Center(
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.notifications_none_rounded,
+                    color: context.onSurfaceVariantColor.withValues(alpha: 0.3),
+                    size: 40,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.noRemindersSet,
+                    style: TextStyle(color: context.onSurfaceVariantColor),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          ...state.reminders.asMap().entries.map((entry) {
+            final index = entry.key;
+            final reminder = entry.value;
+            return Column(
+              children: [
+                _buildReminderItem(
+                  context: context,
+                  index: index,
+                  reminder: reminder,
+                ),
+                if (index < state.reminders.length - 1)
+                  const Divider(height: 1),
+              ],
+            );
+          }),
+      ],
+    );
+  }
+
+  // ==================== GENERAL SECTION ====================
+
+  Widget _buildGeneralSection(
+    BuildContext context,
+    SettingsState state,
+    AppLocalizations l10n,
+  ) {
+    return _buildSection(
+      context,
+      title: l10n.generalSettings,
+      icon: Icons.settings_rounded,
+      children: [
+        // Qada Tracker
+        _buildSettingItem(
+          title: l10n.qadaTracker,
+          description: l10n.qadaTrackerDesc,
+          trailing: CustomToggle(
+            value: state.isQadaEnabled,
+            onChanged: (val) {
+              context.read<SettingsCubit>().toggleQadaEnabled();
+            },
+          ),
+        ),
+        const Divider(height: 32),
+        // Hijri Adjustment
+        _buildSettingItem(
+          title: l10n.hijriAdjustment,
+          description: l10n.hijriAdjustmentDesc,
+          trailing: _buildDropdown<int>(
+            value: state.hijriAdjustment,
+            items: [-2, -1, 0, 1, 2].map((adj) {
+              return DropdownMenuItem(
+                value: adj,
+                child: Text(
+                  adj == 0 ? '0' : (adj > 0 ? '+$adj' : '$adj'),
+                  style: const TextStyle(fontSize: 13),
+                ),
+              );
+            }).toList(),
+            onChanged: (value) {
+              if (value != null) {
+                context.read<SettingsCubit>().updateHijriAdjustment(value);
+              }
+            },
+          ),
+        ),
+        const Divider(height: 32),
+        // Offline Audio
+        _buildSettingItem(
+          title: l10n.offlineAudio,
+          description: l10n.downloadRecitersOffline,
+          trailing: Icon(
+            Icons.arrow_forward_ios_rounded,
+            size: 16,
+            color: context.onSurfaceVariantColor,
+          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const OfflineAudioScreen()),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  // ==================== DATA & LOCATION SECTION ====================
+
+  Widget _buildDataAndLocationSection(
+    BuildContext context,
+    SettingsState state,
+    AppLocalizations l10n,
+  ) {
+    return _buildSection(
+      context,
+      title: l10n.dataAndLocation,
+      icon: Icons.backup_rounded,
+      children: [
+        // Location
+        if (state.latitude == null || state.longitude == null)
+          _buildWarningCard(
+            '',
+            l10n.locationWarning,
+            Icons.location_off_rounded,
+            isSmall: true,
+          ),
+        Text(
+          l10n.locationDesc,
+          style: TextStyle(color: context.onSurfaceVariantColor, fontSize: 13),
+        ),
+        const SizedBox(height: 12),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(l10n.currentLocation),
+          subtitle: Text(
+            state.cityName ?? l10n.locationNotSet,
+            style: TextStyle(
+              color: state.cityName != null
+                  ? context.secondaryColor
+                  : context.errorColor,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          trailing: ElevatedButton.icon(
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+              context.read<SettingsCubit>().refreshLocation();
+            },
+            icon: Icon(Icons.my_location, size: 18),
+            label: Text(l10n.refreshLocation),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
+          ),
+        ),
+        const Divider(height: 32),
+        // Export Backup
+        _buildSettingItem(
+          title: l10n.exportBackup,
+          description: l10n.exportBackupDesc,
+          onTap: () async {
+            try {
+              await getIt<ExportImportService>().exportData();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.backupExportSuccess)),
+                );
+              }
+            } catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('${l10n.backupError}: $e')),
+                );
+              }
+            }
+          },
+          trailing: Icon(
+            Icons.share_rounded,
+            size: 20,
+            color: context.secondaryColor,
+          ),
+        ),
+        const Divider(height: 32),
+        // Import Backup
+        _buildSettingItem(
+          title: l10n.importBackup,
+          description: l10n.importBackupDesc,
+          onTap: () async {
+            final confirm = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Text(l10n.importBackup),
+                content: Text(l10n.importWarning),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: Text(l10n.cancel),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: Text(l10n.yes),
+                  ),
+                ],
+              ),
+            );
+
+            if (confirm == true && context.mounted) {
+              try {
+                final success =
+                    await getIt<ExportImportService>().importData();
+                if (success && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.backupImportSuccess)),
+                  );
+                  context.read<WerdBloc>().add(const WerdEvent.load());
+                  final prayerBloc = context.read<PrayerTrackerBloc>();
+                  prayerBloc.add(PrayerTrackerEvent.load(DateTime.now()));
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('${l10n.backupError}: $e')),
+                  );
+                }
+              }
+            }
+          },
+          trailing: Icon(
+            Icons.file_upload_rounded,
+            size: 20,
+            color: context.secondaryColor,
+          ),
+        ),
+      ],
+    );
+  }

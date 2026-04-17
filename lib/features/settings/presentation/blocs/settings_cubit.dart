@@ -18,6 +18,7 @@ import '../../../../core/services/location_service.dart';
 import '../../../../core/services/widget_update_service.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/theme_presets.dart';
+import '../../../audio/domain/repositories/audio_repository.dart';
 import 'settings_state.dart';
 
 /// Thin presentation-layer cubit for settings UI state.
@@ -65,8 +66,22 @@ class SettingsCubit extends Cubit<SettingsState> {
           customThemeColors: _repo.customThemeColors,
           savedCustomThemes: _repo.savedCustomThemes,
           activeCustomThemeId: _repo.activeCustomThemeId,
+          audioQuality: _repo.audioQuality,
         ),
       );
+
+  void updateAudioQuality(AudioQuality quality) {
+    try {
+      _updateAudioQualityAsync(quality);
+    } catch (e) {
+      debugPrint('SettingsCubit: Error in updateAudioQuality: $e');
+    }
+  }
+
+  Future<void> _updateAudioQualityAsync(AudioQuality quality) async {
+    await _repo.updateAudioQuality(quality);
+    emit(state.copyWith(audioQuality: quality));
+  }
 
   void addReminder(AzkarReminder r) {
     try {

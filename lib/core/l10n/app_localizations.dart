@@ -1478,6 +1478,18 @@ abstract class AppLocalizations {
   /// **'All Surahs and Ayahs with basic info'**
   String get quranTextDesc;
 
+  /// No description provided for @downloadQuranTextConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'All Quran text will be downloaded for offline use.'**
+  String get downloadQuranTextConfirm;
+
+  /// No description provided for @confirmDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Download'**
+  String get confirmDownload;
+
   /// No description provided for @readerSettings.
   ///
   /// In en, this message translates to:

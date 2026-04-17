@@ -7,6 +7,7 @@ import '../../domain/azkar_reminder.dart';
 import '../../domain/entities/custom_theme.dart';
 import '../../domain/repositories/settings_repository.dart';
 import '../../domain/salaah_settings.dart';
+import '../../../audio/domain/repositories/audio_repository.dart';
 import 'settings_storage.dart';
 
 /// Data layer implementation of [SettingsRepository].
@@ -149,6 +150,16 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   String? get activeCustomThemeId =>
       _storage.readString(SettingsKeys.activeCustomThemeId);
+
+  @override
+  AudioQuality get audioQuality {
+    final value = _storage.readString(SettingsKeys.audioQuality);
+    if (value == null) return AudioQuality.low64;
+    return AudioQuality.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => AudioQuality.low64,
+    );
+  }
 
   // ==================== WRITE OPERATIONS ====================
 
@@ -390,5 +401,10 @@ class SettingsRepositoryImpl implements SettingsRepository {
       SettingsKeys.activeCustomThemeId,
       themeId ?? '',
     );
+  }
+
+  @override
+  Future<void> updateAudioQuality(AudioQuality quality) async {
+    await _storage.writeString(SettingsKeys.audioQuality, quality.name);
   }
 }
