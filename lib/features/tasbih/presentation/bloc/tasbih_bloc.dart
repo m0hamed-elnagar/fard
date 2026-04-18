@@ -26,6 +26,18 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
     on<_SelectCompletionDua>(_onSelectCompletionDua);
     on<_RememberCompletionDua>(_onRememberCompletionDua);
     on<_UpdateCustomTarget>(_onUpdateCustomTarget);
+    on<_ChangeItem>(_onChangeItem);
+  }
+
+  Future<void> _onChangeItem(_ChangeItem event, Emitter<TasbihState> emit) async {
+    // In rotating mode, changing item changes currentCycleIndex
+    // In individual mode, this might not apply the same way, but let's implement it
+    // based on index-based category navigation.
+    emit(state.copyWith(
+      currentCycleIndex: event.newIndex,
+      currentCycleCount: 0, // Reset count for the new item?
+      showCompletionDua: false,
+    ));
   }
 
   Future<void> _onLoadData(_LoadData event, Emitter<TasbihState> emit) async {

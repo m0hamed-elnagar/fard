@@ -55,7 +55,7 @@ extension TasbihEventPatterns on TasbihEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _LoadData value)?  loadData,TResult Function( _SelectCategory value)?  selectCategory,TResult Function( _Increment value)?  increment,TResult Function( _Reset value)?  reset,TResult Function( _ToggleSound value)?  toggleSound,TResult Function( _ToggleVibration value)?  toggleVibration,TResult Function( _ToggleTranslation value)?  toggleTranslation,TResult Function( _ToggleTransliteration value)?  toggleTransliteration,TResult Function( _SelectCompletionDua value)?  selectCompletionDua,TResult Function( _RememberCompletionDua value)?  rememberCompletionDua,TResult Function( _UpdateCustomTarget value)?  updateCustomTarget,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _LoadData value)?  loadData,TResult Function( _SelectCategory value)?  selectCategory,TResult Function( _Increment value)?  increment,TResult Function( _Reset value)?  reset,TResult Function( _ToggleSound value)?  toggleSound,TResult Function( _ToggleVibration value)?  toggleVibration,TResult Function( _ToggleTranslation value)?  toggleTranslation,TResult Function( _ToggleTransliteration value)?  toggleTransliteration,TResult Function( _SelectCompletionDua value)?  selectCompletionDua,TResult Function( _RememberCompletionDua value)?  rememberCompletionDua,TResult Function( _UpdateCustomTarget value)?  updateCustomTarget,TResult Function( _ChangeItem value)?  changeItem,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _LoadData() when loadData != null:
@@ -69,7 +69,8 @@ return toggleTranslation(_that);case _ToggleTransliteration() when toggleTransli
 return toggleTransliteration(_that);case _SelectCompletionDua() when selectCompletionDua != null:
 return selectCompletionDua(_that);case _RememberCompletionDua() when rememberCompletionDua != null:
 return rememberCompletionDua(_that);case _UpdateCustomTarget() when updateCustomTarget != null:
-return updateCustomTarget(_that);case _:
+return updateCustomTarget(_that);case _ChangeItem() when changeItem != null:
+return changeItem(_that);case _:
   return orElse();
 
 }
@@ -87,7 +88,7 @@ return updateCustomTarget(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _LoadData value)  loadData,required TResult Function( _SelectCategory value)  selectCategory,required TResult Function( _Increment value)  increment,required TResult Function( _Reset value)  reset,required TResult Function( _ToggleSound value)  toggleSound,required TResult Function( _ToggleVibration value)  toggleVibration,required TResult Function( _ToggleTranslation value)  toggleTranslation,required TResult Function( _ToggleTransliteration value)  toggleTransliteration,required TResult Function( _SelectCompletionDua value)  selectCompletionDua,required TResult Function( _RememberCompletionDua value)  rememberCompletionDua,required TResult Function( _UpdateCustomTarget value)  updateCustomTarget,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _LoadData value)  loadData,required TResult Function( _SelectCategory value)  selectCategory,required TResult Function( _Increment value)  increment,required TResult Function( _Reset value)  reset,required TResult Function( _ToggleSound value)  toggleSound,required TResult Function( _ToggleVibration value)  toggleVibration,required TResult Function( _ToggleTranslation value)  toggleTranslation,required TResult Function( _ToggleTransliteration value)  toggleTransliteration,required TResult Function( _SelectCompletionDua value)  selectCompletionDua,required TResult Function( _RememberCompletionDua value)  rememberCompletionDua,required TResult Function( _UpdateCustomTarget value)  updateCustomTarget,required TResult Function( _ChangeItem value)  changeItem,}){
 final _that = this;
 switch (_that) {
 case _LoadData():
@@ -101,7 +102,8 @@ return toggleTranslation(_that);case _ToggleTransliteration():
 return toggleTransliteration(_that);case _SelectCompletionDua():
 return selectCompletionDua(_that);case _RememberCompletionDua():
 return rememberCompletionDua(_that);case _UpdateCustomTarget():
-return updateCustomTarget(_that);case _:
+return updateCustomTarget(_that);case _ChangeItem():
+return changeItem(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -118,7 +120,7 @@ return updateCustomTarget(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _LoadData value)?  loadData,TResult? Function( _SelectCategory value)?  selectCategory,TResult? Function( _Increment value)?  increment,TResult? Function( _Reset value)?  reset,TResult? Function( _ToggleSound value)?  toggleSound,TResult? Function( _ToggleVibration value)?  toggleVibration,TResult? Function( _ToggleTranslation value)?  toggleTranslation,TResult? Function( _ToggleTransliteration value)?  toggleTransliteration,TResult? Function( _SelectCompletionDua value)?  selectCompletionDua,TResult? Function( _RememberCompletionDua value)?  rememberCompletionDua,TResult? Function( _UpdateCustomTarget value)?  updateCustomTarget,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _LoadData value)?  loadData,TResult? Function( _SelectCategory value)?  selectCategory,TResult? Function( _Increment value)?  increment,TResult? Function( _Reset value)?  reset,TResult? Function( _ToggleSound value)?  toggleSound,TResult? Function( _ToggleVibration value)?  toggleVibration,TResult? Function( _ToggleTranslation value)?  toggleTranslation,TResult? Function( _ToggleTransliteration value)?  toggleTransliteration,TResult? Function( _SelectCompletionDua value)?  selectCompletionDua,TResult? Function( _RememberCompletionDua value)?  rememberCompletionDua,TResult? Function( _UpdateCustomTarget value)?  updateCustomTarget,TResult? Function( _ChangeItem value)?  changeItem,}){
 final _that = this;
 switch (_that) {
 case _LoadData() when loadData != null:
@@ -132,7 +134,8 @@ return toggleTranslation(_that);case _ToggleTransliteration() when toggleTransli
 return toggleTransliteration(_that);case _SelectCompletionDua() when selectCompletionDua != null:
 return selectCompletionDua(_that);case _RememberCompletionDua() when rememberCompletionDua != null:
 return rememberCompletionDua(_that);case _UpdateCustomTarget() when updateCustomTarget != null:
-return updateCustomTarget(_that);case _:
+return updateCustomTarget(_that);case _ChangeItem() when changeItem != null:
+return changeItem(_that);case _:
   return null;
 
 }
@@ -149,7 +152,7 @@ return updateCustomTarget(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  loadData,TResult Function( String categoryId)?  selectCategory,TResult Function()?  increment,TResult Function()?  reset,TResult Function()?  toggleSound,TResult Function()?  toggleVibration,TResult Function()?  toggleTranslation,TResult Function()?  toggleTransliteration,TResult Function( String duaId)?  selectCompletionDua,TResult Function()?  rememberCompletionDua,TResult Function( int? target)?  updateCustomTarget,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  loadData,TResult Function( String categoryId)?  selectCategory,TResult Function()?  increment,TResult Function()?  reset,TResult Function()?  toggleSound,TResult Function()?  toggleVibration,TResult Function()?  toggleTranslation,TResult Function()?  toggleTransliteration,TResult Function( String duaId)?  selectCompletionDua,TResult Function()?  rememberCompletionDua,TResult Function( int? target)?  updateCustomTarget,TResult Function( int newIndex)?  changeItem,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _LoadData() when loadData != null:
 return loadData();case _SelectCategory() when selectCategory != null:
@@ -162,7 +165,8 @@ return toggleTranslation();case _ToggleTransliteration() when toggleTransliterat
 return toggleTransliteration();case _SelectCompletionDua() when selectCompletionDua != null:
 return selectCompletionDua(_that.duaId);case _RememberCompletionDua() when rememberCompletionDua != null:
 return rememberCompletionDua();case _UpdateCustomTarget() when updateCustomTarget != null:
-return updateCustomTarget(_that.target);case _:
+return updateCustomTarget(_that.target);case _ChangeItem() when changeItem != null:
+return changeItem(_that.newIndex);case _:
   return orElse();
 
 }
@@ -180,7 +184,7 @@ return updateCustomTarget(_that.target);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  loadData,required TResult Function( String categoryId)  selectCategory,required TResult Function()  increment,required TResult Function()  reset,required TResult Function()  toggleSound,required TResult Function()  toggleVibration,required TResult Function()  toggleTranslation,required TResult Function()  toggleTransliteration,required TResult Function( String duaId)  selectCompletionDua,required TResult Function()  rememberCompletionDua,required TResult Function( int? target)  updateCustomTarget,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  loadData,required TResult Function( String categoryId)  selectCategory,required TResult Function()  increment,required TResult Function()  reset,required TResult Function()  toggleSound,required TResult Function()  toggleVibration,required TResult Function()  toggleTranslation,required TResult Function()  toggleTransliteration,required TResult Function( String duaId)  selectCompletionDua,required TResult Function()  rememberCompletionDua,required TResult Function( int? target)  updateCustomTarget,required TResult Function( int newIndex)  changeItem,}) {final _that = this;
 switch (_that) {
 case _LoadData():
 return loadData();case _SelectCategory():
@@ -193,7 +197,8 @@ return toggleTranslation();case _ToggleTransliteration():
 return toggleTransliteration();case _SelectCompletionDua():
 return selectCompletionDua(_that.duaId);case _RememberCompletionDua():
 return rememberCompletionDua();case _UpdateCustomTarget():
-return updateCustomTarget(_that.target);case _:
+return updateCustomTarget(_that.target);case _ChangeItem():
+return changeItem(_that.newIndex);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,7 +215,7 @@ return updateCustomTarget(_that.target);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  loadData,TResult? Function( String categoryId)?  selectCategory,TResult? Function()?  increment,TResult? Function()?  reset,TResult? Function()?  toggleSound,TResult? Function()?  toggleVibration,TResult? Function()?  toggleTranslation,TResult? Function()?  toggleTransliteration,TResult? Function( String duaId)?  selectCompletionDua,TResult? Function()?  rememberCompletionDua,TResult? Function( int? target)?  updateCustomTarget,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  loadData,TResult? Function( String categoryId)?  selectCategory,TResult? Function()?  increment,TResult? Function()?  reset,TResult? Function()?  toggleSound,TResult? Function()?  toggleVibration,TResult? Function()?  toggleTranslation,TResult? Function()?  toggleTransliteration,TResult? Function( String duaId)?  selectCompletionDua,TResult? Function()?  rememberCompletionDua,TResult? Function( int? target)?  updateCustomTarget,TResult? Function( int newIndex)?  changeItem,}) {final _that = this;
 switch (_that) {
 case _LoadData() when loadData != null:
 return loadData();case _SelectCategory() when selectCategory != null:
@@ -223,7 +228,8 @@ return toggleTranslation();case _ToggleTransliteration() when toggleTransliterat
 return toggleTransliteration();case _SelectCompletionDua() when selectCompletionDua != null:
 return selectCompletionDua(_that.duaId);case _RememberCompletionDua() when rememberCompletionDua != null:
 return rememberCompletionDua();case _UpdateCustomTarget() when updateCustomTarget != null:
-return updateCustomTarget(_that.target);case _:
+return updateCustomTarget(_that.target);case _ChangeItem() when changeItem != null:
+return changeItem(_that.newIndex);case _:
   return null;
 
 }
@@ -679,6 +685,72 @@ class __$UpdateCustomTargetCopyWithImpl<$Res>
   return _then(_UpdateCustomTarget(
 freezed == target ? _self.target : target // ignore: cast_nullable_to_non_nullable
 as int?,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _ChangeItem implements TasbihEvent {
+  const _ChangeItem(this.newIndex);
+  
+
+ final  int newIndex;
+
+/// Create a copy of TasbihEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ChangeItemCopyWith<_ChangeItem> get copyWith => __$ChangeItemCopyWithImpl<_ChangeItem>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChangeItem&&(identical(other.newIndex, newIndex) || other.newIndex == newIndex));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,newIndex);
+
+@override
+String toString() {
+  return 'TasbihEvent.changeItem(newIndex: $newIndex)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ChangeItemCopyWith<$Res> implements $TasbihEventCopyWith<$Res> {
+  factory _$ChangeItemCopyWith(_ChangeItem value, $Res Function(_ChangeItem) _then) = __$ChangeItemCopyWithImpl;
+@useResult
+$Res call({
+ int newIndex
+});
+
+
+
+
+}
+/// @nodoc
+class __$ChangeItemCopyWithImpl<$Res>
+    implements _$ChangeItemCopyWith<$Res> {
+  __$ChangeItemCopyWithImpl(this._self, this._then);
+
+  final _ChangeItem _self;
+  final $Res Function(_ChangeItem) _then;
+
+/// Create a copy of TasbihEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? newIndex = null,}) {
+  return _then(_ChangeItem(
+null == newIndex ? _self.newIndex : newIndex // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

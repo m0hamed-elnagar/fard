@@ -15,4 +15,5 @@ class TasbihEvent with _$TasbihEvent {
   const factory TasbihEvent.rememberCompletionDua() = _RememberCompletionDua;
   const factory TasbihEvent.updateCustomTarget(int? target) =
       _UpdateCustomTarget;
+  const factory TasbihEvent.changeItem(int newIndex) = _ChangeItem;
 }
