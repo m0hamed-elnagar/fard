@@ -320,6 +320,7 @@
   "cycleCompletionStay": "Stay here",
   "cycleCompletionStayDesc": "Keep current position at Surah An-Nas",
   "downloadCenterBtn": "Download Center",
+  "offlineModeBanner": "You are currently offline. Only downloaded content is available.",
   "switchLanguage": "Switch Language",
   "meccan": "Meccan",
   "medinan": "Medinan",

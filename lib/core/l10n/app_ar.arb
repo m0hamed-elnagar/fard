@@ -320,6 +320,7 @@
   "cycleCompletionStay": "البقاء هنا",
   "cycleCompletionStayDesc": "الإبقاء على الموضع الحالي عند سورة الناس",
   "downloadCenterBtn": "مركز التحميل",
+  "offlineModeBanner": "لا يوجد اتصال بالإنترنت حالياً. يمكنك تصفح المحتوى الذي تم تحميله مسبقاً.",
   "switchLanguage": "تغيير اللغة",
   "meccan": "مكية",
   "medinan": "مدنية",

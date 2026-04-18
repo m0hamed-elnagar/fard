@@ -881,6 +881,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get downloadCenterBtn => 'Download Center';
 
   @override
+  String get offlineModeBanner =>
+      'You are currently offline. Only downloaded content is available.';
+
+  @override
   String get switchLanguage => 'Switch Language';
 
   @override

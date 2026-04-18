@@ -230,7 +230,7 @@ class _QuranPageState extends State<QuranPage> {
                     color: Colors.amber.shade700,
                 child:
                 Text(
-                    l10n.downloadCenter, // Using downloadCenter as it contains "Offline Mode"
+                    l10n.offlineModeBanner,
                     style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                     ),
@@ -301,6 +301,8 @@ class _QuranPageState extends State<QuranPage> {
                         }
 
                         final filteredSurahs = state.surahs.where((surah) {
+                          final isDownloaded = _downloadedSurahIds.contains(surah.number.value);
+                          if (!isConnected && !isDownloaded) return false;
                           return surah.name.contains(_searchQuery) ||
                               surah.number.value.toString().contains(_searchQuery);
                         }).toList();

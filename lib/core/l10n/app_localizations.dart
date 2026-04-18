@@ -1718,6 +1718,12 @@ abstract class AppLocalizations {
   /// **'Download Center'**
   String get downloadCenterBtn;
 
+  /// No description provided for @offlineModeBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'You are currently offline. Only downloaded content is available.'**
+  String get offlineModeBanner;
+
   /// No description provided for @switchLanguage.
   ///
   /// In en, this message translates to:
