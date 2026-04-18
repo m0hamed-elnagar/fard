@@ -4,6 +4,7 @@ import 'package:fard/core/errors/failure.dart';
 import 'package:fard/features/werd/domain/entities/werd_goal.dart';
 import 'package:fard/features/werd/domain/entities/werd_progress.dart';
 import 'package:fard/features/werd/domain/entities/werd_history_entry.dart';
+import 'package:fard/features/werd/domain/entities/reading_segment.dart';
 import 'package:fard/features/werd/domain/repositories/werd_repository.dart';
 import 'package:fard/core/extensions/quran_extension.dart';
 import 'package:quran/quran.dart' as quran;
@@ -92,13 +93,17 @@ class WerdRepositoryImpl implements WerdRepository {
         );
         final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(endAbs);
 
-        // FIX #2: Use segments instead of readItemsToday for calculations
+        // FIX #2: Use segments today, or fallback to items for compatibility
+        final segments = progress.segmentsToday.isNotEmpty 
+            ? progress.segmentsToday 
+            : ReadingSegment.fromSet(progress.readItemsToday);
+            
         final pagesRead = QuranHizbProvider.calculateFractionalProgressFromSegments(
-          progress.segmentsToday,
+          segments,
           WerdUnit.page,
         );
         final juzRead = QuranHizbProvider.calculateFractionalProgressFromSegments(
-          progress.segmentsToday,
+          segments,
           WerdUnit.juz,
         );
 
