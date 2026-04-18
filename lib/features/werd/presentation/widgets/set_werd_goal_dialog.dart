@@ -444,7 +444,7 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
               _valueController.text = (val - 1).toString();
               setState(() {});
             }
-          }),
+          }, key: const ValueKey('decrement_button')),
           Expanded(
             child: TextField(
               controller: _valueController,
