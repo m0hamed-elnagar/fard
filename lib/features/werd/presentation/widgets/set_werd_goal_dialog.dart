@@ -499,8 +499,9 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
     );
   }
 
-  Widget _buildStepButton(IconData icon, VoidCallback onPressed) {
+  Widget _buildStepButton(IconData icon, VoidCallback onPressed, {Key? key}) {
     return Material(
+      key: key,
       color: context.secondaryColor.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
