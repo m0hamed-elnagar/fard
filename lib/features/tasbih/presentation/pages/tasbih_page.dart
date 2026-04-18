@@ -88,101 +88,136 @@ class _TasbihViewState extends State<TasbihView> {
               final counterSize = isSmallScreen ? 180.0 : 240.0;
               final buttonSize = isSmallScreen ? 80.0 : 100.0;
 
-              return SingleChildScrollView(
-                controller: _scrollController,
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: maxHeight),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24.0,
-                      vertical: 16.0,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Top Section: Category & Text
-                        Column(
-                          children: [
-                            _buildCategorySelector(context, state, l10n),
-                            const SizedBox(height: 20),
-                            if (state.currentCategory.sequenceMode ==
-                                'rotating') ...[
-                              CycleProgressIndicator(
-                                currentIndex: state.currentCycleIndex,
-                                totalCycles: state.currentCategory.cycles,
-                              ),
-                              const SizedBox(height: 16),
-                            ],
-                            if (state.showCompletionDua &&
-                                state.currentCompletionDua != null)
-                              CompletionDuaCard(state: state)
-                            else if (currentDhikr != null)
-                              DhikrDisplayCard(
-                                arabic: currentDhikr.arabic,
-                                transliteration: currentDhikr.transliteration,
-                                translation: currentDhikr.translation,
-                                showTransliteration:
-                                    state.data.settings.showTransliteration,
-                                showTranslation:
-                                    state.data.settings.showTranslation,
-                              ),
-                          ],
+              return Stack(
+                children: [
+                  SingleChildScrollView(
+                    controller: _scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: maxHeight),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24.0,
+                          vertical: 16.0,
                         ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Top Section: Category & Text
+                            Column(
+                              children: [
+                                _buildCategorySelector(context, state, l10n),
+                                const SizedBox(height: 20),
+                                if (state.currentCategory.sequenceMode ==
+                                    'rotating') ...[
+                                  CycleProgressIndicator(
+                                    currentIndex: state.currentCycleIndex,
+                                    totalCycles: state.currentCategory.cycles,
+                                  ),
+                                  const SizedBox(height: 16),
+                                ],
+                                if (state.showCompletionDua &&
+                                    state.currentCompletionDua != null)
+                                  CompletionDuaCard(state: state)
+                                else if (currentDhikr != null)
+                                  DhikrDisplayCard(
+                                    arabic: currentDhikr.arabic,
+                                    transliteration: currentDhikr.transliteration,
+                                    translation: currentDhikr.translation,
+                                    showTransliteration:
+                                        state.data.settings.showTransliteration,
+                                    showTranslation:
+                                        state.data.settings.showTranslation,
+                                  ),
+                              ],
+                            ),
 
-                        // Bottom Section: Counter & Button
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 32.0),
-                          child: Column(
-                            children: [
-                              Stack(
-                                alignment: Alignment.center,
+                            // Bottom Section: Counter & Button
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 32.0),
+                              child: Column(
                                 children: [
-                                  CounterCircle(
-                                    count: state.currentCycleCount,
-                                    targetCount:
-                                        state.customTasbihTarget ??
-                                        (state.currentCategory.sequenceMode ==
-                                                'rotating'
-                                            ? state
-                                                  .currentCategory
-                                                  .countsPerCycle
-                                            : (currentDhikr?.targetCount ??
-                                                  state
+                                  Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      CounterCircle(
+                                        count: state.currentCycleCount,
+                                        targetCount:
+                                            state.customTasbihTarget ??
+                                            (state.currentCategory.sequenceMode ==
+                                                    'rotating'
+                                                ? state
                                                       .currentCategory
-                                                      .countsPerCycle)),
-                                    size: counterSize,
-                                  ),
-                                  Positioned(
-                                    right: 0,
-                                    top: 0,
-                                    child: Material(
-                                      color: context.surfaceContainerHighestColor,
-                                      shape: const CircleBorder(),
-                                      child: IconButton(
-                                        icon: const Icon(
-                                          Icons.edit_note_rounded,
-                                        ),
-                                        onPressed: () =>
-                                            _showCustomTargetDialog(
-                                              context,
-                                              state,
-                                            ),
-                                        tooltip: l10n.customTasbihTarget,
+                                                      .countsPerCycle
+                                                : (currentDhikr?.targetCount ?? 33)),
+                                        size: counterSize,
                                       ),
-                                    ),
+                                      Positioned(
+                                        right: 0,
+                                        top: 0,
+                                        child: Material(
+                                          color: context.surfaceContainerHighestColor,
+                                          shape: const CircleBorder(),
+                                          child: IconButton(
+                                            icon: const Icon(
+                                              Icons.edit_note_rounded,
+                                            ),
+                                            onPressed: () =>
+                                                _showCustomTargetDialog(
+                                                  context,
+                                                  state,
+                                                ),
+                                            tooltip: l10n.customTasbihTarget,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
+                                  const SizedBox(height: 32),
+                                  _buildControlBar(context, state, buttonSize),
                                 ],
                               ),
-                              const SizedBox(height: 32),
-                              _buildControlBar(context, state, buttonSize),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
+                  // Navigation arrows
+                  if (state.currentCategory.items.length > 1) ...[
+                    if (state.currentCycleIndex > 0)
+                      PositionedDirectional(
+                        start: 4,
+                        top: 0,
+                        bottom: 0,
+                        child: Center(
+                          child: IconButton(
+                            icon: const Icon(Icons.arrow_back_ios_rounded),
+                            onPressed:
+                                () => context.read<TasbihBloc>().add(
+                                  TasbihEvent.changeItem(state.currentCycleIndex - 1),
+                                ),
+                          ),
+                        ),
+                      ),
+                    if (state.currentCycleIndex <
+                        state.currentCategory.items.length - 1)
+                      PositionedDirectional(
+                        end: 4,
+                        top: 0,
+                        bottom: 0,
+                        child: Center(
+                          child: IconButton(
+                            icon: const Icon(Icons.arrow_forward_ios_rounded),
+                            onPressed:
+                                () => context.read<TasbihBloc>().add(
+                                  TasbihEvent.changeItem(state.currentCycleIndex + 1),
+                                ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ],
               );
             },
           ),
