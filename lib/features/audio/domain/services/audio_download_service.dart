@@ -13,8 +13,8 @@ abstract interface class AudioDownloadService {
   /// Download all Surahs for a Reciter
   Future<void> downloadReciter({required Reciter reciter});
 
-  /// Cancel ongoing downloads for a reciter
-  Future<void> cancelDownload(String reciterId);
+  /// Cancel ongoing downloads for a reciter or a specific surah
+  Future<void> cancelDownload(String reciterId, int? surahNumber);
 
   /// Cancel all ongoing downloads
   Future<void> cancelAllDownloads();

@@ -109,20 +109,30 @@ class AudioDownloadCubit extends Cubit<AudioDownloadState> {
     await _downloadService.downloadReciter(reciter: reciter);
   }
 
-  Future<void> cancelDownload(Reciter reciter) async {
+  Future<void> cancelDownload(Reciter reciter, int? surahNumber) async {
     // Optimistic "Stopping" state
     final newStatuses = Map<int, SurahDownloadStatus>.from(state.surahStatuses);
     bool changed = false;
-    for (int i = 1; i <= 114; i++) {
-      final s = newStatuses[i];
+    
+    if (surahNumber != null) {
+      final s = newStatuses[surahNumber];
       if (s != null && s.isDownloading) {
-        newStatuses[i] = s.copyWith(isStopping: true);
+        newStatuses[surahNumber] = s.copyWith(isStopping: true);
         changed = true;
       }
+    } else {
+      for (int i = 1; i <= 114; i++) {
+        final s = newStatuses[i];
+        if (s != null && s.isDownloading) {
+          newStatuses[i] = s.copyWith(isStopping: true);
+          changed = true;
+        }
+      }
     }
+    
     if (changed) emit(state.copyWith(surahStatuses: newStatuses));
 
-    await _downloadService.cancelDownload(reciter.identifier);
+    await _downloadService.cancelDownload(reciter.identifier, surahNumber);
 
     // Refresh to ensure final states are correct after service stops
     _currentLoadId++;

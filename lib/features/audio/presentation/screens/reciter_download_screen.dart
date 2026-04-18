@@ -152,7 +152,7 @@ class ReciterDownloadScreen extends StatelessWidget {
               else if (isAnyDownloading)
                 ElevatedButton.icon(
                   onPressed: () {
-                    context.read<AudioDownloadCubit>().cancelDownload(reciter);
+                    context.read<AudioDownloadCubit>().cancelDownload(reciter, null);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: context.errorColor.withValues(alpha: 0.05),
@@ -311,7 +311,7 @@ class ReciterDownloadScreen extends StatelessWidget {
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                   onPressed: () {
-                    context.read<AudioDownloadCubit>().cancelDownload(reciter);
+                    context.read<AudioDownloadCubit>().cancelDownload(reciter, surahNumber);
                   },
                 ),
               ],
