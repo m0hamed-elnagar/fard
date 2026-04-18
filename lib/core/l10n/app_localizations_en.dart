@@ -245,6 +245,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Location permission is permanently denied. Please enable it from app settings to use this feature.';
 
   @override
+  String get notificationSettings => 'Notification Settings';
+
+  @override
+  String get notificationSettingsDesc =>
+      'Open system settings to manage app notifications and permissions.';
+
+  @override
   String get openSettings => 'Open Settings';
 
   @override
@@ -1514,4 +1521,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get widgetPreviewCountdown => '3h 45m';
+
+  @override
+  String get widgetStartFromPreset => 'Start from a theme preset:';
+
+  @override
+  String get widgetCustomization => 'Color Customization';
 }

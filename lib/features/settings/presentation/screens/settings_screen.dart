@@ -1,4 +1,4 @@
-﻿import 'package:fard/core/services/export_import_service.dart';
+import 'package:fard/core/services/export_import_service.dart';
 import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
@@ -37,7 +37,9 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  bool _notificationsEnabled = true;
   bool _canScheduleExactAlarms = true;
+  bool _isBatteryOptimizationIgnored = true;
   bool _isThemeListExpanded = false;
   bool _isAppearanceExpanded = false;
   bool _isPrayerAzanExpanded = false;
@@ -69,11 +71,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _checkPermissions() async {
-    final canSchedule = await getIt<NotificationService>()
-        .canScheduleExactNotifications();
+    final notificationService = getIt<NotificationService>();
+    final diagnosticResults = await notificationService.runDiagnostics();
+    
     if (mounted) {
       setState(() {
-        _canScheduleExactAlarms = canSchedule;
+        _notificationsEnabled = diagnosticResults['notifications_enabled'] ?? true;
+        _canScheduleExactAlarms = diagnosticResults['exact_alarm_permission'] ?? true;
+        _isBatteryOptimizationIgnored = diagnosticResults['battery_optimization_ignored'] ?? true;
       });
     }
   }
@@ -173,6 +178,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     l10n.exactAlarmWarningTitle,
                     l10n.exactAlarmWarningDesc,
                     Icons.warning_amber_rounded,
+                    actionLabel: l10n.openSettings,
+                    onAction: () =>
+                        getIt<NotificationService>().openNotificationSettings(),
                   ),
                 // Section 1: Appearance
                 _buildAppearanceSection(context, state, l10n),
@@ -249,6 +257,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     String desc,
     IconData icon, {
     bool isSmall = false,
+    String? actionLabel,
+    VoidCallback? onAction,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -258,29 +268,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: context.errorColor.withValues(alpha: 0.2)),
       ),
-      child: Row(
-        crossAxisAlignment: isSmall
-            ? CrossAxisAlignment.center
-            : CrossAxisAlignment.start,
+      child: Column(
         children: [
-          Icon(icon, color: context.errorColor, size: isSmall ? 20 : 24),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (title.isNotEmpty)
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: context.errorColor,
-                    ),
-                  ),
-                Text(desc, style: TextStyle(fontSize: isSmall ? 12 : 13)),
-              ],
-            ),
+          Row(
+            crossAxisAlignment: isSmall
+                ? CrossAxisAlignment.center
+                : CrossAxisAlignment.start,
+            children: [
+              Icon(icon, color: context.errorColor, size: isSmall ? 20 : 24),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (title.isNotEmpty)
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: context.errorColor,
+                        ),
+                      ),
+                    Text(desc, style: TextStyle(fontSize: isSmall ? 12 : 13)),
+                  ],
+                ),
+              ),
+            ],
           ),
+          if (actionLabel != null && onAction != null) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: onAction,
+                child: Text(actionLabel),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -1916,6 +1940,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Widget _buildDivider() {
+    return const Divider(height: 24);
+  }
+
+  Widget _buildListTile({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: context.primaryContainerColor.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: context.primaryContainerColor, size: 20),
+      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+      subtitle: Text(subtitle, style: TextStyle(fontSize: 13, color: context.onSurfaceVariantColor)),
+      trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: context.onSurfaceVariantColor),
+      onTap: onTap,
+    );
+  }
+
   Widget _buildTimeSettingItem({
     required BuildContext context,
     required String title,
@@ -2141,6 +2192,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     SettingsState state,
     AppLocalizations l10n,
   ) {
+    final cubit = context.read<SettingsCubit>();
+    final presets = cubit.getAvailablePresets();
+    final localeCode = state.locale.languageCode;
+
     return _buildExpandableSection(
       title: l10n.widgetPreviewTitle,
       icon: Icons.widgets_rounded,
@@ -2188,11 +2243,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
+
+        // Theme presets selection
+        Text(
+          l10n.widgetStartFromPreset,
+          style: GoogleFonts.amiri(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 140,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: presets.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final preset = presets[index];
+              return _buildThemeCard(
+                preset: preset,
+                isSelected: false,
+                localeCode: localeCode,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  setState(() {
+                    _widgetPreviewTheme =
+                        WidgetPreviewTheme.fromThemePreset(preset);
+                  });
+                },
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 24),
 
         // Color customization
         Text(
-          l10n.widgetColorsIndependent,
+          l10n.widgetCustomization,
           style: GoogleFonts.amiri(
             fontSize: 14,
             fontWeight: FontWeight.bold,
@@ -2204,35 +2293,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
           label: l10n.widgetPrimaryColor,
           currentHex: _widgetPreviewTheme.primaryColorHex,
           onColorChanged: (hex) => setState(() {
-            _widgetPreviewTheme = _widgetPreviewTheme.copyWith(primaryColorHex: hex);
+            _widgetPreviewTheme =
+                _widgetPreviewTheme.copyWith(primaryColorHex: hex);
           }),
         ),
         WidgetColorPicker(
           label: l10n.widgetAccentColor,
           currentHex: _widgetPreviewTheme.accentColorHex,
           onColorChanged: (hex) => setState(() {
-            _widgetPreviewTheme = _widgetPreviewTheme.copyWith(accentColorHex: hex);
+            _widgetPreviewTheme =
+                _widgetPreviewTheme.copyWith(accentColorHex: hex);
           }),
         ),
         WidgetColorPicker(
           label: l10n.widgetBackgroundColor,
           currentHex: _widgetPreviewTheme.backgroundColorHex,
           onColorChanged: (hex) => setState(() {
-            _widgetPreviewTheme = _widgetPreviewTheme.copyWith(backgroundColorHex: hex);
+            _widgetPreviewTheme =
+                _widgetPreviewTheme.copyWith(backgroundColorHex: hex);
           }),
         ),
         WidgetColorPicker(
           label: l10n.widgetTextColor,
           currentHex: _widgetPreviewTheme.textColorHex,
           onColorChanged: (hex) => setState(() {
-            _widgetPreviewTheme = _widgetPreviewTheme.copyWith(textColorHex: hex);
+            _widgetPreviewTheme =
+                _widgetPreviewTheme.copyWith(textColorHex: hex);
           }),
         ),
         WidgetColorPicker(
           label: l10n.widgetSecondaryTextColor,
           currentHex: _widgetPreviewTheme.textSecondaryColorHex,
           onColorChanged: (hex) => setState(() {
-            _widgetPreviewTheme = _widgetPreviewTheme.copyWith(textSecondaryColorHex: hex);
+            _widgetPreviewTheme =
+                _widgetPreviewTheme.copyWith(textSecondaryColorHex: hex);
           }),
         ),
         const SizedBox(height: 16),
@@ -2258,16 +2352,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       setState(() {
                         _isApplyingWidgetTheme = true;
                       });
-                      
+
                       try {
                         // Apply to actual widgets via WidgetUpdateService
-                        await getIt<WidgetUpdateService>().applyWidgetTheme(_widgetPreviewTheme.toMap());
-                        
+                        await getIt<WidgetUpdateService>()
+                            .applyWidgetTheme(_widgetPreviewTheme.toMap());
+
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(l10n.widgetThemeApplied),
-                              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.primaryContainer,
                             ),
                           );
                         }
@@ -2275,8 +2371,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(l10n.widgetThemeApplyFailed(e.toString())),
-                              backgroundColor: Theme.of(context).colorScheme.errorContainer,
+                              content: Text(
+                                l10n.widgetThemeApplyFailed(e.toString()),
+                              ),
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.errorContainer,
                             ),
                           );
                         }
@@ -2320,108 +2419,117 @@ class _SettingsScreenState extends State<SettingsScreen> {
         });
       },
       children: [
-        // Calculation Method
-        _buildSettingItem(
-          title: l10n.calculationMethod,
-          description: l10n.calculationMethodDesc,
-          trailing: _buildDropdown<String>(
-            value: state.calculationMethod,
-            items: [
-              'muslim_league',
-              'egyptian',
-              'karachi',
-              'umm_al_qura',
-              'dubai',
-              'moonsighting_committee',
-              'north_america',
-              'kuwait',
-              'qatar',
-              'singapore',
-              'tehran',
-              'turkey',
-            ].map((method) {
-              String displayName;
-              switch (method) {
-                case 'muslim_league':
-                  displayName = l10n.muslimWorldLeague;
-                  break;
-                case 'egyptian':
-                  displayName = l10n.egyptianGeneralAuthority;
-                  break;
-                case 'karachi':
-                  displayName = l10n.universityOfIslamicSciencesKarachi;
-                  break;
-                case 'umm_al_qura':
-                  displayName = l10n.ummAlQuraUniversityMakkah;
-                  break;
-                case 'dubai':
-                  displayName = l10n.dubai;
-                  break;
-                case 'moonsighting_committee':
-                  displayName = l10n.moonsightingCommittee;
-                  break;
-                case 'north_america':
-                  displayName = l10n.isnaNorthAmerica;
-                  break;
-                case 'kuwait':
-                  displayName = l10n.kuwait;
-                  break;
-                case 'qatar':
-                  displayName = l10n.qatar;
-                  break;
-                case 'singapore':
-                  displayName = l10n.singapore;
-                  break;
-                case 'tehran':
-                  displayName = l10n.instituteOfGeophysicsTehran;
-                  break;
-                case 'turkey':
-                  displayName = l10n.turkey;
-                  break;
-                default:
-                  displayName = method
-                      .replaceAll('_', ' ')
-                      .split(' ')
-                      .map(
-                        (str) => str[0].toUpperCase() + str.substring(1),
-                      )
-                      .join(' ');
-              }
-              return DropdownMenuItem(
-                value: method,
-                child: Text(displayName, style: const TextStyle(fontSize: 13)),
-              );
-            }).toList(),
-            onChanged: (value) {
-              if (value != null) {
-                context.read<SettingsCubit>().updateCalculationMethod(value);
-              }
-            },
+        // Notification Settings
+        if (!_notificationsEnabled || !_canScheduleExactAlarms || !_isBatteryOptimizationIgnored)
+          _buildListTile(
+            title: l10n.notificationSettings,
+            subtitle: l10n.notificationSettingsDesc,
+            icon: Icons.notifications_active_outlined,
+            onTap: () => getIt<NotificationService>().openNotificationSettings(),
           ),
+        if (!_notificationsEnabled || !_canScheduleExactAlarms || !_isBatteryOptimizationIgnored) _buildDivider(),
+        
+        // Calculation Method (Vertical Layout)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.calculationMethod,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              l10n.calculationMethodDesc,
+              style: TextStyle(color: context.onSurfaceVariantColor, fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: _buildDropdown<String>(
+                value: state.calculationMethod,
+                items: [
+                  'muslim_league',
+                  'egyptian',
+                  'karachi',
+                  'umm_al_qura',
+                  'dubai',
+                  'moonsighting_committee',
+                  'north_america',
+                  'kuwait',
+                  'qatar',
+                  'singapore',
+                  'tehran',
+                  'turkey',
+                ].map((method) {
+                  String displayName;
+                  switch (method) {
+                    case 'muslim_league': displayName = l10n.muslimWorldLeague; break;
+                    case 'egyptian': displayName = l10n.egyptianGeneralAuthority; break;
+                    case 'karachi': displayName = l10n.universityOfIslamicSciencesKarachi; break;
+                    case 'umm_al_qura': displayName = l10n.ummAlQuraUniversityMakkah; break;
+                    case 'dubai': displayName = l10n.dubai; break;
+                    case 'moonsighting_committee': displayName = l10n.moonsightingCommittee; break;
+                    case 'north_america': displayName = l10n.isnaNorthAmerica; break;
+                    case 'kuwait': displayName = l10n.kuwait; break;
+                    case 'qatar': displayName = l10n.qatar; break;
+                    case 'singapore': displayName = l10n.singapore; break;
+                    case 'tehran': displayName = l10n.instituteOfGeophysicsTehran; break;
+                    case 'turkey': displayName = l10n.turkey; break;
+                    default:
+                      displayName = method.replaceAll('_', ' ').split(' ').map((str) => str[0].toUpperCase() + str.substring(1)).join(' ');
+                  }
+                  return DropdownMenuItem(
+                    value: method,
+                    child: Text(displayName, style: const TextStyle(fontSize: 13)),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    context.read<SettingsCubit>().updateCalculationMethod(value);
+                  }
+                },
+              ),
+            ),
+          ],
         ),
         const Divider(height: 32),
-        // Madhab
-        _buildSettingItem(
-          title: l10n.madhab,
-          description: l10n.madhabDesc,
-          trailing: _buildDropdown<String>(
-            value: state.madhab,
-            items: [
-              DropdownMenuItem(
-                value: 'shafi',
-                child: Text(l10n.shafiMadhab, style: const TextStyle(fontSize: 13)),
+        
+        // Madhab (Vertical Layout)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.madhab,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              l10n.madhabDesc,
+              style: TextStyle(color: context.onSurfaceVariantColor, fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: _buildDropdown<String>(
+                value: state.madhab,
+                items: [
+                  DropdownMenuItem(
+                    value: 'shafi',
+                    child: Text(l10n.shafiMadhab, style: const TextStyle(fontSize: 13)),
+                  ),
+                  DropdownMenuItem(
+                    value: 'hanafi',
+                    child: Text(l10n.hanafiMadhab, style: const TextStyle(fontSize: 13)),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    context.read<SettingsCubit>().updateMadhab(value);
+                  }
+                },
               ),
-              DropdownMenuItem(
-                value: 'hanafi',
-                child: Text(l10n.hanafiMadhab, style: const TextStyle(fontSize: 13)),
-              ),
-            ],
-            onChanged: (value) {
-              if (value != null) {
-                context.read<SettingsCubit>().updateMadhab(value);
-              }
-            },
-          ),
+            ),
+          ],
         ),
         const Divider(height: 32),
         // Azan Notifications

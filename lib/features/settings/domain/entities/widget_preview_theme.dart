@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fard/features/settings/domain/entities/theme_preset.dart';
 
 /// Widget preview theme data class for Flutter side.
 /// Contains 6 color fields for complete widget theming.
@@ -28,6 +29,18 @@ class WidgetPreviewTheme {
       surfaceColorHex: _colorToHex(colorScheme.surfaceContainerHighest),
       textColorHex: _colorToHex(colorScheme.onSurface),
       textSecondaryColorHex: _colorToHex(colorScheme.onSurfaceVariant),
+    );
+  }
+
+  /// Create from ThemePreset
+  factory WidgetPreviewTheme.fromThemePreset(ThemePreset preset) {
+    return WidgetPreviewTheme(
+      primaryColorHex: preset.primaryColor.toHex(),
+      accentColorHex: preset.accentColor.toHex(),
+      backgroundColorHex: preset.backgroundColor.toHex(),
+      surfaceColorHex: preset.surfaceColor.toHex(),
+      textColorHex: preset.textColor.toHex(),
+      textSecondaryColorHex: preset.textSecondaryColor.toHex(),
     );
   }
 

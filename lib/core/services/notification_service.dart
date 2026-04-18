@@ -9,6 +9,7 @@ import 'package:fard/core/utils/app_identifiers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:injectable/injectable.dart';
 import '../di/injection.dart';
@@ -123,17 +124,8 @@ class NotificationService {
     // Request permissions for Android 13+
     if (Platform.isAndroid) {
       debugPrint('NotificationService: requesting Android permissions...');
-      await _notificationsPlugin
-          .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin
-          >()
-          ?.requestNotificationsPermission();
-
-      await _notificationsPlugin
-          .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin
-          >()
-          ?.requestExactAlarmsPermission();
+      await Permission.notification.request();
+      await Permission.scheduleExactAlarm.request();
 
       // Create notification channels for Android (using default/empty settings initially if needed,
       // but usually we wait for schedulePrayerNotifications to create specific channels)
@@ -141,11 +133,7 @@ class NotificationService {
       await _channelManager.createNotificationChannels(_notificationsPlugin);
 
       // Check exact alarm permission state
-      final canSchedule = await _notificationsPlugin
-          .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin
-          >()
-          ?.canScheduleExactNotifications();
+      final canSchedule = await canScheduleExactNotifications();
       debugPrint('Can schedule exact notifications: $canSchedule');
     }
     debugPrint('NotificationService: init complete');
@@ -184,13 +172,39 @@ class NotificationService {
     debugPrint('NotificationService: handleInitialNotification complete');
   }
 
-  Future<bool> canScheduleExactNotifications() async {
+  Future<bool> areNotificationsEnabled() async {
+    if (Platform.isAndroid) {
+      return await Permission.notification.isGranted;
+    }
     return await _notificationsPlugin
             .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin
-            >()
+                AndroidFlutterLocalNotificationsPlugin>()
+            ?.areNotificationsEnabled() ??
+        true;
+  }
+
+  Future<bool> canScheduleExactNotifications() async {
+    if (Platform.isAndroid) {
+      return await Permission.scheduleExactAlarm.isGranted;
+    }
+    return await _notificationsPlugin
+            .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>()
             ?.canScheduleExactNotifications() ??
         true;
+  }
+
+  Future<bool> isBatteryOptimizationIgnored() async {
+    if (Platform.isAndroid) {
+      return await Permission.ignoreBatteryOptimizations.isGranted;
+    }
+    return true;
+  }
+
+  Future<void> requestIgnoreBatteryOptimizations() async {
+    if (Platform.isAndroid) {
+      await Permission.ignoreBatteryOptimizations.request();
+    }
   }
 
   Future<void> schedulePrayerNotifications() async {
@@ -366,9 +380,11 @@ class NotificationService {
         >();
 
     results['notifications_enabled'] =
-        await androidPlugin?.areNotificationsEnabled() ?? false;
+        await areNotificationsEnabled();
     results['exact_alarm_permission'] =
-        await androidPlugin?.canScheduleExactNotifications() ?? false;
+        await canScheduleExactNotifications();
+    results['battery_optimization_ignored'] =
+        await isBatteryOptimizationIgnored();
 
     final channels = await androidPlugin?.getNotificationChannels() ?? [];
     results['channels_count'] = channels.length;
@@ -395,11 +411,16 @@ class NotificationService {
   Permissions:
     • Notifications: ${results['notifications_enabled'] ? '✅' : '❌'}
     • Exact Alarms:  ${results['exact_alarm_permission'] ? '✅' : '❌'}
+    • Battery Opt:   ${results['battery_optimization_ignored'] ? '✅' : '❌'}
   
   Channels: ${results['channels_count']} channel(s)
 ${(results['channels'] as List).map((c) => '    • ${c['id']} (${c['importance']})').join('\n')}
 ╚════════════════════════════════════════════════════════════╝
 ''');
+  }
+
+  Future<void> openNotificationSettings() async {
+    await openAppSettings();
   }
 
   Future<void> scheduleAzkarReminders({

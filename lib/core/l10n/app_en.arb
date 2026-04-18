@@ -95,6 +95,8 @@
   "locationDeniedDesc": "This app needs location permission to calculate prayer times based on your city. Please grant permission to continue.",
   "locationDeniedForeverTitle": "Location Permission Required",
   "locationDeniedForeverDesc": "Location permission is permanently denied. Please enable it from app settings to use this feature.",
+  "notificationSettings": "Notification Settings",
+  "notificationSettingsDesc": "Open system settings to manage app notifications and permissions.",
   "openSettings": "Open Settings",
   "tryAgain": "Try Again",
   "later": "Later",
@@ -629,5 +631,7 @@
   "pickAColor": "Pick a color:",
   "widgetPreviewDate": "Tuesday, Apr 14, 2026",
   "widgetPreviewHijriDate": "26 Shawwal 1447",
-  "widgetPreviewCountdown": "3h 45m"
+  "widgetPreviewCountdown": "3h 45m",
+  "widgetStartFromPreset": "Start from a theme preset:",
+  "widgetCustomization": "Color Customization"
 }

@@ -95,6 +95,8 @@
   "locationDeniedDesc": "يحتاج التطبيق إلى إذن الموقع لحساب مواقيت الصلاة بناءً على مدينتك. يرجى منح الإذن للمتابعة.",
   "locationDeniedForeverTitle": "إذن الموقع مطلوب",
   "locationDeniedForeverDesc": "إذن الموقع مرفوض نهائياً. يرجى تفعيله من إعدادات التطبيق لاستخدام هذه الميزة.",
+  "notificationSettings": "إعدادات الإشعارات",
+  "notificationSettingsDesc": "افتح إعدادات النظام لإدارة إشعارات التطبيق والأذونات.",
   "openSettings": "فتح الإعدادات",
   "tryAgain": "إعادة المحاولة",
   "later": "لاحقاً",
@@ -629,5 +631,7 @@
   "pickAColor": "اختر لوناً:",
   "widgetPreviewDate": "الثلاثاء، ١٤ أبريل ٢٠٢٦",
   "widgetPreviewHijriDate": "٢٦ شوال ١٤٤٧",
-  "widgetPreviewCountdown": "٣س ٤٥د"
+  "widgetPreviewCountdown": "٣س ٤٥د",
+  "widgetStartFromPreset": "ابدأ بسمة جاهزة:",
+  "widgetCustomization": "تخصيص الألوان"
 }

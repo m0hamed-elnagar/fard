@@ -38,30 +38,30 @@ class AudioPlayerBar extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(20),
+                  top: Radius.circular(24),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: context.outlineVariantColor,
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 10,
-                    spreadRadius: 1,
-                    offset: const Offset(0, -3),
+                    offset: const Offset(0, -2),
                   ),
                 ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Row 1: Avatar, Surah/Ayah Info, Close
                   Padding(
-                    padding: EdgeInsets.fromLTRB(isNarrow ? 8 : 12, 10, 8, 4),
+                    padding: EdgeInsets.fromLTRB(isNarrow ? 12 : 16, 12, 8, 4),
                     child: Row(
                       children: [
-                        // Reciter avatar - hidden on very narrow screens
+                        // Reciter avatar
                         if (!isVeryNarrow)
                           GestureDetector(
                             onTap: () => _showReciterSelector(context),
                             child: CircleAvatar(
-                              radius: isNarrow ? 14 : 16,
+                              radius: isNarrow ? 16 : 18,
                               backgroundColor: Theme.of(
                                 context,
                               ).colorScheme.primaryContainer,
@@ -75,13 +75,13 @@ class AudioPlayerBar extends StatelessWidget {
                                     context,
                                   ).colorScheme.onPrimaryContainer,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: isNarrow ? 10 : 12,
+                                  fontSize: isNarrow ? 12 : 14,
                                 ),
                               ),
                             ),
                           ),
 
-                        if (!isVeryNarrow) SizedBox(width: isNarrow ? 6 : 10),
+                        if (!isVeryNarrow) SizedBox(width: isNarrow ? 8 : 12),
 
                         // Info text - flexible
                         Expanded(
@@ -91,20 +91,6 @@ class AudioPlayerBar extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
-                                  state.currentReciter != null
-                                      ? (isArabic
-                                            ? state.currentReciter!.name
-                                            : state.currentReciter!.englishName)
-                                      : l10n.selectReciter,
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: isNarrow ? 10 : 11,
-                                      ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
                                 Text(
                                   state.currentSurah != null &&
                                           state.currentAyah != null
@@ -122,12 +108,29 @@ class AudioPlayerBar extends StatelessWidget {
                                                 ),
                                         )
                                       : l10n.readyToPlay,
-                                  style: Theme.of(context).textTheme.labelSmall
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: isNarrow ? 14 : 16,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurface,
+                                      ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  state.currentReciter != null
+                                      ? (isArabic
+                                            ? state.currentReciter!.name
+                                            : state.currentReciter!.englishName)
+                                      : l10n.selectReciter,
+                                  style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         color: Theme.of(
                                           context,
                                         ).colorScheme.onSurfaceVariant,
-                                        fontSize: isNarrow ? 8 : 9,
+                                        fontSize: isNarrow ? 10 : 11,
                                       ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -137,119 +140,9 @@ class AudioPlayerBar extends StatelessWidget {
                           ),
                         ),
 
-                        // Audio Controls
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Go to currently playing Ayah button
-                            if (state.currentAyah != null &&
-                                state.currentSurah != null) ...[
-                              IconButton(
-                                iconSize: isNarrow ? 20 : 22,
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                                tooltip: l10n.goToPlayingAyah,
-                                icon: const Icon(Icons.my_location_rounded),
-                                onPressed: () {
-                                  // 1. Check if we can just scroll (already on correct surah)
-                                  if (onScrollRequest != null &&
-                                      currentViewedSurah ==
-                                          state.currentSurah) {
-                                    onScrollRequest!(
-                                      state.currentSurah!,
-                                      state.currentAyah!,
-                                    );
-                                    return;
-                                  }
-
-                                  // 2. Otherwise navigate
-                                  final currentRoute = ModalRoute.of(context);
-                                  final bool isAlreadyOnReader =
-                                      currentRoute?.settings.name ==
-                                      'QuranReaderPage';
-
-                                  if (isAlreadyOnReader) {
-                                    Navigator.pushReplacement(
-                                      context,
-                                      QuranReaderPage.route(
-                                        surahNumber: state.currentSurah!,
-                                        ayahNumber: state.currentAyah!,
-                                      ),
-                                    );
-                                  } else {
-                                    Navigator.push(
-                                      context,
-                                      QuranReaderPage.route(
-                                        surahNumber: state.currentSurah!,
-                                        ayahNumber: state.currentAyah!,
-                                      ),
-                                    );
-                                  }
-                                },
-                              ),
-                              SizedBox(width: isNarrow ? 4 : 8),
-                            ],
-
-                            // Next Button
-                            IconButton(
-                              iconSize: isNarrow ? 20 : 22,
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                              icon: const Icon(Icons.skip_next_rounded),
-                              onPressed: () => context.read<AudioBloc>().add(
-                                AudioEvent.skipToPrevious(),
-                              ),
-                            ),
-                            SizedBox(width: isNarrow ? 2 : 4),
-                            // Play/Pause
-                            Container(
-                              width: isNarrow ? 32 : 36,
-                              height: isNarrow ? 32 : 36,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary,
-                                shape: BoxShape.circle,
-                              ),
-                              child: state.isLoading
-                                  ? Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: CircularProgressIndicator(
-                                        color: context.onSurfaceColor,
-                                        strokeWidth: isNarrow ? 1.5 : 2,
-                                      ),
-                                    )
-                                  : IconButton(
-                                      padding: EdgeInsets.zero,
-                                      iconSize: isNarrow ? 22 : 24,
-                                      color: context.onSurfaceColor,
-                                      icon: Icon(
-                                        state.isPlaying
-                                            ? Icons.pause_rounded
-                                            : Icons.play_arrow_rounded,
-                                      ),
-                                      onPressed: () => context
-                                          .read<AudioBloc>()
-                                          .add(AudioEvent.togglePlayback()),
-                                    ),
-                            ),
-                            SizedBox(width: isNarrow ? 2 : 4),
-                            // Previous Button
-                            IconButton(
-                              iconSize: isNarrow ? 20 : 22,
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                              icon: const Icon(Icons.skip_previous_rounded),
-                              onPressed: () => context.read<AudioBloc>().add(
-                                AudioEvent.skipToNext(),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        if (!isNarrow) const SizedBox(width: 8),
-
                         // Close Button
                         IconButton(
-                          iconSize: isNarrow ? 18 : 20,
+                          iconSize: 20,
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
                           icon: const Icon(Icons.close_rounded),
@@ -261,16 +154,142 @@ class AudioPlayerBar extends StatelessWidget {
                     ),
                   ),
 
-                  // Enhanced Progress Slider
+                  // Row 2: Secondary Controls and Playback
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // Go to currently playing Ayah button
+                        if (state.currentAyah != null &&
+                            state.currentSurah != null)
+                          IconButton(
+                            iconSize: 22,
+                            tooltip: l10n.goToPlayingAyah,
+                            icon: const Icon(Icons.my_location_rounded),
+                            onPressed: () {
+                              if (onScrollRequest != null &&
+                                  currentViewedSurah == state.currentSurah) {
+                                onScrollRequest!(
+                                  state.currentSurah!,
+                                  state.currentAyah!,
+                                );
+                                return;
+                              }
+                              final currentRoute = ModalRoute.of(context);
+                              final bool isAlreadyOnReader =
+                                  currentRoute?.settings.name ==
+                                  'QuranReaderPage';
+                              if (isAlreadyOnReader) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  QuranReaderPage.route(
+                                    surahNumber: state.currentSurah!,
+                                    ayahNumber: state.currentAyah!,
+                                  ),
+                                );
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  QuranReaderPage.route(
+                                    surahNumber: state.currentSurah!,
+                                    ayahNumber: state.currentAyah!,
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+
+                        // Previous Button
+                        IconButton(
+                          iconSize: 24,
+                          icon: const Icon(Icons.skip_previous_rounded),
+                          onPressed: () => context.read<AudioBloc>().add(
+                            AudioEvent.skipToPrevious(),
+                          ),
+                        ),
+
+                        // Play/Pause
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primary.withValues(alpha: 0.3),
+                                blurRadius: 8,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                          ),
+                          child: state.isLoading
+                              ? Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: CircularProgressIndicator(
+                                    color: context.onSurfaceColor,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : IconButton(
+                                  padding: EdgeInsets.zero,
+                                  iconSize: 28,
+                                  color: context.onSurfaceColor,
+                                  icon: Icon(
+                                    state.isPlaying
+                                        ? Icons.pause_rounded
+                                        : Icons.play_arrow_rounded,
+                                  ),
+                                  onPressed: () => context
+                                      .read<AudioBloc>()
+                                      .add(AudioEvent.togglePlayback()),
+                                ),
+                        ),
+
+                        // Next Button
+                        IconButton(
+                          iconSize: 24,
+                          icon: const Icon(Icons.skip_next_rounded),
+                          onPressed: () => context.read<AudioBloc>().add(
+                            AudioEvent.skipToNext(),
+                          ),
+                        ),
+
+                        // Repeat Button
+                        IconButton(
+                          iconSize: 20,
+                          tooltip: l10n.repeatAyah,
+                          icon: Icon(
+                            Icons.repeat_one_rounded,
+                            color: state.isRepeating
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.onSurfaceVariant
+                                      .withValues(alpha: 0.6),
+                          ),
+                          onPressed: () => context.read<AudioBloc>().add(
+                            AudioEvent.toggleRepeat(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Progress Slider Row
                   if (state.duration > Duration.zero)
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                       child: Row(
                         children: [
                           Text(
                             _formatDuration(state.position),
                             style: TextStyle(
-                              fontSize: 8,
+                              fontSize: 10,
                               color: Theme.of(
                                 context,
                               ).colorScheme.onSurfaceVariant,
@@ -284,7 +303,7 @@ class AudioPlayerBar extends StatelessWidget {
                                   enabledThumbRadius: 6,
                                 ),
                                 overlayShape: const RoundSliderOverlayShape(
-                                  overlayRadius: 14,
+                                  overlayRadius: 16,
                                 ),
                                 activeTrackColor: Theme.of(
                                   context,
@@ -295,9 +314,6 @@ class AudioPlayerBar extends StatelessWidget {
                                 thumbColor: Theme.of(
                                   context,
                                 ).colorScheme.primary,
-                                overlayColor: Theme.of(
-                                  context,
-                                ).colorScheme.primary.withValues(alpha: 0.2),
                               ),
                               child: Slider(
                                 value: state.position.inMilliseconds
@@ -320,55 +336,41 @@ class AudioPlayerBar extends StatelessWidget {
                           Text(
                             _formatDuration(state.duration),
                             style: TextStyle(
-                              fontSize: 8,
+                              fontSize: 10,
                               color: Theme.of(
                                 context,
                               ).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          // Repeat Button
-                          IconButton(
-                            iconSize: isNarrow ? 16 : 18,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            tooltip: l10n.repeatAyah,
-                            icon: Icon(
-                              Icons.repeat_one_rounded,
-                              color: state.isRepeating
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant
-                                        .withValues(alpha: 0.7),
-                            ),
-                            onPressed: () => context.read<AudioBloc>().add(
-                              AudioEvent.toggleRepeat(),
                             ),
                           ),
                         ],
                       ),
                     ),
 
-                  if (!state.hasError) const SizedBox(height: 8),
+                  if (!state.hasError && state.duration == Duration.zero)
+                    const SizedBox(height: 12),
 
-                  // Error Display - very compact at the very bottom
+                  // Error Display
                   if (state.hasError)
                     Container(
                       width: double.infinity,
-                      color: context.errorColor.withValues(alpha: 0.1),
+                      decoration: BoxDecoration(
+                        color: context.errorColor.withValues(alpha: 0.1),
+                        borderRadius: const BorderRadius.vertical(
+                          bottom: Radius.circular(24),
+                        ),
+                      ),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 2,
+                        horizontal: 16,
+                        vertical: 4,
                       ),
                       child: Row(
                         children: [
                           Icon(
                             Icons.error_outline,
                             color: context.errorColor,
-                            size: 12,
+                            size: 14,
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               state.lastErrorMessage ??
@@ -376,7 +378,7 @@ class AudioPlayerBar extends StatelessWidget {
                                   l10n.errorOccurred,
                               style: TextStyle(
                                 color: context.errorColor,
-                                fontSize: 9,
+                                fontSize: 10,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,

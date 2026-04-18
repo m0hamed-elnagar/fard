@@ -78,7 +78,6 @@ app.*.map.json
 /windows/flutter/generated_plugins.cmake
 
 # Test results
-test_output.txt
 test_output_2.txt
 test_output_3.txt
 test_result.txt

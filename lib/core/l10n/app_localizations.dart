@@ -542,6 +542,18 @@ abstract class AppLocalizations {
   /// **'Location permission is permanently denied. Please enable it from app settings to use this feature.'**
   String get locationDeniedForeverDesc;
 
+  /// No description provided for @notificationSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Settings'**
+  String get notificationSettings;
+
+  /// No description provided for @notificationSettingsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Open system settings to manage app notifications and permissions.'**
+  String get notificationSettingsDesc;
+
   /// No description provided for @openSettings.
   ///
   /// In en, this message translates to:
@@ -2845,6 +2857,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'3h 45m'**
   String get widgetPreviewCountdown;
+
+  /// No description provided for @widgetStartFromPreset.
+  ///
+  /// In en, this message translates to:
+  /// **'Start from a theme preset:'**
+  String get widgetStartFromPreset;
+
+  /// No description provided for @widgetCustomization.
+  ///
+  /// In en, this message translates to:
+  /// **'Color Customization'**
+  String get widgetCustomization;
 }
 
 class _AppLocalizationsDelegate

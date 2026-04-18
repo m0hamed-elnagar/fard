@@ -29,4 +29,25 @@ class SurahEntity {
     required this.revelationType,
     required this.ayahs,
   });
+
+  SurahEntity copyWith({
+    int? number,
+    String? name,
+    String? englishName,
+    String? englishNameTranslation,
+    int? numberOfAyahs,
+    String? revelationType,
+    List<AyahEntity>? ayahs,
+  }) {
+    return SurahEntity(
+      number: number ?? this.number,
+      name: name ?? this.name,
+      englishName: englishName ?? this.englishName,
+      englishNameTranslation:
+          englishNameTranslation ?? this.englishNameTranslation,
+      numberOfAyahs: numberOfAyahs ?? this.numberOfAyahs,
+      revelationType: revelationType ?? this.revelationType,
+      ayahs: ayahs ?? this.ayahs,
+    );
+  }
 }

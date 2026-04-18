@@ -23,8 +23,22 @@ class QuranLocalSourceImpl implements QuranLocalSource {
 
   @override
   Future<void> cacheSurahs(List<Surah> surahs) async {
-    // We only cache the basic info if ayahs are empty
-    final entities = {for (var s in surahs) s.number.value: _toEntity(s)};
+    final Map<int, SurahEntity> entities = {};
+    for (var s in surahs) {
+      final existing = _surahBox.get(s.number.value);
+      if (existing != null && s.ayahs.isEmpty && existing.ayahs.isNotEmpty) {
+        // Preserve existing ayahs if new data is just basic info
+        entities[s.number.value] = existing.copyWith(
+          name: s.name,
+          englishName: s.englishName,
+          englishNameTranslation: s.englishNameTranslation,
+          numberOfAyahs: s.numberOfAyahs,
+          revelationType: s.revelationType,
+        );
+      } else {
+        entities[s.number.value] = _toEntity(s);
+      }
+    }
     await _surahBox.putAll(entities);
   }
 

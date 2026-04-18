@@ -1,6 +1,6 @@
-import 'package:fard/core/blocs/connectivity/connectivity_bloc.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/core/services/connectivity_service.dart';
 import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
 import 'package:fard/features/audio/domain/services/audio_download_service.dart';
@@ -20,10 +20,6 @@ class OfflineAudioHelper {
     bool isDownloaded = false,
     bool forceDirectPlay = false,
   }) async {
-    final connState = context.read<ConnectivityBloc>().state;
-    final isConnected =
-        connState is ConnectivityStatus ? connState.isConnected : true;
-
     final audioBloc = context.read<AudioBloc>();
     final audioState = audioBloc.state;
     final currentReciter = audioState.currentReciter;
@@ -47,7 +43,18 @@ class OfflineAudioHelper {
       effectivelyDownloaded = status.isDownloaded;
     }
 
-    if (effectivelyDownloaded || isConnected) {
+    if (effectivelyDownloaded) {
+      audioBloc.add(
+        AudioEvent.playSurah(surahNumber: surahNumber, startAyah: startAyah),
+      );
+      audioBloc.add(AudioEvent.showBanner());
+      return;
+    }
+
+    // NOT downloaded: Perform a robust internet check before attempting to stream
+    final hasInternet = await getIt<ConnectivityService>().hasInternet();
+
+    if (hasInternet) {
       audioBloc.add(
         AudioEvent.playSurah(surahNumber: surahNumber, startAyah: startAyah),
       );

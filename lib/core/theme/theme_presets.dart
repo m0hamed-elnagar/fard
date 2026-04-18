@@ -1,3 +1,4 @@
+import 'package:fard/core/theme/twilight_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -61,24 +62,24 @@ abstract final class ThemePresets {
     isDark: false,
   );
 
-  static final midnight = ThemePreset(
-    id: 'midnight',
-    name: 'Midnight',
-    nameAr: 'منتصف الليل',
-    primaryColor: const Color(0xFF7C4DFF),
-    accentColor: const Color(0xFF00E5FF),
-    backgroundColor: const Color(0xFF0A0E27),
-    surfaceColor: const Color(0xFF121638),
-    surfaceLightColor: const Color(0xFF1A1F4A),
-    cardBorderColor: const Color(0xFF2A2F5A),
-    textColor: const Color(0xFFE8EAF6),
-    textSecondaryColor: const Color(0xFFC5CAE9),
+  static final twilight = ThemePreset(
+    id: 'twilight',
+    name: 'Twilight',
+    nameAr: 'الغسق',
+    primaryColor: TwilightThemeColors.primary,
+    accentColor: TwilightThemeColors.accent,
+    backgroundColor: TwilightThemeColors.background,
+    surfaceColor: TwilightThemeColors.surface,
+    surfaceLightColor: const Color(0xFF282D3D), // Slightly lighter for surface variants
+    cardBorderColor: const Color(0xFF383E50),
+    textColor: TwilightThemeColors.text,
+    textSecondaryColor: TwilightThemeColors.textSecondary,
     icon: Icons.nightlight_round,
     isDark: true,
   );
 
   /// All available presets
-  static final List<ThemePreset> all = [emerald, parchment, rose, midnight];
+  static final List<ThemePreset> all = [emerald, parchment, rose, twilight];
 
   /// Get preset by ID
   static ThemePreset getById(String id) {

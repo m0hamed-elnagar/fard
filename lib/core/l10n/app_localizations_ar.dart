@@ -244,6 +244,13 @@ class AppLocalizationsAr extends AppLocalizations {
       'إذن الموقع مرفوض نهائياً. يرجى تفعيله من إعدادات التطبيق لاستخدام هذه الميزة.';
 
   @override
+  String get notificationSettings => 'إعدادات الإشعارات';
+
+  @override
+  String get notificationSettingsDesc =>
+      'افتح إعدادات النظام لإدارة إشعارات التطبيق والأذونات.';
+
+  @override
   String get openSettings => 'فتح الإعدادات';
 
   @override
@@ -1506,4 +1513,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get widgetPreviewCountdown => '٣س ٤٥د';
+
+  @override
+  String get widgetStartFromPreset => 'ابدأ بسمة جاهزة:';
+
+  @override
+  String get widgetCustomization => 'تخصيص الألوان';
 }
