@@ -2,7 +2,10 @@ import 'dart:async';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
+import 'package:injectable/injectable.dart';
+
 /// Service to monitor network connectivity changes in real-time.
+@injectable
 class ConnectivityService {
   final Connectivity _connectivity = Connectivity();
 

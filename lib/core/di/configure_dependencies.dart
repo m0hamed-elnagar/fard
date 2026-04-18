@@ -1,17 +1,14 @@
-import 'package:get_it/get_it.dart';
-import 'package:injectable/injectable.dart';
-import 'package:hive_ce_flutter/hive_ce_flutter.dart';
-import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
-import 'package:flutter/foundation.dart';
-import 'package:fard/core/services/connectivity_service.dart';
-import 'package:fard/core/blocs/connectivity/connectivity_bloc.dart';
-
 import 'package:fard/core/models/download_entry.dart';
 import 'package:fard/features/prayer_tracking/data/daily_record_entity.dart';
-import 'package:fard/features/quran/data/datasources/local/entities/surah_entity.dart';
 import 'package:fard/features/quran/data/datasources/local/entities/ayah_entity.dart';
 import 'package:fard/features/quran/data/datasources/local/entities/bookmark_entity.dart';
+import 'package:fard/features/quran/data/datasources/local/entities/surah_entity.dart';
+import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
+import 'package:injectable/injectable.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 import 'configure_dependencies.config.dart';
 
@@ -64,8 +61,8 @@ Future<void> configureDependencies({String? hivePath}) async {
   }
 
   // Register Services
-  getIt.registerLazySingleton(() => ConnectivityService());
-  getIt.registerLazySingleton(() => ConnectivityBloc(connectivityService: getIt<ConnectivityService>()));
+  // getIt.registerLazySingleton(() => ConnectivityService());
+  // getIt.registerLazySingleton(() => ConnectivityBloc(connectivityService: getIt<ConnectivityService>()));
 
   // Initialize GetIt
   await getIt.init();

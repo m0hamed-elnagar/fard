@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:injectable/injectable.dart';
 import 'package:fard/core/services/connectivity_service.dart';
 
 // Events
@@ -34,6 +35,7 @@ class ConnectivityStatus extends ConnectivityState {
 }
 
 // BLoC
+@injectable
 class ConnectivityBloc extends Bloc<ConnectivityEvent, ConnectivityState> {
   final ConnectivityService _connectivityService;
 

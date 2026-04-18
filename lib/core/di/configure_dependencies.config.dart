@@ -98,6 +98,8 @@ import '../../features/werd/data/repositories/werd_repository_impl.dart'
     as _i472;
 import '../../features/werd/domain/repositories/werd_repository.dart' as _i724;
 import '../../features/werd/presentation/blocs/werd_bloc.dart' as _i1037;
+import '../blocs/connectivity/connectivity_bloc.dart' as _i256;
+import '../services/connectivity_service.dart' as _i47;
 import '../services/download/download_manifest_service.dart' as _i188;
 import '../services/export_import_service.dart' as _i1068;
 import '../services/location_service.dart' as _i669;
@@ -123,6 +125,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => registerModule.prefs,
       preResolve: true,
     );
+    gh.factory<_i47.ConnectivityService>(() => _i47.ConnectivityService());
     gh.factory<_i494.GetAvailableThemePresets>(
       () => _i494.GetAvailableThemePresets(),
     );
@@ -192,6 +195,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i307.SettingsStorage>(
       () => _i307.SettingsStorage(gh<_i460.SharedPreferences>()),
+    );
+    gh.factory<_i256.ConnectivityBloc>(
+      () => _i256.ConnectivityBloc(
+        connectivityService: gh<_i47.ConnectivityService>(),
+      ),
     );
     gh.singleton<_i700.MushafDownloadService>(
       () => _i700.MushafDownloadService(gh<_i188.DownloadManifestService>()),
