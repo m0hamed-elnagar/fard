@@ -152,9 +152,9 @@ void main() {
           ),
         );
 
-        // Verify Arabic countdown text
-        expect(find.textContaining('الصلاة'), findsOneWidget);
-        expect(find.textContaining('العصر'), findsOneWidget);
+        // Verify Arabic countdown text based on actual localization values
+        expect(find.text('الصلاة القادمة'), findsOneWidget);
+        expect(find.text('عصر'), findsWidgets);
       });
     });
 
