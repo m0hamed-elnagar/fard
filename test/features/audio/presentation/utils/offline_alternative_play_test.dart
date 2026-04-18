@@ -2,6 +2,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:fard/core/blocs/connectivity/connectivity_bloc.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/core/services/connectivity_service.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
 import 'package:fard/features/audio/domain/services/audio_download_service.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
@@ -15,11 +16,13 @@ import 'package:mocktail/mocktail.dart';
 class MockAudioBloc extends MockBloc<AudioEvent, AudioState> implements AudioBloc {}
 class MockConnectivityBloc extends MockBloc<ConnectivityEvent, ConnectivityState> implements ConnectivityBloc {}
 class MockAudioDownloadService extends Mock implements AudioDownloadService {}
+class MockConnectivityService extends Mock implements ConnectivityService {}
 
 void main() {
   late MockAudioBloc mockAudioBloc;
   late MockConnectivityBloc mockConnectivityBloc;
   late MockAudioDownloadService mockDownloadService;
+  late MockConnectivityService mockConnectivityService;
 
   const alafasy = Reciter(
     identifier: 'ar.alafasy',
@@ -45,12 +48,15 @@ void main() {
     mockAudioBloc = MockAudioBloc();
     mockConnectivityBloc = MockConnectivityBloc();
     mockDownloadService = MockAudioDownloadService();
+    mockConnectivityService = MockConnectivityService();
 
     getIt.allowReassignment = true;
     getIt.registerSingleton<AudioDownloadService>(mockDownloadService);
+    getIt.registerSingleton<ConnectivityService>(mockConnectivityService);
 
     when(() => mockAudioBloc.state).thenReturn(const AudioState(currentReciter: alafasy));
     when(() => mockConnectivityBloc.state).thenReturn(const ConnectivityStatus(false));
+    when(() => mockConnectivityService.hasInternet()).thenAnswer((_) async => false);
   });
 
   testWidgets('showAlternativeReciterDialog switches reciter and plays on "Play" click', (tester) async {
