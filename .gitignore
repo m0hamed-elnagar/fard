@@ -89,3 +89,4 @@ repo_test_result.txt
 git_status*.txt
 
 
+.worktrees/
