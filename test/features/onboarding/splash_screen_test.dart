@@ -1,4 +1,6 @@
+import 'mock_audio_download_service.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/features/audio/domain/services/audio_download_service.dart';
 import 'package:fard/features/onboarding/presentation/screens/splash_screen.dart';
 import 'package:fard/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:fard/features/azkar/presentation/screens/main_navigation_screen.dart';
@@ -87,10 +89,13 @@ void main() {
     final getIt = GetIt.instance;
     getIt.reset();
     getIt.registerSingleton<SharedPreferences>(mockPrefs);
+    getIt.registerSingleton<AudioDownloadService>(MockAudioDownloadService());
     getIt.registerSingleton<PrayerTrackerBloc>(mockPrayerTrackerBloc);
     getIt.registerSingleton<PrayerTimeService>(mockPrayerTimeService);
     getIt.registerSingleton<NotificationService>(mockNotificationService);
-    getIt.registerSingleton<WidgetUpdateService>(MockWidgetUpdateService());
+    final mockWidgetUpdateService = MockWidgetUpdateService();
+    when(() => mockWidgetUpdateService.getWidgetTheme()).thenAnswer((_) async => {});
+    getIt.registerSingleton<WidgetUpdateService>(mockWidgetUpdateService);
     getIt.registerSingleton<GlobalKey<NavigatorState>>(
       GlobalKey<NavigatorState>(),
     );
@@ -99,29 +104,10 @@ void main() {
     getIt.registerFactory<TasbihBloc>(() => mockTasbihBloc);
     getIt.registerFactory<ReaderBloc>(() => mockReaderBloc);
 
-    when(
-      () => mockNotificationService.canScheduleExactNotifications(),
-    ).thenAnswer((_) async => true);
-
-    // Default mocks for PrayerTimeService
-    when(
-      () => mockPrayerTimeService.isUpcoming(
-        any(),
-        prayerTimes: any(named: 'prayerTimes'),
-        date: any(named: 'date'),
-      ),
-    ).thenReturn(false);
-    when(
-      () => mockPrayerTimeService.isPassed(
-        any(),
-        prayerTimes: any(named: 'prayerTimes'),
-        date: any(named: 'date'),
-      ),
-    ).thenReturn(true);
-
-    when(
-      () => mockSettingsCubit.state,
-    ).thenReturn(SettingsState(locale: const Locale('en')));
+    when(() => mockNotificationService.canScheduleExactNotifications()).thenAnswer((_) async => true);
+    when(() => mockPrayerTimeService.isUpcoming(any(), prayerTimes: any(named: 'prayerTimes'), date: any(named: 'date'))).thenReturn(false);
+    when(() => mockPrayerTimeService.isPassed(any(), prayerTimes: any(named: 'prayerTimes'), date: any(named: 'date'))).thenReturn(true);
+    when(() => mockSettingsCubit.getAvailablePresets()).thenReturn([]);
     when(() => mockAzkarBloc.state).thenReturn(AzkarState.initial());
     when(
       () => mockPrayerTrackerBloc.state,

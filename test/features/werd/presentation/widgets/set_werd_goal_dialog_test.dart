@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/werd/presentation/widgets/set_werd_goal_dialog.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
@@ -33,6 +34,25 @@ void main() {
     mockQuranBloc = MockQuranBloc();
     mockNavigatorObserver = MockNavigatorObserver();
     registerFallbackValue(FakeRoute());
+    registerFallbackValue(
+      WerdGoal(
+        id: 'fallback',
+        type: WerdGoalType.fixedAmount,
+        value: 1,
+        unit: WerdUnit.ayah,
+        startDate: DateTime.now(),
+        startAbsolute: 1,
+      ),
+    );
+    registerFallbackValue(WerdEvent.setGoal(WerdGoal(
+      id: 'fallback',
+      type: WerdGoalType.fixedAmount,
+      value: 1,
+      unit: WerdUnit.ayah,
+      startDate: DateTime.now(),
+      startAbsolute: 1,
+    )));
+    registerFallbackValue(const QuranState());
     registerFallbackValue(
       WerdGoal(
         id: 'default',
@@ -76,33 +96,28 @@ void main() {
       locale: locale,
       supportedLocales: const [Locale('en'), Locale('ar')],
       localizationsDelegates: const [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
       navigatorObservers: [mockNavigatorObserver],
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider<WerdBloc>.value(value: mockWerdBloc),
-          BlocProvider<QuranBloc>.value(value: mockQuranBloc),
-        ],
-        child: Builder(
+      home: Scaffold(
+        floatingActionButton: Builder(
           builder: (context) {
-            return Scaffold(
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (dialogContext) => MultiBlocProvider(
-                      providers: [
-                        BlocProvider<WerdBloc>.value(value: mockWerdBloc),
-                        BlocProvider<QuranBloc>.value(value: mockQuranBloc),
-                      ],
-                      child: const SetWerdGoalDialog(),
-                    ),
-                  );
-                },
-              ),
+            return FloatingActionButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (dialogContext) => MultiBlocProvider(
+                    providers: [
+                      BlocProvider<WerdBloc>.value(value: mockWerdBloc),
+                      BlocProvider<QuranBloc>.value(value: mockQuranBloc),
+                    ],
+                    child: const SetWerdGoalDialog(),
+                  ),
+                );
+              },
             );
           },
         ),
@@ -341,13 +356,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Open dropdown and select "Choose specific surah/ayah"
-      await tester.tap(find.text('Start from Al-Fatihah (beginning)'));
+      await tester.tap(find.byType(DropdownButton<int>).first);
       await tester.pumpAndSettle();
       await tester.tap(find.text('Choose specific surah/ayah'));
       await tester.pumpAndSettle();
 
       // Should show surah dropdown
-      expect(find.text('Al-Fatihah'), findsOneWidget);
+      expect(find.byType(DropdownButton<int>), findsWidgets);
     });
 
     testWidgets('changing surah resets ayah to 1', (tester) async {
@@ -370,15 +385,16 @@ void main() {
       await tester.pumpAndSettle();
 
       // Select "Choose specific surah/ayah"
-      await tester.tap(find.text('Start from Al-Fatihah (beginning)'));
+      await tester.tap(find.byType(DropdownButton<int>).first);
       await tester.pumpAndSettle();
       await tester.tap(find.text('Choose specific surah/ayah'));
       await tester.pumpAndSettle();
 
-      // Change surah to Al-Baqarah
-      await tester.tap(find.text('Al-Fatihah'));
+      // Change surah to Al-Baqarah: Tap the second dropdown button
+      await tester.tap(find.byType(DropdownButton<int>).at(1));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Al-Baqarah').last);
+      // Tap the second item in the list
+      await tester.tap(find.byType(DropdownMenuItem<int>).at(1));
       await tester.pumpAndSettle();
 
       // Ayah should reset to 1

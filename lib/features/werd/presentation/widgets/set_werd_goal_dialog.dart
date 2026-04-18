@@ -299,6 +299,7 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int>(
+          key: const ValueKey('start_point_dropdown'),
           value: _startPointType,
           isExpanded: true,
           borderRadius: BorderRadius.circular(16),
@@ -338,6 +339,7 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<int>(
+                key: const ValueKey('surah_dropdown'),
                 value: _selectedSurah,
                 isExpanded: true,
                 borderRadius: BorderRadius.circular(16),
@@ -373,6 +375,7 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<int>(
+                key: const ValueKey('ayah_dropdown'),
                 value: _selectedAyah,
                 isExpanded: true,
                 borderRadius: BorderRadius.circular(16),
@@ -441,7 +444,7 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
               _valueController.text = (val - 1).toString();
               setState(() {});
             }
-          }),
+          }, key: const ValueKey('decrement_button')),
           Expanded(
             child: TextField(
               controller: _valueController,
@@ -490,14 +493,17 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
               _valueController.text = (val + 1).toString();
               setState(() {});
             }
-          }),
+          }, key: const ValueKey('increment_button')),
         ],
       ),
     );
   }
 
-  Widget _buildStepButton(IconData icon, VoidCallback onPressed) {
+  Widget _buildStepButton(IconData icon, VoidCallback onPressed, {Key? key}) {
+    // ignore: avoid_print
+    print('DEBUG: Building button with key: $key');
     return Material(
+      key: key,
       color: context.secondaryColor.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(

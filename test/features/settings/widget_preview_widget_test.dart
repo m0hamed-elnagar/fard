@@ -1,19 +1,26 @@
+import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fard/features/settings/presentation/widgets/widget_preview.dart';
 import 'package:fard/features/settings/domain/entities/widget_preview_theme.dart';
+
+Widget _wrapWithL10n(Widget child) {
+  return MaterialApp(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: Scaffold(body: child),
+  );
+}
 
 void main() {
   group('WidgetPreview widget tests', () {
     group('Basic rendering', () {
       testWidgets('renders with default theme without errors', (tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: WidgetPreview(
-                theme: const WidgetPreviewTheme(),
-                widgetType: WidgetPreviewType.prayerSchedule,
-              ),
+          _wrapWithL10n(
+            WidgetPreview(
+              theme: const WidgetPreviewTheme(),
+              widgetType: WidgetPreviewType.prayerSchedule,
             ),
           ),
         );
@@ -23,11 +30,9 @@ void main() {
 
       testWidgets('renders prayer schedule layout by default', (tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: WidgetPreview(
-                theme: const WidgetPreviewTheme(),
-              ),
+          _wrapWithL10n(
+            const WidgetPreview(
+              theme: WidgetPreviewTheme(),
             ),
           ),
         );
@@ -40,12 +45,10 @@ void main() {
 
       testWidgets('renders countdown layout when widgetType is countdown', (tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: WidgetPreview(
-                theme: const WidgetPreviewTheme(),
-                widgetType: WidgetPreviewType.countdown,
-              ),
+          _wrapWithL10n(
+            const WidgetPreview(
+              theme: WidgetPreviewTheme(),
+              widgetType: WidgetPreviewType.countdown,
             ),
           ),
         );
@@ -60,12 +63,10 @@ void main() {
     group('Prayer schedule layout', () {
       testWidgets('shows all prayer times', (tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: WidgetPreview(
-                theme: const WidgetPreviewTheme(),
-                widgetType: WidgetPreviewType.prayerSchedule,
-              ),
+          _wrapWithL10n(
+            const WidgetPreview(
+              theme: WidgetPreviewTheme(),
+              widgetType: WidgetPreviewType.prayerSchedule,
             ),
           ),
         );
@@ -78,12 +79,10 @@ void main() {
 
       testWidgets('shows date header', (tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: WidgetPreview(
-                theme: const WidgetPreviewTheme(),
-                widgetType: WidgetPreviewType.prayerSchedule,
-              ),
+          _wrapWithL10n(
+            const WidgetPreview(
+              theme: WidgetPreviewTheme(),
+              widgetType: WidgetPreviewType.prayerSchedule,
             ),
           ),
         );
@@ -94,12 +93,10 @@ void main() {
 
       testWidgets('highlights next prayer (Asr)', (tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: WidgetPreview(
-                theme: const WidgetPreviewTheme(),
-                widgetType: WidgetPreviewType.prayerSchedule,
-              ),
+          _wrapWithL10n(
+            const WidgetPreview(
+              theme: WidgetPreviewTheme(),
+              widgetType: WidgetPreviewType.prayerSchedule,
             ),
           ),
         );
@@ -113,12 +110,10 @@ void main() {
     group('Countdown layout', () {
       testWidgets('shows next prayer label', (tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: WidgetPreview(
-                theme: const WidgetPreviewTheme(),
-                widgetType: WidgetPreviewType.countdown,
-              ),
+          _wrapWithL10n(
+            const WidgetPreview(
+              theme: WidgetPreviewTheme(),
+              widgetType: WidgetPreviewType.countdown,
             ),
           ),
         );
@@ -132,13 +127,11 @@ void main() {
     group('RTL mode', () {
       testWidgets('shows Arabic text in RTL mode for prayer schedule', (tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: WidgetPreview(
-                theme: const WidgetPreviewTheme(),
-                widgetType: WidgetPreviewType.prayerSchedule,
-                isRtl: true,
-              ),
+          _wrapWithL10n(
+            const WidgetPreview(
+              theme: WidgetPreviewTheme(),
+              widgetType: WidgetPreviewType.prayerSchedule,
+              isRtl: true,
             ),
           ),
         );
@@ -150,20 +143,18 @@ void main() {
 
       testWidgets('shows Arabic text in RTL mode for countdown', (tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: WidgetPreview(
-                theme: const WidgetPreviewTheme(),
-                widgetType: WidgetPreviewType.countdown,
-                isRtl: true,
-              ),
+          _wrapWithL10n(
+            const WidgetPreview(
+              theme: WidgetPreviewTheme(),
+              widgetType: WidgetPreviewType.countdown,
+              isRtl: true,
             ),
           ),
         );
 
-        // Verify Arabic countdown text
-        expect(find.textContaining('الصلاة'), findsOneWidget);
-        expect(find.textContaining('العصر'), findsOneWidget);
+        // Verify Arabic countdown text based on actual localization values
+        expect(find.text('الصلاة القادمة'), findsOneWidget);
+        expect(find.text('عصر'), findsWidgets);
       });
     });
 

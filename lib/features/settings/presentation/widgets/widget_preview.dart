@@ -19,7 +19,7 @@ class WidgetPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = theme.toColors();
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     
     return Container(
       key: ValueKey('${widgetType.index}_${theme.hashCode}'),
@@ -30,9 +30,11 @@ class WidgetPreview extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.all(12),
-      child: widgetType == WidgetPreviewType.prayerSchedule
-          ? _buildPrayerSchedulePreview(colors, l10n)
-          : _buildCountdownPreview(colors, l10n),
+      child: l10n == null
+          ? const SizedBox.shrink()
+          : (widgetType == WidgetPreviewType.prayerSchedule
+              ? _buildPrayerSchedulePreview(colors, l10n)
+              : _buildCountdownPreview(colors, l10n)),
     );
   }
 
