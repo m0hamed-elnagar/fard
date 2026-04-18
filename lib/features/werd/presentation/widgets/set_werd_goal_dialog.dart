@@ -299,6 +299,7 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int>(
+          key: const ValueKey('start_point_dropdown'),
           value: _startPointType,
           isExpanded: true,
           borderRadius: BorderRadius.circular(16),
@@ -338,6 +339,7 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<int>(
+                key: const ValueKey('surah_dropdown'),
                 value: _selectedSurah,
                 isExpanded: true,
                 borderRadius: BorderRadius.circular(16),
@@ -373,6 +375,7 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<int>(
+                key: const ValueKey('ayah_dropdown'),
                 value: _selectedAyah,
                 isExpanded: true,
                 borderRadius: BorderRadius.circular(16),
