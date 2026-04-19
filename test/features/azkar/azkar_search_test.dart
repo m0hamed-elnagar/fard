@@ -1,5 +1,6 @@
 import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/voice_download_service.dart';
+import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/azkar/presentation/screens/azkar_categories_screen.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
@@ -20,9 +21,23 @@ class MockSettingsCubit extends MockCubit<SettingsState>
 class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState>
     implements AzkarBloc {}
 
-class MockNotificationService extends Mock implements NotificationService {}
+class MockNotificationService extends Mock implements NotificationService {
+  @override
+  Future<Map<String, dynamic>> runDiagnostics() async => {
+        'notifications_enabled': true,
+        'exact_alarm_permission': true,
+        'battery_optimization_ignored': true,
+      };
+}
 
 class MockVoiceDownloadService extends Mock implements VoiceDownloadService {}
+
+class MockWidgetUpdateService extends Mock implements WidgetUpdateService {
+  @override
+  Future<Map<String, String>?> getWidgetTheme() async => {};
+  @override
+  Future<void> updateWidget() async {}
+}
 
 void main() {
   setUpAll(() {
@@ -44,6 +59,7 @@ void main() {
     getIt.reset();
     getIt.registerSingleton<NotificationService>(mockNotificationService);
     getIt.registerSingleton<VoiceDownloadService>(mockVoiceDownloadService);
+    getIt.registerSingleton<WidgetUpdateService>(MockWidgetUpdateService());
 
     when(
       () => mockNotificationService.canScheduleExactNotifications(),
@@ -52,6 +68,7 @@ void main() {
       () => mockNotificationService.testReminder(any(), any()),
     ).thenAnswer((_) async {});
 
+    when(() => mockSettingsCubit.getAvailablePresets()).thenReturn([]);
     when(() => mockSettingsCubit.state).thenReturn(
       const SettingsState(
         locale: Locale('en'),
@@ -170,10 +187,12 @@ void main() {
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 
-      final addButton = find.byKey(const Key('add_reminder_button'));
-      expect(addButton, findsOneWidget);
+      final addButtonFinder = find.byKey(const Key('add_reminder_button'));
+      await tester.scrollUntilVisible(addButtonFinder, 100.0, scrollable: find.byType(Scrollable).first);
+      await tester.pumpAndSettle();
+      expect(addButtonFinder, findsOneWidget);
 
-      await tester.tap(addButton);
+      await tester.tap(addButtonFinder);
       await tester.pumpAndSettle();
 
       // Verify dialog is shown
@@ -196,7 +215,7 @@ void main() {
       expect(find.byType(TextField), findsAtLeast(1));
 
       final searchHint = AppLocalizations.of(
-        tester.element(addButton),
+        tester.element(addButtonFinder),
       )!.searchCategory;
       expect(find.text(searchHint), findsOneWidget);
 

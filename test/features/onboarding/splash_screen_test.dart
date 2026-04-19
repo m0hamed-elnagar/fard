@@ -10,6 +10,7 @@ import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/tasbih/presentation/bloc/tasbih_bloc.dart';
+import 'package:fard/core/blocs/connectivity/connectivity_bloc.dart';
 import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
 import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
@@ -38,7 +39,14 @@ class MockPrayerTrackerBloc
 
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
-class MockNotificationService extends Mock implements NotificationService {}
+class MockNotificationService extends Mock implements NotificationService {
+  @override
+  Future<Map<String, dynamic>> runDiagnostics() async => {
+        'notifications_enabled': true,
+        'exact_alarm_permission': true,
+        'battery_optimization_ignored': true,
+      };
+}
 
 class MockWidgetUpdateService extends Mock implements WidgetUpdateService {
   @override
@@ -57,10 +65,14 @@ class MockTasbihBloc extends MockBloc<TasbihEvent, TasbihState>
 class MockReaderBloc extends MockBloc<ReaderEvent, ReaderState>
     implements ReaderBloc {}
 
+class MockConnectivityBloc extends MockBloc<ConnectivityEvent, ConnectivityState>
+    implements ConnectivityBloc {}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(PrayerTrackerEvent.load(DateTime.now()));
     registerFallbackValue(Salaah.fajr);
+    registerFallbackValue(const ConnectivityChanged([]));
   });
 
   late MockSharedPreferences mockPrefs;
@@ -73,10 +85,12 @@ void main() {
   late MockAudioBloc mockAudioBloc;
   late MockTasbihBloc mockTasbihBloc;
   late MockReaderBloc mockReaderBloc;
+  late MockConnectivityBloc mockConnectivityBloc;
 
   setUp(() {
     mockPrefs = MockSharedPreferences();
     mockSettingsCubit = MockSettingsCubit();
+    when(() => mockSettingsCubit.state).thenReturn(const SettingsState(locale: Locale('en')));
     mockAzkarBloc = MockAzkarBloc();
     mockPrayerTrackerBloc = MockPrayerTrackerBloc();
     mockPrayerTimeService = MockPrayerTimeService();
@@ -85,6 +99,7 @@ void main() {
     mockAudioBloc = MockAudioBloc();
     mockTasbihBloc = MockTasbihBloc();
     mockReaderBloc = MockReaderBloc();
+    mockConnectivityBloc = MockConnectivityBloc();
 
     final getIt = GetIt.instance;
     getIt.reset();
@@ -103,6 +118,7 @@ void main() {
     getIt.registerFactory<AudioBloc>(() => mockAudioBloc);
     getIt.registerFactory<TasbihBloc>(() => mockTasbihBloc);
     getIt.registerFactory<ReaderBloc>(() => mockReaderBloc);
+    getIt.registerFactory<ConnectivityBloc>(() => mockConnectivityBloc);
 
     when(() => mockNotificationService.canScheduleExactNotifications()).thenAnswer((_) async => true);
     when(() => mockPrayerTimeService.isUpcoming(any(), prayerTimes: any(named: 'prayerTimes'), date: any(named: 'date'))).thenReturn(false);
@@ -116,6 +132,7 @@ void main() {
     when(() => mockAudioBloc.state).thenReturn(const AudioState());
     when(() => mockTasbihBloc.state).thenReturn(TasbihState.initial());
     when(() => mockReaderBloc.state).thenReturn(const ReaderState.initial());
+    when(() => mockConnectivityBloc.state).thenReturn(const ConnectivityStatus(true));
   });
 
   tearDown(() {
@@ -132,6 +149,7 @@ void main() {
         BlocProvider<ReaderBloc>.value(value: mockReaderBloc),
         BlocProvider<QuranBloc>.value(value: mockQuranBloc),
         BlocProvider<PrayerTrackerBloc>.value(value: mockPrayerTrackerBloc),
+        BlocProvider<ConnectivityBloc>.value(value: mockConnectivityBloc),
       ],
       child: const MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,

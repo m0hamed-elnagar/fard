@@ -45,10 +45,7 @@ class NextPrayerCountdownWidget : GlanceAppWidget() {
                     value.isNotEmpty() && value != defaults[key]
                 }
                 
-                android.util.Log.d("WidgetDebug", "CountdownWidget Theme override detection: hasThemeOverride=$hasThemeOverride")
-                
                 val themeToUse = if (hasThemeOverride) {
-                    android.util.Log.d("WidgetDebug", "CountdownWidget: Using OVERRIDE theme")
                     com.qada.fard.widget.WidgetTheme(
                         primaryColorHex = widgetTheme["primaryColorHex"] ?: widgetData.primaryColorHex,
                         accentColorHex = widgetTheme["accentColorHex"] ?: widgetData.accentColorHex,
@@ -58,12 +55,10 @@ class NextPrayerCountdownWidget : GlanceAppWidget() {
                         textSecondaryColorHex = widgetTheme["textSecondaryColorHex"] ?: widgetData.textSecondaryColorHex
                     )
                 } else {
-                    android.util.Log.d("WidgetDebug", "CountdownWidget: Using FALLBACK theme")
                     widgetData.toWidgetTheme()
                 }
                 
-                android.util.Log.d("WidgetDebug", "CountdownWidget final primary color hex: ${themeToUse.primaryColorHex}")
-                
+                // Pass current timestamp to force recomposition
                 CountdownContent(
                     data = widgetData.toCountdownData(),
                     theme = themeToUse,

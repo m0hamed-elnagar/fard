@@ -46,10 +46,12 @@ class NextPrayerCountdownWidgetReceiver : GlanceAppWidgetReceiver() {
                     } catch (e: Exception) {
                         Log.e("CountdownWidgetRec", "Update failed", e)
                     } finally {
-                        scheduleNextMinuteUpdate(context)
                         pendingResult.finish()
                     }
                 }
+                // 🛡️ Move schedule logic outside the coroutine/try-finally 
+                // to ensure the loop doesn't break even if the UI update fails
+                scheduleNextMinuteUpdate(context)
             }
         }
     }

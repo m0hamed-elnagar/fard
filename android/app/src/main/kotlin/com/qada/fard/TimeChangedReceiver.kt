@@ -20,6 +20,18 @@ class TimeChangedReceiver : BroadcastReceiver() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 updateAll(context)
+                
+                // 🛡️ Trigger Flutter side to reschedule Azan notifications immediately
+                val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.qada.fard.widget.WidgetUpdateWorker>()
+                    .addTag("time_change_reschedule")
+                    .build()
+                
+                // Use the same key as Flutter Workmanager for the main task
+                androidx.work.WorkManager.getInstance(context).enqueueUniqueWork(
+                    "prayer_scheduler_task_name",
+                    androidx.work.ExistingWorkPolicy.REPLACE,
+                    workRequest
+                )
             } finally {
                 pendingResult.finish()
             }

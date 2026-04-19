@@ -104,8 +104,14 @@ class WidgetUpdateService {
         seedColor = _hexToColor(customColors['primary']!);
       }
     } else {
-      final preset = ThemePresets.getById(themePresetId);
-      seedColor = preset.primaryColor;
+      try {
+        final preset = ThemePresets.getById(themePresetId);
+        seedColor = preset.primaryColor;
+      } catch (e) {
+        debugPrint(
+          'WidgetUpdateService: Theme preset not found: $themePresetId',
+        );
+      }
     }
 
     // Use ColorScheme.fromSeed to derive a harmonious and high-contrast palette
@@ -251,6 +257,7 @@ class WidgetUpdateService {
 
   Future<void> _syncNative(String prayerDataJson) async {
     try {
+      final jsonMap = jsonDecode(prayerDataJson) as Map<String, dynamic>;
       final now = DateTime.now();
       final prayerTimes = _prayerTimeService.getPrayerTimes(
         latitude: _settingsProvider.latitude!,
@@ -266,12 +273,21 @@ class WidgetUpdateService {
         ),
         'latitude': _settingsProvider.latitude,
         'longitude': _settingsProvider.longitude,
-        'madhab': _settingsProvider.madhab == 'hanafi'
-            ? CalculationContract.madhabHanafi
-            : CalculationContract.madhabShafi,
+        'madhab':
+            _settingsProvider.madhab == 'hanafi'
+                ? CalculationContract.madhabHanafi
+                : CalculationContract.madhabShafi,
         'locale': _settingsProvider.locale.languageCode,
         'prayer_data': prayerDataJson, // Atomic sync of display data
         'hijri_date': _prefs.getString('flutter.hijri_date_cache') ?? '',
+        'colors': {
+          'primary': jsonMap['primaryColorHex'],
+          'accent': jsonMap['accentColorHex'],
+          'background': jsonMap['backgroundColorHex'],
+          'surface': jsonMap['surfaceColorHex'],
+          'text': jsonMap['textColorHex'],
+          'text_secondary': jsonMap['textSecondaryColorHex'],
+        },
         'prayer_times': {
           'fajr': prayerTimes.fajr.millisecondsSinceEpoch,
           'dhuhr': prayerTimes.dhuhr.millisecondsSinceEpoch,

@@ -211,13 +211,7 @@ void callbackDispatcher() {
           settingsProvider,
         );
 
-        if (task == _widgetTaskKey) {
-          debugPrint('Background Service: Refreshing widget data...');
-          await widgetUpdateService.updateWidget();
-          return Future.value(true);
-        }
-
-        // 4. Initialize Dependencies
+        // 4. Initialize Dependencies for scheduling
         final soundManager = SoundManager();
         final channelManager = ChannelManager(soundManager);
         final azkarSource = BackgroundAzkarSource();
@@ -232,18 +226,37 @@ void callbackDispatcher() {
         final notificationsPlugin = FlutterLocalNotificationsPlugin();
         const AndroidInitializationSettings initializationSettingsAndroid =
             AndroidInitializationSettings('@mipmap/ic_launcher');
-        const DarwinInitializationSettings initializationSettingsDarwin =
-            DarwinInitializationSettings();
         const InitializationSettings initializationSettings =
             InitializationSettings(
               android: initializationSettingsAndroid,
-              iOS: initializationSettingsDarwin,
+              iOS: DarwinInitializationSettings(),
             );
 
-        await notificationsPlugin.initialize(settings: initializationSettings);
+        await notificationsPlugin.initialize(
+          settings: initializationSettings,
+          onDidReceiveNotificationResponse: (_) {},
+        );
 
-        // 5. Schedule Notifications
-        debugPrint('Background Service: Scheduling notifications...');
+        if (task == _widgetTaskKey) {
+          debugPrint(
+            'Background Service: Refreshing widget data and notifications (safety net)...',
+          );
+          await widgetUpdateService.updateWidget();
+
+          // 🛡️ Safety net: also reschedule notifications during widget refresh
+          // This ensures that even if the 12h task fails, the 15m task keeps us covered.
+          await scheduler.schedulePrayerNotifications(notificationsPlugin);
+          final allAzkar = await azkarSource.getAllAzkar();
+          await scheduler.scheduleAzkarReminders(
+            notificationsPlugin,
+            allAzkar: allAzkar,
+          );
+
+          return Future.value(true);
+        }
+
+        // 5. Schedule Notifications (Main 12h Task)
+        debugPrint('Background Service: Scheduling notifications (Main)...');
         await scheduler.schedulePrayerNotifications(notificationsPlugin);
 
         final allAzkar = await azkarSource.getAllAzkar();
@@ -276,7 +289,7 @@ class BackgroundService {
         _backgroundTaskKey,
         frequency: const Duration(hours: 12),
         existingWorkPolicy: ExistingPeriodicWorkPolicy.update,
-        constraints: Constraints(networkType: NetworkType.connected),
+        constraints: Constraints(networkType: NetworkType.notRequired),
       );
 
       // Register fallback widget refresh task (every 15 mins)

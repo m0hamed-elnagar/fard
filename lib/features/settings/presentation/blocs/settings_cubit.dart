@@ -292,6 +292,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     await _repo.updateAllAzanEnabled(v);
     emit(state.copyWith(salaahSettings: _repo.salaahSettings));
     _sync();
+    _widgetSync();
   }
 
   void updateAllReminderEnabled(bool v) {
@@ -306,6 +307,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     await _repo.updateAllReminderEnabled(v);
     emit(state.copyWith(salaahSettings: _repo.salaahSettings));
     _sync();
+    _widgetSync();
   }
 
   void updateAllAzanSound(String? v) {
@@ -320,6 +322,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     await _repo.updateAllAzanSound(v);
     emit(state.copyWith(salaahSettings: _repo.salaahSettings));
     _sync();
+    _widgetSync();
   }
 
   void updateAllReminderMinutes(int v) {
@@ -334,6 +337,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     await _repo.updateAllReminderMinutes(v);
     emit(state.copyWith(salaahSettings: _repo.salaahSettings));
     _sync();
+    _widgetSync();
   }
 
   void updateAllAfterSalahMinutes(int v) {
@@ -348,6 +352,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     await _repo.updateAllAfterSalahMinutes(v);
     emit(state.copyWith(salaahSettings: _repo.salaahSettings));
     _sync();
+    _widgetSync();
   }
 
   void toggleQadaEnabled() {

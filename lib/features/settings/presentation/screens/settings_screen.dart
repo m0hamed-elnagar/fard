@@ -2419,15 +2419,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
         });
       },
       children: [
-        // Notification Settings
+        // Notification & Battery Settings
         if (!_notificationsEnabled || !_canScheduleExactAlarms || !_isBatteryOptimizationIgnored)
-          _buildListTile(
-            title: l10n.notificationSettings,
-            subtitle: l10n.notificationSettingsDesc,
-            icon: Icons.notifications_active_outlined,
-            onTap: () => getIt<NotificationService>().openNotificationSettings(),
+          Column(
+            children: [
+              if (!_notificationsEnabled)
+                _buildListTile(
+                  title: l10n.notificationSettings,
+                  subtitle: l10n.notificationSettingsDesc,
+                  icon: Icons.notifications_active_outlined,
+                  onTap: () => getIt<NotificationService>().openNotificationSettings(),
+                ),
+              if (!_canScheduleExactAlarms)
+                _buildListTile(
+                  title: l10n.exactAlarmWarningTitle,
+                  subtitle: l10n.exactAlarmWarningDesc,
+                  icon: Icons.alarm_on_rounded,
+                  onTap: () => getIt<NotificationService>().openNotificationSettings(),
+                ),
+              if (!_isBatteryOptimizationIgnored)
+                _buildListTile(
+                  title: l10n.batteryOptimization,
+                  subtitle: l10n.batteryOptimizationDesc,
+                  icon: Icons.battery_saver_rounded,
+                  onTap: () async {
+                    await getIt<NotificationService>().requestIgnoreBatteryOptimizations();
+                    _checkPermissions(); // Refresh after returning
+                  },
+                ),
+              _buildDivider(),
+            ],
           ),
-        if (!_notificationsEnabled || !_canScheduleExactAlarms || !_isBatteryOptimizationIgnored) _buildDivider(),
         
         // Calculation Method (Vertical Layout)
         Column(

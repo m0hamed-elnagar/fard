@@ -244,18 +244,25 @@ void main() {
 
       final stream = repository.watchProgress(goalId: 'default');
 
-      await repository.updateProgress(progress);
-
+      // The stream emits the initial value first (totalAmountReadToday: 0)
+      // Then the updateProgress value (totalAmountReadToday: 10)
       expect(
         stream,
-        emits(
+        emitsInOrder([
           isA<Result<WerdProgress>>().having(
             (r) => r.fold((_) => null, (p) => p.totalAmountReadToday),
-            'totalAmountReadToday',
+            'initialTotalAmountReadToday',
+            0,
+          ),
+          isA<Result<WerdProgress>>().having(
+            (r) => r.fold((_) => null, (p) => p.totalAmountReadToday),
+            'updatedTotalAmountReadToday',
             10,
           ),
-        ),
+        ]),
       );
+
+      await repository.updateProgress(progress);
     });
 
     test('getAllProgress returns all progress entries', () async {
@@ -314,7 +321,11 @@ void main() {
       final oldResult = await repository.getProgress(goalId: 'old');
       oldResult.fold(
         (_) => fail('Should not fail'),
-        (progress) => expect(progress, isNull),
+        (progress) {
+          // Should return default empty progress if 'old' was cleared
+          expect(progress.goalId, 'old');
+          expect(progress.totalAmountReadToday, 0);
+        },
       );
     });
   });

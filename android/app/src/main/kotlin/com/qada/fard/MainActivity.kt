@@ -183,6 +183,7 @@ class MainActivity : AudioServiceActivity() {
                 val locale = settingsMap?.get("locale") as? String
                 val prayerData = settingsMap?.get("prayer_data") as? String
                 val hijriDate = settingsMap?.get("hijri_date") as? String
+                val colors = settingsMap?.get("colors") as? Map<String, String>
 
                 // Validate required settings
                 if (latitude == null || longitude == null || calculationMethod == null ||
@@ -202,7 +203,21 @@ class MainActivity : AudioServiceActivity() {
                     prayerData = prayerData,
                     hijriDate = hijriDate
                 )
-                Log.d(TAG, "Settings saved to SharedPreferences")
+
+                // 2.1 Save colors to widget theme if present
+                if (colors != null) {
+                    val themeMap = mapOf(
+                        "primaryColorHex" to (colors["primary"] ?: "#2E7D32"),
+                        "accentColorHex" to (colors["accent"] ?: "#FFD54F"),
+                        "backgroundColorHex" to (colors["background"] ?: "#0D1117"),
+                        "surfaceColorHex" to (colors["surface"] ?: "#161B22"),
+                        "textColorHex" to (colors["text"] ?: "#FFFFFF"),
+                        "textSecondaryColorHex" to (colors["text_secondary"] ?: "#8B949E")
+                    )
+                    repository.saveWidgetTheme(themeMap)
+                }
+
+                Log.d(TAG, "Settings and colors saved to SharedPreferences")
 
                 // 3. Invalidate Kotlin calculation cache
                 PrayerTimesCalculator.invalidateCache()

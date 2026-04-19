@@ -122,6 +122,10 @@ class WidgetUpdateWorker(
         val now = Calendar.getInstance()
         val lang = if (isRtl) "ar" else "en"
         
+        // 🛡️ PRESERVE COLORS: Get existing JSON to copy color values
+        val existingJsonStr = repository.getPrayerDataJson()
+        val existingJson = if (existingJsonStr != null) try { JSONObject(existingJsonStr) } catch(e: Exception) { null } else null
+
         // Build prayers array
         val prayers = org.json.JSONArray()
         listOf(
@@ -150,6 +154,18 @@ class WidgetUpdateWorker(
             put("nextPrayerName", getPrayerNameLocalizedName(nextPrayerName, lang))
             put("nextPrayerTime", nextPrayerTime)
             put("lastUpdated", lastUpdated)
+
+            // 🛡️ RE-APPLY PRESERVED COLORS (if they exist)
+            if (existingJson != null) {
+                listOf(
+                    "primaryColorHex", "accentColorHex", "backgroundColorHex",
+                    "surfaceColorHex", "textColorHex", "textSecondaryColorHex"
+                ).forEach { key ->
+                    if (existingJson.has(key)) {
+                        put(key, existingJson.getString(key))
+                    }
+                }
+            }
         }.toString()
     }
     

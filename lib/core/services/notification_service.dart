@@ -203,7 +203,11 @@ class NotificationService {
 
   Future<void> requestIgnoreBatteryOptimizations() async {
     if (Platform.isAndroid) {
-      await Permission.ignoreBatteryOptimizations.request();
+      if (await Permission.ignoreBatteryOptimizations.request().isGranted) {
+        return;
+      }
+      // If direct request fails or isn't enough, open settings
+      await openAppSettings();
     }
   }
 

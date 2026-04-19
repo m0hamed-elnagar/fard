@@ -19,7 +19,8 @@ class ChannelManager {
     final String fileName = sound
         .split(RegExp(r'[/\\]'))
         .last
-        .replaceAll('.mp3', '');
+        .replaceAll('.mp3', '')
+        .replaceAll(RegExp(r'[^a-zA-Z0-9_]'), '_');
     return 'azan_${salaahId}_$fileName';
   }
 
@@ -91,6 +92,20 @@ class ChannelManager {
 
     // Create new channel with proper sound
     final String? soundUri = await _soundManager.getSoundUriForChannel(sound);
+    AndroidNotificationSound? notificationSound;
+
+    if (sound != 'default') {
+      if (soundUri != null) {
+        notificationSound = UriAndroidNotificationSound(soundUri);
+      } else {
+        // Fallback to resource if URI failed, but only if it's not a path
+        if (!sound.contains('/') && !sound.contains('\\')) {
+          notificationSound = RawResourceAndroidNotificationSound(
+            sound.split('.').first,
+          );
+        }
+      }
+    }
 
     final androidChannel = AndroidNotificationChannel(
       channelId,
@@ -101,11 +116,7 @@ class ChannelManager {
       importance: Importance.max,
       playSound: true,
       audioAttributesUsage: AudioAttributesUsage.alarm,
-      sound: sound == 'default'
-          ? null
-          : (soundUri != null
-                ? UriAndroidNotificationSound(soundUri)
-                : RawResourceAndroidNotificationSound(sound.split('.').first)),
+      sound: notificationSound,
     );
 
     await androidPlugin.createNotificationChannel(androidChannel);

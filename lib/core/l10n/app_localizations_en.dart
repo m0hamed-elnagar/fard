@@ -255,6 +255,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get openSettings => 'Open Settings';
 
   @override
+  String get batteryOptimization => 'Battery Optimization';
+
+  @override
+  String get batteryOptimizationDesc =>
+      'Disable battery optimization to ensure Azan works forever in the background.';
+
+  @override
+  String get disableRestrictions => 'Disable Restrictions';
+
+  @override
   String get tryAgain => 'Try Again';
 
   @override

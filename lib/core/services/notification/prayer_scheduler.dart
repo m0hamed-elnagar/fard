@@ -12,6 +12,7 @@ import 'package:fard/features/azkar/domain/azkar_item.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'channel_manager.dart';
 import 'sound_manager.dart';
+import 'package:flutter/foundation.dart';
 
 @singleton
 class PrayerNotificationScheduler {
@@ -25,7 +26,6 @@ class PrayerNotificationScheduler {
   static const String widgetTaskKey = 'widget_refresh_task';
 
   // Notification ID Ranges
-  // ... (rest of the constants)
   static const int azkarReminderIdStart = 100;
   static const int azanIdStart = 200;
   static const int prayerReminderIdStart = 300;
@@ -37,7 +37,7 @@ class PrayerNotificationScheduler {
 
   // Max counts for cancellation
   static const int maxAzkarReminders = 50;
-  static const int maxScheduledDays = 7;
+  static const int maxScheduledDays = 2;
   static const int prayersPerDay = 5;
   static const int maxPrayerNotificationIds = maxScheduledDays * prayersPerDay;
 
@@ -72,8 +72,21 @@ class PrayerNotificationScheduler {
     final now = tz.TZDateTime.now(tz.local);
     final allAzkar = await _azkarSource.getAllAzkar();
 
-    final List<({DateTime time, Future<void> Function(int?) schedule})> events =
-        [];
+    // 🏎️ Pre-resolve sound URIs for all unique sounds used to avoid redundant I/O in the loop
+    final uniqueSounds = _settingsProvider.salaahSettings
+        .map((s) => s.azanSound ?? 'default')
+        .toSet();
+    final Map<String, String?> soundUriMap = {};
+    for (final sound in uniqueSounds) {
+      soundUriMap[sound] = await _soundManager.getSoundUriForChannel(sound);
+    }
+
+    final List<
+      ({DateTime time, bool isAzan, Future<void> Function(int?) schedule})
+    > events = [];
+
+    // Track the latest missed Azan (within 1 min) to avoid firing multiple old ones
+    ({DateTime time, Future<void> Function(int?) schedule})? latestMissedAzan;
 
     for (int day = 0; day < maxScheduledDays; day++) {
       final date = DateTime.now().add(Duration(days: day));
@@ -96,30 +109,77 @@ class PrayerNotificationScheduler {
         final dayOffset = day * prayersPerDay + salaahSetting.salaah.index;
 
         // 1. Azan Event
-        if (salaahSetting.isAzanEnabled && tzSalaahTime.isAfter(now)) {
-          events.add((
-            time: tzSalaahTime,
-            schedule: (int? timeout) async {
-              await _scheduleAzan(
-                notificationsPlugin,
-                id: azanIdStart + dayOffset,
-                salaah: salaahSetting.salaah,
-                scheduledDate: tzSalaahTime,
-                sound: salaahSetting.azanSound,
-                timeoutAfter: timeout,
-              );
+        if (salaahSetting.isAzanEnabled) {
+          if (tzSalaahTime.isAfter(now)) {
+            // Future Azan
+            events.add((
+              time: tzSalaahTime,
+              isAzan: true,
+              schedule: (int? timeout) async {
+                try {
+                  await _scheduleAzan(
+                    notificationsPlugin,
+                    id: azanIdStart + dayOffset,
+                    salaah: salaahSetting.salaah,
+                    scheduledDate: tzSalaahTime,
+                    sound: salaahSetting.azanSound,
+                    soundUri: soundUriMap[salaahSetting.azanSound ?? 'default'],
+                    timeoutAfter: timeout,
+                  );
 
-              // 🚀 Schedule a one-off widget refresh for the Adhan time
-              await Workmanager().registerOneOffTask(
-                "widget_refresh_${salaahSetting.salaah.name}_$day",
-                widgetTaskKey,
-                initialDelay: tzSalaahTime.difference(now),
-                existingWorkPolicy: ExistingWorkPolicy.replace,
-              );
-            },
-          ));
+                  Workmanager()
+                      .registerOneOffTask(
+                        "widget_refresh_${salaahSetting.salaah.name}_$day",
+                        widgetTaskKey,
+                        initialDelay: tzSalaahTime.difference(now),
+                        existingWorkPolicy: ExistingWorkPolicy.replace,
+                      )
+                      .catchError((e) {
+                    debugPrint(
+                      'PrayerNotificationScheduler: Workmanager error: $e',
+                    );
+                  });
+                } catch (e) {
+                  debugPrint(
+                    'PrayerNotificationScheduler: Error scheduling Azan: $e',
+                  );
+                }
+              },
+            ));
+          } else {
+            // Missed Azan? Check if it was very recent (< 1 min)
+            final bool isVeryRecentPast =
+                now.difference(tzSalaahTime).inMinutes < 1;
+
+            if (isVeryRecentPast) {
+              final scheduledTime = now.add(const Duration(seconds: 1));
+              if (latestMissedAzan == null ||
+                  tzSalaahTime.isAfter(latestMissedAzan.time)) {
+                latestMissedAzan = (
+                  time: tzSalaahTime,
+                  schedule: (int? timeout) async {
+                    try {
+                      await _scheduleAzan(
+                        notificationsPlugin,
+                        id: azanIdStart + dayOffset,
+                        salaah: salaahSetting.salaah,
+                        scheduledDate: scheduledTime,
+                        sound: salaahSetting.azanSound,
+                        soundUri:
+                            soundUriMap[salaahSetting.azanSound ?? 'default'],
+                        timeoutAfter: timeout,
+                      );
+                    } catch (e) {
+                      debugPrint(
+                        'PrayerNotificationScheduler: Error scheduling catch-up Azan: $e',
+                      );
+                    }
+                  },
+                );
+              }
+            }
+          }
         }
-        // ... rest of loop
 
         // 2. Reminder Event
         if (salaahSetting.isReminderEnabled &&
@@ -127,27 +187,34 @@ class PrayerNotificationScheduler {
           final reminderTime = tzSalaahTime.subtract(
             Duration(minutes: salaahSetting.reminderMinutesBefore),
           );
-          // Check if reminder is in the future (or very recently past to handle "just now" race conditions)
-          // We allow reminders slightly in the past if they are still relevant, but here we strictly check vs now
           if (reminderTime.isAfter(now.subtract(const Duration(minutes: 1)))) {
             final scheduledTime = reminderTime.isBefore(now)
                 ? now.add(const Duration(seconds: 5))
                 : reminderTime;
             events.add((
               time: scheduledTime,
-              schedule: (int? timeout) => _schedulePrayerReminder(
-                notificationsPlugin,
-                id: prayerReminderIdStart + dayOffset,
-                salaah: salaahSetting.salaah,
-                scheduledDate: scheduledTime, // cast safe because we created it
-                minutesBefore: salaahSetting.reminderMinutesBefore,
-                timeoutAfter: timeout,
-              ),
+              isAzan: false,
+              schedule: (int? timeout) async {
+                try {
+                  await _schedulePrayerReminder(
+                    notificationsPlugin,
+                    id: prayerReminderIdStart + dayOffset,
+                    salaah: salaahSetting.salaah,
+                    scheduledDate: scheduledTime,
+                    minutesBefore: salaahSetting.reminderMinutesBefore,
+                    timeoutAfter: timeout,
+                  );
+                } catch (e) {
+                  debugPrint(
+                    'PrayerNotificationScheduler: Error scheduling reminder: $e',
+                  );
+                }
+              },
             ));
           }
         }
 
-        // 3. After Salah Azkar Event
+    // 3. After Salah Azkar Event
         if (_settingsProvider.isAfterSalahAzkarEnabled &&
             salaahSetting.isAfterSalahAzkarEnabled) {
           final azkarTime = tzSalaahTime.add(
@@ -156,17 +223,33 @@ class PrayerNotificationScheduler {
           if (azkarTime.isAfter(now)) {
             events.add((
               time: azkarTime,
-              schedule: (int? timeout) => _scheduleAfterSalahAzkar(
-                notificationsPlugin,
-                id: afterSalahAzkarIdStart + dayOffset,
-                scheduledDate: azkarTime,
-                allAzkar: allAzkar,
-                timeoutAfter: timeout,
-              ),
+              isAzan: false,
+              schedule: (int? timeout) async {
+                try {
+                  await _scheduleAfterSalahAzkar(
+                    notificationsPlugin,
+                    id: afterSalahAzkarIdStart + dayOffset,
+                    scheduledDate: azkarTime,
+                    allAzkar: allAzkar,
+                    timeoutAfter: timeout,
+                  );
+                } catch (e) {
+                  debugPrint('PrayerNotificationScheduler: Error scheduling After-Salah Azkar: $e');
+                }
+              },
             ));
           }
         }
       }
+    }
+
+    // Add the single most recent missed Azan if one exists
+    if (latestMissedAzan != null) {
+      events.add((
+        time: now.add(const Duration(seconds: 1)),
+        isAzan: true,
+        schedule: latestMissedAzan.schedule,
+      ));
     }
 
     // Sort events by time
@@ -179,14 +262,22 @@ class PrayerNotificationScheduler {
         final nextTime = events[i + 1].time;
         final duration = nextTime.difference(events[i].time);
         if (duration.isNegative) {
-          timeout = null; // Should not happen if sorted
+          timeout = null;
         } else {
           timeout = duration.inMilliseconds;
         }
       } else {
-        // Last event: default timeout or none?
-        // Let's set a safe max timeout of 8 hours to avoid stale notifications forever
         timeout = const Duration(hours: 8).inMilliseconds;
+      }
+
+      // 🛡️ Special handling for Azan: Don't let it timeout too quickly
+      // Even if another event (like After-Salah Azkar) is scheduled soon,
+      // the Adhan notification should stay visible for at least 2 hours.
+      if (events[i].isAzan) {
+        final minAzanTimeout = const Duration(hours: 2).inMilliseconds;
+        if (timeout == null || timeout < minAzanTimeout) {
+          timeout = minAzanTimeout;
+        }
       }
 
       await events[i].schedule(timeout);
@@ -274,7 +365,8 @@ class PrayerNotificationScheduler {
           timeoutAfter: timeoutAfter,
         ),
       ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      // 🛡️ Standard alarm (allowWhileIdle) for non-essential notifications
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
       payload: payload,
     );
@@ -308,7 +400,8 @@ class PrayerNotificationScheduler {
           timeoutAfter: timeoutAfter,
         ),
       ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      // 🛡️ Standard alarm (allowWhileIdle) for non-essential notifications
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       payload: 'category:$category',
     );
   }
@@ -334,6 +427,7 @@ class PrayerNotificationScheduler {
     required Salaah salaah,
     required tz.TZDateTime scheduledDate,
     String? sound,
+    String? soundUri,
     int? timeoutAfter,
   }) async {
     final String salaahName = _getSalaahName(salaah);
@@ -343,6 +437,7 @@ class PrayerNotificationScheduler {
       soundPath,
     );
 
+    // ensureChannelExists already checks if it exists, but it's good to keep it deterministic
     await _channelManager.ensureChannelExists(
       notificationsPlugin,
       channelId: channelId,
@@ -350,18 +445,18 @@ class PrayerNotificationScheduler {
       sound: soundPath,
     );
 
-    final String? soundUri = await _soundManager.getSoundUriForChannel(
-      soundPath,
-    );
     AndroidNotificationSound? notificationSound;
 
     if (soundPath != 'default') {
       if (soundUri != null) {
         notificationSound = UriAndroidNotificationSound(soundUri);
       } else {
-        notificationSound = RawResourceAndroidNotificationSound(
-          soundPath.split('.').first,
-        );
+        // Fallback to resource if URI failed, but only if it's not a path
+        if (!soundPath.contains('/') && !soundPath.contains('\\')) {
+          notificationSound = RawResourceAndroidNotificationSound(
+            soundPath.split('.').first,
+          );
+        }
       }
     }
 
@@ -385,6 +480,8 @@ class PrayerNotificationScheduler {
           ticker: _applyRtl(title),
           subText: _applyRtl(title),
           timeoutAfter: timeoutAfter,
+          // 🛡️ High reliability for Azan
+          fullScreenIntent: true,
         );
 
     NotificationDetails platformChannelSpecifics = NotificationDetails(
@@ -445,7 +542,8 @@ class PrayerNotificationScheduler {
         ),
         windows: const WindowsNotificationDetails(),
       ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      // 🛡️ Standard alarm (allowWhileIdle) for non-essential notifications
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     );
   }
 

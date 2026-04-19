@@ -560,6 +560,24 @@ abstract class AppLocalizations {
   /// **'Open Settings'**
   String get openSettings;
 
+  /// No description provided for @batteryOptimization.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery Optimization'**
+  String get batteryOptimization;
+
+  /// No description provided for @batteryOptimizationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable battery optimization to ensure Azan works forever in the background.'**
+  String get batteryOptimizationDesc;
+
+  /// No description provided for @disableRestrictions.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable Restrictions'**
+  String get disableRestrictions;
+
   /// No description provided for @tryAgain.
   ///
   /// In en, this message translates to:

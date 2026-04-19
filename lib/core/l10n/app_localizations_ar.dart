@@ -254,6 +254,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get openSettings => 'فتح الإعدادات';
 
   @override
+  String get batteryOptimization => 'تحسين البطارية';
+
+  @override
+  String get batteryOptimizationDesc =>
+      'قم بتعطيل تحسين البطارية لضمان عمل الأذان دائماً في الخلفية.';
+
+  @override
+  String get disableRestrictions => 'إلغاء القيود';
+
+  @override
   String get tryAgain => 'إعادة المحاولة';
 
   @override

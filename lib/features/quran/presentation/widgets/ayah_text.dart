@@ -11,6 +11,19 @@ import 'package:fard/features/quran/domain/entities/bookmark.dart';
 import 'package:fard/core/theme/app_colors.dart';
 import 'package:quran/quran.dart' as quran;
 
+class _AyahBlockData {
+  final List<Ayah> ayahs;
+  final String? label;
+  _AyahBlockData({required this.ayahs, this.label});
+}
+
+class _AyahRange {
+  final Ayah ayah;
+  final int start;
+  final int end;
+  _AyahRange({required this.ayah, required this.start, required this.end});
+}
+
 class AyahText extends StatefulWidget {
   final List<Ayah> ayahs;
   final Ayah? highlightedAyah;
@@ -114,8 +127,6 @@ class _AyahTextState extends State<AyahText> {
             ayah.number.surahNumber,
             ayah.number.ayahNumberInSurah,
           );
-          // If this is the first ayah of this page in this surah
-          // We need to check if the previous ayah was on a different page
           bool isPageStart = false;
           if (i == 0) {
             isPageStart = true;
@@ -176,7 +187,6 @@ class _AyahTextState extends State<AyahText> {
         }
       }
 
-      // Also split if block gets too large to improve layout performance
       bool forceSplit = currentAyahs.length >= maxAyahsPerBlock;
 
       if ((newLabel != null || forceSplit) && currentAyahs.isNotEmpty) {
@@ -221,22 +231,13 @@ class _AyahTextState extends State<AyahText> {
       );
       final String ayahText = ayah.uthmaniText.trim();
 
-      // Calculate length for gesture detection
-      // 1. SCROLL ANCHOR (WidgetSpan) = 1
       const int anchorLen = 1;
-      // 2. START FLAG (TextSpan space + 🏁 + thin space) = 3 (if exists)
       final int dayStartLen = isDayStart ? 3 : 0;
-      // 3. AYAH TEXT (TextSpan) = length
       final int textLen = ayahText.length;
-      // 4. MARKER (TextSpan) = thin space (1) + markerText.length
       final int markerLen = 1 + markerText.length;
-      // 5. PROGRESS MARKER (TextSpan space + ➤) = 2 (if exists)
       final int lastReadLen = isLastRead ? 2 : 0;
-      // 6. BOOKMARK (TextSpan space + 🔖) = 3 (if exists, surrogate pair)
       final int bookmarkLen = isBookmarked ? 3 : 0;
-      // 7. SAJDAH (TextSpan space + WidgetSpan) = 2 (if exists)
       final int sajdahLen = (ayah.isSajdah && ayah.sajdahType != null) ? 2 : 0;
-      // 8. TRAILING SPACE (TextSpan) = 1
       const int trailingSpaceLen = 1;
 
       final int totalLen =
@@ -266,7 +267,6 @@ class _AyahTextState extends State<AyahText> {
         TextSpan(
           style: _getFontStyle(fontSize: baseFontSize, height: lineHeight),
           children: [
-            // 0. SCROLL ANCHOR
             WidgetSpan(
               child: SizedBox(
                 key: widget.ayahKeys?[ayah.number.ayahNumberInSurah],
@@ -274,18 +274,14 @@ class _AyahTextState extends State<AyahText> {
                 height: 0,
               ),
             ),
-
-            // 1. START FLAG (Werd session start)
             if (isDayStart)
               TextSpan(
-                text: ' \u2691\u2009', // Black flag + thin space
+                text: ' \u2691\u2009',
                 style: TextStyle(
                   color: context.primaryColor,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
-            // 2. AYAH TEXT
             TextSpan(
               text: ayahText,
               style: TextStyle(
@@ -299,8 +295,6 @@ class _AyahTextState extends State<AyahText> {
                     : null,
               ),
             ),
-
-            // 4. MARKER (always Amiri for verse end symbols)
             TextSpan(
               text: '\u2009$markerText',
               style: QuranFonts.getFontStyle(
@@ -312,33 +306,25 @@ class _AyahTextState extends State<AyahText> {
                     : textTheme.bodyLarge?.color?.withValues(alpha: 0.7),
               ),
             ),
-
-            // 5. PROGRESS MARKER
             if (isLastRead)
               TextSpan(
-                text: ' \u27A4', // Arrow
+                text: ' \u27A4',
                 style: TextStyle(
                   color: context.primaryColor,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
-            // 6. BOOKMARK
             if (isBookmarked)
               TextSpan(
-                text: ' \u{1F516}', // Bookmark emoji
+                text: ' \u{1F516}',
                 style: TextStyle(color: context.primaryColor),
               ),
-
             if (ayah.isSajdah && ayah.sajdahType != null) ...[
               const TextSpan(text: ' '),
               WidgetSpan(
                 alignment: PlaceholderAlignment.middle,
                 child: Container(
-                  height:
-                      baseFontSize *
-                      (lineHeight *
-                          0.8), // Slightly shorter to avoid overflow but keep alignment
+                  height: baseFontSize * (lineHeight * 0.8),
                   alignment: Alignment.center,
                   color: isHighlighted
                       ? colorScheme.primary.withValues(alpha: 0.1)
@@ -393,6 +379,7 @@ class _AyahTextState extends State<AyahText> {
           child: Directionality(
             textDirection: TextDirection.rtl,
             child: GestureDetector(
+              key: const ValueKey('ayah_text_gesture_detector'),
               behavior: HitTestBehavior.translucent,
               onTapDown: (details) => _handleGesture(
                 details.localPosition,
@@ -452,36 +439,27 @@ class _AyahTextState extends State<AyahText> {
 
     for (final range in ranges) {
       if (offset >= range.start && offset < range.end) {
-        switch (type) {
-          case 'tap':
-            widget.onAyahTap(range.ayah);
-            break;
-          case 'longPress':
-            widget.onAyahLongPress?.call(range.ayah);
-            break;
-          case 'doubleTap':
-            if (widget.onAyahDoubleTap != null) {
-              widget.onAyahDoubleTap!(range.ayah);
-            } else {
-              widget.onAyahLongPress?.call(range.ayah);
-            }
-            break;
-        }
+        _invokeCallback(type, range.ayah);
         break;
       }
     }
   }
-}
 
-class _AyahBlockData {
-  final List<Ayah> ayahs;
-  final String? label;
-  _AyahBlockData({required this.ayahs, this.label});
-}
-
-class _AyahRange {
-  final Ayah ayah;
-  final int start;
-  final int end;
-  _AyahRange({required this.ayah, required this.start, required this.end});
+  void _invokeCallback(String type, Ayah ayah) {
+    switch (type) {
+        case 'tap':
+            widget.onAyahTap(ayah);
+            break;
+        case 'longPress':
+            widget.onAyahLongPress?.call(ayah);
+            break;
+        case 'doubleTap':
+            if (widget.onAyahDoubleTap != null) {
+                widget.onAyahDoubleTap!(ayah);
+            } else {
+                widget.onAyahLongPress?.call(ayah);
+            }
+            break;
+    }
+  }
 }

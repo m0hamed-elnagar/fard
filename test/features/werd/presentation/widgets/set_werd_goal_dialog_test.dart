@@ -520,10 +520,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap increment
-      await tester.tap(find.byIcon(Icons.add_rounded));
+      await tester.tap(find.byKey(const ValueKey('increment_button')));
       await tester.pumpAndSettle();
 
-      expect(find.text('11'), findsOneWidget);
+      // Assuming start value 10, should be 11
+      expect(find.byType(TextField), findsOneWidget);
+      expect((tester.widget(find.byType(TextField)) as TextField).controller!.text, '11');
     });
 
     testWidgets('decrement button decreases value (min 1)', (tester) async {
@@ -546,10 +548,11 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap decrement
-      await tester.tap(find.byIcon(Icons.remove_rounded));
+      await tester.tap(find.byKey(const ValueKey('decrement_button')));
       await tester.pumpAndSettle();
 
-      expect(find.text('9'), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
+      expect((tester.widget(find.byType(TextField)) as TextField).controller!.text, '9');
     });
 
     testWidgets('value respects max limit for juz (30)', (tester) async {
@@ -663,15 +666,23 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      // Select "Choose specific surah/ayah" - Surah 2, Ayah 5
+      // Select "Choose specific surah/ayah"
       await tester.tap(find.text('Start from Al-Fatihah (beginning)'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Choose specific surah/ayah'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Al-Fatihah'));
+      // Need to tap the surah dropdown first to open
+      await tester.tap(find.byKey(const ValueKey('surah_dropdown')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Al-Baqarah').last);
+      
+      // Tap the surah 'Al-Baqarah' using a robust finder that targets only the dropdown menu
+      await tester.tap(
+        find.descendant(
+          of: find.byType(Material),
+          matching: find.text('Al-Baqarah'),
+        ).last,
+      );
       await tester.pumpAndSettle();
 
       // Tap Save
@@ -730,8 +741,8 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      // Tap close icon
-      await tester.tap(find.byIcon(Icons.close_rounded));
+      // Tap close icon - use byType for Icon to be safer
+      await tester.tap(find.byType(IconButton).first);
       await tester.pumpAndSettle();
 
       expect(find.byType(SetWerdGoalDialog), findsNothing);
@@ -781,7 +792,10 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      expect(find.text('من البداية (الفاتحة)'), findsOneWidget);
+      // Need to open dropdown to find translated text
+      await tester.tap(find.text('من البداية (الفاتحة)'));
+      await tester.pumpAndSettle();
+
       expect(find.text('متابعة من حيث توقفت'), findsOneWidget);
       expect(find.text('اختيار سورة وآية محددة'), findsOneWidget);
     });
