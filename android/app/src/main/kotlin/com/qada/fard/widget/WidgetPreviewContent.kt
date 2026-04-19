@@ -458,8 +458,8 @@ fun CountdownContent(
                 val minutes = totalMinutes % 60
                 if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
             }
-            // Treat up to 5 minutes after prayer as 'Now' to smooth transition
-            totalMinutes >= -5 -> "Now"
+            // Treat up to 1 minute after prayer as 'Now' to smooth transition
+            totalMinutes >= -1 -> "Now"
             else -> {
                 Text(
                     text = "Syncing...",
