@@ -452,22 +452,25 @@ fun CountdownContent(
 
         val totalMinutes = (prayerCal.timeInMillis - nowCal.timeInMillis) / 60000
 
-        val statusText = if (totalMinutes > 0) {
-            val hours = totalMinutes / 60
-            val minutes = totalMinutes % 60
-            if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
-        } else if (totalMinutes == 0L) {
-            "Now"
-        } else {
-            Text(
-                text = "Update Required",
-                style = TextStyle(
-                    color = ColorProvider(colors.text),
-                    fontSize = if (isTiny) 10.sp else 12.sp,
-                    textAlign = TextAlign.Center
+        val statusText = when {
+            totalMinutes > 0 -> {
+                val hours = totalMinutes / 60
+                val minutes = totalMinutes % 60
+                if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
+            }
+            // Treat up to 5 minutes after prayer as 'Now' to smooth transition
+            totalMinutes >= -5 -> "Now"
+            else -> {
+                Text(
+                    text = "Syncing...",
+                    style = TextStyle(
+                        color = ColorProvider(colors.text),
+                        fontSize = if (isTiny) 10.sp else 12.sp,
+                        textAlign = TextAlign.Center
+                    )
                 )
-            )
-            return@Column
+                return@Column
+            }
         }
 
         if (isWide) {
