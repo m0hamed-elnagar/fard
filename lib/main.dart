@@ -203,7 +203,7 @@ class _MaterialAppWithReactiveThemeState
     extends State<_MaterialAppWithReactiveTheme> {
   final _themeObserver = ThemeUpdateObserver();
   ThemeData _theme = ThemePresets.buildThemeData(ThemePresets.emerald);
-  Locale _locale = const Locale('en');
+  Locale _locale = const Locale('ar');
   SettingsState? _pendingThemeState;
 
   @override

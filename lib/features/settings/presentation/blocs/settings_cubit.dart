@@ -49,7 +49,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     this._widget,
   ) : super(
         SettingsState(
-          locale: _repo.locale,
+          locale: const Locale('ar'), // Forced Arabic
           latitude: _repo.latitude,
           longitude: _repo.longitude,
           cityName: _repo.cityName,

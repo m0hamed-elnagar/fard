@@ -25,8 +25,8 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Locale get locale {
-    final code = _storage.readString(SettingsKeys.locale, defaultValue: 'ar')!;
-    return Locale(code);
+    // ENFORCED: Always return Arabic for now as per user request
+    return const Locale('ar');
   }
 
   @override
