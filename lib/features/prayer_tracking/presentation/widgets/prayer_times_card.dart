@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:adhan/adhan.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/core/extensions/salaah_extension.dart';
@@ -294,8 +295,8 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                           ];
 
                           final itemWidth = useSingleRow
-                              ? (gridConstraints.maxWidth - 40) / 6
-                              : (gridConstraints.maxWidth - 16) / 3;
+                              ? math.max(0.0, (gridConstraints.maxWidth - 40) / 6)
+                              : math.max(0.0, (gridConstraints.maxWidth - 16) / 3);
 
                           return Wrap(
                             spacing: 8,

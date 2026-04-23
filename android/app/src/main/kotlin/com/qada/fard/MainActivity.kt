@@ -97,7 +97,16 @@ class MainActivity : AudioServiceActivity() {
                     try {
                         val repository = SettingsRepository(this)
                         val theme = repository.getWidgetTheme()
-                        result.success(theme)
+                        // Convert custom object to map for serialization over MethodChannel
+                        val themeMap = mapOf(
+                            "primaryColorHex" to theme.primaryColorHex,
+                            "accentColorHex" to theme.accentColorHex,
+                            "backgroundColorHex" to theme.backgroundColorHex,
+                            "surfaceColorHex" to theme.surfaceColorHex,
+                            "textColorHex" to theme.textColorHex,
+                            "textSecondaryColorHex" to theme.textSecondaryColorHex
+                        )
+                        result.success(themeMap)
                     } catch (e: Exception) {
                         result.error("GET_FAILED", e.message, null)
                     }

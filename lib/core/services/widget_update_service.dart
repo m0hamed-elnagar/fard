@@ -22,6 +22,9 @@ class WidgetUpdateService {
   final SharedPreferences _prefs;
   final SettingsRepository _settingsProvider;
 
+  bool _isUpdating = false;
+  DateTime? _lastUpdate;
+
   WidgetUpdateService(
     this._prayerTimeService,
     this._prefs,
@@ -29,13 +32,35 @@ class WidgetUpdateService {
   );
 
   Future<void> updateWidget() async {
+    if (_isUpdating) {
+      debugPrint('WidgetUpdateService: Update already in progress, skipping');
+      return;
+    }
+
+    // Throttle updates to max once per 2 seconds to avoid main thread jank 
+    // during rapid lifecycle transitions (e.g., inactive -> paused)
+    final now = DateTime.now();
+    if (_lastUpdate != null && now.difference(_lastUpdate!) < const Duration(seconds: 2)) {
+      debugPrint('WidgetUpdateService: Throttling update - too soon since last update');
+      return;
+    }
+
+    _isUpdating = true;
+    try {
+      await _performUpdate(now);
+      _lastUpdate = DateTime.now();
+    } finally {
+      _isUpdating = false;
+    }
+  }
+
+  Future<void> _performUpdate(DateTime now) async {
     if (_settingsProvider.latitude == null ||
         _settingsProvider.longitude == null) {
       debugPrint('WidgetUpdateService: Cannot update - missing location');
       return;
     }
 
-    final now = DateTime.now();
     debugPrint('WidgetUpdateService: Starting update at $now');
 
     final prayerTimes = _prayerTimeService.getPrayerTimes(
