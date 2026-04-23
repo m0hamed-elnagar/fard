@@ -75,40 +75,44 @@ class _AyahInfoSheetState extends State<AyahInfoSheet> {
           separatorBuilder: (context, index) => const Divider(),
           itemBuilder: (context, index) {
             final symbol = symbols[index];
-            return ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Container(
-                width: 48,
-                height: 48,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Color(int.parse(symbol.color.replaceFirst('#', '0xFF'))).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  symbol.char,
-                  style: TextStyle(
-                    fontSize: 28,
-                    color: Color(int.parse(symbol.color.replaceFirst('#', '0xFF'))),
+            return Tooltip(
+              message: symbol.brief,
+              triggerMode: TooltipTriggerMode.longPress,
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Container(
+                  width: 48,
+                  height: 48,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Color(int.parse(symbol.color.replaceFirst('#', '0xFF'))).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    symbol.char,
+                    style: TextStyle(
+                      fontSize: 28,
+                      color: Color(int.parse(symbol.color.replaceFirst('#', '0xFF'))),
+                    ),
                   ),
                 ),
+                title: Text(
+                  symbol.arabicName,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: Text(symbol.brief),
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SymbolDetailScreen(symbol: symbol),
+                    ),
+                  );
+                },
               ),
-              title: Text(
-                symbol.arabicName,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 4.0),
-                child: Text(symbol.brief),
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SymbolDetailScreen(symbol: symbol),
-                  ),
-                );
-              },
             );
           },
         );

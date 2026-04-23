@@ -70,31 +70,35 @@ class SymbolListScreen extends StatelessWidget {
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
       children: sortedSymbols.map((symbol) {
         final color = Color(int.parse(symbol.color.replaceFirst('#', '0xFF')));
-        return ListTile(
-          leading: Container(
-            width: 40,
-            height: 40,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              symbol.char, 
-              style: TextStyle(fontSize: 24, color: color, fontWeight: FontWeight.bold),
-            ),
-          ),
-          title: Text(symbol.arabicName, style: const TextStyle(fontWeight: FontWeight.w500)),
-          subtitle: Text(symbol.brief, maxLines: 1, overflow: TextOverflow.ellipsis),
-          trailing: const Icon(Icons.chevron_right, size: 18),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SymbolDetailScreen(symbol: symbol),
+        return Tooltip(
+          message: symbol.brief,
+          triggerMode: TooltipTriggerMode.longPress,
+          child: ListTile(
+            leading: Container(
+              width: 40,
+              height: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
               ),
-            );
-          },
+              child: Text(
+                symbol.char, 
+                style: TextStyle(fontSize: 24, color: color, fontWeight: FontWeight.bold),
+              ),
+            ),
+            title: Text(symbol.arabicName, style: const TextStyle(fontWeight: FontWeight.w500)),
+            subtitle: Text(symbol.brief, maxLines: 1, overflow: TextOverflow.ellipsis),
+            trailing: const Icon(Icons.chevron_right, size: 18),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SymbolDetailScreen(symbol: symbol),
+                ),
+              );
+            },
+          ),
         );
       }).toList(),
     );
