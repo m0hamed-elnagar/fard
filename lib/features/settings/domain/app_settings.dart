@@ -25,6 +25,7 @@ class AppSettings {
   final String themePresetId;
   final Map<String, String>? customThemeColors;
   final AudioQuality audioQuality;
+  final bool isAudioPlayerExpanded;
 
   const AppSettings({
     required this.locale,
@@ -43,5 +44,6 @@ class AppSettings {
     this.themePresetId = 'emerald',
     this.customThemeColors,
     this.audioQuality = AudioQuality.low64,
+    this.isAudioPlayerExpanded = false,
   });
 }

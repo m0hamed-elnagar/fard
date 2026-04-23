@@ -4,7 +4,6 @@ import 'package:fard/features/settings/domain/repositories/settings_repository.d
 import 'package:fard/core/utils/rtl_text_util.dart';
 import 'package:fard/core/utils/app_identifiers.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:workmanager/workmanager.dart';
 import 'package:injectable/injectable.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:fard/core/services/prayer_time_service.dart';
@@ -39,7 +38,7 @@ class PrayerNotificationScheduler {
   static const int maxAzkarReminders = 50;
   static const int maxScheduledDays = 2;
   static const int prayersPerDay = 5;
-  static const int maxPrayerNotificationIds = maxScheduledDays * prayersPerDay;
+  static const int maxPrayerNotificationIds = 100; // 🧹 Increased to sweep old 7-day IDs (7*5=35)
 
   PrayerNotificationScheduler(
     this._prayerTimeService,
@@ -85,9 +84,6 @@ class PrayerNotificationScheduler {
       ({DateTime time, bool isAzan, Future<void> Function(int?) schedule})
     > events = [];
 
-    // Track the latest missed Azan (within 1 min) to avoid firing multiple old ones
-    ({DateTime time, Future<void> Function(int?) schedule})? latestMissedAzan;
-
     for (int day = 0; day < maxScheduledDays; day++) {
       final date = DateTime.now().add(Duration(days: day));
       final prayerTimes = _prayerTimeService.getPrayerTimes(
@@ -126,19 +122,6 @@ class PrayerNotificationScheduler {
                     soundUri: soundUriMap[salaahSetting.azanSound ?? 'default'],
                     timeoutAfter: timeout,
                   );
-
-                  Workmanager()
-                      .registerOneOffTask(
-                        "widget_refresh_${salaahSetting.salaah.name}_$day",
-                        widgetTaskKey,
-                        initialDelay: tzSalaahTime.difference(now),
-                        existingWorkPolicy: ExistingWorkPolicy.replace,
-                      )
-                      .catchError((e) {
-                    debugPrint(
-                      'PrayerNotificationScheduler: Workmanager error: $e',
-                    );
-                  });
                 } catch (e) {
                   debugPrint(
                     'PrayerNotificationScheduler: Error scheduling Azan: $e',
@@ -146,38 +129,6 @@ class PrayerNotificationScheduler {
                 }
               },
             ));
-          } else {
-            // Missed Azan? Check if it was very recent (< 1 min)
-            final bool isVeryRecentPast =
-                now.difference(tzSalaahTime).inMinutes < 1;
-
-            if (isVeryRecentPast) {
-              final scheduledTime = now.add(const Duration(seconds: 1));
-              if (latestMissedAzan == null ||
-                  tzSalaahTime.isAfter(latestMissedAzan.time)) {
-                latestMissedAzan = (
-                  time: tzSalaahTime,
-                  schedule: (int? timeout) async {
-                    try {
-                      await _scheduleAzan(
-                        notificationsPlugin,
-                        id: azanIdStart + dayOffset,
-                        salaah: salaahSetting.salaah,
-                        scheduledDate: scheduledTime,
-                        sound: salaahSetting.azanSound,
-                        soundUri:
-                            soundUriMap[salaahSetting.azanSound ?? 'default'],
-                        timeoutAfter: timeout,
-                      );
-                    } catch (e) {
-                      debugPrint(
-                        'PrayerNotificationScheduler: Error scheduling catch-up Azan: $e',
-                      );
-                    }
-                  },
-                );
-              }
-            }
           }
         }
 
@@ -241,15 +192,6 @@ class PrayerNotificationScheduler {
           }
         }
       }
-    }
-
-    // Add the single most recent missed Azan if one exists
-    if (latestMissedAzan != null) {
-      events.add((
-        time: now.add(const Duration(seconds: 1)),
-        isAzan: true,
-        schedule: latestMissedAzan.schedule,
-      ));
     }
 
     // Sort events by time
@@ -481,7 +423,7 @@ class PrayerNotificationScheduler {
           subText: _applyRtl(title),
           timeoutAfter: timeoutAfter,
           // 🛡️ High reliability for Azan
-          fullScreenIntent: true,
+          fullScreenIntent: false,
         );
 
     NotificationDetails platformChannelSpecifics = NotificationDetails(

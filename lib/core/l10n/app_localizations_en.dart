@@ -1350,6 +1350,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetToDefault => 'Reset to Default';
 
   @override
+  String get followAppTheme => 'Follow App Theme';
+
+  @override
+  String get widgetThemeColorCustomization => 'Widget Color Customization';
+
+  @override
   String get applyTheme => 'Apply Theme';
 
   @override

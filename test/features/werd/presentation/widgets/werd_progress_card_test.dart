@@ -212,7 +212,7 @@ void main() {
         findsWidgets,
       );
       // Should show completion icon
-      expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.check_circle), findsOneWidget);
     });
 
     testWidgets('progress bar reflects correct percentage (50%)', (tester) async {

@@ -520,7 +520,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap increment
-      await tester.tap(find.byKey(const ValueKey('increment_button')));
+      final incrementButton = find.byKey(const ValueKey('increment_button'));
+      await tester.ensureVisible(incrementButton);
+      await tester.tap(incrementButton);
       await tester.pumpAndSettle();
 
       // Assuming start value 10, should be 11
@@ -548,7 +550,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap decrement
-      await tester.tap(find.byKey(const ValueKey('decrement_button')));
+      final decrementButton = find.byKey(const ValueKey('decrement_button'));
+      await tester.ensureVisible(decrementButton);
+      await tester.tap(decrementButton);
       await tester.pumpAndSettle();
 
       expect(find.byType(TextField), findsOneWidget);
@@ -676,13 +680,10 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('surah_dropdown')));
       await tester.pumpAndSettle();
       
-      // Tap the surah 'Al-Baqarah' using a robust finder that targets only the dropdown menu
-      await tester.tap(
-        find.descendant(
-          of: find.byType(Material),
-          matching: find.text('Al-Baqarah'),
-        ).last,
-      );
+      // Tap the surah 'Al-Baqarah'
+      // We look for the item in the list of dropdown items
+      final surahItem = find.byWidgetPredicate((w) => w is DropdownMenuItem<int> && w.value == 2).last;
+      await tester.tap(surahItem);
       await tester.pumpAndSettle();
 
       // Tap Save

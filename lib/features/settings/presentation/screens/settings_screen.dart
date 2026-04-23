@@ -2277,57 +2277,90 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
 
         // Color customization
-        Text(
-          l10n.widgetCustomization,
-          style: GoogleFonts.amiri(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
+        Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-
-        WidgetColorPicker(
-          label: l10n.widgetPrimaryColor,
-          currentHex: _widgetPreviewTheme.primaryColorHex,
-          onColorChanged: (hex) => setState(() {
-            _widgetPreviewTheme =
-                _widgetPreviewTheme.copyWith(primaryColorHex: hex);
-          }),
-        ),
-        WidgetColorPicker(
-          label: l10n.widgetAccentColor,
-          currentHex: _widgetPreviewTheme.accentColorHex,
-          onColorChanged: (hex) => setState(() {
-            _widgetPreviewTheme =
-                _widgetPreviewTheme.copyWith(accentColorHex: hex);
-          }),
-        ),
-        WidgetColorPicker(
-          label: l10n.widgetBackgroundColor,
-          currentHex: _widgetPreviewTheme.backgroundColorHex,
-          onColorChanged: (hex) => setState(() {
-            _widgetPreviewTheme =
-                _widgetPreviewTheme.copyWith(backgroundColorHex: hex);
-          }),
-        ),
-        WidgetColorPicker(
-          label: l10n.widgetTextColor,
-          currentHex: _widgetPreviewTheme.textColorHex,
-          onColorChanged: (hex) => setState(() {
-            _widgetPreviewTheme =
-                _widgetPreviewTheme.copyWith(textColorHex: hex);
-          }),
-        ),
-        WidgetColorPicker(
-          label: l10n.widgetSecondaryTextColor,
-          currentHex: _widgetPreviewTheme.textSecondaryColorHex,
-          onColorChanged: (hex) => setState(() {
-            _widgetPreviewTheme =
-                _widgetPreviewTheme.copyWith(textSecondaryColorHex: hex);
-          }),
+          clipBehavior: Clip.antiAlias,
+          child: ExpansionTile(
+            title: Text(
+              l10n.widgetThemeColorCustomization,
+              style: GoogleFonts.amiri(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            leading: Icon(
+              Icons.color_lens_rounded,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    WidgetColorPicker(
+                      label: l10n.widgetPrimaryColor,
+                      currentHex: _widgetPreviewTheme.primaryColorHex,
+                      onColorChanged:
+                          (hex) => setState(() {
+                            _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
+                              primaryColorHex: hex,
+                            );
+                          }),
+                    ),
+                    WidgetColorPicker(
+                      label: l10n.widgetAccentColor,
+                      currentHex: _widgetPreviewTheme.accentColorHex,
+                      onColorChanged:
+                          (hex) => setState(() {
+                            _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
+                              accentColorHex: hex,
+                            );
+                          }),
+                    ),
+                    WidgetColorPicker(
+                      label: l10n.widgetBackgroundColor,
+                      currentHex: _widgetPreviewTheme.backgroundColorHex,
+                      onColorChanged:
+                          (hex) => setState(() {
+                            _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
+                              backgroundColorHex: hex,
+                            );
+                          }),
+                    ),
+                    WidgetColorPicker(
+                      label: l10n.widgetTextColor,
+                      currentHex: _widgetPreviewTheme.textColorHex,
+                      onColorChanged:
+                          (hex) => setState(() {
+                            _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
+                              textColorHex: hex,
+                            );
+                          }),
+                    ),
+                    WidgetColorPicker(
+                      label: l10n.widgetSecondaryTextColor,
+                      currentHex: _widgetPreviewTheme.textSecondaryColorHex,
+                      onColorChanged:
+                          (hex) => setState(() {
+                            _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
+                              textSecondaryColorHex: hex,
+                            );
+                          }),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 16),
 
@@ -2335,65 +2368,84 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Row(
           children: [
             OutlinedButton.icon(
-              onPressed: () {
-                // Reset to DEFAULT widget theme colors (Emerald/Gold dark theme)
+              onPressed: () async {
+                // Reset to APP theme colors (dynamic tracking)
                 setState(() {
-                  _widgetPreviewTheme = const WidgetPreviewTheme();
+                  _widgetPreviewTheme = WidgetPreviewTheme.fromColorScheme(
+                    Theme.of(context).colorScheme,
+                  );
                 });
+
+                // Clear the override in SharedPreferences immediately
+                try {
+                  await getIt<WidgetUpdateService>().clearWidgetTheme();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.widgetThemeApplied)),
+                    );
+                  }
+                } catch (e) {
+                  debugPrint('Error clearing widget theme: $e');
+                }
               },
-              icon: const Icon(Icons.restore, size: 18),
-              label: Text(l10n.resetToDefault),
+              icon: const Icon(Icons.sync_rounded, size: 18),
+              label: Text(l10n.followAppTheme),
             ),
             const Spacer(),
             FilledButton(
-              onPressed: _isApplyingWidgetTheme
-                  ? null
-                  : () async {
-                      setState(() {
-                        _isApplyingWidgetTheme = true;
-                      });
+              onPressed:
+                  _isApplyingWidgetTheme
+                      ? null
+                      : () async {
+                        setState(() {
+                          _isApplyingWidgetTheme = true;
+                        });
 
-                      try {
-                        // Apply to actual widgets via WidgetUpdateService
-                        await getIt<WidgetUpdateService>()
-                            .applyWidgetTheme(_widgetPreviewTheme.toMap());
-
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(l10n.widgetThemeApplied),
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.primaryContainer,
-                            ),
+                        try {
+                          // Apply to actual widgets via WidgetUpdateService
+                          await getIt<WidgetUpdateService>().applyWidgetTheme(
+                            _widgetPreviewTheme.toMap(),
                           );
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                l10n.widgetThemeApplyFailed(e.toString()),
+
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.widgetThemeApplied),
+                                backgroundColor:
+                                    Theme.of(context)
+                                        .colorScheme
+                                        .primaryContainer,
                               ),
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.errorContainer,
-                            ),
-                          );
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  l10n.widgetThemeApplyFailed(e.toString()),
+                                ),
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.errorContainer,
+                              ),
+                            );
+                          }
+                        } finally {
+                          if (mounted) {
+                            setState(() {
+                              _isApplyingWidgetTheme = false;
+                            });
+                          }
                         }
-                      } finally {
-                        if (mounted) {
-                          setState(() {
-                            _isApplyingWidgetTheme = false;
-                          });
-                        }
-                      }
-                    },
-              child: _isApplyingWidgetTheme
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(l10n.applyToWidget),
+                      },
+              child:
+                  _isApplyingWidgetTheme
+                      ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                      : Text(l10n.applyToWidget),
             ),
           ],
         ),

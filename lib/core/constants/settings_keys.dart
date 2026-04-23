@@ -29,4 +29,5 @@ abstract final class SettingsKeys {
   static const String savedCustomThemes = 'saved_custom_themes';
   static const String activeCustomThemeId = 'active_custom_theme_id';
   static const String audioQuality = 'audio_quality';
+  static const String isAudioPlayerExpanded = 'is_audio_player_expanded';
 }

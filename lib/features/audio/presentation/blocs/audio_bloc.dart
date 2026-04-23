@@ -32,7 +32,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
     required this.playerService,
     required this.downloadService,
     required this.settingsRepository,
-  }) : super(const AudioState()) {
+    }) : super(AudioState(isPlayerExpanded: settingsRepository.isAudioPlayerExpanded)) {
     on<AudioEvent>((event, emit) async {
       debugPrint('AudioBloc: Event received: $event');
       await event.map<Future<void>>(
@@ -60,6 +60,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
         changeQuality: (e) => _onChangeQuality(e.quality, emit),
         hideBanner: (e) => _onHideBanner(emit),
         showBanner: (e) => _onShowBanner(emit),
+        togglePlayerExpanded: (e) => _onTogglePlayerExpanded(emit),
         statusChanged: (e) async => _onStatusChanged(e.status, emit),
         lastErrorChanged: (e) async => _onLastErrorChanged(e.error, emit),
         positionChanged: (e) async => _onPositionChanged(e.position, emit),
@@ -540,6 +541,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
     emit(
       state.copyWith(
         isBannerVisible: false,
+        isPlayerExpanded: false,
         error: null,
         lastErrorMessage: null,
       ),
@@ -549,6 +551,13 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
   Future<void> _onShowBanner(Emitter<AudioState> emit) async {
     emit(state.copyWith(isBannerVisible: true));
   }
+
+  Future<void> _onTogglePlayerExpanded(Emitter<AudioState> emit) async {
+    final newValue = !state.isPlayerExpanded;
+    emit(state.copyWith(isPlayerExpanded: newValue));
+    await settingsRepository.updateAudioPlayerExpanded(newValue);
+  }
+
 
   Future<void> _onChangeSpeed(double speed, Emitter<AudioState> emit) async {
     emit(state.copyWith(speed: speed));

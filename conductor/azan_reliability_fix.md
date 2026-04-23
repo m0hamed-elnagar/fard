@@ -1,35 +1,36 @@
-# Plan: Fix Azan Notification Reliability & "Forever" Background Sync
+# Plan: Fix Azan Notification Reliability, Spam & Time Changes
 
 ## Objective
-Ensure Azan notifications show up reliably on all Android devices (fixing the "reminder shows but Azan doesn't" bug) and maintain the schedule indefinitely without requiring the user to open the app.
+Ensure Azan notifications work forever without opening the app, prevent multiple notifications from firing at once (spamming) when the time changes or device lags, and remove the intrusive full-screen pop-up.
 
 ## Key Problems Identified
-1.  **Exact Alarm Quota:** Scheduling 105 exact alarms at once (7 days of sync) hits Android system limits on many devices.
-2.  **Network Constraint:** The background refresh task currently requires internet, even though prayer calculations are offline.
-3.  **One-Way Safety Net:** The native `WidgetUpdateWorker` (which runs every 15 mins) only updates widgets, not Azan notifications.
-4.  **Redundant/Broken Sound Logic:** Azan sounds use complex URI logic that can fail silently if the FileProvider path is inconsistent.
+1.  **Notification Spam on Time Change:** When the user changes the device time/date to "tomorrow", Android instantly fires all pending alarms that were skipped over, resulting in notification spam.
+2.  **Catch-up Logic Conflict:** The "catch-up" feature triggers an Azan immediately if missed by < 1 minute. However, the exact `WorkManager` task scheduled alongside it wakes up the app, causing a second identical Azan to fire simultaneously.
+3.  **Intrusive Pop-ups:** Azan uses `fullScreenIntent: true`, which aggressively forces the app onto the screen when the phone is locked.
+4.  **Exact Alarm Quotas:** Scheduling too many exact alarms (e.g., 7 days) hits Android system limits on many devices.
 
 ## Proposed Changes
 
-### 1. Optimize Notification Scheduling (`lib/core/services/notification/prayer_scheduler.dart`)
-- **Reduce Window:** Change `maxScheduledDays` from 7 to **2 days**. This reduces the alarm count from 105 to ~30, staying safely under system limits.
-- **Prioritize Azans:** Use `exactAllowWhileIdle` ONLY for Azans. Switch "Prayer Reminders" and "After Salah Azkar" to standard `allowWhileIdle` (non-exact). This makes the OS more likely to prioritize the Azan.
-- **Catch-up Logic:** If an Azan time was missed by less than 1 minute (due to system lag), show it immediately.
+### 1. Stop Notification Spam on Time Change (`android/app/src/main/kotlin/com/qada/fard/TimeChangedReceiver.kt`)
+- When a time/timezone change is detected, immediately call the Android `NotificationManager` to cancel all active notifications to clear any spam that Android just fired.
+- Enqueue a one-off `WorkManager` task for `prayer_scheduler_task` to silently wake up the Flutter engine and reschedule the correct, updated alarms for the new time.
 
-### 2. Remove Background Constraints (`lib/core/services/background_service.dart`)
-- Remove `networkType: NetworkType.connected` constraint from the periodic background task. Rescheduling should work 100% offline.
+### 2. Disable Full-Screen Intrusions (`lib/core/services/notification/prayer_scheduler.dart`)
+- Set `fullScreenIntent: false` in the AndroidNotificationDetails for Azans. This allows the notification to ring normally without aggressively taking over the user's screen.
 
-### 3. Strengthen the "Forever" Safety Net (`lib/core/services/widget_update_service.dart`)
-- Update `WidgetUpdateService` (which is called by the native 15-minute worker) to also trigger `NotificationService.schedulePrayerNotifications()`. This ensures that even if the 12-hour Flutter task fails, the 15-minute native safety net will keep Azans scheduled.
+### 3. Remove Conflicting Catch-up Logic & Redundant Tasks (`lib/core/services/notification/prayer_scheduler.dart`)
+- **Remove the 1-minute "Catch-up" Logic:** `flutter_local_notifications` uses exact alarms that are highly reliable. Trying to manually catch them up causes duplicate fires when `WorkManager` runs.
+- **Remove Redundant `registerOneOffTask`:** The Azan loop currently creates a precise `WorkManager` task for every prayer to update the widget. This is unnecessary and causes conflicts because `PrayerAlarmManager.kt` already handles widget updates natively and precisely.
+- **Reduce Window:** Limit scheduled Azans to the next **2 days** (instead of 7) to stay under Android's exact alarm limits. 
 
-### 4. Fix Sound URI Fallbacks (`lib/core/services/notification/sound_manager.dart`)
-- Ensure `getSoundUriForChannel` returns `null` if file copying fails, instead of falling back to a broken resource path.
-- In `channel_manager.dart`, if sound resolution fails, use the default system sound so the user at least gets a notification.
+### 4. Sweep Orphaned Notifications (`lib/core/services/notification/prayer_scheduler.dart`)
+- Increase the ID range in `_cancelNotificationRanges` to cancel up to **100** old IDs. This acts as a broom to sweep up any orphaned alarms left behind by previous versions of the app that scheduled 7 days out.
 
-### 5. Add Battery Optimization Request (`lib/features/settings/presentation/screens/settings_screen.dart`)
-- Add a clear action/button in the Settings UI to guide users to disable battery optimizations for the app, which is required for "Forever" reliability on brands like Xiaomi/Samsung.
+### 5. Strengthen the "Forever" Safety Net (`lib/core/services/background_service.dart`)
+- Ensure the native 15-minute fallback worker unconditionally triggers `PrayerNotificationScheduler.schedulePrayerNotifications()` to guarantee the 2-day alarm window is always pushed forward indefinitely, even if the user never opens the app.
+- Ensure `networkType` is set to `NetworkType.notRequired` so it works completely offline.
 
 ## Verification
-- **Diagnostic Tool:** Use the existing `runDiagnostics()` in `NotificationService` to verify channel and alarm states.
-- **Manual Test:** Use the "Test Azan" button to verify sound URI resolution.
-- **Logs:** Check background service logs to ensure rescheduling happens without internet.
+- **Manual Test (Time Change):** Change phone time forward by 2 days. Verify no notification spam occurs and new alarms are scheduled correctly.
+- **Manual Test (Spam):** Wait for an actual prayer time. Verify only 1 notification is shown, not 2.
+- **Manual Test (Pop-up):** Wait for a prayer time with the screen locked. Verify it rings but does not force the app open.

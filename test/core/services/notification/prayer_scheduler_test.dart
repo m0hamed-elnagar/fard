@@ -1,4 +1,3 @@
-import 'dart:io' show Platform;
 import 'package:fard/core/services/notification/channel_manager.dart';
 import 'package:fard/core/services/notification/prayer_scheduler.dart';
 import 'package:adhan/adhan.dart';
@@ -156,11 +155,6 @@ void main() {
   });
 
   test('schedulePrayerNotifications schedules all 5 prayers', () async {
-    // Skip on desktop platforms (WorkManager not available)
-    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-      return;
-    }
-    
     when(() => mockSettingsRepository.latitude).thenReturn(30.0);
     when(() => mockSettingsRepository.longitude).thenReturn(31.0);
     when(
@@ -197,7 +191,7 @@ void main() {
 
     await scheduler.schedulePrayerNotifications(mockNotificationsPlugin);
 
-    // 5 prayers * 7 days = 35 azan notifications
+    // 5 prayers * 2 days = 10 azan notifications
     verify(
       () => mockNotificationsPlugin.zonedSchedule(
         id: any(named: 'id', that: greaterThanOrEqualTo(200)),
@@ -207,7 +201,7 @@ void main() {
         notificationDetails: any(named: 'notificationDetails'),
         androidScheduleMode: any(named: 'androidScheduleMode'),
       ),
-    ).called(35);
+    ).called(10);
   });
 
   test('scheduleAzkarReminders schedules reminders from settings', () async {

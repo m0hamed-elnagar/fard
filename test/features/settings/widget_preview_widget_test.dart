@@ -4,10 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fard/features/settings/presentation/widgets/widget_preview.dart';
 import 'package:fard/features/settings/domain/entities/widget_preview_theme.dart';
 
-Widget _wrapWithL10n(Widget child) {
+Widget _wrapWithL10n(Widget child, {Locale locale = const Locale('en')}) {
   return MaterialApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
+    locale: locale,
     home: Scaffold(body: child),
   );
 }
@@ -133,6 +134,7 @@ void main() {
               widgetType: WidgetPreviewType.prayerSchedule,
               isRtl: true,
             ),
+            locale: const Locale('ar'),
           ),
         );
 
@@ -149,6 +151,7 @@ void main() {
               widgetType: WidgetPreviewType.countdown,
               isRtl: true,
             ),
+            locale: const Locale('ar'),
           ),
         );
 

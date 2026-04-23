@@ -44,6 +44,7 @@ abstract class AudioEvent extends Equatable {
       ChangeQuality(quality);
   static AudioEvent hideBanner() => const HideBanner();
   static AudioEvent showBanner() => const ShowBanner();
+  static AudioEvent togglePlayerExpanded() => const TogglePlayerExpanded();
   static AudioEvent statusChanged(AudioStatus status) => StatusChanged(status);
   static AudioEvent lastErrorChanged(String? error) => LastErrorChanged(error);
   static AudioEvent positionChanged(Duration position) =>
@@ -60,6 +61,10 @@ abstract class AudioEvent extends Equatable {
 
 class ShowBanner extends AudioEvent {
   const ShowBanner();
+}
+
+class TogglePlayerExpanded extends AudioEvent {
+  const TogglePlayerExpanded();
 }
 
 class UpdateCurrentPosition extends AudioEvent {
@@ -227,6 +232,7 @@ extension AudioEventMapper on AudioEvent {
     required R Function(ChangeQuality) changeQuality,
     required R Function(HideBanner) hideBanner,
     required R Function(ShowBanner) showBanner,
+    required R Function(TogglePlayerExpanded) togglePlayerExpanded,
     required R Function(StatusChanged) statusChanged,
     required R Function(LastErrorChanged) lastErrorChanged,
     required R Function(PositionChanged) positionChanged,
@@ -253,6 +259,7 @@ extension AudioEventMapper on AudioEvent {
     if (event is ChangeQuality) return changeQuality(event);
     if (event is HideBanner) return hideBanner(event);
     if (event is ShowBanner) return showBanner(event);
+    if (event is TogglePlayerExpanded) return togglePlayerExpanded(event);
     if (event is StatusChanged) return statusChanged(event);
     if (event is LastErrorChanged) return lastErrorChanged(event);
     if (event is PositionChanged) return positionChanged(event);

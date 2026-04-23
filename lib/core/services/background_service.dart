@@ -83,6 +83,9 @@ class _BackgroundSettingsProvider implements SettingsRepository {
   @override
   AudioQuality get audioQuality => _settings.audioQuality;
 
+  @override
+  bool get isAudioPlayerExpanded => _settings.isAudioPlayerExpanded;
+
   // Write operations are not supported in background isolate
   @override
   Future<void> updateLocale(Locale locale) => Future.value();
@@ -167,6 +170,9 @@ class _BackgroundSettingsProvider implements SettingsRepository {
 
   @override
   Future<void> updateAudioQuality(AudioQuality quality) => Future.value();
+
+  @override
+  Future<void> updateAudioPlayerExpanded(bool expanded) => Future.value();
 }
 
 /// WorkManager task unique names (initialized when needed).

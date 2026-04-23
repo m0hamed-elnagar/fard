@@ -187,8 +187,24 @@ void main() {
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 
+      final l10n = AppLocalizations.of(tester.element(find.byType(SettingsScreen)))!;
+
+      // Expand Azkar section
+      final azkarSectionFinder = find.text(l10n.azkarSection);
+      await tester.scrollUntilVisible(
+        azkarSectionFinder,
+        500.0,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(azkarSectionFinder);
+      await tester.pumpAndSettle();
+
       final addButtonFinder = find.byKey(const Key('add_reminder_button'));
-      await tester.scrollUntilVisible(addButtonFinder, 100.0, scrollable: find.byType(Scrollable).first);
+      await tester.scrollUntilVisible(
+        addButtonFinder,
+        100.0,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
       expect(addButtonFinder, findsOneWidget);
 
@@ -196,19 +212,11 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify dialog is shown
-      expect(find.text('Add Reminder'), findsOneWidget);
+      expect(find.text(l10n.addReminder), findsOneWidget);
 
       // Tap the category picker
-      await tester.tap(
-        find.ancestor(
-          of: find.text('Morning Azkar'),
-          matching: find.byWidgetPredicate(
-            (widget) =>
-                widget is InputDecorator &&
-                widget.decoration.labelText == 'Category',
-          ),
-        ),
-      );
+      final categoryPicker = find.widgetWithText(InputDecorator, 'Category');
+      await tester.tap(categoryPicker);
       await tester.pumpAndSettle();
 
       // Verify bottom sheet is shown with search field

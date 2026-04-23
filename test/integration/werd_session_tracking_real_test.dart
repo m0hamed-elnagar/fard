@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/features/werd/domain/entities/werd_goal.dart';
 import 'package:fard/features/werd/domain/entities/werd_progress.dart';
@@ -16,6 +17,7 @@ void main() {
     late WerdRepository werdRepository;
 
     setUp(() async {
+      SharedPreferences.setMockInitialValues({});
       tempDir = Directory.systemTemp.createTempSync('fard_session_repo_test_');
       await getIt.reset();
       await configureDependencies(hivePath: tempDir.path);
@@ -56,6 +58,9 @@ void main() {
 
         await werdRepository.setGoal(goal);
 
+        final now = DateTime.now();
+        final testDate = DateTime(now.year, now.month, now.day);
+        
         // Session 1: Read 1-3
         print('=== Saving Session 1: ayahs 1-3 ===');
         var progress = WerdProgress(
@@ -65,13 +70,13 @@ void main() {
             ReadingSegment(
               startAyah: 1,
               endAyah: 3,
-              startTime: DateTime(2026, 4, 7, 9, 0),
-              endTime: DateTime(2026, 4, 7, 9, 15),
+              startTime: testDate.add(const Duration(hours: 9)),
+              endTime: testDate.add(const Duration(hours: 9, minutes: 15)),
             ),
           ],
           lastReadAbsolute: 3,
           sessionStartAbsolute: 1,
-          lastUpdated: DateTime(2026, 4, 7, 9, 15),
+          lastUpdated: testDate.add(const Duration(hours: 9, minutes: 15)),
           streak: 0,
           completedCycles: 0,
         );
@@ -88,12 +93,12 @@ void main() {
             ReadingSegment(
               startAyah: 4,
               endAyah: 6,
-              startTime: DateTime(2026, 4, 7, 14, 0),
-              endTime: DateTime(2026, 4, 7, 14, 10),
+              startTime: testDate.add(const Duration(hours: 14)),
+              endTime: testDate.add(const Duration(hours: 14, minutes: 10)),
             ),
           ],
           lastReadAbsolute: 6,
-          lastUpdated: DateTime(2026, 4, 7, 14, 10),
+          lastUpdated: testDate.add(const Duration(hours: 14, minutes: 10)),
         );
 
         await werdRepository.updateProgress(progress);
@@ -108,12 +113,12 @@ void main() {
             ReadingSegment(
               startAyah: 7,
               endAyah: 9,
-              startTime: DateTime(2026, 4, 7, 18, 0),
-              endTime: DateTime(2026, 4, 7, 18, 20),
+              startTime: testDate.add(const Duration(hours: 18)),
+              endTime: testDate.add(const Duration(hours: 18, minutes: 20)),
             ),
           ],
           lastReadAbsolute: 9,
-          lastUpdated: DateTime(2026, 4, 7, 18, 20),
+          lastUpdated: testDate.add(const Duration(hours: 18, minutes: 20)),
         );
 
         await werdRepository.updateProgress(progress);
@@ -216,6 +221,9 @@ void main() {
 
         await werdRepository.setGoal(goal);
 
+        final now = DateTime.now();
+        final testDate = DateTime(now.year, now.month, now.day);
+
         // Session 1: Read 1-5
         print('=== Saving Session 1: ayahs 1-5 ===');
         var progress = WerdProgress(
@@ -225,13 +233,13 @@ void main() {
             ReadingSegment(
               startAyah: 1,
               endAyah: 5,
-              startTime: DateTime(2026, 4, 7, 9, 0),
-              endTime: DateTime(2026, 4, 7, 9, 20),
+              startTime: testDate.add(const Duration(hours: 9)),
+              endTime: testDate.add(const Duration(hours: 9, minutes: 20)),
             ),
           ],
           lastReadAbsolute: 5,
           sessionStartAbsolute: 1,
-          lastUpdated: DateTime(2026, 4, 7, 9, 20),
+          lastUpdated: testDate.add(const Duration(hours: 9, minutes: 20)),
           streak: 0,
           completedCycles: 0,
         );
@@ -248,12 +256,12 @@ void main() {
             ReadingSegment(
               startAyah: 1,
               endAyah: 200,
-              startTime: DateTime(2026, 4, 7, 14, 0),
-              endTime: DateTime(2026, 4, 7, 14, 30),
+              startTime: testDate.add(const Duration(hours: 14)),
+              endTime: testDate.add(const Duration(hours: 14, minutes: 30)),
             ),
           ],
           lastReadAbsolute: 200,
-          lastUpdated: DateTime(2026, 4, 7, 14, 30),
+          lastUpdated: testDate.add(const Duration(hours: 14, minutes: 30)),
         );
 
         await werdRepository.updateProgress(progress);
@@ -343,6 +351,9 @@ void main() {
 
         await werdRepository.setGoal(goal);
 
+        final now = DateTime.now();
+        final testDate = DateTime(now.year, now.month, now.day);
+
         // Session 1: Al-Fatihah
         print('=== Saving Session 1: Al-Fatihah (1-7) ===');
         var progress = WerdProgress(
@@ -352,13 +363,13 @@ void main() {
             ReadingSegment(
               startAyah: 1,
               endAyah: 7,
-              startTime: DateTime(2026, 4, 7, 6, 30),
-              endTime: DateTime(2026, 4, 7, 6, 45),
+              startTime: testDate.add(const Duration(hours: 6, minutes: 30)),
+              endTime: testDate.add(const Duration(hours: 6, minutes: 45)),
             ),
           ],
           lastReadAbsolute: 7,
           sessionStartAbsolute: 1,
-          lastUpdated: DateTime(2026, 4, 7, 6, 45),
+          lastUpdated: testDate.add(const Duration(hours: 6, minutes: 45)),
           streak: 0,
           completedCycles: 0,
         );
@@ -375,12 +386,12 @@ void main() {
             ReadingSegment(
               startAyah: 1,
               endAyah: 100,
-              startTime: DateTime(2026, 4, 7, 12, 0),
-              endTime: DateTime(2026, 4, 7, 12, 15),
+              startTime: testDate.add(const Duration(hours: 12)),
+              endTime: testDate.add(const Duration(hours: 12, minutes: 15)),
             ),
           ],
           lastReadAbsolute: 100,
-          lastUpdated: DateTime(2026, 4, 7, 12, 15),
+          lastUpdated: testDate.add(const Duration(hours: 12, minutes: 15)),
         );
 
         await werdRepository.updateProgress(progress);
@@ -395,12 +406,12 @@ void main() {
             ReadingSegment(
               startAyah: 101,
               endAyah: 110,
-              startTime: DateTime(2026, 4, 7, 17, 0),
-              endTime: DateTime(2026, 4, 7, 17, 30),
+              startTime: testDate.add(const Duration(hours: 17)),
+              endTime: testDate.add(const Duration(hours: 17, minutes: 30)),
             ),
           ],
           lastReadAbsolute: 110,
-          lastUpdated: DateTime(2026, 4, 7, 17, 30),
+          lastUpdated: testDate.add(const Duration(hours: 17, minutes: 30)),
         );
 
         await werdRepository.updateProgress(progress);
@@ -415,12 +426,12 @@ void main() {
             ReadingSegment(
               startAyah: 200,
               endAyah: 202,
-              startTime: DateTime(2026, 4, 7, 22, 0),
-              endTime: DateTime(2026, 4, 7, 22, 10),
+              startTime: testDate.add(const Duration(hours: 22)),
+              endTime: testDate.add(const Duration(hours: 22, minutes: 10)),
             ),
           ],
           lastReadAbsolute: 202,
-          lastUpdated: DateTime(2026, 4, 7, 22, 10),
+          lastUpdated: testDate.add(const Duration(hours: 22, minutes: 10)),
         );
 
         await werdRepository.updateProgress(progress);
@@ -503,3 +514,4 @@ void main() {
     );
   });
 }
+

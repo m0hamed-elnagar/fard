@@ -49,6 +49,7 @@ This document provides foundational context and instructions for the Fard (Qada 
 ### Project Mandates (GEMINI.md Precedence)
 - **GitFlow:** Use feature branches for development, `develop` for integration, and `main` for releases.
 - **Testing:** Always add tests when implementing features or fixing bugs. Never remove existing tests unless they are obsolete.
+- **Documentation:** ALWAYS update the technical log or change log (e.g., `docs/NOTIFICATION_REMEDIATION_LOG.md` or similar) when implementing major fixes or architectural changes to ensure the project history is preserved.
 - **Android Linting:** Use `./gradlew :app:lintDebug` from the `android` directory for Kotlin/Android linting.
 - **Validation:** Always run `flutter analyze` and relevant tests before completing a task.
 

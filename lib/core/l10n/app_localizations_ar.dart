@@ -1343,6 +1343,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resetToDefault => 'إعادة إلى الافتراضي';
 
   @override
+  String get followAppTheme => 'اتباع مظهر التطبيق';
+
+  @override
+  String get widgetThemeColorCustomization => 'تخصيص ألوان الودجت';
+
+  @override
   String get applyTheme => 'تطبيق المظهر';
 
   @override

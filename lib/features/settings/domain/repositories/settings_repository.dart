@@ -70,6 +70,9 @@ abstract interface class SettingsRepository {
   /// Preferred audio quality
   AudioQuality get audioQuality;
 
+  /// Whether the audio player is expanded
+  bool get isAudioPlayerExpanded;
+
   // ==================== WRITE OPERATIONS ====================
 
   /// Update the app locale
@@ -153,5 +156,8 @@ abstract interface class SettingsRepository {
 
   /// Update preferred audio quality
   Future<void> updateAudioQuality(AudioQuality quality);
+
+  /// Update whether the audio player is expanded
+  Future<void> updateAudioPlayerExpanded(bool expanded);
 }
 

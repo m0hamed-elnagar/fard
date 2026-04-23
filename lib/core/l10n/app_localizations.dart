@@ -2545,6 +2545,18 @@ abstract class AppLocalizations {
   /// **'Reset to Default'**
   String get resetToDefault;
 
+  /// No description provided for @followAppTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow App Theme'**
+  String get followAppTheme;
+
+  /// No description provided for @widgetThemeColorCustomization.
+  ///
+  /// In en, this message translates to:
+  /// **'Widget Color Customization'**
+  String get widgetThemeColorCustomization;
+
   /// No description provided for @applyTheme.
   ///
   /// In en, this message translates to:

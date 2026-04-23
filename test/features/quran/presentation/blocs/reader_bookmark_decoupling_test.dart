@@ -89,6 +89,14 @@ void main() {
     when(
       () => mockQuranRepository.getReaderSeparator(),
     ).thenAnswer((_) async => 0);
+
+    when(
+      () => mockQuranRepository.getTextScale(),
+    ).thenAnswer((_) async => 1.0);
+
+    when(
+      () => mockQuranRepository.getFontFamily(),
+    ).thenAnswer((_) async => 'Amiri');
     when(
       () => mockGetSurah(any()),
     ).thenAnswer((_) async => Result.success(tSurah));

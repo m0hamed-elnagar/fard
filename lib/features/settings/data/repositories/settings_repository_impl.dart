@@ -161,6 +161,10 @@ class SettingsRepositoryImpl implements SettingsRepository {
     );
   }
 
+  @override
+  bool get isAudioPlayerExpanded =>
+      _storage.readBool(SettingsKeys.isAudioPlayerExpanded, defaultValue: false);
+
   // ==================== WRITE OPERATIONS ====================
 
   @override
@@ -406,5 +410,10 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<void> updateAudioQuality(AudioQuality quality) async {
     await _storage.writeString(SettingsKeys.audioQuality, quality.name);
+  }
+
+  @override
+  Future<void> updateAudioPlayerExpanded(bool expanded) async {
+    await _storage.writeBool(SettingsKeys.isAudioPlayerExpanded, expanded);
   }
 }

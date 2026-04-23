@@ -1,17 +1,17 @@
 package com.qada.fard.widget
 
 import android.content.Context
-import android.content.SharedPreferences
+import android.content.Intent
 import android.util.Log
+import androidx.core.content.edit
 import androidx.glance.appwidget.updateAll
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import android.content.Intent
-import com.qada.fard.PrayerWidget
-import com.qada.fard.NextPrayerCountdownWidgetReceiver
-import com.qada.fard.prayer.SettingsRepository
-import com.qada.fard.prayer.PrayerTimesCalculator
 import com.batoulapps.adhan.PrayerTimes
+import com.qada.fard.NextPrayerCountdownWidgetReceiver
+import com.qada.fard.PrayerWidget
+import com.qada.fard.prayer.PrayerTimesCalculator
+import com.qada.fard.prayer.SettingsRepository
 import org.json.JSONObject
 import java.util.Calendar
 import java.util.Locale
@@ -51,12 +51,13 @@ class WidgetUpdateWorker(
                 )
                 
                 // Save to SharedPreferences (this is what the widgets read from)
-                // Use the Flutter SharedPreferences with the correct key prefix
                 val prefs = applicationContext.getSharedPreferences(
                     "FlutterSharedPreferences",
                     Context.MODE_PRIVATE
                 )
-                prefs.edit().putString("flutter.prayer_data", widgetData).apply()
+                prefs.edit {
+                    putString("flutter.prayer_data", widgetData)
+                }
                 
                 Log.d("WidgetUpdateWorker", "Saved fresh prayer data to flutter.prayer_data")
             } else {
@@ -67,7 +68,6 @@ class WidgetUpdateWorker(
             PrayerWidget().updateAll(applicationContext)
 
             // For the CountdownWidget, send a broadcast to the receiver
-            // This ensures the minute-loop is restarted if it died
             val intent = Intent(applicationContext, NextPrayerCountdownWidgetReceiver::class.java).apply {
                 action = NextPrayerCountdownWidgetReceiver.ACTION_FORCE_UPDATE
             }
@@ -87,12 +87,10 @@ class WidgetUpdateWorker(
         todayTimes: PrayerTimes,
         tomorrowTimes: PrayerTimes
     ): PrayerInfo {
-        // Clear seconds for comparison
         val nowClear = now.clone() as Calendar
         nowClear.set(Calendar.SECOND, 0)
         nowClear.set(Calendar.MILLISECOND, 0)
         
-        // Check each prayer in order
         val prayers = listOf(
             Pair("Fajr", todayTimes.fajr),
             Pair("Dhuhr", todayTimes.dhuhr),
@@ -107,7 +105,6 @@ class WidgetUpdateWorker(
             }
         }
         
-        // After Isha - return tomorrow's Fajr
         return PrayerInfo("Fajr", tomorrowTimes.fajr.time)
     }
     
@@ -122,11 +119,9 @@ class WidgetUpdateWorker(
         val now = Calendar.getInstance()
         val lang = if (isRtl) "ar" else "en"
         
-        // 🛡️ PRESERVE COLORS: Get existing JSON to copy color values
         val existingJsonStr = repository.getPrayerDataJson()
         val existingJson = if (existingJsonStr != null) try { JSONObject(existingJsonStr) } catch(e: Exception) { null } else null
 
-        // Build prayers array
         val prayers = org.json.JSONArray()
         listOf(
             Pair("fajr", prayerTimes.fajr),
@@ -143,7 +138,6 @@ class WidgetUpdateWorker(
             prayers.put(prayerObj)
         }
         
-        // Build complete widget data
         return JSONObject().apply {
             put("gregorianDate", formatDate(now.time, lang))
             put("hijriDate", repository.getCachedHijriDate() ?: "Loading...")
@@ -155,14 +149,17 @@ class WidgetUpdateWorker(
             put("nextPrayerTime", nextPrayerTime)
             put("lastUpdated", lastUpdated)
 
-            // 🛡️ RE-APPLY PRESERVED COLORS (if they exist)
             if (existingJson != null) {
+                val cu = ColorUtils
                 listOf(
                     "primaryColorHex", "accentColorHex", "backgroundColorHex",
                     "surfaceColorHex", "textColorHex", "textSecondaryColorHex"
                 ).forEach { key ->
                     if (existingJson.has(key)) {
-                        put(key, existingJson.getString(key))
+                        val hex = existingJson.getString(key)
+                        if (cu.isValidHex(hex)) {
+                            put(key, hex)
+                        }
                     }
                 }
             }
@@ -195,14 +192,10 @@ class WidgetUpdateWorker(
         val cal = Calendar.getInstance().apply { timeInMillis = timeMs }
         val hour = cal.get(Calendar.HOUR_OF_DAY)
         val minute = cal.get(Calendar.MINUTE)
-        
-        return if (lang == "en") {
-            val period = if (hour < 12) "AM" else "PM"
-            val h = if (hour == 0 || hour == 12) 12 else hour % 12
-            String.format(Locale.US, "%d:%02d %s", h, minute, period)
-        } else {
-            String.format(Locale.US, "%02d:%02d", hour, minute)
-        }
+
+        val period = if (hour < 12) "AM" else "PM"
+        val h = if (hour == 0 || hour == 12) 12 else hour % 12
+        return String.format(Locale.US, "%d:%02d %s", h, minute, period)
     }
     
     private fun getMinutesFromMidnight(timeMs: Long): Int {

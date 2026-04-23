@@ -16,6 +16,7 @@ class AudioState extends Equatable {
   final double speed;
   final bool isRepeating;
   final bool isBannerVisible;
+  final bool isPlayerExpanded;
   final String? error;
   final String? lastErrorMessage;
 
@@ -34,6 +35,7 @@ class AudioState extends Equatable {
     this.speed = 1.0,
     this.isRepeating = false,
     this.isBannerVisible = false,
+    this.isPlayerExpanded = false,
     this.error,
     this.lastErrorMessage,
   });
@@ -53,6 +55,7 @@ class AudioState extends Equatable {
     double? speed,
     bool? isRepeating,
     bool? isBannerVisible,
+    bool? isPlayerExpanded,
     Object? error = _sentinel,
     Object? lastErrorMessage = _sentinel,
   }) {
@@ -78,6 +81,7 @@ class AudioState extends Equatable {
       speed: speed ?? this.speed,
       isRepeating: isRepeating ?? this.isRepeating,
       isBannerVisible: isBannerVisible ?? this.isBannerVisible,
+      isPlayerExpanded: isPlayerExpanded ?? this.isPlayerExpanded,
       error: error == _sentinel ? this.error : error as String?,
       lastErrorMessage: lastErrorMessage == _sentinel
           ? this.lastErrorMessage
@@ -103,6 +107,7 @@ class AudioState extends Equatable {
     speed,
     isRepeating,
     isBannerVisible,
+    isPlayerExpanded,
     error,
     lastErrorMessage,
   ];

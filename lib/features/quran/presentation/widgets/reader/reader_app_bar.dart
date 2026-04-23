@@ -8,6 +8,10 @@ import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
 import 'package:fard/features/quran/presentation/widgets/reader_settings_sheet.dart';
 import 'package:fard/features/quran/presentation/pages/scanned_mushaf_reader_page.dart';
 
+import 'package:fard/core/di/injection.dart';
+import 'package:fard/features/quran/presentation/widgets/quran_reader_help_overlay.dart';
+import 'package:fard/features/quran/domain/repositories/quran_symbols_repository.dart';
+
 class QuranReaderAppBar extends StatelessWidget implements PreferredSizeWidget {
   const QuranReaderAppBar({super.key});
 
@@ -25,6 +29,9 @@ class QuranReaderAppBar extends StatelessWidget implements PreferredSizeWidget {
         },
       ),
       actions: [
+        QuranReaderHelpOverlay(
+          repository: getIt<QuranSymbolsRepository>(),
+        ),
         BlocBuilder<ReaderBloc, ReaderState>(
           builder: (context, state) {
             return IconButton(

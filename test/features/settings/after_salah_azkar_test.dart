@@ -1,6 +1,7 @@
 import 'package:fard/core/services/location_service.dart';
 import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/features/azkar/data/azkar_repository.dart';
+import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
@@ -53,6 +54,7 @@ void main() {
   });
 
   void mockDefaults() {
+    when(() => mockRepo.audioQuality).thenReturn(AudioQuality.high192);
     when(() => mockRepo.locale).thenReturn(const Locale('ar'));
     when(() => mockRepo.latitude).thenReturn(null);
     when(() => mockRepo.longitude).thenReturn(null);

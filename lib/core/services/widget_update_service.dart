@@ -5,6 +5,7 @@ import 'package:fard/core/extensions/hijri_extension.dart';
 import 'package:fard/core/models/widget_data_model.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/core/theme/theme_presets.dart';
+import 'package:fard/features/settings/domain/entities/theme_preset.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -55,7 +56,7 @@ class WidgetUpdateService {
     );
 
     final lang = _settingsProvider.locale.languageCode;
-    final sunrise = DateFormat.jm(lang).format(prayerTimes.sunrise);
+    final sunrise = DateFormat('h:mm a', lang).format(prayerTimes.sunrise);
     final dayOfWeek = DateFormat('EEEE', lang).format(now);
     final isRtl = lang == 'ar';
 
@@ -91,41 +92,62 @@ class WidgetUpdateService {
       nextPrayerTime = tomorrowPrayerTimes.fajr;
     }
 
-    // The widget follows system brightness for a seamless zero-config experience
-    final targetBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
-
-    // Get current theme colors
-    Color seedColor = const Color(0xFF2E7D32);
-    
+    // Get current theme colors from the active preset
     final themePresetId = _settingsProvider.themePresetId;
-    if (themePresetId == 'custom') {
-      final customColors = _settingsProvider.customThemeColors;
-      if (customColors != null && customColors['primary'] != null) {
-        seedColor = _hexToColor(customColors['primary']!);
-      }
-    } else {
+    ThemePreset? currentPreset;
+    
+    if (themePresetId != 'custom') {
       try {
-        final preset = ThemePresets.getById(themePresetId);
-        seedColor = preset.primaryColor;
+        currentPreset = ThemePresets.getById(themePresetId);
       } catch (e) {
-        debugPrint(
-          'WidgetUpdateService: Theme preset not found: $themePresetId',
-        );
+        debugPrint('WidgetUpdateService: Theme preset not found: $themePresetId');
       }
     }
 
-    // Use ColorScheme.fromSeed to derive a harmonious and high-contrast palette
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: seedColor,
-      brightness: targetBrightness,
-    );
+    // Determine target colors
+    String primaryColor;
+    String accentColor;
+    String backgroundColor;
+    String surfaceColor;
+    String textColor;
+    String textSecondaryColor;
 
-    final primaryColor = _colorToHex(colorScheme.primary);
-    final accentColor = _colorToHex(colorScheme.secondary); // Using secondary as Accent
-    final backgroundColor = _colorToHex(colorScheme.surface); // Use surface as background for consistency
-    final surfaceColor = _colorToHex(colorScheme.surfaceContainerHighest);
-    final textColor = _colorToHex(colorScheme.onSurface); 
-    final textSecondaryColor = _colorToHex(colorScheme.onSurfaceVariant);
+    if (currentPreset != null) {
+      // Use preset colors directly for perfect app-widget alignment
+      primaryColor = _colorToHex(currentPreset.primaryColor);
+      accentColor = _colorToHex(currentPreset.accentColor);
+      backgroundColor = _colorToHex(currentPreset.backgroundColor);
+      surfaceColor = _colorToHex(currentPreset.surfaceColor);
+      textColor = _colorToHex(currentPreset.textColor);
+      textSecondaryColor = _colorToHex(currentPreset.textSecondaryColor);
+    } else {
+      // For custom themes, or as fallback, use ColorScheme.fromSeed
+      final targetBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+      Color seedColor = const Color(0xFF2E7D32);
+      
+      if (themePresetId == 'custom') {
+        final customColors = _settingsProvider.customThemeColors;
+        if (customColors != null && customColors['primary'] != null) {
+          seedColor = _hexToColor(customColors['primary']!);
+        }
+      }
+
+      final colorScheme = ColorScheme.fromSeed(
+        seedColor: seedColor,
+        brightness: targetBrightness,
+      );
+
+      debugPrint(
+        'WidgetUpdateService: Target brightness (derived): $targetBrightness',
+      );
+
+      primaryColor = _colorToHex(colorScheme.primary);
+      accentColor = _colorToHex(colorScheme.secondary);
+      backgroundColor = _colorToHex(colorScheme.surface);
+      surfaceColor = _colorToHex(colorScheme.surfaceContainerHighest);
+      textColor = _colorToHex(colorScheme.onSurface);
+      textSecondaryColor = _colorToHex(colorScheme.onSurfaceVariant);
+    }
 
     final data = WidgetDataModel(
       gregorianDate: DateFormat('d MMMM yyyy', lang).format(now),
@@ -156,9 +178,6 @@ class WidgetUpdateService {
     );
     debugPrint(
       'WidgetUpdateService: Next prayer: $nextPrayerName at $nextPrayerTime',
-    );
-    debugPrint(
-      'WidgetUpdateService: Target brightness: $targetBrightness',
     );
     debugPrint(
       'WidgetUpdateService: Primary color: $primaryColor, Background: $backgroundColor',
@@ -255,6 +274,17 @@ class WidgetUpdateService {
     }
   }
 
+  /// Clear widget theme from native SharedPreferences
+  Future<void> clearWidgetTheme() async {
+    try {
+      const channel = MethodChannel('com.qada.fard/widget_theme');
+      await channel.invokeMethod('clearWidgetTheme');
+    } catch (e) {
+      debugPrint('WidgetUpdateService: Error clearing widget theme: $e');
+      rethrow;
+    }
+  }
+
   Future<void> _syncNative(String prayerDataJson) async {
     try {
       final jsonMap = jsonDecode(prayerDataJson) as Map<String, dynamic>;
@@ -335,7 +365,7 @@ class WidgetUpdateService {
   PrayerTimeItem _createItem(String id, DateTime time, String lang) {
     return PrayerTimeItem(
       name: _getPrayerName(id, lang),
-      time: DateFormat.jm(lang).format(time),
+      time: DateFormat('h:mm a', lang).format(time),
       minutesFromMidnight: time.hour * 60 + time.minute,
     );
   }

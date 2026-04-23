@@ -20,72 +20,6 @@ import androidx.glance.unit.ColorProvider
 import com.qada.fard.MainActivity
 
 /**
- * Widget theme data class used by both preview and real widgets.
- * Contains 6 color fields for complete widget theming.
- */
-data class WidgetTheme(
-    val primaryColorHex: String = "#2E7D32",
-    val accentColorHex: String = "#FFD54F",
-    val backgroundColorHex: String = "#0D1117",
-    val surfaceColorHex: String = "#161B22",
-    val textColorHex: String = "#FFFFFF",
-    val textSecondaryColorHex: String = "#8B949E"
-) {
-    fun toColors(): WidgetColors = WidgetColors(
-        primary = Color(android.graphics.Color.parseColor(primaryColorHex)),
-        accent = Color(android.graphics.Color.parseColor(accentColorHex)),
-        background = Color(android.graphics.Color.parseColor(backgroundColorHex)),
-        surface = Color(android.graphics.Color.parseColor(surfaceColorHex)),
-        text = Color(android.graphics.Color.parseColor(textColorHex)),
-        textSecondary = Color(android.graphics.Color.parseColor(textSecondaryColorHex))
-    )
-}
-
-/**
- * Resolved Color objects from hex strings.
- */
-data class WidgetColors(
-    val primary: Color,
-    val accent: Color,
-    val background: Color,
-    val surface: Color,
-    val text: Color,
-    val textSecondary: Color
-)
-
-/**
- * Prayer data for widget display.
- */
-data class PrayerData(
-    val name: String,
-    val time: String
-)
-
-/**
- * Complete data for Prayer Schedule widget.
- */
-data class PrayerScheduleData(
-    val gregorianDate: String,
-    val hijriDate: String,
-    val dayOfWeek: String,
-    val sunrise: String,
-    val isRtl: Boolean,
-    val nextPrayerName: String,
-    val prayers: List<PrayerData>,
-    val lastUpdated: Long = 0
-)
-
-/**
- * Data for Next Prayer Countdown widget.
- */
-data class CountdownData(
-    val nextPrayerName: String,
-    val nextPrayerTime: Long = 0,
-    val isRtl: Boolean,
-    val lastUpdated: Long = 0
-)
-
-/**
  * Sample prayer data for preview mode.
  */
 val samplePrayerScheduleData = PrayerScheduleData(
@@ -152,9 +86,7 @@ fun PrayerScheduleContent(
         // Check for stale data (> 24h) - skip in preview mode
         if (!isPreview && (data.lastUpdated == 0L || 
             System.currentTimeMillis() - data.lastUpdated > 24 * 60 * 60 * 1000)) {
-            Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Open App", style = TextStyle(color = ColorProvider(colors.text)))
-            }
+            WidgetErrorContent(message = "Open App", colors = colors)
             return@Column
         }
 
@@ -430,14 +362,7 @@ fun CountdownContent(
         // Check for stale data - skip in preview mode
         if (!isPreview && (data.nextPrayerTime == 0L || 
             System.currentTimeMillis() - data.lastUpdated > 24 * 60 * 60 * 1000)) {
-            Text(
-                text = "Open App",
-                style = TextStyle(
-                    color = ColorProvider(colors.text),
-                    fontSize = if (isTiny) 10.sp else 14.sp,
-                    textAlign = TextAlign.Center
-                )
-            )
+            WidgetErrorContent(message = "Open App", colors = colors)
             return@Column
         }
 
@@ -629,4 +554,38 @@ private fun CountdownStandardLayout(
             textAlign = TextAlign.Center
         )
     )
+}
+
+/**
+ * Common error state for all widgets.
+ */
+@Composable
+fun WidgetErrorContent(
+    message: String,
+    colors: WidgetColors
+) {
+    Column(
+        modifier = GlanceModifier.fillMaxSize(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = message,
+            style = TextStyle(
+                color = ColorProvider(colors.text),
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center
+            )
+        )
+        Spacer(modifier = GlanceModifier.height(8.dp))
+        Text(
+            text = "Tap to Sync",
+            style = TextStyle(
+                color = ColorProvider(colors.accent),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+        )
+    }
 }

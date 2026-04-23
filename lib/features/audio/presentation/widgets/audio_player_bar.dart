@@ -5,7 +5,6 @@ import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
 import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/extensions/number_extension.dart';
-import 'package:fard/core/theme/app_colors.dart';
 import 'package:quran/quran.dart' as quran;
 
 class AudioPlayerBar extends StatelessWidget {
@@ -21,7 +20,6 @@ class AudioPlayerBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isArabic = l10n.localeName == 'ar';
 
     return BlocBuilder<AudioBloc, AudioState>(
       builder: (context, state) {
@@ -32,368 +30,403 @@ class AudioPlayerBar extends StatelessWidget {
         return LayoutBuilder(
           builder: (context, constraints) {
             final bool isNarrow = constraints.maxWidth < 360;
-            final bool isVeryNarrow = constraints.maxWidth < 320;
 
-            return Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(24),
+            return AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(24),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 15,
+                      offset: const Offset(0, -4),
+                    ),
+                  ],
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Row 1: Avatar, Surah/Ayah Info, Close
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(isNarrow ? 12 : 16, 12, 8, 4),
-                    child: Row(
-                      children: [
-                        // Reciter avatar
-                        if (!isVeryNarrow)
-                          GestureDetector(
-                            onTap: () => _showReciterSelector(context),
-                            child: CircleAvatar(
-                              radius: isNarrow ? 16 : 18,
-                              backgroundColor: Theme.of(
-                                context,
-                              ).colorScheme.primaryContainer,
-                              child: Text(
-                                state.currentReciter != null &&
-                                        state.currentReciter!.name.isNotEmpty
-                                    ? state.currentReciter!.name.substring(0, 1)
-                                    : 'A',
-                                style: TextStyle(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onPrimaryContainer,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: isNarrow ? 12 : 14,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                        if (!isVeryNarrow) SizedBox(width: isNarrow ? 8 : 12),
-
-                        // Info text - flexible
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => _showReciterSelector(context),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  state.currentSurah != null &&
-                                          state.currentAyah != null
-                                      ? l10n.surahWithAyah(
-                                          isArabic
-                                              ? state.currentAyah!
-                                                    .toArabicIndic()
-                                              : state.currentAyah!.toString(),
-                                          isArabic
-                                              ? quran.getSurahNameArabic(
-                                                  state.currentSurah!,
-                                                )
-                                              : quran.getSurahName(
-                                                  state.currentSurah!,
-                                                ),
-                                        )
-                                      : l10n.readyToPlay,
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: isNarrow ? 14 : 16,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onSurface,
-                                      ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  state.currentReciter != null
-                                      ? (isArabic
-                                            ? state.currentReciter!.name
-                                            : state.currentReciter!.englishName)
-                                      : l10n.selectReciter,
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant,
-                                        fontSize: isNarrow ? 10 : 11,
-                                      ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (!state.isPlayerExpanded)
+                      _buildCollapsedView(context, state, isNarrow, l10n)
+                    else
+                      _buildExpandedView(context, state, isNarrow, l10n),
+                    
+                    // Error Display - Ultra compact footer
+                    if (state.hasError)
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
+                          borderRadius: const BorderRadius.vertical(
+                            bottom: Radius.circular(24),
                           ),
                         ),
-
-                        // Close Button
-                        IconButton(
-                          iconSize: 20,
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                          icon: const Icon(Icons.close_rounded),
-                          onPressed: () => context.read<AudioBloc>().add(
-                            AudioEvent.hideBanner(),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        child: Text(
+                          state.lastErrorMessage ?? state.error ?? l10n.errorOccurred,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                            fontSize: 10,
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Row 2: Secondary Controls and Playback
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 4,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        // Go to currently playing Ayah button
-                        if (state.currentAyah != null &&
-                            state.currentSurah != null)
-                          IconButton(
-                            iconSize: 22,
-                            tooltip: l10n.goToPlayingAyah,
-                            icon: const Icon(Icons.my_location_rounded),
-                            onPressed: () {
-                              if (onScrollRequest != null &&
-                                  currentViewedSurah == state.currentSurah) {
-                                onScrollRequest!(
-                                  state.currentSurah!,
-                                  state.currentAyah!,
-                                );
-                                return;
-                              }
-                              final currentRoute = ModalRoute.of(context);
-                              final bool isAlreadyOnReader =
-                                  currentRoute?.settings.name ==
-                                  'QuranReaderPage';
-                              if (isAlreadyOnReader) {
-                                Navigator.pushReplacement(
-                                  context,
-                                  QuranReaderPage.route(
-                                    surahNumber: state.currentSurah!,
-                                    ayahNumber: state.currentAyah!,
-                                  ),
-                                );
-                              } else {
-                                Navigator.push(
-                                  context,
-                                  QuranReaderPage.route(
-                                    surahNumber: state.currentSurah!,
-                                    ayahNumber: state.currentAyah!,
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-
-                        // Previous Button
-                        IconButton(
-                          iconSize: 24,
-                          icon: const Icon(Icons.skip_previous_rounded),
-                          onPressed: () => context.read<AudioBloc>().add(
-                            AudioEvent.skipToPrevious(),
-                          ),
-                        ),
-
-                        // Play/Pause
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.primary.withValues(alpha: 0.3),
-                                blurRadius: 8,
-                                spreadRadius: 1,
-                              ),
-                            ],
-                          ),
-                          child: state.isLoading
-                              ? Padding(
-                                  padding: const EdgeInsets.all(10.0),
-                                  child: CircularProgressIndicator(
-                                    color: context.onSurfaceColor,
-                                    strokeWidth: 2.5,
-                                  ),
-                                )
-                              : IconButton(
-                                  padding: EdgeInsets.zero,
-                                  iconSize: 28,
-                                  color: context.onSurfaceColor,
-                                  icon: Icon(
-                                    state.isPlaying
-                                        ? Icons.pause_rounded
-                                        : Icons.play_arrow_rounded,
-                                  ),
-                                  onPressed: () => context
-                                      .read<AudioBloc>()
-                                      .add(AudioEvent.togglePlayback()),
-                                ),
-                        ),
-
-                        // Next Button
-                        IconButton(
-                          iconSize: 24,
-                          icon: const Icon(Icons.skip_next_rounded),
-                          onPressed: () => context.read<AudioBloc>().add(
-                            AudioEvent.skipToNext(),
-                          ),
-                        ),
-
-                        // Repeat Button
-                        IconButton(
-                          iconSize: 20,
-                          tooltip: l10n.repeatAyah,
-                          icon: Icon(
-                            Icons.repeat_one_rounded,
-                            color: state.isRepeating
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.onSurfaceVariant
-                                      .withValues(alpha: 0.6),
-                          ),
-                          onPressed: () => context.read<AudioBloc>().add(
-                            AudioEvent.toggleRepeat(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Progress Slider Row
-                  if (state.duration > Duration.zero)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                      child: Row(
-                        children: [
-                          Text(
-                            _formatDuration(state.position),
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          Expanded(
-                            child: SliderTheme(
-                              data: SliderTheme.of(context).copyWith(
-                                trackHeight: 4,
-                                thumbShape: const RoundSliderThumbShape(
-                                  enabledThumbRadius: 6,
-                                ),
-                                overlayShape: const RoundSliderOverlayShape(
-                                  overlayRadius: 16,
-                                ),
-                                activeTrackColor: Theme.of(
-                                  context,
-                                ).colorScheme.primary,
-                                inactiveTrackColor: Theme.of(
-                                  context,
-                                ).colorScheme.primary.withValues(alpha: 0.1),
-                                thumbColor: Theme.of(
-                                  context,
-                                ).colorScheme.primary,
-                              ),
-                              child: Slider(
-                                value: state.position.inMilliseconds
-                                    .toDouble()
-                                    .clamp(
-                                      0.0,
-                                      state.duration.inMilliseconds.toDouble(),
-                                    ),
-                                max: state.duration.inMilliseconds.toDouble(),
-                                onChanged: (value) {
-                                  context.read<AudioBloc>().add(
-                                    AudioEvent.seekTo(
-                                      Duration(milliseconds: value.toInt()),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                          Text(
-                            _formatDuration(state.duration),
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                  if (!state.hasError && state.duration == Duration.zero)
-                    const SizedBox(height: 12),
-
-                  // Error Display
-                  if (state.hasError)
-                    Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: context.errorColor.withValues(alpha: 0.1),
-                        borderRadius: const BorderRadius.vertical(
-                          bottom: Radius.circular(24),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            color: context.errorColor,
-                            size: 14,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              state.lastErrorMessage ??
-                                  state.error ??
-                                  l10n.errorOccurred,
-                              style: TextStyle(
-                                color: context.errorColor,
-                                fontSize: 10,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             );
           },
         );
       },
     );
+  }
+
+  Widget _buildCollapsedView(
+    BuildContext context, 
+    AudioState state, 
+    bool isNarrow,
+    AppLocalizations l10n,
+  ) {
+    final isArabic = l10n.localeName == 'ar';
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Thin Interactive Progress Line
+        _buildProgressBar(context, state),
+
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 8, 10),
+          child: Row(
+            children: [
+              // Surah/Ayah Info - Expanded to take space
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      state.currentSurah != null && state.currentAyah != null
+                          ? l10n.surahWithAyah(
+                              isArabic
+                                  ? state.currentAyah!.toArabicIndic()
+                                  : state.currentAyah!.toString(),
+                              isArabic
+                                  ? quran.getSurahNameArabic(state.currentSurah!)
+                                  : quran.getSurahName(state.currentSurah!),
+                            )
+                          : l10n.readyToPlay,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontSize: isNarrow ? 14 : 16,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+
+              // Essential Controls: Location, Play/Pause and Expand
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (state.currentAyah != null && state.currentSurah != null)
+                    _buildActionButton(
+                      icon: const Icon(Icons.my_location_rounded),
+                      tooltip: l10n.goToPlayingAyah,
+                      iconSize: isNarrow ? 18 : 20,
+                      onPressed: () => _handleLocationClick(context, state),
+                    ),
+                  _buildPlayPauseButton(context, state, isNarrow),
+                  // NOTE: ICON DIRECTIONS ARE SWAPPED DELIBERATELY TO LOOK CORRECT IN THE UI. DO NOT CHANGE.
+                  _buildActionButton(
+                    icon: const Icon(Icons.expand_more_rounded),
+                    tooltip: "Expand", 
+                    onPressed: () => context.read<AudioBloc>().add(
+                      AudioEvent.togglePlayerExpanded(),
+                    ),
+                  ),
+                  _buildActionButton(
+                    icon: const Icon(Icons.close_rounded),
+                    tooltip: l10n.close,
+                    onPressed: () => context.read<AudioBloc>().add(
+                      const HideBanner(),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildExpandedView(
+    BuildContext context, 
+    AudioState state, 
+    bool isNarrow,
+    AppLocalizations l10n,
+  ) {
+    final isArabic = l10n.localeName == 'ar';
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // 1. Info Row with Avatar
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 12, 8),
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: () => _showReciterSelector(context),
+                child: CircleAvatar(
+                  radius: 20,
+                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                  child: Text(
+                    state.currentReciter != null && state.currentReciter!.name.isNotEmpty
+                        ? state.currentReciter!.name.substring(0, 1)
+                        : 'A',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      state.currentSurah != null && state.currentAyah != null
+                          ? l10n.surahWithAyah(
+                              isArabic
+                                  ? state.currentAyah!.toArabicIndic()
+                                  : state.currentAyah!.toString(),
+                              isArabic
+                                  ? quran.getSurahNameArabic(state.currentSurah!)
+                                  : quran.getSurahName(state.currentSurah!),
+                            )
+                          : l10n.readyToPlay,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                    ),
+                    Text(
+                      state.currentReciter != null
+                          ? (isArabic ? state.currentReciter!.name : state.currentReciter!.englishName)
+                          : l10n.selectReciter,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              _buildActionButton(
+                // NOTE: ICON DIRECTIONS ARE SWAPPED DELIBERATELY TO LOOK CORRECT IN THE UI. DO NOT CHANGE.
+                icon: const Icon(Icons.expand_less_rounded),
+                tooltip: "Collapse",
+                onPressed: () => context.read<AudioBloc>().add(
+                  AudioEvent.togglePlayerExpanded(),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // 2. Full Progress Slider with Times
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              Text(
+                _formatDuration(state.position),
+                style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ),
+              Expanded(
+                child: _buildProgressBar(context, state),
+              ),
+              Text(
+                state.duration > Duration.zero ? _formatDuration(state.duration) : "--:--",
+                style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ),
+            ],
+          ),
+        ),
+
+        // 3. Full Control Cluster
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12, top: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              if (state.currentAyah != null && state.currentSurah != null)
+                _buildActionButton(
+                  icon: const Icon(Icons.my_location_rounded),
+                  tooltip: l10n.goToPlayingAyah,
+                  onPressed: () => _handleLocationClick(context, state),
+                ),
+              _buildActionButton(
+                icon: Icon(
+                  state.isRepeating ? Icons.repeat_one_on_rounded : Icons.repeat_one_rounded,
+                  color: state.isRepeating ? Theme.of(context).colorScheme.primary : null,
+                ),
+                tooltip: l10n.repeatAyah,
+                onPressed: () => context.read<AudioBloc>().add(const ToggleRepeat()),
+              ),
+              _buildActionButton(
+                // NOTE: ICON DIRECTIONS ARE SWAPPED DELIBERATELY TO LOOK CORRECT IN THE UI. DO NOT CHANGE.
+                icon: const Icon(Icons.skip_next_rounded),
+                iconSize: 24,
+                onPressed: () => context.read<AudioBloc>().add(const SkipToPrevious()),
+              ),
+              _buildPlayPauseButton(context, state, isNarrow, size: 48),
+              _buildActionButton(
+                // NOTE: ICON DIRECTIONS ARE SWAPPED DELIBERATELY TO LOOK CORRECT IN THE UI. DO NOT CHANGE.
+                icon: const Icon(Icons.skip_previous_rounded),
+                iconSize: 24,
+                onPressed: () => context.read<AudioBloc>().add(const SkipToNext()),
+              ),
+              _buildActionButton(
+                icon: const Icon(Icons.close_rounded),
+                tooltip: l10n.close,
+                onPressed: () => context.read<AudioBloc>().add(const HideBanner()),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProgressBar(
+    BuildContext context, 
+    AudioState state, 
+  ) {
+    return SizedBox(
+      height: 32, // Large hit area for fingers (32dp)
+      child: SliderTheme(
+        data: SliderTheme.of(context).copyWith(
+          trackHeight: 2, // Thin bar
+          thumbShape: state.duration > Duration.zero 
+              ? const RoundSliderThumbShape(
+                  enabledThumbRadius: 7, // Big circle
+                  elevation: 2,
+                )
+              : SliderComponentShape.noThumb,
+          overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+          activeTrackColor: Theme.of(context).colorScheme.primary,
+          inactiveTrackColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+          thumbColor: Theme.of(context).colorScheme.primary,
+        ),
+        child: Slider(
+          value: state.duration > Duration.zero
+              ? state.position.inMilliseconds.toDouble().clamp(0.0, state.duration.inMilliseconds.toDouble())
+              : 0.0,
+          max: state.duration > Duration.zero ? state.duration.inMilliseconds.toDouble() : 1.0,
+          onChanged: state.duration > Duration.zero
+              ? (value) => context.read<AudioBloc>().add(SeekTo(Duration(milliseconds: value.toInt())))
+              : null,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlayPauseButton(
+    BuildContext context, 
+    AudioState state, 
+    bool isNarrow,
+    {double size = 42}
+  ) {
+    return Container(
+      width: size,
+      height: size,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: state.isLoading
+          ? Padding(
+              padding: EdgeInsets.all(size * 0.25),
+              child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+            )
+          : IconButton(
+              padding: EdgeInsets.zero,
+              iconSize: size * 0.6,
+              color: Colors.white,
+              icon: Icon(state.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded),
+              onPressed: () => context.read<AudioBloc>().add(const TogglePlayback()),
+            ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required Widget icon,
+    required VoidCallback onPressed,
+    double iconSize = 20,
+    String? tooltip,
+  }) {
+    return IconButton(
+      iconSize: iconSize,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(
+        minWidth: 44,
+        minHeight: 44,
+      ),
+      tooltip: tooltip,
+      icon: icon,
+      onPressed: onPressed,
+    );
+  }
+
+  void _handleLocationClick(BuildContext context, AudioState state) {
+    if (onScrollRequest != null && currentViewedSurah == state.currentSurah) {
+      onScrollRequest!(state.currentSurah!, state.currentAyah!);
+      return;
+    }
+    final currentRoute = ModalRoute.of(context);
+    final bool isAlreadyOnReader = currentRoute?.settings.name == 'QuranReaderPage';
+    
+    if (isAlreadyOnReader) {
+      Navigator.pushReplacement(
+        context,
+        QuranReaderPage.route(
+          surahNumber: state.currentSurah!,
+          ayahNumber: state.currentAyah!,
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        QuranReaderPage.route(
+          surahNumber: state.currentSurah!,
+          ayahNumber: state.currentAyah!,
+        ),
+      );
+    }
   }
 
   String _formatDuration(Duration duration) {

@@ -121,53 +121,64 @@ class MainActivity : AudioServiceActivity() {
                                 // Small delay to ensure commit has settled
                                 kotlinx.coroutines.delay(100)
 
-                                // Refresh 1: Immediate update
-                                Log.d(TAG, "First update attempt - PrayerWidget & CountdownWidget...")
-                                PrayerWidget().updateAll(this@MainActivity)
-                                NextPrayerCountdownWidget().updateAll(this@MainActivity)
+                                // Trigger Widget Refresh
+                                triggerWidgetUpdates()
                                 
-                                // Android 15+ Picker Preview synchronization
-                                if (Build.VERSION.SDK_INT >= 35) { // Build.VERSION_CODES.VANILLA_ICE_CREAM
-                                    try {
-                                        val manager = androidx.glance.appwidget.GlanceAppWidgetManager(this@MainActivity)
-                                        
-                                        // Update PrayerWidget picker preview
-                                        manager.setWidgetPreviews(
-                                            receiver = PrayerWidgetReceiver::class,
-                                        )
-                                        Log.d(TAG, "Android 15+ PrayerWidget preview synchronized")
-                                        
-                                        // Update CountdownWidget picker preview
-                                        manager.setWidgetPreviews(
-                                            receiver = NextPrayerCountdownWidgetReceiver::class,
-                                        )
-                                        Log.d(TAG, "Android 15+ NextPrayerCountdownWidget preview synchronized")
-                                    } catch (e: Exception) {
-                                        Log.e(TAG, "Failed to synchronize widget previews", e)
-                                    }
-                                }
-                                
-                                // Delay slightly (300ms as requested) to force recomputation
-                                kotlinx.coroutines.delay(300)
-                                
-                                // Refresh 2: Force secondary update to ensure persistence is picked up
-                                Log.d(TAG, "Second update attempt - PrayerWidget & CountdownWidget...")
-                                PrayerWidget().updateAll(this@MainActivity)
-                                NextPrayerCountdownWidget().updateAll(this@MainActivity)
-                                
-                                result.success(null)
+                                result.success(true)
                             } catch (e: Exception) {
-                                Log.e(TAG, "APPLY_FAILED", e)
-                                result.error("APPLY_FAILED", e.message, null)
+                                Log.e(TAG, "Error applying widget theme: $e")
+                                result.error("THEME_ERROR", e.message, null)
                             }
                         }
                     } else {
                         result.error("INVALID_ARGS", "Arguments are null", null)
                     }
                 }
+
+                "clearWidgetTheme" -> {
+                    Log.d(TAG, "=== CLEAR WIDGET THEME CALLED ===")
+                    CoroutineScope(Dispatchers.Main).launch {
+                        try {
+                            val repository = SettingsRepository(this@MainActivity)
+                            repository.clearWidgetTheme()
+                            
+                            // Small delay to ensure commit has settled
+                            kotlinx.coroutines.delay(100)
+
+                            // Trigger Widget Refresh to revert to dynamic colors
+                            triggerWidgetUpdates()
+                            
+                            result.success(true)
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error clearing widget theme: $e")
+                            result.error("THEME_ERROR", e.message, null)
+                        }
+                    }
+                }
                 else -> {
                     result.notImplemented()
                 }
+            }
+        }
+    }
+
+    /**
+     * Helper to trigger updates for all Glance widgets.
+     */
+    private suspend fun triggerWidgetUpdates() {
+        Log.d(TAG, "Refreshing PrayerWidget & CountdownWidget...")
+        PrayerWidget().updateAll(this@MainActivity)
+        NextPrayerCountdownWidget().updateAll(this@MainActivity)
+
+        // Android 15+ Picker Preview synchronization
+        if (Build.VERSION.SDK_INT >= 35) { // Build.VERSION_CODES.VANILLA_ICE_CREAM
+            try {
+                val manager = androidx.glance.appwidget.GlanceAppWidgetManager(this@MainActivity)
+                manager.setWidgetPreviews(receiver = PrayerWidgetReceiver::class)
+                manager.setWidgetPreviews(receiver = NextPrayerCountdownWidgetReceiver::class)
+                Log.d(TAG, "Android 15+ widget previews synchronized")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to synchronize widget previews", e)
             }
         }
     }

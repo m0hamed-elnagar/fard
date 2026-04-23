@@ -46,6 +46,14 @@ void main() {
     getIt.registerSingleton<WidgetUpdateService>(mockWidgetUpdateService);
 
     when(
+      () => mockNotificationService.runDiagnostics(),
+    ).thenAnswer((_) async => {
+      'notifications_enabled': true,
+      'exact_alarm_permission': true,
+      'battery_optimization_ignored': true,
+    });
+
+    when(
       () => mockNotificationService.canScheduleExactNotifications(),
     ).thenAnswer((_) async => true);
     
@@ -101,18 +109,53 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Settings'), findsOneWidget);
+    
+    // Expand Data & Location
+    final dataLocationFinder = find.text('Data & Location');
+    await tester.scrollUntilVisible(
+      dataLocationFinder,
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(dataLocationFinder);
+    await tester.pumpAndSettle();
     expect(find.text('Data & Location'), findsOneWidget);
 
-    // Scroll by dragging
-    await tester.drag(find.byType(ListView).first, const Offset(0, -500));
+    // Expand Prayer & Azan
+    final prayerAzanFinder = find.text('Prayer & Azan');
+    await tester.scrollUntilVisible(
+      prayerAzanFinder,
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(prayerAzanFinder);
     await tester.pumpAndSettle();
-
     expect(find.text('Prayer & Azan'), findsOneWidget);
+
+    // Expand General App Settings
+    final generalSettingsFinder = find.text('General App Settings');
+    await tester.scrollUntilVisible(
+      generalSettingsFinder,
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(generalSettingsFinder);
+    await tester.pumpAndSettle();
     expect(find.text('General App Settings'), findsOneWidget);
   });
 
   testWidgets('shows current location city', (WidgetTester tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    // Expand Data & Location section
+    final dataLocationFinder = find.text('Data & Location');
+    await tester.scrollUntilVisible(
+      dataLocationFinder,
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(dataLocationFinder);
     await tester.pumpAndSettle();
 
     expect(find.text('London'), findsOneWidget);

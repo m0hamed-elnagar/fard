@@ -4,24 +4,34 @@ import android.content.Context
 import android.content.SharedPreferences
 
 class SettingsRepository(private val context: Context) {
-    private val prefs: SharedPreferences = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+    private val prefs: SharedPreferences =
+        context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
 
     fun getSettings(): CalculationSettings? {
-        val lat = (prefs.getString(CalculationContract.PREF_PREFIX + "latitude", null))?.toDoubleOrNull()
-            ?: return null
-        val lon = (prefs.getString(CalculationContract.PREF_PREFIX + "longitude", null))?.toDoubleOrNull()
-            ?: return null
+        val lat =
+            (prefs.getString(CalculationContract.PREF_PREFIX + "latitude", null))?.toDoubleOrNull()
+                ?: return null
+        val lon =
+            (prefs.getString(CalculationContract.PREF_PREFIX + "longitude", null))?.toDoubleOrNull()
+                ?: return null
 
-        val methodString = prefs.getString(CalculationContract.PREF_PREFIX + "calculation_method", "muslim_league") ?: "muslim_league"
-        val madhabString = prefs.getString(CalculationContract.PREF_PREFIX + "madhab", "shafi") ?: "shafi"
+        val methodString =
+            prefs.getString(CalculationContract.PREF_PREFIX + "calculation_method", "muslim_league")
+                ?: "muslim_league"
+        val madhabString =
+            prefs.getString(CalculationContract.PREF_PREFIX + "madhab", "shafi") ?: "shafi"
 
         // Map string names to Contract IDs
         val methodId = mapMethodStringToId(methodString)
-        val madhabId = if (madhabString == "hanafi") CalculationContract.MADHAB_HANAFI else CalculationContract.MADHAB_SHAFI
+        val madhabId =
+            if (madhabString == "hanafi") CalculationContract.MADHAB_HANAFI else CalculationContract.MADHAB_SHAFI
 
         // In this app, high latitude rule might not be explicitly set in basic SharedPreferences
-        // but we can default it or read if available.
-        val highLatId = prefs.getInt(CalculationContract.PREF_PREFIX + "high_latitude_method", CalculationContract.HIGH_LAT_MIDDLE_OF_THE_NIGHT)
+        // ,but we can default it or read if available.
+        val highLatId = prefs.getInt(
+            CalculationContract.PREF_PREFIX + "high_latitude_method",
+            CalculationContract.HIGH_LAT_MIDDLE_OF_THE_NIGHT
+        )
 
         val locale = prefs.getString(CalculationContract.PREF_PREFIX + "locale", "ar") ?: "ar"
 
@@ -37,11 +47,20 @@ class SettingsRepository(private val context: Context) {
 
     fun getPrayerDataJson(): String? {
         // Debugging the path
-        val file = context.getSharedPreferences("FlutterSharedPreferences", android.content.Context.MODE_PRIVATE)
-        android.util.Log.d("WidgetDebug", "SettingsRepository SharedPreferences Path: " + context.filesDir.parent + "/shared_prefs/FlutterSharedPreferences.xml")
-        
+        val file = context.getSharedPreferences(
+            "FlutterSharedPreferences",
+            android.content.Context.MODE_PRIVATE
+        )
+        android.util.Log.d(
+            "WidgetDebug",
+            "SettingsRepository SharedPreferences Path: " + context.filesDir.parent + "/shared_prefs/FlutterSharedPreferences.xml"
+        )
+
         val json = prefs.getString(CalculationContract.PREF_PREFIX + "prayer_data", null)
-        android.util.Log.d("WidgetDebug", "SettingsRepository getPrayerDataJson key: " + CalculationContract.PREF_PREFIX + "prayer_data" + " Found: " + json)
+        android.util.Log.d(
+            "WidgetDebug",
+            "SettingsRepository getPrayerDataJson key: " + CalculationContract.PREF_PREFIX + "prayer_data" + " Found: " + json
+        )
         return json
     }
 
@@ -62,8 +81,14 @@ class SettingsRepository(private val context: Context) {
         prefs.edit().apply {
             putString(CalculationContract.PREF_PREFIX + "latitude", latitude.toString())
             putString(CalculationContract.PREF_PREFIX + "longitude", longitude.toString())
-            putString(CalculationContract.PREF_PREFIX + "calculation_method", mapMethodIdToString(calculationMethod))
-            putString(CalculationContract.PREF_PREFIX + "madhab", if (madhab == CalculationContract.MADHAB_HANAFI) "hanafi" else "shafi")
+            putString(
+                CalculationContract.PREF_PREFIX + "calculation_method",
+                mapMethodIdToString(calculationMethod)
+            )
+            putString(
+                CalculationContract.PREF_PREFIX + "madhab",
+                if (madhab == CalculationContract.MADHAB_HANAFI) "hanafi" else "shafi"
+            )
             putInt(CalculationContract.PREF_PREFIX + "high_latitude_method", highLatitudeRule)
             putString(CalculationContract.PREF_PREFIX + "locale", locale)
             if (prayerData != null) {
@@ -85,17 +110,37 @@ class SettingsRepository(private val context: Context) {
     }
 
     /**
+     * Check if a custom widget theme is currently saved in SharedPreferences.
+     */
+    fun hasWidgetThemeOverride(): Boolean {
+        return prefs.contains("flutter.widget_theme_primary")
+    }
+
+    /**
      * Save widget theme to SharedPreferences.
      * This allows widgets to read independent theme colors.
      */
     fun saveWidgetTheme(themeData: Map<String, Any>) {
+        val cu = com.qada.fard.widget.ColorUtils
         prefs.edit().apply {
-            putString("flutter.widget_theme_primary", themeData["primaryColorHex"] as? String ?: "#2E7D32")
-            putString("flutter.widget_theme_accent", themeData["accentColorHex"] as? String ?: "#FFD54F")
-            putString("flutter.widget_theme_background", themeData["backgroundColorHex"] as? String ?: "#0D1117")
-            putString("flutter.widget_theme_surface", themeData["surfaceColorHex"] as? String ?: "#161B22")
-            putString("flutter.widget_theme_text", themeData["textColorHex"] as? String ?: "#FFFFFF")
-            putString("flutter.widget_theme_text_secondary", themeData["textSecondaryColorHex"] as? String ?: "#8B949E")
+            val primary = themeData["primaryColorHex"] as? String
+            putString("flutter.widget_theme_primary", if (cu.isValidHex(primary)) primary else "#2E7D32")
+            
+            val accent = themeData["accentColorHex"] as? String
+            putString("flutter.widget_theme_accent", if (cu.isValidHex(accent)) accent else "#FFD54F")
+            
+            val background = themeData["backgroundColorHex"] as? String
+            putString("flutter.widget_theme_background", if (cu.isValidHex(background)) background else "#0D1117")
+            
+            val surface = themeData["surfaceColorHex"] as? String
+            putString("flutter.widget_theme_surface", if (cu.isValidHex(surface)) surface else "#161B22")
+            
+            val text = themeData["textColorHex"] as? String
+            putString("flutter.widget_theme_text", if (cu.isValidHex(text)) text else "#FFFFFF")
+            
+            val secondary = themeData["textSecondaryColorHex"] as? String
+            putString("flutter.widget_theme_text_secondary", if (cu.isValidHex(secondary)) secondary else "#8B949E")
+            
             putLong("flutter/widget_theme_timestamp", System.currentTimeMillis())
             commit()
         }
@@ -103,17 +148,34 @@ class SettingsRepository(private val context: Context) {
 
     /**
      * Get widget theme from SharedPreferences.
-     * Returns map with 6 color hex strings.
+     * Returns a WidgetTheme object.
      */
-    fun getWidgetTheme(): Map<String, String> {
-        return mapOf(
-            "primaryColorHex" to (prefs.getString("flutter.widget_theme_primary", "#2E7D32") ?: "#2E7D32"),
-            "accentColorHex" to (prefs.getString("flutter.widget_theme_accent", "#FFD54F") ?: "#FFD54F"),
-            "backgroundColorHex" to (prefs.getString("flutter.widget_theme_background", "#0D1117") ?: "#0D1117"),
-            "surfaceColorHex" to (prefs.getString("flutter.widget_theme_surface", "#161B22") ?: "#161B22"),
-            "textColorHex" to (prefs.getString("flutter.widget_theme_text", "#FFFFFF") ?: "#FFFFFF"),
-            "textSecondaryColorHex" to (prefs.getString("flutter.widget_theme_text_secondary", "#8B949E") ?: "#8B949E")
+    fun getWidgetTheme(): com.qada.fard.widget.WidgetTheme {
+        return com.qada.fard.widget.WidgetTheme(
+            primaryColorHex = prefs.getString("flutter.widget_theme_primary", "#2E7D32")
+                ?: "#2E7D32",
+            accentColorHex = prefs.getString("flutter.widget_theme_accent", "#FFD54F") ?: "#FFD54F",
+            backgroundColorHex = prefs.getString("flutter.widget_theme_background", "#0D1117")
+                ?: "#0D1117",
+            surfaceColorHex = prefs.getString("flutter.widget_theme_surface", "#161B22")
+                ?: "#161B22",
+            textColorHex = prefs.getString("flutter.widget_theme_text", "#FFFFFF") ?: "#FFFFFF",
+            textSecondaryColorHex = prefs.getString(
+                "flutter.widget_theme_text_secondary",
+                "#8B949E"
+            ) ?: "#8B949E"
         )
+    }
+
+    /**
+     * Resolves the theme to use for a widget, considering overrides and fallbacks.
+     */
+    fun resolveWidgetTheme(fallback: com.qada.fard.widget.WidgetTheme): com.qada.fard.widget.WidgetTheme {
+        return if (hasWidgetThemeOverride()) {
+            getWidgetTheme()
+        } else {
+            fallback
+        }
     }
 
     /**

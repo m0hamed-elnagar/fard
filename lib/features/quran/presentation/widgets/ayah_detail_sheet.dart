@@ -20,6 +20,10 @@ import 'package:fard/core/extensions/number_extension.dart';
 
 import '../../../audio/domain/repositories/audio_player_service.dart';
 
+import 'package:fard/features/quran/presentation/widgets/ayah_info_sheet.dart';
+import 'package:fard/core/utils/symbol_detector.dart';
+import 'package:fard/features/quran/domain/repositories/quran_symbols_repository.dart';
+
 class AyahDetailSheet extends StatelessWidget {
   final Ayah ayah;
   final int? surahAyahCount;
@@ -37,7 +41,7 @@ class AyahDetailSheet extends StatelessWidget {
       expand: false,
       builder: (context, scrollController) {
         return DefaultTabController(
-          length: 2,
+          length: 3,
           child: Container(
             decoration: BoxDecoration(
               color: Theme.of(context).scaffoldBackgroundColor,
@@ -270,6 +274,7 @@ class AyahDetailSheet extends StatelessWidget {
                         tabs: [
                           Tab(text: l10n.tafsir),
                           Tab(text: l10n.audio),
+                          const Tab(text: 'الرموز'),
                         ],
                       ),
                     ),
@@ -280,6 +285,11 @@ class AyahDetailSheet extends StatelessWidget {
                 children: [
                   _TafsirTab(ayah: ayah),
                   _AudioTab(ayah: ayah, surahAyahCount: surahAyahCount),
+                  AyahInfoSheet(
+                    ayahText: ayah.uthmaniText,
+                    repository: getIt<QuranSymbolsRepository>(),
+                    detector: getIt<SymbolDetectorService>(),
+                  ),
                 ],
               ),
             ),

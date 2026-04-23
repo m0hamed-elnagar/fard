@@ -55,10 +55,14 @@ import '../../features/quran/data/repositories/bookmark_repository_impl.dart'
     as _i215;
 import '../../features/quran/data/repositories/quran_repository_impl.dart'
     as _i82;
+import '../../features/quran/data/repositories/quran_symbols_repository_impl.dart'
+    as _i1014;
 import '../../features/quran/domain/repositories/bookmark_repository.dart'
     as _i33;
 import '../../features/quran/domain/repositories/quran_repository.dart'
     as _i498;
+import '../../features/quran/domain/repositories/quran_symbols_repository.dart'
+    as _i303;
 import '../../features/quran/domain/usecases/get_all_surahs.dart' as _i177;
 import '../../features/quran/domain/usecases/get_page.dart' as _i451;
 import '../../features/quran/domain/usecases/get_surah.dart' as _i941;
@@ -111,6 +115,7 @@ import '../services/notification_service.dart' as _i941;
 import '../services/prayer_time_service.dart' as _i552;
 import '../services/voice_download_service.dart' as _i492;
 import '../services/widget_update_service.dart' as _i682;
+import '../utils/symbol_detector.dart' as _i433;
 import 'register_module.dart' as _i291;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -150,6 +155,9 @@ extension GetItInjectableX on _i174.GetIt {
           instanceName: 'dailyRecordsBox',
         ),
       ),
+    );
+    gh.lazySingleton<_i303.QuranSymbolsRepository>(
+      () => _i1014.QuranSymbolsRepositoryImpl(),
     );
     await gh.factoryAsync<_i1055.Box<int>>(
       () => registerModule.azkarBox,
@@ -200,6 +208,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i256.ConnectivityBloc(
         connectivityService: gh<_i47.ConnectivityService>(),
       ),
+    );
+    gh.lazySingleton<_i433.SymbolDetectorService>(
+      () => _i433.SymbolDetectorService(gh<_i303.QuranSymbolsRepository>()),
     );
     gh.singleton<_i700.MushafDownloadService>(
       () => _i700.MushafDownloadService(gh<_i188.DownloadManifestService>()),

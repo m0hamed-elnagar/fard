@@ -1,5 +1,6 @@
 package com.qada.fard
 
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -15,6 +16,10 @@ import kotlinx.coroutines.launch
 class TimeChangedReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         Log.d("TimeChangedReceiver", "Time change broadcast received: ${intent.action}")
+
+        // 🛡️ Immediately cancel all active notifications to prevent Android from firing "skipped" alarms as spam
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancelAll()
 
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {

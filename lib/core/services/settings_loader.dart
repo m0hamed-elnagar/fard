@@ -46,6 +46,8 @@ class SettingsLoader {
       ),
       salaahSettings: _loadSalaahSettings(prefs),
       audioQuality: audioQuality,
+      isAudioPlayerExpanded:
+          prefs.getBool(SettingsKeys.isAudioPlayerExpanded) ?? false,
     );
   }
 
