@@ -57,7 +57,16 @@ class _CalendarWidgetState extends State<CalendarWidget> {
   HijriCalendar _getHijriDate(DateTime date) {
     final normalized = _normalize(date);
     return _hijriCache.putIfAbsent(normalized, () {
-      final adjustedDate = date.add(Duration(days: widget.hijriAdjustment));
+      // HijriCalendar (Umm al-Qura) only supports dates from 1356 AH (1937 CE) to 1500 AH (2077 CE)
+      // We clamp the year to prevent crashes from TableCalendar's padding cells for years like 1900
+      DateTime safeDate = date;
+      if (safeDate.year < 1937) {
+        safeDate = DateTime(1937, safeDate.month, safeDate.day);
+      } else if (safeDate.year > 2077) {
+        safeDate = DateTime(2077, safeDate.month, safeDate.day);
+      }
+
+      final adjustedDate = safeDate.add(Duration(days: widget.hijriAdjustment));
       return HijriCalendar.fromDate(adjustedDate);
     });
   }

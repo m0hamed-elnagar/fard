@@ -95,18 +95,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               },
             ),
             Positioned(
-              top: 16.0,
-              right: 16.0,
-              child: IconButton(
-                onPressed: () => context.read<SettingsCubit>().toggleLocale(),
-                icon: const Icon(
-                  Icons.language_rounded,
-                  color: AppTheme.accent,
-                ),
-                tooltip: l10n.switchLanguage,
-              ),
-            ),
-            Positioned(
               bottom: 24.0,
               left: 24.0,
               right: 24.0,

@@ -2046,9 +2046,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return null;
   }
 
-// Add these methods to _SettingsScreenState class in settings_screen.dart
-// Insert them before the closing brace of the class (around line 2447)
-
   // ==================== APPEARANCE SECTION ====================
 
   Widget _buildAppearanceSection(
