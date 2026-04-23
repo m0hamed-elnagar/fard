@@ -299,16 +299,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1055.Box<_i852.SurahEntity>>(instanceName: 'surahBox'),
       ),
     );
-    gh.singleton<_i941.NotificationService>(
-      () => _i941.NotificationService(
-        gh<_i1055.SoundManager>(),
-        gh<_i680.ChannelManager>(),
-        gh<_i3.PrayerNotificationScheduler>(),
-        gh<_i163.FlutterLocalNotificationsPlugin>(),
-        gh<_i682.WidgetUpdateService>(),
-        gh<_i674.SettingsRepository>(),
-      ),
-    );
     gh.lazySingleton<_i498.QuranRepository>(
       () => _i82.QuranRepositoryImpl(
         remoteSource: gh<_i331.QuranRemoteSource>(),
@@ -318,21 +308,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i218.WatchBookmarks>(
       () => _i218.WatchBookmarks(gh<_i33.BookmarkRepository>()),
-    );
-    gh.lazySingleton<_i224.AudioDownloadService>(
-      () => _i779.AudioDownloadServiceImpl(
-        gh<_i451.AudioRepository>(),
-        gh<_i519.Client>(),
-        gh<_i941.NotificationService>(),
-        gh<_i674.SettingsRepository>(),
-        gh<_i188.DownloadManifestService>(),
-      ),
-    );
-    gh.factory<_i760.SyncNotificationSchedule>(
-      () => _i760.SyncNotificationSchedule(
-        gh<_i941.NotificationService>(),
-        gh<_i1027.IAzkarSource>(),
-      ),
     );
     gh.factory<_i1008.PlayAudio>(
       () => _i1008.PlayAudio(
@@ -346,36 +321,22 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i724.WerdRepository>(),
       ),
     );
-    gh.factory<_i573.SettingsCubit>(
-      () => _i573.SettingsCubit(
-        gh<_i674.SettingsRepository>(),
-        gh<_i669.LocationService>(),
-        gh<_i47.SyncLocationSettings>(),
-        gh<_i760.SyncNotificationSchedule>(),
-        gh<_i769.ToggleAfterSalahAzkarUseCase>(),
-        gh<_i6.UpdateCalculationMethodUseCase>(),
-        gh<_i808.ApplyThemePreset>(),
-        gh<_i1036.SaveCustomTheme>(),
-        gh<_i494.GetAvailableThemePresets>(),
-        gh<_i682.WidgetUpdateService>(),
-      ),
-    );
     gh.factory<_i1037.AzkarBloc>(
       () => _i1037.AzkarBloc(gh<_i1027.IAzkarSource>()),
     );
-    gh.factory<_i352.AudioDownloadCubit>(
-      () => _i352.AudioDownloadCubit(gh<_i224.AudioDownloadService>()),
+    gh.singleton<_i941.NotificationService>(
+      () => _i941.NotificationService(
+        gh<_i1055.SoundManager>(),
+        gh<_i680.ChannelManager>(),
+        gh<_i3.PrayerNotificationScheduler>(),
+        gh<_i163.FlutterLocalNotificationsPlugin>(),
+        gh<_i682.WidgetUpdateService>(),
+        gh<_i674.SettingsRepository>(),
+        gh<_i460.SharedPreferences>(),
+      ),
     );
     gh.factory<_i809.TasbihBloc>(
       () => _i809.TasbihBloc(gh<_i352.TasbihRepository>()),
-    );
-    gh.factory<_i9.AudioBloc>(
-      () => _i9.AudioBloc(
-        audioRepository: gh<_i451.AudioRepository>(),
-        playerService: gh<_i720.AudioPlayerService>(),
-        downloadService: gh<_i224.AudioDownloadService>(),
-        settingsRepository: gh<_i674.SettingsRepository>(),
-      ),
     );
     gh.factory<_i177.GetAllSurahs>(
       () => _i177.GetAllSurahs(gh<_i498.QuranRepository>()),
@@ -393,6 +354,21 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i358.WatchLastRead>(
       () => _i358.WatchLastRead(gh<_i498.QuranRepository>()),
     );
+    gh.lazySingleton<_i224.AudioDownloadService>(
+      () => _i779.AudioDownloadServiceImpl(
+        gh<_i451.AudioRepository>(),
+        gh<_i519.Client>(),
+        gh<_i941.NotificationService>(),
+        gh<_i674.SettingsRepository>(),
+        gh<_i188.DownloadManifestService>(),
+      ),
+    );
+    gh.factory<_i760.SyncNotificationSchedule>(
+      () => _i760.SyncNotificationSchedule(
+        gh<_i941.NotificationService>(),
+        gh<_i1027.IAzkarSource>(),
+      ),
+    );
     gh.factory<_i1060.ReaderBloc>(
       () => _i1060.ReaderBloc(
         getSurah: gh<_i941.GetSurah>(),
@@ -403,11 +379,36 @@ extension GetItInjectableX on _i174.GetIt {
         quranRepository: gh<_i498.QuranRepository>(),
       ),
     );
+    gh.factory<_i573.SettingsCubit>(
+      () => _i573.SettingsCubit(
+        gh<_i674.SettingsRepository>(),
+        gh<_i669.LocationService>(),
+        gh<_i47.SyncLocationSettings>(),
+        gh<_i760.SyncNotificationSchedule>(),
+        gh<_i769.ToggleAfterSalahAzkarUseCase>(),
+        gh<_i6.UpdateCalculationMethodUseCase>(),
+        gh<_i808.ApplyThemePreset>(),
+        gh<_i1036.SaveCustomTheme>(),
+        gh<_i494.GetAvailableThemePresets>(),
+        gh<_i682.WidgetUpdateService>(),
+      ),
+    );
     gh.factory<_i733.QuranBloc>(
       () => _i733.QuranBloc(
         gh<_i498.QuranRepository>(),
         gh<_i358.WatchLastRead>(),
         gh<_i33.BookmarkRepository>(),
+      ),
+    );
+    gh.factory<_i352.AudioDownloadCubit>(
+      () => _i352.AudioDownloadCubit(gh<_i224.AudioDownloadService>()),
+    );
+    gh.factory<_i9.AudioBloc>(
+      () => _i9.AudioBloc(
+        audioRepository: gh<_i451.AudioRepository>(),
+        playerService: gh<_i720.AudioPlayerService>(),
+        downloadService: gh<_i224.AudioDownloadService>(),
+        settingsRepository: gh<_i674.SettingsRepository>(),
       ),
     );
     return this;

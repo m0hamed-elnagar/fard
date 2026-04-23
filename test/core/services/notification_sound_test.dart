@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MockFlutterLocalNotificationsPlugin extends Mock
     implements FlutterLocalNotificationsPlugin {}
@@ -27,6 +28,8 @@ class MockWidgetUpdateService extends Mock implements WidgetUpdateService {}
 
 class MockSettingsRepository extends Mock implements SettingsRepository {}
 
+class MockSharedPreferences extends Mock implements SharedPreferences {}
+
 void main() {
   late NotificationService notificationService;
   late MockFlutterLocalNotificationsPlugin mockNotificationsPlugin;
@@ -36,6 +39,7 @@ void main() {
   late MockPrayerNotificationScheduler mockPrayerScheduler;
   late MockWidgetUpdateService mockWidgetUpdateService;
   late MockSettingsRepository mockSettingsRepository;
+  late MockSharedPreferences mockSharedPreferences;
 
   setUpAll(() {
     registerFallbackValue(const NotificationDetails());
@@ -53,6 +57,12 @@ void main() {
     mockPrayerScheduler = MockPrayerNotificationScheduler();
     mockWidgetUpdateService = MockWidgetUpdateService();
     mockSettingsRepository = MockSettingsRepository();
+    mockSharedPreferences = MockSharedPreferences();
+
+    // Mock SharedPreferences
+    when(() => mockSharedPreferences.getString(any())).thenReturn(null);
+    when(() => mockSharedPreferences.setString(any(), any()))
+        .thenAnswer((_) async => true);
 
     when(
       () => mockNotificationsPlugin
@@ -106,6 +116,7 @@ void main() {
       mockNotificationsPlugin,
       mockWidgetUpdateService,
       mockSettingsRepository,
+      mockSharedPreferences,
     );
   });
 

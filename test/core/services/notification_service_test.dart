@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter/services.dart';
@@ -32,6 +33,8 @@ class MockWidgetUpdateService extends Mock implements WidgetUpdateService {}
 
 class MockSettingsRepository extends Mock implements SettingsRepository {}
 
+class MockSharedPreferences extends Mock implements SharedPreferences {}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -52,6 +55,7 @@ void main() {
   late MockPrayerNotificationScheduler mockPrayerScheduler;
   late MockWidgetUpdateService mockWidgetUpdateService;
   late MockSettingsRepository mockSettingsRepository;
+  late MockSharedPreferences mockSharedPreferences;
 
   setUpAll(() {
     tz.initializeTimeZones();
@@ -81,6 +85,12 @@ void main() {
     mockPrayerScheduler = MockPrayerNotificationScheduler();
     mockWidgetUpdateService = MockWidgetUpdateService();
     mockSettingsRepository = MockSettingsRepository();
+    mockSharedPreferences = MockSharedPreferences();
+
+    // Mock SharedPreferences
+    when(() => mockSharedPreferences.getString(any())).thenReturn(null);
+    when(() => mockSharedPreferences.setString(any(), any()))
+        .thenAnswer((_) async => true);
 
     when(
       () => mockNotificationsPlugin
@@ -121,6 +131,8 @@ void main() {
     ).thenAnswer((_) async {});
     when(() => mockWidgetUpdateService.updateWidget()).thenAnswer((_) async {});
 
+    when(() => mockSettingsRepository.locale).thenReturn(const Locale('en'));
+
     notificationService = NotificationService(
       mockSoundManager,
       mockChannelManager,
@@ -128,6 +140,7 @@ void main() {
       mockNotificationsPlugin,
       mockWidgetUpdateService,
       mockSettingsRepository,
+      mockSharedPreferences,
     );
   });
 

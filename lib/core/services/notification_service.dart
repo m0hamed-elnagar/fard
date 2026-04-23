@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:injectable/injectable.dart';
 import '../di/injection.dart';
@@ -26,6 +27,7 @@ class NotificationService {
   final PrayerNotificationScheduler _prayerScheduler;
   final WidgetUpdateService _widgetUpdateService;
   final SettingsRepository _settingsProvider;
+  final SharedPreferences _prefs;
 
   NotificationService(
     this._soundManager,
@@ -34,6 +36,7 @@ class NotificationService {
     this._notificationsPlugin,
     this._widgetUpdateService,
     this._settingsProvider,
+    this._prefs,
   );
 
   static const String reminderChannelId = ChannelManager.reminderChannelId;
@@ -51,31 +54,49 @@ class NotificationService {
     try {
       // Timezone already initialized in configureDependencies(), just get local timezone
       debugPrint('NotificationService: getting local timezone...');
-      final rawTimeZone = await FlutterTimezone.getLocalTimezone().timeout(
-        const Duration(seconds: 5),
-      );
-      String timeZoneName = rawTimeZone.toString();
+      
+      String timeZoneName;
+      final cachedTimezone = _prefs.getString('last_known_timezone');
 
-      // On some platforms (like Windows), flutter_timezone might return "TimezoneInfo(Name, ...)"
-      if (timeZoneName.contains('(') && timeZoneName.contains(')')) {
-        final startIndex = timeZoneName.indexOf('(') + 1;
-        final endIndex = timeZoneName.indexOf(',');
-        if (endIndex != -1 && endIndex > startIndex) {
-          timeZoneName = timeZoneName.substring(startIndex, endIndex).trim();
-        } else {
-          final closeIndex = timeZoneName.indexOf(')');
-          if (closeIndex > startIndex) {
-            timeZoneName = timeZoneName
-                .substring(startIndex, closeIndex)
-                .trim();
+      try {
+        final rawTimeZone = await FlutterTimezone.getLocalTimezone().timeout(
+          const Duration(seconds: 10), // Increased timeout to 10s
+        );
+        timeZoneName = rawTimeZone.toString();
+        
+        // On some platforms (like Windows), flutter_timezone might return "TimezoneInfo(Name, ...)"
+        if (timeZoneName.contains('(') && timeZoneName.contains(')')) {
+          final startIndex = timeZoneName.indexOf('(') + 1;
+          final endIndex = timeZoneName.indexOf(',');
+          if (endIndex != -1 && endIndex > startIndex) {
+            timeZoneName = timeZoneName.substring(startIndex, endIndex).trim();
+          } else {
+            final closeIndex = timeZoneName.indexOf(')');
+            if (closeIndex > startIndex) {
+              timeZoneName = timeZoneName
+                  .substring(startIndex, closeIndex)
+                  .trim();
+            }
           }
+        }
+        
+        // Cache successful timezone
+        await _prefs.setString('last_known_timezone', timeZoneName);
+      } catch (e) {
+        debugPrint('NotificationService: Error/Timeout getting local timezone: $e');
+        if (cachedTimezone != null) {
+          debugPrint('NotificationService: Using cached timezone: $cachedTimezone');
+          timeZoneName = cachedTimezone;
+        } else {
+          debugPrint('NotificationService: No cached timezone found, defaulting to UTC');
+          timeZoneName = 'UTC';
         }
       }
 
       tz.setLocalLocation(tz.getLocation(timeZoneName));
       debugPrint('Local timezone set to: $timeZoneName');
     } catch (e) {
-      debugPrint('Could not get local timezone, defaulting to UTC: $e');
+      debugPrint('Could not set local timezone location: $e');
       tz.setLocalLocation(tz.getLocation('UTC'));
     }
 
