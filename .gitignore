@@ -112,16 +112,4 @@ tasks/
 all_reciters.json
 reciters.json
 editions.json
-docs/archive/
-docs/superpowers/
-docs/fix_qada_logic.md
-/docs/MASTER_REMEDIATION_PLAN.md
-/docs/RESTORATION_PLAN.md
-/docs/RESTORATION_REPORT.md
-/docs/NOTIFICATION_REMEDIATION_LOG.md
-/docs/OFFLINE_DOWNLOAD_FIX_PROGRESS.md
-/docs/PHASE_1_IMPLEMENTATION_COMPLETE.md
-/docs/PHASE_1B_HYBRID_ARCHITECTURE.md
-/docs/SCROLLING_REFACTOR_STATUS.md
-/docs/SKIPPED_FEATURES_REPORT.md
-/docs/WERD_IMPLEMENTATION_CONTEXT.md
+docs/
