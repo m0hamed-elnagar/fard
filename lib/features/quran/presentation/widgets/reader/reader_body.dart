@@ -1,7 +1,7 @@
 import 'package:fard/core/extensions/quran_extension.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/player/audio_player_bloc.dart';
 import 'package:fard/features/quran/domain/entities/ayah.dart';
 import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
 import 'package:fard/features/quran/presentation/controllers/reader_scroll_controller.dart';
@@ -132,7 +132,7 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
                       ),
                     ),
 
-                  BlocBuilder<AudioBloc, AudioState>(
+                  BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
                     builder: (context, audioState) {
                       final isThisSurah =
                           audioState.currentSurah == s.surah.number.value;

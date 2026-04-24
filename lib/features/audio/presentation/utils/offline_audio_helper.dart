@@ -4,7 +4,8 @@ import 'package:fard/core/services/connectivity_service.dart';
 import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
 import 'package:fard/features/audio/domain/services/audio_download_service.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/player/audio_player_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/manager/reciter_manager_bloc.dart';
 import 'package:fard/features/quran/presentation/widgets/download_center_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,17 +21,18 @@ class OfflineAudioHelper {
     bool isDownloaded = false,
     bool forceDirectPlay = false,
   }) async {
-    final audioBloc = context.read<AudioBloc>();
-    final audioState = audioBloc.state;
-    final currentReciter = audioState.currentReciter;
+    final playerBloc = context.read<AudioPlayerBloc>();
+    final managerBloc = context.read<ReciterManagerBloc>();
+    final playerState = playerBloc.state;
+    final currentReciter = managerBloc.state.currentReciter;
 
     // Smart play/pause: If this surah is already active, toggle its state
-    if (audioState.currentSurah == surahNumber) {
-      if (audioState.isPlaying) {
-        audioBloc.add(AudioEvent.pause());
+    if (playerState.currentSurah == surahNumber) {
+      if (playerState.isPlaying) {
+        playerBloc.add(const Pause());
         return;
-      } else if (audioState.status == AudioStatus.paused) {
-        audioBloc.add(AudioEvent.resume());
+      } else if (playerState.status == AudioStatus.paused) {
+        playerBloc.add(const Resume());
         return;
       }
     }
@@ -44,10 +46,10 @@ class OfflineAudioHelper {
     }
 
     if (effectivelyDownloaded) {
-      audioBloc.add(
-        AudioEvent.playSurah(surahNumber: surahNumber, startAyah: startAyah),
+      playerBloc.add(
+        PlaySurah(surahNumber: surahNumber, startAyah: startAyah, reciter: currentReciter),
       );
-      audioBloc.add(AudioEvent.showBanner());
+      playerBloc.add(const ShowBanner());
       return;
     }
 
@@ -55,10 +57,10 @@ class OfflineAudioHelper {
     final hasInternet = await getIt<ConnectivityService>().hasInternet();
 
     if (hasInternet) {
-      audioBloc.add(
-        AudioEvent.playSurah(surahNumber: surahNumber, startAyah: startAyah),
+      playerBloc.add(
+        PlaySurah(surahNumber: surahNumber, startAyah: startAyah, reciter: currentReciter),
       );
-      audioBloc.add(AudioEvent.showBanner());
+      playerBloc.add(const ShowBanner());
       return;
     }
 
@@ -105,8 +107,9 @@ class OfflineAudioHelper {
     Reciter alternative,
   ) {
     final l10n = AppLocalizations.of(context)!;
-    final audioBloc = context.read<AudioBloc>();
-    final currentReciter = audioBloc.state.currentReciter;
+    final playerBloc = context.read<AudioPlayerBloc>();
+    final managerBloc = context.read<ReciterManagerBloc>();
+    final currentReciter = managerBloc.state.currentReciter;
     final isArabic = l10n.localeName == 'ar';
 
     showDialog(
@@ -129,14 +132,16 @@ class OfflineAudioHelper {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              audioBloc.add(AudioEvent.selectReciter(alternative));
-              audioBloc.add(
-                AudioEvent.playSurah(
+              managerBloc.add(SelectReciter(alternative));
+              playerBloc.add(ChangeReciter(alternative));
+              playerBloc.add(
+                PlaySurah(
                   surahNumber: surahNumber,
                   startAyah: startAyah,
+                  reciter: alternative,
                 ),
               );
-              audioBloc.add(AudioEvent.showBanner());
+              playerBloc.add(const ShowBanner());
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).primaryColor,

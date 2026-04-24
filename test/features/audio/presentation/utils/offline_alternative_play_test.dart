@@ -5,7 +5,8 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/services/connectivity_service.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
 import 'package:fard/features/audio/domain/services/audio_download_service.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/player/audio_player_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/manager/reciter_manager_bloc.dart';
 import 'package:fard/features/audio/presentation/utils/offline_audio_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,13 +14,15 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockAudioBloc extends MockBloc<AudioEvent, AudioState> implements AudioBloc {}
+class MockAudioPlayerBloc extends MockBloc<AudioPlayerEvent, AudioPlayerState> implements AudioPlayerBloc {}
+class MockReciterManagerBloc extends MockBloc<ReciterManagerEvent, ReciterManagerState> implements ReciterManagerBloc {}
 class MockConnectivityBloc extends MockBloc<ConnectivityEvent, ConnectivityState> implements ConnectivityBloc {}
 class MockAudioDownloadService extends Mock implements AudioDownloadService {}
 class MockConnectivityService extends Mock implements ConnectivityService {}
 
 void main() {
-  late MockAudioBloc mockAudioBloc;
+  late MockAudioPlayerBloc mockAudioPlayerBloc;
+  late MockReciterManagerBloc mockReciterManagerBloc;
   late MockConnectivityBloc mockConnectivityBloc;
   late MockAudioDownloadService mockDownloadService;
   late MockConnectivityService mockConnectivityService;
@@ -39,13 +42,16 @@ void main() {
   );
 
   setUpAll(() {
-    registerFallbackValue(const AudioState());
+    registerFallbackValue(const AudioPlayerState());
+    registerFallbackValue(const ReciterManagerState());
     registerFallbackValue(const Stop());
+    registerFallbackValue(const SelectReciter(alafasy));
     registerFallbackValue(alafasy);
   });
 
   setUp(() {
-    mockAudioBloc = MockAudioBloc();
+    mockAudioPlayerBloc = MockAudioPlayerBloc();
+    mockReciterManagerBloc = MockReciterManagerBloc();
     mockConnectivityBloc = MockConnectivityBloc();
     mockDownloadService = MockAudioDownloadService();
     mockConnectivityService = MockConnectivityService();
@@ -54,7 +60,8 @@ void main() {
     getIt.registerSingleton<AudioDownloadService>(mockDownloadService);
     getIt.registerSingleton<ConnectivityService>(mockConnectivityService);
 
-    when(() => mockAudioBloc.state).thenReturn(const AudioState(currentReciter: alafasy));
+    when(() => mockAudioPlayerBloc.state).thenReturn(const AudioPlayerState());
+    when(() => mockReciterManagerBloc.state).thenReturn(const ReciterManagerState(currentReciter: alafasy));
     when(() => mockConnectivityBloc.state).thenReturn(const ConnectivityStatus(false));
     when(() => mockConnectivityService.hasInternet()).thenAnswer((_) async => false);
   });
@@ -78,7 +85,8 @@ void main() {
     await tester.pumpWidget(
       MultiBlocProvider(
         providers: [
-          BlocProvider<AudioBloc>.value(value: mockAudioBloc),
+          BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
+          BlocProvider<ReciterManagerBloc>.value(value: mockReciterManagerBloc),
           BlocProvider<ConnectivityBloc>.value(value: mockConnectivityBloc),
         ],
         child: const MaterialApp(
@@ -121,15 +129,15 @@ void main() {
     expect(find.byType(AlertDialog), findsNothing);
     
     // Verify and check specific values directly using capture
-    final selectReciterEvent = verify(() => mockAudioBloc.add(captureAny(that: isA<SelectReciter>())))
+    final selectReciterEvent = verify(() => mockReciterManagerBloc.add(captureAny(that: isA<SelectReciter>())))
         .captured.last as SelectReciter;
     expect(selectReciterEvent.reciter.identifier, husary.identifier);
 
-    final playSurahEvent = verify(() => mockAudioBloc.add(captureAny(that: isA<PlaySurah>())))
+    final playSurahEvent = verify(() => mockAudioPlayerBloc.add(captureAny(that: isA<PlaySurah>())))
         .captured.last as PlaySurah;
     expect(playSurahEvent.surahNumber, 18);
     expect(playSurahEvent.startAyah, 1);
 
-    verify(() => mockAudioBloc.add(any(that: isA<ShowBanner>()))).called(1);
+    verify(() => mockAudioPlayerBloc.add(any(that: isA<ShowBanner>()))).called(1);
   });
 }

@@ -32,9 +32,12 @@ import '../../features/audio/domain/repositories/audio_repository.dart'
 import '../../features/audio/domain/services/audio_download_service.dart'
     as _i224;
 import '../../features/audio/domain/usecases/play_audio.dart' as _i1008;
-import '../../features/audio/presentation/blocs/audio_bloc.dart' as _i9;
 import '../../features/audio/presentation/blocs/audio_download/audio_download_cubit.dart'
     as _i352;
+import '../../features/audio/presentation/blocs/manager/reciter_manager_bloc.dart'
+    as _i730;
+import '../../features/audio/presentation/blocs/player/audio_player_bloc.dart'
+    as _i288;
 import '../../features/azkar/data/azkar_repository.dart' as _i1004;
 import '../../features/azkar/data/azkar_source.dart' as _i1027;
 import '../../features/azkar/presentation/blocs/azkar_bloc.dart' as _i1037;
@@ -265,6 +268,13 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i1004.AzkarRepository(gh<_i1055.Box<int>>(instanceName: 'azkarBox')),
     );
+    gh.factory<_i288.AudioPlayerBloc>(
+      () => _i288.AudioPlayerBloc(
+        audioRepository: gh<_i451.AudioRepository>(),
+        playerService: gh<_i720.AudioPlayerService>(),
+        settingsRepository: gh<_i674.SettingsRepository>(),
+      ),
+    );
     gh.lazySingleton<_i1068.ExportImportService>(
       () => _i1068.ExportImportService(
         gh<_i800.PrayerRepo>(),
@@ -379,6 +389,12 @@ extension GetItInjectableX on _i174.GetIt {
         quranRepository: gh<_i498.QuranRepository>(),
       ),
     );
+    gh.factory<_i730.ReciterManagerBloc>(
+      () => _i730.ReciterManagerBloc(
+        audioRepository: gh<_i451.AudioRepository>(),
+        downloadService: gh<_i224.AudioDownloadService>(),
+      ),
+    );
     gh.factory<_i573.SettingsCubit>(
       () => _i573.SettingsCubit(
         gh<_i674.SettingsRepository>(),
@@ -402,14 +418,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i352.AudioDownloadCubit>(
       () => _i352.AudioDownloadCubit(gh<_i224.AudioDownloadService>()),
-    );
-    gh.factory<_i9.AudioBloc>(
-      () => _i9.AudioBloc(
-        audioRepository: gh<_i451.AudioRepository>(),
-        playerService: gh<_i720.AudioPlayerService>(),
-        downloadService: gh<_i224.AudioDownloadService>(),
-        settingsRepository: gh<_i674.SettingsRepository>(),
-      ),
     );
     return this;
   }

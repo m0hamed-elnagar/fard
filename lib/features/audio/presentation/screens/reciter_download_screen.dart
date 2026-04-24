@@ -2,13 +2,13 @@ import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_download/audio_download_cubit.dart';
 import 'package:fard/features/audio/presentation/blocs/audio_download/audio_download_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quran/quran.dart' as quran;
+import 'package:fard/features/audio/presentation/blocs/manager/reciter_manager_bloc.dart';
 
 class ReciterDownloadScreen extends StatelessWidget {
   final Reciter reciter;
@@ -23,7 +23,7 @@ class ReciterDownloadScreen extends StatelessWidget {
       child: PopScope(
         onPopInvokedWithResult: (didPop, result) {
           if (didPop) {
-            context.read<AudioBloc>().add(AudioEvent.refreshReciterStatuses());
+            context.read<ReciterManagerBloc>().add(const RefreshReciterStatuses());
           }
         },
         child: Scaffold(

@@ -1,6 +1,7 @@
 import 'package:fard/core/extensions/number_extension.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/player/audio_player_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/manager/reciter_manager_bloc.dart';
 import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
 import 'package:fard/features/quran/domain/entities/surah.dart';
 import 'package:fard/features/quran/presentation/utils/quran_fonts.dart';
@@ -102,62 +103,66 @@ class SurahHeader extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-          BlocBuilder<AudioBloc, AudioState>(
-            builder: (context, state) {
-              final isPlaying = state.isPlaying;
-              final isLoading = state.isLoading;
-              final isThisSurah = state.currentSurah == surah.number.value;
+          BlocBuilder<ReciterManagerBloc, ReciterManagerState>(
+            builder: (context, managerState) {
+              return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+                builder: (context, state) {
+                  final isPlaying = state.isPlaying;
+                  final isLoading = state.isLoading;
+                  final isThisSurah = state.currentSurah == surah.number.value;
 
-              return Wrap(
-                alignment: WrapAlignment.center,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      OfflineAudioHelper.handlePlayRequest(
-                        context: context,
-                        surahNumber: surah.number.value,
-                        startAyah: currentAyahNumber ?? 1,
-                        isDownloaded: false, // Will be checked inside if needed
-                      );
-                    },
-                    icon: isLoading && isThisSurah
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Icon(
-                            isPlaying && isThisSurah
-                                ? Icons.pause_rounded
-                                : Icons.play_arrow_rounded,
+                  return Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          OfflineAudioHelper.handlePlayRequest(
+                            context: context,
+                            surahNumber: surah.number.value,
+                            startAyah: currentAyahNumber ?? 1,
+                            isDownloaded: false, // Will be checked inside if needed
+                          );
+                        },
+                        icon: isLoading && isThisSurah
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Icon(
+                                isPlaying && isThisSurah
+                                    ? Icons.pause_rounded
+                                    : Icons.play_arrow_rounded,
+                              ),
+                        label: Text(
+                          isPlaying && isThisSurah
+                              ? l10n.pauseSurah
+                              : l10n.playSurahBtn,
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
                           ),
-                    label: Text(
-                      isPlaying && isThisSurah
-                          ? l10n.pauseSurah
-                          : l10n.playSurahBtn,
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                      ActionChip(
+                        avatar: const Icon(Icons.person_outline, size: 18),
+                        label: Text(
+                          managerState.currentReciter?.name.split(' ').first ??
+                              l10n.reciter,
+                        ),
+                        onPressed: () => _showReciterSelector(context),
                       ),
-                    ),
-                  ),
-                  ActionChip(
-                    avatar: const Icon(Icons.person_outline, size: 18),
-                    label: Text(
-                      state.currentReciter?.name.split(' ').first ??
-                          l10n.reciter,
-                    ),
-                    onPressed: () => _showReciterSelector(context),
-                  ),
-                ],
+                    ],
+                  );
+                },
               );
             },
           ),
@@ -171,8 +176,11 @@ class SurahHeader extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => BlocProvider.value(
-        value: context.read<AudioBloc>(),
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: context.read<AudioPlayerBloc>()),
+          BlocProvider.value(value: context.read<ReciterManagerBloc>()),
+        ],
         child: const Material(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           clipBehavior: Clip.antiAlias,

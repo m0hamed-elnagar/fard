@@ -1,5 +1,5 @@
 import 'package:fard/features/audio/domain/repositories/audio_player_service.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/player/audio_player_bloc.dart';
 import 'package:fard/features/audio/presentation/widgets/audio_player_bar.dart';
 import 'package:fard/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/missed_days_dialog.dart';
@@ -76,7 +76,7 @@ void main() {
 
       final audioBloc = tester
           .element(find.byType(AudioPlayerBar))
-          .read<AudioBloc>();
+          .read<AudioPlayerBloc>();
 
       // Wait for "Playing" or "Paused" status (Active)
       bool isActive = false;

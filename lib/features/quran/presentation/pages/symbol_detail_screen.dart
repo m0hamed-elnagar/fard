@@ -1,7 +1,8 @@
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/extensions/number_extension.dart';
 import 'package:fard/features/audio/domain/repositories/audio_player_service.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/player/audio_player_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/manager/reciter_manager_bloc.dart';
 import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
 import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
@@ -336,60 +337,64 @@ class _SymbolExampleCardState extends State<_SymbolExampleCard> {
   }
 
   Widget _buildAudioControls(BuildContext context) {
-    return BlocBuilder<AudioBloc, AudioState>(
-      builder: (context, state) {
-        final isCurrentAyah = state.currentSurah == widget.example.surah &&
-            state.currentAyah == widget.example.ayah;
-        
-        final isLoading = state.status == AudioStatus.loading && isCurrentAyah;
-        final isPlaying = state.status == AudioStatus.playing && isCurrentAyah;
+    return BlocBuilder<ReciterManagerBloc, ReciterManagerState>(
+      builder: (context, managerState) {
+        return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+          builder: (context, state) {
+            final isCurrentAyah = state.currentSurah == widget.example.surah &&
+                state.currentAyah == widget.example.ayah;
+            
+            final isLoading = state.status == AudioStatus.loading && isCurrentAyah;
+            final isPlaying = state.status == AudioStatus.playing && isCurrentAyah;
 
-        return Row(
-          children: [
-            // Play/Pause Button
-            IconButton.filledTonal(
-              onPressed: isLoading ? null : () {
-                final audioBloc = context.read<AudioBloc>();
-                if (isPlaying) {
-                  audioBloc.add(AudioEvent.pause());
-                } else if (state.status == AudioStatus.paused && isCurrentAyah) {
-                  audioBloc.add(AudioEvent.resume());
-                } else {
-                  audioBloc.add(AudioEvent.playAyah(
-                    surahNumber: widget.example.surah,
-                    ayahNumber: widget.example.ayah,
-                    reciter: state.currentReciter,
-                  ));
-                }
-              },
-              icon: isLoading 
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                : Icon(isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded),
-            ),
-            
-            // Stop Button
-            if (isCurrentAyah && (isPlaying || state.status == AudioStatus.paused))
-              IconButton(
-                onPressed: () => context.read<AudioBloc>().add(AudioEvent.stop()),
-                icon: const Icon(Icons.stop_rounded),
-                color: Theme.of(context).colorScheme.error,
-              ),
-            
-            const Spacer(),
-            
-            // Reciter Switcher
-            TextButton.icon(
-              onPressed: () => _showReciterSelector(context),
-              icon: const Icon(Icons.person_outline, size: 18),
-              label: Text(
-                state.currentReciter?.name ?? 'اختر القارئ',
-                style: const TextStyle(fontSize: 12),
-              ),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-              ),
-            ),
-          ],
+            return Row(
+              children: [
+                // Play/Pause Button
+                IconButton.filledTonal(
+                  onPressed: isLoading ? null : () {
+                    final audioBloc = context.read<AudioPlayerBloc>();
+                    if (isPlaying) {
+                      audioBloc.add(const Pause());
+                    } else if (state.status == AudioStatus.paused && isCurrentAyah) {
+                      audioBloc.add(const Resume());
+                    } else {
+                      audioBloc.add(PlayAyah(
+                        surahNumber: widget.example.surah,
+                        ayahNumber: widget.example.ayah,
+                        reciter: managerState.currentReciter,
+                      ));
+                    }
+                  },
+                  icon: isLoading 
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    : Icon(isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded),
+                ),
+                
+                // Stop Button
+                if (isCurrentAyah && (isPlaying || state.status == AudioStatus.paused))
+                  IconButton(
+                    onPressed: () => context.read<AudioPlayerBloc>().add(const Stop()),
+                    icon: const Icon(Icons.stop_rounded),
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                
+                const Spacer(),
+                
+                // Reciter Switcher
+                TextButton.icon(
+                  onPressed: () => _showReciterSelector(context),
+                  icon: const Icon(Icons.person_outline, size: 18),
+                  label: Text(
+                    managerState.currentReciter?.name ?? 'اختر القارئ',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -400,9 +405,16 @@ class _SymbolExampleCardState extends State<_SymbolExampleCard> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => BlocProvider.value(
-        value: context.read<AudioBloc>(),
-        child: const ReciterSelector(),
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: context.read<AudioPlayerBloc>()),
+          BlocProvider.value(value: context.read<ReciterManagerBloc>()),
+        ],
+        child: const Material(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          clipBehavior: Clip.antiAlias,
+          child: ReciterSelector(),
+        ),
       ),
     );
   }

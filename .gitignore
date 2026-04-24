@@ -77,6 +77,16 @@ app.*.map.json
 /windows/flutter/generated_plugin_registrant.h
 /windows/flutter/generated_plugins.cmake
 
+# Desktop ephemeral files
+linux/flutter/ephemeral/
+macos/Flutter/ephemeral/
+windows/flutter/ephemeral/
+
+# Build runner generated files
+*.g.dart
+*.freezed.dart
+*.config.dart
+
 # Test results
 test_output_2.txt
 test_output_3.txt

@@ -4,8 +4,8 @@ import 'package:fard/core/constants/calculation_contract.dart';
 import 'package:fard/core/extensions/hijri_extension.dart';
 import 'package:fard/core/models/widget_data_model.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
-import 'package:fard/core/theme/theme_presets.dart';
-import 'package:fard/features/settings/domain/entities/theme_preset.dart';
+import 'package:fard/core/utils/widget_prayer_calculator.dart';
+import 'package:fard/core/utils/widget_theme_resolver.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -37,8 +37,6 @@ class WidgetUpdateService {
       return;
     }
 
-    // Throttle updates to max once per 2 seconds to avoid main thread jank 
-    // during rapid lifecycle transitions (e.g., inactive -> paused)
     final now = DateTime.now();
     if (_lastUpdate != null && now.difference(_lastUpdate!) < const Duration(seconds: 2)) {
       debugPrint('WidgetUpdateService: Throttling update - too soon since last update');
@@ -71,11 +69,6 @@ class WidgetUpdateService {
       date: now,
     );
 
-    debugPrint(
-      'WidgetUpdateService: Calculated prayer times - Fajr: ${prayerTimes.fajr}, Dhuhr: ${prayerTimes.dhuhr}, Asr: ${prayerTimes.asr}, Maghrib: ${prayerTimes.maghrib}, Isha: ${prayerTimes.isha}',
-    );
-
-    // Consistent with app's Hijri adjustment logic
     final hijriDate = HijriCalendar.fromDate(
       now.add(Duration(days: _settingsProvider.hijriAdjustment)),
     );
@@ -85,94 +78,25 @@ class WidgetUpdateService {
     final dayOfWeek = DateFormat('EEEE', lang).format(now);
     final isRtl = lang == 'ar';
 
-    // Calculate Next Prayer
-    String nextPrayerName = _getPrayerName('fajr', lang);
-    DateTime nextPrayerTime = prayerTimes.fajr;
+    // Use WidgetPrayerCalculator
+    final nextPrayer = WidgetPrayerCalculator.calculateNextPrayer(
+      now: now,
+      prayerTimes: prayerTimes,
+      prayerTimeService: _prayerTimeService,
+      latitude: _settingsProvider.latitude!,
+      longitude: _settingsProvider.longitude!,
+      method: _settingsProvider.calculationMethod,
+      madhab: _settingsProvider.madhab,
+      lang: lang,
+    );
 
-    if (now.isBefore(prayerTimes.fajr)) {
-      nextPrayerName = _getPrayerName('fajr', lang);
-      nextPrayerTime = prayerTimes.fajr;
-    } else if (now.isBefore(prayerTimes.dhuhr)) {
-      nextPrayerName = _getPrayerName('dhuhr', lang);
-      nextPrayerTime = prayerTimes.dhuhr;
-    } else if (now.isBefore(prayerTimes.asr)) {
-      nextPrayerName = _getPrayerName('asr', lang);
-      nextPrayerTime = prayerTimes.asr;
-    } else if (now.isBefore(prayerTimes.maghrib)) {
-      nextPrayerName = _getPrayerName('maghrib', lang);
-      nextPrayerTime = prayerTimes.maghrib;
-    } else if (now.isBefore(prayerTimes.isha)) {
-      nextPrayerName = _getPrayerName('isha', lang);
-      nextPrayerTime = prayerTimes.isha;
-    } else {
-      // After Isha - calculate tomorrow's Fajr
-      final tomorrowPrayerTimes = _prayerTimeService.getPrayerTimes(
-        latitude: _settingsProvider.latitude!,
-        longitude: _settingsProvider.longitude!,
-        method: _settingsProvider.calculationMethod,
-        madhab: _settingsProvider.madhab,
-        date: now.add(const Duration(days: 1)),
-      );
-      nextPrayerName = _getPrayerName('fajr', lang);
-      nextPrayerTime = tomorrowPrayerTimes.fajr;
-    }
-
-    // Get current theme colors from the active preset
-    final themePresetId = _settingsProvider.themePresetId;
-    ThemePreset? currentPreset;
-    
-    if (themePresetId != 'custom') {
-      try {
-        currentPreset = ThemePresets.getById(themePresetId);
-      } catch (e) {
-        debugPrint('WidgetUpdateService: Theme preset not found: $themePresetId');
-      }
-    }
-
-    // Determine target colors
-    String primaryColor;
-    String accentColor;
-    String backgroundColor;
-    String surfaceColor;
-    String textColor;
-    String textSecondaryColor;
-
-    if (currentPreset != null) {
-      // Use preset colors directly for perfect app-widget alignment
-      primaryColor = _colorToHex(currentPreset.primaryColor);
-      accentColor = _colorToHex(currentPreset.accentColor);
-      backgroundColor = _colorToHex(currentPreset.backgroundColor);
-      surfaceColor = _colorToHex(currentPreset.surfaceColor);
-      textColor = _colorToHex(currentPreset.textColor);
-      textSecondaryColor = _colorToHex(currentPreset.textSecondaryColor);
-    } else {
-      // For custom themes, or as fallback, use ColorScheme.fromSeed
-      final targetBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
-      Color seedColor = const Color(0xFF2E7D32);
-      
-      if (themePresetId == 'custom') {
-        final customColors = _settingsProvider.customThemeColors;
-        if (customColors != null && customColors['primary'] != null) {
-          seedColor = _hexToColor(customColors['primary']!);
-        }
-      }
-
-      final colorScheme = ColorScheme.fromSeed(
-        seedColor: seedColor,
-        brightness: targetBrightness,
-      );
-
-      debugPrint(
-        'WidgetUpdateService: Target brightness (derived): $targetBrightness',
-      );
-
-      primaryColor = _colorToHex(colorScheme.primary);
-      accentColor = _colorToHex(colorScheme.secondary);
-      backgroundColor = _colorToHex(colorScheme.surface);
-      surfaceColor = _colorToHex(colorScheme.surfaceContainerHighest);
-      textColor = _colorToHex(colorScheme.onSurface);
-      textSecondaryColor = _colorToHex(colorScheme.onSurfaceVariant);
-    }
+    // Use WidgetThemeResolver
+    final targetBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    final themeColors = WidgetThemeResolver.resolve(
+      themePresetId: _settingsProvider.themePresetId,
+      customColors: _settingsProvider.customThemeColors,
+      brightness: targetBrightness,
+    );
 
     final data = WidgetDataModel(
       gregorianDate: DateFormat('d MMMM yyyy', lang).format(now),
@@ -180,134 +104,44 @@ class WidgetUpdateService {
       dayOfWeek: dayOfWeek,
       sunrise: sunrise,
       isRtl: isRtl,
-      nextPrayerName: nextPrayerName,
-      nextPrayerTime: nextPrayerTime.millisecondsSinceEpoch,
+      nextPrayerName: nextPrayer.name,
+      nextPrayerTime: nextPrayer.time.millisecondsSinceEpoch,
       lastUpdated: now.millisecondsSinceEpoch,
-      primaryColorHex: primaryColor,
-      accentColorHex: accentColor,
-      backgroundColorHex: backgroundColor,
-      surfaceColorHex: surfaceColor,
-      textColorHex: textColor,
-      textSecondaryColorHex: textSecondaryColor,
+      primaryColorHex: themeColors.primary,
+      accentColorHex: themeColors.accent,
+      backgroundColorHex: themeColors.background,
+      surfaceColorHex: themeColors.surface,
+      textColorHex: themeColors.text,
+      textSecondaryColorHex: themeColors.textSecondary,
       prayers: [
-        _createItem('fajr', prayerTimes.fajr, lang),
-        _createItem('dhuhr', prayerTimes.dhuhr, lang),
-        _createItem('asr', prayerTimes.asr, lang),
-        _createItem('maghrib', prayerTimes.maghrib, lang),
-        _createItem('isha', prayerTimes.isha, lang),
+        WidgetPrayerCalculator.createItem('fajr', prayerTimes.fajr, lang),
+        WidgetPrayerCalculator.createItem('dhuhr', prayerTimes.dhuhr, lang),
+        WidgetPrayerCalculator.createItem('asr', prayerTimes.asr, lang),
+        WidgetPrayerCalculator.createItem('maghrib', prayerTimes.maghrib, lang),
+        WidgetPrayerCalculator.createItem('isha', prayerTimes.isha, lang),
       ],
-    );
-
-    debugPrint(
-      'WidgetUpdateService: Saving data for widget: ${data.gregorianDate}',
-    );
-    debugPrint(
-      'WidgetUpdateService: Next prayer: $nextPrayerName at $nextPrayerTime',
-    );
-    debugPrint(
-      'WidgetUpdateService: Primary color: $primaryColor, Background: $backgroundColor',
     );
 
     final jsonData = jsonEncode(data.toJson());
     final key = '${CalculationContract.prefPrefix}prayer_data';
 
-    // DEBUG: Print the actual JSON being saved
-    final jsonForDebug = jsonDecode(jsonData) as Map<String, dynamic>;
-    debugPrint(
-      'WidgetUpdateService: JSON primaryColorHex=${jsonForDebug['primaryColorHex']}, backgroundColorHex=${jsonForDebug['backgroundColorHex']}',
-    );
-
-    // Save to HomeWidget (for native background refresh if needed)
     try {
       await HomeWidget.saveWidgetData(key, jsonData);
-    } catch (e) {
-      debugPrint('WidgetUpdateService: Error saving to HomeWidget: $e');
-    }
-
-    // Save to standard SharedPreferences (which SettingsRepository.kt reads from)
-    try {
       await _prefs.setString(key, jsonData);
-      debugPrint(
-        'WidgetUpdateService: Saved to SharedPreferences with key: $key',
-      );
-    } catch (e) {
-      debugPrint('WidgetUpdateService: Error saving to SharedPreferences: $e');
-    }
-
-    // 🚀 CRITICAL FIX: Cache Hijri date separately for native worker
-    // This prevents the native worker from showing "Loading..." placeholder
-    final hijriKey = '${CalculationContract.prefPrefix}hijri_date_cache';
-    try {
+      
+      final hijriKey = '${CalculationContract.prefPrefix}hijri_date_cache';
       await _prefs.setString(hijriKey, data.hijriDate);
       await HomeWidget.saveWidgetData('${CalculationContract.prefPrefix}hijri_date', data.hijriDate);
-      debugPrint('WidgetUpdateService: Cached Hijri date: ${data.hijriDate}');
+      
+      await _syncNative(jsonData);
+      
+      await HomeWidget.updateWidget(name: 'PrayerWidget', androidName: 'PrayerWidget');
+      await HomeWidget.updateWidget(name: 'NextPrayerCountdownWidget', androidName: 'NextPrayerCountdownWidget');
     } catch (e) {
-      debugPrint('WidgetUpdateService: Error caching Hijri date: $e');
-    }
-
-    // 🚀 CRITICAL FIX: Sync settings to Native BEFORE updating widget
-    // This ensures SettingsRepository.getSettings() returns valid data
-    // _syncNative also triggers Glance widget update via MainActivity
-    await _syncNative(jsonData);
-    debugPrint('WidgetUpdateService: Settings synced to native');
-
-    // 🚀 CRITICAL FIX: Explicitly request Glance widget update
-    // This ensures Android calls provideGlance() again with new theme data
-    try {
-      await HomeWidget.updateWidget(
-        name: 'PrayerWidget',
-        androidName: 'PrayerWidget',
-      );
-      debugPrint('WidgetUpdateService: Requested PrayerWidget update');
-    } catch (e) {
-      debugPrint('WidgetUpdateService: Error updating PrayerWidget: $e');
-    }
-
-    try {
-      await HomeWidget.updateWidget(
-        name: 'NextPrayerCountdownWidget',
-        androidName: 'NextPrayerCountdownWidget',
-      );
-      debugPrint('WidgetUpdateService: Requested CountdownWidget update');
-    } catch (e) {
-      debugPrint('WidgetUpdateService: Error updating CountdownWidget: $e');
+      debugPrint('WidgetUpdateService: Error during update: $e');
     }
 
     debugPrint('WidgetUpdateService: Update complete!');
-  }
-
-  /// Get saved widget theme from native SharedPreferences
-  Future<Map<String, String>?> getWidgetTheme() async {
-    try {
-      const channel = MethodChannel('com.qada.fard/widget_theme');
-      final result = await channel.invokeMapMethod<String, String>('getWidgetTheme');
-      return result;
-    } catch (e) {
-      debugPrint('WidgetUpdateService: Error getting widget theme: $e');
-      return null;
-    }
-  }
-
-  /// Save widget theme to native SharedPreferences and apply
-  Future<void> applyWidgetTheme(Map<String, String> themeMap) async {
-    try {
-      const channel = MethodChannel('com.qada.fard/widget_theme');
-      await channel.invokeMethod('applyWidgetTheme', themeMap);
-    } catch (e) {
-      debugPrint('WidgetUpdateService: Error applying widget theme: $e');
-      rethrow;
-    }
-  }
-
-  /// Clear widget theme from native SharedPreferences
-  Future<void> clearWidgetTheme() async {
-    try {
-      const channel = MethodChannel('com.qada.fard/widget_theme');
-      await channel.invokeMethod('clearWidgetTheme');
-    } catch (e) {
-      debugPrint('WidgetUpdateService: Error clearing widget theme: $e');
-      rethrow;
-    }
   }
 
   Future<void> _syncNative(String prayerDataJson) async {
@@ -333,7 +167,7 @@ class WidgetUpdateService {
                 ? CalculationContract.madhabHanafi
                 : CalculationContract.madhabShafi,
         'locale': _settingsProvider.locale.languageCode,
-        'prayer_data': prayerDataJson, // Atomic sync of display data
+        'prayer_data': prayerDataJson,
         'hijri_date': _prefs.getString('flutter.hijri_date_cache') ?? '',
         'colors': {
           'primary': jsonMap['primaryColorHex'],
@@ -358,87 +192,50 @@ class WidgetUpdateService {
 
   int _mapMethodToContract(String method) {
     switch (method) {
-      case 'muslim_league':
-        return CalculationContract.methodMuslimWorldLeague;
-      case 'egyptian':
-        return CalculationContract.methodEgyptian;
-      case 'karachi':
-        return CalculationContract.methodKarachi;
-      case 'umm_al_qura':
-        return CalculationContract.methodUmmAlQura;
-      case 'dubai':
-        return CalculationContract.methodDubai;
-      case 'moonsighting_committee':
-        return CalculationContract.methodMoonSightingCommittee;
-      case 'north_america':
-        return CalculationContract.methodNorthAmerica;
-      case 'kuwait':
-        return CalculationContract.methodKuwait;
-      case 'qatar':
-        return CalculationContract.methodQatar;
-      case 'singapore':
-        return CalculationContract.methodSingapore;
-      case 'tehran':
-        return CalculationContract.methodTehran;
-      case 'turkey':
-        return CalculationContract.methodTurkey;
-      default:
-        return CalculationContract.methodMuslimWorldLeague;
+      case 'muslim_league': return CalculationContract.methodMuslimWorldLeague;
+      case 'egyptian': return CalculationContract.methodEgyptian;
+      case 'karachi': return CalculationContract.methodKarachi;
+      case 'umm_al_qura': return CalculationContract.methodUmmAlQura;
+      case 'dubai': return CalculationContract.methodDubai;
+      case 'moonsighting_committee': return CalculationContract.methodMoonSightingCommittee;
+      case 'north_america': return CalculationContract.methodNorthAmerica;
+      case 'kuwait': return CalculationContract.methodKuwait;
+      case 'qatar': return CalculationContract.methodQatar;
+      case 'singapore': return CalculationContract.methodSingapore;
+      case 'tehran': return CalculationContract.methodTehran;
+      case 'turkey': return CalculationContract.methodTurkey;
+      default: return CalculationContract.methodMuslimWorldLeague;
     }
   }
 
-  PrayerTimeItem _createItem(String id, DateTime time, String lang) {
-    return PrayerTimeItem(
-      name: _getPrayerName(id, lang),
-      time: DateFormat('h:mm a', lang).format(time),
-      minutesFromMidnight: time.hour * 60 + time.minute,
-    );
-  }
-
-  String _getPrayerName(String id, String lang) {
-    if (lang == 'ar') {
-      switch (id) {
-        case 'fajr':
-          return 'الفجر';
-        case 'dhuhr':
-          return 'الظهر';
-        case 'asr':
-          return 'العصر';
-        case 'maghrib':
-          return 'المغرب';
-        case 'isha':
-          return 'العشاء';
-        default:
-          return id;
-      }
-    } else {
-      switch (id) {
-        case 'fajr':
-          return 'Fajr';
-        case 'dhuhr':
-          return 'Dhuhr';
-        case 'asr':
-          return 'Asr';
-        case 'maghrib':
-          return 'Maghrib';
-        case 'isha':
-          return 'Isha';
-        default:
-          return id;
-      }
+  // Native theme management methods retained as they are orchestration, not logic
+  Future<Map<String, String>?> getWidgetTheme() async {
+    try {
+      const channel = MethodChannel('com.qada.fard/widget_theme');
+      return await channel.invokeMapMethod<String, String>('getWidgetTheme');
+    } catch (e) {
+      debugPrint('WidgetUpdateService: Error getting widget theme: $e');
+      return null;
     }
   }
 
-  /// Convert hex string to Color
-  Color _hexToColor(String hex) {
-    final buffer = StringBuffer();
-    if (hex.length == 6 || hex.length == 7) buffer.write('ff');
-    buffer.write(hex.replaceFirst('#', ''));
-    return Color(int.parse(buffer.toString(), radix: 16));
+  Future<void> applyWidgetTheme(Map<String, String> themeMap) async {
+    try {
+      const channel = MethodChannel('com.qada.fard/widget_theme');
+      await channel.invokeMethod('applyWidgetTheme', themeMap);
+    } catch (e) {
+      debugPrint('WidgetUpdateService: Error applying widget theme: $e');
+      rethrow;
+    }
   }
 
-  /// Convert Color to hex string
-  String _colorToHex(Color color) {
-    return '#${(color.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
+  Future<void> clearWidgetTheme() async {
+    try {
+      const channel = MethodChannel('com.qada.fard/widget_theme');
+      await channel.invokeMethod('clearWidgetTheme');
+    } catch (e) {
+      debugPrint('WidgetUpdateService: Error clearing widget theme: $e');
+      rethrow;
+    }
   }
 }

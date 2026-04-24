@@ -47,6 +47,18 @@ void main() {
 
       // --- Onboarding Page 2 ---
       expect(find.text('إدارة القضاء'), findsOneWidget);
+      await tester.tap(find.text('التالي'));
+      await tester.pumpAndSettle();
+
+      // --- Onboarding Page 3 (Location) ---
+      await tester.tap(find.text('التالي'));
+      await tester.pumpAndSettle();
+
+      // --- Onboarding Page 4 (Azan) ---
+      await tester.tap(find.text('التالي'));
+      await tester.pumpAndSettle();
+
+      // --- Onboarding Page 5 (Qada) ---
       await tester.tap(find.text('ابدأ الآن'));
       await tester.pumpAndSettle();
 
@@ -55,27 +67,54 @@ void main() {
 
       await tester.pumpAndSettle();
 
+      // Handle Initial Add Qada Dialog if it appears
+      final cancelBtn = find.text('إلغاء');
+      if (cancelBtn.evaluate().isNotEmpty) {
+        await tester.tap(cancelBtn);
+        await tester.pumpAndSettle();
+      }
+
       // Switch to Settings
-      final settingsTab = find.text('الإعدادات').last;
-      await tester.tap(settingsTab);
+      final settingsIcon = find.byIcon(Icons.settings_outlined);
+      await tester.ensureVisible(settingsIcon);
+      await tester.tap(settingsIcon);
       await tester.pumpAndSettle();
 
+      // Verify we are on Settings screen
+      expect(find.text('الإعدادات').first, findsOneWidget);
+
       // Toggle language switch (Arabic -> English)
+      // Scroll until dropdown is visible
+      final dropdownFinder = find.byType(DropdownButton<String>);
+      final scrollableFinder = find.byType(Scrollable).at(1); // Settings list scrollable
+      
+      await tester.dragUntilVisible(
+        dropdownFinder.first,
+        scrollableFinder,
+        const Offset(0, -300),
+      );
+      await tester.pumpAndSettle();
+
       // Open dropdown
-      await tester.tap(find.byType(DropdownButton<String>).first);
+      await tester.tap(dropdownFinder.first, warnIfMissed: false);
       await tester.pumpAndSettle();
 
       // Select English
-      await tester.tap(find.text('English').last);
+      final englishOption = find.text('English').last;
+      await tester.tap(englishOption, warnIfMissed: false);
       await tester.pumpAndSettle();
-      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 2)); // Wait for locale change
 
       // Go back to Prayer tab
       final prayerTab = find.text('Prayer');
+      final prayerTabAr = find.text('الصلاة');
+      
       if (prayerTab.evaluate().isNotEmpty) {
-        await tester.tap(prayerTab.last);
-      } else {
-        await tester.tap(find.text('الصلاة').last);
+        await tester.ensureVisible(prayerTab.last);
+        await tester.tap(prayerTab.last, warnIfMissed: false);
+      } else if (prayerTabAr.evaluate().isNotEmpty) {
+        await tester.ensureVisible(prayerTabAr.last);
+        await tester.tap(prayerTabAr.last, warnIfMissed: false);
       }
       await tester.pumpAndSettle();
 

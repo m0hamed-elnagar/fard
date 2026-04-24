@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
-import 'package:fard/features/audio/domain/repositories/audio_player_service.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/player/audio_player_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/manager/reciter_manager_bloc.dart';
 import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mocktail/mocktail.dart';
@@ -11,14 +11,21 @@ import 'package:mocktail/mocktail.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-class MockAudioBloc extends MockBloc<AudioEvent, AudioState>
-    implements AudioBloc {}
+class MockAudioPlayerBloc extends MockBloc<AudioPlayerEvent, AudioPlayerState>
+    implements AudioPlayerBloc {}
+
+class MockReciterManagerBloc extends MockBloc<ReciterManagerEvent, ReciterManagerState>
+    implements ReciterManagerBloc {}
 
 void main() {
-  late MockAudioBloc mockAudioBloc;
+  late MockAudioPlayerBloc mockAudioPlayerBloc;
+  late MockReciterManagerBloc mockReciterManagerBloc;
 
   setUp(() {
-    mockAudioBloc = MockAudioBloc();
+    mockAudioPlayerBloc = MockAudioPlayerBloc();
+    mockReciterManagerBloc = MockReciterManagerBloc();
+
+    when(() => mockAudioPlayerBloc.state).thenReturn(const AudioPlayerState());
   });
 
   Widget createWidgetUnderTest() {
@@ -30,8 +37,11 @@ void main() {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('en'), Locale('ar')],
-      home: BlocProvider<AudioBloc>.value(
-        value: mockAudioBloc,
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
+          BlocProvider<ReciterManagerBloc>.value(value: mockReciterManagerBloc),
+        ],
         child: const Scaffold(body: ReciterSelector()),
       ),
     );
@@ -61,8 +71,8 @@ void main() {
   testWidgets('ReciterSelector should display Alafasy and Husary', (
     tester,
   ) async {
-    when(() => mockAudioBloc.state).thenReturn(
-      const AudioState(availableReciters: tReciters, status: AudioStatus.idle),
+    when(() => mockReciterManagerBloc.state).thenReturn(
+      const ReciterManagerState(availableReciters: tReciters),
     );
 
     await tester.pumpWidget(createWidgetUnderTest());

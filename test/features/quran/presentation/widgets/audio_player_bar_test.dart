@@ -4,21 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/player/audio_player_bloc.dart';
 import 'package:fard/features/audio/presentation/widgets/audio_player_bar.dart';
 import 'package:fard/features/audio/domain/entities/reciter.dart';
 
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-class MockAudioBloc extends MockBloc<AudioEvent, AudioState>
-    implements AudioBloc {}
+class MockAudioPlayerBloc extends MockBloc<AudioPlayerEvent, AudioPlayerState>
+    implements AudioPlayerBloc {}
 
 void main() {
-  late MockAudioBloc mockAudioBloc;
+  late MockAudioPlayerBloc mockAudioPlayerBloc;
 
   setUp(() {
-    mockAudioBloc = MockAudioBloc();
+    mockAudioPlayerBloc = MockAudioPlayerBloc();
   });
 
   Widget createWidgetUnderTest() {
@@ -31,8 +31,8 @@ void main() {
       ],
       supportedLocales: const [Locale('en'), Locale('ar')],
       home: Scaffold(
-        bottomNavigationBar: BlocProvider<AudioBloc>.value(
-          value: mockAudioBloc,
+        bottomNavigationBar: BlocProvider<AudioPlayerBloc>.value(
+          value: mockAudioPlayerBloc,
           child: const AudioPlayerBar(),
         ),
       ),
@@ -40,7 +40,7 @@ void main() {
   }
 
   testWidgets('AudioPlayerBar displays Ayah info correctly', (tester) async {
-    final state = const AudioState(
+    final state = const AudioPlayerState(
       status: AudioStatus.playing,
       isBannerVisible: true,
       currentSurah: 1,
@@ -55,20 +55,18 @@ void main() {
       ),
     );
 
-    when(() => mockAudioBloc.state).thenReturn(state);
+    when(() => mockAudioPlayerBloc.state).thenReturn(state);
 
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pump();
 
-    // Surah 1 is Al Fatiha (no hyphen in quran package)
-    // English surahWithAyah format is "Surah {surah}, Ayah {ayah}"
     expect(find.text('Surah Al Fatiha, Ayah 1'), findsOneWidget);
   });
 
   testWidgets('AudioPlayerBar clamps slider value when position > duration', (
     tester,
   ) async {
-    final state = const AudioState(
+    final state = const AudioPlayerState(
       status: AudioStatus.playing,
       isBannerVisible: true,
       currentSurah: 1,
@@ -83,7 +81,7 @@ void main() {
       ),
     );
 
-    when(() => mockAudioBloc.state).thenReturn(state);
+    when(() => mockAudioPlayerBloc.state).thenReturn(state);
 
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pump();
@@ -98,8 +96,8 @@ void main() {
 
   testWidgets('AudioPlayerBar shows nothing when idle', (tester) async {
     when(
-      () => mockAudioBloc.state,
-    ).thenReturn(const AudioState(status: AudioStatus.idle));
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(status: AudioStatus.idle));
     await tester.pumpWidget(createWidgetUnderTest());
     expect(find.byType(Container), findsNothing);
   });

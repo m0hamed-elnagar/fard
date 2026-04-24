@@ -264,9 +264,9 @@ void main() {
       );
 
       // Verify icons
-      expect(find.byIcon(Icons.close_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.fiber_new_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.close_rounded, skipOffstage: false), findsOneWidget);
+      expect(find.byIcon(Icons.play_circle_outline_rounded, skipOffstage: false), findsOneWidget);
+      expect(find.byIcon(Icons.check_circle_rounded, skipOffstage: false), findsOneWidget);
     });
 
     testWidgets('dismiss option shows current total', (tester) async {

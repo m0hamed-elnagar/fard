@@ -4,7 +4,8 @@ import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/features/quran/domain/entities/ayah.dart';
 import 'package:fard/features/quran/domain/usecases/get_tafsir.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/player/audio_player_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/manager/reciter_manager_bloc.dart';
 import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
 import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
 import 'package:fard/features/quran/presentation/widgets/jump_dialog.dart';
@@ -506,170 +507,176 @@ class _AudioTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return BlocBuilder<AudioBloc, AudioState>(
-      builder: (context, state) {
-        final status = state.status;
+    return BlocBuilder<ReciterManagerBloc, ReciterManagerState>(
+      builder: (context, managerState) {
+        return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+          builder: (context, playerState) {
+            final status = playerState.status;
 
-        final isCurrentAyah =
-            state.currentSurah == ayah.number.surahNumber &&
-            state.currentAyah == ayah.number.ayahNumberInSurah;
+            final isCurrentAyah =
+                playerState.currentSurah == ayah.number.surahNumber &&
+                playerState.currentAyah == ayah.number.ayahNumberInSurah;
 
-        final isLoading = state.isLoading && isCurrentAyah;
-        final isPlaying = state.isPlaying && isCurrentAyah;
-        final isError = state.hasError && isCurrentAyah;
+            final isLoading = playerState.isLoading && isCurrentAyah;
+            final isPlaying = playerState.isPlaying && isCurrentAyah;
+            final isError = playerState.hasError && isCurrentAyah;
 
-        return ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            Center(
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primary.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.headset_rounded,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              isError
-                  ? l10n.errorPlayingAudio(state.error ?? '')
-                  : l10n.quranRecitation,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: isError ? context.errorColor : null,
-              ),
-            ),
-            const SizedBox(height: 32),
-            Wrap(
-              alignment: WrapAlignment.center,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 24,
-              runSpacing: 16,
+            return ListView(
+              padding: const EdgeInsets.all(20),
               children: [
-                _AudioButton(
-                  icon: Icons.repeat_one_rounded,
-                  label: l10n.ayahBtn,
-                  onPressed: () {
-                    context.read<AudioBloc>().add(
-                      AudioEvent.playAyah(
-                        surahNumber: ayah.number.surahNumber,
-                        ayahNumber: ayah.number.ayahNumberInSurah,
-                        reciter: state.currentReciter,
-                      ),
-                    );
-                  },
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.headset_rounded,
+                      size: 64,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
                 ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
+                const SizedBox(height: 24),
+                Text(
+                  isError
+                      ? l10n.errorPlayingAudio(playerState.error ?? '')
+                      : l10n.quranRecitation,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: isError ? context.errorColor : null,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 24,
+                  runSpacing: 16,
                   children: [
-                    Container(
-                      width: 72,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        color: isError
-                            ? context.errorColor
-                            : Theme.of(context).colorScheme.primary,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color:
-                                (isError
+                    _AudioButton(
+                      icon: Icons.repeat_one_rounded,
+                      label: l10n.ayahBtn,
+                      onPressed: () {
+                        context.read<AudioPlayerBloc>().add(
+                              PlayAyah(
+                                surahNumber: ayah.number.surahNumber,
+                                ayahNumber: ayah.number.ayahNumberInSurah,
+                                reciter: managerState.currentReciter,
+                              ),
+                            );
+                      },
+                    ),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 72,
+                          height: 72,
+                          decoration: BoxDecoration(
+                            color: isError
+                                ? context.errorColor
+                                : Theme.of(context).colorScheme.primary,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: (isError
                                         ? context.errorColor
                                         : Theme.of(context).colorScheme.primary)
                                     .withValues(alpha: 0.3),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: isLoading
-                          ? Padding(
-                              padding: EdgeInsets.all(18.0),
-                              child: CircularProgressIndicator(
-                                color: context.onSurfaceColor,
-                                strokeWidth: 3,
-                              ),
-                            )
-                          : IconButton(
-                              icon: Icon(
-                                isError
-                                    ? Icons.refresh_rounded
-                                    : (isPlaying
-                                          ? Icons.pause_rounded
-                                          : Icons.play_arrow_rounded),
-                                size: 40,
-                                color: context.onSurfaceColor,
-                              ),
-                              onPressed: () {
-                                if (isPlaying) {
-                                  context.read<AudioBloc>().add(
-                                    AudioEvent.pause(),
-                                  );
-                                } else if (status == AudioStatus.paused &&
-                                    isCurrentAyah) {
-                                  context.read<AudioBloc>().add(
-                                    AudioEvent.resume(),
-                                  );
-                                } else {
-                                  context.read<AudioBloc>().add(
-                                    AudioEvent.playSurah(
-                                      surahNumber: ayah.number.surahNumber,
-                                      startAyah: ayah.number.ayahNumberInSurah,
-                                      ayahCount: surahAyahCount,
-                                      reciter: state.currentReciter,
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
+                          child: isLoading
+                              ? Padding(
+                                  padding: EdgeInsets.all(18.0),
+                                  child: CircularProgressIndicator(
+                                    color: context.onSurfaceColor,
+                                    strokeWidth: 3,
+                                  ),
+                                )
+                              : IconButton(
+                                  icon: Icon(
+                                    isError
+                                        ? Icons.refresh_rounded
+                                        : (isPlaying
+                                            ? Icons.pause_rounded
+                                            : Icons.play_arrow_rounded),
+                                    size: 40,
+                                    color: context.onSurfaceColor,
+                                  ),
+                                  onPressed: () {
+                                    if (isPlaying) {
+                                      context.read<AudioPlayerBloc>().add(
+                                            const Pause(),
+                                          );
+                                    } else if (status == AudioStatus.paused &&
+                                        isCurrentAyah) {
+                                      context.read<AudioPlayerBloc>().add(
+                                            const Resume(),
+                                          );
+                                    } else {
+                                      context.read<AudioPlayerBloc>().add(
+                                            PlaySurah(
+                                              surahNumber:
+                                                  ayah.number.surahNumber,
+                                              startAyah: ayah
+                                                  .number.ayahNumberInSurah,
+                                              ayahCount: surahAyahCount,
+                                              reciter:
+                                                  managerState.currentReciter,
+                                            ),
+                                          );
+                                    }
+                                  },
+                                ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          isPlaying ? l10n.pause : l10n.playSurah,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      isPlaying ? l10n.pause : l10n.playSurah,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
+                    _AudioButton(
+                      icon: Icons.stop_rounded,
+                      label: l10n.stop,
+                      onPressed: () {
+                        context.read<AudioPlayerBloc>().add(const Stop());
+                      },
                     ),
                   ],
                 ),
-                _AudioButton(
-                  icon: Icons.stop_rounded,
-                  label: l10n.stop,
-                  onPressed: () {
-                    context.read<AudioBloc>().add(AudioEvent.stop());
-                  },
+
+                const SizedBox(height: 40),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.person_outline),
+                  title: Text(l10n.reciter),
+                  subtitle: Text(
+                    managerState.currentReciter != null
+                        ? (l10n.localeName == 'ar'
+                            ? managerState.currentReciter!.name
+                            : managerState.currentReciter!.englishName)
+                        : l10n.selectReciter,
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _showReciterSelector(context),
                 ),
               ],
-            ),
-
-            const SizedBox(height: 40),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.person_outline),
-              title: Text(l10n.reciter),
-              subtitle: Text(
-                state.currentReciter != null
-                    ? (l10n.localeName == 'ar'
-                          ? state.currentReciter!.name
-                          : state.currentReciter!.englishName)
-                    : l10n.selectReciter,
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => _showReciterSelector(context),
-            ),
-          ],
+            );
+          },
         );
       },
     );
@@ -680,9 +687,16 @@ class _AudioTab extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => BlocProvider.value(
-        value: context.read<AudioBloc>(),
-        child: const ReciterSelector(),
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: context.read<AudioPlayerBloc>()),
+          BlocProvider.value(value: context.read<ReciterManagerBloc>()),
+        ],
+        child: const Material(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          clipBehavior: Clip.antiAlias,
+          child: ReciterSelector(),
+        ),
       ),
     );
   }

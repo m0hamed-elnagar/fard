@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/player/audio_player_bloc.dart';
 import 'package:fard/features/audio/presentation/widgets/audio_player_bar.dart';
 import 'package:fard/core/services/mushaf_download_service.dart';
 import 'package:fard/core/di/injection.dart';
@@ -57,7 +57,7 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
     // Update audio position and ensure banner is shown if playing
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateAudioPosition();
-      context.read<AudioBloc>().add(AudioEvent.showBanner());
+      context.read<AudioPlayerBloc>().add(const ShowBanner());
     });
   }
 
@@ -66,8 +66,8 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
     if (pageData.isNotEmpty) {
       final surahNum = pageData.first['surah'] as int;
       final ayahNum = pageData.first['start'] as int;
-      context.read<AudioBloc>().add(
-        AudioEvent.updateCurrentPosition(
+      context.read<AudioPlayerBloc>().add(
+        UpdateCurrentPosition(
           surahNumber: surahNum,
           ayahNumber: ayahNum,
         ),
@@ -198,7 +198,7 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
             ),
           ],
         ),
-        body: BlocListener<AudioBloc, AudioState>(
+        body: BlocListener<AudioPlayerBloc, AudioPlayerState>(
           listenWhen: (previous, current) =>
               current.isActive &&
               (previous.currentSurah != current.currentSurah ||

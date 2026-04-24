@@ -1,25 +1,24 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/core/di/injection.dart';
-import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/core/widgets/fast_scroll_scrollbar.dart';
 import 'package:fard/features/audio/domain/services/audio_download_service.dart';
+import 'package:fard/features/audio/presentation/blocs/player/audio_player_bloc.dart';
 import 'package:fard/features/audio/presentation/utils/offline_audio_helper.dart';
+import 'package:fard/features/azkar/presentation/screens/azkar_list_screen.dart';
 import 'package:fard/features/quran/domain/entities/surah.dart';
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
+import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
+import 'package:fard/features/quran/presentation/controllers/reader_scroll_controller.dart';
+import 'package:fard/features/quran/presentation/widgets/cycle_completion_dialog.dart';
+import 'package:fard/features/quran/presentation/widgets/reader/reader_app_bar.dart';
+import 'package:fard/features/quran/presentation/widgets/reader/reader_body.dart';
+import 'package:fard/features/quran/presentation/widgets/reader/reader_bottom_bar.dart';
+import 'package:fard/features/quran/presentation/widgets/reader/reader_header.dart';
+import 'package:fard/features/quran/presentation/widgets/reader/scroll_to_top_fab.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
-import 'package:fard/features/azkar/presentation/screens/azkar_list_screen.dart';
-import 'package:fard/features/quran/presentation/widgets/cycle_completion_dialog.dart';
-
-import 'package:fard/features/quran/presentation/widgets/reader/reader_app_bar.dart';
-import 'package:fard/features/quran/presentation/widgets/reader/reader_header.dart';
-import 'package:fard/features/quran/presentation/widgets/reader/reader_body.dart';
-import 'package:fard/features/quran/presentation/widgets/reader/reader_bottom_bar.dart';
-import 'package:fard/features/quran/presentation/widgets/reader/scroll_to_top_fab.dart';
-import 'package:fard/features/quran/presentation/controllers/reader_scroll_controller.dart';
-import 'package:fard/core/widgets/fast_scroll_scrollbar.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class QuranReaderPage extends StatefulWidget {
   final int surahNumber;
@@ -186,8 +185,8 @@ class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingOb
                               }
 
                               // Update audio bloc with current surah and first ayah for the player bar
-                              context.read<AudioBloc>().add(
-                                AudioEvent.updateCurrentPosition(
+                              context.read<AudioPlayerBloc>().add(
+                                UpdateCurrentPosition(
                                   surahNumber: s.surah.number.value,
                                   ayahNumber: s.surah.ayahs.isNotEmpty
                                       ? s
@@ -254,7 +253,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingOb
                           }
                         },
                       ),
-                      BlocListener<AudioBloc, AudioState>(
+                      BlocListener<AudioPlayerBloc, AudioPlayerState>(
                         listenWhen: (prev, curr) {
                           // Only trigger if ayah changed while active in the current surah
                           return curr.currentSurah == widget.surahNumber &&

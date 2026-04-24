@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/player/audio_player_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/manager/reciter_manager_bloc.dart';
 import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
 import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
@@ -21,7 +22,7 @@ class AudioPlayerBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return BlocBuilder<AudioBloc, AudioState>(
+    return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
       builder: (context, state) {
         if (!state.isBannerVisible) {
           return const SizedBox.shrink();
@@ -91,7 +92,7 @@ class AudioPlayerBar extends StatelessWidget {
 
   Widget _buildCollapsedView(
     BuildContext context, 
-    AudioState state, 
+    AudioPlayerState state, 
     bool isNarrow,
     AppLocalizations l10n,
   ) {
@@ -148,18 +149,17 @@ class AudioPlayerBar extends StatelessWidget {
                       onPressed: () => _handleLocationClick(context, state),
                     ),
                   _buildPlayPauseButton(context, state, isNarrow),
-                  // NOTE: ICON DIRECTIONS ARE SWAPPED DELIBERATELY TO LOOK CORRECT IN THE UI. DO NOT CHANGE.
                   _buildActionButton(
-                    icon: const Icon(Icons.expand_more_rounded),
+                    icon: const Icon(Icons.expand_less_rounded),
                     tooltip: "Expand", 
-                    onPressed: () => context.read<AudioBloc>().add(
-                      AudioEvent.togglePlayerExpanded(),
+                    onPressed: () => context.read<AudioPlayerBloc>().add(
+                      const TogglePlayerExpanded(),
                     ),
                   ),
                   _buildActionButton(
                     icon: const Icon(Icons.close_rounded),
                     tooltip: l10n.close,
-                    onPressed: () => context.read<AudioBloc>().add(
+                    onPressed: () => context.read<AudioPlayerBloc>().add(
                       const HideBanner(),
                     ),
                   ),
@@ -174,7 +174,7 @@ class AudioPlayerBar extends StatelessWidget {
 
   Widget _buildExpandedView(
     BuildContext context, 
-    AudioState state, 
+    AudioPlayerState state, 
     bool isNarrow,
     AppLocalizations l10n,
   ) {
@@ -238,11 +238,10 @@ class AudioPlayerBar extends StatelessWidget {
                 ),
               ),
               _buildActionButton(
-                // NOTE: ICON DIRECTIONS ARE SWAPPED DELIBERATELY TO LOOK CORRECT IN THE UI. DO NOT CHANGE.
-                icon: const Icon(Icons.expand_less_rounded),
+                icon: const Icon(Icons.expand_more_rounded),
                 tooltip: "Collapse",
-                onPressed: () => context.read<AudioBloc>().add(
-                  AudioEvent.togglePlayerExpanded(),
+                onPressed: () => context.read<AudioPlayerBloc>().add(
+                  const TogglePlayerExpanded(),
                 ),
               ),
             ],
@@ -287,25 +286,25 @@ class AudioPlayerBar extends StatelessWidget {
                   color: state.isRepeating ? Theme.of(context).colorScheme.primary : null,
                 ),
                 tooltip: l10n.repeatAyah,
-                onPressed: () => context.read<AudioBloc>().add(const ToggleRepeat()),
+                onPressed: () => context.read<AudioPlayerBloc>().add(const ToggleRepeat()),
               ),
               _buildActionButton(
                 // NOTE: ICON DIRECTIONS ARE SWAPPED DELIBERATELY TO LOOK CORRECT IN THE UI. DO NOT CHANGE.
                 icon: const Icon(Icons.skip_next_rounded),
                 iconSize: 24,
-                onPressed: () => context.read<AudioBloc>().add(const SkipToPrevious()),
+                onPressed: () => context.read<AudioPlayerBloc>().add(const SkipToPrevious()),
               ),
               _buildPlayPauseButton(context, state, isNarrow, size: 48),
               _buildActionButton(
                 // NOTE: ICON DIRECTIONS ARE SWAPPED DELIBERATELY TO LOOK CORRECT IN THE UI. DO NOT CHANGE.
                 icon: const Icon(Icons.skip_previous_rounded),
                 iconSize: 24,
-                onPressed: () => context.read<AudioBloc>().add(const SkipToNext()),
+                onPressed: () => context.read<AudioPlayerBloc>().add(const SkipToNext()),
               ),
               _buildActionButton(
                 icon: const Icon(Icons.close_rounded),
                 tooltip: l10n.close,
-                onPressed: () => context.read<AudioBloc>().add(const HideBanner()),
+                onPressed: () => context.read<AudioPlayerBloc>().add(const HideBanner()),
               ),
             ],
           ),
@@ -316,7 +315,7 @@ class AudioPlayerBar extends StatelessWidget {
 
   Widget _buildProgressBar(
     BuildContext context, 
-    AudioState state, 
+    AudioPlayerState state, 
   ) {
     return SizedBox(
       height: 32, // Large hit area for fingers (32dp)
@@ -340,7 +339,7 @@ class AudioPlayerBar extends StatelessWidget {
               : 0.0,
           max: state.duration > Duration.zero ? state.duration.inMilliseconds.toDouble() : 1.0,
           onChanged: state.duration > Duration.zero
-              ? (value) => context.read<AudioBloc>().add(SeekTo(Duration(milliseconds: value.toInt())))
+              ? (value) => context.read<AudioPlayerBloc>().add(SeekTo(Duration(milliseconds: value.toInt())))
               : null,
         ),
       ),
@@ -349,7 +348,7 @@ class AudioPlayerBar extends StatelessWidget {
 
   Widget _buildPlayPauseButton(
     BuildContext context, 
-    AudioState state, 
+    AudioPlayerState state, 
     bool isNarrow,
     {double size = 42}
   ) {
@@ -378,7 +377,7 @@ class AudioPlayerBar extends StatelessWidget {
               iconSize: size * 0.6,
               color: Colors.white,
               icon: Icon(state.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded),
-              onPressed: () => context.read<AudioBloc>().add(const TogglePlayback()),
+              onPressed: () => context.read<AudioPlayerBloc>().add(const TogglePlayback()),
             ),
     );
   }
@@ -402,7 +401,7 @@ class AudioPlayerBar extends StatelessWidget {
     );
   }
 
-  void _handleLocationClick(BuildContext context, AudioState state) {
+  void _handleLocationClick(BuildContext context, AudioPlayerState state) {
     if (onScrollRequest != null && currentViewedSurah == state.currentSurah) {
       onScrollRequest!(state.currentSurah!, state.currentAyah!);
       return;
@@ -441,8 +440,11 @@ class AudioPlayerBar extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => BlocProvider.value(
-        value: context.read<AudioBloc>(),
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: context.read<AudioPlayerBloc>()),
+          BlocProvider.value(value: context.read<ReciterManagerBloc>()),
+        ],
         child: const Material(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           clipBehavior: Clip.antiAlias,

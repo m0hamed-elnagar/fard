@@ -1,14 +1,10 @@
-part of 'audio_bloc.dart';
+part of 'audio_player_bloc.dart';
 
-class AudioState extends Equatable {
+class AudioPlayerState extends Equatable {
   final AudioStatus status;
   final Reciter? currentReciter;
   final int? currentSurah;
   final int? currentAyah;
-  final List<Reciter> availableReciters;
-  final Map<String, double>
-  reciterDownloadProgress; // reciterId -> percentage (0.0 to 1.0)
-  final Map<String, int> reciterDownloadSizes; // reciterId -> size in bytes
   final AudioPlayMode mode;
   final AudioQuality quality;
   final Duration position;
@@ -20,14 +16,11 @@ class AudioState extends Equatable {
   final String? error;
   final String? lastErrorMessage;
 
-  const AudioState({
+  const AudioPlayerState({
     this.status = AudioStatus.idle,
     this.currentReciter,
     this.currentSurah,
     this.currentAyah,
-    this.availableReciters = const [],
-    this.reciterDownloadProgress = const {},
-    this.reciterDownloadSizes = const {},
     this.mode = AudioPlayMode.ayah,
     this.quality = AudioQuality.medium128,
     this.position = Duration.zero,
@@ -40,14 +33,11 @@ class AudioState extends Equatable {
     this.lastErrorMessage,
   });
 
-  AudioState copyWith({
+  AudioPlayerState copyWith({
     AudioStatus? status,
     Object? currentReciter = _sentinel,
     Object? currentSurah = _sentinel,
     Object? currentAyah = _sentinel,
-    List<Reciter>? availableReciters,
-    Map<String, double>? reciterDownloadProgress,
-    Map<String, int>? reciterDownloadSizes,
     AudioPlayMode? mode,
     AudioQuality? quality,
     Duration? position,
@@ -59,7 +49,7 @@ class AudioState extends Equatable {
     Object? error = _sentinel,
     Object? lastErrorMessage = _sentinel,
   }) {
-    return AudioState(
+    return AudioPlayerState(
       status: status ?? this.status,
       currentReciter: currentReciter == _sentinel
           ? this.currentReciter
@@ -70,10 +60,6 @@ class AudioState extends Equatable {
       currentAyah: currentAyah == _sentinel
           ? this.currentAyah
           : currentAyah as int?,
-      availableReciters: availableReciters ?? this.availableReciters,
-      reciterDownloadProgress:
-          reciterDownloadProgress ?? this.reciterDownloadProgress,
-      reciterDownloadSizes: reciterDownloadSizes ?? this.reciterDownloadSizes,
       mode: mode ?? this.mode,
       quality: quality ?? this.quality,
       position: position ?? this.position,
@@ -97,9 +83,6 @@ class AudioState extends Equatable {
     currentReciter,
     currentSurah,
     currentAyah,
-    availableReciters,
-    reciterDownloadProgress,
-    reciterDownloadSizes,
     mode,
     quality,
     position,
@@ -113,7 +96,7 @@ class AudioState extends Equatable {
   ];
 }
 
-extension AudioStateX on AudioState {
+extension AudioPlayerStateX on AudioPlayerState {
   bool get isPlaying => status == AudioStatus.playing;
   bool get isPaused => status == AudioStatus.paused;
   bool get isLoading => status == AudioStatus.loading;

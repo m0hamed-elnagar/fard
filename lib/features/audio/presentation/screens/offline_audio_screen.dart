@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_colors.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/manager/reciter_manager_bloc.dart';
 import 'package:fard/features/audio/presentation/screens/reciter_download_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,19 +14,14 @@ class OfflineAudioScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.offlineAudio)),
-      body: BlocBuilder<AudioBloc, AudioState>(
+      body: BlocBuilder<ReciterManagerBloc, ReciterManagerState>(
         builder: (context, state) {
           if (state.availableReciters.isEmpty) {
-            if (state.isLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (state.hasError) {
+            if (state.error != null) {
               return Center(
                 child: Text(l10n.errorLoadingReciters(state.error ?? '')),
               );
             }
-            // Trigger load if empty and not loading
-            context.read<AudioBloc>().add(AudioEvent.loadReciters());
             return const Center(child: CircularProgressIndicator());
           }
 

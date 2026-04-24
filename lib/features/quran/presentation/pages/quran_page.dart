@@ -7,7 +7,8 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/core/widgets/fast_scroll_scrollbar.dart';
 import 'package:fard/features/audio/domain/services/audio_download_service.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/player/audio_player_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/manager/reciter_manager_bloc.dart';
 import 'package:fard/features/audio/presentation/utils/offline_audio_helper.dart';
 import 'package:fard/features/quran/domain/entities/surah.dart';
 import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
@@ -53,7 +54,7 @@ class _QuranPageState extends State<QuranPage> {
     _downloadSubscription = getIt<AudioDownloadService>().progressStream.listen((progress) {
       if (!mounted) return;
       
-      final currentReciter = context.read<AudioBloc>().state.currentReciter;
+      final currentReciter = context.read<ReciterManagerBloc>().state.currentReciter;
       if (progress.reciterId != currentReciter?.identifier) return;
 
       if (progress.isCompleted && progress.surahNumber != null) {
@@ -74,7 +75,7 @@ class _QuranPageState extends State<QuranPage> {
   }
 
   Future<void> _downloadSurah(int surahNumber) async {
-    final reciter = context.read<AudioBloc>().state.currentReciter;
+    final reciter = context.read<ReciterManagerBloc>().state.currentReciter;
     if (reciter == null) return;
 
     setState(() {
@@ -99,8 +100,7 @@ class _QuranPageState extends State<QuranPage> {
   }
 
   Future<void> _updateDownloadedSurahs() async {
-    final audioBloc = context.read<AudioBloc>();
-    final reciter = audioBloc.state.currentReciter;
+    final reciter = context.read<ReciterManagerBloc>().state.currentReciter;
     if (reciter == null) return;
 
     if (_lastReciterId == reciter.identifier && _downloadedSurahIds.isNotEmpty) return;
@@ -239,7 +239,7 @@ class _QuranPageState extends State<QuranPage> {
                 Expanded(
                   child: MultiBlocListener(
                     listeners: [
-                      BlocListener<AudioBloc, AudioState>(
+                      BlocListener<ReciterManagerBloc, ReciterManagerState>(
                         listenWhen: (prev, curr) => prev.currentReciter?.identifier != curr.currentReciter?.identifier,
                         listener: (context, state) => _updateDownloadedSurahs(),
                       ),
@@ -446,7 +446,7 @@ class _QuranPageState extends State<QuranPage> {
                                                         ),
                                                 
                                                 // Play / Pause Button
-                                                BlocBuilder<AudioBloc, AudioState>(
+                                                BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
                                                   builder: (context, audioState) {
                                                     final isThisSurah = audioState.currentSurah == surah.number.value;
                                                     final isPlaying = audioState.isPlaying && isThisSurah;
@@ -630,7 +630,7 @@ class _ContinueReadingCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                BlocBuilder<AudioBloc, AudioState>(
+                BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
                   builder: (context, audioState) {
                     final isThisSurah = audioState.currentSurah == surah.number.value;
                     final isPlaying = audioState.isPlaying && isThisSurah;

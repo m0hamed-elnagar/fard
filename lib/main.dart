@@ -1,30 +1,32 @@
+import 'dart:io';
+
 import 'package:fard/core/di/injection.dart';
-import 'package:fard/core/services/notification_service.dart';
+import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/core/navigation/theme_update_observer.dart';
 import 'package:fard/core/services/background_service.dart';
 import 'package:fard/core/services/migration_service.dart';
+import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/widget_update_service.dart';
+import 'package:fard/core/theme/theme_presets.dart';
 import 'package:fard/core/utils/app_identifiers.dart';
-import 'package:fard/core/navigation/theme_update_observer.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
-import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/features/onboarding/presentation/screens/splash_screen.dart';
-import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
-import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
+import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
+import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
-import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
-import 'package:fard/core/theme/theme_presets.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:flutter/material.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:just_audio_background/just_audio_background.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:just_audio_background/just_audio_background.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'core/blocs/connectivity/connectivity_bloc.dart';
+import 'features/audio/presentation/blocs/manager/reciter_manager_bloc.dart';
+import 'features/audio/presentation/blocs/player/audio_player_bloc.dart';
 
 void main() async {
   final startupTimer = Stopwatch()..start();
@@ -143,7 +145,8 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
             return bloc;
           },
         ),
-        BlocProvider(create: (_) => getIt<AudioBloc>()),
+        BlocProvider(create: (_) => getIt<AudioPlayerBloc>()),
+        BlocProvider(create: (_) => getIt<ReciterManagerBloc>()),
         BlocProvider(
           create: (_) {
             final bloc = getIt<QuranBloc>();

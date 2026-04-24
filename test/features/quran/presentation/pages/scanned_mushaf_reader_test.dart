@@ -6,7 +6,7 @@ import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/services/mushaf_download_service.dart';
 import 'package:fard/features/audio/domain/repositories/audio_player_service.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/player/audio_player_bloc.dart';
 import 'package:fard/features/quran/presentation/pages/scanned_mushaf_reader_page.dart';
 import 'package:fard/features/quran/presentation/widgets/scanned/mushaf_page_item.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
@@ -19,8 +19,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class MockAudioBloc extends MockBloc<AudioEvent, AudioState>
-    implements AudioBloc {}
+class MockAudioPlayerBloc extends MockBloc<AudioPlayerEvent, AudioPlayerState>
+    implements AudioPlayerBloc {}
 
 class MockWerdBloc extends MockBloc<WerdEvent, WerdState> implements WerdBloc {}
 
@@ -31,25 +31,25 @@ class MockSharedPreferences extends Mock implements SharedPreferences {}
 class MockFile extends Mock implements File {}
 
 void main() {
-  late MockAudioBloc mockAudioBloc;
+  late MockAudioPlayerBloc mockAudioPlayerBloc;
   late MockWerdBloc mockWerdBloc;
   late MockMushafDownloadService mockDownloadService;
   late MockSharedPreferences mockSharedPreferences;
-  late StreamController<AudioState> audioStateController;
+  late StreamController<AudioPlayerState> audioStateController;
 
   setUpAll(() {
-    registerFallbackValue(const AudioState());
-    registerFallbackValue(AudioEvent.stop());
+    registerFallbackValue(const AudioPlayerState());
+    registerFallbackValue(const Stop());
     registerFallbackValue(const WerdEvent.load());
     getIt.allowReassignment = true;
   });
 
   setUp(() {
-    mockAudioBloc = MockAudioBloc();
+    mockAudioPlayerBloc = MockAudioPlayerBloc();
     mockWerdBloc = MockWerdBloc();
     mockDownloadService = MockMushafDownloadService();
     mockSharedPreferences = MockSharedPreferences();
-    audioStateController = StreamController<AudioState>.broadcast();
+    audioStateController = StreamController<AudioPlayerState>.broadcast();
 
     getIt.registerSingleton<MushafDownloadService>(mockDownloadService);
     getIt.registerSingleton<SharedPreferences>(mockSharedPreferences);
@@ -59,9 +59,9 @@ void main() {
       () => mockSharedPreferences.setBool(any(), any()),
     ).thenAnswer((_) async => true);
 
-    when(() => mockAudioBloc.state).thenReturn(const AudioState());
+    when(() => mockAudioPlayerBloc.state).thenReturn(const AudioPlayerState());
     when(
-      () => mockAudioBloc.stream,
+      () => mockAudioPlayerBloc.stream,
     ).thenAnswer((_) => audioStateController.stream);
     when(() => mockWerdBloc.state).thenReturn(const WerdState());
 
@@ -83,7 +83,7 @@ void main() {
   Widget createWidgetUnderTest({int initialPage = 1}) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AudioBloc>.value(value: mockAudioBloc),
+        BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
         BlocProvider<WerdBloc>.value(value: mockWerdBloc),
       ],
       child: MaterialApp(
@@ -165,18 +165,18 @@ void main() {
     expect(findDigit(tester, '2'), isTrue);
   });
 
-  testWidgets('AudioBloc state changes update reader page', (tester) async {
+  testWidgets('AudioPlayerBloc state changes update reader page', (tester) async {
     await tester.pumpWidget(createWidgetUnderTest(initialPage: 1));
     await tester.pump(const Duration(seconds: 1));
 
-    final newState = const AudioState().copyWith(
+    final newState = const AudioPlayerState().copyWith(
       status: AudioStatus.playing,
       currentSurah: 2,
       currentAyah: 1,
     );
 
     audioStateController.add(newState);
-    when(() => mockAudioBloc.state).thenReturn(newState);
+    when(() => mockAudioPlayerBloc.state).thenReturn(newState);
 
     // Pump many times to allow listener and animation to complete
     for (int i = 0; i < 20; i++) {

@@ -8,7 +8,8 @@ import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
-import 'package:fard/features/audio/presentation/blocs/audio_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/player/audio_player_bloc.dart';
+import 'package:fard/features/audio/presentation/blocs/manager/reciter_manager_bloc.dart';
 import 'package:fard/features/tasbih/presentation/bloc/tasbih_bloc.dart';
 import 'package:fard/core/blocs/connectivity/connectivity_bloc.dart';
 import 'package:fard/features/quran/presentation/blocs/reader_bloc.dart';
@@ -56,11 +57,17 @@ class MockWidgetUpdateService extends Mock implements WidgetUpdateService {
 class MockQuranBloc extends MockBloc<QuranEvent, QuranState>
     implements QuranBloc {}
 
-class MockAudioBloc extends MockBloc<AudioEvent, AudioState>
-    implements AudioBloc {}
+class MockAudioPlayerBloc extends MockBloc<AudioPlayerEvent, AudioPlayerState>
+    implements AudioPlayerBloc {}
+
+class MockReciterManagerBloc extends MockBloc<ReciterManagerEvent, ReciterManagerState>
+    implements ReciterManagerBloc {}
 
 class MockTasbihBloc extends MockBloc<TasbihEvent, TasbihState>
-    implements TasbihBloc {}
+    implements MockTasbihBlocInstance {}
+
+// Need a non-mock class for implements if it has issues with multiple mocks
+abstract class MockTasbihBlocInstance extends MockBloc<TasbihEvent, TasbihState> implements TasbihBloc {}
 
 class MockReaderBloc extends MockBloc<ReaderEvent, ReaderState>
     implements ReaderBloc {}
@@ -82,7 +89,8 @@ void main() {
   late MockPrayerTimeService mockPrayerTimeService;
   late MockNotificationService mockNotificationService;
   late MockQuranBloc mockQuranBloc;
-  late MockAudioBloc mockAudioBloc;
+  late MockAudioPlayerBloc mockAudioPlayerBloc;
+  late MockReciterManagerBloc mockReciterManagerBloc;
   late MockTasbihBloc mockTasbihBloc;
   late MockReaderBloc mockReaderBloc;
   late MockConnectivityBloc mockConnectivityBloc;
@@ -96,7 +104,8 @@ void main() {
     mockPrayerTimeService = MockPrayerTimeService();
     mockNotificationService = MockNotificationService();
     mockQuranBloc = MockQuranBloc();
-    mockAudioBloc = MockAudioBloc();
+    mockAudioPlayerBloc = MockAudioPlayerBloc();
+    mockReciterManagerBloc = MockReciterManagerBloc();
     mockTasbihBloc = MockTasbihBloc();
     mockReaderBloc = MockReaderBloc();
     mockConnectivityBloc = MockConnectivityBloc();
@@ -115,7 +124,8 @@ void main() {
       GlobalKey<NavigatorState>(),
     );
     getIt.registerFactory<QuranBloc>(() => mockQuranBloc);
-    getIt.registerFactory<AudioBloc>(() => mockAudioBloc);
+    getIt.registerFactory<AudioPlayerBloc>(() => mockAudioPlayerBloc);
+    getIt.registerFactory<ReciterManagerBloc>(() => mockReciterManagerBloc);
     getIt.registerFactory<TasbihBloc>(() => mockTasbihBloc);
     getIt.registerFactory<ReaderBloc>(() => mockReaderBloc);
     getIt.registerFactory<ConnectivityBloc>(() => mockConnectivityBloc);
@@ -129,7 +139,8 @@ void main() {
       () => mockPrayerTrackerBloc.state,
     ).thenReturn(const PrayerTrackerState.loading());
     when(() => mockQuranBloc.state).thenReturn(const QuranState());
-    when(() => mockAudioBloc.state).thenReturn(const AudioState());
+    when(() => mockAudioPlayerBloc.state).thenReturn(const AudioPlayerState());
+    when(() => mockReciterManagerBloc.state).thenReturn(const ReciterManagerState());
     when(() => mockTasbihBloc.state).thenReturn(TasbihState.initial());
     when(() => mockReaderBloc.state).thenReturn(const ReaderState.initial());
     when(() => mockConnectivityBloc.state).thenReturn(const ConnectivityStatus(true));
@@ -144,7 +155,8 @@ void main() {
       providers: [
         BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
         BlocProvider<AzkarBloc>.value(value: mockAzkarBloc),
-        BlocProvider<AudioBloc>.value(value: mockAudioBloc),
+        BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
+        BlocProvider<ReciterManagerBloc>.value(value: mockReciterManagerBloc),
         BlocProvider<TasbihBloc>.value(value: mockTasbihBloc),
         BlocProvider<ReaderBloc>.value(value: mockReaderBloc),
         BlocProvider<QuranBloc>.value(value: mockQuranBloc),
