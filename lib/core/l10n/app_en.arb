@@ -420,6 +420,7 @@
       }
     }
   },
+  "newSessionStartedSuccess": "New reading session started",
   "jumpOptionMarkAll": "Mark all as read",
   "jumpMarkAllDesc": "Mark ALL {gap} ayahs ({pages} pages) from your last position to here as read",
   "@jumpMarkAllDesc": {

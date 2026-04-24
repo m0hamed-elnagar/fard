@@ -226,7 +226,21 @@ class JumpDialog extends StatelessWidget {
             ),
             const SizedBox(height: 10),
 
-            // Option 2: Dismiss
+            // Option 2: New Session (TERTIARY - alternative path)
+            _buildOption(
+              context,
+              icon: Icons.play_circle_outline_rounded,
+              label: l10n.jumpOptionNewSession,
+              description: l10n.jumpNewSessionDesc(
+                isAr ? currentTotalToday.toArabicIndic() : currentTotalToday.toString(),
+                isAr ? (currentTotalToday + 1).toArabicIndic() : (currentTotalToday + 1).toString(),
+              ),
+              color: context.tertiaryColor,
+              onTap: () => Navigator.of(context).pop(2), // New Session = 2
+            ),
+            const SizedBox(height: 10),
+
+            // Option 3: Dismiss
             _buildOption(
               context,
               icon: Icons.close_rounded,

@@ -24,6 +24,9 @@ class WerdEvent with _$WerdEvent {
     required int endAbsolute,
   }) = _TrackItemReadMarkAll;
 
+  const factory WerdEvent.jumpToNewSession(int targetAbsoluteIndex) =
+      _JumpToNewSession;
+
   // NEW: Cycle completion
   const factory WerdEvent.completeCycle() = _CompleteCycle;
   const factory WerdEvent.completeCycleAndRestart() = _CompleteCycleAndRestart;

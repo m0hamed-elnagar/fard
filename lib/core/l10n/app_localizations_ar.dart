@@ -1077,6 +1077,9 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get newSessionStartedSuccess => 'تم بدء جلسة قراءة جديدة';
+
+  @override
   String get jumpOptionMarkAll => 'تحديد الكل كمقروء';
 
   @override

@@ -1081,6 +1081,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get newSessionStartedSuccess => 'New reading session started';
+
+  @override
   String get jumpOptionMarkAll => 'Mark all as read';
 
   @override

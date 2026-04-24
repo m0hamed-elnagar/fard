@@ -392,6 +392,65 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           // Emit updated state
           await _emitUpdatedState(goalId);
         },
+        jumpToNewSession: (e) async {
+          debugPrint(
+              '🚀 [WerdBloc] Jump to New Session triggered: target ${e.targetAbsoluteIndex}');
+
+          final goalId = state.goal?.id ?? 'default';
+          final progressRes = await _repository.getProgress(goalId: goalId);
+          final currentProgress = progressRes.fold(
+            (_) => WerdProgress(
+              goalId: goalId,
+              totalAmountReadToday: 0,
+              segmentsToday: const [],
+              lastUpdated: DateTime.now(),
+              streak: 0,
+            ),
+            (p) => p,
+          );
+
+          final segments =
+              List<ReadingSegment>.from(currentProgress.segmentsToday);
+
+          // 1. End any active session
+          int activeIndex = -1;
+          for (int i = segments.length - 1; i >= 0; i--) {
+            if (segments[i].endTime == null) {
+              activeIndex = i;
+              break;
+            }
+          }
+
+          if (activeIndex >= 0) {
+            final activeSeg = segments[activeIndex];
+            // If it's a "ghost" session (just a start point without progress), remove it
+            if (activeSeg.startAyah == activeSeg.endAyah) {
+              segments.removeAt(activeIndex);
+              debugPrint('🗑️ Removed empty active session at ${activeSeg.startAyah}');
+            } else {
+              segments[activeIndex] = activeSeg.endSession();
+              debugPrint(
+                  '✅ Ended previous session: ${activeSeg.startAyah}-${activeSeg.endAyah}');
+            }
+          }
+
+          // 2. Update tracking points to the target to avoid repeat jumps
+          // We DON'T add a segment here, similar to how "Continue" button works.
+          // The first ayah will be tracked when the user marks the NEXT ayah.
+          final newProgress = currentProgress.copyWith(
+            segmentsToday: segments,
+            lastReadAbsolute: e.targetAbsoluteIndex,
+            sessionStartAbsolute: e.targetAbsoluteIndex,
+            lastUpdated: DateTime.now(),
+          );
+
+          await _repository.updateProgress(newProgress);
+          debugPrint(
+              '📖 Jumped to new session at ${e.targetAbsoluteIndex}. lastReadAbsolute updated.');
+
+          // Emit updated state
+          await _emitUpdatedState(goalId);
+        },
         completeCycle: (e) async {
           // Increment completedCycles, keep position at 6236
           await _handleCycleCompletion(restartToAyah1: false);

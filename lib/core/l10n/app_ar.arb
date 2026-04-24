@@ -420,6 +420,7 @@
       }
     }
   },
+  "newSessionStartedSuccess": "تم بدء جلسة قراءة جديدة",
   "jumpOptionMarkAll": "تحديد الكل كمقروء",
   "jumpMarkAllDesc": "علّم جميع {gap} آية ({pages} صفحات) من موقعك الأخير إلى هنا كمقروءة",
   "@jumpMarkAllDesc": {

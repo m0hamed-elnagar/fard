@@ -866,15 +866,15 @@ class _MarkAsLastReadButtonState extends State<_MarkAsLastReadButton> {
         if (choice == 1 && mounted) {
           debugPrint('📖 [MarkAsRead] Mark All - saving ayah $absAyah');
           context.read<ReaderBloc>().add(
-            ReaderEvent.saveLastRead(widget.ayah),
-          );
+                ReaderEvent.saveLastRead(widget.ayah),
+              );
 
           context.read<WerdBloc>().add(
-            WerdEvent.trackItemReadMarkAll(
-              startAbsolute: lastReadAbs,
-              endAbsolute: absAyah,
-            ),
-          );
+                WerdEvent.trackItemReadMarkAll(
+                  startAbsolute: lastReadAbs,
+                  endAbsolute: absAyah,
+                ),
+              );
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -884,8 +884,27 @@ class _MarkAsLastReadButtonState extends State<_MarkAsLastReadButton> {
           );
           _lastMarkTapTime = DateTime.now();
         }
-      } else {
-        // Gap is small (< 50 ayahs) - save normally without jump dialog
+
+        // User chose "Start New Session" - mark only current ayah, don't count gap
+        if (choice == 2 && mounted) {
+          debugPrint('🚀 [MarkAsRead] New Session - jumping to ayah $absAyah');
+          context.read<ReaderBloc>().add(
+                ReaderEvent.saveLastRead(widget.ayah),
+              );
+
+          context.read<WerdBloc>().add(
+                WerdEvent.jumpToNewSession(absAyah),
+              );
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.newSessionStartedSuccess),
+              duration: const Duration(seconds: 1),
+            ),
+          );
+          _lastMarkTapTime = DateTime.now();
+        }
+        } else {        // Gap is small (< 50 ayahs) - save normally without jump dialog
         debugPrint('📖 [MarkAsRead] Gap too small ($gap < $jumpThreshold) - saving normally');
         context.read<ReaderBloc>().add(
           ReaderEvent.saveLastRead(widget.ayah),

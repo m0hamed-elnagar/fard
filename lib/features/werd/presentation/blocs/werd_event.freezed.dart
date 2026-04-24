@@ -55,7 +55,7 @@ extension WerdEventPatterns on WerdEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Load value)?  load,TResult Function( _SetGoal value)?  setGoal,TResult Function( _StartSession value)?  startSession,TResult Function( _EndSession value)?  endSession,TResult Function( _TrackItemRead value)?  trackItemRead,TResult Function( _TrackRangeRead value)?  trackRangeRead,TResult Function( _TrackItemReadMarkAll value)?  trackItemReadMarkAll,TResult Function( _CompleteCycle value)?  completeCycle,TResult Function( _CompleteCycleAndRestart value)?  completeCycleAndRestart,TResult Function( _CompleteCycleStayHere value)?  completeCycleStayHere,TResult Function( _UndoLastAction value)?  undoLastAction,TResult Function( _ToggleAyahMark value)?  toggleAyahMark,TResult Function( _RemoveSegment value)?  removeSegment,TResult Function( _UpdateBookmark value)?  updateBookmark,TResult Function( _ProgressUpdated value)?  progressUpdated,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Load value)?  load,TResult Function( _SetGoal value)?  setGoal,TResult Function( _StartSession value)?  startSession,TResult Function( _EndSession value)?  endSession,TResult Function( _TrackItemRead value)?  trackItemRead,TResult Function( _TrackRangeRead value)?  trackRangeRead,TResult Function( _TrackItemReadMarkAll value)?  trackItemReadMarkAll,TResult Function( _JumpToNewSession value)?  jumpToNewSession,TResult Function( _CompleteCycle value)?  completeCycle,TResult Function( _CompleteCycleAndRestart value)?  completeCycleAndRestart,TResult Function( _CompleteCycleStayHere value)?  completeCycleStayHere,TResult Function( _UndoLastAction value)?  undoLastAction,TResult Function( _ToggleAyahMark value)?  toggleAyahMark,TResult Function( _RemoveSegment value)?  removeSegment,TResult Function( _UpdateBookmark value)?  updateBookmark,TResult Function( _ProgressUpdated value)?  progressUpdated,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Load() when load != null:
@@ -65,7 +65,8 @@ return startSession(_that);case _EndSession() when endSession != null:
 return endSession(_that);case _TrackItemRead() when trackItemRead != null:
 return trackItemRead(_that);case _TrackRangeRead() when trackRangeRead != null:
 return trackRangeRead(_that);case _TrackItemReadMarkAll() when trackItemReadMarkAll != null:
-return trackItemReadMarkAll(_that);case _CompleteCycle() when completeCycle != null:
+return trackItemReadMarkAll(_that);case _JumpToNewSession() when jumpToNewSession != null:
+return jumpToNewSession(_that);case _CompleteCycle() when completeCycle != null:
 return completeCycle(_that);case _CompleteCycleAndRestart() when completeCycleAndRestart != null:
 return completeCycleAndRestart(_that);case _CompleteCycleStayHere() when completeCycleStayHere != null:
 return completeCycleStayHere(_that);case _UndoLastAction() when undoLastAction != null:
@@ -91,7 +92,7 @@ return progressUpdated(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Load value)  load,required TResult Function( _SetGoal value)  setGoal,required TResult Function( _StartSession value)  startSession,required TResult Function( _EndSession value)  endSession,required TResult Function( _TrackItemRead value)  trackItemRead,required TResult Function( _TrackRangeRead value)  trackRangeRead,required TResult Function( _TrackItemReadMarkAll value)  trackItemReadMarkAll,required TResult Function( _CompleteCycle value)  completeCycle,required TResult Function( _CompleteCycleAndRestart value)  completeCycleAndRestart,required TResult Function( _CompleteCycleStayHere value)  completeCycleStayHere,required TResult Function( _UndoLastAction value)  undoLastAction,required TResult Function( _ToggleAyahMark value)  toggleAyahMark,required TResult Function( _RemoveSegment value)  removeSegment,required TResult Function( _UpdateBookmark value)  updateBookmark,required TResult Function( _ProgressUpdated value)  progressUpdated,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Load value)  load,required TResult Function( _SetGoal value)  setGoal,required TResult Function( _StartSession value)  startSession,required TResult Function( _EndSession value)  endSession,required TResult Function( _TrackItemRead value)  trackItemRead,required TResult Function( _TrackRangeRead value)  trackRangeRead,required TResult Function( _TrackItemReadMarkAll value)  trackItemReadMarkAll,required TResult Function( _JumpToNewSession value)  jumpToNewSession,required TResult Function( _CompleteCycle value)  completeCycle,required TResult Function( _CompleteCycleAndRestart value)  completeCycleAndRestart,required TResult Function( _CompleteCycleStayHere value)  completeCycleStayHere,required TResult Function( _UndoLastAction value)  undoLastAction,required TResult Function( _ToggleAyahMark value)  toggleAyahMark,required TResult Function( _RemoveSegment value)  removeSegment,required TResult Function( _UpdateBookmark value)  updateBookmark,required TResult Function( _ProgressUpdated value)  progressUpdated,}){
 final _that = this;
 switch (_that) {
 case _Load():
@@ -101,7 +102,8 @@ return startSession(_that);case _EndSession():
 return endSession(_that);case _TrackItemRead():
 return trackItemRead(_that);case _TrackRangeRead():
 return trackRangeRead(_that);case _TrackItemReadMarkAll():
-return trackItemReadMarkAll(_that);case _CompleteCycle():
+return trackItemReadMarkAll(_that);case _JumpToNewSession():
+return jumpToNewSession(_that);case _CompleteCycle():
 return completeCycle(_that);case _CompleteCycleAndRestart():
 return completeCycleAndRestart(_that);case _CompleteCycleStayHere():
 return completeCycleStayHere(_that);case _UndoLastAction():
@@ -126,7 +128,7 @@ return progressUpdated(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Load value)?  load,TResult? Function( _SetGoal value)?  setGoal,TResult? Function( _StartSession value)?  startSession,TResult? Function( _EndSession value)?  endSession,TResult? Function( _TrackItemRead value)?  trackItemRead,TResult? Function( _TrackRangeRead value)?  trackRangeRead,TResult? Function( _TrackItemReadMarkAll value)?  trackItemReadMarkAll,TResult? Function( _CompleteCycle value)?  completeCycle,TResult? Function( _CompleteCycleAndRestart value)?  completeCycleAndRestart,TResult? Function( _CompleteCycleStayHere value)?  completeCycleStayHere,TResult? Function( _UndoLastAction value)?  undoLastAction,TResult? Function( _ToggleAyahMark value)?  toggleAyahMark,TResult? Function( _RemoveSegment value)?  removeSegment,TResult? Function( _UpdateBookmark value)?  updateBookmark,TResult? Function( _ProgressUpdated value)?  progressUpdated,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Load value)?  load,TResult? Function( _SetGoal value)?  setGoal,TResult? Function( _StartSession value)?  startSession,TResult? Function( _EndSession value)?  endSession,TResult? Function( _TrackItemRead value)?  trackItemRead,TResult? Function( _TrackRangeRead value)?  trackRangeRead,TResult? Function( _TrackItemReadMarkAll value)?  trackItemReadMarkAll,TResult? Function( _JumpToNewSession value)?  jumpToNewSession,TResult? Function( _CompleteCycle value)?  completeCycle,TResult? Function( _CompleteCycleAndRestart value)?  completeCycleAndRestart,TResult? Function( _CompleteCycleStayHere value)?  completeCycleStayHere,TResult? Function( _UndoLastAction value)?  undoLastAction,TResult? Function( _ToggleAyahMark value)?  toggleAyahMark,TResult? Function( _RemoveSegment value)?  removeSegment,TResult? Function( _UpdateBookmark value)?  updateBookmark,TResult? Function( _ProgressUpdated value)?  progressUpdated,}){
 final _that = this;
 switch (_that) {
 case _Load() when load != null:
@@ -136,7 +138,8 @@ return startSession(_that);case _EndSession() when endSession != null:
 return endSession(_that);case _TrackItemRead() when trackItemRead != null:
 return trackItemRead(_that);case _TrackRangeRead() when trackRangeRead != null:
 return trackRangeRead(_that);case _TrackItemReadMarkAll() when trackItemReadMarkAll != null:
-return trackItemReadMarkAll(_that);case _CompleteCycle() when completeCycle != null:
+return trackItemReadMarkAll(_that);case _JumpToNewSession() when jumpToNewSession != null:
+return jumpToNewSession(_that);case _CompleteCycle() when completeCycle != null:
 return completeCycle(_that);case _CompleteCycleAndRestart() when completeCycleAndRestart != null:
 return completeCycleAndRestart(_that);case _CompleteCycleStayHere() when completeCycleStayHere != null:
 return completeCycleStayHere(_that);case _UndoLastAction() when undoLastAction != null:
@@ -161,7 +164,7 @@ return progressUpdated(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String id)?  load,TResult Function( WerdGoal goal)?  setGoal,TResult Function( int startAyah)?  startSession,TResult Function()?  endSession,TResult Function( int absoluteIndex)?  trackItemRead,TResult Function( int startAbsolute,  int endAbsolute)?  trackRangeRead,TResult Function( int startAbsolute,  int endAbsolute)?  trackItemReadMarkAll,TResult Function()?  completeCycle,TResult Function()?  completeCycleAndRestart,TResult Function()?  completeCycleStayHere,TResult Function()?  undoLastAction,TResult Function( int absoluteIndex)?  toggleAyahMark,TResult Function( int segmentIndex)?  removeSegment,TResult Function( int absoluteIndex)?  updateBookmark,TResult Function( WerdProgress progress)?  progressUpdated,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String id)?  load,TResult Function( WerdGoal goal)?  setGoal,TResult Function( int startAyah)?  startSession,TResult Function()?  endSession,TResult Function( int absoluteIndex)?  trackItemRead,TResult Function( int startAbsolute,  int endAbsolute)?  trackRangeRead,TResult Function( int startAbsolute,  int endAbsolute)?  trackItemReadMarkAll,TResult Function( int targetAbsoluteIndex)?  jumpToNewSession,TResult Function()?  completeCycle,TResult Function()?  completeCycleAndRestart,TResult Function()?  completeCycleStayHere,TResult Function()?  undoLastAction,TResult Function( int absoluteIndex)?  toggleAyahMark,TResult Function( int segmentIndex)?  removeSegment,TResult Function( int absoluteIndex)?  updateBookmark,TResult Function( WerdProgress progress)?  progressUpdated,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Load() when load != null:
 return load(_that.id);case _SetGoal() when setGoal != null:
@@ -170,7 +173,8 @@ return startSession(_that.startAyah);case _EndSession() when endSession != null:
 return endSession();case _TrackItemRead() when trackItemRead != null:
 return trackItemRead(_that.absoluteIndex);case _TrackRangeRead() when trackRangeRead != null:
 return trackRangeRead(_that.startAbsolute,_that.endAbsolute);case _TrackItemReadMarkAll() when trackItemReadMarkAll != null:
-return trackItemReadMarkAll(_that.startAbsolute,_that.endAbsolute);case _CompleteCycle() when completeCycle != null:
+return trackItemReadMarkAll(_that.startAbsolute,_that.endAbsolute);case _JumpToNewSession() when jumpToNewSession != null:
+return jumpToNewSession(_that.targetAbsoluteIndex);case _CompleteCycle() when completeCycle != null:
 return completeCycle();case _CompleteCycleAndRestart() when completeCycleAndRestart != null:
 return completeCycleAndRestart();case _CompleteCycleStayHere() when completeCycleStayHere != null:
 return completeCycleStayHere();case _UndoLastAction() when undoLastAction != null:
@@ -196,7 +200,7 @@ return progressUpdated(_that.progress);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String id)  load,required TResult Function( WerdGoal goal)  setGoal,required TResult Function( int startAyah)  startSession,required TResult Function()  endSession,required TResult Function( int absoluteIndex)  trackItemRead,required TResult Function( int startAbsolute,  int endAbsolute)  trackRangeRead,required TResult Function( int startAbsolute,  int endAbsolute)  trackItemReadMarkAll,required TResult Function()  completeCycle,required TResult Function()  completeCycleAndRestart,required TResult Function()  completeCycleStayHere,required TResult Function()  undoLastAction,required TResult Function( int absoluteIndex)  toggleAyahMark,required TResult Function( int segmentIndex)  removeSegment,required TResult Function( int absoluteIndex)  updateBookmark,required TResult Function( WerdProgress progress)  progressUpdated,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String id)  load,required TResult Function( WerdGoal goal)  setGoal,required TResult Function( int startAyah)  startSession,required TResult Function()  endSession,required TResult Function( int absoluteIndex)  trackItemRead,required TResult Function( int startAbsolute,  int endAbsolute)  trackRangeRead,required TResult Function( int startAbsolute,  int endAbsolute)  trackItemReadMarkAll,required TResult Function( int targetAbsoluteIndex)  jumpToNewSession,required TResult Function()  completeCycle,required TResult Function()  completeCycleAndRestart,required TResult Function()  completeCycleStayHere,required TResult Function()  undoLastAction,required TResult Function( int absoluteIndex)  toggleAyahMark,required TResult Function( int segmentIndex)  removeSegment,required TResult Function( int absoluteIndex)  updateBookmark,required TResult Function( WerdProgress progress)  progressUpdated,}) {final _that = this;
 switch (_that) {
 case _Load():
 return load(_that.id);case _SetGoal():
@@ -205,7 +209,8 @@ return startSession(_that.startAyah);case _EndSession():
 return endSession();case _TrackItemRead():
 return trackItemRead(_that.absoluteIndex);case _TrackRangeRead():
 return trackRangeRead(_that.startAbsolute,_that.endAbsolute);case _TrackItemReadMarkAll():
-return trackItemReadMarkAll(_that.startAbsolute,_that.endAbsolute);case _CompleteCycle():
+return trackItemReadMarkAll(_that.startAbsolute,_that.endAbsolute);case _JumpToNewSession():
+return jumpToNewSession(_that.targetAbsoluteIndex);case _CompleteCycle():
 return completeCycle();case _CompleteCycleAndRestart():
 return completeCycleAndRestart();case _CompleteCycleStayHere():
 return completeCycleStayHere();case _UndoLastAction():
@@ -230,7 +235,7 @@ return progressUpdated(_that.progress);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String id)?  load,TResult? Function( WerdGoal goal)?  setGoal,TResult? Function( int startAyah)?  startSession,TResult? Function()?  endSession,TResult? Function( int absoluteIndex)?  trackItemRead,TResult? Function( int startAbsolute,  int endAbsolute)?  trackRangeRead,TResult? Function( int startAbsolute,  int endAbsolute)?  trackItemReadMarkAll,TResult? Function()?  completeCycle,TResult? Function()?  completeCycleAndRestart,TResult? Function()?  completeCycleStayHere,TResult? Function()?  undoLastAction,TResult? Function( int absoluteIndex)?  toggleAyahMark,TResult? Function( int segmentIndex)?  removeSegment,TResult? Function( int absoluteIndex)?  updateBookmark,TResult? Function( WerdProgress progress)?  progressUpdated,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String id)?  load,TResult? Function( WerdGoal goal)?  setGoal,TResult? Function( int startAyah)?  startSession,TResult? Function()?  endSession,TResult? Function( int absoluteIndex)?  trackItemRead,TResult? Function( int startAbsolute,  int endAbsolute)?  trackRangeRead,TResult? Function( int startAbsolute,  int endAbsolute)?  trackItemReadMarkAll,TResult? Function( int targetAbsoluteIndex)?  jumpToNewSession,TResult? Function()?  completeCycle,TResult? Function()?  completeCycleAndRestart,TResult? Function()?  completeCycleStayHere,TResult? Function()?  undoLastAction,TResult? Function( int absoluteIndex)?  toggleAyahMark,TResult? Function( int segmentIndex)?  removeSegment,TResult? Function( int absoluteIndex)?  updateBookmark,TResult? Function( WerdProgress progress)?  progressUpdated,}) {final _that = this;
 switch (_that) {
 case _Load() when load != null:
 return load(_that.id);case _SetGoal() when setGoal != null:
@@ -239,7 +244,8 @@ return startSession(_that.startAyah);case _EndSession() when endSession != null:
 return endSession();case _TrackItemRead() when trackItemRead != null:
 return trackItemRead(_that.absoluteIndex);case _TrackRangeRead() when trackRangeRead != null:
 return trackRangeRead(_that.startAbsolute,_that.endAbsolute);case _TrackItemReadMarkAll() when trackItemReadMarkAll != null:
-return trackItemReadMarkAll(_that.startAbsolute,_that.endAbsolute);case _CompleteCycle() when completeCycle != null:
+return trackItemReadMarkAll(_that.startAbsolute,_that.endAbsolute);case _JumpToNewSession() when jumpToNewSession != null:
+return jumpToNewSession(_that.targetAbsoluteIndex);case _CompleteCycle() when completeCycle != null:
 return completeCycle();case _CompleteCycleAndRestart() when completeCycleAndRestart != null:
 return completeCycleAndRestart();case _CompleteCycleStayHere() when completeCycleStayHere != null:
 return completeCycleStayHere();case _UndoLastAction() when undoLastAction != null:
@@ -680,6 +686,72 @@ class __$TrackItemReadMarkAllCopyWithImpl<$Res>
   return _then(_TrackItemReadMarkAll(
 startAbsolute: null == startAbsolute ? _self.startAbsolute : startAbsolute // ignore: cast_nullable_to_non_nullable
 as int,endAbsolute: null == endAbsolute ? _self.endAbsolute : endAbsolute // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _JumpToNewSession implements WerdEvent {
+  const _JumpToNewSession(this.targetAbsoluteIndex);
+  
+
+ final  int targetAbsoluteIndex;
+
+/// Create a copy of WerdEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$JumpToNewSessionCopyWith<_JumpToNewSession> get copyWith => __$JumpToNewSessionCopyWithImpl<_JumpToNewSession>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _JumpToNewSession&&(identical(other.targetAbsoluteIndex, targetAbsoluteIndex) || other.targetAbsoluteIndex == targetAbsoluteIndex));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,targetAbsoluteIndex);
+
+@override
+String toString() {
+  return 'WerdEvent.jumpToNewSession(targetAbsoluteIndex: $targetAbsoluteIndex)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$JumpToNewSessionCopyWith<$Res> implements $WerdEventCopyWith<$Res> {
+  factory _$JumpToNewSessionCopyWith(_JumpToNewSession value, $Res Function(_JumpToNewSession) _then) = __$JumpToNewSessionCopyWithImpl;
+@useResult
+$Res call({
+ int targetAbsoluteIndex
+});
+
+
+
+
+}
+/// @nodoc
+class __$JumpToNewSessionCopyWithImpl<$Res>
+    implements _$JumpToNewSessionCopyWith<$Res> {
+  __$JumpToNewSessionCopyWithImpl(this._self, this._then);
+
+  final _JumpToNewSession _self;
+  final $Res Function(_JumpToNewSession) _then;
+
+/// Create a copy of WerdEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? targetAbsoluteIndex = null,}) {
+  return _then(_JumpToNewSession(
+null == targetAbsoluteIndex ? _self.targetAbsoluteIndex : targetAbsoluteIndex // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }

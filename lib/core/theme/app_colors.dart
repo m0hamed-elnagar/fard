@@ -13,6 +13,7 @@ extension AppColors on BuildContext {
   Color get primaryContainerColor => colors.primaryContainer;
   Color get secondaryColor => colors.secondary;
   Color get secondaryContainerColor => colors.secondaryContainer;
+  Color get tertiaryColor => colors.tertiary;
 
   // Surface colors
   Color get surfaceColor => colors.surface;

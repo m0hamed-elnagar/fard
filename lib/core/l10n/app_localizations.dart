@@ -2078,6 +2078,12 @@ abstract class AppLocalizations {
   /// **'Mark only this ayah as read (+1 ayah, total today: {current} → {newTotal})'**
   String jumpNewSessionDesc(String current, String newTotal);
 
+  /// No description provided for @newSessionStartedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'New reading session started'**
+  String get newSessionStartedSuccess;
+
   /// No description provided for @jumpOptionMarkAll.
   ///
   /// In en, this message translates to:
