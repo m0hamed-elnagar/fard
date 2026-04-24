@@ -390,11 +390,13 @@ void main() {
       await tester.tap(find.text('Choose specific surah/ayah'));
       await tester.pumpAndSettle();
 
-      // Change surah to Al-Baqarah: Tap the second dropdown button
-      await tester.tap(find.byType(DropdownButton<int>).at(1));
+      // Change surah to Al-Baqarah: Tap the surah dropdown
+      await tester.tap(find.byKey(const ValueKey('surah_dropdown')));
       await tester.pumpAndSettle();
-      // Tap the second item in the list
-      await tester.tap(find.byType(DropdownMenuItem<int>).at(1));
+      
+      // Tap Al-Baqarah (the 2nd surah) using value predicate
+      final baqarahItem = find.byWidgetPredicate((w) => w is DropdownMenuItem<int> && w.value == 2).last;
+      await tester.tap(baqarahItem);
       await tester.pumpAndSettle();
 
       // Ayah should reset to 1

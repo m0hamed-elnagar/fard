@@ -200,7 +200,7 @@ void main() {
         () => prayerTimeService.isPassed(
           any(),
           prayerTimes: any(named: 'prayerTimes'),
-          date: tomorrow,
+          date: any(named: 'date'),
         ),
       ).thenReturn(false);
 
@@ -223,9 +223,7 @@ void main() {
         () => repo.loadLastRecordBefore(any()),
       ).thenAnswer((_) async => lastRecord);
 
-      bloc.add(PrayerTrackerEvent.load(tomorrow));
-
-      await expectLater(
+      final expectation = expectLater(
         bloc.stream,
         emitsThrough(
           isA<PrayerTrackerState>().having(
@@ -240,6 +238,9 @@ void main() {
           ),
         ),
       );
+
+      bloc.add(PrayerTrackerEvent.load(tomorrow));
+      await expectation;
     });
   });
 }

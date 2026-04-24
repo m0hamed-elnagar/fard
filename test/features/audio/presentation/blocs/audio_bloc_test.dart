@@ -51,6 +51,7 @@ void main() {
     mockSettingsRepository = MockSettingsRepository();
 
     when(() => mockSettingsRepository.locale).thenReturn(const Locale('ar'));
+    when(() => mockSettingsRepository.isAudioPlayerExpanded).thenReturn(false);
 
     when(
       () => mockRepository.getCachedReciters(),

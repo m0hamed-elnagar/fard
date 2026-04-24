@@ -3,10 +3,11 @@
 ## Table of Contents
 1. [Overview](#overview)
 2. [Features](#features)
-3. [Technical Architecture](#technical-architecture)
-4. [User Guide](#user-guide)
-5. [Development Guide](#development-guide)
-6. [Changelog](#changelog)
+3. [Automatic Time Synchronization](#automatic-time-synchronization)
+4. [Technical Architecture](#technical-architecture)
+5. [User Guide](#user-guide)
+6. [Development Guide](#development-guide)
+7. [Changelog](#changelog)
 
 ---
 
@@ -85,6 +86,8 @@
 |---------|------------|
 | Location | GPS or manual location |
 | Calculation | Prayer time calculation method |
+
+| DST Support | Automatic Summer Time (Daylight Saving Time) adjustment |
 | Theme | Dark/Light with custom colors |
 | Notifications | Enable/disable reminders |
 | Backup | Export/Import data |
@@ -93,6 +96,13 @@
 - Display next prayer countdown
 - Shows Qada count
 - Customizable theme
+
+### 9. Automatic Time Synchronization
+| Feature | Description |
+|---------|------------|
+| DST Awareness | Fully respects and automatically adjusts for Summer Time (Daylight Saving Time) globally |
+| Timezone Sync | Automatically synchronizes prayer times when the device's timezone or system clock changes |
+| Real-time Updates | Background service reschedules notifications immediately upon system time changes |
 
 ---
 
@@ -266,6 +276,12 @@ A: Yes, all core features work offline. Quran text is bundled; audio requires do
 
 ### Q: Can I change prayer calculation method?
 A: Yes, Settings > Location > Calculation Method
+
+### Q: Does the app support Summer Time (Daylight Saving Time)?
+A: Yes. The app automatically detects your region's summer timing rules and adjusts all Salah times and notifications accordingly. No manual adjustment is required.
+
+### Q: What happens if I travel to a different timezone?
+A: The app detects system timezone changes and will automatically synchronize prayer times for your new location (ensure GPS is enabled or update location manually in Settings).
 
 ---
 

@@ -1,26 +1,25 @@
 import 'package:fard/core/di/injection.dart';
+import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/core/services/widget_update_service.dart';
+import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
 import 'package:fard/features/prayer_tracking/domain/missed_counter.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
-import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/add_qada_dialog.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/calendar_widget.dart';
-import 'package:fard/features/prayer_tracking/presentation/widgets/history_list.dart';
-import 'package:fard/features/werd/presentation/widgets/set_werd_goal_dialog.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/dashboard_carousel.dart';
+import 'package:fard/features/prayer_tracking/presentation/widgets/history_list.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/salaah_tile.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/suggested_azkar_section.dart';
-import 'package:fard/features/settings/presentation/screens/settings_screen.dart';
+import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
+import 'package:fard/features/werd/presentation/widgets/set_werd_goal_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/core/theme/app_colors.dart';
 
 class HomeContent extends StatefulWidget {
   final DateTime selectedDate;
@@ -144,22 +143,7 @@ class _HomeContentState extends State<HomeContent> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            actions: [
-              IconButton(
-                icon: Icon(
-                  Icons.settings_outlined,
-                  color: context.onSurfaceColor,
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SettingsScreen(),
-                    ),
-                  );
-                },
-              ),
-            ],
+            actions: const [],
           ),
           body: SafeArea(
             child: CustomScrollView(
