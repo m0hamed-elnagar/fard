@@ -89,3 +89,4 @@ git_status*.txt
 
 
 .worktrees/
+/career/
