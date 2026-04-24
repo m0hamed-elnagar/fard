@@ -90,3 +90,35 @@ git_status*.txt
 
 .worktrees/
 /career/
+
+# AI/LLM Orchestration
+.gemini/
+.qwen/
+conductor/
+GEMINI.md
+QWEN.md
+AGENTS.md
+AGENTS_COMMUNICATION.md
+AGENTS_PLAN.md
+AGENTS_REFERENCE.md
+IMPROVEMENT_PLAN.md
+GOAL_CHANGE_DEBUG_GUIDE.md
+THEME_SYSTEM_TASKS.md
+
+# Internal Development & Research
+research/
+helpingDataForFutureUpdates/
+tasks/
+all_reciters.json
+reciters.json
+editions.json
+/docs/MASTER_REMEDIATION_PLAN.md
+/docs/RESTORATION_PLAN.md
+/docs/RESTORATION_REPORT.md
+/docs/NOTIFICATION_REMEDIATION_LOG.md
+/docs/OFFLINE_DOWNLOAD_FIX_PROGRESS.md
+/docs/PHASE_1_IMPLEMENTATION_COMPLETE.md
+/docs/PHASE_1B_HYBRID_ARCHITECTURE.md
+/docs/SCROLLING_REFACTOR_STATUS.md
+/docs/SKIPPED_FEATURES_REPORT.md
+/docs/WERD_IMPLEMENTATION_CONTEXT.md
