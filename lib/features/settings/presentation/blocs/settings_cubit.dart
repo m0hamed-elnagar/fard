@@ -132,13 +132,23 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   Future<void> _toggleSpecificSalahReminderAsync(Salaah salaah) async {
     final list = List<String>.from(state.enabledSalahReminders);
+    bool masterEnabled = state.isSalahReminderEnabled;
+
     if (list.contains(salaah.name)) {
       list.remove(salaah.name);
     } else {
       list.add(salaah.name);
+      // Smart Toggle: If enabling a specific prayer but master is OFF, turn it ON
+      if (!masterEnabled) {
+        masterEnabled = true;
+        await _repo.updateSalahReminderEnabled(true);
+      }
     }
     await _repo.updateEnabledSalahReminders(list);
-    emit(state.copyWith(enabledSalahReminders: list));
+    emit(state.copyWith(
+      enabledSalahReminders: list,
+      isSalahReminderEnabled: masterEnabled,
+    ));
     _sync();
   }
 
