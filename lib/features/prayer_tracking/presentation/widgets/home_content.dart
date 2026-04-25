@@ -15,7 +15,7 @@ import 'package:fard/features/prayer_tracking/presentation/widgets/salaah_tile.d
 import 'package:fard/features/prayer_tracking/presentation/widgets/suggested_azkar_section.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
-import 'package:fard/features/settings/presentation/widgets/reminders_settings_sheet.dart';
+import 'package:fard/features/settings/presentation/widgets/reminders_settings_dialog.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/widgets/set_werd_goal_dialog.dart';
 import 'package:flutter/material.dart';

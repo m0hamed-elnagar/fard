@@ -180,9 +180,6 @@ extension GetItInjectableX on _i174.GetIt {
       instanceName: 'tasbihHistoryBox',
       preResolve: true,
     );
-    gh.factory<_i1037.WerdBloc>(
-      () => _i1037.WerdBloc(gh<_i724.WerdRepository>()),
-    );
     await gh.factoryAsync<_i1055.Box<_i852.SurahEntity>>(
       () => registerModule.surahBox,
       instanceName: 'surahBox',
@@ -204,6 +201,12 @@ extension GetItInjectableX on _i174.GetIt {
       instanceName: 'bookmarkBox',
       preResolve: true,
     );
+    gh.factory<_i1037.WerdBloc>(
+      () => _i1037.WerdBloc(
+        gh<_i724.WerdRepository>(),
+        gh<_i941.NotificationService>(),
+      ),
+    );
     gh.lazySingleton<_i307.SettingsStorage>(
       () => _i307.SettingsStorage(gh<_i460.SharedPreferences>()),
     );
@@ -220,6 +223,14 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i492.VoiceDownloadService>(
       () => _i492.VoiceDownloadService(gh<_i188.DownloadManifestService>()),
+    );
+    gh.factory<_i278.PrayerTrackerBloc>(
+      () => _i278.PrayerTrackerBloc(
+        gh<_i800.PrayerRepo>(),
+        gh<_i460.SharedPreferences>(),
+        gh<_i552.PrayerTimeService>(),
+        gh<_i941.NotificationService>(),
+      ),
     );
     gh.lazySingleton<_i331.QuranRemoteSource>(
       () => _i331.QuranRemoteSourceImpl(client: gh<_i519.Client>()),
@@ -241,13 +252,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i6.UpdateCalculationMethodUseCase>(
       () => _i6.UpdateCalculationMethodUseCase(gh<_i674.SettingsRepository>()),
-    );
-    gh.factory<_i278.PrayerTrackerBloc>(
-      () => _i278.PrayerTrackerBloc(
-        gh<_i800.PrayerRepo>(),
-        gh<_i460.SharedPreferences>(),
-        gh<_i552.PrayerTimeService>(),
-      ),
     );
     gh.singleton<_i682.WidgetUpdateService>(
       () => _i682.WidgetUpdateService(
