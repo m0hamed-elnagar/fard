@@ -91,6 +91,16 @@ void main() {
     when(() => mockSettingsRepo.savedCustomThemes).thenReturn([]);
     when(() => mockSettingsRepo.activeCustomThemeId).thenReturn(null);
     when(() => mockSettingsRepo.audioQuality).thenReturn(AudioQuality.low64);
+    when(() => mockSettingsRepo.isAudioPlayerExpanded).thenReturn(false);
+    when(() => mockSettingsRepo.isSalahReminderEnabled).thenReturn(false);
+    when(() => mockSettingsRepo.salahReminderOffsetMinutes).thenReturn(0);
+    when(() => mockSettingsRepo.enabledSalahReminders).thenReturn([]);
+    when(() => mockSettingsRepo.isWerdReminderEnabled).thenReturn(false);
+    when(() => mockSettingsRepo.werdReminderTime).thenReturn('04:00');
+    when(() => mockSettingsRepo.isSalawatReminderEnabled).thenReturn(false);
+    when(() => mockSettingsRepo.salawatFrequencyHours).thenReturn(1);
+    when(() => mockSettingsRepo.salawatStartTime).thenReturn('08:00');
+    when(() => mockSettingsRepo.salawatEndTime).thenReturn('22:00');
     when(() => mockSettingsRepo.reminders).thenReturn([]);
     when(
       () => mockSettingsRepo.salaahSettings,
@@ -146,6 +156,8 @@ void main() {
     when(
       () => mockSettingsRepo.updateAllAfterSalahMinutes(any()),
     ).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateSalahReminderEnabled(any())).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateEnabledSalahReminders(any())).thenAnswer((_) async {});
 
     // Mock use cases
     when(() => mockSyncNotif.execute()).thenAnswer((_) async {});
@@ -409,6 +421,51 @@ void main() {
         ).called(1);
         verify(() => mockSyncNotif.execute()).called(1);
       });
+    });
+
+    group('Smart Master Toggle', () {
+      test(
+        'toggleSpecificSalahReminder turns ON master switch if it was OFF when enabling a reminder',
+        () async {
+          // 1. Ensure master is OFF initially (it is by default in setup)
+          expect(cubit.state.isSalahReminderEnabled, false);
+
+          // 2. Enable a specific reminder
+          cubit.toggleSpecificSalahReminder(Salaah.fajr);
+          await Future.delayed(const Duration(milliseconds: 100));
+
+          // 3. Verify master is now ON
+          expect(cubit.state.isSalahReminderEnabled, true);
+          expect(cubit.state.enabledSalahReminders, contains(Salaah.fajr.name));
+
+          // 4. Verify repository was updated for both
+          verify(() => mockSettingsRepo.updateSalahReminderEnabled(true))
+              .called(1);
+          verify(() => mockSettingsRepo.updateEnabledSalahReminders(any()))
+              .called(1);
+        },
+      );
+
+      test(
+        'toggleSpecificSalahReminder does NOT change master switch if it was already ON',
+        () async {
+          // 1. Manually turn ON master switch
+          cubit.toggleSalahReminder(true);
+          await Future.delayed(const Duration(milliseconds: 100));
+          expect(cubit.state.isSalahReminderEnabled, true);
+          clearInteractions(mockSettingsRepo);
+
+          // 2. Enable another specific reminder
+          cubit.toggleSpecificSalahReminder(Salaah.dhuhr);
+          await Future.delayed(const Duration(milliseconds: 100));
+
+          // 3. Verify master remains ON and repo was not called again for master
+          expect(cubit.state.isSalahReminderEnabled, true);
+          verifyNever(() => mockSettingsRepo.updateSalahReminderEnabled(any()));
+          verify(() => mockSettingsRepo.updateEnabledSalahReminders(any()))
+              .called(1);
+        },
+      );
     });
   });
 }
