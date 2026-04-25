@@ -309,6 +309,11 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
         },
         progressUpdated: (e) {
           emit(state.copyWith(progress: e.progress));
+          // Smart cancellation: if goal is completed today, cancel the reminder
+          final goal = state.goal;
+          if (goal != null && e.progress.totalAmountReadToday >= goal.valueInAyahs) {
+            _notificationService.cancelWerdReminder(forTodayOnly: true);
+          }
         },
         updateBookmark: (e) async {
           // No longer used to update progress

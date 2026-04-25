@@ -3,6 +3,7 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/core/theme/app_colors.dart';
+import 'package:fard/core/extensions/salaah_extension.dart';
 import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
 import 'package:fard/features/prayer_tracking/domain/missed_counter.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
@@ -86,10 +87,53 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
+  void _showReminderSnackBar(String title, bool enabled, {String? customMessage}) {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final String status = enabled
+        ? (isAr ? 'مفعل' : 'Enabled')
+        : (isAr ? 'معطل' : 'Disabled');
+
+    final String message = customMessage ?? (enabled ? '$title: $status' : '$title: $status');
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              enabled
+                  ? Icons.notifications_active_rounded
+                  : Icons.notifications_off_rounded,
+              color: context.secondaryColor,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.amiri(
+                  color: context.onSurfaceColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: context.surfaceContainerHighestColor,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bloc = context.read<PrayerTrackerBloc>();
     final l10n = AppLocalizations.of(context)!;
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
 
     return BlocBuilder<SettingsCubit, SettingsState>(
       buildWhen: (previous, current) =>
@@ -280,113 +324,220 @@ class _HomeContentState extends State<HomeContent> {
                     ),
                   ),
 
-                // Today's Prayers Section Header
+                // Unified Today's Prayers Section (Header + List) inside a Frame
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20.0, 24.0, 20.0, 12.0),
+                  padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 12.0),
                   sliver: SliverToBoxAdapter(
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.today_rounded,
-                          color: context.secondaryColor,
-                          size: 20,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: context.surfaceContainerColor,
+                        borderRadius: BorderRadius.circular(24.0),
+                        border: Border.all(
+                          color: context.outlineColor.withValues(alpha: 0.8),
+                          width: 1.0,
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          l10n.dailyPrayers,
-                          key: const Key('daily_prayers_header'),
-                          style: GoogleFonts.amiri(
-                            color: context.onSurfaceColor,
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.w700,
+                        boxShadow: [
+                          BoxShadow(
+                            color:
+                                context.backgroundColor.withValues(alpha: 0.05),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
                           ),
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          onPressed: () => context
-                              .read<SettingsCubit>()
-                              .toggleSalahReminder(
-                                !settings.isSalahReminderEnabled,
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Header (Inside the frame)
+                          InkWell(
+                            onTap:
+                                () => setState(() {
+                                  _isDailyPrayersExpanded =
+                                      !_isDailyPrayersExpanded;
+                                }),
+                            borderRadius: BorderRadius.vertical(
+                              top: const Radius.circular(24.0),
+                              bottom: Radius.circular(
+                                _isDailyPrayersExpanded ? 0 : 24.0,
                               ),
-                          icon: Icon(
-                            settings.isSalahReminderEnabled
-                                ? Icons.notifications_active_rounded
-                                : Icons.notifications_none_rounded,
-                            color: settings.isSalahReminderEnabled
-                                ? context.secondaryColor
-                                : context.onSurfaceColor.withValues(alpha: 0.5),
-                            size: 20,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                16.0,
+                                12.0,
+                                12.0,
+                                12.0,
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.today_rounded,
+                                    color: context.secondaryColor,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    l10n.dailyPrayers,
+                                    style: GoogleFonts.amiri(
+                                      color: context.onSurfaceColor,
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  IconButton(
+                                    onPressed: () {
+                                      final newState =
+                                          !settings.isSalahReminderEnabled;
+                                      context
+                                          .read<SettingsCubit>()
+                                          .toggleSalahReminder(newState);
+                                      _showReminderSnackBar(
+                                        isAr
+                                            ? 'تذكيرات الصلاة'
+                                            : 'Salah Reminders',
+                                        newState,
+                                        customMessage:
+                                            newState
+                                                ? (isAr
+                                                    ? 'سنذكرك بتسجيل صلواتك بعد الأذان بـ ${settings.salahReminderOffsetMinutes} دقيقة'
+                                                    : 'We will remind you to log prayers ${settings.salahReminderOffsetMinutes}m after Azan')
+                                                : (isAr
+                                                    ? 'تم إيقاف تذكيرات تسجيل الصلاة'
+                                                    : 'Post-prayer logging reminders disabled'),
+                                      );
+                                    },
+                                    icon: Icon(
+                                      settings.isSalahReminderEnabled
+                                          ? Icons.notifications_active_rounded
+                                          : Icons.notifications_none_rounded,
+                                      color:
+                                          settings.isSalahReminderEnabled
+                                              ? context.secondaryColor
+                                              : context.onSurfaceColor
+                                                  .withValues(alpha: 0.5),
+                                      size: 20,
+                                    ),
+                                    tooltip: l10n.azanNotifications,
+                                  ),
+                                  Icon(
+                                    _isDailyPrayersExpanded
+                                        ? Icons.expand_less_rounded
+                                        : Icons.expand_more_rounded,
+                                    color: context.onSurfaceColor.withValues(
+                                      alpha: 0.7,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                          tooltip: l10n.azanNotifications,
-                        ),
-                        IconButton(
-                          onPressed: () => setState(() {
-                            _isDailyPrayersExpanded = !_isDailyPrayersExpanded;
-                          }),
-                          icon: Icon(
-                            _isDailyPrayersExpanded
-                                ? Icons.expand_less_rounded
-                                : Icons.expand_more_rounded,
-                            color: context.onSurfaceColor.withValues(alpha: 0.7),
-                          ),
-                        ),
-                      ],
+
+                          // Collapsible List
+                          if (_isDailyPrayersExpanded) ...[
+                            const Divider(height: 1.0),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                8.0,
+                                12.0,
+                                8.0,
+                                16.0,
+                              ),
+                              child: Column(
+                                children: [
+                                  for (int index = 0;
+                                      index < Salaah.values.length;
+                                      index++) ...[
+                                    SalaahTile(
+                                      salaah: Salaah.values[index],
+                                      qadaCount:
+                                          widget.qadaStatus[Salaah
+                                                      .values[index]]
+                                                  ?.value ??
+                                              0,
+                                      completedQadaCount:
+                                          widget.completedQadaToday[Salaah
+                                                  .values[index]] ??
+                                              0,
+                                      isMissedToday: widget.missedToday
+                                          .contains(Salaah.values[index]),
+                                      isCompletedToday: widget.completedToday
+                                          .contains(Salaah.values[index]),
+                                      isUpcoming: getIt<PrayerTimeService>()
+                                              .isUpcoming(
+                                        Salaah.values[index],
+                                        prayerTimes: selectedDatePrayerTimes,
+                                        date: widget.selectedDate,
+                                      ),
+                                      time:
+                                          selectedDatePrayerTimes != null
+                                              ? getIt<PrayerTimeService>()
+                                                  .getTimeForSalaah(
+                                                    selectedDatePrayerTimes,
+                                                    Salaah.values[index],
+                                                  )
+                                              : null,
+                                      isQadaEnabled: settings.isQadaEnabled,
+                                      isReminderEnabled:
+                                          settings.isSalahReminderEnabled &&
+                                          settings.enabledSalahReminders
+                                              .contains(
+                                                Salaah.values[index].name,
+                                              ),
+                                      onAdd:
+                                          () => bloc.add(
+                                            PrayerTrackerEvent.addQada(
+                                              Salaah.values[index],
+                                            ),
+                                          ),
+                                      onRemove:
+                                          () => bloc.add(
+                                            PrayerTrackerEvent.removeQada(
+                                              Salaah.values[index],
+                                            ),
+                                          ),
+                                      onToggleMissed:
+                                          () => bloc.add(
+                                            PrayerTrackerEvent.togglePrayer(
+                                              Salaah.values[index],
+                                            ),
+                                          ),
+                                      onToggleReminder: () {
+                                        final salaah = Salaah.values[index];
+                                        final isEnabled = settings
+                                            .enabledSalahReminders
+                                            .contains(salaah);
+                                        context
+                                            .read<SettingsCubit>()
+                                            .toggleSpecificSalahReminder(
+                                              salaah,
+                                            );
+                                        _showReminderSnackBar(
+                                          salaah.localizedName(l10n),
+                                          !isEnabled,
+                                          customMessage:
+                                              !isEnabled
+                                                  ? (isAr
+                                                      ? 'سنذكرك بتسجيل ${salaah.localizedName(l10n)} بعد الأذان'
+                                                      : 'We will remind you to log ${salaah.localizedName(l10n)} after Azan')
+                                                  : (isAr
+                                                      ? 'تم إيقاف تذكير ${salaah.localizedName(l10n)}'
+                                                      : 'Reminder for ${salaah.localizedName(l10n)} disabled'),
+                                        );
+                                      },
+                                      onLimitExceeded: _scrollToAddQada,
+                                    ),
+                                    if (index < Salaah.values.length - 1)
+                                      const SizedBox(height: 8.0),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-
-                // Salaah list
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  sliver: _isDailyPrayersExpanded
-                      ? SliverList(
-                          delegate: SliverChildBuilderDelegate((context, index) {
-                            final salaah = Salaah.values[index];
-                            final time = selectedDatePrayerTimes != null
-                                ? getIt<PrayerTimeService>().getTimeForSalaah(
-                                    selectedDatePrayerTimes,
-                                    salaah,
-                                  )
-                                : null;
-
-                            final isUpcoming = getIt<PrayerTimeService>().isUpcoming(
-                              salaah,
-                              prayerTimes: selectedDatePrayerTimes,
-                              date: widget.selectedDate,
-                            );
-
-                            return SalaahTile(
-                              salaah: salaah,
-                              qadaCount: widget.qadaStatus[salaah]?.value ?? 0,
-                              completedQadaCount:
-                                  widget.completedQadaToday[salaah] ?? 0,
-                              isMissedToday: widget.missedToday.contains(salaah),
-                              isCompletedToday: widget.completedToday.contains(
-                                salaah,
-                              ),
-                              isUpcoming: isUpcoming,
-                              time: time,
-                              isQadaEnabled: settings.isQadaEnabled,
-                              isReminderEnabled:
-                                  settings.isSalahReminderEnabled &&
-                                  settings.enabledSalahReminders.contains(
-                                    salaah.name,
-                                  ),
-                              onAdd: () =>
-                                  bloc.add(PrayerTrackerEvent.addQada(salaah)),
-                              onRemove: () =>
-                                  bloc.add(PrayerTrackerEvent.removeQada(salaah)),
-                              onToggleMissed: () =>
-                                  bloc.add(PrayerTrackerEvent.togglePrayer(salaah)),
-                              onToggleReminder: () =>
-                                  context
-                                      .read<SettingsCubit>()
-                                      .toggleSpecificSalahReminder(salaah),
-                              onLimitExceeded: _scrollToAddQada,
-                            );
-                          }, childCount: Salaah.values.length),
-                        )
-                      : const SliverToBoxAdapter(child: SizedBox.shrink()),
                 ),
 
                 // History section

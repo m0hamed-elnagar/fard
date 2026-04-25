@@ -380,7 +380,7 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
           completed.add(e.prayer);
           qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0))
               .removeMissed();
-          _notificationService.cancelPostPrayerReminder(e.prayer);
+          _notificationService.cancelPrayerReminder(e.prayer, forTodayOnly: true);
         } else if (completed.contains(e.prayer)) {
           completed.remove(e.prayer);
           missed.add(e.prayer);
