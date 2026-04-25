@@ -1,4 +1,5 @@
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
+import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/domain/entities/custom_theme.dart';
 import 'package:fard/features/settings/domain/entities/theme_preset.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
@@ -67,8 +68,163 @@ class SettingsCubit extends Cubit<SettingsState> {
           savedCustomThemes: _repo.savedCustomThemes,
           activeCustomThemeId: _repo.activeCustomThemeId,
           audioQuality: _repo.audioQuality,
+          isAudioPlayerExpanded: _repo.isAudioPlayerExpanded,
+          isSalahReminderEnabled: _repo.isSalahReminderEnabled,
+          salahReminderOffsetMinutes: _repo.salahReminderOffsetMinutes,
+          enabledSalahReminders: _repo.enabledSalahReminders,
+          isWerdReminderEnabled: _repo.isWerdReminderEnabled,
+          werdReminderTime: _repo.werdReminderTime,
+          isSalawatReminderEnabled: _repo.isSalawatReminderEnabled,
+          salawatFrequencyHours: _repo.salawatFrequencyHours,
+          salawatStartTime: _repo.salawatStartTime,
+          salawatEndTime: _repo.salawatEndTime,
         ),
       );
+
+  void updateAudioPlayerExpanded(bool expanded) {
+    try {
+      _updateAudioPlayerExpandedAsync(expanded);
+    } catch (e) {
+      debugPrint('SettingsCubit: Error in updateAudioPlayerExpanded: $e');
+    }
+  }
+
+  Future<void> _updateAudioPlayerExpandedAsync(bool expanded) async {
+    await _repo.updateAudioPlayerExpanded(expanded);
+    emit(state.copyWith(isAudioPlayerExpanded: expanded));
+  }
+
+  void toggleSalahReminder(bool enabled) {
+    try {
+      _toggleSalahReminderAsync(enabled);
+    } catch (e) {
+      debugPrint('SettingsCubit: Error in toggleSalahReminder: $e');
+    }
+  }
+
+  Future<void> _toggleSalahReminderAsync(bool enabled) async {
+    await _repo.updateSalahReminderEnabled(enabled);
+    emit(state.copyWith(isSalahReminderEnabled: enabled));
+    _sync();
+  }
+
+  void setSalahReminderOffset(int minutes) {
+    try {
+      _setSalahReminderOffsetAsync(minutes);
+    } catch (e) {
+      debugPrint('SettingsCubit: Error in setSalahReminderOffset: $e');
+    }
+  }
+
+  Future<void> _setSalahReminderOffsetAsync(int minutes) async {
+    await _repo.updateSalahReminderOffset(minutes);
+    emit(state.copyWith(salahReminderOffsetMinutes: minutes));
+    _sync();
+  }
+
+  void toggleSpecificSalahReminder(Salaah salaah) {
+    try {
+      _toggleSpecificSalahReminderAsync(salaah);
+    } catch (e) {
+      debugPrint('SettingsCubit: Error in toggleSpecificSalahReminder: $e');
+    }
+  }
+
+  Future<void> _toggleSpecificSalahReminderAsync(Salaah salaah) async {
+    final list = List<String>.from(state.enabledSalahReminders);
+    if (list.contains(salaah.name)) {
+      list.remove(salaah.name);
+    } else {
+      list.add(salaah.name);
+    }
+    await _repo.updateEnabledSalahReminders(list);
+    emit(state.copyWith(enabledSalahReminders: list));
+    _sync();
+  }
+
+  void toggleWerdReminder(bool enabled) {
+    try {
+      _toggleWerdReminderAsync(enabled);
+    } catch (e) {
+      debugPrint('SettingsCubit: Error in toggleWerdReminder: $e');
+    }
+  }
+
+  Future<void> _toggleWerdReminderAsync(bool enabled) async {
+    await _repo.updateWerdReminderEnabled(enabled);
+    emit(state.copyWith(isWerdReminderEnabled: enabled));
+    _sync();
+  }
+
+  void setWerdReminderTime(String time) {
+    try {
+      _setWerdReminderTimeAsync(time);
+    } catch (e) {
+      debugPrint('SettingsCubit: Error in setWerdReminderTime: $e');
+    }
+  }
+
+  Future<void> _setWerdReminderTimeAsync(String time) async {
+    await _repo.updateWerdReminderTime(time);
+    emit(state.copyWith(werdReminderTime: time));
+    _sync();
+  }
+
+  void toggleSalawatReminder(bool enabled) {
+    try {
+      _toggleSalawatReminderAsync(enabled);
+    } catch (e) {
+      debugPrint('SettingsCubit: Error in toggleSalawatReminder: $e');
+    }
+  }
+
+  Future<void> _toggleSalawatReminderAsync(bool enabled) async {
+    await _repo.updateSalawatReminderEnabled(enabled);
+    emit(state.copyWith(isSalawatReminderEnabled: enabled));
+    _sync();
+  }
+
+  void setSalawatFrequency(int hours) {
+    try {
+      _setSalawatFrequencyAsync(hours);
+    } catch (e) {
+      debugPrint('SettingsCubit: Error in setSalawatFrequency: $e');
+    }
+  }
+
+  Future<void> _setSalawatFrequencyAsync(int hours) async {
+    await _repo.updateSalawatFrequency(hours);
+    emit(state.copyWith(salawatFrequencyHours: hours));
+    _sync();
+  }
+
+  void setSalawatStartTime(String time) {
+    try {
+      _setSalawatStartTimeAsync(time);
+    } catch (e) {
+      debugPrint('SettingsCubit: Error in setSalawatStartTime: $e');
+    }
+  }
+
+  Future<void> _setSalawatStartTimeAsync(String time) async {
+    await _repo.updateSalawatStartTime(time);
+    emit(state.copyWith(salawatStartTime: time));
+    _sync();
+  }
+
+  void setSalawatEndTime(String time) {
+    try {
+      _setSalawatEndTimeAsync(time);
+    } catch (e) {
+      debugPrint('SettingsCubit: Error in setSalawatEndTime: $e');
+    }
+  }
+
+  Future<void> _setSalawatEndTimeAsync(String time) async {
+    await _repo.updateSalawatEndTime(time);
+    emit(state.copyWith(salawatEndTime: time));
+    _sync();
+  }
 
   void updateAudioQuality(AudioQuality quality) {
     try {

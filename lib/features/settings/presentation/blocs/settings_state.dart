@@ -31,5 +31,17 @@ sealed class SettingsState with _$SettingsState {
     String? activeCustomThemeId,
     @Default(null) LocationStatus? lastLocationStatus,
     @Default(AudioQuality.low64) AudioQuality audioQuality,
-    }) = _SettingsState;
-    }
+    @Default(false) bool isAudioPlayerExpanded,
+
+    // Reminders
+    @Default(false) bool isSalahReminderEnabled,
+    @Default(15) int salahReminderOffsetMinutes,
+    @Default([]) List<String> enabledSalahReminders,
+    @Default(false) bool isWerdReminderEnabled,
+    @Default('20:00') String werdReminderTime,
+    @Default(false) bool isSalawatReminderEnabled,
+    @Default(3) int salawatFrequencyHours,
+    @Default('10:00') String salawatStartTime,
+    @Default('20:00') String salawatEndTime,
+  }) = _SettingsState;
+}
