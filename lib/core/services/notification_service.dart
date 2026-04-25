@@ -459,4 +459,27 @@ ${(results['channels'] as List).map((c) => '    • ${c['id']} (${c['importance'
       allAzkar: allAzkar,
     );
   }
+
+  Future<void> scheduleSalawatReminders() async {
+    await _prayerScheduler.scheduleSalawatReminders(_notificationsPlugin);
+  }
+
+  Future<void> cancelPostPrayerReminder(Salaah salaah) async {
+    // Current day and next day
+    for (int day = 0; day < 2; day++) {
+      final dayOffset =
+          day * PrayerNotificationScheduler.prayersPerDay + salaah.index;
+      await _notificationsPlugin.cancel(
+        id: PrayerNotificationScheduler.postPrayerReminderIdStart + dayOffset,
+      );
+    }
+  }
+
+  Future<void> cancelWerdReminder({bool forTodayOnly = false}) async {
+    // Note: forTodayOnly would require more complex scheduling logic
+    // For now, just cancel the persistent daily notification
+    await _notificationsPlugin.cancel(
+      id: PrayerNotificationScheduler.werdReminderId,
+    );
+  }
 }

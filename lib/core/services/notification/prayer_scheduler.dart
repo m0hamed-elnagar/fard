@@ -29,6 +29,9 @@ class PrayerNotificationScheduler {
   static const int azanIdStart = 200;
   static const int prayerReminderIdStart = 300;
   static const int afterSalahAzkarIdStart = 400;
+  static const int postPrayerReminderIdStart = 500;
+  static const int werdReminderId = 600;
+  static const int salawatReminderIdStart = 700;
 
   String _applyRtl(String text) {
     return RtlTextUtil.applyRtlFromSettings(text, _settingsProvider);
@@ -38,7 +41,8 @@ class PrayerNotificationScheduler {
   static const int maxAzkarReminders = 50;
   static const int maxScheduledDays = 2;
   static const int prayersPerDay = 5;
-  static const int maxPrayerNotificationIds = 100; // 🧹 Increased to sweep old 7-day IDs (7*5=35)
+  static const int maxPrayerNotificationIds = 100;
+  static const int maxSalawatReminders = 24;
 
   PrayerNotificationScheduler(
     this._prayerTimeService,
@@ -66,6 +70,7 @@ class PrayerNotificationScheduler {
       azanIdStart,
       prayerReminderIdStart,
       afterSalahAzkarIdStart,
+      postPrayerReminderIdStart,
     ], maxPrayerNotificationIds);
 
     final now = tz.TZDateTime.now(tz.local);
@@ -191,6 +196,37 @@ class PrayerNotificationScheduler {
             ));
           }
         }
+
+        // 4. Post-Prayer Reminder (Did you pray?)
+        if (_settingsProvider.isSalahReminderEnabled &&
+            _settingsProvider.enabledSalahReminders.contains(
+              salaahSetting.salaah.name,
+            )) {
+          final reminderTime = tzSalaahTime.add(
+            Duration(minutes: _settingsProvider.salahReminderOffsetMinutes),
+          );
+          if (reminderTime.isAfter(now)) {
+            events.add((
+              time: reminderTime,
+              isAzan: false,
+              schedule: (int? timeout) async {
+                try {
+                  await _schedulePostPrayerReminder(
+                    notificationsPlugin,
+                    id: postPrayerReminderIdStart + dayOffset,
+                    salaah: salaahSetting.salaah,
+                    scheduledDate: reminderTime,
+                    timeoutAfter: timeout,
+                  );
+                } catch (e) {
+                  debugPrint(
+                    'PrayerNotificationScheduler: Error scheduling post-prayer reminder: $e',
+                  );
+                }
+              },
+            ));
+          }
+        }
       }
     }
 
@@ -223,6 +259,18 @@ class PrayerNotificationScheduler {
       }
 
       await events[i].schedule(timeout);
+    }
+
+    // 5. Werd Reminder
+    if (_settingsProvider.isWerdReminderEnabled) {
+      final werdTime =
+          _parseTime(_settingsProvider.werdReminderTime, DateTime.now());
+      await _scheduleWerdReminder(notificationsPlugin, scheduledDate: werdTime);
+    }
+
+    // 6. Salawat Reminders
+    if (_settingsProvider.isSalawatReminderEnabled) {
+      await scheduleSalawatReminders(notificationsPlugin);
     }
   }
 
@@ -260,6 +308,94 @@ class PrayerNotificationScheduler {
       );
     }
     await Future.wait(scheduleFutures);
+  }
+
+  Future<void> scheduleSalawatReminders(
+    FlutterLocalNotificationsPlugin notificationsPlugin,
+  ) async {
+    await _cancelNotificationRanges(notificationsPlugin, [
+      salawatReminderIdStart,
+    ], maxSalawatReminders);
+
+    if (!_settingsProvider.isSalawatReminderEnabled) return;
+
+    final start = _parseTime(
+      _settingsProvider.salawatStartTime,
+      DateTime.now(),
+    );
+    final end = _parseTime(_settingsProvider.salawatEndTime, DateTime.now());
+    final freqHours = _settingsProvider.salawatFrequencyHours;
+
+    final List<Future<void>> futures = [];
+    int id = 0;
+    DateTime current = start;
+
+    while (current.isBefore(end) || current.isAtSameMomentAs(end)) {
+      if (id >= maxSalawatReminders) break;
+
+      futures.add(
+        _scheduleDailyNotification(
+          notificationsPlugin,
+          id: salawatReminderIdStart + id,
+          title: 'هل صليت على النبي اليوم؟',
+          body: 'اللهم صل وسلم وبارك على نبينا محمد ﷺ',
+          scheduledDate: current,
+        ),
+      );
+
+      current = current.add(Duration(hours: freqHours));
+      id++;
+    }
+
+    await Future.wait(futures);
+  }
+
+  Future<void> _schedulePostPrayerReminder(
+    FlutterLocalNotificationsPlugin notificationsPlugin, {
+    required int id,
+    required Salaah salaah,
+    required tz.TZDateTime scheduledDate,
+    int? timeoutAfter,
+  }) async {
+    final String salaahName = _getSalaahName(salaah);
+    final String title = 'هل صليت $salaahName؟';
+
+    await notificationsPlugin.zonedSchedule(
+      id: id,
+      title: _applyRtl(title),
+      body: _applyRtl('اضغط لتسجيل صلاتك في متتبع القضاء'),
+      scheduledDate: scheduledDate,
+      notificationDetails: NotificationDetails(
+        android: AndroidNotificationDetails(
+          ChannelManager.reminderChannelId,
+          _applyRtl('Reminders'),
+          channelDescription: _applyRtl('Post-prayer reminders'),
+          importance: Importance.max,
+          priority: Priority.high,
+          groupKey: groupKey,
+          timeoutAfter: timeoutAfter,
+        ),
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+    );
+  }
+
+  Future<void> _scheduleWerdReminder(
+    FlutterLocalNotificationsPlugin notificationsPlugin, {
+    required DateTime scheduledDate,
+  }) async {
+    await _scheduleDailyNotification(
+      notificationsPlugin,
+      id: werdReminderId,
+      title: 'الورد اليومي',
+      body: 'حان وقت قراءة وردك اليومي من القرآن الكريم',
+      scheduledDate: scheduledDate,
+    );
   }
 
   Future<void> _cancelNotificationRanges(
