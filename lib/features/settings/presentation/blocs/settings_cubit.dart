@@ -103,8 +103,8 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   Future<void> _toggleSalahReminderAsync(bool enabled) async {
-    await _repo.updateSalahReminderEnabled(enabled);
     emit(state.copyWith(isSalahReminderEnabled: enabled));
+    await _repo.updateSalahReminderEnabled(enabled);
     _sync();
   }
 
@@ -117,8 +117,8 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   Future<void> _setSalahReminderOffsetAsync(int minutes) async {
-    await _repo.updateSalahReminderOffset(minutes);
     emit(state.copyWith(salahReminderOffsetMinutes: minutes));
+    await _repo.updateSalahReminderOffset(minutes);
     _sync();
   }
 
@@ -141,14 +141,18 @@ class SettingsCubit extends Cubit<SettingsState> {
       // Smart Toggle: If enabling a specific prayer but master is OFF, turn it ON
       if (!masterEnabled) {
         masterEnabled = true;
-        await _repo.updateSalahReminderEnabled(true);
       }
     }
-    await _repo.updateEnabledSalahReminders(list);
+
     emit(state.copyWith(
       enabledSalahReminders: list,
       isSalahReminderEnabled: masterEnabled,
     ));
+
+    if (masterEnabled != state.isSalahReminderEnabled) {
+      await _repo.updateSalahReminderEnabled(masterEnabled);
+    }
+    await _repo.updateEnabledSalahReminders(list);
     _sync();
   }
 
@@ -161,8 +165,8 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   Future<void> _toggleWerdReminderAsync(bool enabled) async {
-    await _repo.updateWerdReminderEnabled(enabled);
     emit(state.copyWith(isWerdReminderEnabled: enabled));
+    await _repo.updateWerdReminderEnabled(enabled);
     _sync();
   }
 
@@ -175,8 +179,8 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   Future<void> _setWerdReminderTimeAsync(String time) async {
-    await _repo.updateWerdReminderTime(time);
     emit(state.copyWith(werdReminderTime: time));
+    await _repo.updateWerdReminderTime(time);
     _sync();
   }
 
@@ -189,8 +193,8 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   Future<void> _toggleSalawatReminderAsync(bool enabled) async {
-    await _repo.updateSalawatReminderEnabled(enabled);
     emit(state.copyWith(isSalawatReminderEnabled: enabled));
+    await _repo.updateSalawatReminderEnabled(enabled);
     _sync();
   }
 
@@ -203,8 +207,8 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   Future<void> _setSalawatFrequencyAsync(int hours) async {
-    await _repo.updateSalawatFrequency(hours);
     emit(state.copyWith(salawatFrequencyHours: hours));
+    await _repo.updateSalawatFrequency(hours);
     _sync();
   }
 
@@ -217,8 +221,8 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   Future<void> _setSalawatStartTimeAsync(String time) async {
-    await _repo.updateSalawatStartTime(time);
     emit(state.copyWith(salawatStartTime: time));
+    await _repo.updateSalawatStartTime(time);
     _sync();
   }
 
@@ -231,8 +235,8 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   Future<void> _setSalawatEndTimeAsync(String time) async {
-    await _repo.updateSalawatEndTime(time);
     emit(state.copyWith(salawatEndTime: time));
+    await _repo.updateSalawatEndTime(time);
     _sync();
   }
 

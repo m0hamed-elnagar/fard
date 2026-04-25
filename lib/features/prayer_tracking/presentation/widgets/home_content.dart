@@ -49,6 +49,7 @@ class HomeContent extends StatefulWidget {
 class _HomeContentState extends State<HomeContent> {
   final ScrollController _scrollController = ScrollController();
   final PageController _pageController = PageController(viewportFraction: 0.9);
+  bool _isDailyPrayersExpanded = true;
 
   @override
   void dispose() {
@@ -99,7 +100,9 @@ class _HomeContentState extends State<HomeContent> {
           previous.locale != current.locale ||
           previous.cityName != current.cityName ||
           previous.isQadaEnabled != current.isQadaEnabled ||
-          previous.hijriAdjustment != current.hijriAdjustment,
+          previous.hijriAdjustment != current.hijriAdjustment ||
+          previous.isSalahReminderEnabled != current.isSalahReminderEnabled ||
+          previous.enabledSalahReminders != current.enabledSalahReminders,
       builder: (context, settings) {
         // Calculate today's prayer times for countdown (always uses DateTime.now())
         final todayPrayerTimes =
@@ -298,6 +301,35 @@ class _HomeContentState extends State<HomeContent> {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
+                        const Spacer(),
+                        IconButton(
+                          onPressed: () => context
+                              .read<SettingsCubit>()
+                              .toggleSalahReminder(
+                                !settings.isSalahReminderEnabled,
+                              ),
+                          icon: Icon(
+                            settings.isSalahReminderEnabled
+                                ? Icons.notifications_active_rounded
+                                : Icons.notifications_none_rounded,
+                            color: settings.isSalahReminderEnabled
+                                ? context.secondaryColor
+                                : context.onSurfaceColor.withValues(alpha: 0.5),
+                            size: 20,
+                          ),
+                          tooltip: l10n.azanNotifications,
+                        ),
+                        IconButton(
+                          onPressed: () => setState(() {
+                            _isDailyPrayersExpanded = !_isDailyPrayersExpanded;
+                          }),
+                          icon: Icon(
+                            _isDailyPrayersExpanded
+                                ? Icons.expand_less_rounded
+                                : Icons.expand_more_rounded,
+                            color: context.onSurfaceColor.withValues(alpha: 0.7),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -306,53 +338,55 @@ class _HomeContentState extends State<HomeContent> {
                 // Salaah list
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      final salaah = Salaah.values[index];
-                      final time = selectedDatePrayerTimes != null
-                          ? getIt<PrayerTimeService>().getTimeForSalaah(
-                              selectedDatePrayerTimes,
+                  sliver: _isDailyPrayersExpanded
+                      ? SliverList(
+                          delegate: SliverChildBuilderDelegate((context, index) {
+                            final salaah = Salaah.values[index];
+                            final time = selectedDatePrayerTimes != null
+                                ? getIt<PrayerTimeService>().getTimeForSalaah(
+                                    selectedDatePrayerTimes,
+                                    salaah,
+                                  )
+                                : null;
+
+                            final isUpcoming = getIt<PrayerTimeService>().isUpcoming(
                               salaah,
-                            )
-                          : null;
+                              prayerTimes: selectedDatePrayerTimes,
+                              date: widget.selectedDate,
+                            );
 
-                      final isUpcoming = getIt<PrayerTimeService>().isUpcoming(
-                        salaah,
-                        prayerTimes: selectedDatePrayerTimes,
-                        date: widget.selectedDate,
-                      );
-
-                      return SalaahTile(
-                        salaah: salaah,
-                        qadaCount: widget.qadaStatus[salaah]?.value ?? 0,
-                        completedQadaCount:
-                            widget.completedQadaToday[salaah] ?? 0,
-                        isMissedToday: widget.missedToday.contains(salaah),
-                        isCompletedToday: widget.completedToday.contains(
-                          salaah,
-                        ),
-                        isUpcoming: isUpcoming,
-                        time: time,
-                        isQadaEnabled: settings.isQadaEnabled,
-                        isReminderEnabled:
-                            settings.isSalahReminderEnabled &&
-                            settings.enabledSalahReminders.contains(
-                              salaah.name,
-                            ),
-                        onAdd: () =>
-                            bloc.add(PrayerTrackerEvent.addQada(salaah)),
-                        onRemove: () =>
-                            bloc.add(PrayerTrackerEvent.removeQada(salaah)),
-                        onToggleMissed: () =>
-                            bloc.add(PrayerTrackerEvent.togglePrayer(salaah)),
-                        onToggleReminder: () =>
-                            context
-                                .read<SettingsCubit>()
-                                .toggleSpecificSalahReminder(salaah),
-                        onLimitExceeded: _scrollToAddQada,
-                      );
-                    }, childCount: Salaah.values.length),
-                  ),
+                            return SalaahTile(
+                              salaah: salaah,
+                              qadaCount: widget.qadaStatus[salaah]?.value ?? 0,
+                              completedQadaCount:
+                                  widget.completedQadaToday[salaah] ?? 0,
+                              isMissedToday: widget.missedToday.contains(salaah),
+                              isCompletedToday: widget.completedToday.contains(
+                                salaah,
+                              ),
+                              isUpcoming: isUpcoming,
+                              time: time,
+                              isQadaEnabled: settings.isQadaEnabled,
+                              isReminderEnabled:
+                                  settings.isSalahReminderEnabled &&
+                                  settings.enabledSalahReminders.contains(
+                                    salaah.name,
+                                  ),
+                              onAdd: () =>
+                                  bloc.add(PrayerTrackerEvent.addQada(salaah)),
+                              onRemove: () =>
+                                  bloc.add(PrayerTrackerEvent.removeQada(salaah)),
+                              onToggleMissed: () =>
+                                  bloc.add(PrayerTrackerEvent.togglePrayer(salaah)),
+                              onToggleReminder: () =>
+                                  context
+                                      .read<SettingsCubit>()
+                                      .toggleSpecificSalahReminder(salaah),
+                              onLimitExceeded: _scrollToAddQada,
+                            );
+                          }, childCount: Salaah.values.length),
+                        )
+                      : const SliverToBoxAdapter(child: SizedBox.shrink()),
                 ),
 
                 // History section

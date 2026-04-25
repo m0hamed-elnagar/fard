@@ -53,7 +53,7 @@ class HistoryList extends StatelessWidget {
           ),
           child: ExpansionTile(
             key: PageStorageKey('history_$monthKey'),
-            initiallyExpanded: monthKey == sortedKeys.first,
+            initiallyExpanded: false,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16.0),
             ),
