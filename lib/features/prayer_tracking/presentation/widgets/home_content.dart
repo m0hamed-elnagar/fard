@@ -327,12 +327,21 @@ class _HomeContentState extends State<HomeContent> {
                         isUpcoming: isUpcoming,
                         time: time,
                         isQadaEnabled: settings.isQadaEnabled,
+                        isReminderEnabled:
+                            settings.isSalahReminderEnabled &&
+                            settings.enabledSalahReminders.contains(
+                              salaah.name,
+                            ),
                         onAdd: () =>
                             bloc.add(PrayerTrackerEvent.addQada(salaah)),
                         onRemove: () =>
                             bloc.add(PrayerTrackerEvent.removeQada(salaah)),
                         onToggleMissed: () =>
                             bloc.add(PrayerTrackerEvent.togglePrayer(salaah)),
+                        onToggleReminder: () =>
+                            context
+                                .read<SettingsCubit>()
+                                .toggleSpecificSalahReminder(salaah),
                         onLimitExceeded: _scrollToAddQada,
                       );
                     }, childCount: Salaah.values.length),

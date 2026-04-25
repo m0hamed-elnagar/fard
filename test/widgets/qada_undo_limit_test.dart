@@ -136,6 +136,7 @@ void main() {
                 isUpcoming: false,
                 time: DateTime.now(),
                 isQadaEnabled: true,
+                isReminderEnabled: false,
                 onToggleMissed: () {
                   setState(() => toggled = !toggled);
                 },
@@ -143,6 +144,7 @@ void main() {
                 onRemove: () {
                   setState(() => toggled = true);
                 },
+                onToggleReminder: () {},
               );
             },
           ),

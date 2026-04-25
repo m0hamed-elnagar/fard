@@ -16,9 +16,11 @@ class SalaahTile extends StatefulWidget {
   final bool isUpcoming;
   final DateTime? time;
   final bool isQadaEnabled;
+  final bool isReminderEnabled;
   final VoidCallback onAdd;
   final VoidCallback onRemove;
   final VoidCallback onToggleMissed;
+  final VoidCallback onToggleReminder;
   final VoidCallback? onLimitExceeded;
 
   const SalaahTile({
@@ -31,9 +33,11 @@ class SalaahTile extends StatefulWidget {
     required this.isUpcoming,
     required this.time,
     required this.isQadaEnabled,
+    required this.isReminderEnabled,
     required this.onAdd,
     required this.onRemove,
     required this.onToggleMissed,
+    required this.onToggleReminder,
     this.onLimitExceeded,
   });
 
@@ -269,14 +273,37 @@ class _SalaahTileState extends State<SalaahTile> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              widget.salaah.localizedName(l10n),
-                              style: GoogleFonts.amiri(
-                                color: context.onSurfaceColor,
-                                fontSize: isNarrow ? 18.0 : 22.0,
-                                fontWeight: FontWeight.w700,
-                                height: 1.2,
-                              ),
+                            Row(
+                              children: [
+                                Text(
+                                  widget.salaah.localizedName(l10n),
+                                  style: GoogleFonts.amiri(
+                                    color: context.onSurfaceColor,
+                                    fontSize: isNarrow ? 18.0 : 22.0,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.2,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                IconButton(
+                                  onPressed: widget.onToggleReminder,
+                                  visualDensity: VisualDensity.compact,
+                                  iconSize: 18,
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  icon: Icon(
+                                    widget.isReminderEnabled
+                                        ? Icons.notifications_active_rounded
+                                        : Icons.notifications_none_rounded,
+                                    color:
+                                        widget.isReminderEnabled
+                                            ? context.secondaryColor
+                                            : context.neutralColor.withValues(
+                                              alpha: 0.5,
+                                            ),
+                                  ),
+                                ),
+                              ],
                             ),
                             if (widget.time != null)
                               Padding(

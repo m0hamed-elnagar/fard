@@ -10,6 +10,8 @@ import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
 import 'package:fard/features/werd/presentation/pages/werd_history_page.dart';
+import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -325,13 +327,43 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                isAr ? 'الورد اليومي' : 'Daily Werd',
-                style: GoogleFonts.amiri(
-                  color: context.onSurfaceColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                children: [
+                  Text(
+                    isAr ? 'الورد اليومي' : 'Daily Werd',
+                    style: GoogleFonts.amiri(
+                      color: context.onSurfaceColor,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  BlocBuilder<SettingsCubit, SettingsState>(
+                    builder: (context, settings) {
+                      return IconButton(
+                        onPressed:
+                            () => context
+                                .read<SettingsCubit>()
+                                .toggleWerdReminder(
+                                  !settings.isWerdReminderEnabled,
+                                ),
+                        visualDensity: VisualDensity.compact,
+                        iconSize: 18,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        icon: Icon(
+                          settings.isWerdReminderEnabled
+                              ? Icons.notifications_active_rounded
+                              : Icons.notifications_none_rounded,
+                          color:
+                              settings.isWerdReminderEnabled
+                                  ? context.secondaryColor
+                                  : context.neutralColor.withValues(alpha: 0.5),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
               if (remainingDays != null)
                 Text(
