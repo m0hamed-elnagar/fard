@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
+import 'package:fard/core/di/injection.dart';
+import 'package:fard/core/services/notification_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/features/werd/domain/entities/werd_progress.dart';
 import 'package:fard/features/werd/domain/entities/werd_history_entry.dart';
@@ -16,9 +18,15 @@ import '../../domain/entities/werd_goal.dart';
 @injectable
 class WerdBloc extends Bloc<WerdEvent, WerdState> {
   final WerdRepository _repository;
+  final NotificationService _notificationService;
   StreamSubscription? _progressSubscription;
 
-  WerdBloc(this._repository) : super(WerdState.initial()) {
+  WerdBloc(
+    this._repository, [
+    NotificationService? notificationService,
+  ]) : _notificationService =
+           notificationService ?? getIt<NotificationService>(),
+       super(WerdState.initial()) {
     on<WerdEvent>((event, emit) async {
       await event.map(
         load: (e) async {
@@ -888,7 +896,17 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
     if (progress != null) {
       // ignore: invalid_use_of_visible_for_testing_member
       emit(state.copyWith(progress: progress));
-      debugPrint('📡 [WerdBloc] State emitted - Segments: ${progress.segmentsToday.length}, Total: ${progress.totalAmountReadToday}');
+      debugPrint(
+        '📡 [WerdBloc] State emitted - Segments: ${progress.segmentsToday.length}, Total: ${progress.totalAmountReadToday}',
+      );
+
+      // Smart cancellation: if goal is completed today, cancel the reminder
+      final goal = state.goal;
+      if (goal != null) {
+        if (progress.totalAmountReadToday >= goal.valueInAyahs) {
+          _notificationService.cancelWerdReminder(forTodayOnly: true);
+        }
+      }
     }
   }
 }

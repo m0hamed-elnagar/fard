@@ -2,11 +2,13 @@ import 'dart:developer' as developer;
 
 import 'package:adhan/adhan.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
 import 'package:fard/features/prayer_tracking/domain/missed_counter.dart';
 import 'package:fard/features/prayer_tracking/domain/prayer_repo.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
+import 'package:fard/core/services/notification_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
@@ -22,9 +24,16 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
   final PrayerRepo _repo;
   final SharedPreferences _prefs;
   final PrayerTimeService _prayerTimeService;
+  final NotificationService _notificationService;
 
-  PrayerTrackerBloc(this._repo, this._prefs, this._prayerTimeService)
-    : super(const PrayerTrackerState.loading()) {
+  PrayerTrackerBloc(
+    this._repo,
+    this._prefs,
+    this._prayerTimeService, [
+    NotificationService? notificationService,
+  ]) : _notificationService =
+           notificationService ?? getIt<NotificationService>(),
+       super(const PrayerTrackerState.loading()) {
     on<_Load>(_onLoad, transformer: sequential());
     on<_TogglePrayer>(_onTogglePrayer, transformer: sequential());
     on<_AddQada>(_onAddQada, transformer: sequential());
@@ -371,6 +380,7 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
           completed.add(e.prayer);
           qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0))
               .removeMissed();
+          _notificationService.cancelPostPrayerReminder(e.prayer);
         } else if (completed.contains(e.prayer)) {
           completed.remove(e.prayer);
           missed.add(e.prayer);
