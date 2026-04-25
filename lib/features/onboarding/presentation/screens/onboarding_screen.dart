@@ -14,6 +14,8 @@ import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 
+import 'package:fard/core/mixins/notification_permission_mixin.dart';
+
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -21,7 +23,7 @@ class OnboardingScreen extends StatefulWidget {
   State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends State<OnboardingScreen> with NotificationPermissionMixin {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   bool _isQadaEnabled = true;
@@ -29,6 +31,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final int _totalPages = 5;
 
   Future<void> _completeOnboarding() async {
+    // If Azan is enabled, make one last check for permissions
+    final settings = context.read<SettingsCubit>().state;
+    if (settings.salaahSettings.any((s) => s.isAzanEnabled)) {
+      await checkAndRequestNotificationPermissions(context);
+    }
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_complete', true);
 
@@ -323,7 +331,14 @@ class _AzanSelectionPage extends StatelessWidget {
                 ),
                 CustomToggle(
                   value: isAzanEnabled,
-                  onChanged: (val) => cubit.updateAllAzanEnabled(val),
+                  onChanged: (val) async {
+                    if (val) {
+                      final granted = await (context.findAncestorStateOfType<_OnboardingScreenState>() as _OnboardingScreenState)
+                          .checkAndRequestNotificationPermissions(context);
+                      if (!granted) return;
+                    }
+                    cubit.updateAllAzanEnabled(val);
+                  },
                 ),
               ],
             ),

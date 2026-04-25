@@ -142,22 +142,25 @@ class NotificationService {
       },
     );
 
-    // Request permissions for Android 13+
+    // Create notification channels for Android initially
     if (Platform.isAndroid) {
-      debugPrint('NotificationService: requesting Android permissions...');
-      await Permission.notification.request();
-      await Permission.scheduleExactAlarm.request();
-
-      // Create notification channels for Android (using default/empty settings initially if needed,
-      // but usually we wait for schedulePrayerNotifications to create specific channels)
-      // We can just create the static ones here.
       await _channelManager.createNotificationChannels(_notificationsPlugin);
-
-      // Check exact alarm permission state
-      final canSchedule = await canScheduleExactNotifications();
-      debugPrint('Can schedule exact notifications: $canSchedule');
     }
     debugPrint('NotificationService: init complete');
+  }
+
+  /// Request all required permissions for notifications and exact alarms.
+  /// Returns true if all critical permissions are granted.
+  Future<bool> requestPermissions() async {
+    if (!Platform.isAndroid) return true;
+
+    debugPrint('NotificationService: requesting Android permissions...');
+    final notificationStatus = await Permission.notification.request();
+    final alarmStatus = await Permission.scheduleExactAlarm.request();
+    
+    debugPrint('Permissions result: Notifications=$notificationStatus, Alarms=$alarmStatus');
+    
+    return notificationStatus.isGranted && alarmStatus.isGranted;
   }
 
   Future<void> handleInitialNotification() async {

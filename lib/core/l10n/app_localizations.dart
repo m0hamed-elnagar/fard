@@ -2911,6 +2911,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Color Customization'**
   String get widgetCustomization;
+
+  /// No description provided for @notificationsRequiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications Required'**
+  String get notificationsRequiredTitle;
+
+  /// No description provided for @notificationsRequiredDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'To hear the Azan and receive prayer reminders on time, Fard needs permission to show notifications and schedule exact alarms.'**
+  String get notificationsRequiredDesc;
+
+  /// No description provided for @enable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get enable;
 }
 
 class _AppLocalizationsDelegate

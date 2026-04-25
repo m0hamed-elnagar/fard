@@ -639,5 +639,8 @@
   "widgetPreviewHijriDate": "26 Shawwal 1447",
   "widgetPreviewCountdown": "3h 45m",
   "widgetStartFromPreset": "Start from a theme preset:",
-  "widgetCustomization": "Color Customization"
+  "widgetCustomization": "Color Customization",
+  "notificationsRequiredTitle": "Notifications Required",
+  "notificationsRequiredDesc": "To hear the Azan and receive prayer reminders on time, Fard needs permission to show notifications and schedule exact alarms.",
+  "enable": "Enable"
 }

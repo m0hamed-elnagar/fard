@@ -1550,4 +1550,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get widgetCustomization => 'Color Customization';
+
+  @override
+  String get notificationsRequiredTitle => 'Notifications Required';
+
+  @override
+  String get notificationsRequiredDesc =>
+      'To hear the Azan and receive prayer reminders on time, Fard needs permission to show notifications and schedule exact alarms.';
+
+  @override
+  String get enable => 'Enable';
 }

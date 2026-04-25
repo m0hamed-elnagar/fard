@@ -639,5 +639,8 @@
   "widgetPreviewHijriDate": "٢٦ شوال ١٤٤٧",
   "widgetPreviewCountdown": "٣س ٤٥د",
   "widgetStartFromPreset": "ابدأ بسمة جاهزة:",
-  "widgetCustomization": "تخصيص الألوان"
+  "widgetCustomization": "تخصيص الألوان",
+  "notificationsRequiredTitle": "الأذان يحتاج إذن الإشعارات",
+  "notificationsRequiredDesc": "لسماع الأذان وتلقي التذكيرات في وقتها، يحتاج التطبيق إلى إذن لعرض الإشعارات وجدولة التنبيهات الدقيقة.",
+  "enable": "تفعيل"
 }

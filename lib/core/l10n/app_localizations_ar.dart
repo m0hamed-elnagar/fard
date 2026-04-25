@@ -1542,4 +1542,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get widgetCustomization => 'تخصيص الألوان';
+
+  @override
+  String get notificationsRequiredTitle => 'الأذان يحتاج إذن الإشعارات';
+
+  @override
+  String get notificationsRequiredDesc =>
+      'لسماع الأذان وتلقي التذكيرات في وقتها، يحتاج التطبيق إلى إذن لعرض الإشعارات وجدولة التنبيهات الدقيقة.';
+
+  @override
+  String get enable => 'تفعيل';
 }

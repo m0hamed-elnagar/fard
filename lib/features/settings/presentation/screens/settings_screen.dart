@@ -29,6 +29,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:fard/core/mixins/notification_permission_mixin.dart';
+
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -36,7 +38,7 @@ class SettingsScreen extends StatefulWidget {
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends State<SettingsScreen> with NotificationPermissionMixin {
   bool _notificationsEnabled = true;
   bool _canScheduleExactAlarms = true;
   bool _isBatteryOptimizationIgnored = true;
@@ -372,8 +374,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _buildToggleItem(
                       title: l10n.enableAzan,
                       value: isAzanEnabled,
-                      onChanged: (val) =>
-                          setDialogState(() => isAzanEnabled = val),
+                      onChanged: (val) async {
+                        if (val) {
+                          final granted = await checkAndRequestNotificationPermissions(context);
+                          if (!granted) return;
+                        }
+                        setDialogState(() => isAzanEnabled = val);
+                      },
                     ),
                     if (isAzanEnabled)
                       Padding(
@@ -785,8 +792,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _buildToggleItem(
                       title: l10n.enableAzan,
                       value: isAzanEnabled,
-                      onChanged: (val) =>
-                          setDialogState(() => isAzanEnabled = val),
+                      onChanged: (val) async {
+                        if (val) {
+                          final granted = await checkAndRequestNotificationPermissions(context);
+                          if (!granted) return;
+                        }
+                        setDialogState(() => isAzanEnabled = val);
+                      },
                     ),
                     if (isAzanEnabled)
                       Padding(
@@ -1137,7 +1149,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           CustomToggle(
             value: reminder.isEnabled,
-            onChanged: (val) => cubit.toggleReminder(index),
+            onChanged: (val) async {
+              if (val) {
+                final granted = await checkAndRequestNotificationPermissions(context);
+                if (!granted) return;
+              }
+              cubit.toggleReminder(index);
+            },
           ),
           IconButton(
             icon: Icon(
