@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 
@@ -164,6 +165,60 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   bool get isAudioPlayerExpanded =>
       _storage.readBool(SettingsKeys.isAudioPlayerExpanded, defaultValue: false);
+
+  // ==================== REMINDERS ====================
+
+  @override
+  bool get isSalahReminderEnabled =>
+      _storage.readBool(SettingsKeys.isSalahReminderEnabled, defaultValue: false);
+
+  @override
+  int get salahReminderOffsetMinutes => _storage.readInt(
+    SettingsKeys.salahReminderOffsetMinutes,
+    defaultValue: 15,
+  );
+
+  @override
+  List<String> get enabledSalahReminders {
+    final String? jsonStr = _storage.readString(SettingsKeys.enabledSalahReminders);
+    if (jsonStr == null) return [];
+    try {
+      final List<dynamic> decoded = jsonDecode(jsonStr);
+      return decoded.cast<String>();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  @override
+  bool get isWerdReminderEnabled =>
+      _storage.readBool(SettingsKeys.isWerdReminderEnabled, defaultValue: false);
+
+  @override
+  String get werdReminderTime => _storage.readString(
+    SettingsKeys.werdReminderTime,
+    defaultValue: '20:00',
+  )!;
+
+  @override
+  bool get isSalawatReminderEnabled =>
+      _storage.readBool(SettingsKeys.isSalawatReminderEnabled, defaultValue: false);
+
+  @override
+  int get salawatFrequencyHours =>
+      _storage.readInt(SettingsKeys.salawatFrequencyHours, defaultValue: 3);
+
+  @override
+  String get salawatStartTime => _storage.readString(
+    SettingsKeys.salawatStartTime,
+    defaultValue: '10:00',
+  )!;
+
+  @override
+  String get salawatEndTime => _storage.readString(
+    SettingsKeys.salawatEndTime,
+    defaultValue: '20:00',
+  )!;
 
   // ==================== WRITE OPERATIONS ====================
 
@@ -415,5 +470,53 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<void> updateAudioPlayerExpanded(bool expanded) async {
     await _storage.writeBool(SettingsKeys.isAudioPlayerExpanded, expanded);
+  }
+
+  @override
+  Future<void> updateSalahReminderEnabled(bool enabled) async {
+    await _storage.writeBool(SettingsKeys.isSalahReminderEnabled, enabled);
+  }
+
+  @override
+  Future<void> updateSalahReminderOffset(int minutes) async {
+    await _storage.writeInt(SettingsKeys.salahReminderOffsetMinutes, minutes);
+  }
+
+  @override
+  Future<void> updateEnabledSalahReminders(List<String> enabledSalahs) async {
+    await _storage.writeString(
+      SettingsKeys.enabledSalahReminders,
+      jsonEncode(enabledSalahs),
+    );
+  }
+
+  @override
+  Future<void> updateWerdReminderEnabled(bool enabled) async {
+    await _storage.writeBool(SettingsKeys.isWerdReminderEnabled, enabled);
+  }
+
+  @override
+  Future<void> updateWerdReminderTime(String time) async {
+    await _storage.writeString(SettingsKeys.werdReminderTime, time);
+  }
+
+  @override
+  Future<void> updateSalawatReminderEnabled(bool enabled) async {
+    await _storage.writeBool(SettingsKeys.isSalawatReminderEnabled, enabled);
+  }
+
+  @override
+  Future<void> updateSalawatFrequency(int hours) async {
+    await _storage.writeInt(SettingsKeys.salawatFrequencyHours, hours);
+  }
+
+  @override
+  Future<void> updateSalawatStartTime(String time) async {
+    await _storage.writeString(SettingsKeys.salawatStartTime, time);
+  }
+
+  @override
+  Future<void> updateSalawatEndTime(String time) async {
+    await _storage.writeString(SettingsKeys.salawatEndTime, time);
   }
 }

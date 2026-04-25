@@ -48,7 +48,33 @@ class SettingsLoader {
       audioQuality: audioQuality,
       isAudioPlayerExpanded:
           prefs.getBool(SettingsKeys.isAudioPlayerExpanded) ?? false,
+      isSalahReminderEnabled:
+          prefs.getBool(SettingsKeys.isSalahReminderEnabled) ?? false,
+      salahReminderOffsetMinutes:
+          prefs.getInt(SettingsKeys.salahReminderOffsetMinutes) ?? 15,
+      enabledSalahReminders: _loadEnabledSalahReminders(prefs),
+      isWerdReminderEnabled:
+          prefs.getBool(SettingsKeys.isWerdReminderEnabled) ?? false,
+      werdReminderTime: prefs.getString(SettingsKeys.werdReminderTime) ?? '20:00',
+      isSalawatReminderEnabled:
+          prefs.getBool(SettingsKeys.isSalawatReminderEnabled) ?? false,
+      salawatFrequencyHours:
+          prefs.getInt(SettingsKeys.salawatFrequencyHours) ?? 3,
+      salawatStartTime:
+          prefs.getString(SettingsKeys.salawatStartTime) ?? '10:00',
+      salawatEndTime: prefs.getString(SettingsKeys.salawatEndTime) ?? '20:00',
     );
+  }
+
+  static List<String> _loadEnabledSalahReminders(SharedPreferences prefs) {
+    final String? jsonStr = prefs.getString(SettingsKeys.enabledSalahReminders);
+    if (jsonStr == null) return [];
+    try {
+      final List<dynamic> decoded = jsonDecode(jsonStr);
+      return decoded.cast<String>();
+    } catch (_) {
+      return [];
+    }
   }
 
   static List<SalaahSettings> _loadSalaahSettings(SharedPreferences prefs) {

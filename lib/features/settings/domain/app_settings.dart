@@ -27,6 +27,17 @@ class AppSettings {
   final AudioQuality audioQuality;
   final bool isAudioPlayerExpanded;
 
+  // Reminders
+  final bool isSalahReminderEnabled;
+  final int salahReminderOffsetMinutes;
+  final List<String> enabledSalahReminders;
+  final bool isWerdReminderEnabled;
+  final String werdReminderTime;
+  final bool isSalawatReminderEnabled;
+  final int salawatFrequencyHours;
+  final String salawatStartTime;
+  final String salawatEndTime;
+
   const AppSettings({
     required this.locale,
     this.latitude,
@@ -45,5 +56,14 @@ class AppSettings {
     this.customThemeColors,
     this.audioQuality = AudioQuality.low64,
     this.isAudioPlayerExpanded = false,
+    this.isSalahReminderEnabled = false,
+    this.salahReminderOffsetMinutes = 15,
+    this.enabledSalahReminders = const [],
+    this.isWerdReminderEnabled = false,
+    this.werdReminderTime = '20:00',
+    this.isSalawatReminderEnabled = false,
+    this.salawatFrequencyHours = 3,
+    this.salawatStartTime = '10:00',
+    this.salawatEndTime = '20:00',
   });
 }

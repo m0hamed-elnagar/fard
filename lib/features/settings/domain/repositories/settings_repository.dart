@@ -73,6 +73,35 @@ abstract interface class SettingsRepository {
   /// Whether the audio player is expanded
   bool get isAudioPlayerExpanded;
 
+  // ==================== REMINDERS ====================
+
+  /// Whether post-prayer reminders are globally enabled
+  bool get isSalahReminderEnabled;
+
+  /// Minutes after Azan for post-prayer reminder
+  int get salahReminderOffsetMinutes;
+
+  /// List of prayer names (IDs) that have post-prayer reminders enabled
+  List<String> get enabledSalahReminders;
+
+  /// Whether daily Werd reminder is enabled
+  bool get isWerdReminderEnabled;
+
+  /// Daily Werd reminder time (HH:mm)
+  String get werdReminderTime;
+
+  /// Whether periodic Salawat reminder is enabled
+  bool get isSalawatReminderEnabled;
+
+  /// Frequency of Salawat reminder in hours
+  int get salawatFrequencyHours;
+
+  /// Start time for Salawat reminders (HH:mm)
+  String get salawatStartTime;
+
+  /// End time for Salawat reminders (HH:mm)
+  String get salawatEndTime;
+
   // ==================== WRITE OPERATIONS ====================
 
   /// Update the app locale
@@ -159,5 +188,32 @@ abstract interface class SettingsRepository {
 
   /// Update whether the audio player is expanded
   Future<void> updateAudioPlayerExpanded(bool expanded);
+
+  /// Update post-prayer reminders enabled state
+  Future<void> updateSalahReminderEnabled(bool enabled);
+
+  /// Update post-prayer reminder offset minutes
+  Future<void> updateSalahReminderOffset(int minutes);
+
+  /// Update the list of enabled post-prayer reminders
+  Future<void> updateEnabledSalahReminders(List<String> enabledSalahs);
+
+  /// Update Werd reminder enabled state
+  Future<void> updateWerdReminderEnabled(bool enabled);
+
+  /// Update Werd reminder time
+  Future<void> updateWerdReminderTime(String time);
+
+  /// Update periodic Salawat reminder enabled state
+  Future<void> updateSalawatReminderEnabled(bool enabled);
+
+  /// Update Salawat reminder frequency
+  Future<void> updateSalawatFrequency(int hours);
+
+  /// Update Salawat reminder start time
+  Future<void> updateSalawatStartTime(String time);
+
+  /// Update Salawat reminder end time
+  Future<void> updateSalawatEndTime(String time);
 }
 

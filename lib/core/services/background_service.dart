@@ -86,6 +86,33 @@ class _BackgroundSettingsProvider implements SettingsRepository {
   @override
   bool get isAudioPlayerExpanded => _settings.isAudioPlayerExpanded;
 
+  @override
+  bool get isSalahReminderEnabled => _settings.isSalahReminderEnabled;
+
+  @override
+  int get salahReminderOffsetMinutes => _settings.salahReminderOffsetMinutes;
+
+  @override
+  List<String> get enabledSalahReminders => _settings.enabledSalahReminders;
+
+  @override
+  bool get isWerdReminderEnabled => _settings.isWerdReminderEnabled;
+
+  @override
+  String get werdReminderTime => _settings.werdReminderTime;
+
+  @override
+  bool get isSalawatReminderEnabled => _settings.isSalawatReminderEnabled;
+
+  @override
+  int get salawatFrequencyHours => _settings.salawatFrequencyHours;
+
+  @override
+  String get salawatStartTime => _settings.salawatStartTime;
+
+  @override
+  String get salawatEndTime => _settings.salawatEndTime;
+
   // Write operations are not supported in background isolate
   @override
   Future<void> updateLocale(Locale locale) => Future.value();
@@ -173,6 +200,33 @@ class _BackgroundSettingsProvider implements SettingsRepository {
 
   @override
   Future<void> updateAudioPlayerExpanded(bool expanded) => Future.value();
+
+  @override
+  Future<void> updateSalahReminderEnabled(bool enabled) => Future.value();
+
+  @override
+  Future<void> updateSalahReminderOffset(int minutes) => Future.value();
+
+  @override
+  Future<void> updateEnabledSalahReminders(List<String> enabledSalahs) => Future.value();
+
+  @override
+  Future<void> updateWerdReminderEnabled(bool enabled) => Future.value();
+
+  @override
+  Future<void> updateWerdReminderTime(String time) => Future.value();
+
+  @override
+  Future<void> updateSalawatReminderEnabled(bool enabled) => Future.value();
+
+  @override
+  Future<void> updateSalawatFrequency(int hours) => Future.value();
+
+  @override
+  Future<void> updateSalawatStartTime(String time) => Future.value();
+
+  @override
+  Future<void> updateSalawatEndTime(String time) => Future.value();
 }
 
 /// WorkManager task unique names (initialized when needed).
