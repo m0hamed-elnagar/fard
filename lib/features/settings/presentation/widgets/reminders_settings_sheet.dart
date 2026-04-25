@@ -8,15 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class RemindersSettingsSheet extends StatelessWidget {
-  const RemindersSettingsSheet({super.key});
+class RemindersSettingsDialog extends StatelessWidget {
+  const RemindersSettingsDialog({super.key});
 
   static Future<void> show(BuildContext context) {
-    return showModalBottomSheet(
+    return showDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const RemindersSettingsSheet(),
+      builder: (context) => const RemindersSettingsDialog(),
     );
   }
 
@@ -27,59 +25,49 @@ class RemindersSettingsSheet extends StatelessWidget {
 
     return BlocBuilder<SettingsCubit, SettingsState>(
       builder: (context, state) {
-        return Container(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          decoration: BoxDecoration(
-            color: context.surfaceColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 12),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: context.outlineColor.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
+        return Dialog(
+          backgroundColor: context.surfaceColor,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          clipBehavior: Clip.antiAlias,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 500),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 24),
+                Text(
+                  isAr ? 'إعدادات التذكيرات' : 'Reminders Settings',
+                  style: GoogleFonts.amiri(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: context.onSurfaceColor,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                isAr ? 'إعدادات التذكيرات' : 'Reminders Settings',
-                style: GoogleFonts.amiri(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: context.onSurfaceColor,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSectionTitle(
-                        isAr ? 'تذكيرات الصلاة' : 'Salah Reminders',
-                        context,
-                      ),
-                      _buildSwitchTile(
-                        isAr
-                            ? 'تفعيل التذكير بعد الصلاة'
-                            : 'Post-Prayer Reminders',
-                        isAr
-                            ? 'تذكير لتسجيل الصلاة في المتتبع'
-                            : 'Reminder to log prayer in tracker',
-                        state.isSalahReminderEnabled,
-                        (val) => context
-                            .read<SettingsCubit>()
-                            .toggleSalahReminder(val),
-                        context,
-                      ),
+                const SizedBox(height: 8),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionTitle(
+                          isAr ? 'تذكيرات الصلاة' : 'Salah Reminders',
+                          context,
+                        ),
+                        _buildSwitchTile(
+                          isAr
+                              ? 'تفعيل التذكير بعد الصلاة'
+                              : 'Post-Prayer Reminders',
+                          isAr
+                              ? 'تذكير لتسجيل الصلاة في المتتبع'
+                              : 'Reminder to log prayer in tracker',
+                          state.isSalahReminderEnabled,
+                          (val) => context
+                              .read<SettingsCubit>()
+                              .toggleSalahReminder(val),
+                          context,
+                        ),
                       if (state.isSalahReminderEnabled) ...[
                         const SizedBox(height: 8),
                         Padding(
@@ -250,10 +238,11 @@ class RemindersSettingsSheet extends StatelessWidget {
               ),
             ],
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
   Widget _buildSectionTitle(String title, BuildContext context) {
     return Padding(

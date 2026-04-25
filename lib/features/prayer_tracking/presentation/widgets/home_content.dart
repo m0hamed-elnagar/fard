@@ -146,7 +146,7 @@ class _HomeContentState extends State<HomeContent> {
             ),
             actions: [
               IconButton(
-                onPressed: () => RemindersSettingsSheet.show(context),
+                onPressed: () => RemindersSettingsDialog.show(context),
                 icon: const Icon(Icons.notifications_active_rounded),
                 color: context.secondaryColor,
               ),
