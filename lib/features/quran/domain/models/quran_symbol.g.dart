@@ -42,6 +42,7 @@ _SymbolSource _$SymbolSourceFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String,
       sourceType: json['type'] as String,
       content: json['text'] as String,
+      url: json['url'] as String?,
     );
 
 Map<String, dynamic> _$SymbolSourceToJson(_SymbolSource instance) =>
@@ -49,6 +50,7 @@ Map<String, dynamic> _$SymbolSourceToJson(_SymbolSource instance) =>
       'name': instance.name,
       'type': instance.sourceType,
       'text': instance.content,
+      'url': instance.url,
     };
 
 _SymbolExample _$SymbolExampleFromJson(Map<String, dynamic> json) =>

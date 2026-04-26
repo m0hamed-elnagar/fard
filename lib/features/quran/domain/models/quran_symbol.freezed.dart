@@ -315,7 +315,8 @@ as List<SymbolExample>,
 mixin _$SymbolSource {
 
  String get name;@JsonKey(name: 'type') String get sourceType;// 'book', 'website', 'video'
-@JsonKey(name: 'text') String get content;
+@JsonKey(name: 'text') String get content;// text or url
+ String? get url;
 /// Create a copy of SymbolSource
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -328,16 +329,16 @@ $SymbolSourceCopyWith<SymbolSource> get copyWith => _$SymbolSourceCopyWithImpl<S
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SymbolSource&&(identical(other.name, name) || other.name == name)&&(identical(other.sourceType, sourceType) || other.sourceType == sourceType)&&(identical(other.content, content) || other.content == content));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SymbolSource&&(identical(other.name, name) || other.name == name)&&(identical(other.sourceType, sourceType) || other.sourceType == sourceType)&&(identical(other.content, content) || other.content == content)&&(identical(other.url, url) || other.url == url));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,name,sourceType,content);
+int get hashCode => Object.hash(runtimeType,name,sourceType,content,url);
 
 @override
 String toString() {
-  return 'SymbolSource(name: $name, sourceType: $sourceType, content: $content)';
+  return 'SymbolSource(name: $name, sourceType: $sourceType, content: $content, url: $url)';
 }
 
 
@@ -348,7 +349,7 @@ abstract mixin class $SymbolSourceCopyWith<$Res>  {
   factory $SymbolSourceCopyWith(SymbolSource value, $Res Function(SymbolSource) _then) = _$SymbolSourceCopyWithImpl;
 @useResult
 $Res call({
- String name,@JsonKey(name: 'type') String sourceType,@JsonKey(name: 'text') String content
+ String name,@JsonKey(name: 'type') String sourceType,@JsonKey(name: 'text') String content, String? url
 });
 
 
@@ -365,12 +366,13 @@ class _$SymbolSourceCopyWithImpl<$Res>
 
 /// Create a copy of SymbolSource
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? sourceType = null,Object? content = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? sourceType = null,Object? content = null,Object? url = freezed,}) {
   return _then(_self.copyWith(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,sourceType: null == sourceType ? _self.sourceType : sourceType // ignore: cast_nullable_to_non_nullable
 as String,content: null == content ? _self.content : content // ignore: cast_nullable_to_non_nullable
-as String,
+as String,url: freezed == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -455,10 +457,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name, @JsonKey(name: 'type')  String sourceType, @JsonKey(name: 'text')  String content)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name, @JsonKey(name: 'type')  String sourceType, @JsonKey(name: 'text')  String content,  String? url)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SymbolSource() when $default != null:
-return $default(_that.name,_that.sourceType,_that.content);case _:
+return $default(_that.name,_that.sourceType,_that.content,_that.url);case _:
   return orElse();
 
 }
@@ -476,10 +478,10 @@ return $default(_that.name,_that.sourceType,_that.content);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name, @JsonKey(name: 'type')  String sourceType, @JsonKey(name: 'text')  String content)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name, @JsonKey(name: 'type')  String sourceType, @JsonKey(name: 'text')  String content,  String? url)  $default,) {final _that = this;
 switch (_that) {
 case _SymbolSource():
-return $default(_that.name,_that.sourceType,_that.content);case _:
+return $default(_that.name,_that.sourceType,_that.content,_that.url);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -496,10 +498,10 @@ return $default(_that.name,_that.sourceType,_that.content);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name, @JsonKey(name: 'type')  String sourceType, @JsonKey(name: 'text')  String content)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name, @JsonKey(name: 'type')  String sourceType, @JsonKey(name: 'text')  String content,  String? url)?  $default,) {final _that = this;
 switch (_that) {
 case _SymbolSource() when $default != null:
-return $default(_that.name,_that.sourceType,_that.content);case _:
+return $default(_that.name,_that.sourceType,_that.content,_that.url);case _:
   return null;
 
 }
@@ -511,13 +513,15 @@ return $default(_that.name,_that.sourceType,_that.content);case _:
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class _SymbolSource extends SymbolSource {
-  const _SymbolSource({required this.name, @JsonKey(name: 'type') required this.sourceType, @JsonKey(name: 'text') required this.content}): super._();
+  const _SymbolSource({required this.name, @JsonKey(name: 'type') required this.sourceType, @JsonKey(name: 'text') required this.content, this.url}): super._();
   factory _SymbolSource.fromJson(Map<String, dynamic> json) => _$SymbolSourceFromJson(json);
 
 @override final  String name;
 @override@JsonKey(name: 'type') final  String sourceType;
 // 'book', 'website', 'video'
 @override@JsonKey(name: 'text') final  String content;
+// text or url
+@override final  String? url;
 
 /// Create a copy of SymbolSource
 /// with the given fields replaced by the non-null parameter values.
@@ -532,16 +536,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SymbolSource&&(identical(other.name, name) || other.name == name)&&(identical(other.sourceType, sourceType) || other.sourceType == sourceType)&&(identical(other.content, content) || other.content == content));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SymbolSource&&(identical(other.name, name) || other.name == name)&&(identical(other.sourceType, sourceType) || other.sourceType == sourceType)&&(identical(other.content, content) || other.content == content)&&(identical(other.url, url) || other.url == url));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,name,sourceType,content);
+int get hashCode => Object.hash(runtimeType,name,sourceType,content,url);
 
 @override
 String toString() {
-  return 'SymbolSource(name: $name, sourceType: $sourceType, content: $content)';
+  return 'SymbolSource(name: $name, sourceType: $sourceType, content: $content, url: $url)';
 }
 
 
@@ -552,7 +556,7 @@ abstract mixin class _$SymbolSourceCopyWith<$Res> implements $SymbolSourceCopyWi
   factory _$SymbolSourceCopyWith(_SymbolSource value, $Res Function(_SymbolSource) _then) = __$SymbolSourceCopyWithImpl;
 @override @useResult
 $Res call({
- String name,@JsonKey(name: 'type') String sourceType,@JsonKey(name: 'text') String content
+ String name,@JsonKey(name: 'type') String sourceType,@JsonKey(name: 'text') String content, String? url
 });
 
 
@@ -569,12 +573,13 @@ class __$SymbolSourceCopyWithImpl<$Res>
 
 /// Create a copy of SymbolSource
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? sourceType = null,Object? content = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? sourceType = null,Object? content = null,Object? url = freezed,}) {
   return _then(_SymbolSource(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,sourceType: null == sourceType ? _self.sourceType : sourceType // ignore: cast_nullable_to_non_nullable
 as String,content: null == content ? _self.content : content // ignore: cast_nullable_to_non_nullable
-as String,
+as String,url: freezed == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

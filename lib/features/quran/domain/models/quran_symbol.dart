@@ -32,6 +32,7 @@ abstract class SymbolSource with _$SymbolSource {
     required String name,
     @JsonKey(name: 'type') required String sourceType, // 'book', 'website', 'video'
     @JsonKey(name: 'text') required String content,    // text or url
+    String? url,
   }) = _SymbolSource;
 
   factory SymbolSource.fromJson(Map<String, dynamic> json) => _$SymbolSourceFromJson(json);

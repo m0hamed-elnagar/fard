@@ -13,6 +13,7 @@ import 'package:fard/features/quran/domain/models/quran_symbol.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quran/quran.dart' as quran;
+import 'package:url_launcher/url_launcher.dart';
 
 class SymbolDetailScreen extends StatefulWidget {
   final QuranSymbol symbol;
@@ -134,7 +135,7 @@ class _SymbolDetailScreenState extends State<SymbolDetailScreen> {
                           s.name,
                           style: const TextStyle(fontSize: 12),
                         ),
-                        icon: Icon(_getSourceIcon(s.sourceType), size: 16),
+                        icon: Icon(_getSourceIcon(s.sourceType)),
                       ),
                     )
                     .toList(),
@@ -186,6 +187,17 @@ class _SymbolDetailScreenState extends State<SymbolDetailScreen> {
     }
   }
 
+  Future<void> _launchUrl(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not launch $urlString')),
+        );
+      }
+    }
+  }
+
   Widget _buildSourceContent(BuildContext context) {
     final source = widget.symbol.sources.firstWhere(
       (s) => s.name == selectedSourceId,
@@ -200,11 +212,45 @@ class _SymbolDetailScreenState extends State<SymbolDetailScreen> {
           color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
         ),
       ),
-      child: Text(
-        source.content,
-        textAlign: TextAlign.right,
-        textDirection: TextDirection.rtl,
-        style: const TextStyle(fontSize: 14, height: 1.6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            source.content,
+            textAlign: TextAlign.right,
+            textDirection: TextDirection.rtl,
+            style: const TextStyle(fontSize: 14, height: 1.6),
+          ),
+          if (source.url != null && source.url!.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 8),
+            Center(
+              child: TextButton.icon(
+                onPressed: () => _launchUrl(source.url!),
+                icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                label: const Text(
+                  'الانتقال إلى المصدر',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.primary,
+                  backgroundColor:
+                      Theme.of(context).colorScheme.primaryContainer.withValues(
+                        alpha: 0.3,
+                      ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
