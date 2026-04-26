@@ -92,17 +92,22 @@ class _DashboardCarouselState extends State<DashboardCarousel> {
       children: [
         SizedBox(
           height: cardHeight,
-          child: PageView(
+          child: PageView.builder(
             controller: _pageController,
             clipBehavior: Clip.none,
+            itemCount: pages.length,
             onPageChanged: (index) {
               setState(() {
                 _currentPage = index;
               });
             },
-            children: List.generate(pages.length, (index) {
-              return _buildPageItem(pages[index], index);
-            }),
+            itemBuilder: (context, index) {
+              return _CarouselPageItem(
+                pageController: _pageController,
+                index: index,
+                child: pages[index],
+              );
+            },
           ),
         ),
         const SizedBox(height: 16),
@@ -136,18 +141,32 @@ class _DashboardCarouselState extends State<DashboardCarousel> {
       ],
     );
   }
+}
 
-  Widget _buildPageItem(Widget child, int index) {
+class _CarouselPageItem extends StatelessWidget {
+  final PageController pageController;
+  final int index;
+  final Widget child;
+
+  const _CarouselPageItem({
+    required this.pageController,
+    required this.index,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _pageController,
+      animation: pageController,
       builder: (context, child) {
         double value = 1.0;
-        if (_pageController.position.haveDimensions) {
-          value = (_pageController.page! - index);
+        if (pageController.position.haveDimensions) {
+          value = (pageController.page! - index);
           value = (1 - (value.abs() * 0.1)).clamp(0.0, 1.0);
         } else {
-          // Handle initial state before first frame/layout
-          if (_currentPage != index) {
+          // Handle initial state
+          final int currentPage = pageController.initialPage;
+          if (currentPage != index) {
             value = 0.9;
           }
         }
