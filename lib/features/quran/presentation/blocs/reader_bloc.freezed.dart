@@ -146,10 +146,10 @@ return updateTafsir(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( SurahNumber surahNumber)?  loadSurah,TResult Function( Ayah ayah)?  selectAyah,TResult Function( Ayah ayah)?  saveLastRead,TResult Function( double scale)?  updateScale,TResult Function( String fontFamily)?  updateFontFamily,TResult Function( ReaderSeparator separator)?  updateSeparator,TResult Function( Ayah ayah)?  toggleBookmark,TResult Function( Ayah ayah)?  checkBookmark,TResult Function( List<Bookmark> bookmarks)?  bookmarksUpdated,TResult Function( int tafsirId)?  updateTafsir,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( SurahNumber surahNumber,  int? initialAyahNumber)?  loadSurah,TResult Function( Ayah ayah)?  selectAyah,TResult Function( Ayah ayah)?  saveLastRead,TResult Function( double scale)?  updateScale,TResult Function( String fontFamily)?  updateFontFamily,TResult Function( ReaderSeparator separator)?  updateSeparator,TResult Function( Ayah ayah)?  toggleBookmark,TResult Function( Ayah ayah)?  checkBookmark,TResult Function( List<Bookmark> bookmarks)?  bookmarksUpdated,TResult Function( int tafsirId)?  updateTafsir,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _LoadSurah() when loadSurah != null:
-return loadSurah(_that.surahNumber);case _SelectAyah() when selectAyah != null:
+return loadSurah(_that.surahNumber,_that.initialAyahNumber);case _SelectAyah() when selectAyah != null:
 return selectAyah(_that.ayah);case _SaveLastRead() when saveLastRead != null:
 return saveLastRead(_that.ayah);case _UpdateScale() when updateScale != null:
 return updateScale(_that.scale);case _UpdateFontFamily() when updateFontFamily != null:
@@ -176,10 +176,10 @@ return updateTafsir(_that.tafsirId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( SurahNumber surahNumber)  loadSurah,required TResult Function( Ayah ayah)  selectAyah,required TResult Function( Ayah ayah)  saveLastRead,required TResult Function( double scale)  updateScale,required TResult Function( String fontFamily)  updateFontFamily,required TResult Function( ReaderSeparator separator)  updateSeparator,required TResult Function( Ayah ayah)  toggleBookmark,required TResult Function( Ayah ayah)  checkBookmark,required TResult Function( List<Bookmark> bookmarks)  bookmarksUpdated,required TResult Function( int tafsirId)  updateTafsir,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( SurahNumber surahNumber,  int? initialAyahNumber)  loadSurah,required TResult Function( Ayah ayah)  selectAyah,required TResult Function( Ayah ayah)  saveLastRead,required TResult Function( double scale)  updateScale,required TResult Function( String fontFamily)  updateFontFamily,required TResult Function( ReaderSeparator separator)  updateSeparator,required TResult Function( Ayah ayah)  toggleBookmark,required TResult Function( Ayah ayah)  checkBookmark,required TResult Function( List<Bookmark> bookmarks)  bookmarksUpdated,required TResult Function( int tafsirId)  updateTafsir,}) {final _that = this;
 switch (_that) {
 case _LoadSurah():
-return loadSurah(_that.surahNumber);case _SelectAyah():
+return loadSurah(_that.surahNumber,_that.initialAyahNumber);case _SelectAyah():
 return selectAyah(_that.ayah);case _SaveLastRead():
 return saveLastRead(_that.ayah);case _UpdateScale():
 return updateScale(_that.scale);case _UpdateFontFamily():
@@ -205,10 +205,10 @@ return updateTafsir(_that.tafsirId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( SurahNumber surahNumber)?  loadSurah,TResult? Function( Ayah ayah)?  selectAyah,TResult? Function( Ayah ayah)?  saveLastRead,TResult? Function( double scale)?  updateScale,TResult? Function( String fontFamily)?  updateFontFamily,TResult? Function( ReaderSeparator separator)?  updateSeparator,TResult? Function( Ayah ayah)?  toggleBookmark,TResult? Function( Ayah ayah)?  checkBookmark,TResult? Function( List<Bookmark> bookmarks)?  bookmarksUpdated,TResult? Function( int tafsirId)?  updateTafsir,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( SurahNumber surahNumber,  int? initialAyahNumber)?  loadSurah,TResult? Function( Ayah ayah)?  selectAyah,TResult? Function( Ayah ayah)?  saveLastRead,TResult? Function( double scale)?  updateScale,TResult? Function( String fontFamily)?  updateFontFamily,TResult? Function( ReaderSeparator separator)?  updateSeparator,TResult? Function( Ayah ayah)?  toggleBookmark,TResult? Function( Ayah ayah)?  checkBookmark,TResult? Function( List<Bookmark> bookmarks)?  bookmarksUpdated,TResult? Function( int tafsirId)?  updateTafsir,}) {final _that = this;
 switch (_that) {
 case _LoadSurah() when loadSurah != null:
-return loadSurah(_that.surahNumber);case _SelectAyah() when selectAyah != null:
+return loadSurah(_that.surahNumber,_that.initialAyahNumber);case _SelectAyah() when selectAyah != null:
 return selectAyah(_that.ayah);case _SaveLastRead() when saveLastRead != null:
 return saveLastRead(_that.ayah);case _UpdateScale() when updateScale != null:
 return updateScale(_that.scale);case _UpdateFontFamily() when updateFontFamily != null:
@@ -229,10 +229,11 @@ return updateTafsir(_that.tafsirId);case _:
 
 
 class _LoadSurah implements ReaderEvent {
-  const _LoadSurah({required this.surahNumber});
+  const _LoadSurah({required this.surahNumber, this.initialAyahNumber});
   
 
  final  SurahNumber surahNumber;
+ final  int? initialAyahNumber;
 
 /// Create a copy of ReaderEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -244,16 +245,16 @@ _$LoadSurahCopyWith<_LoadSurah> get copyWith => __$LoadSurahCopyWithImpl<_LoadSu
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LoadSurah&&(identical(other.surahNumber, surahNumber) || other.surahNumber == surahNumber));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LoadSurah&&(identical(other.surahNumber, surahNumber) || other.surahNumber == surahNumber)&&(identical(other.initialAyahNumber, initialAyahNumber) || other.initialAyahNumber == initialAyahNumber));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,surahNumber);
+int get hashCode => Object.hash(runtimeType,surahNumber,initialAyahNumber);
 
 @override
 String toString() {
-  return 'ReaderEvent.loadSurah(surahNumber: $surahNumber)';
+  return 'ReaderEvent.loadSurah(surahNumber: $surahNumber, initialAyahNumber: $initialAyahNumber)';
 }
 
 
@@ -264,7 +265,7 @@ abstract mixin class _$LoadSurahCopyWith<$Res> implements $ReaderEventCopyWith<$
   factory _$LoadSurahCopyWith(_LoadSurah value, $Res Function(_LoadSurah) _then) = __$LoadSurahCopyWithImpl;
 @useResult
 $Res call({
- SurahNumber surahNumber
+ SurahNumber surahNumber, int? initialAyahNumber
 });
 
 
@@ -281,10 +282,11 @@ class __$LoadSurahCopyWithImpl<$Res>
 
 /// Create a copy of ReaderEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? surahNumber = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? surahNumber = null,Object? initialAyahNumber = freezed,}) {
   return _then(_LoadSurah(
 surahNumber: null == surahNumber ? _self.surahNumber : surahNumber // ignore: cast_nullable_to_non_nullable
-as SurahNumber,
+as SurahNumber,initialAyahNumber: freezed == initialAyahNumber ? _self.initialAyahNumber : initialAyahNumber // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

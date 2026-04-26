@@ -6,6 +6,12 @@ import 'package:fard/features/prayer_tracking/domain/prayer_repo.dart';
 import 'package:fard/features/werd/domain/repositories/werd_repository.dart';
 import 'package:fard/features/werd/domain/entities/werd_goal.dart';
 import 'package:fard/features/werd/domain/entities/werd_progress.dart';
+import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
+import 'package:fard/features/tasbih/domain/tasbih_repository.dart';
+import 'package:fard/features/azkar/data/azkar_source.dart';
+import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
+import 'package:fard/features/quran/domain/entities/bookmark.dart';
+import 'package:fard/features/quran/domain/repositories/bookmark_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -16,10 +22,23 @@ import 'package:share_plus/share_plus.dart';
 class ExportImportService {
   final PrayerRepo prayerRepo;
   final WerdRepository werdRepo;
+  final SettingsRepository settingsRepo;
+  final TasbihRepository tasbihRepo;
+  final IAzkarSource azkarRepo;
+  final BookmarkRepository bookmarkRepo;
+  final QuranRepository quranRepo;
 
-  ExportImportService(this.prayerRepo, this.werdRepo);
+  ExportImportService(
+    this.prayerRepo,
+    this.werdRepo,
+    this.settingsRepo,
+    this.tasbihRepo,
+    this.azkarRepo,
+    this.bookmarkRepo,
+    this.quranRepo,
+  );
 
-  static const int currentBackupVersion = 1;
+  static const int currentBackupVersion = 2;
 
   Future<void> exportData() async {
     try {
@@ -35,6 +54,15 @@ class ExportImportService {
         (r) => r,
       );
 
+      final preferences = settingsRepo.getAllSettings();
+      final tasbihHistory = await tasbihRepo.getHistory();
+      final tasbihProgress = await tasbihRepo.getAllProgress();
+      final tasbihPreferredDuas = await tasbihRepo.getAllPreferredDuas();
+      final azkarProgress = await azkarRepo.getAllProgress();
+      final bookmarksResult = await bookmarkRepo.getBookmarks();
+      final List<Bookmark> bookmarks =
+          bookmarksResult.fold((l) => <Bookmark>[], (r) => r);
+
       final backup = AppBackup(
         version: currentBackupVersion,
         appVersion: packageInfo.version,
@@ -42,6 +70,12 @@ class ExportImportService {
         prayerRecords: prayerRecords,
         werdGoals: werdGoals,
         werdProgress: werdProgress,
+        preferences: preferences,
+        tasbihHistory: tasbihHistory,
+        tasbihProgress: tasbihProgress,
+        tasbihPreferredDuas: tasbihPreferredDuas,
+        azkarProgress: azkarProgress,
+        bookmarks: bookmarks,
       );
 
       // Perform serialization in an isolate to keep UI responsive
@@ -99,6 +133,18 @@ class ExportImportService {
       await prayerRepo.importAllRecords(backup.prayerRecords);
       await werdRepo.importGoals(backup.werdGoals);
       await werdRepo.importProgress(backup.werdProgress);
+      await settingsRepo.importSettings(backup.preferences);
+      await tasbihRepo.importData(
+        progress: backup.tasbihProgress,
+        history: backup.tasbihHistory,
+        preferredDuas: backup.tasbihPreferredDuas,
+      );
+      await azkarRepo.importProgress(backup.azkarProgress);
+      await bookmarkRepo.importBookmarks(backup.bookmarks);
+
+      // Reset Quran state to avoid hangs with stale/inconsistent data
+      await quranRepo.clearCache();
+      quranRepo.refresh();
 
       return true;
     } catch (e) {

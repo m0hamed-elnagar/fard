@@ -235,6 +235,14 @@ class _BackgroundSettingsProvider implements SettingsRepository {
 
   @override
   Future<void> updateSalawatEndTime(String time) => Future.value();
+
+  // ==================== BACKUP / RESTORE ====================
+
+  @override
+  Map<String, dynamic> getAllSettings() => {};
+
+  @override
+  Future<void> importSettings(Map<String, dynamic> settings) => Future.value();
 }
 
 /// WorkManager task unique names (initialized when needed).

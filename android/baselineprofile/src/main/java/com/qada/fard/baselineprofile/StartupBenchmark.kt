@@ -53,25 +53,45 @@ class StartupBenchmark {
         Thread.sleep(2000)
 
         // Basic interactions to capture more code
-        // Scroll down if possible
-        device.findObject(By.pkg("com.qada.fard"))?.scroll(Direction.DOWN, 0.5f)
-        Thread.sleep(500)
-        device.findObject(By.pkg("com.qada.fard"))?.scroll(Direction.UP, 0.5f)
-        
-        // Try to click some common locations (e.g., bottom tabs)
+        // 1. Scroll main screen
+        device.findObject(By.pkg("com.qada.fard"))?.scroll(Direction.DOWN, 0.8f)
+        Thread.sleep(1000)
+        device.findObject(By.pkg("com.qada.fard"))?.scroll(Direction.UP, 0.8f)
+        Thread.sleep(1000)
+
+        // 2. Navigate through tabs
         val width = device.displayWidth
         val height = device.displayHeight
         
-        // Click second tab (Quran) - approximate location
-        device.click(width / 4, height - 100)
+        // Tab 2: Quran List
+        device.click(width * 3 / 8, height - 100)
+        Thread.sleep(2000)
+        device.findObject(By.pkg("com.qada.fard"))?.scroll(Direction.DOWN, 0.5f)
+        
+        // Click a surah (approximate position for first item)
+        device.click(width / 2, height / 3)
+        Thread.sleep(3000) // Wait for Quran reader to load
+        
+        // Scroll in Quran reader to warm up text rendering
+        device.findObject(By.pkg("com.qada.fard"))?.scroll(Direction.DOWN, 0.8f)
+        Thread.sleep(1000)
+        device.findObject(By.pkg("com.qada.fard"))?.scroll(Direction.DOWN, 0.8f)
         Thread.sleep(1000)
         
-        // Click third tab (Azkar)
-        device.click(width / 2, height - 100)
+        // Go back
+        device.pressBack()
         Thread.sleep(1000)
         
-        // Click back to first tab
-        device.click(100, height - 100)
+        // Tab 3: Azkar
+        device.click(width * 5 / 8, height - 100)
+        Thread.sleep(1500)
+        
+        // Tab 4: Settings/More
+        device.click(width * 7 / 8, height - 100)
+        Thread.sleep(1500)
+        
+        // Back to Tab 1
+        device.click(width / 8, height - 100)
         Thread.sleep(1000)
     }
 }

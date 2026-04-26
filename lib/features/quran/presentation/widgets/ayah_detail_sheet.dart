@@ -923,6 +923,11 @@ class _MarkAsLastReadButtonState extends State<_MarkAsLastReadButton> {
         context.read<ReaderBloc>().add(
           ReaderEvent.saveLastRead(widget.ayah),
         );
+        
+        // Ensure WerdBloc is informed to track the progress for this ayah
+        context.read<WerdBloc>().add(
+          WerdEvent.trackItemRead(absAyah),
+        );
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -937,6 +942,11 @@ class _MarkAsLastReadButtonState extends State<_MarkAsLastReadButton> {
       debugPrint('📖 [MarkAsRead] No previous position - saving ayah $absAyah');
       context.read<ReaderBloc>().add(
         ReaderEvent.saveLastRead(widget.ayah),
+      );
+      
+      // Ensure WerdBloc is informed to track the progress for this ayah
+      context.read<WerdBloc>().add(
+        WerdEvent.trackItemRead(absAyah),
       );
 
       ScaffoldMessenger.of(context).showSnackBar(

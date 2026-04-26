@@ -173,4 +173,28 @@ class AzkarRepository implements IAzkarSource {
     }
     return '${category}_$hash';
   }
+
+  // ==================== BACKUP / RESTORE ====================
+
+  @override
+  Future<Map<String, int>> getAllProgress() async {
+    final Map<String, int> progress = {};
+    for (var key in _progressBox.keys) {
+      if (key is String) {
+        progress[key] = _progressBox.get(key) ?? 0;
+      }
+    }
+    return progress;
+  }
+
+  @override
+  Future<void> importProgress(Map<String, int> progress) async {
+    // We don't clear the whole box because of 'last_reset_date'
+    // but we can update the progress entries.
+    for (var entry in progress.entries) {
+      await _progressBox.put(entry.key, entry.value);
+    }
+    // Clear cache to force reload
+    _cachedAzkar = null;
+  }
 }

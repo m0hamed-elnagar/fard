@@ -58,4 +58,12 @@ class BackgroundAzkarSource implements IAzkarSource {
     final azkar = await getAllAzkar();
     return azkar.where((e) => e.category == category).toList();
   }
+
+  // ==================== BACKUP / RESTORE ====================
+
+  @override
+  Future<Map<String, int>> getAllProgress() async => {};
+
+  @override
+  Future<void> importProgress(Map<String, int> progress) async {}
 }

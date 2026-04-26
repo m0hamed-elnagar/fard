@@ -71,4 +71,55 @@ class TasbihRepositoryImpl implements TasbihRepository {
   ) async {
     await _preferredDuaBox.put(categoryId, duaId);
   }
+
+  // ==================== BACKUP / RESTORE ====================
+
+  @override
+  Future<Map<String, int>> getAllProgress() async {
+    final Map<String, int> progress = {};
+    for (var key in _progressBox.keys) {
+      progress[key.toString()] = _progressBox.get(key) ?? 0;
+    }
+    return progress;
+  }
+
+  @override
+  Future<Map<String, String>> getAllPreferredDuas() async {
+    final Map<String, String> preferredDuas = {};
+    for (var key in _preferredDuaBox.keys) {
+      preferredDuas[key.toString()] = _preferredDuaBox.get(key) ?? '';
+    }
+    return preferredDuas;
+  }
+
+  @override
+  Future<void> importData({
+    required Map<String, int> progress,
+    required Map<String, int> history,
+    required Map<String, String> preferredDuas,
+  }) async {
+    // Clear current data
+    await _progressBox.clear();
+    await _historyBox.clear();
+    await _preferredDuaBox.clear();
+
+    // Import progress
+    for (var entry in progress.entries) {
+      await _progressBox.put(entry.key, entry.value);
+    }
+
+    // Import history
+    for (var entry in history.entries) {
+      await _historyBox.put(entry.key, entry.value);
+    }
+
+    // Import preferred duas
+    for (var entry in preferredDuas.entries) {
+      await _preferredDuaBox.put(entry.key, entry.value);
+    }
+
+    await _progressBox.flush();
+    await _historyBox.flush();
+    await _preferredDuaBox.flush();
+  }
 }

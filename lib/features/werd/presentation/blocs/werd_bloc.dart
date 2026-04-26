@@ -18,14 +18,14 @@ import '../../domain/entities/werd_goal.dart';
 @injectable
 class WerdBloc extends Bloc<WerdEvent, WerdState> {
   final WerdRepository _repository;
-  final NotificationService _notificationService;
+  final NotificationService? _notificationService;
   StreamSubscription? _progressSubscription;
 
   WerdBloc(
     this._repository, [
     NotificationService? notificationService,
   ]) : _notificationService =
-           notificationService ?? getIt<NotificationService>(),
+           notificationService ?? (getIt.isRegistered<NotificationService>() ? getIt<NotificationService>() : null),
        super(WerdState.initial()) {
     on<WerdEvent>((event, emit) async {
       await event.map(
@@ -243,11 +243,13 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
 
           debugPrint('📖 Created new session: ayah ${e.startAyah} (Total sessions: ${segments.length})');
 
+          // Recalculate total to ensure consistency
+          final newTotal = segments.fold(0, (sum, seg) => sum + seg.ayahsCount);
+
           final updatedProgress = currentProgress.copyWith(
             segmentsToday: segments,
-            // Don't update totalAmountReadToday - only count when user actually reads
+            totalAmountReadToday: newTotal, // Recalculate!
             sessionStartAbsolute: e.startAyah,
-            // Don't update lastReadAbsolute - only update when user actually reads
             lastUpdated: DateTime.now(),
           );
 
@@ -297,8 +299,12 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
             debugPrint('⚠️ No active session to end');
           }
 
+          // Recalculate total to ensure consistency
+          final newTotal = segments.fold(0, (sum, seg) => sum + seg.ayahsCount);
+
           final updatedProgress = currentProgress.copyWith(
             segmentsToday: segments,
+            totalAmountReadToday: newTotal, // Recalculate!
             lastUpdated: DateTime.now(),
           );
 
@@ -312,7 +318,7 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           // Smart cancellation: if goal is completed today, cancel the reminder
           final goal = state.goal;
           if (goal != null && e.progress.totalAmountReadToday >= goal.valueInAyahs) {
-            _notificationService.cancelWerdReminder(forTodayOnly: true);
+            _notificationService?.cancelWerdReminder(forTodayOnly: true);
           }
         },
         updateBookmark: (e) async {
@@ -807,8 +813,8 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
       segments.add(ReadingSegment(startAyah: ayahAbs, endAyah: ayahAbs));
     }
     
-    // Merge segments
-    final mergedSegments = ReadingSegment.mergeSegments(segments);
+    // Merge segments with session awareness
+    final mergedSegments = ReadingSegment.mergeSegmentsWithSessionAwareness(segments);
     final newTotal = mergedSegments.fold(0, (sum, seg) => sum + seg.ayahsCount);
     
     // FIX #1: Populate readItemsToday from segments for fractional calculations
@@ -909,7 +915,7 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
       final goal = state.goal;
       if (goal != null) {
         if (progress.totalAmountReadToday >= goal.valueInAyahs) {
-          _notificationService.cancelWerdReminder(forTodayOnly: true);
+          _notificationService?.cancelWerdReminder(forTodayOnly: true);
         }
       }
     }

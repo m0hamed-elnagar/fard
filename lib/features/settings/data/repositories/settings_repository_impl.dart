@@ -580,4 +580,46 @@ class SettingsRepositoryImpl implements SettingsRepository {
   Future<void> updateSalawatEndTime(String time) async {
     await _storage.writeString(SettingsKeys.salawatEndTime, time);
   }
+
+  // ==================== BACKUP / RESTORE ====================
+
+  @override
+  Map<String, dynamic> getAllSettings() {
+    final Map<String, dynamic> settings = {};
+    for (final key in _storage.getKeys()) {
+      final value = _storage.read(key);
+      if (value != null) {
+        settings[key] = value;
+      }
+    }
+    return settings;
+  }
+
+  @override
+  Future<void> importSettings(Map<String, dynamic> settings) async {
+    for (final entry in settings.entries) {
+      final key = entry.key;
+      final value = entry.value;
+
+      if (value is String) {
+        await _storage.writeString(key, value);
+      } else if (value is int) {
+        await _storage.writeInt(key, value);
+      } else if (value is bool) {
+        await _storage.writeBool(key, value);
+      } else if (value is double) {
+        await _storage.writeDouble(key, value);
+      } else if (value is List) {
+        if (value.every((e) => e is String)) {
+          await _storage.writeStringList(key, value.cast<String>());
+        } else {
+          // If it's a complex list, encode it to JSON string (some keys use this)
+          await _storage.writeString(key, jsonEncode(value));
+        }
+      } else if (value is Map) {
+        // If it's a map, encode it to JSON string
+        await _storage.writeString(key, jsonEncode(value));
+      }
+    }
+  }
 }

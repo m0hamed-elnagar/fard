@@ -12,6 +12,7 @@ abstract interface class QuranLocalSource {
   Future<List<Surah>> getCachedSurahs();
   Future<void> cacheSurahDetail(Surah surah);
   Future<Surah?> getCachedSurahDetail(int surahNumber);
+  Future<void> clearCache();
 }
 
 @LazySingleton(as: QuranLocalSource)
@@ -20,6 +21,11 @@ class QuranLocalSourceImpl implements QuranLocalSource {
   static const String boxName = 'quran_surahs';
 
   QuranLocalSourceImpl(@Named('surahBox') this._surahBox);
+
+  @override
+  Future<void> clearCache() async {
+    await _surahBox.clear();
+  }
 
   @override
   Future<void> cacheSurahs(List<Surah> surahs) async {

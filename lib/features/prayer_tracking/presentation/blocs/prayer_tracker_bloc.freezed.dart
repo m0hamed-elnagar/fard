@@ -55,11 +55,12 @@ extension PrayerTrackerEventPatterns on PrayerTrackerEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Load value)?  load,TResult Function( _TogglePrayer value)?  togglePrayer,TResult Function( _AddQada value)?  addQada,TResult Function( _RemoveQada value)?  removeQada,TResult Function( _Save value)?  save,TResult Function( _LoadMonth value)?  loadMonth,TResult Function( _CheckMissedDays value)?  checkMissedDays,TResult Function( _AcknowledgeMissedDays value)?  acknowledgeMissedDays,TResult Function( _BulkAddQada value)?  bulkAddQada,TResult Function( _UpdateQada value)?  updateQada,TResult Function( _DeleteRecord value)?  deleteRecord,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Load value)?  load,TResult Function( _Reload value)?  reload,TResult Function( _TogglePrayer value)?  togglePrayer,TResult Function( _AddQada value)?  addQada,TResult Function( _RemoveQada value)?  removeQada,TResult Function( _Save value)?  save,TResult Function( _LoadMonth value)?  loadMonth,TResult Function( _CheckMissedDays value)?  checkMissedDays,TResult Function( _AcknowledgeMissedDays value)?  acknowledgeMissedDays,TResult Function( _BulkAddQada value)?  bulkAddQada,TResult Function( _UpdateQada value)?  updateQada,TResult Function( _DeleteRecord value)?  deleteRecord,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Load() when load != null:
-return load(_that);case _TogglePrayer() when togglePrayer != null:
+return load(_that);case _Reload() when reload != null:
+return reload(_that);case _TogglePrayer() when togglePrayer != null:
 return togglePrayer(_that);case _AddQada() when addQada != null:
 return addQada(_that);case _RemoveQada() when removeQada != null:
 return removeQada(_that);case _Save() when save != null:
@@ -87,11 +88,12 @@ return deleteRecord(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Load value)  load,required TResult Function( _TogglePrayer value)  togglePrayer,required TResult Function( _AddQada value)  addQada,required TResult Function( _RemoveQada value)  removeQada,required TResult Function( _Save value)  save,required TResult Function( _LoadMonth value)  loadMonth,required TResult Function( _CheckMissedDays value)  checkMissedDays,required TResult Function( _AcknowledgeMissedDays value)  acknowledgeMissedDays,required TResult Function( _BulkAddQada value)  bulkAddQada,required TResult Function( _UpdateQada value)  updateQada,required TResult Function( _DeleteRecord value)  deleteRecord,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Load value)  load,required TResult Function( _Reload value)  reload,required TResult Function( _TogglePrayer value)  togglePrayer,required TResult Function( _AddQada value)  addQada,required TResult Function( _RemoveQada value)  removeQada,required TResult Function( _Save value)  save,required TResult Function( _LoadMonth value)  loadMonth,required TResult Function( _CheckMissedDays value)  checkMissedDays,required TResult Function( _AcknowledgeMissedDays value)  acknowledgeMissedDays,required TResult Function( _BulkAddQada value)  bulkAddQada,required TResult Function( _UpdateQada value)  updateQada,required TResult Function( _DeleteRecord value)  deleteRecord,}){
 final _that = this;
 switch (_that) {
 case _Load():
-return load(_that);case _TogglePrayer():
+return load(_that);case _Reload():
+return reload(_that);case _TogglePrayer():
 return togglePrayer(_that);case _AddQada():
 return addQada(_that);case _RemoveQada():
 return removeQada(_that);case _Save():
@@ -118,11 +120,12 @@ return deleteRecord(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Load value)?  load,TResult? Function( _TogglePrayer value)?  togglePrayer,TResult? Function( _AddQada value)?  addQada,TResult? Function( _RemoveQada value)?  removeQada,TResult? Function( _Save value)?  save,TResult? Function( _LoadMonth value)?  loadMonth,TResult? Function( _CheckMissedDays value)?  checkMissedDays,TResult? Function( _AcknowledgeMissedDays value)?  acknowledgeMissedDays,TResult? Function( _BulkAddQada value)?  bulkAddQada,TResult? Function( _UpdateQada value)?  updateQada,TResult? Function( _DeleteRecord value)?  deleteRecord,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Load value)?  load,TResult? Function( _Reload value)?  reload,TResult? Function( _TogglePrayer value)?  togglePrayer,TResult? Function( _AddQada value)?  addQada,TResult? Function( _RemoveQada value)?  removeQada,TResult? Function( _Save value)?  save,TResult? Function( _LoadMonth value)?  loadMonth,TResult? Function( _CheckMissedDays value)?  checkMissedDays,TResult? Function( _AcknowledgeMissedDays value)?  acknowledgeMissedDays,TResult? Function( _BulkAddQada value)?  bulkAddQada,TResult? Function( _UpdateQada value)?  updateQada,TResult? Function( _DeleteRecord value)?  deleteRecord,}){
 final _that = this;
 switch (_that) {
 case _Load() when load != null:
-return load(_that);case _TogglePrayer() when togglePrayer != null:
+return load(_that);case _Reload() when reload != null:
+return reload(_that);case _TogglePrayer() when togglePrayer != null:
 return togglePrayer(_that);case _AddQada() when addQada != null:
 return addQada(_that);case _RemoveQada() when removeQada != null:
 return removeQada(_that);case _Save() when save != null:
@@ -149,10 +152,11 @@ return deleteRecord(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( DateTime date)?  load,TResult Function( Salaah prayer)?  togglePrayer,TResult Function( Salaah prayer)?  addQada,TResult Function( Salaah prayer)?  removeQada,TResult Function()?  save,TResult Function( int year,  int month)?  loadMonth,TResult Function()?  checkMissedDays,TResult Function( List<DateTime> selectedDates)?  acknowledgeMissedDays,TResult Function( Map<Salaah, int> counts)?  bulkAddQada,TResult Function( Map<Salaah, int> counts)?  updateQada,TResult Function( DateTime date)?  deleteRecord,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( DateTime date)?  load,TResult Function( DateTime date)?  reload,TResult Function( Salaah prayer)?  togglePrayer,TResult Function( Salaah prayer)?  addQada,TResult Function( Salaah prayer)?  removeQada,TResult Function()?  save,TResult Function( int year,  int month)?  loadMonth,TResult Function()?  checkMissedDays,TResult Function( List<DateTime> selectedDates)?  acknowledgeMissedDays,TResult Function( Map<Salaah, int> counts)?  bulkAddQada,TResult Function( Map<Salaah, int> counts)?  updateQada,TResult Function( DateTime date)?  deleteRecord,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Load() when load != null:
-return load(_that.date);case _TogglePrayer() when togglePrayer != null:
+return load(_that.date);case _Reload() when reload != null:
+return reload(_that.date);case _TogglePrayer() when togglePrayer != null:
 return togglePrayer(_that.prayer);case _AddQada() when addQada != null:
 return addQada(_that.prayer);case _RemoveQada() when removeQada != null:
 return removeQada(_that.prayer);case _Save() when save != null:
@@ -180,10 +184,11 @@ return deleteRecord(_that.date);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( DateTime date)  load,required TResult Function( Salaah prayer)  togglePrayer,required TResult Function( Salaah prayer)  addQada,required TResult Function( Salaah prayer)  removeQada,required TResult Function()  save,required TResult Function( int year,  int month)  loadMonth,required TResult Function()  checkMissedDays,required TResult Function( List<DateTime> selectedDates)  acknowledgeMissedDays,required TResult Function( Map<Salaah, int> counts)  bulkAddQada,required TResult Function( Map<Salaah, int> counts)  updateQada,required TResult Function( DateTime date)  deleteRecord,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( DateTime date)  load,required TResult Function( DateTime date)  reload,required TResult Function( Salaah prayer)  togglePrayer,required TResult Function( Salaah prayer)  addQada,required TResult Function( Salaah prayer)  removeQada,required TResult Function()  save,required TResult Function( int year,  int month)  loadMonth,required TResult Function()  checkMissedDays,required TResult Function( List<DateTime> selectedDates)  acknowledgeMissedDays,required TResult Function( Map<Salaah, int> counts)  bulkAddQada,required TResult Function( Map<Salaah, int> counts)  updateQada,required TResult Function( DateTime date)  deleteRecord,}) {final _that = this;
 switch (_that) {
 case _Load():
-return load(_that.date);case _TogglePrayer():
+return load(_that.date);case _Reload():
+return reload(_that.date);case _TogglePrayer():
 return togglePrayer(_that.prayer);case _AddQada():
 return addQada(_that.prayer);case _RemoveQada():
 return removeQada(_that.prayer);case _Save():
@@ -210,10 +215,11 @@ return deleteRecord(_that.date);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( DateTime date)?  load,TResult? Function( Salaah prayer)?  togglePrayer,TResult? Function( Salaah prayer)?  addQada,TResult? Function( Salaah prayer)?  removeQada,TResult? Function()?  save,TResult? Function( int year,  int month)?  loadMonth,TResult? Function()?  checkMissedDays,TResult? Function( List<DateTime> selectedDates)?  acknowledgeMissedDays,TResult? Function( Map<Salaah, int> counts)?  bulkAddQada,TResult? Function( Map<Salaah, int> counts)?  updateQada,TResult? Function( DateTime date)?  deleteRecord,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( DateTime date)?  load,TResult? Function( DateTime date)?  reload,TResult? Function( Salaah prayer)?  togglePrayer,TResult? Function( Salaah prayer)?  addQada,TResult? Function( Salaah prayer)?  removeQada,TResult? Function()?  save,TResult? Function( int year,  int month)?  loadMonth,TResult? Function()?  checkMissedDays,TResult? Function( List<DateTime> selectedDates)?  acknowledgeMissedDays,TResult? Function( Map<Salaah, int> counts)?  bulkAddQada,TResult? Function( Map<Salaah, int> counts)?  updateQada,TResult? Function( DateTime date)?  deleteRecord,}) {final _that = this;
 switch (_that) {
 case _Load() when load != null:
-return load(_that.date);case _TogglePrayer() when togglePrayer != null:
+return load(_that.date);case _Reload() when reload != null:
+return reload(_that.date);case _TogglePrayer() when togglePrayer != null:
 return togglePrayer(_that.prayer);case _AddQada() when addQada != null:
 return addQada(_that.prayer);case _RemoveQada() when removeQada != null:
 return removeQada(_that.prayer);case _Save() when save != null:
@@ -289,6 +295,72 @@ class __$LoadCopyWithImpl<$Res>
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? date = null,}) {
   return _then(_Load(
+null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
+as DateTime,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _Reload implements PrayerTrackerEvent {
+  const _Reload(this.date);
+  
+
+ final  DateTime date;
+
+/// Create a copy of PrayerTrackerEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ReloadCopyWith<_Reload> get copyWith => __$ReloadCopyWithImpl<_Reload>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Reload&&(identical(other.date, date) || other.date == date));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,date);
+
+@override
+String toString() {
+  return 'PrayerTrackerEvent.reload(date: $date)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ReloadCopyWith<$Res> implements $PrayerTrackerEventCopyWith<$Res> {
+  factory _$ReloadCopyWith(_Reload value, $Res Function(_Reload) _then) = __$ReloadCopyWithImpl;
+@useResult
+$Res call({
+ DateTime date
+});
+
+
+
+
+}
+/// @nodoc
+class __$ReloadCopyWithImpl<$Res>
+    implements _$ReloadCopyWith<$Res> {
+  __$ReloadCopyWithImpl(this._self, this._then);
+
+  final _Reload _self;
+  final $Res Function(_Reload) _then;
+
+/// Create a copy of PrayerTrackerEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? date = null,}) {
+  return _then(_Reload(
 null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));

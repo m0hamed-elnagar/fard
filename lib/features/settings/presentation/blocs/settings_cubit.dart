@@ -722,4 +722,41 @@ class SettingsCubit extends Cubit<SettingsState> {
       debugPrint('Widget sync error: $e');
     }
   }
+
+  /// Refresh state from repository (e.g. after import)
+  void refresh() {
+    emit(SettingsState(
+      locale: _repo.locale,
+      latitude: _repo.latitude,
+      longitude: _repo.longitude,
+      cityName: _repo.cityName,
+      calculationMethod: _repo.calculationMethod,
+      madhab: _repo.madhab,
+      morningAzkarTime: _repo.morningAzkarTime,
+      eveningAzkarTime: _repo.eveningAzkarTime,
+      isAfterSalahAzkarEnabled: _repo.isAfterSalahAzkarEnabled,
+      reminders: _repo.reminders,
+      salaahSettings: _repo.salaahSettings,
+      isQadaEnabled: _repo.isQadaEnabled,
+      hijriAdjustment: _repo.hijriAdjustment,
+      themePresetId: _repo.themePresetId,
+      customThemeColors: _repo.customThemeColors,
+      savedCustomThemes: _repo.savedCustomThemes,
+      activeCustomThemeId: _repo.activeCustomThemeId,
+      audioQuality: _repo.audioQuality,
+      isAudioPlayerExpanded: _repo.isAudioPlayerExpanded,
+      isSalahReminderEnabled: _repo.isSalahReminderEnabled,
+      salahReminderOffsetMinutes: _repo.salahReminderOffsetMinutes,
+      prayerReminderType: _repo.prayerReminderType,
+      enabledSalahReminders: _repo.enabledSalahReminders,
+      isWerdReminderEnabled: _repo.isWerdReminderEnabled,
+      werdReminderTime: _repo.werdReminderTime,
+      isSalawatReminderEnabled: _repo.isSalawatReminderEnabled,
+      salawatFrequencyHours: _repo.salawatFrequencyHours,
+      salawatStartTime: _repo.salawatStartTime,
+      salawatEndTime: _repo.salawatEndTime,
+    ));
+    _sync();
+    _widgetSync();
+  }
 }

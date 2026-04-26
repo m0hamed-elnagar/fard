@@ -7,6 +7,7 @@ import 'package:fard/features/quran/domain/usecases/get_page.dart';
 import 'package:fard/features/quran/domain/usecases/update_last_read.dart';
 import 'package:fard/features/quran/domain/usecases/watch_last_read.dart';
 import 'package:fard/features/quran/domain/entities/surah.dart';
+import 'package:fard/features/quran/domain/entities/ayah.dart';
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
 import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
 import 'package:fard/features/quran/domain/repositories/bookmark_repository.dart';
@@ -117,6 +118,94 @@ void main() {
         const ReaderState.loading(),
         ReaderState.loaded(surah: tSurah, lastReadAyah: null, bookmarks: []),
       ],
+    );
+
+    final tAyah = Ayah(
+      number: AyahNumber.create(
+        surahNumber: 1,
+        ayahNumberInSurah: 1,
+      ).data!,
+      uthmaniText: 'Bismillah',
+      page: 1,
+      juz: 1,
+      hizb: 1,
+    );
+    final tSurahWithAyah = tSurah.copyWith(ayahs: [tAyah]);
+
+    blocTest<ReaderBloc, ReaderState>(
+      'sets highlightedAyah when loadSurah is added with initialAyahNumber',
+      build: () {
+        when(
+          () => mockGetSurah(any()),
+        ).thenAnswer((_) async => Result.success(tSurahWithAyah));
+        when(() => mockWatchLastRead()).thenAnswer(
+          (_) => Stream.value(
+            Result.failure(const CacheFailure('No last read position found')),
+          ),
+        );
+        return readerBloc;
+      },
+      act:
+          (bloc) => bloc.add(
+            ReaderEvent.loadSurah(
+              surahNumber: tSurahNumber,
+              initialAyahNumber: 1,
+            ),
+          ),
+      expect:
+          () => [
+            const ReaderState.loading(),
+            ReaderState.loaded(
+              surah: tSurahWithAyah,
+              highlightedAyah: tAyah,
+              lastReadAyah: null,
+              bookmarks: [],
+            ),
+          ],
+    );
+
+    blocTest<ReaderBloc, ReaderState>(
+      'watchLastRead DOES NOT override explicit highlightedAyah',
+      build: () {
+        when(
+          () => mockGetSurah(any()),
+        ).thenAnswer((_) async => Result.success(tSurahWithAyah));
+        when(() => mockWatchLastRead()).thenAnswer(
+          (_) => Stream.fromIterable([
+            Result.success(
+              LastReadPosition(
+                ayahNumber: AyahNumber.create(
+                  surahNumber: 1,
+                  ayahNumberInSurah: 1,
+                ).data!,
+                updatedAt: DateTime.now(),
+              ),
+            ),
+          ]),
+        );
+        return readerBloc;
+      },
+      act:
+          (bloc) => bloc.add(
+            ReaderEvent.loadSurah(
+              surahNumber: tSurahNumber,
+              initialAyahNumber: 1,
+            ),
+          ),
+      expect:
+          () => [
+            const ReaderState.loading(),
+            ReaderState.loaded(
+              surah: tSurahWithAyah,
+              highlightedAyah: tAyah,
+              lastReadAyah: null,
+              bookmarks: [],
+            ),
+          ],
+      verify: (bloc) {
+        // Should NOT have added selectAyah event again from subscription
+        // because highlightedAyah was already set
+      },
     );
   });
 }

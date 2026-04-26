@@ -11,6 +11,8 @@ import 'package:fard/features/audio/presentation/blocs/player/audio_player_bloc.
 import 'package:fard/features/audio/presentation/blocs/manager/reciter_manager_bloc.dart';
 import 'package:fard/features/audio/presentation/utils/offline_audio_helper.dart';
 import 'package:fard/features/quran/domain/entities/surah.dart';
+import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
+import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
 import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +41,9 @@ class _QuranPageState extends State<QuranPage> {
   bool _isSearching = false;
 
   Set<int> _downloadedSurahIds = {};
+  Set<int> _downloadedTextSurahIds = {};
   final Map<int, double> _downloadingSurahs = {};
+  final Set<int> _downloadingTextSurahs = {};
   StreamSubscription? _downloadSubscription;
   String? _lastReciterId;
 
@@ -51,6 +55,7 @@ class _QuranPageState extends State<QuranPage> {
 
   void _initDownloadTracking() {
     _updateDownloadedSurahs();
+    _updateDownloadedTextSurahs();
     _downloadSubscription = getIt<AudioDownloadService>().progressStream.listen((progress) {
       if (!mounted) return;
       
@@ -113,6 +118,29 @@ class _QuranPageState extends State<QuranPage> {
         _downloadedSurahIds = downloaded;
         _lastReciterId = reciter.identifier;
       });
+    }
+  }
+
+  Future<void> _updateDownloadedTextSurahs() async {
+    final downloaded = await getIt<QuranRepository>().getDownloadedTextSurahIds();
+    if (mounted) {
+      setState(() {
+        _downloadedTextSurahIds = downloaded;
+      });
+    }
+  }
+
+  Future<void> _downloadSurahText(int surahNumber) async {
+    setState(() => _downloadingTextSurahs.add(surahNumber));
+    try {
+      final result = await getIt<QuranRepository>().getSurah(
+        SurahNumber.create(surahNumber).data!,
+      );
+      if (result.isSuccess && mounted) {
+        _updateDownloadedTextSurahs();
+      }
+    } finally {
+      if (mounted) setState(() => _downloadingTextSurahs.remove(surahNumber));
     }
   }
 
@@ -301,8 +329,6 @@ class _QuranPageState extends State<QuranPage> {
                         }
 
                         final filteredSurahs = state.surahs.where((surah) {
-                          final isDownloaded = _downloadedSurahIds.contains(surah.number.value);
-                          if (!isConnected && !isDownloaded) return false;
                           return surah.name.contains(_searchQuery) ||
                               surah.number.value.toString().contains(_searchQuery);
                         }).toList();
@@ -369,130 +395,34 @@ class _QuranPageState extends State<QuranPage> {
                                               ? index - 1
                                               : index;
                                           final surah = filteredSurahs[surahIndex];
-                                          final isDownloaded = _downloadedSurahIds.contains(surah.number.value);
+                                          final isAudioDownloaded = _downloadedSurahIds.contains(surah.number.value);
+                                          final isTextDownloaded = _downloadedTextSurahIds.contains(surah.number.value);
 
-                                          return ListTile(
-                                            contentPadding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 4,
-                                            ),
-                                            leading: CircleAvatar(
-                                              backgroundColor: Theme.of(
-                                                context,
-                                              ).primaryColor.withValues(alpha: 0.1),
-                                              child: Text(
-                                                surah.number.value.toArabicIndic(),
-                                                style: const TextStyle(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ),
-                                            title: Row(
-                                              mainAxisAlignment: MainAxisAlignment.end,
-                                              children: [
-                                                if (isDownloaded)
-                                                  Padding(
-                                                    padding: const EdgeInsets.only(left: 4.0),
-                                                    child: Icon(
-                                                      Icons.check_circle_outline,
-                                                      size: 14,
-                                                      color: Theme.of(context).primaryColor.withValues(alpha: 0.8),
-                                                    ),
-                                                  ),
-                                                Expanded(
-                                                  child: Text(
-                                                    surah.name,
-                                                    style: GoogleFonts.amiri(
-                                                      fontSize: 20,
-                                                      fontWeight: FontWeight.bold,
-                                                      height: 1.4,
-                                                      wordSpacing: 2,
-                                                    ),
-                                                    textAlign: TextAlign.right,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            subtitle: Align(
-                                              alignment: Alignment.centerRight,
-                                              child: Text(
-                                                '${surah.numberOfAyahs.toArabicIndic()} ${l10n.ayah}',
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: context.onSurfaceVariantColor,
-                                                ),
-                                                textAlign: TextAlign.right,
-                                              ),
-                                            ),
-                                            trailing: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                // Download / Progress Button
-                                                if (!isDownloaded)
-                                                  _downloadingSurahs.containsKey(surah.number.value)
-                                                      ? SizedBox(
-                                                          width: 24,
-                                                          height: 24,
-                                                          child: CircularProgressIndicator(
-                                                            value: _downloadingSurahs[surah.number.value],
-                                                            strokeWidth: 2,
-                                                          ),
-                                                        )
-                                                      : IconButton(
-                                                          icon: const Icon(Icons.download_for_offline_outlined, size: 20),
-                                                          onPressed: () => _downloadSurah(surah.number.value),
-                                                          tooltip: l10n.startDownload,
-                                                        ),
-                                                
-                                                // Play / Pause Button
-                                                BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
-                                                  builder: (context, audioState) {
-                                                    final isThisSurah = audioState.currentSurah == surah.number.value;
-                                                    final isPlaying = audioState.isPlaying && isThisSurah;
-                                                    final isLoading = audioState.isLoading && isThisSurah;
-
-                                                    if (isLoading) {
-                                                      return const Padding(
-                                                        padding: EdgeInsets.all(12.0),
-                                                        child: SizedBox(
-                                                          width: 20,
-                                                          height: 20,
-                                                          child: CircularProgressIndicator(strokeWidth: 2),
-                                                        ),
-                                                      );
-                                                    }
-
-                                                    return IconButton(
-                                                      icon: Icon(
-                                                        isPlaying
-                                                            ? Icons.pause_circle_filled
-                                                            : Icons.play_circle_outline,
-                                                        color: Theme.of(context).primaryColor,
-                                                      ),
-                                                      onPressed: () => OfflineAudioHelper.handlePlayRequest(
-                                                        context: context,
-                                                        surahNumber: surah.number.value,
-                                                        startAyah: (lastRead?.ayahNumber.surahNumber == surah.number.value)
-                                                            ? lastRead?.ayahNumber.ayahNumberInSurah ?? 1
-                                                            : 1,
-                                                        isDownloaded: isDownloaded,
-                                                      ),
-                                                    );
-                                                  },
-                                                ),
-                                                // Arabic RTL: Disclosure arrow points Left. DO NOT CHANGE.
-                                                const Icon(Icons.arrow_forward_ios, size: 14),
-                                              ],
-                                            ),
-                                            onTap: () {
-                                              Navigator.push(
+                                          return _SurahListTile(
+                                            surah: surah,
+                                            isAudioDownloaded: isAudioDownloaded,
+                                            isTextDownloaded: isTextDownloaded,
+                                            isDownloadingAudio: _downloadingSurahs.containsKey(surah.number.value),
+                                            audioDownloadProgress: _downloadingSurahs[surah.number.value],
+                                            isDownloadingText: _downloadingTextSurahs.contains(surah.number.value),
+                                            isConnected: isConnected,
+                                            lastReadAyahNumber: (lastRead?.ayahNumber.surahNumber == surah.number.value)
+                                                ? lastRead?.ayahNumber.ayahNumberInSurah
+                                                : null,
+                                            onDownloadAudio: () => _downloadSurah(surah.number.value),
+                                            onDownloadText: () => _downloadSurahText(surah.number.value),
+                                            onTap: () async {
+                                              await Navigator.push(
                                                 context,
                                                 QuranReaderPage.route(
                                                   surahNumber: surah.number.value,
                                                   allSurahs: state.surahs,
                                                 ),
                                               );
+                                              // Refresh download status when returning from reader
+                                              if (mounted) {
+                                                _updateDownloadedTextSurahs();
+                                              }
                                             },
                                           );
                                         },
@@ -667,6 +597,196 @@ class _ContinueReadingCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _SurahListTile extends StatelessWidget {
+  final Surah surah;
+  final bool isAudioDownloaded;
+  final bool isTextDownloaded;
+  final bool isDownloadingAudio;
+  final double? audioDownloadProgress;
+  final bool isDownloadingText;
+  final bool isConnected;
+  final int? lastReadAyahNumber;
+  final VoidCallback onDownloadAudio;
+  final VoidCallback onDownloadText;
+  final VoidCallback onTap;
+
+  const _SurahListTile({
+    required this.surah,
+    required this.isAudioDownloaded,
+    required this.isTextDownloaded,
+    required this.isDownloadingAudio,
+    this.audioDownloadProgress,
+    required this.isDownloadingText,
+    required this.isConnected,
+    this.lastReadAyahNumber,
+    required this.onDownloadAudio,
+    required this.onDownloadText,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
+      leading: CircleAvatar(
+        backgroundColor: Theme.of(context).primaryColor,
+        child: Text(
+          surah.number.value.toArabicIndic(),
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Expanded(
+            child: Text(
+              surah.name,
+              style: GoogleFonts.amiri(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                height: 1.4,
+                wordSpacing: 2,
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ],
+      ),
+      subtitle: Align(
+        alignment: Alignment.centerRight,
+        child: Text(
+          '${surah.numberOfAyahs.toArabicIndic()} ${l10n.ayah}',
+          style: TextStyle(
+            fontSize: 12,
+            color: context.onSurfaceVariantColor,
+          ),
+          textAlign: TextAlign.right,
+        ),
+      ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Text Download / Status
+          if (!isTextDownloaded)
+            isDownloadingText
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : IconButton(
+                    icon: Icon(
+                      !isConnected ? Icons.text_snippet_outlined : Icons.file_download_outlined,
+                      size: 18,
+                      color: !isConnected ? context.onSurfaceVariantColor.withValues(alpha: 0.5) : context.onSurfaceVariantColor,
+                    ),
+                    onPressed: !isConnected
+                        ? () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(l10n.noInternetConnection)),
+                            );
+                          }
+                        : onDownloadText,
+                    tooltip: 'Download Text',
+                  )
+          else
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Icon(
+                Icons.text_snippet,
+                size: 18,
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.7),
+              ),
+            ),
+
+          // Audio Download / Progress Button
+          if (!isAudioDownloaded)
+            isDownloadingAudio
+                ? SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      value: audioDownloadProgress,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : IconButton(
+                    icon: Icon(
+                      !isConnected ? Icons.cloud_off_outlined : Icons.download_for_offline_outlined,
+                      size: 20,
+                      color: !isConnected ? context.onSurfaceVariantColor.withValues(alpha: 0.5) : null,
+                    ),
+                    onPressed: !isConnected
+                        ? () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(l10n.noInternetConnection)),
+                            );
+                          }
+                        : onDownloadAudio,
+                    tooltip: !isConnected ? l10n.noInternetConnection : l10n.startDownload,
+                  )
+          else
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Icon(
+                Icons.audiotrack,
+                size: 18,
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.7),
+              ),
+            ),
+          
+          // Play / Pause Button
+          BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+            builder: (context, audioState) {
+              final isThisSurah = audioState.currentSurah == surah.number.value;
+              final isPlaying = audioState.isPlaying && isThisSurah;
+              final isLoading = audioState.isLoading && isThisSurah;
+
+              if (isLoading) {
+                return const Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                );
+              }
+
+              return IconButton(
+                icon: Icon(
+                  isPlaying
+                      ? Icons.pause_circle_filled
+                      : Icons.play_circle_outline,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                onPressed: () => OfflineAudioHelper.handlePlayRequest(
+                  context: context,
+                  surahNumber: surah.number.value,
+                  startAyah: lastReadAyahNumber ?? 1,
+                  isDownloaded: isAudioDownloaded,
+                ),
+              );
+            },
+          ),
+          // Arabic RTL: Disclosure arrow points Left. DO NOT CHANGE.
+          const Icon(Icons.arrow_forward_ios, size: 14),
+        ],
+      ),
+      onTap: onTap,
     );
   }
 }

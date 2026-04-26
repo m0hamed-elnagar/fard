@@ -11,6 +11,7 @@ import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
 import 'package:fard/features/quran/domain/repositories/bookmark_repository.dart';
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
 import 'package:fard/features/quran/domain/entities/reader_settings.dart';
+import 'package:fard/core/errors/failure.dart';
 import 'dart:async';
 import 'package:injectable/injectable.dart';
 
@@ -38,65 +39,86 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
     required this.quranRepository,
   }) : super(const ReaderState.initial()) {
     on<_LoadSurah>((event, emit) async {
-      emit(const ReaderState.loading());
-      final result = await getSurah(
-        GetSurahParams(surahNumber: event.surahNumber),
-      );
-      final separatorIndex = await quranRepository.getReaderSeparator();
-      final separator = ReaderSeparator.values[separatorIndex];
-      final textScale = await quranRepository.getTextScale();
-      final fontFamily = await quranRepository.getFontFamily();
+      try {
+        emit(const ReaderState.loading());
+        final result = await getSurah(
+          GetSurahParams(surahNumber: event.surahNumber),
+        );
 
-      await result.fold(
-        (failure) async => emit(ReaderState.error(failure.message)),
-        (surah) async {
-          final bookmarksRes = await bookmarkRepository.getBookmarks();
-          final bookmarks = bookmarksRes.fold((_) => <Bookmark>[], (v) => v);
+        // Load settings in parallel to avoid sequential awaiting
+        final settings = await Future.wait([
+          quranRepository.getReaderSeparator(),
+          quranRepository.getTextScale(),
+          quranRepository.getFontFamily(),
+          bookmarkRepository.getBookmarks(),
+        ]);
 
-          emit(
-            ReaderState.loaded(
-              surah: surah,
-              separator: separator,
-              textScale: textScale,
-              fontFamily: fontFamily,
-              bookmarks: bookmarks,
-            ),
-          );
+        final separator = ReaderSeparator.values[settings[0] as int];
+        final textScale = settings[1] as double;
+        final fontFamily = settings[2] as String;
+        final bookmarksRes = settings[3] as Result<List<Bookmark>>;
+        final bookmarks = bookmarksRes.fold((_) => <Bookmark>[], (v) => v);
 
-          _lastReadSubscription?.cancel();
-          _lastReadSubscription = watchLastRead().listen((result) {
-            result.fold((_) => null, (position) {
-              state.mapOrNull(
-                loaded: (s) {
-                  if (position.ayahNumber.surahNumber == s.surah.number.value) {
-                    final ayah = s.surah.ayahs.firstWhere(
-                      (a) =>
-                          a.number.ayahNumberInSurah ==
-                          position.ayahNumber.ayahNumberInSurah,
-                      orElse: () => s.surah.ayahs.first,
-                    );
+        result.fold(
+          (failure) => emit(ReaderState.error(failure.message)),
+          (surah) {
+            Ayah? highlightedAyah;
+            if (event.initialAyahNumber != null) {
+              highlightedAyah = surah.ayahs.firstWhere(
+                (a) => a.number.ayahNumberInSurah == event.initialAyahNumber,
+                orElse: () => surah.ayahs.first,
+              );
+            }
 
-                    // Only highlight, DON'T auto-save - let user explicitly choose
-                    if (s.lastReadAyah == null) {
-                      add(ReaderEvent.selectAyah(ayah));
+            emit(
+              ReaderState.loaded(
+                surah: surah,
+                separator: separator,
+                textScale: textScale,
+                fontFamily: fontFamily,
+                bookmarks: bookmarks,
+                highlightedAyah: highlightedAyah,
+              ),
+            );
+
+            _lastReadSubscription?.cancel();
+            _lastReadSubscription = watchLastRead().listen((result) {
+              result.fold((_) => null, (position) {
+                state.mapOrNull(
+                  loaded: (s) {
+                    if (position.ayahNumber.surahNumber ==
+                        s.surah.number.value) {
+                      final ayah = s.surah.ayahs.firstWhere(
+                        (a) =>
+                            a.number.ayahNumberInSurah ==
+                            position.ayahNumber.ayahNumberInSurah,
+                        orElse: () => s.surah.ayahs.first,
+                      );
+
+                      // FIX: Only auto-select if NOTHING is highlighted yet
+                      if (s.lastReadAyah == null && s.highlightedAyah == null) {
+                        add(ReaderEvent.selectAyah(ayah));
+                      }
                     }
-                  }
-                },
+                  },
+                );
+              });
+            });
+
+            _bookmarksSubscription?.cancel();
+            _bookmarksSubscription = bookmarkRepository
+                .watchBookmarks()
+                .listen((result) {
+              result.fold(
+                (_) => null,
+                (bookmarks) => add(ReaderEvent.bookmarksUpdated(bookmarks)),
               );
             });
-          });
-
-          _bookmarksSubscription?.cancel();
-          _bookmarksSubscription = bookmarkRepository.watchBookmarks().listen((
-            result,
-          ) {
-            result.fold(
-              (_) => null,
-              (bookmarks) => add(ReaderEvent.bookmarksUpdated(bookmarks)),
-            );
-          });
-        },
-      );
+          },
+        );
+      } catch (e) {
+        emit(ReaderState.error(e.toString()));
+      }
     });
 
     on<_BookmarksUpdated>((event, emit) {

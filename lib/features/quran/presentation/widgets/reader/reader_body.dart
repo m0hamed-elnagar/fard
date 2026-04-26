@@ -1,3 +1,4 @@
+import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
 import 'package:fard/core/extensions/quran_extension.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -19,12 +20,14 @@ class QuranReaderBody extends StatefulWidget {
   final ReaderScrollController scrollController;
   final int? currentVisibleAyah;
   final VoidCallback? onCompletionDoaa;
+  final int surahNumber;
 
   const QuranReaderBody({
     super.key,
     required this.scrollController,
     this.currentVisibleAyah,
     this.onCompletionDoaa,
+    required this.surahNumber,
   });
 
   @override
@@ -88,18 +91,16 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
                     const SizedBox(height: 16),
                     Text(e.message, textAlign: TextAlign.center),
                     const SizedBox(height: 16),
-                    ElevatedButton(
+                    ElevatedButton.icon(
                       onPressed: () {
-                        // This needs to be handled by the parent or we need to pass the surah number
-                        // Ideally ReaderBloc already has the event to retry or we just re-add loadSurah
-                        // But we don't have the surah number here easily unless we store it or get it from arguments
-                        // For now, let's assume the user will go back or the parent handles error refetching logic
-                        // or we can just ask the bloc to retry if it supports it.
-                        // The original code used widget.surahNumber.
+                        context.read<ReaderBloc>().add(
+                              ReaderEvent.loadSurah(
+                                surahNumber: SurahNumber.create(widget.surahNumber).data!,
+                              ),
+                            );
                       },
-                      child: const Text(
-                        'Retry',
-                      ), // Localize if possible, or pass l10n
+                      icon: const Icon(Icons.refresh),
+                      label: Text(l10n.retry),
                     ),
                   ],
                 ),

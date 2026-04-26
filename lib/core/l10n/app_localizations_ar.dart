@@ -888,6 +888,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get downloadCenterBtn => 'مركز التحميل';
 
   @override
+  String get noInternetConnection => 'لا يوجد اتصال بالإنترنت';
+
+  @override
   String get offlineModeBanner =>
       'لا يوجد اتصال بالإنترنت حالياً. يمكنك تصفح المحتوى الذي تم تحميله مسبقاً.';
 

@@ -106,5 +106,6 @@ class PrayerRepoImpl implements PrayerRepo {
     for (final record in records) {
       await _box.put(record.id, DailyRecordMapper.toEntity(record));
     }
+    await _box.flush();
   }
 }

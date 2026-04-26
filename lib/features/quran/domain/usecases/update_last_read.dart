@@ -13,10 +13,12 @@ class UpdateLastRead {
   UpdateLastRead(this.repository, this.werdRepository);
 
   Future<Result<void>> call(LastReadPosition position) async {
-    // 1. Update general last read in QuranRepository
+    // 1. Update general last read in QuranRepository (UI state)
     await repository.updateLastReadPosition(position);
 
-    // 2. Update werd progress through repository
+    // 2. Update werd progress markers through repository
+    // Note: We only update markers here. Actual progress tracking (segments/total)
+    // is handled by WerdBloc via trackItemRead/trackRangeRead/etc.
     final progressRes = await werdRepository.getProgress();
 
     return progressRes.fold((failure) => Result.failure(failure), (
@@ -27,68 +29,23 @@ class UpdateLastRead {
         position.ayahNumber.ayahNumberInSurah,
       );
 
-      // If sessionStartAbsolute is null, it means this is the first read of the day.
-      // Or if it was from a previous day (lastUpdated is not today), we should reset.
       final now = DateTime.now();
       final isSameDay =
           currentProgress.lastUpdated.year == now.year &&
           currentProgress.lastUpdated.month == now.month &&
           currentProgress.lastUpdated.day == now.day;
 
-      final startAbs =
-          (isSameDay && currentProgress.sessionStartAbsolute != null)
-          ? currentProgress.sessionStartAbsolute!
-          : newAbs;
-
-      // Progress is direct distance from session start to current position
-      int newTotal = 0;
-      Set<int> newItems = {};
-      List<ReadingSegment> newSegments = [];
-      
-      if (newAbs >= startAbs) {
-        newTotal = newAbs - startAbs + 1;
-        // In "reading flow", we assume user read everything from start to current
-        newItems = Set.from(List.generate(newTotal, (i) => startAbs + i));
-        // Create segments from the set of ayahs
-        // Check if there's already an active session
-        if (currentProgress.segmentsToday.isNotEmpty) {
-          final lastSegment = currentProgress.segmentsToday.last;
-          if (lastSegment.endTime == null) {
-            // Extend the active session
-            newSegments = List.from(currentProgress.segmentsToday);
-            newSegments[newSegments.length - 1] = lastSegment.extend(newAbs);
-          } else {
-            // Previous session ended, create new one
-            newSegments = ReadingSegment.fromSet(newItems);
-            if (newSegments.isNotEmpty) {
-              newSegments[0] = newSegments[0].copyWith(startTime: DateTime.now());
-            }
-          }
-        } else {
-          // No existing segments, create new session
-          newSegments = ReadingSegment.fromSet(newItems);
-          if (newSegments.isNotEmpty) {
-            newSegments[0] = newSegments[0].copyWith(startTime: DateTime.now());
-          }
-        }
-      } else {
-        // If user jumps BACKWARDS from start, we don't count it towards progress for now
-        // to keep the simplified "session start" logic.
-        newTotal = currentProgress.totalAmountReadToday;
-        newItems = currentProgress.readItemsToday;
-        newSegments = currentProgress.segmentsToday;
-      }
-
-      final newProgress = currentProgress.copyWith(
-        totalAmountReadToday: newTotal,
-        readItemsToday: newItems,
-        segmentsToday: newSegments, // FIX: Set BOTH formats!
+      // Only update markers, don't touch segments or totalAmountReadToday
+      final updatedProgress = currentProgress.copyWith(
         lastReadAbsolute: newAbs,
-        sessionStartAbsolute: startAbs,
+        // If it's a new day, we also set sessionStartAbsolute
+        sessionStartAbsolute: isSameDay 
+            ? currentProgress.sessionStartAbsolute 
+            : newAbs,
         lastUpdated: now,
       );
 
-      return werdRepository.updateProgress(newProgress);
+      return werdRepository.updateProgress(updatedProgress);
     });
   }
 }

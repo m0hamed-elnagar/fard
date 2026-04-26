@@ -279,12 +279,6 @@ extension GetItInjectableX on _i174.GetIt {
         settingsRepository: gh<_i674.SettingsRepository>(),
       ),
     );
-    gh.lazySingleton<_i1068.ExportImportService>(
-      () => _i1068.ExportImportService(
-        gh<_i800.PrayerRepo>(),
-        gh<_i724.WerdRepository>(),
-      ),
-    );
     gh.singleton<_i3.PrayerNotificationScheduler>(
       () => _i3.PrayerNotificationScheduler(
         gh<_i552.PrayerTimeService>(),
@@ -300,6 +294,17 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i738.Box<int>>(instanceName: 'tasbihHistoryBox'),
         gh<_i738.Box<String>>(instanceName: 'tasbihPreferredDuaBox'),
         gh<_i460.SharedPreferences>(),
+      ),
+    );
+    gh.lazySingleton<_i1068.ExportImportService>(
+      () => _i1068.ExportImportService(
+        gh<_i800.PrayerRepo>(),
+        gh<_i724.WerdRepository>(),
+        gh<_i674.SettingsRepository>(),
+        gh<_i352.TasbihRepository>(),
+        gh<_i1027.IAzkarSource>(),
+        gh<_i33.BookmarkRepository>(),
+        gh<_i498.QuranRepository>(),
       ),
     );
     gh.factory<_i47.SyncLocationSettings>(
@@ -338,7 +343,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i1037.AzkarBloc>(
       () => _i1037.AzkarBloc(gh<_i1027.IAzkarSource>()),
     );
-    gh.singleton<_i941.NotificationService>(
+    gh.lazySingleton<_i941.NotificationService>(
       () => _i941.NotificationService(
         gh<_i1055.SoundManager>(),
         gh<_i680.ChannelManager>(),

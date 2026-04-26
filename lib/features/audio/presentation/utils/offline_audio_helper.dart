@@ -53,10 +53,10 @@ class OfflineAudioHelper {
       return;
     }
 
-    // NOT downloaded: Perform a robust internet check before attempting to stream
-    final hasInternet = await getIt<ConnectivityService>().hasInternet();
+    // NOT downloaded: Check for network before attempting to stream
+    final hasNetwork = await getIt<ConnectivityService>().hasNetwork();
 
-    if (hasInternet) {
+    if (hasNetwork) {
       playerBloc.add(
         PlaySurah(surahNumber: surahNumber, startAyah: startAyah, reciter: currentReciter),
       );

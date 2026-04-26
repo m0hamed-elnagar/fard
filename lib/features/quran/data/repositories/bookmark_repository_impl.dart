@@ -114,6 +114,21 @@ class BookmarkRepositoryImpl implements BookmarkRepository {
     }
   }
 
+  @override
+  Future<Result<void>> importBookmarks(List<Bookmark> bookmarks) async {
+    try {
+      await _bookmarkBox.clear();
+      for (final bookmark in bookmarks) {
+        final entity = _toEntity(bookmark);
+        await _bookmarkBox.put(_getKey(bookmark.ayahNumber), entity);
+      }
+      await _bookmarkBox.flush();
+      return Result.success(null);
+    } catch (e) {
+      return Result.failure(UnknownFailure(e.toString()));
+    }
+  }
+
   Bookmark _toDomain(BookmarkEntity e) {
     return Bookmark(
       id: e.id,

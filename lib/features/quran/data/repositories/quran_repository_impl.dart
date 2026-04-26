@@ -9,6 +9,7 @@ import 'package:fard/features/quran/data/datasources/remote/quran_remote_source.
 import 'package:fard/features/quran/data/datasources/local/quran_local_source.dart';
 import 'package:fard/features/quran/presentation/utils/quran_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fard/core/constants/settings_keys.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:injectable/injectable.dart';
@@ -21,10 +22,6 @@ class QuranRepositoryImpl implements QuranRepository {
 
   final _lastReadController =
       StreamController<Result<LastReadPosition>>.broadcast();
-  static const String _lastReadKey = 'last_read_position';
-  static const String _separatorKey = 'reader_separator_choice';
-  static const String _textScaleKey = 'reader_text_scale';
-  static const String _fontFamilyKey = 'reader_font_family';
 
   QuranRepositoryImpl({
     required this.remoteSource,
@@ -37,8 +34,32 @@ class QuranRepositoryImpl implements QuranRepository {
     }
   }
 
+  double _readDouble(String key, double defaultValue) {
+    try {
+      final value = sharedPreferences.get(key);
+      if (value is double) return value;
+      if (value is int) return value.toDouble();
+      if (value is String) return double.tryParse(value) ?? defaultValue;
+      return defaultValue;
+    } catch (_) {
+      return defaultValue;
+    }
+  }
+
+  int _readInt(String key, int defaultValue) {
+    try {
+      final value = sharedPreferences.get(key);
+      if (value is int) return value;
+      if (value is double) return value.toInt();
+      if (value is String) return int.tryParse(value) ?? defaultValue;
+      return defaultValue;
+    } catch (_) {
+      return defaultValue;
+    }
+  }
+
   LastReadPosition? _getCachedLastRead() {
-    final jsonStr = sharedPreferences.getString(_lastReadKey);
+    final jsonStr = sharedPreferences.getString(SettingsKeys.quranLastRead);
     if (jsonStr == null) return null;
     try {
       final Map<String, dynamic> data = json.decode(jsonStr);
@@ -88,9 +109,10 @@ class QuranRepositoryImpl implements QuranRepository {
       final cached = await localSource.getCachedSurahDetail(number.value);
       if (cached != null &&
           cached.ayahs.isNotEmpty &&
-          cached.ayahs.length == cached.numberOfAyahs) {
+          cached.ayahs.length >= cached.numberOfAyahs) {
         return Result.success(cached);
       }
+
       final surahModel = await remoteSource.getSurahDetail(number.value);
       final verses = await remoteSource.getSurahVerses(number.value);
       final sortedAyahs = verses.map((v) => v.toDomain(number.value)).toList()
@@ -101,8 +123,10 @@ class QuranRepositoryImpl implements QuranRepository {
       final surah = surahModel.toDomain().copyWith(ayahs: sortedAyahs);
       await localSource.cacheSurahDetail(surah);
       return Result.success(surah);
+    } on Failure catch (e) {
+      return Result.failure(e);
     } catch (e) {
-      return Result.failure(const UnknownFailure());
+      return Result.failure(UnknownFailure(e.toString()));
     }
   }
 
@@ -146,7 +170,7 @@ class QuranRepositoryImpl implements QuranRepository {
         'ayah': position.ayahNumber.ayahNumberInSurah,
         'updatedAt': position.updatedAt.toIso8601String(),
       });
-      await sharedPreferences.setString(_lastReadKey, jsonStr);
+      await sharedPreferences.setString(SettingsKeys.quranLastRead, jsonStr);
       _lastReadController.add(Result.success(position));
       return Result.success(null);
     } catch (e) {
@@ -156,34 +180,34 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   Future<int> getReaderSeparator() async {
-    return sharedPreferences.getInt(_separatorKey) ?? 0;
+    return _readInt(SettingsKeys.quranReaderSeparator, 0);
   }
 
   @override
   Future<void> updateReaderSeparator(int separatorIndex) async {
-    await sharedPreferences.setInt(_separatorKey, separatorIndex);
+    await sharedPreferences.setInt(SettingsKeys.quranReaderSeparator, separatorIndex);
   }
 
   @override
   Future<double> getTextScale() async {
-    return sharedPreferences.getDouble(_textScaleKey) ?? 1.0;
+    return _readDouble(SettingsKeys.quranTextScale, 1.0);
   }
 
   @override
   Future<void> updateTextScale(double scale) async {
-    await sharedPreferences.setDouble(_textScaleKey, scale);
+    await sharedPreferences.setDouble(SettingsKeys.quranTextScale, scale);
   }
 
   @override
   Future<String> getFontFamily() async {
-    final saved = sharedPreferences.getString(_fontFamilyKey) ?? QuranFonts.defaultFont;
+    final saved = sharedPreferences.getString(SettingsKeys.quranFontFamily) ?? QuranFonts.defaultFont;
     // Validate against whitelist - auto-fix any invalid stored values
     return QuranFonts.safeFont(saved);
   }
 
   @override
   Future<void> updateFontFamily(String fontFamily) async {
-    await sharedPreferences.setString(_fontFamilyKey, fontFamily);
+    await sharedPreferences.setString(SettingsKeys.quranFontFamily, fontFamily);
   }
 
   @override
@@ -201,6 +225,19 @@ class QuranRepositoryImpl implements QuranRepository {
       return Result.success(tafsir);
     } catch (e) {
       return Result.failure(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<void> clearCache() async {
+    await localSource.clearCache();
+  }
+
+  @override
+  void refresh() {
+    final current = _getCachedLastRead();
+    if (current != null) {
+      _lastReadController.add(Result.success(current));
     }
   }
 
@@ -283,5 +320,21 @@ class QuranRepositoryImpl implements QuranRepository {
     } catch (_) {
       return 0.0;
     }
+  }
+
+  @override
+  Future<Set<int>> getDownloadedTextSurahIds() async {
+    final Set<int> downloadedIds = {};
+    try {
+      for (int i = 1; i <= 114; i++) {
+        final cached = await localSource.getCachedSurahDetail(i);
+        if (cached != null &&
+            cached.ayahs.isNotEmpty &&
+            cached.ayahs.length == cached.numberOfAyahs) {
+          downloadedIds.add(i);
+        }
+      }
+    } catch (_) {}
+    return downloadedIds;
   }
 }

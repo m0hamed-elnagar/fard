@@ -55,24 +55,6 @@ class TafsirInfo {
       languageName: "arabic",
     ),
     TafsirInfo(
-      id: 171,
-      name: "تفسير المنتخب",
-      authorName: "لجنة علماء بالأزهر",
-      languageName: "arabic",
-    ),
-    TafsirInfo(
-      id: 161,
-      name: "المختصر في تفسير القرآن الكريم",
-      authorName: "جماعة من العلماء",
-      languageName: "arabic",
-    ),
-    TafsirInfo(
-      id: 48,
-      name: "في ظلال القرآن",
-      authorName: "سيد قطب",
-      languageName: "arabic",
-    ),
-    TafsirInfo(
       id: 169,
       name: "Ibn Kathir (Abridged)",
       authorName: "Hafiz Ibn Kathir",
@@ -82,6 +64,12 @@ class TafsirInfo {
       id: 168,
       name: "Ma'arif al-Qur'an",
       authorName: "Mufti Muhammad Shafi",
+      languageName: "english",
+    ),
+    TafsirInfo(
+      id: 817,
+      name: "Tazkirul Quran",
+      authorName: "Maulana Wahiduddin Khan",
       languageName: "english",
     ),
   ];

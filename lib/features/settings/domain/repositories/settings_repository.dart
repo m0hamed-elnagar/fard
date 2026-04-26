@@ -223,5 +223,13 @@ abstract interface class SettingsRepository {
 
   /// Update Salawat reminder end time
   Future<void> updateSalawatEndTime(String time);
+
+  // ==================== BACKUP / RESTORE ====================
+
+  /// Get all settings as a key-value map for backup
+  Map<String, dynamic> getAllSettings();
+
+  /// Import all settings from a map
+  Future<void> importSettings(Map<String, dynamic> settings);
 }
 

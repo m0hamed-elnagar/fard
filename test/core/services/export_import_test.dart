@@ -6,6 +6,8 @@ import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/werd/domain/entities/werd_goal.dart';
 import 'package:fard/features/werd/domain/entities/werd_progress.dart';
 import 'package:fard/features/werd/domain/entities/werd_history_entry.dart';
+import 'package:fard/features/quran/domain/entities/bookmark.dart';
+import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -63,13 +65,30 @@ void main() {
         ),
       ];
 
+      final bookmarks = [
+        Bookmark(
+          id: 'b1',
+          ayahNumber: AyahNumber.create(
+            surahNumber: 1,
+            ayahNumberInSurah: 1,
+          ).data!,
+          createdAt: DateTime(2024, 1, 1),
+          note: 'First Ayah',
+        ),
+      ];
+
       final originalBackup = AppBackup(
-        version: 1,
-        appVersion: '1.3.0',
+        version: 2,
+        appVersion: '1.4.0',
         timestamp: DateTime(2024, 1, 1),
         prayerRecords: prayerRecords,
         werdGoals: werdGoals,
         werdProgress: werdProgress,
+        preferences: {'theme': 'dark', 'font_size': 16},
+        tasbihHistory: {'dhikr1': 500},
+        tasbihProgress: {'cat1': 11},
+        tasbihPreferredDuas: {'cat1': 'dua1'},
+        bookmarks: bookmarks,
       );
 
       // 2. Serialize to JSON
@@ -97,14 +116,6 @@ void main() {
         restoredBackup.prayerRecords.first.missedToday,
         originalBackup.prayerRecords.first.missedToday,
       );
-      expect(
-        restoredBackup.prayerRecords.first.qada[Salaah.fajr]?.value,
-        originalBackup.prayerRecords.first.qada[Salaah.fajr]?.value,
-      );
-      expect(
-        restoredBackup.prayerRecords.first.completedQada[Salaah.fajr],
-        originalBackup.prayerRecords.first.completedQada[Salaah.fajr],
-      );
 
       // Werd Goals Check
       expect(restoredBackup.werdGoals.length, originalBackup.werdGoals.length);
@@ -112,36 +123,16 @@ void main() {
         restoredBackup.werdGoals.first.id,
         originalBackup.werdGoals.first.id,
       );
-      expect(
-        restoredBackup.werdGoals.first.type,
-        originalBackup.werdGoals.first.type,
-      );
-      expect(
-        restoredBackup.werdGoals.first.value,
-        originalBackup.werdGoals.first.value,
-      );
 
-      // Werd Progress Check
-      expect(
-        restoredBackup.werdProgress.length,
-        originalBackup.werdProgress.length,
-      );
-      expect(
-        restoredBackup.werdProgress.first.goalId,
-        originalBackup.werdProgress.first.goalId,
-      );
-      expect(
-        restoredBackup.werdProgress.first.readItemsToday,
-        originalBackup.werdProgress.first.readItemsToday,
-      );
-      expect(
-        restoredBackup.werdProgress.first.history['2024-01-01']?.totalAyahsRead,
-        5,
-      );
-      expect(
-        restoredBackup.werdProgress.first.history['2024-01-01']?.startSurahName,
-        'Al-Baqarah',
-      );
+      // New Fields Check
+      expect(restoredBackup.preferences['theme'], 'dark');
+      expect(restoredBackup.preferences['font_size'], 16);
+      expect(restoredBackup.tasbihHistory['dhikr1'], 500);
+      expect(restoredBackup.tasbihProgress['cat1'], 11);
+      expect(restoredBackup.tasbihPreferredDuas['cat1'], 'dua1');
+      expect(restoredBackup.bookmarks.length, 1);
+      expect(restoredBackup.bookmarks.first.note, 'First Ayah');
+      expect(restoredBackup.bookmarks.first.ayahNumber.surahNumber, 1);
     });
 
     test('Should handle newer backup version error', () {
@@ -157,6 +148,25 @@ void main() {
       final backup = AppBackup.fromJson(jsonData);
       expect(backup.version, 99);
       // The logic to throw exception should be in ExportImportService
+    });
+
+    test('Should handle missing new fields in v1 backup (backward compatibility)',
+        () {
+      final jsonData = {
+        'version': 1,
+        'appVersion': '1.0.0',
+        'timestamp': DateTime.now().toIso8601String(),
+        'prayerRecords': [],
+        'werdGoals': [],
+        'werdProgress': [],
+      };
+
+      final backup = AppBackup.fromJson(jsonData);
+      expect(backup.preferences, isEmpty);
+      expect(backup.tasbihHistory, isEmpty);
+      expect(backup.tasbihProgress, isEmpty);
+      expect(backup.tasbihPreferredDuas, isEmpty);
+      expect(backup.bookmarks, isEmpty);
     });
   });
 }

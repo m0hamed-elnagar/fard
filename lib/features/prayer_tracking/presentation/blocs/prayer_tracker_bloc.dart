@@ -35,6 +35,7 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
            notificationService ?? getIt<NotificationService>(),
        super(const PrayerTrackerState.loading()) {
     on<_Load>(_onLoad, transformer: sequential());
+    on<_Reload>(_onReload, transformer: sequential());
     on<_TogglePrayer>(_onTogglePrayer, transformer: sequential());
     on<_AddQada>(_onAddQada, transformer: sequential());
     on<_RemoveQada>(_onRemoveQada, transformer: sequential());
@@ -210,6 +211,11 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
       await _repo.saveToday(updatedRecord);
       runningNewPrev = updatedRecord;
     }
+  }
+
+  Future<void> _onReload(_Reload e, Emitter<PrayerTrackerState> em) async {
+    em(const PrayerTrackerState.loading());
+    add(PrayerTrackerEvent.load(e.date));
   }
 
   Future<void> _onLoad(_Load e, Emitter<PrayerTrackerState> em) async {

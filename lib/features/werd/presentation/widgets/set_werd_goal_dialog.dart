@@ -96,10 +96,12 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
     if (_startPointType == 1) {
       final lastRead = context.read<QuranBloc>().state.lastReadPosition;
       if (lastRead != null) {
-        return QuranHizbProvider.getAbsoluteAyahNumber(
+        final lastAbs = QuranHizbProvider.getAbsoluteAyahNumber(
           lastRead.ayahNumber.surahNumber,
           lastRead.ayahNumber.ayahNumberInSurah,
         );
+        // FIX: Suggest the NEXT ayah, not the one already read
+        return (lastAbs + 1 > 6236) ? 1 : lastAbs + 1;
       }
       return 1;
     }
@@ -356,7 +358,11 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
                 }).toList(),
                 onChanged: (v) => setState(() {
                   _selectedSurah = v ?? 1;
-                  _selectedAyah = 1;
+                  // Ensure selected ayah is still valid for the new surah
+                  final maxAyahs = quran.getVerseCount(_selectedSurah);
+                  if (_selectedAyah > maxAyahs) {
+                    _selectedAyah = 1;
+                  }
                 }),
               ),
             ),

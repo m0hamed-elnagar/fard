@@ -3,6 +3,7 @@ part of 'prayer_tracker_bloc.dart';
 @freezed
 class PrayerTrackerEvent with _$PrayerTrackerEvent {
   const factory PrayerTrackerEvent.load(DateTime date) = _Load;
+  const factory PrayerTrackerEvent.reload(DateTime date) = _Reload;
   const factory PrayerTrackerEvent.togglePrayer(Salaah prayer) = _TogglePrayer;
   const factory PrayerTrackerEvent.addQada(Salaah prayer) = _AddQada;
   const factory PrayerTrackerEvent.removeQada(Salaah prayer) = _RemoveQada;

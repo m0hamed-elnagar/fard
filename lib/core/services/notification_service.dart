@@ -19,7 +19,7 @@ import 'notification/prayer_scheduler.dart';
 import 'notification/sound_manager.dart';
 import 'widget_update_service.dart';
 
-@singleton
+@lazySingleton
 class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin;
   final SoundManager _soundManager;

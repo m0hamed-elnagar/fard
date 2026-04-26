@@ -2,8 +2,10 @@ part of 'reader_bloc.dart';
 
 @freezed
 class ReaderEvent with _$ReaderEvent {
-  const factory ReaderEvent.loadSurah({required SurahNumber surahNumber}) =
-      _LoadSurah;
+  const factory ReaderEvent.loadSurah({
+    required SurahNumber surahNumber,
+    int? initialAyahNumber,
+  }) = _LoadSurah;
   const factory ReaderEvent.selectAyah(Ayah ayah) = _SelectAyah;
   const factory ReaderEvent.saveLastRead(Ayah ayah) = _SaveLastRead;
   const factory ReaderEvent.updateScale(double scale) = _UpdateScale;

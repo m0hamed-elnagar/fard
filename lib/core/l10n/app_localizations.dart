@@ -1736,6 +1736,12 @@ abstract class AppLocalizations {
   /// **'Download Center'**
   String get downloadCenterBtn;
 
+  /// No description provided for @noInternetConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection'**
+  String get noInternetConnection;
+
   /// No description provided for @offlineModeBanner.
   ///
   /// In en, this message translates to:

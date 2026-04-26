@@ -43,4 +43,10 @@ abstract final class SettingsKeys {
   static const String salawatFrequencyHours = 'salawat_frequency_hours';
   static const String salawatStartTime = 'salawat_start_time';
   static const String salawatEndTime = 'salawat_end_time';
+
+  // Quran Reader
+  static const String quranLastRead = 'last_read_position';
+  static const String quranReaderSeparator = 'reader_separator_choice';
+  static const String quranTextScale = 'reader_text_scale';
+  static const String quranFontFamily = 'reader_font_family';
 }

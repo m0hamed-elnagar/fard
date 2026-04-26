@@ -891,6 +891,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get downloadCenterBtn => 'Download Center';
 
   @override
+  String get noInternetConnection => 'No internet connection';
+
+  @override
   String get offlineModeBanner =>
       'You are currently offline. Only downloaded content is available.';
 

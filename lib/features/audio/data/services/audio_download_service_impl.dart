@@ -299,24 +299,41 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
   @override
   Future<SurahDownloadStatus> getSurahStatus({required String reciterId, required int surahNumber}) async {
     final entries = await _manifestService.getEntriesBySurah(reciterId, surahNumber);
-    if (entries.isEmpty) return _syncManifestForSurah(reciterId, surahNumber);
-    int downloaded = 0;
+    
+    // Robust check: If manifest is empty OR if manifest says it's not downloaded but files might exist
+    // we sync to ensure accuracy.
+    if (entries.isEmpty) {
+      return _syncManifestForSurah(reciterId, surahNumber);
+    }
+    
+    int downloadedCount = 0;
     int size = 0;
     for (final entry in entries) {
       if (entry.status == DownloadStatus.completed) {
-        downloaded++;
+        downloadedCount++;
         size += entry.expectedSize;
       }
     }
+    
+    final totalAyahs = _audioRepository.getAyahCount(surahNumber);
+    final isDownloaded = downloadedCount >= totalAyahs && totalAyahs > 0;
+
+    // One more check: if manifest says not downloaded but we have the files, fix it.
+    if (!isDownloaded) {
+      final syncStatus = await _syncManifestForSurah(reciterId, surahNumber);
+      if (syncStatus.isDownloaded) return syncStatus;
+    }
+
     final isDownloading = _activeDownloads.contains('${reciterId}_$surahNumber');
     final isStopping = isDownloading && (_cancellationFlags[reciterId]?.contains(surahNumber) ?? false);
+    
     return SurahDownloadStatus(
-      isDownloaded: downloaded == entries.length && entries.isNotEmpty,
+      isDownloaded: isDownloaded,
       isDownloading: isDownloading && !isStopping,
       isStopping: isStopping,
       sizeInBytes: size,
-      downloadedAyahs: downloaded,
-      totalAyahs: entries.length,
+      downloadedAyahs: downloadedCount,
+      totalAyahs: totalAyahs,
     );
   }
 
@@ -427,16 +444,67 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
   @override
   Future<Set<int>> getDownloadedSurahIdsForReciter(String reciterId) async {
     final entries = await _manifestService.getEntriesByReciter(reciterId);
-    if (entries.isEmpty) return {};
-    final Map<int, Set<int>> surahAyahs = {};
+    final Map<int, Set<int>> incompleteManifestAyahs = {};
+    final Map<int, Set<int>> completeManifestAyahs = {};
+
     for (final entry in entries) {
       if (entry.surahNumber == null || entry.ayahNumber == null) continue;
-      if (entry.status == DownloadStatus.completed) surahAyahs.putIfAbsent(entry.surahNumber!, () => {}).add(entry.ayahNumber!);
+      if (entry.status == DownloadStatus.completed) {
+        completeManifestAyahs.putIfAbsent(entry.surahNumber!, () => {}).add(entry.ayahNumber!);
+      } else {
+        incompleteManifestAyahs.putIfAbsent(entry.surahNumber!, () => {}).add(entry.ayahNumber!);
+      }
     }
+
+    final directory = await getApplicationSupportDirectory();
+    final dir = Directory('${directory.path}/audio/$reciterId');
+    final Map<int, Set<int>> fileSystemAyahs = {};
+
+    if (await dir.exists()) {
+      try {
+        final files = await dir.list().toList();
+        for (final file in files) {
+          if (file is File && file.path.endsWith('.mp3')) {
+            final name = file.uri.pathSegments.last.replaceAll('.mp3', '');
+            if (name.length == 6) {
+              final surahNum = int.tryParse(name.substring(0, 3));
+              final ayahNum = int.tryParse(name.substring(3, 6));
+              if (surahNum != null && ayahNum != null) {
+                fileSystemAyahs.putIfAbsent(surahNum, () => {}).add(ayahNum);
+              }
+            }
+          }
+        }
+      } catch (e) {
+        // Fallback to manifest if filesystem check fails
+      }
+    }
+
     final downloadedSurahs = <int>{};
-    surahAyahs.forEach((surahNum, ayahs) {
-      if (ayahs.length >= _audioRepository.getAyahCount(surahNum)) downloadedSurahs.add(surahNum);
-    });
+    
+    // Check all surahs from 1 to 114
+    for (int surahNum = 1; surahNum <= 114; surahNum++) {
+      final expectedCount = _audioRepository.getAyahCount(surahNum);
+      if (expectedCount == 0) continue;
+
+      int validCount = 0;
+      for (int ayahNum = 1; ayahNum <= expectedCount; ayahNum++) {
+        final isCompleteInManifest = completeManifestAyahs[surahNum]?.contains(ayahNum) == true;
+        final isIncompleteInManifest = incompleteManifestAyahs[surahNum]?.contains(ayahNum) == true;
+        final existsOnDisk = fileSystemAyahs[surahNum]?.contains(ayahNum) == true;
+
+        if (isCompleteInManifest) {
+          validCount++;
+        } else if (existsOnDisk && !isIncompleteInManifest) {
+          validCount++;
+        }
+      }
+
+      if (validCount >= expectedCount) {
+        downloadedSurahs.add(surahNum);
+      }
+    }
+
     return downloadedSurahs;
   }
 

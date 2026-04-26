@@ -107,7 +107,26 @@ class SettingsStorage {
     }
   }
 
+  // ==================== String List ====================
+
+  List<String> readStringList(String key, {List<String>? defaultValue}) {
+    return _prefs.getStringList(key) ?? defaultValue ?? [];
+  }
+
+  Future<bool> writeStringList(String key, List<String> value) async {
+    try {
+      return await _prefs.setStringList(key, value);
+    } catch (e) {
+      debugPrint('SettingsStorage: Failed to write string list [$key]: $e');
+      return false;
+    }
+  }
+
   // ==================== Raw Access (for edge cases) ====================
 
   SharedPreferences get prefs => _prefs;
+
+  Set<String> getKeys() => _prefs.getKeys();
+
+  Object? read(String key) => _prefs.get(key);
 }

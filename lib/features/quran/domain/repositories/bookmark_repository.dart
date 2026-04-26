@@ -9,4 +9,9 @@ abstract interface class BookmarkRepository {
   Future<Result<void>> removeBookmark(AyahNumber ayahNumber);
   Future<Result<void>> clearAllBookmarks();
   Future<Result<bool>> isBookmarked(AyahNumber ayahNumber);
+
+  // ==================== BACKUP / RESTORE ====================
+
+  /// Import bookmarks from a list
+  Future<Result<void>> importBookmarks(List<Bookmark> bookmarks);
 }

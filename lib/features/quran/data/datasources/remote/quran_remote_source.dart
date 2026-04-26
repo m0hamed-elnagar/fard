@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:fard/features/quran/data/models/surah_model.dart';
 import 'package:fard/features/quran/data/models/ayah_model.dart';
@@ -24,32 +26,48 @@ class QuranRemoteSourceImpl implements QuranRemoteSource {
 
   @override
   Future<List<SurahModel>> getAllSurahs() async {
-    final response = await client.get(
-      Uri.parse('$baseUrl/chapters'),
-      headers: {'Accept': 'application/json'},
-    );
+    try {
+      final response = await client.get(
+        Uri.parse('$baseUrl/chapters'),
+        headers: {'Accept': 'application/json'},
+      ).timeout(const Duration(seconds: 30));
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final List chapters = data['chapters'];
-      return chapters.map((json) => SurahModel.fromJson(json)).toList();
-    } else {
-      throw ServerFailure();
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List chapters = data['chapters'];
+        return chapters.map((json) => SurahModel.fromJson(json)).toList();
+      } else {
+        throw ServerFailure('Failed to load surahs: ${response.statusCode}');
+      }
+    } on SocketException {
+      throw const NoInternetFailure();
+    } on TimeoutException {
+      throw const ServerFailure('Connection timed out');
+    } catch (e) {
+      throw ServerFailure(e.toString());
     }
   }
 
   @override
   Future<SurahModel> getSurahDetail(int surahNumber) async {
-    final response = await client.get(
-      Uri.parse('$baseUrl/chapters/$surahNumber'),
-      headers: {'Accept': 'application/json'},
-    );
+    try {
+      final response = await client.get(
+        Uri.parse('$baseUrl/chapters/$surahNumber'),
+        headers: {'Accept': 'application/json'},
+      ).timeout(const Duration(seconds: 30));
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return SurahModel.fromJson(data['chapter']);
-    } else {
-      throw ServerFailure();
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return SurahModel.fromJson(data['chapter']);
+      } else {
+        throw ServerFailure('Failed to load surah details: ${response.statusCode}');
+      }
+    } on SocketException {
+      throw const NoInternetFailure();
+    } on TimeoutException {
+      throw const ServerFailure('Connection timed out');
+    } catch (e) {
+      throw ServerFailure(e.toString());
     }
   }
 
@@ -69,21 +87,45 @@ class QuranRemoteSourceImpl implements QuranRemoteSource {
       'juz_number',
     ].join(',');
 
-    // Using audio=7 (Alafasy) as default for better reliability
-    final response = await client.get(
-      Uri.parse(
-        '$baseUrl/verses/by_chapter/$surahNumber?language=en&words=true&fields=$fields&per_page=300&audio=7',
-      ),
-      headers: {'Accept': 'application/json'},
-    );
+    List<AyahModel> allVerses = [];
+    int currentPage = 1;
+    bool hasMore = true;
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final List verses = data['verses'];
-      return verses.map((json) => AyahModel.fromJson(json)).toList();
-    } else {
-      throw ServerFailure();
+    try {
+      while (hasMore) {
+        final response = await client.get(
+          Uri.parse(
+            '$baseUrl/verses/by_chapter/$surahNumber?language=en&words=true&fields=$fields&per_page=50&page=$currentPage&audio=7',
+          ),
+          headers: {'Accept': 'application/json'},
+        ).timeout(const Duration(seconds: 60));
+
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          final List versesJson = data['verses'];
+          final List<AyahModel> verses =
+              versesJson.map((json) => AyahModel.fromJson(json)).toList();
+          allVerses.addAll(verses);
+
+          final pagination = data['pagination'];
+          if (pagination != null && pagination['next_page'] != null) {
+            currentPage = pagination['next_page'];
+          } else {
+            hasMore = false;
+          }
+        } else {
+          throw ServerFailure('Failed to load verses: ${response.statusCode}');
+        }
+      }
+    } on SocketException {
+      throw const NoInternetFailure();
+    } on TimeoutException {
+      throw const ServerFailure('Connection timed out while downloading verses');
+    } catch (e) {
+      throw ServerFailure(e.toString());
     }
+
+    return allVerses;
   }
 
   @override
@@ -93,19 +135,27 @@ class QuranRemoteSourceImpl implements QuranRemoteSource {
     int? tafsirId,
   }) async {
     final id = tafsirId ?? 16;
-    final response = await client.get(
-      Uri.parse('$baseUrl/tafsirs/$id/by_ayah/$surahNumber:$ayahNumber'),
-      headers: {'Accept': 'application/json'},
-    );
+    try {
+      final response = await client.get(
+        Uri.parse('$baseUrl/tafsirs/$id/by_ayah/$surahNumber:$ayahNumber'),
+        headers: {'Accept': 'application/json'},
+      ).timeout(const Duration(seconds: 30));
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      if (data['tafsir'] != null && data['tafsir']['text'] != null) {
-        return data['tafsir']['text'] as String;
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['tafsir'] != null && data['tafsir']['text'] != null) {
+          return data['tafsir']['text'] as String;
+        }
+        return 'لا يوجد تفسير متاح حالياً';
+      } else {
+        throw ServerFailure('Failed to load Tafsir: ${response.statusCode}');
       }
-      return 'لا يوجد تفسير متاح حالياً';
-    } else {
-      throw ServerFailure('Failed to load Tafsir: ${response.statusCode}');
+    } on SocketException {
+      return 'لا يوجد اتصال بالإنترنت لتحميل التفسير';
+    } on TimeoutException {
+      return 'انتهت مهلة الاتصال أثناء تحميل التفسير';
+    } catch (e) {
+      return 'فشل تحميل التفسير: $e';
     }
   }
 }

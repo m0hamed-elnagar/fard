@@ -26,9 +26,15 @@ abstract interface class QuranRepository {
     int ayahNumber, {
     int? tafsirId,
   });
+
+  // Data management
+  Future<void> clearCache();
+  void refresh();
+
   Stream<double> downloadAllSurahs();
   Future<void> cancelTextDownload();
   Future<double> getTextDownloadProgress();
+  Future<Set<int>> getDownloadedTextSurahIds();
 }
 
 class SearchResult extends Equatable {

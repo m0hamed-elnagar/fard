@@ -13,7 +13,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+
 class MockWerdBloc extends MockBloc<WerdEvent, WerdState> implements WerdBloc {}
+
+class MockSettingsCubit extends MockBloc<dynamic, SettingsState> implements SettingsCubit {}
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 
@@ -21,6 +26,7 @@ class FakeRoute extends Fake implements Route<dynamic> {}
 
 void main() {
   late MockWerdBloc mockWerdBloc;
+  late MockSettingsCubit mockSettingsCubit;
   late MockNavigatorObserver mockNavigatorObserver;
 
   setUpAll(() async {
@@ -30,11 +36,22 @@ void main() {
 
   setUp(() {
     mockWerdBloc = MockWerdBloc();
+    mockSettingsCubit = MockSettingsCubit();
     mockNavigatorObserver = MockNavigatorObserver();
     registerFallbackValue(FakeRoute());
+
+    // Mock Settings state
+    when(() => mockSettingsCubit.state).thenReturn(
+      SettingsState(locale: const Locale('en')),
+    );
   });
 
   Widget createWidgetUnderTest({Locale locale = const Locale('en')}) {
+    // Update settings state to match requested locale
+    when(() => mockSettingsCubit.state).thenReturn(
+      SettingsState(locale: locale),
+    );
+
     return MaterialApp(
       locale: locale,
       supportedLocales: const [Locale('en'), Locale('ar')],
@@ -45,8 +62,11 @@ void main() {
       ],
       navigatorObservers: [mockNavigatorObserver],
       home: Scaffold(
-        body: BlocProvider<WerdBloc>.value(
-          value: mockWerdBloc,
+        body: MultiBlocProvider(
+          providers: [
+            BlocProvider<WerdBloc>.value(value: mockWerdBloc),
+            BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
+          ],
           child: WerdProgressCard(onSetGoalPressed: () {}),
         ),
       ),
@@ -55,6 +75,14 @@ void main() {
 
   group('WerdProgressCard No Goal State', () {
     testWidgets('shows set goal CTA when no goal is set', (tester) async {
+      // Set a larger surface size to avoid overflows in tests
+      tester.view.physicalSize = const Size(1200, 1000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
       when(() => mockWerdBloc.state).thenReturn(WerdState());
 
       await tester.pumpWidget(createWidgetUnderTest());

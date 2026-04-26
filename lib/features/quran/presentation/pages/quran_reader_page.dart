@@ -56,7 +56,6 @@ class QuranReaderPage extends StatefulWidget {
 
 class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingObserver {
   late final ReaderScrollController _scrollController;
-  bool _hasHandledInitialAyah = false;
   bool _hasHandledPlayOnLoad = false;
   bool _hasShownCycleCompletionDialog = false;
 
@@ -110,7 +109,12 @@ class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingOb
           create: (context) {
             final surahNumResult = SurahNumber.create(widget.surahNumber);
             return getIt<ReaderBloc>()
-              ..add(ReaderEvent.loadSurah(surahNumber: surahNumResult.data!));
+              ..add(
+                ReaderEvent.loadSurah(
+                  surahNumber: surahNumResult.data!,
+                  initialAyahNumber: widget.initialAyahNumber,
+                ),
+              );
           },
         ),
       ],
@@ -151,24 +155,8 @@ class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingOb
                               // Generate keys for all ayahs if not already done
                               _scrollController.generateKeys(s.surah.ayahs);
 
-                              if (!_hasHandledInitialAyah &&
-                                  widget.initialAyahNumber != null) {
-                                _hasHandledInitialAyah = true;
-                                try {
-                                  final ayah = s.surah.ayahs.firstWhere(
-                                    (a) =>
-                                        a.number.ayahNumberInSurah ==
-                                        widget.initialAyahNumber,
-                                  );
-                                  context.read<ReaderBloc>().add(
-                                    ReaderEvent.selectAyah(ayah),
-                                  );
-                                  _scrollController.scrollToAyah(
-                                    widget.initialAyahNumber!,
-                                  );
-                                } catch (_) {}
-                              } else if (s.highlightedAyah != null) {
-                                // If highlight changed (e.g. from navigation elsewhere), scroll to it
+                              if (s.highlightedAyah != null) {
+                                // Scroll to highlighted ayah (initial or changed)
                                 _scrollController.scrollToAyah(
                                   s.highlightedAyah!.number.ayahNumberInSurah,
                                 );
@@ -313,6 +301,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingOb
                                           );
                                         }
                                       : null,
+                                  surahNumber: widget.surahNumber,
                                 );
                               },
                             ),

@@ -57,7 +57,7 @@ class ConnectivityBloc extends Bloc<ConnectivityEvent, ConnectivityState> {
 
   void _onConnectivityChanged(
       ConnectivityChanged event, Emitter<ConnectivityState> emit) async {
-    final isConnected = await _connectivityService.hasInternet();
+    final isConnected = await _connectivityService.hasNetwork();
     emit(ConnectivityStatus(isConnected));
   }
 }

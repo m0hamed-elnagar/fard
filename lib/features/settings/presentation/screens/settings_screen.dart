@@ -1961,7 +1961,8 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
                   );
                   context.read<WerdBloc>().add(const WerdEvent.load());
                   final prayerBloc = context.read<PrayerTrackerBloc>();
-                  prayerBloc.add(PrayerTrackerEvent.load(DateTime.now()));
+                  prayerBloc.add(PrayerTrackerEvent.reload(DateTime.now()));
+                  context.read<SettingsCubit>().refresh();
                 }
               } catch (e) {
                 if (context.mounted) {
