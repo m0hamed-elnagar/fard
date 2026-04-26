@@ -1560,4 +1560,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enable => 'Enable';
+
+  @override
+  String get remindersNotifications => 'Reminders & Notifications';
+
+  @override
+  String get werdReminder => 'Daily Werd Reminder';
+
+  @override
+  String get werdReminderDesc => 'Reminder to read your daily Quran portion.';
+
+  @override
+  String get salawatReminder => 'Periodic Salawat Reminders';
+
+  @override
+  String get salawatReminderDesc =>
+      'Reminders to send salutations upon the Prophet (PBUH).';
+
+  @override
+  String get frequency => 'Frequency';
+
+  @override
+  String everyHour(int count) {
+    return 'Every $count hours';
+  }
+
+  @override
+  String get startTime => 'Start Time';
+
+  @override
+  String get endTime => 'End Time';
+
+  @override
+  String get activeWindow => 'Active Window';
+
+  @override
+  String get activeWindowDesc =>
+      'Reminders will only be sent during this period.';
+
+  @override
+  String get reminderType => 'Reminder Type';
+
+  @override
+  String get beforeAzan => 'Before Azan';
+
+  @override
+  String get afterAzan => 'After Azan';
+
+  @override
+  String get offset => 'Offset';
 }

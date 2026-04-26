@@ -15,6 +15,7 @@ import 'package:fard/features/settings/domain/usecases/apply_theme_preset.dart';
 import 'package:fard/features/settings/domain/usecases/save_custom_theme.dart';
 import 'package:fard/features/settings/domain/usecases/get_available_theme_presets.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
+import 'package:fard/features/settings/domain/prayer_reminder_type.dart';
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -94,7 +95,8 @@ void main() {
     when(() => mockSettingsRepo.isAudioPlayerExpanded).thenReturn(false);
     when(() => mockSettingsRepo.isSalahReminderEnabled).thenReturn(false);
     when(() => mockSettingsRepo.salahReminderOffsetMinutes).thenReturn(0);
-    when(() => mockSettingsRepo.enabledSalahReminders).thenReturn([]);
+    when(() => mockSettingsRepo.prayerReminderType).thenReturn(PrayerReminderType.after);
+    when(() => mockSettingsRepo.enabledSalahReminders).thenReturn(<Salaah>{});
     when(() => mockSettingsRepo.isWerdReminderEnabled).thenReturn(false);
     when(() => mockSettingsRepo.werdReminderTime).thenReturn('04:00');
     when(() => mockSettingsRepo.isSalawatReminderEnabled).thenReturn(false);
@@ -436,7 +438,7 @@ void main() {
 
           // 3. Verify master is now ON
           expect(cubit.state.isSalahReminderEnabled, true);
-          expect(cubit.state.enabledSalahReminders, contains(Salaah.fajr.name));
+          expect(cubit.state.enabledSalahReminders, contains(Salaah.fajr));
 
           // 4. Verify repository was updated for both
           verify(() => mockSettingsRepo.updateSalahReminderEnabled(true))

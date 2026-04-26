@@ -4,6 +4,8 @@ import '../../domain/azkar_reminder.dart';
 import '../../domain/entities/custom_theme.dart';
 import '../../domain/salaah_settings.dart';
 import '../../../audio/domain/repositories/audio_repository.dart';
+import '../../../prayer_tracking/domain/salaah.dart';
+import '../prayer_reminder_type.dart';
 
 /// Repository interface for managing app settings persistence.
 ///
@@ -81,8 +83,11 @@ abstract interface class SettingsRepository {
   /// Minutes after Azan for post-prayer reminder
   int get salahReminderOffsetMinutes;
 
-  /// List of prayer names (IDs) that have post-prayer reminders enabled
-  List<String> get enabledSalahReminders;
+  /// Type of prayer reminder (before/after)
+  PrayerReminderType get prayerReminderType;
+
+  /// Set of prayers that have reminders enabled
+  Set<Salaah> get enabledSalahReminders;
 
   /// Whether daily Werd reminder is enabled
   bool get isWerdReminderEnabled;
@@ -195,8 +200,11 @@ abstract interface class SettingsRepository {
   /// Update post-prayer reminder offset minutes
   Future<void> updateSalahReminderOffset(int minutes);
 
+  /// Update prayer reminder type
+  Future<void> updatePrayerReminderType(PrayerReminderType type);
+
   /// Update the list of enabled post-prayer reminders
-  Future<void> updateEnabledSalahReminders(List<String> enabledSalahs);
+  Future<void> updateEnabledSalahReminders(Set<Salaah> enabledSalahs);
 
   /// Update Werd reminder enabled state
   Future<void> updateWerdReminderEnabled(bool enabled);

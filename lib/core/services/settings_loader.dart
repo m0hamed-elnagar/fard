@@ -7,6 +7,7 @@ import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
+import 'package:fard/features/settings/domain/prayer_reminder_type.dart';
 
 /// Static utility class for loading settings from SharedPreferences.
 /// This is only used during app initialization to create the initial settings.
@@ -19,6 +20,12 @@ class SettingsLoader {
     final audioQuality = AudioQuality.values.firstWhere(
       (e) => e.name == audioQualityStr,
       orElse: () => AudioQuality.low64,
+    );
+
+    final reminderTypeStr = prefs.getString(SettingsKeys.salahReminderType);
+    final reminderType = PrayerReminderType.values.firstWhere(
+      (e) => e.name == reminderTypeStr,
+      orElse: () => PrayerReminderType.after,
     );
 
     return AppSettings(
@@ -52,6 +59,7 @@ class SettingsLoader {
           prefs.getBool(SettingsKeys.isSalahReminderEnabled) ?? false,
       salahReminderOffsetMinutes:
           prefs.getInt(SettingsKeys.salahReminderOffsetMinutes) ?? 15,
+      prayerReminderType: reminderType,
       enabledSalahReminders: _loadEnabledSalahReminders(prefs),
       isWerdReminderEnabled:
           prefs.getBool(SettingsKeys.isWerdReminderEnabled) ?? false,
@@ -66,14 +74,16 @@ class SettingsLoader {
     );
   }
 
-  static List<String> _loadEnabledSalahReminders(SharedPreferences prefs) {
+  static Set<Salaah> _loadEnabledSalahReminders(SharedPreferences prefs) {
     final String? jsonStr = prefs.getString(SettingsKeys.enabledSalahReminders);
-    if (jsonStr == null) return [];
+    if (jsonStr == null) return {};
     try {
       final List<dynamic> decoded = jsonDecode(jsonStr);
-      return decoded.cast<String>();
+      return decoded
+          .map((e) => Salaah.values.firstWhere((s) => s.name == e))
+          .toSet();
     } catch (_) {
-      return [];
+      return {};
     }
   }
 

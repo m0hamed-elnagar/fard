@@ -149,18 +149,31 @@ class NotificationService {
     debugPrint('NotificationService: init complete');
   }
 
+  /// Request only basic notification permissions.
+  /// Useful for first-open or when the user interacts with a toggle.
+  Future<bool> requestNotificationPermission() async {
+    debugPrint('NotificationService: requesting notification permission...');
+    final status = await Permission.notification.request();
+    debugPrint('Notification permission status: $status');
+    return status.isGranted;
+  }
+
   /// Request all required permissions for notifications and exact alarms.
   /// Returns true if all critical permissions are granted.
   Future<bool> requestPermissions() async {
-    if (!Platform.isAndroid) return true;
-
-    debugPrint('NotificationService: requesting Android permissions...');
+    debugPrint('NotificationService: requesting permissions...');
+    
+    // Notification permission is required on both Android 13+ and iOS
     final notificationStatus = await Permission.notification.request();
-    final alarmStatus = await Permission.scheduleExactAlarm.request();
     
-    debugPrint('Permissions result: Notifications=$notificationStatus, Alarms=$alarmStatus');
+    if (Platform.isAndroid) {
+      final alarmStatus = await Permission.scheduleExactAlarm.request();
+      debugPrint('Permissions result: Notifications=$notificationStatus, Alarms=$alarmStatus');
+      return notificationStatus.isGranted && alarmStatus.isGranted;
+    }
     
-    return notificationStatus.isGranted && alarmStatus.isGranted;
+    debugPrint('Permissions result: Notifications=$notificationStatus');
+    return notificationStatus.isGranted;
   }
 
   Future<void> handleInitialNotification() async {
@@ -464,20 +477,26 @@ ${(results['channels'] as List).map((c) => '    • ${c['id']} (${c['importance'
     await _prayerScheduler.scheduleSalawatReminders(_notificationsPlugin);
   }
 
-  Future<void> cancelPostPrayerReminder(Salaah salaah) async {
-    // Current day and next day
-    for (int day = 0; day < 2; day++) {
-      final dayOffset =
-          day * PrayerNotificationScheduler.prayersPerDay + salaah.index;
-      await _notificationsPlugin.cancel(
-        id: PrayerNotificationScheduler.postPrayerReminderIdStart + dayOffset,
-      );
-    }
+  Future<void> cancelPrayerReminder(Salaah salaah, {bool forTodayOnly = true}) async {
+    // Current day only for smart cancellation
+    final dayOffset = salaah.index;
+    
+    // Cancel pre-prayer reminder
+    await _notificationsPlugin.cancel(
+      id: PrayerNotificationScheduler.prayerReminderIdStart + dayOffset,
+    );
+    
+    // Cancel post-prayer reminder
+    await _notificationsPlugin.cancel(
+      id: PrayerNotificationScheduler.postPrayerReminderIdStart + dayOffset,
+    );
   }
 
   Future<void> cancelWerdReminder({bool forTodayOnly = false}) async {
-    // Note: forTodayOnly would require more complex scheduling logic
-    // For now, just cancel the persistent daily notification
+    // If forTodayOnly, we would need to know the specific day's ID
+    // Since werdReminderId is currently a single repeating ID, 
+    // we just cancel it. 
+    // TODO: If we move to non-repeating for rolling window, use day-specific IDs.
     await _notificationsPlugin.cancel(
       id: PrayerNotificationScheduler.werdReminderId,
     );

@@ -642,5 +642,27 @@
   "widgetCustomization": "تخصيص الألوان",
   "notificationsRequiredTitle": "الأذان يحتاج إذن الإشعارات",
   "notificationsRequiredDesc": "لسماع الأذان وتلقي التذكيرات في وقتها، يحتاج التطبيق إلى إذن لعرض الإشعارات وجدولة التنبيهات الدقيقة.",
-  "enable": "تفعيل"
+  "enable": "تفعيل",
+  "remindersNotifications": "التذكيرات والتنبيهات",
+  "werdReminder": "تذكير الورد اليومي",
+  "werdReminderDesc": "تذكير بقراءة وردك اليومي من القرآن الكريم.",
+  "salawatReminder": "تذكير الصلاة على النبي ﷺ",
+  "salawatReminderDesc": "تذكيرات دورية للصلاة على النبي ﷺ خلال اليوم.",
+  "frequency": "التكرار",
+  "everyHour": "كل {count} ساعات",
+  "@everyHour": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "startTime": "وقت البدء",
+  "endTime": "وقت الانتهاء",
+  "activeWindow": "الفترة النشطة",
+  "activeWindowDesc": "سيتم إرسال التذكيرات خلال هذه الفترة فقط.",
+  "reminderType": "نوع التذكير",
+  "beforeAzan": "قبل الأذان",
+  "afterAzan": "بعد الأذان",
+  "offset": "المدة"
 }

@@ -92,6 +92,49 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
     return formatted;
   }
 
+  void _showReminderSnackBar(String title, bool enabled, {String? customMessage}) {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final String status =
+        enabled
+            ? (isAr ? 'مفعل' : 'Enabled')
+            : (isAr ? 'معطل' : 'Disabled');
+
+    final String message = customMessage ?? (enabled ? '$title: $status' : '$title: $status');
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              enabled
+                  ? Icons.notifications_active_rounded
+                  : Icons.notifications_off_rounded,
+              color: context.secondaryColor,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.amiri(
+                  color: context.onSurfaceColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: context.surfaceContainerHighestColor,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<WerdBloc, WerdState>(
@@ -341,12 +384,23 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                   BlocBuilder<SettingsCubit, SettingsState>(
                     builder: (context, settings) {
                       return IconButton(
-                        onPressed:
-                            () => context
-                                .read<SettingsCubit>()
-                                .toggleWerdReminder(
-                                  !settings.isWerdReminderEnabled,
-                                ),
+                        onPressed: () {
+                          final newState = !settings.isWerdReminderEnabled;
+                          context
+                              .read<SettingsCubit>()
+                              .toggleWerdReminder(newState);
+                          _showReminderSnackBar(
+                            isAr ? 'تذكير الورد' : 'Werd Reminder',
+                            newState,
+                            customMessage: newState
+                                ? (isAr
+                                    ? 'سنذكرك بوردك اليومي في الساعة ${settings.werdReminderTime}'
+                                    : 'Daily Werd reminder set for ${settings.werdReminderTime}')
+                                : (isAr
+                                    ? 'تم إيقاف تذكير الورد اليومي'
+                                    : 'Daily Werd reminder disabled'),
+                          );
+                        },
                         visualDensity: VisualDensity.compact,
                         iconSize: 18,
                         padding: EdgeInsets.zero,

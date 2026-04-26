@@ -6,6 +6,7 @@ import '../../../../core/constants/settings_keys.dart';
 import '../../../prayer_tracking/domain/salaah.dart';
 import '../../domain/azkar_reminder.dart';
 import '../../domain/entities/custom_theme.dart';
+import '../../domain/prayer_reminder_type.dart';
 import '../../domain/repositories/settings_repository.dart';
 import '../../domain/salaah_settings.dart';
 import '../../../audio/domain/repositories/audio_repository.dart';
@@ -20,7 +21,9 @@ import 'settings_storage.dart';
 class SettingsRepositoryImpl implements SettingsRepository {
   final SettingsStorage _storage;
 
-  SettingsRepositoryImpl(this._storage);
+  SettingsRepositoryImpl(this._storage) {
+    _performMigration();
+  }
 
   // ==================== READ OPERATIONS ====================
 
@@ -179,14 +182,30 @@ class SettingsRepositoryImpl implements SettingsRepository {
   );
 
   @override
-  List<String> get enabledSalahReminders {
-    final String? jsonStr = _storage.readString(SettingsKeys.enabledSalahReminders);
-    if (jsonStr == null) return [];
+  PrayerReminderType get prayerReminderType {
+    final value = _storage.readString(SettingsKeys.salahReminderType);
+    if (value == null) return PrayerReminderType.after;
+    return PrayerReminderType.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => PrayerReminderType.after,
+    );
+  }
+
+  @override
+  Set<Salaah> get enabledSalahReminders {
+    final String? jsonStr =
+        _storage.readString(SettingsKeys.enabledSalahReminders);
+    if (jsonStr == null) return {};
     try {
       final List<dynamic> decoded = jsonDecode(jsonStr);
-      return decoded.cast<String>();
+      return decoded
+          .map((name) => Salaah.values.firstWhere(
+                (s) => s.name == name,
+                orElse: () => Salaah.fajr,
+              ))
+          .toSet();
     } catch (e) {
-      return [];
+      return {};
     }
   }
 
@@ -219,6 +238,43 @@ class SettingsRepositoryImpl implements SettingsRepository {
     SettingsKeys.salawatEndTime,
     defaultValue: '20:00',
   )!;
+
+  // ==================== MIGRATION ====================
+
+  Future<void> _performMigration() async {
+    const String migrationKey = 'azan_settings_migration_v1_done';
+    if (_storage.readBool(migrationKey)) return;
+
+    try {
+      debugPrint('SettingsRepositoryImpl: performing Azan settings migration...');
+
+      // 1. Migrate post-prayer reminders if not already set
+      if (!_storage.prefs.containsKey(SettingsKeys.isSalahReminderEnabled)) {
+        final currentSalaahSettings = salaahSettings;
+
+        // If any prayer has Azan enabled OR pre-prayer reminder enabled,
+        // we'll enable the new unified reminder by default
+        // and populate the enabled list with those prayers.
+        final enabledPrayers = currentSalaahSettings
+            .where((s) => s.isAzanEnabled || s.isReminderEnabled)
+            .map((s) => s.salaah)
+            .toSet();
+
+        if (enabledPrayers.isNotEmpty) {
+          debugPrint(
+            'SettingsRepositoryImpl: Migrating ${enabledPrayers.length} prayers to unified reminders',
+          );
+          await updateSalahReminderEnabled(true);
+          await updateEnabledSalahReminders(enabledPrayers);
+        }
+      }
+
+      await _storage.writeBool(migrationKey, true);
+      debugPrint('SettingsRepositoryImpl: Migration completed.');
+    } catch (e) {
+      debugPrint('SettingsRepositoryImpl: Migration failed: $e');
+    }
+  }
 
   // ==================== WRITE OPERATIONS ====================
 
@@ -483,10 +539,15 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
-  Future<void> updateEnabledSalahReminders(List<String> enabledSalahs) async {
+  Future<void> updatePrayerReminderType(PrayerReminderType type) async {
+    await _storage.writeString(SettingsKeys.salahReminderType, type.name);
+  }
+
+  @override
+  Future<void> updateEnabledSalahReminders(Set<Salaah> enabledSalahs) async {
     await _storage.writeString(
       SettingsKeys.enabledSalahReminders,
-      jsonEncode(enabledSalahs),
+      jsonEncode(enabledSalahs.map((s) => s.name).toList()),
     );
   }
 

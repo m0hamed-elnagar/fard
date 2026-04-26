@@ -2929,6 +2929,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enable'**
   String get enable;
+
+  /// No description provided for @remindersNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders & Notifications'**
+  String get remindersNotifications;
+
+  /// No description provided for @werdReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Werd Reminder'**
+  String get werdReminder;
+
+  /// No description provided for @werdReminderDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder to read your daily Quran portion.'**
+  String get werdReminderDesc;
+
+  /// No description provided for @salawatReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Periodic Salawat Reminders'**
+  String get salawatReminder;
+
+  /// No description provided for @salawatReminderDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders to send salutations upon the Prophet (PBUH).'**
+  String get salawatReminderDesc;
+
+  /// No description provided for @frequency.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency'**
+  String get frequency;
+
+  /// No description provided for @everyHour.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {count} hours'**
+  String everyHour(int count);
+
+  /// No description provided for @startTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Time'**
+  String get startTime;
+
+  /// No description provided for @endTime.
+  ///
+  /// In en, this message translates to:
+  /// **'End Time'**
+  String get endTime;
+
+  /// No description provided for @activeWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Window'**
+  String get activeWindow;
+
+  /// No description provided for @activeWindowDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders will only be sent during this period.'**
+  String get activeWindowDesc;
+
+  /// No description provided for @reminderType.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder Type'**
+  String get reminderType;
+
+  /// No description provided for @beforeAzan.
+  ///
+  /// In en, this message translates to:
+  /// **'Before Azan'**
+  String get beforeAzan;
+
+  /// No description provided for @afterAzan.
+  ///
+  /// In en, this message translates to:
+  /// **'After Azan'**
+  String get afterAzan;
+
+  /// No description provided for @offset.
+  ///
+  /// In en, this message translates to:
+  /// **'Offset'**
+  String get offset;
 }
 
 class _AppLocalizationsDelegate

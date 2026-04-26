@@ -482,7 +482,7 @@ class _HomeContentState extends State<HomeContent> {
                                           settings.isSalahReminderEnabled &&
                                           settings.enabledSalahReminders
                                               .contains(
-                                                Salaah.values[index].name,
+                                                Salaah.values[index],
                                               ),
                                       onAdd:
                                           () => bloc.add(

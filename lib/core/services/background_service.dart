@@ -13,6 +13,8 @@ import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:fard/features/settings/domain/entities/custom_theme.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
 import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
+import 'package:fard/features/prayer_tracking/domain/salaah.dart';
+import 'package:fard/features/settings/domain/prayer_reminder_type.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -93,7 +95,10 @@ class _BackgroundSettingsProvider implements SettingsRepository {
   int get salahReminderOffsetMinutes => _settings.salahReminderOffsetMinutes;
 
   @override
-  List<String> get enabledSalahReminders => _settings.enabledSalahReminders;
+  PrayerReminderType get prayerReminderType => _settings.prayerReminderType;
+
+  @override
+  Set<Salaah> get enabledSalahReminders => _settings.enabledSalahReminders;
 
   @override
   bool get isWerdReminderEnabled => _settings.isWerdReminderEnabled;
@@ -208,7 +213,10 @@ class _BackgroundSettingsProvider implements SettingsRepository {
   Future<void> updateSalahReminderOffset(int minutes) => Future.value();
 
   @override
-  Future<void> updateEnabledSalahReminders(List<String> enabledSalahs) => Future.value();
+  Future<void> updatePrayerReminderType(PrayerReminderType type) => Future.value();
+
+  @override
+  Future<void> updateEnabledSalahReminders(Set<Salaah> enabledSalahs) => Future.value();
 
   @override
   Future<void> updateWerdReminderEnabled(bool enabled) => Future.value();

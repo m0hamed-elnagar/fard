@@ -1,4 +1,5 @@
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
+import 'package:fard/features/settings/domain/prayer_reminder_type.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/domain/entities/custom_theme.dart';
 import 'package:fard/features/settings/domain/entities/theme_preset.dart';
@@ -71,6 +72,7 @@ class SettingsCubit extends Cubit<SettingsState> {
           isAudioPlayerExpanded: _repo.isAudioPlayerExpanded,
           isSalahReminderEnabled: _repo.isSalahReminderEnabled,
           salahReminderOffsetMinutes: _repo.salahReminderOffsetMinutes,
+          prayerReminderType: _repo.prayerReminderType,
           enabledSalahReminders: _repo.enabledSalahReminders,
           isWerdReminderEnabled: _repo.isWerdReminderEnabled,
           werdReminderTime: _repo.werdReminderTime,
@@ -122,6 +124,20 @@ class SettingsCubit extends Cubit<SettingsState> {
     _sync();
   }
 
+  void setPrayerReminderType(PrayerReminderType type) {
+    try {
+      _setPrayerReminderTypeAsync(type);
+    } catch (e) {
+      debugPrint('SettingsCubit: Error in setPrayerReminderType: $e');
+    }
+  }
+
+  Future<void> _setPrayerReminderTypeAsync(PrayerReminderType type) async {
+    emit(state.copyWith(prayerReminderType: type));
+    await _repo.updatePrayerReminderType(type);
+    _sync();
+  }
+
   void toggleSpecificSalahReminder(Salaah salaah) {
     try {
       _toggleSpecificSalahReminderAsync(salaah);
@@ -131,13 +147,13 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   Future<void> _toggleSpecificSalahReminderAsync(Salaah salaah) async {
-    final list = List<String>.from(state.enabledSalahReminders);
+    final set = Set<Salaah>.from(state.enabledSalahReminders);
     bool masterEnabled = state.isSalahReminderEnabled;
 
-    if (list.contains(salaah.name)) {
-      list.remove(salaah.name);
+    if (set.contains(salaah)) {
+      set.remove(salaah);
     } else {
-      list.add(salaah.name);
+      set.add(salaah);
       // Smart Toggle: If enabling a specific prayer but master is OFF, turn it ON
       if (!masterEnabled) {
         masterEnabled = true;
@@ -145,14 +161,14 @@ class SettingsCubit extends Cubit<SettingsState> {
     }
 
     emit(state.copyWith(
-      enabledSalahReminders: list,
+      enabledSalahReminders: set,
       isSalahReminderEnabled: masterEnabled,
     ));
 
     if (masterEnabled != state.isSalahReminderEnabled) {
       await _repo.updateSalahReminderEnabled(masterEnabled);
     }
-    await _repo.updateEnabledSalahReminders(list);
+    await _repo.updateEnabledSalahReminders(set);
     _sync();
   }
 

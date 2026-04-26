@@ -4,7 +4,9 @@ import '../../../../core/services/location_service.dart';
 import '../../domain/azkar_reminder.dart';
 import '../../domain/entities/custom_theme.dart';
 import '../../domain/salaah_settings.dart';
+import '../../domain/prayer_reminder_type.dart';
 import '../../../audio/domain/repositories/audio_repository.dart';
+import '../../../prayer_tracking/domain/salaah.dart';
 
 part 'settings_state.freezed.dart';
 
@@ -36,7 +38,8 @@ sealed class SettingsState with _$SettingsState {
     // Reminders
     @Default(false) bool isSalahReminderEnabled,
     @Default(15) int salahReminderOffsetMinutes,
-    @Default([]) List<String> enabledSalahReminders,
+    @Default(PrayerReminderType.after) PrayerReminderType prayerReminderType,
+    @Default({}) Set<Salaah> enabledSalahReminders,
     @Default(false) bool isWerdReminderEnabled,
     @Default('20:00') String werdReminderTime,
     @Default(false) bool isSalawatReminderEnabled,

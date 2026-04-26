@@ -642,5 +642,27 @@
   "widgetCustomization": "Color Customization",
   "notificationsRequiredTitle": "Notifications Required",
   "notificationsRequiredDesc": "To hear the Azan and receive prayer reminders on time, Fard needs permission to show notifications and schedule exact alarms.",
-  "enable": "Enable"
+  "enable": "Enable",
+  "remindersNotifications": "Reminders & Notifications",
+  "werdReminder": "Daily Werd Reminder",
+  "werdReminderDesc": "Reminder to read your daily Quran portion.",
+  "salawatReminder": "Periodic Salawat Reminders",
+  "salawatReminderDesc": "Reminders to send salutations upon the Prophet (PBUH).",
+  "frequency": "Frequency",
+  "everyHour": "Every {count} hours",
+  "@everyHour": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "startTime": "Start Time",
+  "endTime": "End Time",
+  "activeWindow": "Active Window",
+  "activeWindowDesc": "Reminders will only be sent during this period.",
+  "reminderType": "Reminder Type",
+  "beforeAzan": "Before Azan",
+  "afterAzan": "After Azan",
+  "offset": "Offset"
 }

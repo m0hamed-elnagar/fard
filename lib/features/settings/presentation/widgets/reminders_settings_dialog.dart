@@ -18,6 +18,53 @@ class RemindersSettingsDialog extends StatelessWidget {
     );
   }
 
+  void _showReminderSnackBar(
+    BuildContext context,
+    String title,
+    bool enabled, {
+    String? customMessage,
+  }) {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final String status =
+        enabled ? (isAr ? 'مفعل' : 'Enabled') : (isAr ? 'معطل' : 'Disabled');
+
+    final String message =
+        customMessage ?? (enabled ? '$title: $status' : '$title: $status');
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              enabled
+                  ? Icons.notifications_active_rounded
+                  : Icons.notifications_off_rounded,
+              color: context.secondaryColor,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: GoogleFonts.amiri(
+                  color: context.onSurfaceColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: context.surfaceContainerHighestColor,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -63,117 +110,192 @@ class RemindersSettingsDialog extends StatelessWidget {
                               ? 'تذكير لتسجيل الصلاة في المتتبع'
                               : 'Reminder to log prayer in tracker',
                           state.isSalahReminderEnabled,
-                          (val) => context
-                              .read<SettingsCubit>()
-                              .toggleSalahReminder(val),
+                          (val) {
+                            context
+                                .read<SettingsCubit>()
+                                .toggleSalahReminder(val);
+                            _showReminderSnackBar(
+                              context,
+                              isAr ? 'تذكيرات الصلاة' : 'Salah Reminders',
+                              val,
+                              customMessage: val
+                                  ? (isAr
+                                      ? 'سنذكرك بتسجيل صلواتك بعد الأذان بـ ${state.salahReminderOffsetMinutes} دقيقة'
+                                      : 'We will remind you to log prayers ${state.salahReminderOffsetMinutes}m after Azan')
+                                  : (isAr
+                                      ? 'تم إيقاف تذكيرات تسجيل الصلاة'
+                                      : 'Post-prayer logging reminders disabled'),
+                            );
+                          },
                           context,
                         ),
-                      if (state.isSalahReminderEnabled) ...[
-                        const SizedBox(height: 8),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                isAr
-                                    ? 'التذكير بعد ${state.salahReminderOffsetMinutes} دقيقة'
-                                    : 'Remind after ${state.salahReminderOffsetMinutes} minutes',
-                                style: TextStyle(
-                                  color: context.onSurfaceVariantColor,
-                                  fontSize: 13,
+                        if (state.isSalahReminderEnabled) ...[
+                          const SizedBox(height: 8),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  isAr
+                                      ? 'التذكير بعد ${state.salahReminderOffsetMinutes} دقيقة'
+                                      : 'Remind after ${state.salahReminderOffsetMinutes} minutes',
+                                  style: TextStyle(
+                                    color: context.onSurfaceVariantColor,
+                                    fontSize: 13,
+                                  ),
                                 ),
-                              ),
-                              Slider(
-                                value: state.salahReminderOffsetMinutes
-                                    .toDouble(),
-                                min: 5,
-                                max: 60,
-                                divisions: 11,
-                                activeColor: context.secondaryColor,
-                                onChanged: (val) => context
-                                    .read<SettingsCubit>()
-                                    .setSalahReminderOffset(val.round()),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Wrap(
-                            spacing: 8,
-                            children: Salaah.values.map((s) {
-                              final isEnabled = state.enabledSalahReminders
-                                  .contains(s.name);
-                              return FilterChip(
-                                label: Text(s.localizedName(l10n)),
-                                selected: isEnabled,
-                                onSelected: (_) => context
-                                    .read<SettingsCubit>()
-                                    .toggleSpecificSalahReminder(s),
-                                selectedColor: context.secondaryColor
-                                    .withValues(alpha: 0.2),
-                                checkmarkColor: context.secondaryColor,
-                                labelStyle: TextStyle(
-                                  fontSize: 12,
-                                  color: isEnabled
-                                      ? context.secondaryColor
-                                      : context.onSurfaceColor,
+                                Slider(
+                                  value:
+                                      state.salahReminderOffsetMinutes
+                                          .toDouble(),
+                                  min: 5,
+                                  max: 60,
+                                  divisions: 11,
+                                  activeColor: context.secondaryColor,
+                                  onChanged:
+                                      (val) => context
+                                          .read<SettingsCubit>()
+                                          .setSalahReminderOffset(val.round()),
                                 ),
-                              );
-                            }).toList(),
+                              ],
+                            ),
                           ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Wrap(
+                              spacing: 8,
+                              children:
+                                  Salaah.values.map((s) {
+                                    final isEnabled = state
+                                        .enabledSalahReminders
+                                        .contains(s);
+                                    return FilterChip(
+                                      label: Text(s.localizedName(l10n)),
+                                      selected: isEnabled,
+                                      onSelected: (val) {
+                                        context
+                                            .read<SettingsCubit>()
+                                            .toggleSpecificSalahReminder(s);
+                                        _showReminderSnackBar(
+                                          context,
+                                          s.localizedName(l10n),
+                                          val,
+                                          customMessage:
+                                              val
+                                                  ? (isAr
+                                                      ? 'سنذكرك بتسجيل ${s.localizedName(l10n)} بعد الأذان'
+                                                      : 'We will remind you to log ${s.localizedName(l10n)} after Azan')
+                                                  : (isAr
+                                                      ? 'تم إيقاف تذكير ${s.localizedName(l10n)}'
+                                                      : 'Reminder for ${s.localizedName(l10n)} disabled'),
+                                        );
+                                      },
+                                      selectedColor: context.secondaryColor
+                                          .withValues(alpha: 0.2),
+                                      checkmarkColor: context.secondaryColor,
+                                      labelStyle: TextStyle(
+                                        fontSize: 12,
+                                        color:
+                                            isEnabled
+                                                ? context.secondaryColor
+                                                : context.onSurfaceColor,
+                                      ),
+                                    );
+                                  }).toList(),
+                            ),
+                          ),
+                        ],
+                        const Divider(height: 32),
+                        _buildSectionTitle(
+                          isAr ? 'الورد اليومي' : 'Daily Werd',
+                          context,
                         ),
-                      ],
-                      const Divider(height: 32),
-                      _buildSectionTitle(
-                        isAr ? 'الورد اليومي' : 'Daily Werd',
-                        context,
-                      ),
-                      _buildSwitchTile(
-                        isAr ? 'تذكير الورد اليومي' : 'Werd Reminder',
-                        isAr
-                            ? 'تذكير بقراءة وردك اليومي'
-                            : 'Reminder to read your daily werd',
-                        state.isWerdReminderEnabled,
-                        (val) => context
-                            .read<SettingsCubit>()
-                            .toggleWerdReminder(val),
-                        context,
-                      ),
-                      if (state.isWerdReminderEnabled)
-                        ListTile(
-                          title: Text(isAr ? 'وقت التذكير' : 'Reminder Time'),
-                          subtitle: Text(state.werdReminderTime),
-                          trailing: const Icon(Icons.access_time_rounded),
-                          onTap: () async {
-                            final time = await _selectTime(
+                        _buildSwitchTile(
+                          isAr ? 'تذكير الورد اليومي' : 'Werd Reminder',
+                          isAr
+                              ? 'تذكير بقراءة وردك اليومي'
+                              : 'Reminder to read your daily werd',
+                          state.isWerdReminderEnabled,
+                          (val) {
+                            context
+                                .read<SettingsCubit>()
+                                .toggleWerdReminder(val);
+                            _showReminderSnackBar(
                               context,
-                              state.werdReminderTime,
+                              isAr ? 'تذكير الورد' : 'Werd Reminder',
+                              val,
+                              customMessage:
+                                  val
+                                      ? (isAr
+                                          ? 'سنذكرك بوردك اليومي في الساعة ${state.werdReminderTime}'
+                                          : 'Daily Werd reminder set for ${state.werdReminderTime}')
+                                      : (isAr
+                                          ? 'تم إيقاف تذكير الورد اليومي'
+                                          : 'Daily Werd reminder disabled'),
                             );
-                            if (time != null && context.mounted) {
-                              context
-                                  .read<SettingsCubit>()
-                                  .setWerdReminderTime(time);
-                            }
                           },
+                          context,
                         ),
-                      const Divider(height: 32),
-                      _buildSectionTitle(
-                        isAr ? 'الصلاة على النبي ﷺ' : 'Salawat Reminders',
-                        context,
-                      ),
-                      _buildSwitchTile(
-                        isAr ? 'تفعيل تذكير الصلاة على النبي' : 'Salawat Reminders',
-                        isAr
-                            ? 'تذكير دوري بالصلاة على النبي ﷺ'
-                            : 'Periodic reminders to send Salawat',
-                        state.isSalawatReminderEnabled,
-                        (val) => context
-                            .read<SettingsCubit>()
-                            .toggleSalawatReminder(val),
-                        context,
-                      ),
+                        if (state.isWerdReminderEnabled)
+                          ListTile(
+                            title: Text(isAr ? 'وقت التذكير' : 'Reminder Time'),
+                            subtitle: Text(state.werdReminderTime),
+                            trailing: const Icon(Icons.access_time_rounded),
+                            onTap: () async {
+                              final time = await _selectTime(
+                                context,
+                                state.werdReminderTime,
+                              );
+                              if (time != null && context.mounted) {
+                                context
+                                    .read<SettingsCubit>()
+                                    .setWerdReminderTime(time);
+                                _showReminderSnackBar(
+                                  context,
+                                  isAr ? 'وقت الورد' : 'Werd Time',
+                                  true,
+                                  customMessage:
+                                      isAr
+                                          ? 'تم تحديث وقت تذكير الورد إلى $time'
+                                          : 'Werd reminder time updated to $time',
+                                );
+                              }
+                            },
+                          ),
+                        const Divider(height: 32),
+                        _buildSectionTitle(
+                          isAr ? 'الصلاة على النبي ﷺ' : 'Salawat Reminders',
+                          context,
+                        ),
+                        _buildSwitchTile(
+                          isAr
+                              ? 'تفعيل تذكير الصلاة على النبي'
+                              : 'Salawat Reminders',
+                          isAr
+                              ? 'تذكير دوري بالصلاة على النبي ﷺ'
+                              : 'Periodic reminders to send Salawat',
+                          state.isSalawatReminderEnabled,
+                          (val) {
+                            context
+                                .read<SettingsCubit>()
+                                .toggleSalawatReminder(val);
+                            _showReminderSnackBar(
+                              context,
+                              isAr ? 'الصلاة على النبي' : 'Salawat Reminder',
+                              val,
+                              customMessage:
+                                  val
+                                      ? (isAr
+                                          ? 'تذكير دوري بالصلاة على النبي ﷺ كل ${state.salawatFrequencyHours} ساعات'
+                                          : 'Periodic Salawat reminders enabled every ${state.salawatFrequencyHours} hours')
+                                      : (isAr
+                                          ? 'تم إيقاف تذكير الصلاة على النبي'
+                                          : 'Salawat reminders disabled'),
+                            );
+                          },
+                          context,
+                        ),
                       if (state.isSalawatReminderEnabled) ...[
                         ListTile(
                           title: Text(isAr ? 'التكرار كل' : 'Frequency'),

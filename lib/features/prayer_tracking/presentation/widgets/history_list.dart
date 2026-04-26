@@ -45,20 +45,27 @@ class HistoryList extends StatelessWidget {
       children: sortedKeys.map((monthKey) {
         final monthRecords = grouped[monthKey]!;
         return Container(
-          margin: const EdgeInsets.only(bottom: 12.0),
+          margin: const EdgeInsets.only(bottom: 16.0),
           decoration: BoxDecoration(
             color: context.surfaceContainerColor,
-            borderRadius: BorderRadius.circular(16.0),
-            border: Border.all(color: context.outlineColor),
+            borderRadius: BorderRadius.circular(24.0),
+            border: Border.all(color: context.outlineColor.withValues(alpha: 0.8), width: 1.0),
+            boxShadow: [
+              BoxShadow(
+                color: context.backgroundColor.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: ExpansionTile(
             key: PageStorageKey('history_$monthKey'),
             initiallyExpanded: false,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16.0),
+              borderRadius: BorderRadius.circular(24.0),
             ),
             collapsedShape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16.0),
+              borderRadius: BorderRadius.circular(24.0),
             ),
             tilePadding: const EdgeInsets.fromLTRB(16.0, 8.0, 12.0, 8.0),
             title: Row(

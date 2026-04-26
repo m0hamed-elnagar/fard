@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:fard/features/azkar/data/azkar_source.dart';
+import 'package:fard/core/utils/salawat_schedule_helper.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/core/utils/rtl_text_util.dart';
 import 'package:fard/core/utils/app_identifiers.dart';
@@ -39,10 +40,10 @@ class PrayerNotificationScheduler {
 
   // Max counts for cancellation
   static const int maxAzkarReminders = 50;
-  static const int maxScheduledDays = 2;
+  static const int maxScheduledDays = 3;
   static const int prayersPerDay = 5;
   static const int maxPrayerNotificationIds = 100;
-  static const int maxSalawatReminders = 24;
+  static const int maxSalawatReminders = 36;
 
   PrayerNotificationScheduler(
     this._prayerTimeService,
@@ -71,6 +72,7 @@ class PrayerNotificationScheduler {
       prayerReminderIdStart,
       afterSalahAzkarIdStart,
       postPrayerReminderIdStart,
+      salawatReminderIdStart,
     ], maxPrayerNotificationIds);
 
     final now = tz.TZDateTime.now(tz.local);
@@ -200,7 +202,7 @@ class PrayerNotificationScheduler {
         // 4. Post-Prayer Reminder (Did you pray?)
         if (_settingsProvider.isSalahReminderEnabled &&
             _settingsProvider.enabledSalahReminders.contains(
-              salaahSetting.salaah.name,
+              salaahSetting.salaah,
             )) {
           final reminderTime = tzSalaahTime.add(
             Duration(minutes: _settingsProvider.salahReminderOffsetMinutes),
@@ -319,35 +321,50 @@ class PrayerNotificationScheduler {
 
     if (!_settingsProvider.isSalawatReminderEnabled) return;
 
-    final start = _parseTime(
-      _settingsProvider.salawatStartTime,
-      DateTime.now(),
+    final scheduledTimes = SalawatScheduleHelper.generateTimes(
+      startTimeStr: _settingsProvider.salawatStartTime,
+      endTimeStr: _settingsProvider.salawatEndTime,
+      frequencyHours: _settingsProvider.salawatFrequencyHours,
+      daysToSchedule: maxScheduledDays,
     );
-    final end = _parseTime(_settingsProvider.salawatEndTime, DateTime.now());
-    final freqHours = _settingsProvider.salawatFrequencyHours;
 
     final List<Future<void>> futures = [];
-    int id = 0;
-    DateTime current = start;
-
-    while (current.isBefore(end) || current.isAtSameMomentAs(end)) {
-      if (id >= maxSalawatReminders) break;
-
+    for (int i = 0; i < min(scheduledTimes.length, maxSalawatReminders); i++) {
       futures.add(
-        _scheduleDailyNotification(
+        _scheduleSingleSalawatNotification(
           notificationsPlugin,
-          id: salawatReminderIdStart + id,
-          title: 'هل صليت على النبي اليوم؟',
-          body: 'اللهم صل وسلم وبارك على نبينا محمد ﷺ',
-          scheduledDate: current,
+          id: salawatReminderIdStart + i,
+          scheduledDate: scheduledTimes[i],
         ),
       );
-
-      current = current.add(Duration(hours: freqHours));
-      id++;
     }
 
     await Future.wait(futures);
+  }
+
+  Future<void> _scheduleSingleSalawatNotification(
+    FlutterLocalNotificationsPlugin notificationsPlugin, {
+    required int id,
+    required DateTime scheduledDate,
+  }) async {
+    final scheduledTzDate = tz.TZDateTime.from(scheduledDate, tz.local);
+
+    await notificationsPlugin.zonedSchedule(
+      id: id,
+      title: _applyRtl('هل صليت على النبي اليوم؟'),
+      body: _applyRtl('اللهم صل وسلم وبارك على نبينا محمد ﷺ'),
+      scheduledDate: scheduledTzDate,
+      notificationDetails: NotificationDetails(
+        android: AndroidNotificationDetails(
+          'salawat_reminders',
+          _applyRtl('Salawat Reminders'),
+          importance: Importance.max,
+          priority: Priority.high,
+          groupKey: groupKey,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+    );
   }
 
   Future<void> _schedulePostPrayerReminder(

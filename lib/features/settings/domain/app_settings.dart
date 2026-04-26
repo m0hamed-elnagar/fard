@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'azkar_reminder.dart';
 import 'salaah_settings.dart';
 import '../../audio/domain/repositories/audio_repository.dart';
+import '../../prayer_tracking/domain/salaah.dart';
+import 'prayer_reminder_type.dart';
 
 /// Immutable domain-level settings object.
 ///
@@ -30,7 +32,8 @@ class AppSettings {
   // Reminders
   final bool isSalahReminderEnabled;
   final int salahReminderOffsetMinutes;
-  final List<String> enabledSalahReminders;
+  final PrayerReminderType prayerReminderType;
+  final Set<Salaah> enabledSalahReminders;
   final bool isWerdReminderEnabled;
   final String werdReminderTime;
   final bool isSalawatReminderEnabled;
@@ -58,7 +61,8 @@ class AppSettings {
     this.isAudioPlayerExpanded = false,
     this.isSalahReminderEnabled = false,
     this.salahReminderOffsetMinutes = 15,
-    this.enabledSalahReminders = const [],
+    this.prayerReminderType = PrayerReminderType.after,
+    this.enabledSalahReminders = const {},
     this.isWerdReminderEnabled = false,
     this.werdReminderTime = '20:00',
     this.isSalawatReminderEnabled = false,
