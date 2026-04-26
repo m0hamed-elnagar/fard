@@ -7,6 +7,7 @@ import 'package:fard/features/audio/presentation/widgets/reciter_selector.dart';
 import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
 import 'package:fard/features/quran/domain/value_objects/surah_number.dart';
 import 'package:fard/features/quran/presentation/pages/quran_reader_page.dart';
+import 'package:fard/features/quran/presentation/utils/quran_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:fard/features/quran/domain/models/quran_symbol.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,15 +29,17 @@ class _SymbolDetailScreenState extends State<SymbolDetailScreen> {
   @override
   void initState() {
     super.initState();
-    selectedSourceId = widget.symbol.sources.isNotEmpty 
-        ? widget.symbol.sources.first.name 
+    selectedSourceId = widget.symbol.sources.isNotEmpty
+        ? widget.symbol.sources.first.name
         : 'default';
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = Color(int.parse(widget.symbol.color.replaceFirst('#', '0xFF')));
+    final color = Color(
+      int.parse(widget.symbol.color.replaceFirst('#', '0xFF')),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -55,7 +58,10 @@ class _SymbolDetailScreenState extends State<SymbolDetailScreen> {
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
-                border: Border.all(color: color.withValues(alpha: 0.3), width: 2),
+                border: Border.all(
+                  color: color.withValues(alpha: 0.3),
+                  width: 2,
+                ),
               ),
               child: Text(
                 widget.symbol.char,
@@ -63,7 +69,7 @@ class _SymbolDetailScreenState extends State<SymbolDetailScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // Brief
             Text(
               widget.symbol.brief,
@@ -71,11 +77,13 @@ class _SymbolDetailScreenState extends State<SymbolDetailScreen> {
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            
+
             // Rule Summary Card
             Card(
               elevation: 0,
-              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.3,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
                 side: BorderSide(color: theme.colorScheme.outlineVariant),
@@ -88,7 +96,10 @@ class _SymbolDetailScreenState extends State<SymbolDetailScreen> {
                       children: [
                         Icon(Icons.gavel_outlined, size: 20),
                         SizedBox(width: 8),
-                        Text('القاعدة العامة', style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text(
+                          'القاعدة العامة',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -115,11 +126,18 @@ class _SymbolDetailScreenState extends State<SymbolDetailScreen> {
               ),
               const SizedBox(height: 12),
               SegmentedButton<String>(
-                segments: widget.symbol.sources.map((s) => ButtonSegment(
-                  value: s.name,
-                  label: Text(s.name, style: const TextStyle(fontSize: 12)),
-                  icon: Icon(_getSourceIcon(s.sourceType), size: 16),
-                )).toList(),
+                segments: widget.symbol.sources
+                    .map(
+                      (s) => ButtonSegment(
+                        value: s.name,
+                        label: Text(
+                          s.name,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        icon: Icon(_getSourceIcon(s.sourceType), size: 16),
+                      ),
+                    )
+                    .toList(),
                 selected: {selectedSourceId},
                 onSelectionChanged: (newVal) {
                   setState(() => selectedSourceId = newVal.first);
@@ -128,9 +146,9 @@ class _SymbolDetailScreenState extends State<SymbolDetailScreen> {
               const SizedBox(height: 16),
               _buildSourceContent(context),
             ],
-            
+
             const SizedBox(height: 32),
-            
+
             // Examples Section
             if (widget.symbol.examples.isNotEmpty) ...[
               const Align(
@@ -141,11 +159,13 @@ class _SymbolDetailScreenState extends State<SymbolDetailScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              ...widget.symbol.examples.map((ex) => _SymbolExampleCard(
-                example: ex,
-                symbolChar: widget.symbol.char,
-                highlightColor: color,
-              )),
+              ...widget.symbol.examples.map(
+                (ex) => _SymbolExampleCard(
+                  example: ex,
+                  symbolChar: widget.symbol.char,
+                  highlightColor: color,
+                ),
+              ),
             ],
           ],
         ),
@@ -155,22 +175,30 @@ class _SymbolDetailScreenState extends State<SymbolDetailScreen> {
 
   IconData _getSourceIcon(String type) {
     switch (type) {
-      case 'book': return Icons.menu_book_rounded;
-      case 'website': return Icons.language_rounded;
-      case 'video': return Icons.play_circle_outline_rounded;
-      default: return Icons.info_outline_rounded;
+      case 'book':
+        return Icons.menu_book_rounded;
+      case 'website':
+        return Icons.language_rounded;
+      case 'video':
+        return Icons.play_circle_outline_rounded;
+      default:
+        return Icons.info_outline_rounded;
     }
   }
 
   Widget _buildSourceContent(BuildContext context) {
-    final source = widget.symbol.sources.firstWhere((s) => s.name == selectedSourceId);
+    final source = widget.symbol.sources.firstWhere(
+      (s) => s.name == selectedSourceId,
+    );
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+        ),
       ),
       child: Text(
         source.content,
@@ -215,14 +243,14 @@ class _SymbolExampleCardState extends State<_SymbolExampleCard> {
     setState(() => _isLoading = true);
     final repo = getIt<QuranRepository>();
     final surahNumResult = SurahNumber.create(widget.example.surah);
-    
+
     if (surahNumResult.isFailure) {
       if (mounted) setState(() => _isLoading = false);
       return;
     }
 
     final result = await repo.getSurah(surahNumResult.data!);
-    
+
     result.fold(
       (failure) {
         if (mounted) setState(() => _isLoading = false);
@@ -245,12 +273,14 @@ class _SymbolExampleCardState extends State<_SymbolExampleCard> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final surahNameAr = quran.getSurahNameArabic(widget.example.surah);
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
+        side: BorderSide(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -258,15 +288,17 @@ class _SymbolExampleCardState extends State<_SymbolExampleCard> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (_isLoading)
-              const Center(child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: CircularProgressIndicator(),
-              ))
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: CircularProgressIndicator(),
+                ),
+              )
             else if (_ayahText != null)
               _buildHighlightedText(_ayahText!)
             else
               const Text('تعذر تحميل نص الآية'),
-            
+
             const SizedBox(height: 12),
             Row(
               children: [
@@ -303,35 +335,50 @@ class _SymbolExampleCardState extends State<_SymbolExampleCard> {
   }
 
   Widget _buildHighlightedText(String text) {
-    final parts = text.split(widget.symbolChar);
+    // Split by space to preserve word-level ligatures and combining marks
+    final words = text.split(' ');
     final List<InlineSpan> spans = [];
-    
-    for (int i = 0; i < parts.length; i++) {
-      spans.add(TextSpan(text: parts[i]));
-      if (i < parts.length - 1) {
-        spans.add(TextSpan(
-          text: widget.symbolChar,
-          style: TextStyle(
-            color: widget.highlightColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 32,
-          ),
-        ));
+
+    final ayahStyle = QuranFonts.getFontStyle(
+      fontFamily: 'Amiri Quran',
+      fontSize: 28,
+      height: 2.2,
+      color: Theme.of(context).colorScheme.onSurface,
+    );
+
+    for (int i = 0; i < words.length; i++) {
+      final word = words[i];
+      final bool hasSymbol = word.contains(widget.symbolChar);
+
+      spans.add(
+        TextSpan(
+          text: word,
+          style: hasSymbol
+              ? ayahStyle.copyWith(
+                  color: widget.highlightColor,
+                  backgroundColor: widget.highlightColor.withValues(alpha: 0.1),
+                )
+              : ayahStyle,
+        ),
+      );
+
+      if (i < words.length - 1) {
+        spans.add(TextSpan(text: ' ', style: ayahStyle));
       }
     }
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Text.rich(
-        TextSpan(
-          children: spans,
-          style: GoogleFonts.amiri(
-            fontSize: 24,
-            height: 1.8,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
+        TextSpan(children: spans),
         textAlign: TextAlign.center,
+        strutStyle: StrutStyle(
+          fontFamily: QuranFonts.getFontFamilyName('Amiri Quran'),
+          fontSize: 28,
+          height: 2.2,
+          forceStrutHeight: true,
+          leadingDistribution: TextLeadingDistribution.even,
+        ),
       ),
     );
   }
@@ -341,45 +388,63 @@ class _SymbolExampleCardState extends State<_SymbolExampleCard> {
       builder: (context, managerState) {
         return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
           builder: (context, state) {
-            final isCurrentAyah = state.currentSurah == widget.example.surah &&
+            final isCurrentAyah =
+                state.currentSurah == widget.example.surah &&
                 state.currentAyah == widget.example.ayah;
-            
-            final isLoading = state.status == AudioStatus.loading && isCurrentAyah;
-            final isPlaying = state.status == AudioStatus.playing && isCurrentAyah;
+
+            final isLoading =
+                state.status == AudioStatus.loading && isCurrentAyah;
+            final isPlaying =
+                state.status == AudioStatus.playing && isCurrentAyah;
 
             return Row(
               children: [
                 // Play/Pause Button
                 IconButton.filledTonal(
-                  onPressed: isLoading ? null : () {
-                    final audioBloc = context.read<AudioPlayerBloc>();
-                    if (isPlaying) {
-                      audioBloc.add(const Pause());
-                    } else if (state.status == AudioStatus.paused && isCurrentAyah) {
-                      audioBloc.add(const Resume());
-                    } else {
-                      audioBloc.add(PlayAyah(
-                        surahNumber: widget.example.surah,
-                        ayahNumber: widget.example.ayah,
-                        reciter: managerState.currentReciter,
-                      ));
-                    }
-                  },
-                  icon: isLoading 
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                    : Icon(isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded),
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          final audioBloc = context.read<AudioPlayerBloc>();
+                          if (isPlaying) {
+                            audioBloc.add(const Pause());
+                          } else if (state.status == AudioStatus.paused &&
+                              isCurrentAyah) {
+                            audioBloc.add(const Resume());
+                          } else {
+                            audioBloc.add(
+                              PlayAyah(
+                                surahNumber: widget.example.surah,
+                                ayahNumber: widget.example.ayah,
+                                reciter: managerState.currentReciter,
+                              ),
+                            );
+                          }
+                        },
+                  icon: isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Icon(
+                          isPlaying
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
+                        ),
                 ),
-                
+
                 // Stop Button
-                if (isCurrentAyah && (isPlaying || state.status == AudioStatus.paused))
+                if (isCurrentAyah &&
+                    (isPlaying || state.status == AudioStatus.paused))
                   IconButton(
-                    onPressed: () => context.read<AudioPlayerBloc>().add(const Stop()),
+                    onPressed: () =>
+                        context.read<AudioPlayerBloc>().add(const Stop()),
                     icon: const Icon(Icons.stop_rounded),
                     color: Theme.of(context).colorScheme.error,
                   ),
-                
+
                 const Spacer(),
-                
+
                 // Reciter Switcher
                 TextButton.icon(
                   onPressed: () => _showReciterSelector(context),
@@ -419,4 +484,3 @@ class _SymbolExampleCardState extends State<_SymbolExampleCard> {
     );
   }
 }
-
