@@ -120,31 +120,67 @@ class _SymbolDetailScreenState extends State<SymbolDetailScreen> {
             if (widget.symbol.sources.isNotEmpty) ...[
               const Align(
                 alignment: Alignment.centerRight,
-                child: Text(
-                  'شرح مفصل من المصادر:',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'مصادر ومراجع',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    SizedBox(width: 8),
+                    Icon(Icons.verified_user_rounded,
+                        size: 16, color: Colors.blue),
+                  ],
                 ),
               ),
               const SizedBox(height: 12),
-              SegmentedButton<String>(
-                segments: widget.symbol.sources
-                    .map(
-                      (s) => ButtonSegment(
-                        value: s.name,
-                        label: Text(
-                          s.name,
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        icon: Icon(_getSourceIcon(s.sourceType)),
+              SizedBox(
+                height: 48,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: widget.symbol.sources.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final s = widget.symbol.sources[index];
+                    final isSelected = selectedSourceId == s.name;
+                    return ChoiceChip(
+                      label: Text(s.name),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        if (selected) {
+                          setState(() => selectedSourceId = s.name);
+                        }
+                      },
+                      avatar: Icon(
+                        _getSourceIcon(s.sourceType),
+                        size: 16,
+                        color: isSelected
+                            ? theme.colorScheme.onPrimary
+                            : theme.colorScheme.primary,
                       ),
-                    )
-                    .toList(),
-                selected: {selectedSourceId},
-                onSelectionChanged: (newVal) {
-                  setState(() => selectedSourceId = newVal.first);
-                },
+                      selectedColor: theme.colorScheme.primary,
+                      labelStyle: TextStyle(
+                        color: isSelected
+                            ? theme.colorScheme.onPrimary
+                            : theme.colorScheme.onSurface,
+                        fontSize: 13,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                      backgroundColor: theme.colorScheme.surface,
+                      side: BorderSide(
+                        color: isSelected
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.outlineVariant,
+                      ),
+                      showCheckmark: false,
+                    );
+                  },
+                ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               _buildSourceContent(context),
             ],
 
