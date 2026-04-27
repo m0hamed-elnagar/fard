@@ -116,6 +116,27 @@ class _SymbolDetailScreenState extends State<SymbolDetailScreen> {
             ),
             const SizedBox(height: 24),
 
+            // Examples Section
+            if (widget.symbol.examples.isNotEmpty) ...[
+              const Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  'أمثلة من القرآن الكريم:',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...widget.symbol.examples.map(
+                (ex) => _SymbolExampleCard(
+                  example: ex,
+                  symbolChar: widget.symbol.char,
+                  highlightColor: color,
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 32),
+
             // Sources Section
             if (widget.symbol.sources.isNotEmpty) ...[
               const Align(
@@ -182,27 +203,6 @@ class _SymbolDetailScreenState extends State<SymbolDetailScreen> {
               ),
               const SizedBox(height: 12),
               _buildSourceContent(context),
-            ],
-
-            const SizedBox(height: 32),
-
-            // Examples Section
-            if (widget.symbol.examples.isNotEmpty) ...[
-              const Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  'أمثلة من القرآن الكريم:',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-              ),
-              const SizedBox(height: 12),
-              ...widget.symbol.examples.map(
-                (ex) => _SymbolExampleCard(
-                  example: ex,
-                  symbolChar: widget.symbol.char,
-                  highlightColor: color,
-                ),
-              ),
             ],
           ],
         ),
