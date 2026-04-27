@@ -36,7 +36,8 @@ class SettingsScreen extends StatefulWidget {
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> with NotificationPermissionMixin {
+class _SettingsScreenState extends State<SettingsScreen>
+    with NotificationPermissionMixin {
   bool _canScheduleExactAlarms = true;
   bool _isThemeListExpanded = false;
   bool _isAppearanceExpanded = false;
@@ -44,7 +45,7 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
   bool _isGeneralExpanded = false;
   bool _isDataLocationExpanded = false;
   bool _isWidgetPreviewExpanded = false;
-  
+
   // Widget preview state
   WidgetPreviewType _widgetPreviewType = WidgetPreviewType.prayerSchedule;
   WidgetPreviewTheme _widgetPreviewTheme = const WidgetPreviewTheme();
@@ -70,10 +71,11 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
   Future<void> _checkPermissions() async {
     final notificationService = getIt<NotificationService>();
     final diagnosticResults = await notificationService.runDiagnostics();
-    
+
     if (mounted) {
       setState(() {
-        _canScheduleExactAlarms = diagnosticResults['exact_alarm_permission'] ?? true;
+        _canScheduleExactAlarms =
+            diagnosticResults['exact_alarm_permission'] ?? true;
       });
     }
   }
@@ -163,10 +165,7 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
           builder: (context, state) {
             return ListView(
               physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 20.0,
-              ),
+              padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 40.0),
               children: [
                 if (!_canScheduleExactAlarms)
                   _buildWarningCard(
@@ -177,17 +176,19 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
                     onAction: () =>
                         getIt<NotificationService>().openNotificationSettings(),
                   ),
+
                 // Section 1: Appearance
                 _buildAppearanceSection(context, state, l10n),
-                const SizedBox(height: 20),
+
                 // Section 2: Widget Preview
                 _buildWidgetPreviewSection(context, state, l10n),
-                const SizedBox(height: 20),
-                // Section 3: Reminders & Notifications
-                _buildListTile(
+
+                // Section 3: Reminders & Notifications (Clickable Card)
+                _buildSectionTile(
                   title: l10n.remindersNotifications,
                   subtitle: l10n.azanSettingsDesc,
                   icon: Icons.notifications_active_rounded,
+                  accentColor: context.tertiaryColor,
                   onTap: () {
                     HapticFeedback.lightImpact();
                     Navigator.push(
@@ -198,22 +199,23 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
                     );
                   },
                 ),
-                const SizedBox(height: 20),
-                // Section 3: Azkar
+
+                // Section 4: Azkar
                 _buildAzkarSection(context, state, l10n),
-                const SizedBox(height: 20),
-                // Section 4: General
+
+                // Section 5: General
                 _buildGeneralSection(context, state, l10n),
-                const SizedBox(height: 20),
-                // Section 5: Data & Location
+
+                // Section 6: Data & Location
                 _buildDataAndLocationSection(context, state, l10n),
+
                 // Debug: Widget Refresh Section (only in debug mode)
                 if (!kReleaseMode) ...[
-                  const SizedBox(height: 20),
                   _buildSection(
                     context,
                     title: 'Debug: Widget',
                     icon: Icons.bug_report_rounded,
+                    accentColor: context.errorColor,
                     children: [
                       Text(
                         'Force refresh the home screen widget. Use this for testing.',
@@ -231,27 +233,19 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
                             HapticFeedback.mediumImpact();
                             getIt<WidgetUpdateService>().updateWidget();
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
+                              const SnackBar(
                                 content: Text('Widget refresh triggered!'),
-                                backgroundColor: context.primaryContainerColor,
                                 duration: Duration(seconds: 2),
                               ),
                             );
                           },
-                          icon: Icon(Icons.refresh, size: 18),
+                          icon: const Icon(Icons.refresh, size: 18),
                           label: const Text('Refresh'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                          ),
                         ),
                       ),
                     ],
                   ),
                 ],
-                const SizedBox(height: 40),
               ],
             );
           },
@@ -307,10 +301,7 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
             const SizedBox(height: 8),
             Align(
               alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: onAction,
-                child: Text(actionLabel),
-              ),
+              child: TextButton(onPressed: onAction, child: Text(actionLabel)),
             ),
           ],
         ],
@@ -376,7 +367,9 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
             value: reminder.isEnabled,
             onChanged: (val) async {
               if (val) {
-                final granted = await checkAndRequestNotificationPermissions(context);
+                final granted = await checkAndRequestNotificationPermissions(
+                  context,
+                );
                 if (!granted) return;
               }
               cubit.toggleReminder(index);
@@ -592,7 +585,7 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
                   Container(
                     width: 40,
                     height: 4,
-                    margin: const EdgeInsets.only(bottom: 20),
+                    margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
                       color: context.outlineColor,
                       borderRadius: BorderRadius.circular(2),
@@ -715,16 +708,26 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      CircleAvatar(radius: 6, backgroundColor: preset.primaryColor),
+                      CircleAvatar(
+                        radius: 6,
+                        backgroundColor: preset.primaryColor,
+                      ),
                       const SizedBox(width: 4),
-                      CircleAvatar(radius: 6, backgroundColor: preset.accentColor),
+                      CircleAvatar(
+                        radius: 6,
+                        backgroundColor: preset.accentColor,
+                      ),
                     ],
                   ),
                   const Spacer(),
                   if (isSelected)
                     Align(
                       alignment: Alignment.bottomRight,
-                      child: Icon(Icons.check_circle_rounded, color: preset.primaryColor, size: 24),
+                      child: Icon(
+                        Icons.check_circle_rounded,
+                        color: preset.primaryColor,
+                        size: 24,
+                      ),
                     ),
                 ],
               ),
@@ -772,8 +775,12 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        Color(int.parse(theme.primary.replaceFirst('#', '0xFF'))),
-                        Color(int.parse(theme.accent.replaceFirst('#', '0xFF'))),
+                        Color(
+                          int.parse(theme.primary.replaceFirst('#', '0xFF')),
+                        ),
+                        Color(
+                          int.parse(theme.accent.replaceFirst('#', '0xFF')),
+                        ),
                       ],
                     ),
                   ),
@@ -907,9 +914,13 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
       cubit.updateCustomTheme(existingTheme.id, result);
     } else {
       if (!context.mounted) return;
-      final name = await _showThemeNameDialog(context, l10n, state.savedCustomThemes);
+      final name = await _showThemeNameDialog(
+        context,
+        l10n,
+        state.savedCustomThemes,
+      );
       if (name == null) return;
-      
+
       final theme = CustomTheme(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         name: name,
@@ -962,12 +973,15 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
             autofocus: true,
             textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               hintText: l10n.themeNameHint,
               helperText: 'You can edit this name',
             ),
             onSubmitted: (val) {
-              if (val.trim().isNotEmpty) Navigator.pop(dialogContext, val.trim());
+              if (val.trim().isNotEmpty)
+                Navigator.pop(dialogContext, val.trim());
             },
           ),
           actions: [
@@ -1003,10 +1017,15 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
         title: Text(l10n.deleteTheme),
         content: Text(l10n.deleteThemeConfirm(theme.name)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(d), child: Text(l10n.cancel)),
+          TextButton(
+            onPressed: () => Navigator.pop(d),
+            child: Text(l10n.cancel),
+          ),
           ElevatedButton(
             onPressed: () => Navigator.pop(d, true),
-            style: ElevatedButton.styleFrom(backgroundColor: context.errorColor),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: context.errorColor,
+            ),
             child: Text(l10n.delete),
           ),
         ],
@@ -1022,16 +1041,21 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
     required String title,
     required IconData icon,
     required List<Widget> children,
+    Color? accentColor,
   }) {
+    final effectiveAccentColor = accentColor ?? context.primaryColor;
     return Container(
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: context.surfaceContainerColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: context.outlineColor),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: context.outlineColor.withValues(alpha: 0.15),
+          width: 1.0,
+        ),
         boxShadow: [
           BoxShadow(
-            color: context.outlineColor,
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1040,29 +1064,38 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: context.primaryContainerColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: effectiveAccentColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(icon, color: effectiveAccentColor, size: 22),
                 ),
-                child: Icon(icon, color: context.primaryContainerColor, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                title,
-                style: GoogleFonts.amiri(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: context.onSurfaceColor,
+                const SizedBox(width: 16),
+                Text(
+                  title,
+                  style: GoogleFonts.amiri(
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold,
+                    color: context.onSurfaceColor,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 16),
-          ...children,
+          const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children,
+            ),
+          ),
         ],
       ),
     );
@@ -1074,63 +1107,175 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
     required bool isExpanded,
     required VoidCallback onToggle,
     required List<Widget> children,
+    Color? accentColor,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InkWell(
-          onTap: onToggle,
-          borderRadius: BorderRadius.circular(12),
+    final effectiveAccentColor = accentColor ?? context.primaryColor;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: context.surfaceContainerColor,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: context.outlineColor.withValues(alpha: 0.15),
+          width: 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: onToggle,
+            borderRadius: BorderRadius.circular(24),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: effectiveAccentColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(icon, color: effectiveAccentColor, size: 22),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: GoogleFonts.amiri(
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                        color: context.onSurfaceColor,
+                      ),
+                    ),
+                  ),
+                  AnimatedRotation(
+                    turns: isExpanded ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 250),
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: context.surfaceContainerHighestColor,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: context.onSurfaceVariantColor,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          AnimatedCrossFade(
+            firstChild: const SizedBox.shrink(),
+            secondChild: Column(
+              children: [
+                const Divider(height: 1),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: children,
+                  ),
+                ),
+              ],
+            ),
+            crossFadeState: isExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            duration: const Duration(milliseconds: 250),
+            sizeCurve: Curves.easeInOut,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTile({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required VoidCallback onTap,
+    Color? accentColor,
+  }) {
+    final effectiveAccentColor = accentColor ?? context.primaryColor;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: context.surfaceContainerColor,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: context.outlineColor.withValues(alpha: 0.15),
+          width: 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.all(16),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: context.primaryContainerColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
+                    color: effectiveAccentColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Icon(icon, color: context.primaryContainerColor, size: 20),
+                  child: Icon(icon, color: effectiveAccentColor, size: 22),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
                 Expanded(
-                  child: Text(
-                    title,
-                    style: GoogleFonts.amiri(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: context.onSurfaceColor,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: GoogleFonts.amiri(
+                          fontSize: 19,
+                          fontWeight: FontWeight.bold,
+                          color: context.onSurfaceColor,
+                        ),
+                      ),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: context.onSurfaceVariantColor,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                AnimatedRotation(
-                  turns: isExpanded ? 0.5 : 0,
-                  duration: const Duration(milliseconds: 200),
-                  child: Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    color: context.onSurfaceVariantColor,
-                  ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 16,
+                  color: context.onSurfaceVariantColor,
                 ),
               ],
             ),
           ),
         ),
-        AnimatedCrossFade(
-          firstChild: const SizedBox.shrink(),
-          secondChild: Padding(
-            padding: const EdgeInsets.only(top: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: children,
-            ),
-          ),
-          crossFadeState: isExpanded
-              ? CrossFadeState.showSecond
-              : CrossFadeState.showFirst,
-          duration: const Duration(milliseconds: 200),
-        ),
-      ],
+      ),
     );
   }
 
@@ -1142,67 +1287,38 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+        child: Row(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        description,
-                        style: TextStyle(
-                          color: context.onSurfaceVariantColor,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                trailing,
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      color: context.onSurfaceVariantColor,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
             ),
+            const SizedBox(width: 16),
+            trailing,
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildListTile({
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: context.primaryContainerColor.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(icon, color: context.primaryContainerColor, size: 20),
-      ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-      subtitle: Text(subtitle, style: TextStyle(fontSize: 13, color: context.onSurfaceVariantColor)),
-      trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: context.onSurfaceVariantColor),
-      onTap: onTap,
     );
   }
 
@@ -1226,7 +1342,9 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
           decoration: BoxDecoration(
             color: context.secondaryColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: context.secondaryColor.withValues(alpha: 0.3)),
+            border: Border.all(
+              color: context.secondaryColor.withValues(alpha: 0.3),
+            ),
           ),
           child: Text(
             time,
@@ -1269,7 +1387,9 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
               ),
             ),
             textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(foregroundColor: context.secondaryColor),
+              style: TextButton.styleFrom(
+                foregroundColor: context.secondaryColor,
+              ),
             ),
           ),
           child: child!,
@@ -1301,6 +1421,7 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
     return _buildExpandableSection(
       title: l10n.appearance,
       icon: Icons.palette_rounded,
+      accentColor: context.primaryColor,
       isExpanded: _isAppearanceExpanded,
       onToggle: () {
         setState(() {
@@ -1410,7 +1531,7 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
           const SizedBox(height: 12),
           Center(
             child: TextButton.icon(
-              icon: Icon(Icons.restore, size: 18),
+              icon: const Icon(Icons.restore, size: 18),
               label: Text(l10n.resetToDefault),
               onPressed: () => cubit.selectThemePreset('emerald'),
             ),
@@ -1435,6 +1556,7 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
     return _buildExpandableSection(
       title: l10n.widgetPreviewTitle,
       icon: Icons.widgets_rounded,
+      accentColor: context.secondaryColor,
       isExpanded: _isWidgetPreviewExpanded,
       onToggle: () {
         setState(() {
@@ -1484,10 +1606,7 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
         // Theme presets selection
         Text(
           l10n.widgetStartFromPreset,
-          style: GoogleFonts.amiri(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
+          style: GoogleFonts.amiri(fontSize: 14, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -1505,8 +1624,9 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
                 onTap: () {
                   HapticFeedback.selectionClick();
                   setState(() {
-                    _widgetPreviewTheme =
-                        WidgetPreviewTheme.fromThemePreset(preset);
+                    _widgetPreviewTheme = WidgetPreviewTheme.fromThemePreset(
+                      preset,
+                    );
                   });
                 },
               );
@@ -1545,52 +1665,47 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
                     WidgetColorPicker(
                       label: l10n.widgetPrimaryColor,
                       currentHex: _widgetPreviewTheme.primaryColorHex,
-                      onColorChanged:
-                          (hex) => setState(() {
-                            _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
-                              primaryColorHex: hex,
-                            );
-                          }),
+                      onColorChanged: (hex) => setState(() {
+                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
+                          primaryColorHex: hex,
+                        );
+                      }),
                     ),
                     WidgetColorPicker(
                       label: l10n.widgetAccentColor,
                       currentHex: _widgetPreviewTheme.accentColorHex,
-                      onColorChanged:
-                          (hex) => setState(() {
-                            _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
-                              accentColorHex: hex,
-                            );
-                          }),
+                      onColorChanged: (hex) => setState(() {
+                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
+                          accentColorHex: hex,
+                        );
+                      }),
                     ),
                     WidgetColorPicker(
                       label: l10n.widgetBackgroundColor,
                       currentHex: _widgetPreviewTheme.backgroundColorHex,
-                      onColorChanged:
-                          (hex) => setState(() {
-                            _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
-                              backgroundColorHex: hex,
-                            );
-                          }),
+                      onColorChanged: (hex) => setState(() {
+                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
+                          backgroundColorHex: hex,
+                        );
+                      }),
                     ),
                     WidgetColorPicker(
                       label: l10n.widgetTextColor,
                       currentHex: _widgetPreviewTheme.textColorHex,
-                      onColorChanged:
-                          (hex) => setState(() {
-                            _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
-                              textColorHex: hex,
-                            );
-                          }),
+                      onColorChanged: (hex) => setState(() {
+                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
+                          textColorHex: hex,
+                        );
+                      }),
                     ),
                     WidgetColorPicker(
                       label: l10n.widgetSecondaryTextColor,
                       currentHex: _widgetPreviewTheme.textSecondaryColorHex,
-                      onColorChanged:
-                          (hex) => setState(() {
-                            _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
-                              textSecondaryColorHex: hex,
-                            );
-                          }),
+                      onColorChanged: (hex) => setState(() {
+                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
+                          textSecondaryColorHex: hex,
+                        );
+                      }),
                     ),
                   ],
                 ),
@@ -1629,59 +1744,57 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
             ),
             const Spacer(),
             FilledButton(
-              onPressed:
-                  _isApplyingWidgetTheme
-                      ? null
-                      : () async {
-                        setState(() {
-                          _isApplyingWidgetTheme = true;
-                        });
+              onPressed: _isApplyingWidgetTheme
+                  ? null
+                  : () async {
+                      setState(() {
+                        _isApplyingWidgetTheme = true;
+                      });
 
-                        try {
-                          // Apply to actual widgets via WidgetUpdateService
-                          await getIt<WidgetUpdateService>().applyWidgetTheme(
-                            _widgetPreviewTheme.toMap(),
+                      try {
+                        // Apply to actual widgets via WidgetUpdateService
+                        await getIt<WidgetUpdateService>().applyWidgetTheme(
+                          _widgetPreviewTheme.toMap(),
+                        );
+
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(l10n.widgetThemeApplied),
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primaryContainer,
+                            ),
                           );
-
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.widgetThemeApplied),
-                                backgroundColor:
-                                    Theme.of(context)
-                                        .colorScheme
-                                        .primaryContainer,
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  l10n.widgetThemeApplyFailed(e.toString()),
-                                ),
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.errorContainer,
-                              ),
-                            );
-                          }
-                        } finally {
-                          if (mounted) {
-                            setState(() {
-                              _isApplyingWidgetTheme = false;
-                            });
-                          }
                         }
-                      },
-              child:
-                  _isApplyingWidgetTheme
-                      ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                      : Text(l10n.applyToWidget),
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                l10n.widgetThemeApplyFailed(e.toString()),
+                              ),
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.errorContainer,
+                            ),
+                          );
+                        }
+                      } finally {
+                        if (mounted) {
+                          setState(() {
+                            _isApplyingWidgetTheme = false;
+                          });
+                        }
+                      }
+                    },
+              child: _isApplyingWidgetTheme
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(l10n.applyToWidget),
             ),
           ],
         ),
@@ -1700,6 +1813,7 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
     return _buildExpandableSection(
       title: l10n.azkarSection,
       icon: Icons.auto_stories_rounded,
+      accentColor: Colors.deepPurpleAccent,
       isExpanded: _isAzkarExpanded,
       onToggle: () {
         setState(() {
@@ -1725,7 +1839,7 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
                 HapticFeedback.lightImpact();
                 _showAddReminderDialog(context);
               },
-              icon: Icon(Icons.add, size: 20),
+              icon: const Icon(Icons.add, size: 20),
               label: Text(l10n.add),
               style: TextButton.styleFrom(
                 foregroundColor: context.secondaryColor,
@@ -1784,6 +1898,7 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
     return _buildExpandableSection(
       title: l10n.generalSettings,
       icon: Icons.settings_rounded,
+      accentColor: Colors.blueGrey,
       isExpanded: _isGeneralExpanded,
       onToggle: () {
         setState(() {
@@ -1856,6 +1971,7 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
     return _buildExpandableSection(
       title: l10n.dataAndLocation,
       icon: Icons.backup_rounded,
+      accentColor: Colors.teal,
       isExpanded: _isDataLocationExpanded,
       onToggle: () {
         setState(() {
@@ -1893,7 +2009,7 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
               HapticFeedback.mediumImpact();
               context.read<SettingsCubit>().refreshLocation();
             },
-            icon: Icon(Icons.my_location, size: 18),
+            icon: const Icon(Icons.my_location, size: 18),
             label: Text(l10n.refreshLocation),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1953,8 +2069,7 @@ class _SettingsScreenState extends State<SettingsScreen> with NotificationPermis
 
             if (confirm == true && context.mounted) {
               try {
-                final success =
-                    await getIt<ExportImportService>().importData();
+                final success = await getIt<ExportImportService>().importData();
                 if (success && context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(l10n.backupImportSuccess)),

@@ -1,7 +1,6 @@
 import 'package:fard/core/errors/failure.dart';
 import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
 import 'package:fard/features/werd/domain/repositories/werd_repository.dart';
-import 'package:fard/features/werd/domain/entities/reading_segment.dart';
 import 'package:fard/core/extensions/quran_extension.dart';
 import 'package:injectable/injectable.dart';
 

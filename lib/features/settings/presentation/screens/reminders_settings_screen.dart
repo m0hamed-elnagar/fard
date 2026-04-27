@@ -44,16 +44,12 @@ class _RemindersSettingsScreenState extends State<RemindersSettingsScreen> with 
         builder: (context, state) {
           return ListView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+            padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 40.0),
             children: [
               _buildAzanSection(context, state, l10n),
-              const SizedBox(height: 24),
               _buildPrayerRemindersSection(context, state, l10n),
-              const SizedBox(height: 24),
               _buildWerdReminderSection(context, state, l10n),
-              const SizedBox(height: 24),
               _buildSalawatReminderSection(context, state, l10n),
-              const SizedBox(height: 40),
             ],
           );
         },
@@ -71,6 +67,7 @@ class _RemindersSettingsScreenState extends State<RemindersSettingsScreen> with 
       context,
       title: l10n.azan,
       icon: Icons.volume_up_rounded,
+      accentColor: context.primaryColor,
       children: [
         _buildToggleItem(
           title: l10n.enableAzan,
@@ -84,7 +81,7 @@ class _RemindersSettingsScreenState extends State<RemindersSettingsScreen> with 
           },
         ),
         if (allAzanEnabled) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _buildVoiceDropdown(context, commonVoice, l10n, (val) {
             cubit.updateAllAzanSound(val);
           }),
@@ -102,7 +99,7 @@ class _RemindersSettingsScreenState extends State<RemindersSettingsScreen> with 
               style: TextButton.styleFrom(foregroundColor: context.secondaryColor),
             ),
           ),
-          const Divider(height: 32),
+          const Divider(height: 24),
           Text(
             l10n.individualSettings,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
@@ -136,6 +133,7 @@ class _RemindersSettingsScreenState extends State<RemindersSettingsScreen> with 
       context,
       title: l10n.reminder,
       icon: Icons.notification_important_rounded,
+      accentColor: context.secondaryColor,
       children: [
         _buildToggleItem(
           title: l10n.enableReminder,
@@ -180,7 +178,7 @@ class _RemindersSettingsScreenState extends State<RemindersSettingsScreen> with 
             label: state.salahReminderOffsetMinutes.toString(),
             onChanged: (val) => cubit.setSalahReminderOffset(val.toInt()),
           ),
-          const Divider(height: 32),
+          const Divider(height: 24),
           Wrap(
             spacing: 8,
             children: Salaah.values.map((s) {
@@ -206,6 +204,7 @@ class _RemindersSettingsScreenState extends State<RemindersSettingsScreen> with 
       context,
       title: l10n.werdReminder,
       icon: Icons.menu_book_rounded,
+      accentColor: Colors.deepPurpleAccent,
       children: [
         _buildToggleItem(
           title: l10n.enable,
@@ -222,12 +221,19 @@ class _RemindersSettingsScreenState extends State<RemindersSettingsScreen> with 
           ListTile(
             contentPadding: EdgeInsets.zero,
             title: Text(l10n.time),
-            trailing: Text(
-              state.werdReminderTime,
-              style: TextStyle(
-                color: context.secondaryColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+            trailing: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: context.secondaryColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                state.werdReminderTime,
+                style: TextStyle(
+                  color: context.secondaryColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
             ),
             onTap: () async {
@@ -246,6 +252,7 @@ class _RemindersSettingsScreenState extends State<RemindersSettingsScreen> with 
       context,
       title: l10n.salawatReminder,
       icon: Icons.favorite_rounded,
+      accentColor: Colors.teal,
       children: [
         _buildToggleItem(
           title: l10n.enable,
@@ -311,26 +318,66 @@ class _RemindersSettingsScreenState extends State<RemindersSettingsScreen> with 
   }
 
   // Helper Methods
-  Widget _buildSection(BuildContext context, {required String title, required IconData icon, required List<Widget> children}) {
+  Widget _buildSection(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+    Color? accentColor,
+  }) {
+    final effectiveAccentColor = accentColor ?? context.primaryColor;
     return Container(
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: context.surfaceContainerColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: context.outlineColor),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: context.outlineColor.withValues(alpha: 0.15),
+          width: 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(icon, color: context.primaryColor, size: 20),
-              const SizedBox(width: 12),
-              Text(title, style: GoogleFonts.amiri(fontSize: 18, fontWeight: FontWeight.bold)),
-            ],
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: effectiveAccentColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(icon, color: effectiveAccentColor, size: 22),
+                ),
+                const SizedBox(width: 16),
+                Text(
+                  title,
+                  style: GoogleFonts.amiri(
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold,
+                    color: context.onSurfaceColor,
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 16),
-          ...children,
+          const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children,
+            ),
+          ),
         ],
       ),
     );

@@ -16,19 +16,6 @@
         ],
         "count": 9,
         "priority": "high"
-      },
-      "tajweed_detection": {
-        "method": "unicode_set_scan",
-        "field": "text_uthmani",
-        "specific_chars": [
-          "U+0671",
-          "U+0670",
-          "U+06E5",
-          "U+06E6",
-          "U+0653"
-        ],
-        "count": 5,
-        "priority": "medium"
       }
     }
   },
