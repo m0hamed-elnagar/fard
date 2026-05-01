@@ -223,16 +223,18 @@ class MainActivity : AudioServiceActivity() {
                         colors[key] = value
                     }
                 }
+                Log.d(TAG, "Parsed colors: $colors")
 
                 // Validate required settings
                 if (latitude == null || longitude == null || calculationMethod == null ||
                     madhab == null || locale == null) {
-                    Log.e(TAG, "Invalid settings received from Flutter: $settingsMap")
+                    Log.e(TAG, "CRITICAL: Missing required settings! lat=$latitude, lon=$longitude, method=$calculationMethod, madhab=$madhab, locale=$locale")
                     return@launch
                 }
 
                 // 2. Save settings to SharedPreferences FIRST
                 val repository = SettingsRepository(this@MainActivity)
+                Log.d(TAG, "Saving settings to repository...")
                 repository.saveSettings(
                     latitude = latitude,
                     longitude = longitude,
@@ -245,6 +247,7 @@ class MainActivity : AudioServiceActivity() {
 
                 // 2.1 Save colors to widget theme if present
                 if (colors.isNotEmpty()) {
+                    Log.d(TAG, "Saving theme colors override...")
                     repository.saveWidgetTheme(colors)
                 }
 
