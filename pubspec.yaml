@@ -70,6 +70,16 @@ dev_dependencies:
   path_provider_platform_interface: ^2.1.2
   plugin_platform_interface: ^2.1.8
   injectable_generator: ^2.12.1
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/fard_logo.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/fard_logo.png"
+  adaptive_icon_foreground_inset: 18
+  remove_alpha_ios: true
 
 flutter:
   uses-material-design: true

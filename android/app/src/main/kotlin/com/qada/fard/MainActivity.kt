@@ -113,7 +113,7 @@ class MainActivity : AudioServiceActivity() {
                 }
                 "applyWidgetTheme" -> {
                     // Save theme and trigger widget update
-                    val args = call.arguments<Map<String, Any>>()
+                    val args = call.arguments<Map<*, *>>()
                     if (args != null) {
                         Log.d(TAG, "=== APPLY WIDGET THEME CALLED ===")
                         Log.d(TAG, "Received theme: $args")
@@ -121,7 +121,18 @@ class MainActivity : AudioServiceActivity() {
                         CoroutineScope(Dispatchers.Main).launch {
                             try {
                                 val repository = SettingsRepository(this@MainActivity)
-                                repository.saveWidgetTheme(args)
+                                
+                                // Robust color parsing
+                                val colors = mutableMapOf<String, String>()
+                                args.forEach { (key, value) ->
+                                    if (key is String && value is String) {
+                                        colors[key] = value
+                                    }
+                                }
+                                
+                                if (colors.isNotEmpty()) {
+                                    repository.saveWidgetTheme(colors)
+                                }
                                 
                                 // Verify saved theme
                                 val savedTheme = repository.getWidgetTheme()
@@ -203,7 +214,15 @@ class MainActivity : AudioServiceActivity() {
                 val locale = settingsMap?.get("locale") as? String
                 val prayerData = settingsMap?.get("prayer_data") as? String
                 val hijriDate = settingsMap?.get("hijri_date") as? String
-                val colors = settingsMap?.get("colors") as? Map<String, String>
+                
+                // Robust color parsing - Flutter maps often arrive as Map<Any, Any>
+                val rawColors = settingsMap?.get("colors") as? Map<*, *>
+                val colors = mutableMapOf<String, String>()
+                rawColors?.forEach { (key, value) ->
+                    if (key is String && value is String) {
+                        colors[key] = value
+                    }
+                }
 
                 // Validate required settings
                 if (latitude == null || longitude == null || calculationMethod == null ||
@@ -225,16 +244,8 @@ class MainActivity : AudioServiceActivity() {
                 )
 
                 // 2.1 Save colors to widget theme if present
-                if (colors != null) {
-                    val themeMap = mapOf(
-                        "primaryColorHex" to (colors["primary"] ?: "#2E7D32"),
-                        "accentColorHex" to (colors["accent"] ?: "#FFD54F"),
-                        "backgroundColorHex" to (colors["background"] ?: "#0D1117"),
-                        "surfaceColorHex" to (colors["surface"] ?: "#161B22"),
-                        "textColorHex" to (colors["text"] ?: "#FFFFFF"),
-                        "textSecondaryColorHex" to (colors["text_secondary"] ?: "#8B949E")
-                    )
-                    repository.saveWidgetTheme(themeMap)
+                if (colors.isNotEmpty()) {
+                    repository.saveWidgetTheme(colors)
                 }
 
                 Log.d(TAG, "Settings and colors saved to SharedPreferences")

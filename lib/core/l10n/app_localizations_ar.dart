@@ -1382,7 +1382,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get werdDays => 'أيام';
 
   @override
-  String get werdMissed => 'فات';
+  String get werdMissed => 'انقطاع';
 
   @override
   String get werdCurrent => 'الحالي';

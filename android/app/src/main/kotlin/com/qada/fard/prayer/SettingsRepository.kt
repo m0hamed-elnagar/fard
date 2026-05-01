@@ -169,6 +169,10 @@ class SettingsRepository(private val context: Context) {
 
     /**
      * Resolves the theme to use for a widget, considering overrides and fallbacks.
+     * 
+     * Logic:
+     * 1. If a manual override is set (e.g. from Widget Customizer), use it.
+     * 2. Otherwise, use the fallback provided (which usually comes from Flutter's prayer_data JSON).
      */
     fun resolveWidgetTheme(fallback: com.qada.fard.widget.WidgetTheme): com.qada.fard.widget.WidgetTheme {
         return if (hasWidgetThemeOverride()) {

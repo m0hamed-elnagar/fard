@@ -980,8 +980,9 @@ class _SettingsScreenState extends State<SettingsScreen>
               helperText: 'You can edit this name',
             ),
             onSubmitted: (val) {
-              if (val.trim().isNotEmpty)
+              if (val.trim().isNotEmpty) {
                 Navigator.pop(dialogContext, val.trim());
+              }
             },
           ),
           actions: [

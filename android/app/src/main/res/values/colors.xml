@@ -2,4 +2,5 @@
 <resources>
     <!-- App dark theme background color -->
     <color name="dark_background">#0D1117</color>
+	<color name="ic_launcher_background">#FFFFFF</color>
 </resources>

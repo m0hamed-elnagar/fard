@@ -22,7 +22,6 @@ class WidgetUpdateService {
   final SharedPreferences _prefs;
   final SettingsRepository _settingsProvider;
 
-  bool _isUpdating = false;
   DateTime? _lastUpdate;
 
   WidgetUpdateService(
@@ -32,23 +31,19 @@ class WidgetUpdateService {
   );
 
   Future<void> updateWidget() async {
-    if (_isUpdating) {
-      debugPrint('WidgetUpdateService: Update already in progress, skipping');
-      return;
-    }
-
     final now = DateTime.now();
-    if (_lastUpdate != null && now.difference(_lastUpdate!) < const Duration(seconds: 2)) {
+    
+    // Reduced throttling for better responsiveness during theme changes
+    if (_lastUpdate != null && now.difference(_lastUpdate!) < const Duration(milliseconds: 500)) {
       debugPrint('WidgetUpdateService: Throttling update - too soon since last update');
       return;
     }
 
-    _isUpdating = true;
     try {
       await _performUpdate(now);
       _lastUpdate = DateTime.now();
-    } finally {
-      _isUpdating = false;
+    } catch (e) {
+      debugPrint('WidgetUpdateService: Error during update: $e');
     }
   }
 
