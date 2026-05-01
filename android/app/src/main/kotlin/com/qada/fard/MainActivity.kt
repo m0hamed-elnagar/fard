@@ -247,8 +247,17 @@ class MainActivity : AudioServiceActivity() {
 
                 // 2.1 Save colors to widget theme if present
                 if (colors.isNotEmpty()) {
-                    Log.d(TAG, "Saving theme colors override...")
-                    repository.saveWidgetTheme(colors)
+                    Log.d(TAG, "Saving theme colors override with correct keys...")
+                    val themeMap = mapOf(
+                        "primaryColorHex" to (colors["primary"] ?: "#2E7D32"),
+                        "accentColorHex" to (colors["accent"] ?: "#FFD54F"),
+                        "backgroundColorHex" to (colors["background"] ?: "#0D1117"),
+                        "surfaceColorHex" to (colors["surface"] ?: "#161B22"),
+                        "textColorHex" to (colors["text"] ?: "#FFFFFF"),
+                        "textSecondaryColorHex" to (colors["text_secondary"] ?: "#8B949E")
+                    )
+                    repository.saveWidgetTheme(themeMap)
+                    Log.d(TAG, "Theme saved successfully: $themeMap")
                 }
 
                 Log.d(TAG, "Settings and colors saved to SharedPreferences")
