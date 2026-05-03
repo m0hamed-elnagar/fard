@@ -1,11 +1,11 @@
 import 'dart:io' show Platform;
+import 'package:fard/features/settings/domain/prayer_reminder_type.dart';
 import 'package:fard/core/services/notification/channel_manager.dart';
 import 'package:fard/core/services/notification/prayer_scheduler.dart';
 import 'package:fard/core/services/notification/sound_manager.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/features/azkar/data/azkar_repository.dart';
-import 'package:fard/features/azkar/domain/azkar_item.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
 import 'package:flutter/material.dart';

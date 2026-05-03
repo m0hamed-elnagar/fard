@@ -83,7 +83,10 @@ void main() {
 
     blocTest<PrayerTrackerBloc, PrayerTrackerState>(
       'Day 2 load correctly carries over missed prayers from Day 1 mid-day save',
-      build: () => bloc,
+      build: () {
+        final b = PrayerTrackerBloc(repo, prefs, prayerTimeService);
+        return b;
+      },
       setUp: () {
         when(
           () => repo.loadRecord(day1),

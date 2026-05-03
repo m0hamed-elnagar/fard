@@ -1,13 +1,14 @@
+import 'package:adhan/adhan.dart';
 import 'package:fard/core/services/notification/channel_manager.dart';
 import 'package:fard/core/services/notification/prayer_scheduler.dart';
-import 'package:adhan/adhan.dart';
 import 'package:fard/core/services/notification/sound_manager.dart';
-import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
-import 'package:fard/features/azkar/domain/azkar_item.dart';
-import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/features/azkar/data/azkar_repository.dart';
+import 'package:fard/features/azkar/domain/azkar_item.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
+import 'package:fard/features/settings/domain/azkar_reminder.dart';
+import 'package:fard/features/settings/domain/prayer_reminder_type.dart';
+import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:flutter/material.dart';
@@ -154,7 +155,9 @@ void main() {
     when(() => mockSettingsRepository.locale).thenReturn(const Locale('en'));
     when(() => mockSettingsRepository.isSalahReminderEnabled).thenReturn(false);
     when(() => mockSettingsRepository.salahReminderOffsetMinutes).thenReturn(0);
-    when(() => mockSettingsRepository.prayerReminderType).thenReturn(PrayerReminderType.after);
+    when(
+      () => mockSettingsRepository.prayerReminderType,
+    ).thenReturn(PrayerReminderType.after);
     when(() => mockSettingsRepository.enabledSalahReminders).thenReturn({});
   });
 

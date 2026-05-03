@@ -54,7 +54,7 @@ class NotificationService {
     try {
       // Timezone already initialized in configureDependencies(), just get local timezone
       debugPrint('NotificationService: getting local timezone...');
-      
+
       String timeZoneName;
       final cachedTimezone = _prefs.getString('last_known_timezone');
 
@@ -63,7 +63,7 @@ class NotificationService {
           const Duration(seconds: 10), // Increased timeout to 10s
         );
         timeZoneName = rawTimeZone.toString();
-        
+
         // On some platforms (like Windows), flutter_timezone might return "TimezoneInfo(Name, ...)"
         if (timeZoneName.contains('(') && timeZoneName.contains(')')) {
           final startIndex = timeZoneName.indexOf('(') + 1;
@@ -79,16 +79,22 @@ class NotificationService {
             }
           }
         }
-        
+
         // Cache successful timezone
         await _prefs.setString('last_known_timezone', timeZoneName);
       } catch (e) {
-        debugPrint('NotificationService: Error/Timeout getting local timezone: $e');
+        debugPrint(
+          'NotificationService: Error/Timeout getting local timezone: $e',
+        );
         if (cachedTimezone != null) {
-          debugPrint('NotificationService: Using cached timezone: $cachedTimezone');
+          debugPrint(
+            'NotificationService: Using cached timezone: $cachedTimezone',
+          );
           timeZoneName = cachedTimezone;
         } else {
-          debugPrint('NotificationService: No cached timezone found, defaulting to UTC');
+          debugPrint(
+            'NotificationService: No cached timezone found, defaulting to UTC',
+          );
           timeZoneName = 'UTC';
         }
       }
@@ -162,16 +168,18 @@ class NotificationService {
   /// Returns true if all critical permissions are granted.
   Future<bool> requestPermissions() async {
     debugPrint('NotificationService: requesting permissions...');
-    
+
     // Notification permission is required on both Android 13+ and iOS
     final notificationStatus = await Permission.notification.request();
-    
+
     if (Platform.isAndroid) {
       final alarmStatus = await Permission.scheduleExactAlarm.request();
-      debugPrint('Permissions result: Notifications=$notificationStatus, Alarms=$alarmStatus');
+      debugPrint(
+        'Permissions result: Notifications=$notificationStatus, Alarms=$alarmStatus',
+      );
       return notificationStatus.isGranted && alarmStatus.isGranted;
     }
-    
+
     debugPrint('Permissions result: Notifications=$notificationStatus');
     return notificationStatus.isGranted;
   }
@@ -215,7 +223,8 @@ class NotificationService {
     }
     return await _notificationsPlugin
             .resolvePlatformSpecificImplementation<
-                AndroidFlutterLocalNotificationsPlugin>()
+              AndroidFlutterLocalNotificationsPlugin
+            >()
             ?.areNotificationsEnabled() ??
         true;
   }
@@ -226,7 +235,8 @@ class NotificationService {
     }
     return await _notificationsPlugin
             .resolvePlatformSpecificImplementation<
-                AndroidFlutterLocalNotificationsPlugin>()
+              AndroidFlutterLocalNotificationsPlugin
+            >()
             ?.canScheduleExactNotifications() ??
         true;
   }
@@ -420,10 +430,8 @@ class NotificationService {
           AndroidFlutterLocalNotificationsPlugin
         >();
 
-    results['notifications_enabled'] =
-        await areNotificationsEnabled();
-    results['exact_alarm_permission'] =
-        await canScheduleExactNotifications();
+    results['notifications_enabled'] = await areNotificationsEnabled();
+    results['exact_alarm_permission'] = await canScheduleExactNotifications();
     results['battery_optimization_ignored'] =
         await isBatteryOptimizationIgnored();
 
@@ -477,15 +485,18 @@ ${(results['channels'] as List).map((c) => '    • ${c['id']} (${c['importance'
     await _prayerScheduler.scheduleSalawatReminders(_notificationsPlugin);
   }
 
-  Future<void> cancelPrayerReminder(Salaah salaah, {bool forTodayOnly = true}) async {
+  Future<void> cancelPrayerReminder(
+    Salaah salaah, {
+    bool forTodayOnly = true,
+  }) async {
     // Current day only for smart cancellation
     final dayOffset = salaah.index;
-    
+
     // Cancel pre-prayer reminder
     await _notificationsPlugin.cancel(
       id: PrayerNotificationScheduler.prayerReminderIdStart + dayOffset,
     );
-    
+
     // Cancel post-prayer reminder
     await _notificationsPlugin.cancel(
       id: PrayerNotificationScheduler.postPrayerReminderIdStart + dayOffset,
@@ -494,8 +505,8 @@ ${(results['channels'] as List).map((c) => '    • ${c['id']} (${c['importance'
 
   Future<void> cancelWerdReminder({bool forTodayOnly = false}) async {
     // If forTodayOnly, we would need to know the specific day's ID
-    // Since werdReminderId is currently a single repeating ID, 
-    // we just cancel it. 
+    // Since werdReminderId is currently a single repeating ID,
+    // we just cancel it.
     // TODO: If we move to non-repeating for rolling window, use day-specific IDs.
     await _notificationsPlugin.cancel(
       id: PrayerNotificationScheduler.werdReminderId,

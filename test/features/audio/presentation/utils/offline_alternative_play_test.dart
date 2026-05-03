@@ -64,6 +64,7 @@ void main() {
     when(() => mockReciterManagerBloc.state).thenReturn(const ReciterManagerState(currentReciter: alafasy));
     when(() => mockConnectivityBloc.state).thenReturn(const ConnectivityStatus(false));
     when(() => mockConnectivityService.hasInternet()).thenAnswer((_) async => false);
+    when(() => mockConnectivityService.hasNetwork()).thenAnswer((_) async => false);
   });
 
   testWidgets('showAlternativeReciterDialog switches reciter and plays on "Play" click', (tester) async {

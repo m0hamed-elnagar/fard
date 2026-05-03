@@ -14,6 +14,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fard/core/services/notification_service.dart';
 
 class FakePrayerRepo implements PrayerRepo {
   final Map<String, DailyRecord> _records = {};
@@ -92,10 +93,13 @@ class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
 class MockWidgetUpdateService extends Mock implements WidgetUpdateService {}
 
+class MockNotificationService extends Mock implements NotificationService {}
+
 void main() {
   late FakePrayerRepo repo;
   late MockSharedPreferences prefs;
   late MockPrayerTimeService prayerTimeService;
+  late MockNotificationService notificationService;
 
   final today = DateTime.now();
   final normalizedToday = DateTime(today.year, today.month, today.day);
@@ -127,9 +131,11 @@ void main() {
     repo = FakePrayerRepo();
     prefs = MockSharedPreferences();
     prayerTimeService = MockPrayerTimeService();
+    notificationService = MockNotificationService();
 
     getIt.registerSingleton<SharedPreferences>(prefs);
     getIt.registerSingleton<PrayerTimeService>(prayerTimeService);
+    getIt.registerSingleton<NotificationService>(notificationService);
     getIt.registerSingleton<WidgetUpdateService>(MockWidgetUpdateService());
 
     // Default: all prayers passed

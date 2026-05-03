@@ -1,3 +1,4 @@
+import 'package:fard/core/services/notification_service.dart';
 import 'package:adhan/adhan.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
@@ -89,10 +90,13 @@ class MockSharedPreferences extends Mock implements SharedPreferences {}
 
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
+class MockNotificationService extends Mock implements NotificationService {}
+
 void main() {
   late FakePrayerRepo repo;
   late MockSharedPreferences prefs;
   late MockPrayerTimeService prayerTimeService;
+  late MockNotificationService notificationService;
 
   final today = DateTime.now();
   final normalizedToday = DateTime(today.year, today.month, today.day);
@@ -124,9 +128,11 @@ void main() {
     repo = FakePrayerRepo();
     prefs = MockSharedPreferences();
     prayerTimeService = MockPrayerTimeService();
+    notificationService = MockNotificationService();
 
     getIt.registerSingleton<SharedPreferences>(prefs);
     getIt.registerSingleton<PrayerTimeService>(prayerTimeService);
+    getIt.registerSingleton<NotificationService>(notificationService);
 
     // Default: all prayers passed
     when(
