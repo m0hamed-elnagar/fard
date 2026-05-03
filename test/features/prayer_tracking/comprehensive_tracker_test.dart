@@ -89,10 +89,13 @@ class MockSharedPreferences extends Mock implements SharedPreferences {}
 
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
+class MockNotificationService extends Mock implements NotificationService {}
+
 void main() {
   late FakePrayerRepo repo;
   late MockSharedPreferences prefs;
   late MockPrayerTimeService prayerTimeService;
+  late MockNotificationService notificationService;
 
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
@@ -109,9 +112,11 @@ void main() {
     repo = FakePrayerRepo();
     prefs = MockSharedPreferences();
     prayerTimeService = MockPrayerTimeService();
+    notificationService = MockNotificationService();
 
     getIt.registerSingleton<SharedPreferences>(prefs);
     getIt.registerSingleton<PrayerTimeService>(prayerTimeService);
+    getIt.registerSingleton<NotificationService>(notificationService);
 
     when(() => prefs.getDouble('latitude')).thenReturn(30.0);
     when(() => prefs.getDouble('longitude')).thenReturn(31.0);

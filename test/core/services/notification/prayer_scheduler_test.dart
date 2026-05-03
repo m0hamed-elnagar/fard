@@ -152,6 +152,10 @@ void main() {
     ).thenReturn(false);
     when(() => mockSettingsRepository.reminders).thenReturn([]);
     when(() => mockSettingsRepository.locale).thenReturn(const Locale('en'));
+    when(() => mockSettingsRepository.isSalahReminderEnabled).thenReturn(false);
+    when(() => mockSettingsRepository.salahReminderOffsetMinutes).thenReturn(0);
+    when(() => mockSettingsRepository.prayerReminderType).thenReturn(PrayerReminderType.after);
+    when(() => mockSettingsRepository.enabledSalahReminders).thenReturn({});
   });
 
   test('schedulePrayerNotifications schedules all 5 prayers', () async {

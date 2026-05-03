@@ -164,14 +164,6 @@ class WidgetUpdateService {
         'locale': _settingsProvider.locale.languageCode,
         'prayer_data': prayerDataJson,
         'hijri_date': _prefs.getString('flutter.hijri_date_cache') ?? '',
-        'colors': {
-          'primary': jsonMap['primaryColorHex'],
-          'accent': jsonMap['accentColorHex'],
-          'background': jsonMap['backgroundColorHex'],
-          'surface': jsonMap['surfaceColorHex'],
-          'text': jsonMap['textColorHex'],
-          'text_secondary': jsonMap['textSecondaryColorHex'],
-        },
         'prayer_times': {
           'fajr': prayerTimes.fajr.millisecondsSinceEpoch,
           'dhuhr': prayerTimes.dhuhr.millisecondsSinceEpoch,
@@ -224,10 +216,10 @@ class WidgetUpdateService {
     }
   }
 
-  Future<void> clearWidgetTheme() async {
+  Future<void> clearWidgetTheme({bool triggerUpdate = true}) async {
     try {
       const channel = MethodChannel('com.qada.fard/widget_theme');
-      await channel.invokeMethod('clearWidgetTheme');
+      await channel.invokeMethod('clearWidgetTheme', {'trigger_update': triggerUpdate});
     } catch (e) {
       debugPrint('WidgetUpdateService: Error clearing widget theme: $e');
       rethrow;

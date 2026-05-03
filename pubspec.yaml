@@ -78,7 +78,7 @@ flutter_launcher_icons:
   image_path: "assets/fard_logo.png"
   adaptive_icon_background: "#FFFFFF"
   adaptive_icon_foreground: "assets/fard_logo.png"
-  adaptive_icon_foreground_inset: 18
+  adaptive_icon_foreground_inset: 13
   remove_alpha_ios: true
 
 flutter:

@@ -114,17 +114,11 @@ void main() {
       ),
     ).thenAnswer((_) async {});
 
-    when(() => mockAzkarRepository.getAllAzkar()).thenAnswer(
-      (_) async => [
-        const AzkarItem(
-          category: 'الأذكار بعد السلام من الصلاة',
-          zekr: 'SubhanAllah',
-          description: '',
-          count: 1,
-          reference: '',
-        ),
-      ],
-    );
+    when(() => mockSettingsProvider.isSalahReminderEnabled).thenReturn(false);
+    when(() => mockSettingsProvider.salahReminderOffsetMinutes).thenReturn(0);
+    when(() => mockSettingsProvider.prayerReminderType).thenReturn(PrayerReminderType.after);
+    when(() => mockSettingsProvider.enabledSalahReminders).thenReturn({});
+    when(() => mockSettingsProvider.isAfterSalahAzkarEnabled).thenReturn(false);
   });
 
   test(

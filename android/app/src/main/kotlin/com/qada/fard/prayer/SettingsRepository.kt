@@ -113,7 +113,7 @@ class SettingsRepository(private val context: Context) {
      * Check if a custom widget theme is currently saved in SharedPreferences.
      */
     fun hasWidgetThemeOverride(): Boolean {
-        return prefs.contains("flutter.widget_theme_primary")
+        return prefs.getBoolean("flutter.widget_theme_is_manual", false)
     }
 
     /**
@@ -142,6 +142,26 @@ class SettingsRepository(private val context: Context) {
             putString("flutter.widget_theme_text_secondary", if (cu.isValidHex(secondary)) secondary else "#8B949E")
             
             putLong("flutter/widget_theme_timestamp", System.currentTimeMillis())
+            putBoolean("flutter.widget_theme_is_manual", true)
+            commit()
+        }
+    }
+
+    /**
+     * Save the app's current theme to the widget theme keys, but marked as non-manual.
+     * This makes "Follow App Theme" just as fast and effective as manual changes.
+     */
+    fun syncAppTheme(theme: com.qada.fard.widget.WidgetTheme) {
+        if (hasWidgetThemeOverride()) return // Don't overwrite manual settings
+
+        prefs.edit().apply {
+            putString("flutter.widget_theme_primary", theme.primaryColorHex)
+            putString("flutter.widget_theme_accent", theme.accentColorHex)
+            putString("flutter.widget_theme_background", theme.backgroundColorHex)
+            putString("flutter.widget_theme_surface", theme.surfaceColorHex)
+            putString("flutter.widget_theme_text", theme.textColorHex)
+            putString("flutter.widget_theme_text_secondary", theme.textSecondaryColorHex)
+            putBoolean("flutter.widget_theme_is_manual", false)
             commit()
         }
     }
@@ -168,7 +188,9 @@ class SettingsRepository(private val context: Context) {
     }
 
     fun resolveWidgetTheme(fallback: com.qada.fard.widget.WidgetTheme): com.qada.fard.widget.WidgetTheme {
-        return if (hasWidgetThemeOverride()) {
+        // Now that presets also sync to the direct keys, we always prioritize the direct keys.
+        // This ensures presets are just as 'effective' as manual changes.
+        return if (prefs.contains("flutter.widget_theme_primary")) {
             getWidgetTheme()
         } else {
             fallback

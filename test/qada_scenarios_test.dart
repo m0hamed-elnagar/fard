@@ -5,6 +5,7 @@ import 'package:fard/features/prayer_tracking/domain/missed_counter.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/prayer_tracking/domain/prayer_repo.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
+import 'package:fard/core/services/notification_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,11 +16,14 @@ class MockSharedPreferences extends Mock implements SharedPreferences {}
 
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
+class MockNotificationService extends Mock implements NotificationService {}
+
 void main() {
   late MockPrayerRepo repo;
   late PrayerTrackerBloc bloc;
   late MockSharedPreferences prefs;
   late MockPrayerTimeService prayerTimeService;
+  late MockNotificationService notificationService;
 
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
@@ -43,9 +47,11 @@ void main() {
     repo = MockPrayerRepo();
     prefs = MockSharedPreferences();
     prayerTimeService = MockPrayerTimeService();
+    notificationService = MockNotificationService();
 
     getIt.registerSingleton<SharedPreferences>(prefs);
     getIt.registerSingleton<PrayerTimeService>(prayerTimeService);
+    getIt.registerSingleton<NotificationService>(notificationService);
 
     bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService);
 

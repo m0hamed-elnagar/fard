@@ -604,6 +604,15 @@ class SettingsCubit extends Cubit<SettingsState> {
   Future<void> selectThemePreset(String presetId) async {
     try {
       await _applyTheme.execute(presetId);
+      
+      // Clear manual widget theme override silently (no widget refresh yet)
+      // This prevents rate-limiting when followed by _widgetSync()
+      try {
+        await _widget.clearWidgetTheme(triggerUpdate: false);
+      } catch (e) {
+        debugPrint('SettingsCubit: Failed to clear widget theme override: $e');
+      }
+
       emit(
         state.copyWith(
           themePresetId: presetId,
@@ -620,6 +629,14 @@ class SettingsCubit extends Cubit<SettingsState> {
   Future<void> saveCustomTheme(Map<String, String> colors) async {
     try {
       await _saveCustomTheme.execute(colors);
+
+      // Clear manual widget theme override silently
+      try {
+        await _widget.clearWidgetTheme(triggerUpdate: false);
+      } catch (e) {
+        debugPrint('SettingsCubit: Failed to clear widget theme override: $e');
+      }
+
       emit(
         state.copyWith(
           themePresetId: 'custom',
@@ -690,6 +707,14 @@ class SettingsCubit extends Cubit<SettingsState> {
   Future<void> activateCustomTheme(String themeId) async {
     try {
       await _repo.setActiveCustomTheme(themeId);
+
+      // Clear manual widget theme override silently
+      try {
+        await _widget.clearWidgetTheme(triggerUpdate: false);
+      } catch (e) {
+        debugPrint('SettingsCubit: Failed to clear widget theme override: $e');
+      }
+
       final theme = state.savedCustomThemes.firstWhere(
         (t) => t.id == themeId,
         orElse: () => CustomTheme.defaultPalette(id: themeId, name: 'Unknown'),

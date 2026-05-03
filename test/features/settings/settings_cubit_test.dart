@@ -75,7 +75,7 @@ void main() {
     mockGetPresets = MockGetAvailableThemePresets();
     mockWidget = MockWidgetUpdateService();
 
-    // Mock SettingsRepository defaults
+    // Default SettingsRepository stubs
     when(() => mockSettingsRepo.locale).thenReturn(const Locale('ar'));
     when(() => mockSettingsRepo.latitude).thenReturn(null);
     when(() => mockSettingsRepo.longitude).thenReturn(null);
@@ -107,6 +107,7 @@ void main() {
     when(
       () => mockSettingsRepo.salaahSettings,
     ).thenReturn(Salaah.values.map((s) => SalaahSettings(salaah: s)).toList());
+
     when(() => mockSettingsRepo.updateLocale(any())).thenAnswer((_) async {});
     when(
       () => mockSettingsRepo.updateLocation(
@@ -133,10 +134,10 @@ void main() {
     ).thenAnswer((_) async {});
     when(
       () => mockSettingsRepo.updateAfterSalahAzkarEnabled(any()),
-    ).thenAnswer((_) async => true);
+    ).thenAnswer((_) async {});
     when(
       () => mockSettingsRepo.toggleQadaEnabled(),
-    ).thenAnswer((_) async => true);
+    ).thenAnswer((_) async {});
     when(() => mockSettingsRepo.addReminder(any())).thenAnswer((_) async {});
     when(() => mockSettingsRepo.removeReminder(any())).thenAnswer((_) async {});
     when(
@@ -160,6 +161,22 @@ void main() {
     ).thenAnswer((_) async {});
     when(() => mockSettingsRepo.updateSalahReminderEnabled(any())).thenAnswer((_) async {});
     when(() => mockSettingsRepo.updateEnabledSalahReminders(any())).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateSalahReminderOffset(any())).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updatePrayerReminderType(any())).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateWerdReminderEnabled(any())).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateWerdReminderTime(any())).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateSalawatReminderEnabled(any())).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateSalawatFrequency(any())).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateSalawatStartTime(any())).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateSalawatEndTime(any())).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateThemePreset(any())).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.saveCustomTheme(any())).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.addCustomTheme(any())).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateCustomTheme(any(), any())).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.deleteCustomTheme(any())).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.setActiveCustomTheme(any())).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateAudioQuality(any())).thenAnswer((_) async {});
+    when(() => mockSettingsRepo.updateAudioPlayerExpanded(any())).thenAnswer((_) async {});
 
     // Mock use cases
     when(() => mockSyncNotif.execute()).thenAnswer((_) async {});

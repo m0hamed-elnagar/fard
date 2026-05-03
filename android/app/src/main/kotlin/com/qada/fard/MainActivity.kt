@@ -157,16 +157,19 @@ class MainActivity : AudioServiceActivity() {
 
                 "clearWidgetTheme" -> {
                     Log.d(TAG, "=== CLEAR WIDGET THEME CALLED ===")
+                    val triggerUpdate = call.argument<Boolean>("trigger_update") ?: true
                     CoroutineScope(Dispatchers.Main).launch {
                         try {
                             val repository = SettingsRepository(this@MainActivity)
                             repository.clearWidgetTheme()
                             
-                            // Small delay to ensure commit has settled
-                            kotlinx.coroutines.delay(100)
+                            if (triggerUpdate) {
+                                // Small delay to ensure commit has settled
+                                kotlinx.coroutines.delay(100)
 
-                            // Trigger Widget Refresh to revert to dynamic colors
-                            triggerWidgetUpdates()
+                                // Trigger Widget Refresh to revert to dynamic colors
+                                triggerWidgetUpdates()
+                            }
                             
                             result.success(true)
                         } catch (e: Exception) {
@@ -215,16 +218,6 @@ class MainActivity : AudioServiceActivity() {
                 val prayerData = settingsMap?.get("prayer_data") as? String
                 val hijriDate = settingsMap?.get("hijri_date") as? String
                 
-                // Robust color parsing - Flutter maps often arrive as Map<Any, Any>
-                val rawColors = settingsMap?.get("colors") as? Map<*, *>
-                val colors = mutableMapOf<String, String>()
-                rawColors?.forEach { (key, value) ->
-                    if (key is String && value is String) {
-                        colors[key] = value
-                    }
-                }
-                Log.d(TAG, "Parsed colors: $colors")
-
                 // Validate required settings
                 if (latitude == null || longitude == null || calculationMethod == null ||
                     madhab == null || locale == null) {
@@ -245,22 +238,13 @@ class MainActivity : AudioServiceActivity() {
                     hijriDate = hijriDate
                 )
 
-                // 2.1 Save colors to widget theme if present
-                if (colors.isNotEmpty()) {
-                    Log.d(TAG, "Saving theme colors override with correct keys...")
-                    val themeMap = mapOf(
-                        "primaryColorHex" to (colors["primary"] ?: "#2E7D32"),
-                        "accentColorHex" to (colors["accent"] ?: "#FFD54F"),
-                        "backgroundColorHex" to (colors["background"] ?: "#0D1117"),
-                        "surfaceColorHex" to (colors["surface"] ?: "#161B22"),
-                        "textColorHex" to (colors["text"] ?: "#FFFFFF"),
-                        "textSecondaryColorHex" to (colors["text_secondary"] ?: "#8B949E")
-                    )
-                    repository.saveWidgetTheme(themeMap)
-                    Log.d(TAG, "Theme saved successfully: $themeMap")
+                // 2.1 Explicitly sync app theme to widget theme keys if not manual
+                if (prayerData != null) {
+                    val appTheme = com.qada.fard.widget.WidgetParser.parseTheme(prayerData)
+                    repository.syncAppTheme(appTheme)
                 }
 
-                Log.d(TAG, "Settings and colors saved to SharedPreferences")
+                Log.d(TAG, "Settings saved to SharedPreferences")
 
                 // 3. Invalidate Kotlin calculation cache
                 PrayerTimesCalculator.invalidateCache()
