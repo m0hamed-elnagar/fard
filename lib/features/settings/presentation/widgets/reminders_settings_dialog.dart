@@ -2,8 +2,8 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/core/extensions/salaah_extension.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -70,7 +70,7 @@ class RemindersSettingsDialog extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
 
-    return BlocBuilder<SettingsCubit, SettingsState>(
+    return BlocBuilder<DailyRemindersCubit, DailyRemindersState>(
       builder: (context, state) {
         return Dialog(
           backgroundColor: context.surfaceColor,
@@ -112,7 +112,7 @@ class RemindersSettingsDialog extends StatelessWidget {
                           state.isSalahReminderEnabled,
                           (val) {
                             context
-                                .read<SettingsCubit>()
+                                .read<DailyRemindersCubit>()
                                 .toggleSalahReminder(val);
                             _showReminderSnackBar(
                               context,
@@ -155,7 +155,7 @@ class RemindersSettingsDialog extends StatelessWidget {
                                   activeColor: context.secondaryColor,
                                   onChanged:
                                       (val) => context
-                                          .read<SettingsCubit>()
+                                          .read<DailyRemindersCubit>()
                                           .setSalahReminderOffset(val.round()),
                                 ),
                               ],
@@ -175,7 +175,7 @@ class RemindersSettingsDialog extends StatelessWidget {
                                       selected: isEnabled,
                                       onSelected: (val) {
                                         context
-                                            .read<SettingsCubit>()
+                                            .read<DailyRemindersCubit>()
                                             .toggleSpecificSalahReminder(s);
                                         _showReminderSnackBar(
                                           context,
@@ -219,7 +219,7 @@ class RemindersSettingsDialog extends StatelessWidget {
                           state.isWerdReminderEnabled,
                           (val) {
                             context
-                                .read<SettingsCubit>()
+                                .read<DailyRemindersCubit>()
                                 .toggleWerdReminder(val);
                             _showReminderSnackBar(
                               context,
@@ -249,7 +249,7 @@ class RemindersSettingsDialog extends StatelessWidget {
                               );
                               if (time != null && context.mounted) {
                                 context
-                                    .read<SettingsCubit>()
+                                    .read<DailyRemindersCubit>()
                                     .setWerdReminderTime(time);
                                 _showReminderSnackBar(
                                   context,
@@ -278,7 +278,7 @@ class RemindersSettingsDialog extends StatelessWidget {
                           state.isSalawatReminderEnabled,
                           (val) {
                             context
-                                .read<SettingsCubit>()
+                                .read<DailyRemindersCubit>()
                                 .toggleSalawatReminder(val);
                             _showReminderSnackBar(
                               context,
@@ -296,75 +296,80 @@ class RemindersSettingsDialog extends StatelessWidget {
                           },
                           context,
                         ),
-                      if (state.isSalawatReminderEnabled) ...[
-                        ListTile(
-                          title: Text(isAr ? 'التكرار كل' : 'Frequency'),
-                          subtitle: Text(
-                            isAr
-                                ? '${state.salawatFrequencyHours} ساعات'
-                                : 'Every ${state.salawatFrequencyHours} hours',
+                        if (state.isSalawatReminderEnabled) ...[
+                          ListTile(
+                            title: Text(isAr ? 'التكرار كل' : 'Frequency'),
+                            subtitle: Text(
+                              isAr
+                                  ? '${state.salawatFrequencyHours} ساعات'
+                                  : 'Every ${state.salawatFrequencyHours} hours',
+                            ),
+                            trailing: DropdownButton<int>(
+                              value: state.salawatFrequencyHours,
+                              underline: const SizedBox(),
+                              items:
+                                  [1, 2, 3, 4, 6].map((h) {
+                                    return DropdownMenuItem(
+                                      value: h,
+                                      child: Text(
+                                        isAr ? '$h ساعات' : '$h hours',
+                                      ),
+                                    );
+                                  }).toList(),
+                              onChanged: (val) {
+                                if (val != null) {
+                                  context
+                                      .read<DailyRemindersCubit>()
+                                      .setSalawatFrequency(val);
+                                }
+                              },
+                            ),
                           ),
-                          trailing: DropdownButton<int>(
-                            value: state.salawatFrequencyHours,
-                            underline: const SizedBox(),
-                            items: [1, 2, 3, 4, 6].map((h) => DropdownMenuItem(
-                              value: h,
-                              child: Text(isAr ? '$h ساعات' : '$h hours'),
-                            )).toList(),
-                            onChanged: (val) {
-                              if (val != null) {
+                          ListTile(
+                            title: Text(isAr ? 'من وقت' : 'Start Time'),
+                            subtitle: Text(state.salawatStartTime),
+                            trailing: const Icon(Icons.access_time_rounded),
+                            onTap: () async {
+                              final time = await _selectTime(
+                                context,
+                                state.salawatStartTime,
+                              );
+                              if (time != null && context.mounted) {
                                 context
-                                    .read<SettingsCubit>()
-                                    .setSalawatFrequency(val);
+                                    .read<DailyRemindersCubit>()
+                                    .setSalawatStartTime(time);
                               }
                             },
                           ),
-                        ),
-                        ListTile(
-                          title: Text(isAr ? 'من وقت' : 'Start Time'),
-                          subtitle: Text(state.salawatStartTime),
-                          trailing: const Icon(Icons.access_time_rounded),
-                          onTap: () async {
-                            final time = await _selectTime(
-                              context,
-                              state.salawatStartTime,
-                            );
-                            if (time != null && context.mounted) {
-                              context
-                                  .read<SettingsCubit>()
-                                  .setSalawatStartTime(time);
-                            }
-                          },
-                        ),
-                        ListTile(
-                          title: Text(isAr ? 'إلى وقت' : 'End Time'),
-                          subtitle: Text(state.salawatEndTime),
-                          trailing: const Icon(Icons.access_time_rounded),
-                          onTap: () async {
-                            final time = await _selectTime(
-                              context,
-                              state.salawatEndTime,
-                            );
-                            if (time != null && context.mounted) {
-                              context
-                                  .read<SettingsCubit>()
-                                  .setSalawatEndTime(time);
-                            }
-                          },
-                        ),
+                          ListTile(
+                            title: Text(isAr ? 'إلى وقت' : 'End Time'),
+                            subtitle: Text(state.salawatEndTime),
+                            trailing: const Icon(Icons.access_time_rounded),
+                            onTap: () async {
+                              final time = await _selectTime(
+                                context,
+                                state.salawatEndTime,
+                              );
+                              if (time != null && context.mounted) {
+                                context
+                                    .read<DailyRemindersCubit>()
+                                    .setSalawatEndTime(time);
+                              }
+                            },
+                          ),
+                        ],
+                        const SizedBox(height: 40),
                       ],
-                      const SizedBox(height: 40),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
   Widget _buildSectionTitle(String title, BuildContext context) {
     return Padding(

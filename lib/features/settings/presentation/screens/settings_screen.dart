@@ -1,33 +1,25 @@
-import 'package:fard/core/services/export_import_service.dart';
-import 'package:fard/core/services/widget_update_service.dart';
-import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
-import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
-import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
-import 'package:fard/features/settings/presentation/widgets/theme_editor_widget.dart';
-import 'package:fard/features/settings/presentation/widgets/widget_preview.dart';
-import 'package:fard/features/settings/presentation/widgets/widget_color_picker.dart';
-import 'package:fard/features/settings/domain/entities/widget_preview_theme.dart';
-import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/core/di/injection.dart';
+import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/core/mixins/notification_permission_mixin.dart';
 import 'package:fard/core/services/location_service.dart';
 import 'package:fard/core/services/notification_service.dart';
-import 'package:fard/core/widgets/custom_toggle.dart';
+import 'package:fard/core/services/widget_update_service.dart';
+import 'package:fard/core/theme/app_colors.dart';
+import 'package:fard/core/theme/theme_presets.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
-import 'package:fard/features/settings/domain/azkar_reminder.dart';
-import 'package:fard/features/settings/domain/entities/custom_theme.dart';
-import 'package:fard/features/settings/domain/entities/theme_preset.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
 import 'package:fard/features/settings/presentation/screens/reminders_settings_screen.dart';
-import 'package:fard/features/audio/presentation/screens/offline_audio_screen.dart';
+import 'package:fard/features/settings/presentation/widgets/appearance_section.dart';
+import 'package:fard/features/settings/presentation/widgets/azkar_section.dart';
+import 'package:fard/features/settings/presentation/widgets/general_section.dart';
+import 'package:fard/features/settings/presentation/widgets/location_section.dart';
+import 'package:fard/features/settings/presentation/widgets/widget_preview_section.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import 'package:fard/core/mixins/notification_permission_mixin.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -39,33 +31,12 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen>
     with NotificationPermissionMixin {
   bool _canScheduleExactAlarms = true;
-  bool _isThemeListExpanded = false;
-  bool _isAppearanceExpanded = false;
-  bool _isAzkarExpanded = false;
-  bool _isGeneralExpanded = false;
-  bool _isDataLocationExpanded = false;
-  bool _isWidgetPreviewExpanded = false;
-
-  // Widget preview state
-  WidgetPreviewType _widgetPreviewType = WidgetPreviewType.prayerSchedule;
-  WidgetPreviewTheme _widgetPreviewTheme = const WidgetPreviewTheme();
-  bool _isApplyingWidgetTheme = false;
 
   @override
   void initState() {
     super.initState();
     context.read<AzkarBloc>().add(const AzkarEvent.loadCategories());
     _checkPermissions();
-    _loadSavedWidgetTheme();
-  }
-
-  Future<void> _loadSavedWidgetTheme() async {
-    final themeMap = await getIt<WidgetUpdateService>().getWidgetTheme();
-    if (themeMap != null && mounted) {
-      setState(() {
-        _widgetPreviewTheme = WidgetPreviewTheme.fromMap(themeMap);
-      });
-    }
   }
 
   Future<void> _checkPermissions() async {
@@ -91,14 +62,15 @@ class _SettingsScreenState extends State<SettingsScreen>
     String desc = '';
     String primaryBtnLabel = l10n.tryAgain;
     VoidCallback onPrimary = () =>
-        context.read<SettingsCubit>().refreshLocation();
+        context.read<LocationPrayerCubit>().refreshLocation();
 
     switch (status) {
       case LocationStatus.serviceDisabled:
         title = l10n.locationDisabledTitle;
         desc = l10n.locationDisabledDesc;
         primaryBtnLabel = l10n.enableGPS;
-        onPrimary = () => context.read<SettingsCubit>().openLocationSettings();
+        onPrimary = () =>
+            context.read<LocationPrayerCubit>().openLocationSettings();
         break;
       case LocationStatus.denied:
         title = l10n.locationDeniedTitle;
@@ -108,7 +80,7 @@ class _SettingsScreenState extends State<SettingsScreen>
         title = l10n.locationDeniedForeverTitle;
         desc = l10n.locationDeniedForeverDesc;
         primaryBtnLabel = l10n.openSettings;
-        onPrimary = () => context.read<SettingsCubit>().openAppSettings();
+        onPrimary = () => context.read<LocationPrayerCubit>().openAppSettings();
         break;
       default:
         title = l10n.errorOccurred;
@@ -155,101 +127,149 @@ class _SettingsScreenState extends State<SettingsScreen>
         foregroundColor: context.onSurfaceColor,
         centerTitle: true,
       ),
-      body: BlocListener<SettingsCubit, SettingsState>(
+      body: BlocListener<LocationPrayerCubit, LocationPrayerState>(
         listenWhen: (prev, curr) =>
             curr.lastLocationStatus != null &&
             curr.lastLocationStatus != prev.lastLocationStatus,
         listener: (context, state) =>
             _handleLocationStatus(context, state.lastLocationStatus!, l10n),
-        child: BlocBuilder<SettingsCubit, SettingsState>(
-          builder: (context, state) {
-            return ListView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 40.0),
-              children: [
-                if (!_canScheduleExactAlarms)
-                  _buildWarningCard(
-                    l10n.exactAlarmWarningTitle,
-                    l10n.exactAlarmWarningDesc,
-                    Icons.warning_amber_rounded,
-                    actionLabel: l10n.openSettings,
-                    onAction: () =>
-                        getIt<NotificationService>().openNotificationSettings(),
+        child: ListView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 40.0),
+          children: [
+            if (!_canScheduleExactAlarms)
+              _buildWarningCard(
+                l10n.exactAlarmWarningTitle,
+                l10n.exactAlarmWarningDesc,
+                Icons.warning_amber_rounded,
+                actionLabel: l10n.openSettings,
+                onAction: () =>
+                    getIt<NotificationService>().openNotificationSettings(),
+              ),
+
+            // Section 1: Appearance
+            const AppearanceSection(),
+
+            BlocBuilder<LocationPrayerCubit, LocationPrayerState>(
+              builder: (context, state) {
+                return WidgetPreviewSection(
+                  localeCode: Localizations.localeOf(context).languageCode,
+                  presets: ThemePresets.all,
+                );
+              },
+            ),
+
+            // Section 3: Reminders & Notifications (Clickable Card)
+            _buildSectionTile(
+              title: l10n.remindersNotifications,
+              subtitle: l10n.azanSettingsDesc,
+              icon: Icons.notifications_active_rounded,
+              accentColor: context.tertiaryColor,
+              onTap: () {
+                HapticFeedback.lightImpact();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const RemindersSettingsScreen(),
                   ),
+                );
+              },
+            ),
 
-                // Section 1: Appearance
-                _buildAppearanceSection(context, state, l10n),
+            // Section 4: Azkar
+            const AzkarSection(),
 
-                // Section 2: Widget Preview
-                _buildWidgetPreviewSection(context, state, l10n),
+            // Section 5: General
+            const GeneralSection(),
 
-                // Section 3: Reminders & Notifications (Clickable Card)
-                _buildSectionTile(
-                  title: l10n.remindersNotifications,
-                  subtitle: l10n.azanSettingsDesc,
-                  icon: Icons.notifications_active_rounded,
-                  accentColor: context.tertiaryColor,
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const RemindersSettingsScreen(),
-                      ),
-                    );
-                  },
-                ),
+            // Section 6: Data & Location
+            const DataAndLocationSection(),
 
-                // Section 4: Azkar
-                _buildAzkarSection(context, state, l10n),
-
-                // Section 5: General
-                _buildGeneralSection(context, state, l10n),
-
-                // Section 6: Data & Location
-                _buildDataAndLocationSection(context, state, l10n),
-
-                // Debug: Widget Refresh Section (only in debug mode)
-                if (!kReleaseMode) ...[
-                  _buildSection(
-                    context,
-                    title: 'Debug: Widget',
-                    icon: Icons.bug_report_rounded,
-                    accentColor: context.errorColor,
-                    children: [
-                      Text(
-                        'Force refresh the home screen widget. Use this for testing.',
-                        style: TextStyle(
-                          color: context.onSurfaceVariantColor,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Refresh Widget'),
-                        trailing: ElevatedButton.icon(
-                          onPressed: () {
-                            HapticFeedback.mediumImpact();
-                            getIt<WidgetUpdateService>().updateWidget();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Widget refresh triggered!'),
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.refresh, size: 18),
-                          label: const Text('Refresh'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ],
-            );
-          },
+            // Debug: Widget Refresh Section (only in debug mode)
+            if (!kReleaseMode) ...[
+              _buildDebugWidgetSection(context, l10n),
+            ],
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDebugWidgetSection(BuildContext context, AppLocalizations l10n) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: context.surfaceContainerColor,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: context.outlineColor.withValues(alpha: 0.15),
+          width: 1.0,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: context.errorColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(Icons.bug_report_rounded,
+                      color: context.errorColor, size: 22),
+                ),
+                const SizedBox(width: 16),
+                Text(
+                  'Debug: Widget',
+                  style: GoogleFonts.amiri(
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold,
+                    color: context.onSurfaceColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Force refresh the home screen widget. Use this for testing.',
+                  style: TextStyle(
+                    color: context.onSurfaceVariantColor,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Refresh Widget'),
+                  trailing: ElevatedButton.icon(
+                    onPressed: () {
+                      HapticFeedback.mediumImpact();
+                      getIt<WidgetUpdateService>().updateWidget();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Widget refresh triggered!'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.refresh, size: 18),
+                    label: const Text('Refresh'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -309,899 +329,6 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  Widget _buildDropdown<T>({
-    required T value,
-    required List<DropdownMenuItem<T>> items,
-    required ValueChanged<T?> onChanged,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-      decoration: BoxDecoration(
-        color: context.surfaceContainerHighestColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.outlineColor),
-      ),
-      child: DropdownButton<T>(
-        value: value,
-        items: items,
-        onChanged: (val) {
-          HapticFeedback.selectionClick();
-          onChanged(val);
-        },
-        underline: const SizedBox(),
-        icon: Icon(Icons.keyboard_arrow_down_rounded, size: 20),
-        dropdownColor: context.surfaceContainerHighestColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-    );
-  }
-
-  Widget _buildReminderItem({
-    required BuildContext context,
-    required int index,
-    required AzkarReminder reminder,
-  }) {
-    final cubit = context.read<SettingsCubit>();
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: Text(
-        reminder.title.isNotEmpty ? reminder.title : reminder.category,
-        style: TextStyle(
-          fontWeight: FontWeight.w500,
-          color: reminder.isEnabled
-              ? context.onSurfaceColor
-              : context.onSurfaceVariantColor,
-        ),
-      ),
-      subtitle: Text(
-        reminder.time,
-        style: TextStyle(
-          color: context.secondaryColor,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CustomToggle(
-            value: reminder.isEnabled,
-            onChanged: (val) async {
-              if (val) {
-                final granted = await checkAndRequestNotificationPermissions(
-                  context,
-                );
-                if (!granted) return;
-              }
-              cubit.toggleReminder(index);
-            },
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.edit_outlined,
-              size: 20,
-              color: context.onSurfaceVariantColor,
-            ),
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              _showAddReminderDialog(context, index: index, reminder: reminder);
-            },
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.delete_outline,
-              size: 20,
-              color: context.errorColor,
-            ),
-            onPressed: () {
-              HapticFeedback.mediumImpact();
-              cubit.removeReminder(index);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAddReminderDialog(
-    BuildContext context, {
-    int? index,
-    AzkarReminder? reminder,
-  }) {
-    final cubit = context.read<SettingsCubit>();
-    final azkarBloc = context.read<AzkarBloc>();
-    final l10n = AppLocalizations.of(context)!;
-
-    String selectedCategory = reminder?.category ?? '';
-    String selectedTime = reminder?.time ?? '05:00';
-    String customTitle = reminder?.title ?? '';
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return BlocBuilder<AzkarBloc, AzkarState>(
-              bloc: azkarBloc,
-              builder: (context, azkarState) {
-                if (selectedCategory.isEmpty &&
-                    azkarState.categories.isNotEmpty) {
-                  selectedCategory = azkarState.categories.first;
-                }
-
-                return AlertDialog(
-                  title: Text(
-                    index == null ? l10n.addReminder : l10n.editReminder,
-                    style: GoogleFonts.amiri(fontWeight: FontWeight.bold),
-                  ),
-                  content: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Searchable Category Selection
-                        InkWell(
-                          borderRadius: BorderRadius.circular(12),
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            _showSearchableCategoryPicker(
-                              context,
-                              azkarState.categories,
-                              (val) {
-                                setDialogState(() {
-                                  selectedCategory = val;
-                                });
-                              },
-                            );
-                          },
-                          child: InputDecorator(
-                            decoration: InputDecoration(
-                              labelText: l10n.category,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              suffixIcon: Icon(Icons.search),
-                              filled: true,
-                              fillColor: context.surfaceContainerHighestColor,
-                            ),
-                            child: Text(
-                              selectedCategory.isEmpty
-                                  ? l10n.selectCategory
-                                  : selectedCategory,
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // Custom Title
-                        TextFormField(
-                          decoration: InputDecoration(
-                            labelText: l10n.customTitleOptional,
-                            hintText: selectedCategory,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            filled: true,
-                            fillColor: context.surfaceContainerHighestColor,
-                          ),
-                          initialValue: customTitle,
-                          onChanged: (val) => customTitle = val,
-                        ),
-                        const SizedBox(height: 16),
-                        // Time Selection
-                        _buildTimeSettingItem(
-                          context: context,
-                          title: l10n.time,
-                          time: selectedTime,
-                          onTap: () async {
-                            HapticFeedback.lightImpact();
-                            final time = await _selectTime(
-                              context,
-                              selectedTime,
-                            );
-                            if (time != null) {
-                              setDialogState(() => selectedTime = time);
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(
-                        l10n.cancel,
-                        style: TextStyle(color: context.onSurfaceVariantColor),
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (selectedCategory.isEmpty) return;
-                        HapticFeedback.mediumImpact();
-
-                        final newReminder = AzkarReminder(
-                          category: selectedCategory,
-                          time: selectedTime,
-                          title: customTitle.isNotEmpty
-                              ? customTitle
-                              : selectedCategory,
-                          isEnabled: reminder?.isEnabled ?? true,
-                        );
-
-                        if (index == null) {
-                          cubit.addReminder(newReminder);
-                        } else {
-                          cubit.updateReminder(index, newReminder);
-                        }
-                        Navigator.pop(context);
-                      },
-                      child: Text(l10n.yes),
-                    ),
-                  ],
-                );
-              },
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _showSearchableCategoryPicker(
-    BuildContext context,
-    List<String> categories,
-    Function(String) onSelected,
-  ) {
-    final l10n = AppLocalizations.of(context)!;
-    String sheetSearchQuery = '';
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: context.surfaceContainerColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setSheetState) {
-            final filteredCategories = categories
-                .where(
-                  (cat) =>
-                      sheetSearchQuery.isEmpty ||
-                      cat.toLowerCase().contains(sheetSearchQuery),
-                )
-                .toList();
-
-            return Container(
-              padding: EdgeInsets.only(
-                top: 12,
-                left: 16,
-                right: 16,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-              ),
-              height: MediaQuery.of(context).size.height * 0.75,
-              child: Column(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 12),
-                    decoration: BoxDecoration(
-                      color: context.outlineColor,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  TextField(
-                    autofocus: true,
-                    decoration: InputDecoration(
-                      hintText: l10n.searchCategory,
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      filled: true,
-                      fillColor: context.surfaceContainerHighestColor,
-                    ),
-                    onChanged: (val) {
-                      setSheetState(() {
-                        sheetSearchQuery = val.toLowerCase();
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: ListView.builder(
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: filteredCategories.length,
-                      itemBuilder: (context, index) {
-                        final cat = filteredCategories[index];
-                        return ListTile(
-                          title: Text(
-                            cat,
-                            textAlign: l10n.localeName == 'ar'
-                                ? TextAlign.right
-                                : TextAlign.left,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          onTap: () {
-                            HapticFeedback.selectionClick();
-                            onSelected(cat);
-                            Navigator.pop(context);
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  // ==================== THEME SECTION ====================
-
-  Widget _buildThemeCard({
-    required ThemePreset preset,
-    required bool isSelected,
-    required String localeCode,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: 150,
-        decoration: BoxDecoration(
-          color: preset.backgroundColor,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? preset.primaryColor : preset.cardBorderColor,
-            width: isSelected ? 3 : 1.5,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: preset.primaryColor.withValues(alpha: 0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : null,
-        ),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      preset.primaryColor.withValues(alpha: 0.2),
-                      preset.accentColor.withValues(alpha: 0.1),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(preset.icon, color: preset.primaryColor, size: 36),
-                  const Spacer(),
-                  Text(
-                    localeCode == 'ar' ? preset.nameAr : preset.name,
-                    style: GoogleFonts.outfit(
-                      color: preset.textColor,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 6,
-                        backgroundColor: preset.primaryColor,
-                      ),
-                      const SizedBox(width: 4),
-                      CircleAvatar(
-                        radius: 6,
-                        backgroundColor: preset.accentColor,
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  if (isSelected)
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: Icon(
-                        Icons.check_circle_rounded,
-                        color: preset.primaryColor,
-                        size: 24,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSavedThemeCard({
-    required CustomTheme theme,
-    required bool isActive,
-    required AppLocalizations l10n,
-    required VoidCallback onTap,
-    required VoidCallback onEdit,
-    required VoidCallback onDelete,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: context.surfaceContainerColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isActive ? context.secondaryColor : context.outlineColor,
-          width: isActive ? 3 : 1.5,
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                // Color swatches
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Color(
-                          int.parse(theme.primary.replaceFirst('#', '0xFF')),
-                        ),
-                        Color(
-                          int.parse(theme.accent.replaceFirst('#', '0xFF')),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // Name + subtitle
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              theme.name,
-                              style: GoogleFonts.outfit(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 15,
-                                color: context.onSurfaceColor,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          if (isActive)
-                            Icon(
-                              Icons.check_circle_rounded,
-                              color: context.secondaryColor,
-                              size: 20,
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          _colorDot(theme.primary),
-                          const SizedBox(width: 4),
-                          _colorDot(theme.accent),
-                          const SizedBox(width: 4),
-                          _colorDot(theme.background),
-                          const SizedBox(width: 4),
-                          _colorDot(theme.surface),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // Edit button
-                IconButton(
-                  icon: Icon(Icons.edit_rounded, size: 20),
-                  onPressed: onEdit,
-                  color: context.onSurfaceVariantColor,
-                  tooltip: l10n.edit,
-                ),
-                // Delete button
-                IconButton(
-                  icon: Icon(Icons.delete_outline_rounded, size: 20),
-                  onPressed: onDelete,
-                  color: context.errorColor,
-                  tooltip: l10n.delete,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _colorDot(String hex) {
-    return Container(
-      width: 14,
-      height: 14,
-      decoration: BoxDecoration(
-        color: Color(int.parse(hex.replaceFirst('#', '0xFF'))),
-        shape: BoxShape.circle,
-        border: Border.all(color: context.outlineColor, width: 0.5),
-      ),
-    );
-  }
-
-  Future<void> _showThemeEditorSheet(
-    BuildContext context,
-    SettingsState state,
-    AppLocalizations l10n,
-    CustomTheme? existingTheme,
-  ) async {
-    final cubit = context.read<SettingsCubit>();
-    final isEditing = existingTheme != null;
-
-    final colors = isEditing
-        ? existingTheme.toColorMap()
-        : {
-            'primary': '#2E7D32',
-            'accent': '#FFD54F',
-            'background': '#0D1117',
-            'surface': '#161B22',
-            'text': '#E6EDF3',
-            'textSecondary': '#8B949E',
-            'cardBorder': '#30363D',
-            'surfaceLight': '#21262D',
-          };
-
-    final labels = {
-      'primary': 'Primary',
-      'accent': 'Accent',
-      'background': 'Background',
-      'surface': 'Surface',
-      'text': 'Text',
-      'textSecondary': 'Text Secondary',
-      'cardBorder': 'Card Border',
-      'surfaceLight': 'Surface Light',
-    };
-
-    final result = await showModalBottomSheet<Map<String, String>>(
-      context: context,
-      isScrollControlled: true,
-      builder: (sheetContext) {
-        return ThemeEditorWidget(
-          colors: colors,
-          labels: labels,
-          l10n: l10n,
-          isEditing: isEditing,
-        );
-      },
-    );
-
-    if (result == null) return;
-
-    if (isEditing) {
-      cubit.updateCustomTheme(existingTheme.id, result);
-    } else {
-      if (!context.mounted) return;
-      final name = await _showThemeNameDialog(
-        context,
-        l10n,
-        state.savedCustomThemes,
-      );
-      if (name == null) return;
-
-      final theme = CustomTheme(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: name,
-        primary: result['primary']!,
-        accent: result['accent']!,
-        background: result['background']!,
-        surface: result['surface']!,
-        text: result['text']!,
-        textSecondary: result['textSecondary']!,
-        cardBorder: result['cardBorder']!,
-        surfaceLight: result['surfaceLight']!,
-      );
-      cubit.addCustomTheme(theme);
-    }
-  }
-
-  Future<String?> _showThemeNameDialog(
-    BuildContext context,
-    AppLocalizations l10n,
-    List<CustomTheme> existingThemes,
-  ) async {
-    // Generate a unique default name by incrementing if duplicates exist
-    String defaultName = 'My Theme';
-    int counter = 2;
-    while (existingThemes.any((t) => t.name == defaultName)) {
-      defaultName = 'My Theme $counter';
-      counter++;
-    }
-
-    final controller = TextEditingController(text: defaultName);
-    final focusNode = FocusNode();
-
-    final result = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) {
-        // Select all text when dialog opens for easy editing
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          focusNode.requestFocus();
-          controller.selection = TextSelection(
-            baseOffset: 0,
-            extentOffset: controller.text.length,
-          );
-        });
-
-        return AlertDialog(
-          title: Text(l10n.nameYourTheme),
-          content: TextField(
-            controller: controller,
-            focusNode: focusNode,
-            autofocus: true,
-            textCapitalization: TextCapitalization.words,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              hintText: l10n.themeNameHint,
-              helperText: 'You can edit this name',
-            ),
-            onSubmitted: (val) {
-              if (val.trim().isNotEmpty) {
-                Navigator.pop(dialogContext, val.trim());
-              }
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: Text(l10n.cancel),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (controller.text.trim().isNotEmpty) {
-                  Navigator.pop(dialogContext, controller.text.trim());
-                }
-              },
-              child: Text(l10n.saveTheme),
-            ),
-          ],
-        );
-      },
-    );
-    controller.dispose();
-    focusNode.dispose();
-    return result;
-  }
-
-  Future<void> _confirmDeleteTheme(
-    BuildContext context,
-    CustomTheme theme,
-    AppLocalizations l10n,
-  ) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (d) => AlertDialog(
-        title: Text(l10n.deleteTheme),
-        content: Text(l10n.deleteThemeConfirm(theme.name)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(d),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(d, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: context.errorColor,
-            ),
-            child: Text(l10n.delete),
-          ),
-        ],
-      ),
-    );
-    if (confirm == true && context.mounted) {
-      context.read<SettingsCubit>().deleteCustomTheme(theme.id);
-    }
-  }
-
-  Widget _buildSection(
-    BuildContext context, {
-    required String title,
-    required IconData icon,
-    required List<Widget> children,
-    Color? accentColor,
-  }) {
-    final effectiveAccentColor = accentColor ?? context.primaryColor;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: context.surfaceContainerColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: context.outlineColor.withValues(alpha: 0.15),
-          width: 1.0,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: effectiveAccentColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(icon, color: effectiveAccentColor, size: 22),
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  title,
-                  style: GoogleFonts.amiri(
-                    fontSize: 19,
-                    fontWeight: FontWeight.bold,
-                    color: context.onSurfaceColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: children,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildExpandableSection({
-    required String title,
-    required IconData icon,
-    required bool isExpanded,
-    required VoidCallback onToggle,
-    required List<Widget> children,
-    Color? accentColor,
-  }) {
-    final effectiveAccentColor = accentColor ?? context.primaryColor;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: context.surfaceContainerColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: context.outlineColor.withValues(alpha: 0.15),
-          width: 1.0,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InkWell(
-            onTap: onToggle,
-            borderRadius: BorderRadius.circular(24),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: effectiveAccentColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Icon(icon, color: effectiveAccentColor, size: 22),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: GoogleFonts.amiri(
-                        fontSize: 19,
-                        fontWeight: FontWeight.bold,
-                        color: context.onSurfaceColor,
-                      ),
-                    ),
-                  ),
-                  AnimatedRotation(
-                    turns: isExpanded ? 0.5 : 0,
-                    duration: const Duration(milliseconds: 250),
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: context.surfaceContainerHighestColor,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        color: context.onSurfaceVariantColor,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          AnimatedCrossFade(
-            firstChild: const SizedBox.shrink(),
-            secondChild: Column(
-              children: [
-                const Divider(height: 1),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: children,
-                  ),
-                ),
-              ],
-            ),
-            crossFadeState: isExpanded
-                ? CrossFadeState.showSecond
-                : CrossFadeState.showFirst,
-            duration: const Duration(milliseconds: 250),
-            sizeCurve: Curves.easeInOut,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildSectionTile({
     required String title,
     required String subtitle,
@@ -1219,13 +346,6 @@ class _SettingsScreenState extends State<SettingsScreen>
           color: context.outlineColor.withValues(alpha: 0.15),
           width: 1.0,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -1277,825 +397,6 @@ class _SettingsScreenState extends State<SettingsScreen>
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildSettingItem({
-    required String title,
-    required String description,
-    required Widget trailing,
-    VoidCallback? onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: TextStyle(
-                      color: context.onSurfaceVariantColor,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 16),
-            trailing,
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTimeSettingItem({
-    required BuildContext context,
-    required String title,
-    required String time,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
-      ),
-      trailing: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: context.secondaryColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: context.secondaryColor.withValues(alpha: 0.3),
-            ),
-          ),
-          child: Text(
-            time,
-            style: TextStyle(
-              color: context.secondaryColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
-        ),
-      ),
-      onTap: onTap,
-    );
-  }
-
-  Future<String?> _selectTime(BuildContext context, String currentTime) async {
-    final parts = currentTime.split(':');
-    final initialTime = TimeOfDay(
-      hour: int.parse(parts[0]),
-      minute: int.parse(parts[1]),
-    );
-
-    final selectedTime = await showTimePicker(
-      context: context,
-      initialTime: initialTime,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.dark(
-              primary: context.secondaryColor,
-              onPrimary: context.onSurfaceColor,
-              surface: context.surfaceContainerHighestColor,
-              onSurface: context.onSurfaceColor,
-              secondary: context.secondaryColor,
-            ),
-            dialogTheme: DialogThemeData(
-              backgroundColor: context.surfaceContainerColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: context.secondaryColor,
-              ),
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (selectedTime != null) {
-      final String hour = selectedTime.hour.toString().padLeft(2, '0');
-      final String minute = selectedTime.minute.toString().padLeft(2, '0');
-      return '$hour:$minute';
-    }
-    return null;
-  }
-
-  // ==================== APPEARANCE SECTION ====================
-
-  Widget _buildAppearanceSection(
-    BuildContext context,
-    SettingsState state,
-    AppLocalizations l10n,
-  ) {
-    final cubit = context.read<SettingsCubit>();
-    final presets = cubit.getAvailablePresets();
-    final currentPresetId = state.themePresetId;
-    final localeCode = state.locale.languageCode;
-    final savedThemes = state.savedCustomThemes;
-
-    return _buildExpandableSection(
-      title: l10n.appearance,
-      icon: Icons.palette_rounded,
-      accentColor: context.primaryColor,
-      isExpanded: _isAppearanceExpanded,
-      onToggle: () {
-        setState(() {
-          _isAppearanceExpanded = !_isAppearanceExpanded;
-        });
-      },
-      children: [
-        // Built-in presets horizontal scroll
-        SizedBox(
-          height: 160,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: presets.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              final preset = presets[index];
-              final isSelected = preset.id == currentPresetId;
-              return _buildThemeCard(
-                preset: preset,
-                isSelected: isSelected,
-                localeCode: localeCode,
-                onTap: () => cubit.selectThemePreset(preset.id),
-              );
-            },
-          ),
-        ),
-        // "Create New Theme" button
-        const SizedBox(height: 16),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: () => _showThemeEditorSheet(context, state, l10n, null),
-            icon: const Icon(Icons.add_circle_outline_rounded),
-            label: Text(l10n.createNewTheme),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: context.secondaryColor,
-              side: BorderSide(color: context.secondaryColor),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-          ),
-        ),
-        // Saved custom themes list (EXPANDABLE)
-        if (savedThemes.isNotEmpty) ...[
-          const SizedBox(height: 20),
-          InkWell(
-            onTap: () {
-              setState(() {
-                _isThemeListExpanded = !_isThemeListExpanded;
-              });
-            },
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    _isThemeListExpanded
-                        ? l10n.hideSavedThemes
-                        : l10n.showSavedThemes(savedThemes.length),
-                    style: GoogleFonts.amiri(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: context.onSurfaceColor,
-                    ),
-                  ),
-                  AnimatedRotation(
-                    turns: _isThemeListExpanded ? 0.5 : 0,
-                    duration: const Duration(milliseconds: 200),
-                    child: Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      color: context.onSurfaceVariantColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          AnimatedCrossFade(
-            firstChild: const SizedBox.shrink(),
-            secondChild: Column(
-              children: savedThemes.map((theme) {
-                final isActive =
-                    currentPresetId == 'custom' &&
-                    state.activeCustomThemeId == theme.id;
-                return _buildSavedThemeCard(
-                  theme: theme,
-                  isActive: isActive,
-                  l10n: l10n,
-                  onTap: () => cubit.activateCustomTheme(theme.id),
-                  onEdit: () =>
-                      _showThemeEditorSheet(context, state, l10n, theme),
-                  onDelete: () => _confirmDeleteTheme(context, theme, l10n),
-                );
-              }).toList(),
-            ),
-            crossFadeState: _isThemeListExpanded
-                ? CrossFadeState.showSecond
-                : CrossFadeState.showFirst,
-            duration: const Duration(milliseconds: 200),
-          ),
-        ],
-        if (currentPresetId != 'emerald') ...[
-          const SizedBox(height: 12),
-          Center(
-            child: TextButton.icon(
-              icon: const Icon(Icons.restore, size: 18),
-              label: Text(l10n.resetToDefault),
-              onPressed: () => cubit.selectThemePreset('emerald'),
-            ),
-          ),
-        ],
-        const SizedBox(height: 16),
-      ],
-    );
-  }
-
-  // ==================== WIDGET PREVIEW SECTION ====================
-
-  Widget _buildWidgetPreviewSection(
-    BuildContext context,
-    SettingsState state,
-    AppLocalizations l10n,
-  ) {
-    final cubit = context.read<SettingsCubit>();
-    final presets = cubit.getAvailablePresets();
-    final localeCode = state.locale.languageCode;
-
-    return _buildExpandableSection(
-      title: l10n.widgetPreviewTitle,
-      icon: Icons.widgets_rounded,
-      accentColor: context.secondaryColor,
-      isExpanded: _isWidgetPreviewExpanded,
-      onToggle: () {
-        setState(() {
-          _isWidgetPreviewExpanded = !_isWidgetPreviewExpanded;
-        });
-      },
-      children: [
-        // Widget type toggle
-        SizedBox(
-          width: double.infinity,
-          child: SegmentedButton<WidgetPreviewType>(
-            segments: [
-              ButtonSegment<WidgetPreviewType>(
-                value: WidgetPreviewType.prayerSchedule,
-                label: Text(l10n.prayerSchedule),
-                icon: const Icon(Icons.calendar_view_month),
-              ),
-              ButtonSegment<WidgetPreviewType>(
-                value: WidgetPreviewType.countdown,
-                label: Text(l10n.countdown),
-                icon: const Icon(Icons.timer_outlined),
-              ),
-            ],
-            selected: {_widgetPreviewType},
-            onSelectionChanged: (Set<WidgetPreviewType> newSelection) {
-              setState(() {
-                _widgetPreviewType = newSelection.first;
-              });
-            },
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // Native widget preview
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: WidgetPreview(
-              theme: _widgetPreviewTheme,
-              widgetType: _widgetPreviewType,
-              isRtl: state.locale.languageCode == 'ar',
-            ),
-          ),
-        ),
-        const SizedBox(height: 20),
-
-        // Theme presets selection
-        Text(
-          l10n.widgetStartFromPreset,
-          style: GoogleFonts.amiri(fontSize: 14, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 140,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: presets.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              final preset = presets[index];
-              return _buildThemeCard(
-                preset: preset,
-                isSelected: false,
-                localeCode: localeCode,
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  setState(() {
-                    _widgetPreviewTheme = WidgetPreviewTheme.fromThemePreset(
-                      preset,
-                    );
-                  });
-                },
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // Color customization
-        Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: ExpansionTile(
-            title: Text(
-              l10n.widgetThemeColorCustomization,
-              style: GoogleFonts.amiri(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            leading: Icon(
-              Icons.color_lens_rounded,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    WidgetColorPicker(
-                      label: l10n.widgetPrimaryColor,
-                      currentHex: _widgetPreviewTheme.primaryColorHex,
-                      onColorChanged: (hex) => setState(() {
-                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
-                          primaryColorHex: hex,
-                        );
-                      }),
-                    ),
-                    WidgetColorPicker(
-                      label: l10n.widgetAccentColor,
-                      currentHex: _widgetPreviewTheme.accentColorHex,
-                      onColorChanged: (hex) => setState(() {
-                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
-                          accentColorHex: hex,
-                        );
-                      }),
-                    ),
-                    WidgetColorPicker(
-                      label: l10n.widgetBackgroundColor,
-                      currentHex: _widgetPreviewTheme.backgroundColorHex,
-                      onColorChanged: (hex) => setState(() {
-                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
-                          backgroundColorHex: hex,
-                        );
-                      }),
-                    ),
-                    WidgetColorPicker(
-                      label: l10n.widgetTextColor,
-                      currentHex: _widgetPreviewTheme.textColorHex,
-                      onColorChanged: (hex) => setState(() {
-                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
-                          textColorHex: hex,
-                        );
-                      }),
-                    ),
-                    WidgetColorPicker(
-                      label: l10n.widgetSecondaryTextColor,
-                      currentHex: _widgetPreviewTheme.textSecondaryColorHex,
-                      onColorChanged: (hex) => setState(() {
-                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
-                          textSecondaryColorHex: hex,
-                        );
-                      }),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // Action buttons
-        Row(
-          children: [
-            OutlinedButton.icon(
-              onPressed: () async {
-                // Reset to APP theme colors (dynamic tracking)
-                setState(() {
-                  _widgetPreviewTheme = WidgetPreviewTheme.fromColorScheme(
-                    Theme.of(context).colorScheme,
-                  );
-                });
-
-                // Clear the override in SharedPreferences immediately
-                try {
-                  await getIt<WidgetUpdateService>().clearWidgetTheme();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.widgetThemeApplied)),
-                    );
-                  }
-                } catch (e) {
-                  debugPrint('Error clearing widget theme: $e');
-                }
-              },
-              icon: const Icon(Icons.sync_rounded, size: 18),
-              label: Text(l10n.followAppTheme),
-            ),
-            const Spacer(),
-            FilledButton(
-              onPressed: _isApplyingWidgetTheme
-                  ? null
-                  : () async {
-                      setState(() {
-                        _isApplyingWidgetTheme = true;
-                      });
-
-                      try {
-                        // Apply to actual widgets via WidgetUpdateService
-                        await getIt<WidgetUpdateService>().applyWidgetTheme(
-                          _widgetPreviewTheme.toMap(),
-                        );
-
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(l10n.widgetThemeApplied),
-                              backgroundColor: Theme.of(
-                                context,
-                              ).colorScheme.primaryContainer,
-                            ),
-                          );
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                l10n.widgetThemeApplyFailed(e.toString()),
-                              ),
-                              backgroundColor: Theme.of(
-                                context,
-                              ).colorScheme.errorContainer,
-                            ),
-                          );
-                        }
-                      } finally {
-                        if (mounted) {
-                          setState(() {
-                            _isApplyingWidgetTheme = false;
-                          });
-                        }
-                      }
-                    },
-              child: _isApplyingWidgetTheme
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(l10n.applyToWidget),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
-  }
-
-  // ==================== AZKAR SECTION ====================
-
-  Widget _buildAzkarSection(
-    BuildContext context,
-    SettingsState state,
-    AppLocalizations l10n,
-  ) {
-    return _buildExpandableSection(
-      title: l10n.azkarSection,
-      icon: Icons.auto_stories_rounded,
-      accentColor: Colors.deepPurpleAccent,
-      isExpanded: _isAzkarExpanded,
-      onToggle: () {
-        setState(() {
-          _isAzkarExpanded = !_isAzkarExpanded;
-        });
-      },
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                l10n.azkarSettingsDesc,
-                style: TextStyle(
-                  color: context.onSurfaceVariantColor,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-            TextButton.icon(
-              key: const Key('add_reminder_button'),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                _showAddReminderDialog(context);
-              },
-              icon: const Icon(Icons.add, size: 20),
-              label: Text(l10n.add),
-              style: TextButton.styleFrom(
-                foregroundColor: context.secondaryColor,
-              ),
-            ),
-          ],
-        ),
-        const Divider(height: 12),
-        if (state.reminders.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child: Center(
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.notifications_none_rounded,
-                    color: context.onSurfaceVariantColor.withValues(alpha: 0.3),
-                    size: 40,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.noRemindersSet,
-                    style: TextStyle(color: context.onSurfaceVariantColor),
-                  ),
-                ],
-              ),
-            ),
-          )
-        else
-          ...state.reminders.asMap().entries.map((entry) {
-            final index = entry.key;
-            final reminder = entry.value;
-            return Column(
-              children: [
-                _buildReminderItem(
-                  context: context,
-                  index: index,
-                  reminder: reminder,
-                ),
-                if (index < state.reminders.length - 1)
-                  const Divider(height: 1),
-              ],
-            );
-          }),
-      ],
-    );
-  }
-
-  // ==================== GENERAL SECTION ====================
-
-  Widget _buildGeneralSection(
-    BuildContext context,
-    SettingsState state,
-    AppLocalizations l10n,
-  ) {
-    return _buildExpandableSection(
-      title: l10n.generalSettings,
-      icon: Icons.settings_rounded,
-      accentColor: Colors.blueGrey,
-      isExpanded: _isGeneralExpanded,
-      onToggle: () {
-        setState(() {
-          _isGeneralExpanded = !_isGeneralExpanded;
-        });
-      },
-      children: [
-        // Qada Tracker
-        _buildSettingItem(
-          title: l10n.qadaTracker,
-          description: l10n.qadaTrackerDesc,
-          trailing: CustomToggle(
-            value: state.isQadaEnabled,
-            onChanged: (val) {
-              context.read<SettingsCubit>().toggleQadaEnabled();
-            },
-          ),
-        ),
-        const Divider(height: 32),
-        // Hijri Adjustment
-        _buildSettingItem(
-          title: l10n.hijriAdjustment,
-          description: l10n.hijriAdjustmentDesc,
-          trailing: _buildDropdown<int>(
-            value: state.hijriAdjustment,
-            items: [-2, -1, 0, 1, 2].map((adj) {
-              return DropdownMenuItem(
-                value: adj,
-                child: Text(
-                  adj == 0 ? '0' : (adj > 0 ? '+$adj' : '$adj'),
-                  style: const TextStyle(fontSize: 13),
-                ),
-              );
-            }).toList(),
-            onChanged: (value) {
-              if (value != null) {
-                context.read<SettingsCubit>().updateHijriAdjustment(value);
-              }
-            },
-          ),
-        ),
-        const Divider(height: 32),
-        // Offline Audio
-        _buildSettingItem(
-          title: l10n.offlineAudio,
-          description: l10n.downloadRecitersOffline,
-          trailing: Icon(
-            Icons.arrow_forward_ios_rounded,
-            size: 16,
-            color: context.onSurfaceVariantColor,
-          ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const OfflineAudioScreen()),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  // ==================== DATA & LOCATION SECTION ====================
-
-  Widget _buildDataAndLocationSection(
-    BuildContext context,
-    SettingsState state,
-    AppLocalizations l10n,
-  ) {
-    return _buildExpandableSection(
-      title: l10n.dataAndLocation,
-      icon: Icons.backup_rounded,
-      accentColor: Colors.teal,
-      isExpanded: _isDataLocationExpanded,
-      onToggle: () {
-        setState(() {
-          _isDataLocationExpanded = !_isDataLocationExpanded;
-        });
-      },
-      children: [
-        // Location
-        if (state.latitude == null || state.longitude == null)
-          _buildWarningCard(
-            '',
-            l10n.locationWarning,
-            Icons.location_off_rounded,
-            isSmall: true,
-          ),
-        Text(
-          l10n.locationDesc,
-          style: TextStyle(color: context.onSurfaceVariantColor, fontSize: 13),
-        ),
-        const SizedBox(height: 12),
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(l10n.currentLocation),
-          subtitle: Text(
-            state.cityName ?? l10n.locationNotSet,
-            style: TextStyle(
-              color: state.cityName != null
-                  ? context.secondaryColor
-                  : context.errorColor,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          trailing: ElevatedButton.icon(
-            onPressed: () {
-              HapticFeedback.mediumImpact();
-              context.read<SettingsCubit>().refreshLocation();
-            },
-            icon: const Icon(Icons.my_location, size: 18),
-            label: Text(l10n.refreshLocation),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            ),
-          ),
-        ),
-        const Divider(height: 32),
-        // Export Backup
-        _buildSettingItem(
-          title: l10n.exportBackup,
-          description: l10n.exportBackupDesc,
-          onTap: () async {
-            try {
-              await getIt<ExportImportService>().exportData();
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.backupExportSuccess)),
-                );
-              }
-            } catch (e) {
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${l10n.backupError}: $e')),
-                );
-              }
-            }
-          },
-          trailing: Icon(
-            Icons.share_rounded,
-            size: 20,
-            color: context.secondaryColor,
-          ),
-        ),
-        const Divider(height: 32),
-        // Import Backup
-        _buildSettingItem(
-          title: l10n.importBackup,
-          description: l10n.importBackupDesc,
-          onTap: () async {
-            final confirm = await showDialog<bool>(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: Text(l10n.importBackup),
-                content: Text(l10n.importWarning),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: Text(l10n.cancel),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: Text(l10n.yes),
-                  ),
-                ],
-              ),
-            );
-
-            if (confirm == true && context.mounted) {
-              try {
-                final success = await getIt<ExportImportService>().importData();
-                if (success && context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.backupImportSuccess)),
-                  );
-                  context.read<WerdBloc>().add(const WerdEvent.load());
-                  final prayerBloc = context.read<PrayerTrackerBloc>();
-                  prayerBloc.add(PrayerTrackerEvent.reload(DateTime.now()));
-                  context.read<SettingsCubit>().refresh();
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('${l10n.backupError}: $e')),
-                  );
-                }
-              }
-            }
-          },
-          trailing: Icon(
-            Icons.file_upload_rounded,
-            size: 20,
-            color: context.secondaryColor,
-          ),
-        ),
-      ],
     );
   }
 }

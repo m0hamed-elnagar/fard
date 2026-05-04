@@ -1,7 +1,6 @@
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
-import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/core/extensions/salaah_extension.dart';
 import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
@@ -14,8 +13,10 @@ import 'package:fard/features/prayer_tracking/presentation/widgets/dashboard_car
 import 'package:fard/features/prayer_tracking/presentation/widgets/history_list.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/salaah_tile.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/suggested_azkar_section.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
 import 'package:fard/features/settings/presentation/widgets/reminders_settings_dialog.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/widgets/set_werd_goal_dialog.dart';
@@ -91,167 +92,158 @@ class _HomeContentState extends State<HomeContent> {
     final bloc = context.read<PrayerTrackerBloc>();
     final l10n = AppLocalizations.of(context)!;
 
-    return BlocBuilder<SettingsCubit, SettingsState>(
-      buildWhen: (previous, current) =>
-          previous.latitude != current.latitude ||
-          previous.longitude != current.longitude ||
-          previous.calculationMethod != current.calculationMethod ||
-          previous.madhab != current.madhab ||
-          previous.locale != current.locale ||
-          previous.cityName != current.cityName ||
-          previous.isQadaEnabled != current.isQadaEnabled ||
-          previous.hijriAdjustment != current.hijriAdjustment ||
-          previous.isSalahReminderEnabled != current.isSalahReminderEnabled ||
-          previous.enabledSalahReminders != current.enabledSalahReminders,
-      builder: (context, settings) {
-        // Calculate today's prayer times for countdown (always uses DateTime.now())
-        final todayPrayerTimes =
-            (settings.latitude != null && settings.longitude != null)
-            ? getIt<PrayerTimeService>().getPrayerTimes(
-                latitude: settings.latitude!,
-                longitude: settings.longitude!,
-                method: settings.calculationMethod,
-                madhab: settings.madhab,
-                date: DateTime.now(),
-              )
-            : null;
+    return BlocBuilder<LocationPrayerCubit, LocationPrayerState>(
+      builder: (context, locationState) {
+        return BlocBuilder<DailyRemindersCubit, DailyRemindersState>(
+          builder: (context, remindersState) {
+            // Calculate today's prayer times for countdown (always uses DateTime.now())
+            final todayPrayerTimes = (locationState.latitude != null &&
+                    locationState.longitude != null)
+                ? getIt<PrayerTimeService>().getPrayerTimes(
+                    latitude: locationState.latitude!,
+                    longitude: locationState.longitude!,
+                    method: locationState.calculationMethod,
+                    madhab: locationState.madhab,
+                    date: DateTime.now(),
+                  )
+                : null;
 
-        // Calculate selected date prayer times for display in prayer list
-        final selectedDatePrayerTimes =
-            (settings.latitude != null && settings.longitude != null)
-            ? getIt<PrayerTimeService>().getPrayerTimes(
-                latitude: settings.latitude!,
-                longitude: settings.longitude!,
-                method: settings.calculationMethod,
-                madhab: settings.madhab,
-                date: widget.selectedDate,
-              )
-            : null;
+            // Calculate selected date prayer times for display in prayer list
+            final selectedDatePrayerTimes = (locationState.latitude != null &&
+                    locationState.longitude != null)
+                ? getIt<PrayerTimeService>().getPrayerTimes(
+                    latitude: locationState.latitude!,
+                    longitude: locationState.longitude!,
+                    method: locationState.calculationMethod,
+                    madhab: locationState.madhab,
+                    date: widget.selectedDate,
+                  )
+                : null;
 
-        // Update widget when critical settings change (locale, location, method, etc.)
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          getIt<WidgetUpdateService>().updateWidget();
-        });
-
-        return Scaffold(
-          backgroundColor: context.backgroundColor,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            centerTitle: true,
-            title: Text(
-              l10n.appName,
-              style: GoogleFonts.amiri(
-                color: context.onSurfaceColor,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+            return Scaffold(
+              backgroundColor: context.backgroundColor,
+              appBar: AppBar(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                centerTitle: true,
+                title: Text(
+                  l10n.appName,
+                  style: GoogleFonts.amiri(
+                    color: context.onSurfaceColor,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                actions: [
+                  IconButton(
+                    onPressed: () => RemindersSettingsDialog.show(context),
+                    icon: const Icon(Icons.notifications_active_rounded),
+                    color: context.secondaryColor,
+                  ),
+                ],
               ),
-            ),
-            actions: [
-              IconButton(
-                onPressed: () => RemindersSettingsDialog.show(context),
-                icon: const Icon(Icons.notifications_active_rounded),
-                color: context.secondaryColor,
-              ),
-            ],
-          ),
-          body: SafeArea(
-            child: CustomScrollView(
-              controller: _scrollController,
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  sliver: SliverToBoxAdapter(
-                    child: DashboardCarousel(
-                      prayerTimes: todayPrayerTimes,
+              body: SafeArea(
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  physics: const BouncingScrollPhysics(),
+                  slivers: [
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      sliver: SliverToBoxAdapter(
+                        child: DashboardCarousel(
+                          prayerTimes: todayPrayerTimes,
+                          selectedDate: widget.selectedDate,
+                          cityName: locationState.cityName,
+                          qadaStatus: widget.qadaStatus,
+                          pageController: _pageController,
+                          isQadaEnabled: remindersState.isQadaEnabled,
+                          onAddQadaPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (_) => AddQadaDialog(
+                                onConfirm: (counts) => bloc.add(
+                                  PrayerTrackerEvent.bulkAddQada(counts),
+                                ),
+                              ),
+                            );
+                          },
+                          onEditQadaPressed: () {
+                            final currentCounts = {
+                              for (final s in Salaah.values)
+                                s: widget.qadaStatus[s]?.value ?? 0,
+                            };
+                            showDialog(
+                              context: context,
+                              builder: (_) => AddQadaDialog(
+                                title: l10n.editQada,
+                                initialCounts: currentCounts,
+                                onConfirm: (counts) => bloc
+                                    .add(PrayerTrackerEvent.updateQada(counts)),
+                              ),
+                            );
+                          },
+                          onSetWerdGoalPressed: () =>
+                              _showWerdGoalDialog(context),
+                        ),
+                      ),
+                    ),
+
+                    // Calendar section with subtle top padding
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 8.0),
+                      sliver: SliverToBoxAdapter(
+                        child: CalendarWidget(
+                          selectedDate: widget.selectedDate,
+                          monthRecords: widget.monthRecords,
+                          hijriAdjustment: locationState.hijriAdjustment,
+                          onDaySelected: (date) =>
+                              bloc.add(PrayerTrackerEvent.load(date)),
+                          onMonthChanged: (year, month) => bloc
+                              .add(PrayerTrackerEvent.loadMonth(year, month)),
+                        ),
+                      ),
+                    ),
+
+                    // Suggested Azkar Section
+                    SuggestedAzkarSection(settings: remindersState),
+
+                    // Location Warning
+                    if (locationState.latitude == null ||
+                        locationState.longitude == null)
+                      _LocationWarning(
+                        givePermissionLabel: l10n.givePermission,
+                        locationWarningLabel: l10n.locationWarning,
+                      ),
+
+                    // Unified Today's Prayers Section (Header + List) inside a Frame
+                    _DailyPrayersSection(
+                      locationState: locationState,
+                      remindersState: remindersState,
                       selectedDate: widget.selectedDate,
-                      cityName: settings.cityName,
+                      selectedDatePrayerTimes: selectedDatePrayerTimes,
+                      missedToday: widget.missedToday,
+                      completedToday: widget.completedToday,
                       qadaStatus: widget.qadaStatus,
-                      pageController: _pageController,
-                      isQadaEnabled: settings.isQadaEnabled,
-                      onAddQadaPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (_) => AddQadaDialog(
-                            onConfirm: (counts) => bloc.add(
-                              PrayerTrackerEvent.bulkAddQada(counts),
-                            ),
-                          ),
-                        );
-                      },
-                      onEditQadaPressed: () {
-                        final currentCounts = {
-                          for (final s in Salaah.values)
-                            s: widget.qadaStatus[s]?.value ?? 0,
-                        };
-                        showDialog(
-                          context: context,
-                          builder: (_) => AddQadaDialog(
-                            title: l10n.editQada,
-                            initialCounts: currentCounts,
-                            onConfirm: (counts) =>
-                                bloc.add(PrayerTrackerEvent.updateQada(counts)),
-                          ),
-                        );
-                      },
-                      onSetWerdGoalPressed: () => _showWerdGoalDialog(context),
+                      completedQadaToday: widget.completedQadaToday,
+                      onScrollToAddQada: _scrollToAddQada,
                     ),
-                  ),
-                ),
 
-                // Calendar section with subtle top padding
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 8.0),
-                  sliver: SliverToBoxAdapter(
-                    child: CalendarWidget(
-                      selectedDate: widget.selectedDate,
-                      monthRecords: widget.monthRecords,
-                      hijriAdjustment: settings.hijriAdjustment,
-                      onDaySelected: (date) =>
-                          bloc.add(PrayerTrackerEvent.load(date)),
-                      onMonthChanged: (year, month) =>
-                          bloc.add(PrayerTrackerEvent.loadMonth(year, month)),
+                    // History section
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 40.0),
+                      sliver: SliverToBoxAdapter(
+                        child: HistoryList(
+                          records: widget.history,
+                          onDelete: (date) =>
+                              bloc.add(PrayerTrackerEvent.deleteRecord(date)),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-
-                // Suggested Azkar Section
-                SuggestedAzkarSection(settings: settings),
-
-                // Location Warning
-                if (settings.latitude == null || settings.longitude == null)
-                  _LocationWarning(
-                    givePermissionLabel: l10n.givePermission,
-                    locationWarningLabel: l10n.locationWarning,
-                  ),
-
-                // Unified Today's Prayers Section (Header + List) inside a Frame
-                _DailyPrayersSection(
-                  settings: settings,
-                  selectedDate: widget.selectedDate,
-                  selectedDatePrayerTimes: selectedDatePrayerTimes,
-                  missedToday: widget.missedToday,
-                  completedToday: widget.completedToday,
-                  qadaStatus: widget.qadaStatus,
-                  completedQadaToday: widget.completedQadaToday,
-                  onScrollToAddQada: _scrollToAddQada,
-                ),
-
-                // History section
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 40.0),
-                  sliver: SliverToBoxAdapter(
-                    child: HistoryList(
-                      records: widget.history,
-                      onDelete: (date) =>
-                          bloc.add(PrayerTrackerEvent.deleteRecord(date)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -303,7 +295,7 @@ class _LocationWarning extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: () =>
-                      context.read<SettingsCubit>().refreshLocation(),
+                      context.read<LocationPrayerCubit>().refreshLocation(),
                   icon: const Icon(Icons.my_location, size: 18),
                   label: Text(givePermissionLabel),
                   style: ElevatedButton.styleFrom(
@@ -325,7 +317,8 @@ class _LocationWarning extends StatelessWidget {
 }
 
 class _DailyPrayersSection extends StatefulWidget {
-  final SettingsState settings;
+  final LocationPrayerState locationState;
+  final DailyRemindersState remindersState;
   final DateTime selectedDate;
   final dynamic selectedDatePrayerTimes; // Use actual type from Adhan
   final Set<Salaah> missedToday;
@@ -335,7 +328,8 @@ class _DailyPrayersSection extends StatefulWidget {
   final VoidCallback onScrollToAddQada;
 
   const _DailyPrayersSection({
-    required this.settings,
+    required this.locationState,
+    required this.remindersState,
     required this.selectedDate,
     required this.selectedDatePrayerTimes,
     required this.missedToday,
@@ -457,27 +451,29 @@ class _DailyPrayersSectionState extends State<_DailyPrayersSection> {
                         IconButton(
                           onPressed: () {
                             final newState =
-                                !widget.settings.isSalahReminderEnabled;
-                            context.read<SettingsCubit>().toggleSalahReminder(
-                              newState,
-                            );
+                                !widget.remindersState.isSalahReminderEnabled;
+                            context
+                                .read<DailyRemindersCubit>()
+                                .toggleSalahReminder(
+                                  newState,
+                                );
                             _showReminderSnackBar(
                               isAr ? 'تذكيرات الصلاة' : 'Salah Reminders',
                               newState,
                               customMessage: newState
                                   ? (isAr
-                                        ? 'سنذكرك بتسجيل صلواتك بعد الأذان بـ ${widget.settings.salahReminderOffsetMinutes} دقيقة'
-                                        : 'We will remind you to log prayers ${widget.settings.salahReminderOffsetMinutes}m after Azan')
+                                        ? 'سنذكرك بتسجيل صلواتك بعد الأذان بـ ${widget.remindersState.salahReminderOffsetMinutes} دقيقة'
+                                        : 'We will remind you to log prayers ${widget.remindersState.salahReminderOffsetMinutes}m after Azan')
                                   : (isAr
                                         ? 'تم إيقاف تذكيرات تسجيل الصلاة'
                                         : 'Post-prayer logging reminders disabled'),
                             );
                           },
                           icon: Icon(
-                            widget.settings.isSalahReminderEnabled
+                            widget.remindersState.isSalahReminderEnabled
                                 ? Icons.notifications_active_rounded
                                 : Icons.notifications_none_rounded,
-                            color: widget.settings.isSalahReminderEnabled
+                            color: widget.remindersState.isSalahReminderEnabled
                                 ? context.secondaryColor
                                 : context.onSurfaceColor.withValues(alpha: 0.5),
                             size: 20,
@@ -510,14 +506,11 @@ class _DailyPrayersSectionState extends State<_DailyPrayersSection> {
                           SalaahTile(
                             salaah: Salaah.values[index],
                             qadaCount:
-                                widget
-                                    .qadaStatus[Salaah.values[index]]
-                                    ?.value ??
-                                0,
+                                widget.qadaStatus[Salaah.values[index]]?.value ??
+                                    0,
                             completedQadaCount:
-                                widget.completedQadaToday[Salaah
-                                    .values[index]] ??
-                                0,
+                                widget.completedQadaToday[Salaah.values[index]] ??
+                                    0,
                             isMissedToday: widget.missedToday.contains(
                               Salaah.values[index],
                             ),
@@ -535,12 +528,13 @@ class _DailyPrayersSectionState extends State<_DailyPrayersSection> {
                                     Salaah.values[index],
                                   )
                                 : null,
-                            isQadaEnabled: widget.settings.isQadaEnabled,
+                            isQadaEnabled: widget.remindersState.isQadaEnabled,
                             isReminderEnabled:
-                                widget.settings.isSalahReminderEnabled &&
-                                widget.settings.enabledSalahReminders.contains(
-                                  Salaah.values[index],
-                                ),
+                                widget.remindersState.isSalahReminderEnabled &&
+                                    widget.remindersState.enabledSalahReminders
+                                        .contains(
+                                      Salaah.values[index],
+                                    ),
                             onAdd: () => bloc.add(
                               PrayerTrackerEvent.addQada(Salaah.values[index]),
                             ),
@@ -556,12 +550,11 @@ class _DailyPrayersSectionState extends State<_DailyPrayersSection> {
                             ),
                             onToggleReminder: () {
                               final salaah = Salaah.values[index];
-                              final isEnabled = widget
-                                  .settings
+                              final isEnabled = widget.remindersState
                                   .enabledSalahReminders
                                   .contains(salaah);
                               context
-                                  .read<SettingsCubit>()
+                                  .read<DailyRemindersCubit>()
                                   .toggleSpecificSalahReminder(salaah);
                               _showReminderSnackBar(
                                 salaah.localizedName(l10n),

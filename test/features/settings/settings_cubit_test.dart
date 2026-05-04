@@ -17,6 +17,7 @@ import 'package:fard/features/settings/domain/usecases/get_available_theme_prese
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/domain/prayer_reminder_type.dart';
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
+import 'package:fard/features/settings/domain/entities/custom_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -217,6 +218,9 @@ void main() {
     registerFallbackValue(const Locale('en'));
     registerFallbackValue(const SettingsState(locale: Locale('ar')));
     registerFallbackValue(AzkarReminder(category: '', time: '', title: ''));
+    registerFallbackValue(PrayerReminderType.after);
+    registerFallbackValue(CustomTheme.defaultPalette(id: '1', name: '1'));
+    registerFallbackValue(AudioQuality.low64);
   });
 
   group('SettingsCubit', () {

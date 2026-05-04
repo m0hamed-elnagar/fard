@@ -2846,6 +2846,12 @@ abstract class AppLocalizations {
   /// **'Failed to apply widget theme: {error}'**
   String widgetThemeApplyFailed(String error);
 
+  /// No description provided for @widgetThemeAppliedShortly.
+  ///
+  /// In en, this message translates to:
+  /// **'Widget theme applied! It will update on your home screen shortly.'**
+  String get widgetThemeAppliedShortly;
+
   /// No description provided for @applyToWidget.
   ///
   /// In en, this message translates to:

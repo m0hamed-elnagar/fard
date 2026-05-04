@@ -5,7 +5,6 @@ import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_
 import 'package:fard/features/prayer_tracking/presentation/widgets/add_qada_dialog.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/home_content.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/missed_days_dialog.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -77,10 +76,7 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
 
         // Refresh widget with latest data (includes locale, location, prayer times)
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          final settings = context.read<SettingsCubit>().state;
-          debugPrint(
-            'HomeScreen: Calling updateWidget with settings - locale: ${settings.locale}, lat: ${settings.latitude}, lng: ${settings.longitude}',
-          );
+          debugPrint('HomeScreen: App resumed - triggering widget update');
           getIt<WidgetUpdateService>().updateWidget();
         });
         break;

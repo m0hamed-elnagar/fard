@@ -6,16 +6,16 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/core/utils/rtl_text_util.dart';
 import 'package:fard/core/utils/app_identifiers.dart';
+import 'package:fard/core/di/injection.dart';
+import 'package:fard/core/services/notification/channel_manager.dart';
+import 'package:fard/core/services/notification/prayer_scheduler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:injectable/injectable.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:injectable/injectable.dart';
-import '../di/injection.dart';
-import 'notification/channel_manager.dart';
-import 'notification/prayer_scheduler.dart';
 import 'notification/sound_manager.dart';
 import 'widget_update_service.dart';
 
@@ -28,6 +28,7 @@ class NotificationService {
   final WidgetUpdateService _widgetUpdateService;
   final SettingsRepository _settingsProvider;
   final SharedPreferences _prefs;
+  final GlobalKey<NavigatorState> _navigatorKey;
 
   NotificationService(
     this._soundManager,
@@ -37,6 +38,7 @@ class NotificationService {
     this._widgetUpdateService,
     this._settingsProvider,
     this._prefs,
+    this._navigatorKey,
   );
 
   static const String reminderChannelId = ChannelManager.reminderChannelId;
@@ -133,11 +135,10 @@ class NotificationService {
       settings: initializationSettings,
       onDidReceiveNotificationResponse: (details) {
         if (details.payload != null) {
-          final navigatorKey = getIt<GlobalKey<NavigatorState>>();
-          if (navigatorKey.currentState != null) {
+          if (_navigatorKey.currentState != null) {
             if (details.payload!.startsWith('category:')) {
               final category = details.payload!.replaceFirst('category:', '');
-              navigatorKey.currentState!.push(
+              _navigatorKey.currentState!.push(
                 MaterialPageRoute(
                   builder: (_) => AzkarListScreen(category: category),
                 ),

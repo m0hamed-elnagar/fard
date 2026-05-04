@@ -2,6 +2,7 @@ import 'package:adhan/adhan.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
+import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
 import 'package:fard/features/prayer_tracking/domain/missed_counter.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
@@ -17,10 +18,13 @@ class MockSharedPreferences extends Mock implements SharedPreferences {}
 
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
+class MockNotificationService extends Mock implements NotificationService {}
+
 void main() {
   late MockPrayerRepo repo;
   late MockSharedPreferences prefs;
   late MockPrayerTimeService prayerTimeService;
+  late MockNotificationService notificationService;
 
   final today = DateTime(2026, 2, 26);
   final dummyPrayerTimes = PrayerTimes(
@@ -49,6 +53,8 @@ void main() {
     repo = MockPrayerRepo();
     prefs = MockSharedPreferences();
     prayerTimeService = MockPrayerTimeService();
+    notificationService = MockNotificationService();
+    getIt.registerSingleton<NotificationService>(notificationService);
 
     getIt.registerSingleton<SharedPreferences>(prefs);
     getIt.registerSingleton<PrayerTimeService>(prayerTimeService);
@@ -94,7 +100,7 @@ void main() {
   group('PrayerTrackerBloc - Edge Cases', () {
     blocTest<PrayerTrackerBloc, PrayerTrackerState>(
       'Load when no previous record exists and all prayers passed',
-      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService),
+      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService),
       setUp: () {
         when(
           () => prayerTimeService.isPassed(
@@ -120,7 +126,7 @@ void main() {
 
     blocTest<PrayerTrackerBloc, PrayerTrackerState>(
       'Delete record should trigger cascade update',
-      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService),
+      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService),
       setUp: () {
         final r1 = DailyRecord(
           id: '2026-02-25',
@@ -154,7 +160,7 @@ void main() {
 
     blocTest<PrayerTrackerBloc, PrayerTrackerState>(
       'History should be sorted descending by date',
-      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService),
+      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService),
       setUp: () {
         final r1 = DailyRecord(
           id: '2026-02-24',
@@ -194,7 +200,7 @@ void main() {
 
     blocTest<PrayerTrackerBloc, PrayerTrackerState>(
       'Acknowledge missed days should bulk add correctly',
-      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService),
+      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService),
       setUp: () {
         final lastRecord = DailyRecord(
           id: 'last',
@@ -228,7 +234,7 @@ void main() {
 
     blocTest<PrayerTrackerBloc, PrayerTrackerState>(
       'Check missed days should emit prompt if gap > 1 day',
-      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService),
+      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService),
       setUp: () {
         final lastRecord = DailyRecord(
           id: 'gap-record',
@@ -254,7 +260,7 @@ void main() {
 
     blocTest<PrayerTrackerBloc, PrayerTrackerState>(
       'Remove Qada when already at zero should not go negative',
-      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService),
+      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService),
       act: (bloc) async {
         bloc.add(PrayerTrackerEvent.load(today));
         await Future.delayed(Duration.zero);

@@ -96,8 +96,16 @@ import '../../features/settings/domain/usecases/toggle_after_salah_azkar_usecase
     as _i769;
 import '../../features/settings/domain/usecases/update_calculation_method_usecase.dart'
     as _i6;
+import '../../features/settings/presentation/blocs/adhan_cubit.dart' as _i310;
+import '../../features/settings/presentation/blocs/daily_reminders_cubit.dart'
+    as _i126;
+import '../../features/settings/presentation/blocs/location_prayer_cubit.dart'
+    as _i185;
 import '../../features/settings/presentation/blocs/settings_cubit.dart'
     as _i573;
+import '../../features/settings/presentation/blocs/theme_cubit.dart' as _i984;
+import '../../features/settings/presentation/manager/widget_sync_coordinator.dart'
+    as _i102;
 import '../../features/tasbih/data/tasbih_repository_impl.dart' as _i196;
 import '../../features/tasbih/domain/tasbih_repository.dart' as _i352;
 import '../../features/tasbih/presentation/bloc/tasbih_bloc.dart' as _i809;
@@ -201,12 +209,6 @@ extension GetItInjectableX on _i174.GetIt {
       instanceName: 'bookmarkBox',
       preResolve: true,
     );
-    gh.factory<_i1037.WerdBloc>(
-      () => _i1037.WerdBloc(
-        gh<_i724.WerdRepository>(),
-        gh<_i941.NotificationService>(),
-      ),
-    );
     gh.lazySingleton<_i307.SettingsStorage>(
       () => _i307.SettingsStorage(gh<_i460.SharedPreferences>()),
     );
@@ -223,14 +225,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.singleton<_i492.VoiceDownloadService>(
       () => _i492.VoiceDownloadService(gh<_i188.DownloadManifestService>()),
-    );
-    gh.factory<_i278.PrayerTrackerBloc>(
-      () => _i278.PrayerTrackerBloc(
-        gh<_i800.PrayerRepo>(),
-        gh<_i460.SharedPreferences>(),
-        gh<_i552.PrayerTimeService>(),
-        gh<_i941.NotificationService>(),
-      ),
     );
     gh.lazySingleton<_i331.QuranRemoteSource>(
       () => _i331.QuranRemoteSourceImpl(client: gh<_i519.Client>()),
@@ -272,6 +266,12 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i1004.AzkarRepository(gh<_i1055.Box<int>>(instanceName: 'azkarBox')),
     );
+    gh.factory<_i1037.WerdBloc>(
+      () => _i1037.WerdBloc(
+        gh<_i724.WerdRepository>(),
+        gh<_i941.NotificationService>(),
+      ),
+    );
     gh.factory<_i288.AudioPlayerBloc>(
       () => _i288.AudioPlayerBloc(
         audioRepository: gh<_i451.AudioRepository>(),
@@ -296,17 +296,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferences>(),
       ),
     );
-    gh.lazySingleton<_i1068.ExportImportService>(
-      () => _i1068.ExportImportService(
-        gh<_i800.PrayerRepo>(),
-        gh<_i724.WerdRepository>(),
-        gh<_i674.SettingsRepository>(),
-        gh<_i352.TasbihRepository>(),
-        gh<_i1027.IAzkarSource>(),
-        gh<_i33.BookmarkRepository>(),
-        gh<_i498.QuranRepository>(),
-      ),
-    );
     gh.factory<_i47.SyncLocationSettings>(
       () => _i47.SyncLocationSettings(
         gh<_i669.LocationService>(),
@@ -328,6 +317,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i218.WatchBookmarks>(
       () => _i218.WatchBookmarks(gh<_i33.BookmarkRepository>()),
     );
+    gh.lazySingleton<_i1068.ExportImportService>(
+      () => _i1068.ExportImportService(
+        gh<_i800.PrayerRepo>(),
+        gh<_i724.WerdRepository>(),
+        gh<_i674.SettingsRepository>(),
+        gh<_i352.TasbihRepository>(),
+        gh<_i1027.IAzkarSource>(),
+        gh<_i33.BookmarkRepository>(),
+        gh<_i498.QuranRepository>(),
+      ),
+    );
     gh.factory<_i1008.PlayAudio>(
       () => _i1008.PlayAudio(
         audioRepository: gh<_i451.AudioRepository>(),
@@ -340,19 +340,16 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i724.WerdRepository>(),
       ),
     );
+    gh.factory<_i984.ThemeCubit>(
+      () => _i984.ThemeCubit(
+        gh<_i674.SettingsRepository>(),
+        gh<_i808.ApplyThemePreset>(),
+        gh<_i1036.SaveCustomTheme>(),
+        gh<_i494.GetAvailableThemePresets>(),
+      ),
+    );
     gh.factory<_i1037.AzkarBloc>(
       () => _i1037.AzkarBloc(gh<_i1027.IAzkarSource>()),
-    );
-    gh.lazySingleton<_i941.NotificationService>(
-      () => _i941.NotificationService(
-        gh<_i1055.SoundManager>(),
-        gh<_i680.ChannelManager>(),
-        gh<_i3.PrayerNotificationScheduler>(),
-        gh<_i163.FlutterLocalNotificationsPlugin>(),
-        gh<_i682.WidgetUpdateService>(),
-        gh<_i674.SettingsRepository>(),
-        gh<_i460.SharedPreferences>(),
-      ),
     );
     gh.factory<_i809.TasbihBloc>(
       () => _i809.TasbihBloc(gh<_i352.TasbihRepository>()),
@@ -372,6 +369,18 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i358.WatchLastRead>(
       () => _i358.WatchLastRead(gh<_i498.QuranRepository>()),
+    );
+    gh.lazySingleton<_i941.NotificationService>(
+      () => _i941.NotificationService(
+        gh<_i1055.SoundManager>(),
+        gh<_i680.ChannelManager>(),
+        gh<_i3.PrayerNotificationScheduler>(),
+        gh<_i163.FlutterLocalNotificationsPlugin>(),
+        gh<_i682.WidgetUpdateService>(),
+        gh<_i674.SettingsRepository>(),
+        gh<_i460.SharedPreferences>(),
+        gh<_i409.GlobalKey<_i409.NavigatorState>>(),
+      ),
     );
     gh.lazySingleton<_i224.AudioDownloadService>(
       () => _i779.AudioDownloadServiceImpl(
@@ -425,8 +434,47 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i33.BookmarkRepository>(),
       ),
     );
+    gh.factory<_i185.LocationPrayerCubit>(
+      () => _i185.LocationPrayerCubit(
+        gh<_i674.SettingsRepository>(),
+        gh<_i669.LocationService>(),
+        gh<_i47.SyncLocationSettings>(),
+        gh<_i760.SyncNotificationSchedule>(),
+        gh<_i6.UpdateCalculationMethodUseCase>(),
+      ),
+    );
+    gh.factory<_i126.DailyRemindersCubit>(
+      () => _i126.DailyRemindersCubit(
+        gh<_i674.SettingsRepository>(),
+        gh<_i760.SyncNotificationSchedule>(),
+        gh<_i769.ToggleAfterSalahAzkarUseCase>(),
+      ),
+    );
     gh.factory<_i352.AudioDownloadCubit>(
       () => _i352.AudioDownloadCubit(gh<_i224.AudioDownloadService>()),
+    );
+    gh.factory<_i278.PrayerTrackerBloc>(
+      () => _i278.PrayerTrackerBloc(
+        gh<_i800.PrayerRepo>(),
+        gh<_i460.SharedPreferences>(),
+        gh<_i552.PrayerTimeService>(),
+        gh<_i941.NotificationService>(),
+      ),
+    );
+    gh.factory<_i310.AdhanCubit>(
+      () => _i310.AdhanCubit(
+        gh<_i674.SettingsRepository>(),
+        gh<_i760.SyncNotificationSchedule>(),
+      ),
+    );
+    gh.singleton<_i102.WidgetSyncCoordinator>(
+      () => _i102.WidgetSyncCoordinator(
+        gh<_i682.WidgetUpdateService>(),
+        gh<_i984.ThemeCubit>(),
+        gh<_i185.LocationPrayerCubit>(),
+        gh<_i310.AdhanCubit>(),
+        gh<_i126.DailyRemindersCubit>(),
+      ),
     );
     return this;
   }

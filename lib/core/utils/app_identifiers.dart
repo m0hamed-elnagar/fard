@@ -65,4 +65,7 @@ class AppIdentifiers {
 
   /// Azkar reminders channel ID (package-specific).
   static String get azkarChannelId => '$_notificationBase.azkar_reminders';
+
+  static const String privacyPolicyUrl =
+      'https://github.com/m-nagar/fard/blob/main/PRIVACY_POLICY.md';
 }

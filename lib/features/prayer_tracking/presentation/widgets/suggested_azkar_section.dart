@@ -1,7 +1,6 @@
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/azkar/presentation/screens/azkar_list_screen.dart';
-import 'package:fard/features/settings/domain/azkar_reminder.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,8 +8,10 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/core/theme/app_colors.dart';
 
+import '../../../settings/domain/azkar_reminder.dart';
+
 class SuggestedAzkarSection extends StatelessWidget {
-  final SettingsState settings;
+  final DailyRemindersState settings;
 
   const SuggestedAzkarSection({super.key, required this.settings});
 

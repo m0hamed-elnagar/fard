@@ -7,13 +7,17 @@ import 'package:fard/features/werd/domain/repositories/werd_repository.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
+import 'package:fard/core/services/notification_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockWerdRepository extends Mock implements WerdRepository {}
 
+class MockNotificationService extends Mock implements NotificationService {}
+
 void main() {
   late MockWerdRepository mockRepository;
+  late MockNotificationService mockNotificationService;
   late WerdGoal testGoal;
   late WerdProgress initialProgress;
 
@@ -37,6 +41,7 @@ void main() {
 
   setUp(() {
     mockRepository = MockWerdRepository();
+    mockNotificationService = MockNotificationService();
     testGoal = WerdGoal(
       id: 'default',
       type: WerdGoalType.fixedAmount,
@@ -77,7 +82,7 @@ void main() {
   group('WerdBloc: Jump to New Session', () {
     blocTest<WerdBloc, WerdState>(
       'should update lastReadAbsolute and sessionStartAbsolute without counting the jump ayah immediately',
-      build: () => WerdBloc(mockRepository),
+      build: () => WerdBloc(mockRepository, mockNotificationService),
       seed: () => WerdState(goal: testGoal, progress: initialProgress),
       setUp: () {
         var currentProgress = initialProgress;
@@ -109,7 +114,7 @@ void main() {
 
     blocTest<WerdBloc, WerdState>(
       'subsequent trackItemRead after jump should count 1 ayah (the new mark)',
-      build: () => WerdBloc(mockRepository),
+      build: () => WerdBloc(mockRepository, mockNotificationService),
       seed: () => WerdState(goal: testGoal, progress: initialProgress),
       setUp: () {
         var currentProgress = initialProgress;
@@ -138,7 +143,7 @@ void main() {
 
     blocTest<WerdBloc, WerdState>(
       'jumpToNewSession should end previous active session and NOT add a new one yet',
-      build: () => WerdBloc(mockRepository),
+      build: () => WerdBloc(mockRepository, mockNotificationService),
       seed: () => WerdState(
         goal: testGoal,
         progress: initialProgress.copyWith(

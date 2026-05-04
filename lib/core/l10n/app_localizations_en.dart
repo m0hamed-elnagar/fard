@@ -1515,6 +1515,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get widgetThemeAppliedShortly =>
+      'Widget theme applied! It will update on your home screen shortly.';
+
+  @override
   String get applyToWidget => 'Apply to Widget';
 
   @override

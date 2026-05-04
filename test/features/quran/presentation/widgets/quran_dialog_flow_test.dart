@@ -8,16 +8,21 @@ import 'package:fard/features/werd/domain/repositories/werd_repository.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
+import 'package:fard/core/services/notification_service.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockWerdRepository extends Mock implements WerdRepository {}
 
+class MockNotificationService extends Mock implements NotificationService {}
+
 void main() {
   late MockWerdRepository mockRepository;
+  late MockNotificationService mockNotificationService;
   late WerdGoal testGoal;
 
   setUp(() {
     mockRepository = MockWerdRepository();
+    mockNotificationService = MockNotificationService();
     testGoal = WerdGoal(
       id: 'default',
       type: WerdGoalType.fixedAmount,
@@ -68,7 +73,7 @@ void main() {
   group('Jump Dialog - Mark All Range Tracking', () {
     blocTest<WerdBloc, WerdState>(
       'jump from 100 to 6236: mark all creates segment 101-6236, total = 6136',
-      build: () => WerdBloc(mockRepository),
+      build: () => WerdBloc(mockRepository, mockNotificationService),
       setUp: () {
         when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
             .thenAnswer((_) async => Result.success(
@@ -110,7 +115,7 @@ void main() {
 
     blocTest<WerdBloc, WerdState>(
       'jump from 6100 to 6236: mark all creates segment 6101-6236, total = 186',
-      build: () => WerdBloc(mockRepository),
+      build: () => WerdBloc(mockRepository, mockNotificationService),
       setUp: () {
         when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
             .thenAnswer((_) async => Result.success(
@@ -151,7 +156,7 @@ void main() {
 
     blocTest<WerdBloc, WerdState>(
       'jump from 1 to 6236: mark all creates segment 1-6236 (entire Quran)',
-      build: () => WerdBloc(mockRepository),
+      build: () => WerdBloc(mockRepository, mockNotificationService),
       setUp: () {
         when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
             .thenAnswer((_) async => Result.success(
@@ -192,7 +197,7 @@ void main() {
 
     blocTest<WerdBloc, WerdState>(
       'jump from 6000 to 6236: mark all adds 236 ayahs',
-      build: () => WerdBloc(mockRepository),
+      build: () => WerdBloc(mockRepository, mockNotificationService),
       setUp: () {
         when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
             .thenAnswer((_) async => Result.success(
@@ -240,7 +245,7 @@ void main() {
   group('Jump Dialog - New Session Tracking (DISABLED)', () {
     blocTest<WerdBloc, WerdState>(
       'new session at 6236: tracks only ayah 6236, total = 1 [DISABLED]',
-      build: () => WerdBloc(mockRepository),
+      build: () => WerdBloc(mockRepository, mockNotificationService),
       // Test disabled - trackItemReadWithNewSession event no longer exists
     );
   });
@@ -249,7 +254,7 @@ void main() {
   group('Cycle Completion - State Updates', () {
     blocTest<WerdBloc, WerdState>(
       'after restart: lastReadAbsolute = 1, totalAmountReadToday = 0',
-      build: () => WerdBloc(mockRepository),
+      build: () => WerdBloc(mockRepository, mockNotificationService),
       setUp: () {
         when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
             .thenAnswer((_) async => Result.success(
@@ -284,7 +289,7 @@ void main() {
 
     blocTest<WerdBloc, WerdState>(
       'after stay: lastReadAbsolute = 6236, totalAmountReadToday = 0',
-      build: () => WerdBloc(mockRepository),
+      build: () => WerdBloc(mockRepository, mockNotificationService),
       setUp: () {
         when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
             .thenAnswer((_) async => Result.success(
@@ -319,7 +324,7 @@ void main() {
 
     blocTest<WerdBloc, WerdState>(
       'second cycle completion: completedCycles = 2',
-      build: () => WerdBloc(mockRepository),
+      build: () => WerdBloc(mockRepository, mockNotificationService),
       setUp: () {
         when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
             .thenAnswer((_) async => Result.success(
@@ -354,7 +359,7 @@ void main() {
   group('Edge Cases - Boundary Conditions', () {
     blocTest<WerdBloc, WerdState>(
       'jump from 6185 to 6236 (51 ayah gap): mark all tracks 51 ayahs',
-      build: () => WerdBloc(mockRepository),
+      build: () => WerdBloc(mockRepository, mockNotificationService),
       setUp: () {
         when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
             .thenAnswer((_) async => Result.success(

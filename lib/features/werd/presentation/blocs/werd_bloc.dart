@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
-import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/features/werd/domain/entities/werd_progress.dart';
@@ -22,11 +21,9 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
   StreamSubscription? _progressSubscription;
 
   WerdBloc(
-    this._repository, [
-    NotificationService? notificationService,
-  ]) : _notificationService =
-           notificationService ?? (getIt.isRegistered<NotificationService>() ? getIt<NotificationService>() : null),
-       super(WerdState.initial()) {
+    this._repository,
+    this._notificationService,
+  ) : super(WerdState.initial()) {
     on<WerdEvent>((event, emit) async {
       await event.map(
         load: (e) async {

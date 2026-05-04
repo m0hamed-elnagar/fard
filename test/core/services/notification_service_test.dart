@@ -141,6 +141,7 @@ void main() {
       mockWidgetUpdateService,
       mockSettingsRepository,
       mockSharedPreferences,
+      GlobalKey<NavigatorState>(),
     );
   });
 

@@ -141,7 +141,6 @@ class WidgetUpdateService {
 
   Future<void> _syncNative(String prayerDataJson) async {
     try {
-      final jsonMap = jsonDecode(prayerDataJson) as Map<String, dynamic>;
       final now = DateTime.now();
       final prayerTimes = _prayerTimeService.getPrayerTimes(
         latitude: _settingsProvider.latitude!,

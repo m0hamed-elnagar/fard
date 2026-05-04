@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:fard/core/theme/app_colors.dart';
 import '../blocs/azkar_bloc.dart';
@@ -237,7 +237,7 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                   .firstWhere((s) => !s.isLoading)
                   .timeout(const Duration(seconds: 15), onTimeout: () => state);
             },
-            child: BlocBuilder<SettingsCubit, SettingsState>(
+            child: BlocBuilder<DailyRemindersCubit, DailyRemindersState>(
               builder: (context, settingsState) {
                 final now = DateTime.now();
 
@@ -309,7 +309,7 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
 }
 
 void _showAddReminderDialog(BuildContext context, String category) {
-  final cubit = context.read<SettingsCubit>();
+  final cubit = context.read<DailyRemindersCubit>();
   final l10n = AppLocalizations.of(context)!;
 
   String selectedTime = '05:00';

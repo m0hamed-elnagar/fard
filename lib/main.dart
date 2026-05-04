@@ -14,7 +14,6 @@ import 'package:fard/features/onboarding/presentation/screens/splash_screen.dart
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +26,12 @@ import 'package:path_provider/path_provider.dart';
 import 'core/blocs/connectivity/connectivity_bloc.dart';
 import 'features/audio/presentation/blocs/manager/reciter_manager_bloc.dart';
 import 'features/audio/presentation/blocs/player/audio_player_bloc.dart';
+import 'features/settings/presentation/blocs/adhan_cubit.dart';
+import 'features/settings/presentation/blocs/daily_reminders_cubit.dart';
+import 'features/settings/presentation/blocs/location_prayer_cubit.dart';
+import 'features/settings/presentation/blocs/theme_cubit.dart';
+import 'features/settings/presentation/blocs/theme_state.dart';
+import 'features/settings/presentation/manager/widget_sync_coordinator.dart';
 
 void main() async {
   final startupTimer = Stopwatch()..start();
@@ -46,6 +51,9 @@ void main() async {
   await configureDependencies();
   debugPrint(
       '[STARTUP] Dependencies configured (${startupTimer.elapsedMilliseconds}ms)');
+
+  // 1.5 Initialize Widget Sync Coordinator
+  getIt<WidgetSyncCoordinator>().init();
 
   // 2. NON-CRITICAL: Launch non-blocking services in parallel
   // We don't 'await' this so the app can start immediately.
@@ -108,7 +116,7 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
     super.initState();
     // Initialize reminders and update widget after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      getIt<SettingsCubit>().initReminders();
+      getIt<DailyRemindersCubit>().refresh();
       // Force widget update on app start to ensure fresh prayer times
       await _updateWidgetOnStart();
     });
@@ -117,8 +125,8 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
   /// Updates widget on app start to ensure fresh prayer times after time change.
   Future<void> _updateWidgetOnStart() async {
     try {
-      final settings = getIt<SettingsCubit>().state;
-      if (settings.latitude != null && settings.longitude != null) {
+      final locationState = getIt<LocationPrayerCubit>().state;
+      if (locationState.latitude != null && locationState.longitude != null) {
         debugPrint('MainActivity: Forcing widget update on app start');
         await getIt<WidgetUpdateService>().updateWidget();
       }
@@ -135,6 +143,10 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
           create: (_) => getIt<ConnectivityBloc>(),
         ),
         BlocProvider(create: (_) => getIt<SettingsCubit>()),
+        BlocProvider(create: (_) => getIt<ThemeCubit>()),
+        BlocProvider(create: (_) => getIt<LocationPrayerCubit>()),
+        BlocProvider(create: (_) => getIt<AdhanCubit>()),
+        BlocProvider(create: (_) => getIt<DailyRemindersCubit>()),
         BlocProvider(
           create: (_) {
             final bloc = getIt<AzkarBloc>();
@@ -207,23 +219,23 @@ class _MaterialAppWithReactiveThemeState
   final _themeObserver = ThemeUpdateObserver();
   ThemeData _theme = ThemePresets.buildThemeData(ThemePresets.emerald);
   Locale _locale = const Locale('ar');
-  SettingsState? _pendingThemeState;
+  ThemeState? _pendingThemeState;
 
   @override
   void initState() {
     super.initState();
     _initFromCurrentState();
     _themeObserver.onAllRoutesSettled = _applyPendingTheme;
-    context.read<SettingsCubit>().stream.listen(_onSettingsChanged);
+    context.read<ThemeCubit>().stream.listen(_onThemeChanged);
   }
 
   void _initFromCurrentState() {
-    final state = context.read<SettingsCubit>().state;
+    final state = context.read<ThemeCubit>().state;
     _theme = _buildTheme(state);
     _locale = state.locale;
   }
 
-  void _onSettingsChanged(SettingsState state) {
+  void _onThemeChanged(ThemeState state) {
     if (!mounted) return;
 
     _pendingThemeState = state;
@@ -244,7 +256,7 @@ class _MaterialAppWithReactiveThemeState
     });
   }
 
-  ThemeData _buildTheme(SettingsState state) {
+  ThemeData _buildTheme(ThemeState state) {
     return state.themePresetId == 'custom' && state.customThemeColors != null
         ? ThemePresets.buildCustomThemeData(
             state.customThemeColors!.map(

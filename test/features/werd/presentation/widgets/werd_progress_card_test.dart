@@ -15,10 +15,15 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
 
 class MockWerdBloc extends MockBloc<WerdEvent, WerdState> implements WerdBloc {}
 
 class MockSettingsCubit extends MockBloc<dynamic, SettingsState> implements SettingsCubit {}
+
+class MockDailyRemindersCubit extends MockBloc<dynamic, DailyRemindersState>
+    implements DailyRemindersCubit {}
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 
@@ -27,6 +32,7 @@ class FakeRoute extends Fake implements Route<dynamic> {}
 void main() {
   late MockWerdBloc mockWerdBloc;
   late MockSettingsCubit mockSettingsCubit;
+  late MockDailyRemindersCubit mockDailyRemindersCubit;
   late MockNavigatorObserver mockNavigatorObserver;
 
   setUpAll(() async {
@@ -37,12 +43,16 @@ void main() {
   setUp(() {
     mockWerdBloc = MockWerdBloc();
     mockSettingsCubit = MockSettingsCubit();
+    mockDailyRemindersCubit = MockDailyRemindersCubit();
     mockNavigatorObserver = MockNavigatorObserver();
     registerFallbackValue(FakeRoute());
 
     // Mock Settings state
     when(() => mockSettingsCubit.state).thenReturn(
       SettingsState(locale: const Locale('en')),
+    );
+    when(() => mockDailyRemindersCubit.state).thenReturn(
+      const DailyRemindersState(),
     );
   });
 
@@ -66,6 +76,7 @@ void main() {
           providers: [
             BlocProvider<WerdBloc>.value(value: mockWerdBloc),
             BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
+            BlocProvider<DailyRemindersCubit>.value(value: mockDailyRemindersCubit),
           ],
           child: WerdProgressCard(onSetGoalPressed: () {}),
         ),

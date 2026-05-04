@@ -10,8 +10,8 @@ import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
 import 'package:fard/features/werd/presentation/pages/werd_history_page.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -381,13 +381,13 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  BlocBuilder<SettingsCubit, SettingsState>(
+                  BlocBuilder<DailyRemindersCubit, DailyRemindersState>(
                     builder: (context, settings) {
                       return IconButton(
                         onPressed: () {
                           final newState = !settings.isWerdReminderEnabled;
                           context
-                              .read<SettingsCubit>()
+                              .read<DailyRemindersCubit>()
                               .toggleWerdReminder(newState);
                           _showReminderSnackBar(
                             isAr ? 'تذكير الورد' : 'Werd Reminder',

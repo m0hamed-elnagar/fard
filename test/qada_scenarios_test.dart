@@ -53,7 +53,10 @@ void main() {
     getIt.registerSingleton<PrayerTimeService>(prayerTimeService);
     getIt.registerSingleton<NotificationService>(notificationService);
 
-    bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService);
+    when(() => notificationService.cancelPrayerReminder(any(), forTodayOnly: any(named: 'forTodayOnly')))
+        .thenAnswer((_) async {});
+
+    bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
 
     when(() => repo.loadRecord(any())).thenAnswer((_) async => null);
     when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => null);
@@ -165,7 +168,7 @@ void main() {
 
         await expectLater(
           bloc.stream,
-          emitsThrough(
+          emits(
             isA<PrayerTrackerState>().having(
               (s) => s.maybeMap(
                 loaded: (l) =>
@@ -184,7 +187,7 @@ void main() {
 
         await expectLater(
           bloc.stream,
-          emitsThrough(
+          emits(
             isA<PrayerTrackerState>().having(
               (s) => s.maybeMap(
                 loaded: (l) =>

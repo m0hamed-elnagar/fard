@@ -8,8 +8,6 @@ import 'package:fard/features/tasbih/presentation/pages/tasbih_page.dart';
 import 'package:fard/features/settings/presentation/screens/settings_screen.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/audio/presentation/widgets/audio_player_bar.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -58,28 +56,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       _lastLocale = currentLocale;
     }
 
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<SettingsCubit, SettingsState>(
-          listenWhen: (previous, current) =>
-              previous.latitude != current.latitude ||
-              previous.longitude != current.longitude ||
-              previous.calculationMethod != current.calculationMethod ||
-              previous.madhab != current.madhab ||
-              previous.locale != current.locale ||
-              previous.hijriAdjustment != current.hijriAdjustment,
-          listener: (context, state) {
-            getIt<WidgetUpdateService>().updateWidget();
-          },
-        ),
-        BlocListener<PrayerTrackerBloc, PrayerTrackerState>(
-          listenWhen: (previous, current) =>
-              current.maybeMap(loaded: (_) => true, orElse: () => false),
-          listener: (context, state) {
-            getIt<WidgetUpdateService>().updateWidget();
-          },
-        ),
-      ],
+    return BlocListener<PrayerTrackerBloc, PrayerTrackerState>(
+      listenWhen: (previous, current) =>
+          current.maybeMap(loaded: (_) => true, orElse: () => false),
+      listener: (context, state) {
+        getIt<WidgetUpdateService>().updateWidget();
+      },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: Column(

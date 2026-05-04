@@ -1,6 +1,9 @@
 import 'dart:io';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/presentation/blocs/adhan_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/adhan_state.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -32,8 +35,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> with NotificationPe
 
   Future<void> _completeOnboarding() async {
     // If Azan is enabled, make one last check for permissions
-    final settings = context.read<SettingsCubit>().state;
-    if (settings.salaahSettings.any((s) => s.isAzanEnabled)) {
+    final adhanState = context.read<AdhanCubit>().state;
+    if (adhanState.salaahSettings.any((s) => s.isAzanEnabled)) {
       await checkAndRequestNotificationPermissions(context);
     }
 
@@ -42,7 +45,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with NotificationPe
 
     if (mounted) {
       if (!_isQadaEnabled) {
-        context.read<SettingsCubit>().toggleQadaEnabled();
+        context.read<DailyRemindersCubit>().toggleQadaEnabled();
       }
 
       Navigator.of(context).pushReplacement(
@@ -63,42 +66,46 @@ class _OnboardingScreenState extends State<OnboardingScreen> with NotificationPe
       body: SafeArea(
         child: Stack(
           children: [
-            BlocBuilder<SettingsCubit, SettingsState>(
-              builder: (context, state) {
-                return PageView(
-                  controller: _pageController,
-                  onPageChanged: (index) =>
-                      setState(() => _currentPage = index),
-                  children: [
-                    _OnboardingPage(
-                      title: l10n.onboardingTitle1,
-                      description: l10n.onboardingDesc1,
-                      icon: Icons.auto_graph_rounded,
-                      bottomPadding: bottomPadding,
-                    ),
-                    _OnboardingPage(
-                      title: l10n.onboardingTitle2,
-                      description: l10n.onboardingDesc2,
-                      icon: Icons.history_rounded,
-                      bottomPadding: bottomPadding,
-                    ),
-                    _LocationPrayerPage(
-                      state: state,
-                      bottomPadding: bottomPadding,
-                    ),
-                    _AzanSelectionPage(
-                      state: state,
-                      isDownloading: _isDownloading,
-                      onDownloadingChanged: (val) =>
-                          setState(() => _isDownloading = val),
-                      bottomPadding: bottomPadding,
-                    ),
-                    _QadaSelectionPage(
-                      isEnabled: _isQadaEnabled,
-                      onChanged: (val) => setState(() => _isQadaEnabled = val),
-                      bottomPadding: bottomPadding,
-                    ),
-                  ],
+            BlocBuilder<LocationPrayerCubit, LocationPrayerState>(
+              builder: (context, locationState) {
+                return BlocBuilder<AdhanCubit, AdhanState>(
+                  builder: (context, adhanState) {
+                    return PageView(
+                      controller: _pageController,
+                      onPageChanged: (index) =>
+                          setState(() => _currentPage = index),
+                      children: [
+                        _OnboardingPage(
+                          title: l10n.onboardingTitle1,
+                          description: l10n.onboardingDesc1,
+                          icon: Icons.auto_graph_rounded,
+                          bottomPadding: bottomPadding,
+                        ),
+                        _OnboardingPage(
+                          title: l10n.onboardingTitle2,
+                          description: l10n.onboardingDesc2,
+                          icon: Icons.history_rounded,
+                          bottomPadding: bottomPadding,
+                        ),
+                        _LocationPrayerPage(
+                          state: locationState,
+                          bottomPadding: bottomPadding,
+                        ),
+                        _AzanSelectionPage(
+                          state: adhanState,
+                          isDownloading: _isDownloading,
+                          onDownloadingChanged: (val) =>
+                              setState(() => _isDownloading = val),
+                          bottomPadding: bottomPadding,
+                        ),
+                        _QadaSelectionPage(
+                          isEnabled: _isQadaEnabled,
+                          onChanged: (val) => setState(() => _isQadaEnabled = val),
+                          bottomPadding: bottomPadding,
+                        ),
+                      ],
+                    );
+                  },
                 );
               },
             ),
@@ -179,7 +186,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with NotificationPe
 }
 
 class _LocationPrayerPage extends StatelessWidget {
-  final SettingsState state;
+  final LocationPrayerState state;
   final double bottomPadding;
 
   const _LocationPrayerPage({required this.state, required this.bottomPadding});
@@ -187,7 +194,7 @@ class _LocationPrayerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final cubit = context.read<SettingsCubit>();
+    final cubit = context.read<LocationPrayerCubit>();
 
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(24.0, 40.0, 24.0, bottomPadding),
@@ -264,7 +271,7 @@ class _LocationPrayerPage extends StatelessWidget {
 }
 
 class _AzanSelectionPage extends StatelessWidget {
-  final SettingsState state;
+  final AdhanState state;
   final bool isDownloading;
   final ValueChanged<bool> onDownloadingChanged;
   final double bottomPadding;
@@ -279,9 +286,9 @@ class _AzanSelectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final cubit = context.read<SettingsCubit>();
+    final cubit = context.read<AdhanCubit>();
     final isAzanEnabled = state.salaahSettings.any((s) => s.isAzanEnabled);
-    final currentSound = state.salaahSettings.first.azanSound;
+    final currentSound = state.salaahSettings.isNotEmpty ? state.salaahSettings.first.azanSound : null;
 
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(24.0, 40.0, 24.0, bottomPadding),

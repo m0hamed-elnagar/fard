@@ -615,6 +615,7 @@
       }
     }
   },
+  "widgetThemeAppliedShortly": "تم تطبيق مظهر الويدجت! سيتم التحديث على الشاشة الرئيسية قريباً.",
   "applyToWidget": "تطبيق على الويدجت",
   "pickColorTitle": "اختر لون {label}",
   "@pickColorTitle": {

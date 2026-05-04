@@ -1,5 +1,6 @@
 import 'package:adhan/adhan.dart';
 import 'package:fard/core/di/injection.dart';
+import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
 import 'package:fard/features/prayer_tracking/domain/missed_counter.dart';
@@ -17,12 +18,15 @@ class MockSharedPreferences extends Mock implements SharedPreferences {}
 
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
+class MockNotificationService extends Mock implements NotificationService {}
+
 class MockPrayerTimes extends Mock implements PrayerTimes {}
 
 void main() {
   late MockPrayerRepo repo;
   late MockSharedPreferences prefs;
   late MockPrayerTimeService prayerTimeService;
+  late MockNotificationService notificationService;
   late PrayerTrackerBloc bloc;
 
   final day1 = DateTime(2024, 1, 1);
@@ -48,11 +52,12 @@ void main() {
     repo = MockPrayerRepo();
     prefs = MockSharedPreferences();
     prayerTimeService = MockPrayerTimeService();
+    notificationService = MockNotificationService();
 
     getIt.registerSingleton<SharedPreferences>(prefs);
     getIt.registerSingleton<PrayerTimeService>(prayerTimeService);
 
-    bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService);
+    bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
 
     when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {});
     when(() => repo.saveToday(any())).thenAnswer((_) async {});
@@ -84,7 +89,7 @@ void main() {
     blocTest<PrayerTrackerBloc, PrayerTrackerState>(
       'Day 2 load correctly carries over missed prayers from Day 1 mid-day save',
       build: () {
-        final b = PrayerTrackerBloc(repo, prefs, prayerTimeService);
+        final b = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
         return b;
       },
       setUp: () {

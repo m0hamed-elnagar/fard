@@ -1507,6 +1507,10 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get widgetThemeAppliedShortly =>
+      'تم تطبيق مظهر الويدجت! سيتم التحديث على الشاشة الرئيسية قريباً.';
+
+  @override
   String get applyToWidget => 'تطبيق على الويدجت';
 
   @override

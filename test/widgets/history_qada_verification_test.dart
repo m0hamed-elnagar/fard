@@ -7,6 +7,10 @@ import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/history_list.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -20,17 +24,28 @@ class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 class MockSettingsCubit extends MockCubit<SettingsState>
     implements SettingsCubit {}
 
+class MockLocationPrayerCubit extends MockCubit<LocationPrayerState>
+    implements LocationPrayerCubit {}
+
+class MockDailyRemindersCubit extends MockCubit<DailyRemindersState>
+    implements DailyRemindersCubit {}
+
 void main() {
   late MockPrayerTimeService mockPrayerTimeService;
   late MockSettingsCubit mockSettingsCubit;
+  late MockLocationPrayerCubit mockLocationPrayerCubit;
+  late MockDailyRemindersCubit mockDailyRemindersCubit;
 
   setUpAll(() {
     registerFallbackValue(Salaah.fajr);
+    registerFallbackValue(DateTime.now());
   });
 
   setUp(() async {
     mockPrayerTimeService = MockPrayerTimeService();
     mockSettingsCubit = MockSettingsCubit();
+    mockLocationPrayerCubit = MockLocationPrayerCubit();
+    mockDailyRemindersCubit = MockDailyRemindersCubit();
 
     final getIt = GetIt.instance;
     await getIt.reset();
@@ -48,11 +63,35 @@ void main() {
       () => mockSettingsCubit.stream,
     ).thenAnswer((_) => const Stream.empty());
 
+    when(() => mockLocationPrayerCubit.state).thenReturn(
+      const LocationPrayerState(
+        latitude: 0,
+        longitude: 0,
+      ),
+    );
+    when(
+      () => mockLocationPrayerCubit.stream,
+    ).thenAnswer((_) => const Stream.empty());
+
+    when(() => mockDailyRemindersCubit.state).thenReturn(
+      const DailyRemindersState(),
+    );
+    when(
+      () => mockDailyRemindersCubit.stream,
+    ).thenAnswer((_) => const Stream.empty());
+
     // Mock all prayers as passed
     when(
       () => mockPrayerTimeService.isPassed(
         any(),
         prayerTimes: any(named: 'prayerTimes'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(true);
+    when(
+      () => mockPrayerTimeService.isPassed(
+        any(),
+        prayerTimes: null,
         date: any(named: 'date'),
       ),
     ).thenReturn(true);
@@ -72,6 +111,28 @@ void main() {
       ),
     ).thenReturn(prayerTimes);
   });
+
+  Widget buildTestWidget(Widget child) {
+    return MaterialApp(
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      locale: const Locale('en'),
+      home: Scaffold(
+        body: MultiBlocProvider(
+          providers: [
+            BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
+            BlocProvider<LocationPrayerCubit>.value(value: mockLocationPrayerCubit),
+            BlocProvider<DailyRemindersCubit>.value(value: mockDailyRemindersCubit),
+          ],
+          child: child,
+        ),
+      ),
+    );
+  }
 
   testWidgets(
     'HistoryList shows missed today count and total qada (which includes missed today)',
@@ -98,23 +159,13 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          locale: const Locale('en'),
-          home: Scaffold(
-            body: BlocProvider<SettingsCubit>.value(
-              value: mockSettingsCubit,
-              child: HistoryList(records: [record], onDelete: (_) {}),
-            ),
-          ),
-        ),
+        buildTestWidget(HistoryList(records: [record], onDelete: (_) {})),
       );
 
+      await tester.pumpAndSettle();
+
+      // Expand the month section
+      await tester.tap(find.byType(ExpansionTile));
       await tester.pumpAndSettle();
 
       // Verify "Missed 1" is shown (actualMissedCount)
@@ -147,23 +198,13 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        locale: const Locale('en'),
-        home: Scaffold(
-          body: BlocProvider<SettingsCubit>.value(
-            value: mockSettingsCubit,
-            child: HistoryList(records: [record], onDelete: (_) {}),
-          ),
-        ),
-      ),
+      buildTestWidget(HistoryList(records: [record], onDelete: (_) {})),
     );
 
+    await tester.pumpAndSettle();
+
+    // Expand the month section
+    await tester.tap(find.text('February 2024'));
     await tester.pumpAndSettle();
 
     // Verify "Qada 2" is shown (qadaCompletedToday)
@@ -198,23 +239,13 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        locale: const Locale('en'),
-        home: Scaffold(
-          body: BlocProvider<SettingsCubit>.value(
-            value: mockSettingsCubit,
-            child: HistoryList(records: [record], onDelete: (_) {}),
-          ),
-        ),
-      ),
+      buildTestWidget(HistoryList(records: [record], onDelete: (_) {})),
     );
 
+    await tester.pumpAndSettle();
+
+    // Expand the month section
+    await tester.tap(find.text('February 2024'));
     await tester.pumpAndSettle();
 
     // Missed 1 (Fajr)
@@ -241,23 +272,13 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        locale: const Locale('en'),
-        home: Scaffold(
-          body: BlocProvider<SettingsCubit>.value(
-            value: mockSettingsCubit,
-            child: HistoryList(records: [record], onDelete: (_) {}),
-          ),
-        ),
-      ),
+      buildTestWidget(HistoryList(records: [record], onDelete: (_) {})),
     );
 
+    await tester.pumpAndSettle();
+
+    // Expand the month section
+    await tester.tap(find.byType(ExpansionTile));
     await tester.pumpAndSettle();
 
     // Verify "Missed" count is NOT shown (it is 0)

@@ -52,7 +52,7 @@ void main() {
     getIt.registerSingleton<PrayerTimeService>(prayerTimeService);
     getIt.registerSingleton<NotificationService>(notificationService);
 
-    bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService);
+    bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
 
     // Common Stubs
     when(() => repo.loadRecord(any())).thenAnswer((_) async => null);

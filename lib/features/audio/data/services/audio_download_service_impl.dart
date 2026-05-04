@@ -11,7 +11,7 @@ import 'package:fard/features/audio/domain/entities/reciter.dart';
 import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
 import 'package:fard/features/audio/domain/services/audio_download_service.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/theme_cubit.dart';
 import 'package:http/http.dart' as http;
 import 'package:injectable/injectable.dart';
 import 'package:path_provider/path_provider.dart';
@@ -511,11 +511,11 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
   void _emitProgress(String reciterId, int? surahNumber, int total, int downloaded, {String? currentFileUrl, bool isCompleted = false}) {
     _progressController.add(DownloadProgress(reciterId: reciterId, surahNumber: surahNumber, totalFiles: total, downloadedFiles: downloaded, currentFileUrl: currentFileUrl, isCompleted: isCompleted));
     if (total > 0) {
-      final l10n = lookupAppLocalizations(getIt<SettingsCubit>().state.locale);
+      final l10n = lookupAppLocalizations(getIt<ThemeCubit>().state.locale);
       final id = _getNotificationId(reciterId, surahNumber);
       String title;
       if (surahNumber != null) {
-        final isArabic = getIt<SettingsCubit>().state.locale.languageCode == 'ar';
+        final isArabic = getIt<ThemeCubit>().state.locale.languageCode == 'ar';
         final surahName = isArabic ? quran.getSurahNameArabic(surahNumber) : quran.getSurahName(surahNumber);
         title = l10n.downloadingSurah(surahName);
       } else {
@@ -528,11 +528,11 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
 
   void _emitError(String reciterId, int? surahNumber, String error, {int total = 0, int downloaded = 0}) {
     _progressController.add(DownloadProgress(reciterId: reciterId, surahNumber: surahNumber, totalFiles: total, downloadedFiles: downloaded, error: error));
-    final l10n = lookupAppLocalizations(getIt<SettingsCubit>().state.locale);
+    final l10n = lookupAppLocalizations(getIt<ThemeCubit>().state.locale);
     final id = _getNotificationId(reciterId, surahNumber);
     String title;
     if (surahNumber != null) {
-      final isArabic = getIt<SettingsCubit>().state.locale.languageCode == 'ar';
+      final isArabic = getIt<ThemeCubit>().state.locale.languageCode == 'ar';
       final surahName = isArabic ? quran.getSurahNameArabic(surahNumber) : quran.getSurahName(surahNumber);
       title = '${l10n.downloadError}: $surahName';
     } else {

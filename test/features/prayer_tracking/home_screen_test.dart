@@ -5,6 +5,13 @@ import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_
 import 'package:fard/features/prayer_tracking/presentation/screens/home_screen.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
+import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,8 +31,16 @@ class MockPrayerTrackerBloc
 class MockSettingsCubit extends MockCubit<SettingsState>
     implements SettingsCubit {}
 
+class MockLocationPrayerCubit extends MockCubit<LocationPrayerState>
+    implements LocationPrayerCubit {}
+
+class MockDailyRemindersCubit extends MockCubit<DailyRemindersState>
+    implements DailyRemindersCubit {}
+
 class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState>
     implements AzkarBloc {}
+
+class MockWerdBloc extends MockBloc<WerdEvent, WerdState> implements WerdBloc {}
 
 class MockSharedPreferences extends Mock implements SharedPreferences {}
 
@@ -51,13 +66,19 @@ void main() {
 
   late MockPrayerTrackerBloc mockPrayerTrackerBloc;
   late MockSettingsCubit mockSettingsCubit;
+  late MockLocationPrayerCubit mockLocationPrayerCubit;
+  late MockDailyRemindersCubit mockDailyRemindersCubit;
   late MockAzkarBloc mockAzkarBloc;
+  late MockWerdBloc mockWerdBloc;
   late MockPrayerTimeService mockPrayerTimeService;
 
   setUp(() {
     mockPrayerTrackerBloc = MockPrayerTrackerBloc();
     mockSettingsCubit = MockSettingsCubit();
+    mockLocationPrayerCubit = MockLocationPrayerCubit();
+    mockDailyRemindersCubit = MockDailyRemindersCubit();
     mockAzkarBloc = MockAzkarBloc();
+    mockWerdBloc = MockWerdBloc();
     mockPrayerTimeService = MockPrayerTimeService();
 
     final getIt = GetIt.instance;
@@ -89,7 +110,10 @@ void main() {
       providers: [
         BlocProvider<PrayerTrackerBloc>.value(value: mockPrayerTrackerBloc),
         BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
+        BlocProvider<LocationPrayerCubit>.value(value: mockLocationPrayerCubit),
+        BlocProvider<DailyRemindersCubit>.value(value: mockDailyRemindersCubit),
         BlocProvider<AzkarBloc>.value(value: mockAzkarBloc),
+        BlocProvider<WerdBloc>.value(value: mockWerdBloc),
       ],
       child: const MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -106,7 +130,10 @@ void main() {
     when(
       () => mockSettingsCubit.state,
     ).thenReturn(SettingsState(locale: const Locale('en')));
+    when(() => mockLocationPrayerCubit.state).thenReturn(LocationPrayerState());
+    when(() => mockDailyRemindersCubit.state).thenReturn(DailyRemindersState());
     when(() => mockAzkarBloc.state).thenReturn(AzkarState.initial());
+    when(() => mockWerdBloc.state).thenReturn(WerdState.initial());
 
     await tester.pumpWidget(createWidgetUnderTest());
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -118,7 +145,9 @@ void main() {
       PrayerTrackerState.loaded(
         selectedDate: now,
         missedToday: {},
+        completedToday: {},
         qadaStatus: {},
+        completedQadaToday: {},
         monthRecords: {},
         history: [],
       ),
@@ -126,14 +155,19 @@ void main() {
     when(() => mockSettingsCubit.state).thenReturn(
       SettingsState(locale: const Locale('en'), cityName: 'Test City'),
     );
+    when(() => mockLocationPrayerCubit.state).thenReturn(
+      LocationPrayerState(cityName: 'Test City'),
+    );
+    when(() => mockDailyRemindersCubit.state).thenReturn(DailyRemindersState());
     when(() => mockAzkarBloc.state).thenReturn(AzkarState.initial());
+    when(() => mockWerdBloc.state).thenReturn(WerdState.initial());
 
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
 
     expect(find.text('Fard'), findsOneWidget);
     expect(find.text('Total Qada'), findsOneWidget);
-    expect(find.text('Test City'), findsOneWidget);
+    expect(find.text('Test City'), findsAtLeast(1));
 
     // Use dragUntilVisible for slivers
     final dailyPrayersFinder = find.text('Daily Prayers');
@@ -143,9 +177,6 @@ void main() {
       const Offset(0, -200),
     );
     expect(dailyPrayersFinder, findsAtLeast(1));
-
-    // Verify Salaah Time is displayed (mocked time service should return something if we setup correctly,
-    // but here we didn't setup mock return for getTimeForSalaah. Let's do that)
   });
 
   testWidgets('SalaahTile displays time', (tester) async {
@@ -156,7 +187,9 @@ void main() {
       PrayerTrackerState.loaded(
         selectedDate: now,
         missedToday: {},
+        completedToday: {},
         qadaStatus: {for (var s in Salaah.values) s: const MissedCounter(0)},
+        completedQadaToday: {},
         monthRecords: {},
         history: [],
       ),
@@ -169,7 +202,12 @@ void main() {
         longitude: 10,
       ),
     );
+    when(() => mockLocationPrayerCubit.state).thenReturn(
+      LocationPrayerState(latitude: 10, longitude: 10, cityName: 'Test City'),
+    );
+    when(() => mockDailyRemindersCubit.state).thenReturn(DailyRemindersState());
     when(() => mockAzkarBloc.state).thenReturn(AzkarState.initial());
+    when(() => mockWerdBloc.state).thenReturn(WerdState.initial());
 
     // Mock PrayerTimeService to return specific times
     final prayerTimes = PrayerTimes(

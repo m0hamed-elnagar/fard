@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/azkar/presentation/screens/azkar_list_screen.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -42,7 +42,7 @@ class _AzkarDialogManagerState extends State<AzkarDialogManager> {
   void _checkAzkarTime() {
     if (!mounted) return;
 
-    final settings = context.read<SettingsCubit>().state;
+    final remindersState = context.read<DailyRemindersCubit>().state;
     final azkarState = context.read<AzkarBloc>().state;
     if (azkarState.categories.isEmpty) return;
 
@@ -58,7 +58,7 @@ class _AzkarDialogManagerState extends State<AzkarDialogManager> {
       return;
     }
 
-    for (final reminder in settings.reminders) {
+    for (final reminder in remindersState.reminders) {
       if (!reminder.isEnabled) continue;
 
       final reminderTime = _parseTime(reminder.time, now);

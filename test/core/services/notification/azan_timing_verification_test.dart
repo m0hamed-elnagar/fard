@@ -119,6 +119,11 @@ void main() {
     when(() => mockSettingsProvider.prayerReminderType).thenReturn(PrayerReminderType.after);
     when(() => mockSettingsProvider.enabledSalahReminders).thenReturn({});
     when(() => mockSettingsProvider.isAfterSalahAzkarEnabled).thenReturn(false);
+    when(() => mockSettingsProvider.isWerdReminderEnabled).thenReturn(false);
+    when(() => mockSettingsProvider.isSalawatReminderEnabled).thenReturn(false);
+
+    // Mock AzkarRepository
+    when(() => mockAzkarRepository.getAllAzkar()).thenAnswer((_) async => []);
   });
 
   test(

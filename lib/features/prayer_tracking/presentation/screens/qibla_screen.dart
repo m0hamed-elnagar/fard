@@ -3,8 +3,8 @@ import 'dart:math';
 import 'package:adhan/adhan.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_colors.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_compass/flutter_compass.dart';
@@ -64,9 +64,9 @@ class _QiblaScreenState extends State<QiblaScreen> {
         ),
         centerTitle: true,
       ),
-      body: BlocBuilder<SettingsCubit, SettingsState>(
-        builder: (context, settings) {
-          if (settings.latitude == null || settings.longitude == null) {
+      body: BlocBuilder<LocationPrayerCubit, LocationPrayerState>(
+        builder: (context, state) {
+          if (state.latitude == null || state.longitude == null) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -84,7 +84,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () =>
-                        context.read<SettingsCubit>().refreshLocation(),
+                        context.read<LocationPrayerCubit>().refreshLocation(),
                     child: Text(l10n.refreshLocation),
                   ),
                 ],
@@ -93,8 +93,8 @@ class _QiblaScreenState extends State<QiblaScreen> {
           }
 
           final coordinates = Coordinates(
-            settings.latitude!,
-            settings.longitude!,
+            state.latitude!,
+            state.longitude!,
           );
           final qiblaDirection = Qibla(coordinates).direction;
 

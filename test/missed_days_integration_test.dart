@@ -169,7 +169,7 @@ void main() {
         );
         await repo.saveToday(lastRecord);
 
-        final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService);
+        final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
 
         await tester.pumpWidget(
           MaterialApp(
@@ -239,7 +239,7 @@ void main() {
         );
         await repo.saveToday(lastRecord);
 
-        final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService);
+        final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
 
         await tester.pumpWidget(
           MaterialApp(
@@ -307,7 +307,7 @@ void main() {
       );
       await repo.saveToday(lastRecord);
 
-      final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService);
+      final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -382,7 +382,7 @@ void main() {
       );
       await repo.saveToday(lastRecord);
 
-      final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService);
+      final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
 
       await tester.pumpWidget(
         MaterialApp(

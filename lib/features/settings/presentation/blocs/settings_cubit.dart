@@ -148,7 +148,8 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   Future<void> _toggleSpecificSalahReminderAsync(Salaah salaah) async {
     final set = Set<Salaah>.from(state.enabledSalahReminders);
-    bool masterEnabled = state.isSalahReminderEnabled;
+    final bool oldMasterEnabled = state.isSalahReminderEnabled;
+    bool masterEnabled = oldMasterEnabled;
 
     if (set.contains(salaah)) {
       set.remove(salaah);
@@ -165,7 +166,7 @@ class SettingsCubit extends Cubit<SettingsState> {
       isSalahReminderEnabled: masterEnabled,
     ));
 
-    if (masterEnabled != state.isSalahReminderEnabled) {
+    if (masterEnabled != oldMasterEnabled) {
       await _repo.updateSalahReminderEnabled(masterEnabled);
     }
     await _repo.updateEnabledSalahReminders(set);

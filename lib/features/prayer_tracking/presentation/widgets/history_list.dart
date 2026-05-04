@@ -1,6 +1,9 @@
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
 import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
@@ -245,237 +248,255 @@ class _HistoryRecordTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final prayerTimeService = getIt<PrayerTimeService>();
-    final settings = context.watch<SettingsCubit>().state;
 
-    var totalQada = record.qada.values.fold(0, (sum, c) => sum + c.value);
-    final today = DateTime.now();
-    final isToday =
-        record.date.year == today.year &&
-        record.date.month == today.month &&
-        record.date.day == today.day;
+    return BlocBuilder<LocationPrayerCubit, LocationPrayerState>(
+      builder: (context, locationState) {
+        return BlocBuilder<DailyRemindersCubit, DailyRemindersState>(
+          builder: (context, remindersState) {
+            var totalQada = record.qada.values.fold(0, (sum, c) => sum + c.value);
+            final today = DateTime.now();
+            final isToday =
+                record.date.year == today.year &&
+                record.date.month == today.month &&
+                record.date.day == today.day;
 
-    final prayerTimes =
-        (isToday && settings.latitude != null && settings.longitude != null)
-        ? prayerTimeService.getPrayerTimes(
-            latitude: settings.latitude!,
-            longitude: settings.longitude!,
-            method: settings.calculationMethod,
-            madhab: settings.madhab,
-            date: record.date,
-          )
-        : null;
+            final prayerTimes = (isToday &&
+                    locationState.latitude != null &&
+                    locationState.longitude != null)
+                ? prayerTimeService.getPrayerTimes(
+                    latitude: locationState.latitude!,
+                    longitude: locationState.longitude!,
+                    method: locationState.calculationMethod,
+                    madhab: locationState.madhab,
+                    date: record.date,
+                  )
+                : null;
 
-    final passedPrayers = Salaah.values
-        .where(
-          (s) => prayerTimeService.isPassed(
-            s,
-            prayerTimes: prayerTimes,
-            date: record.date,
-          ),
-        )
-        .toList();
-
-    final actualMissedCount = passedPrayers
-        .where((s) => !record.completedToday.contains(s))
-        .length;
-    final performedToday = record.completedToday
-        .where((s) => passedPrayers.contains(s))
-        .length;
-    final qadaCompletedToday = record.completedQada.values.fold(
-      0,
-      (sum, val) => sum + val,
-    );
-
-    return InkWell(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Date badge
-            Container(
-              width: 44.0,
-              padding: const EdgeInsets.symmetric(vertical: 6.0),
-              decoration: BoxDecoration(
-                color: isToday
-                    ? context.primaryContainerColor.withValues(alpha: 0.15)
-                    : context.surfaceContainerHighestColor,
-                borderRadius: BorderRadius.circular(10.0),
-                border: isToday
-                    ? Border.all(
-                        color: context.primaryContainerColor.withValues(
-                          alpha: 0.40,
-                        ),
-                      )
-                    : Border.all(color: Colors.transparent, width: 0.0),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    '${record.date.day}',
-                    style: GoogleFonts.outfit(
-                      color: isToday
-                          ? context.primaryContainerColor
-                          : context.onSurfaceColor,
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w700,
-                    ),
+            final passedPrayers = Salaah.values
+                .where(
+                  (s) => prayerTimeService.isPassed(
+                    s,
+                    prayerTimes: prayerTimes,
+                    date: record.date,
                   ),
-                  Text(
-                    '${record.date.month}/${record.date.year % 100}',
-                    style: GoogleFonts.outfit(
-                      color: context.onSurfaceVariantColor,
-                      fontSize: 10.0,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12.0),
-            // Details
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Wrap(
-                    spacing: 6.0,
-                    runSpacing: 8.0,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      // Performed Count (Finished)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6.0,
-                          vertical: 2.0,
-                        ),
-                        decoration: BoxDecoration(
-                          color: context.primaryColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(6.0),
-                        ),
-                        child: Text(
-                          '${l10n.localeName == 'ar' ? 'تم' : 'Done'} $performedToday',
-                          style: GoogleFonts.amiri(
-                            color: context.primaryColor,
-                            fontSize: 11.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                )
+                .toList();
+
+            final actualMissedCount = passedPrayers
+                .where((s) => !record.completedToday.contains(s))
+                .length;
+            final performedToday = record.completedToday
+                .where((s) => passedPrayers.contains(s))
+                .length;
+            final qadaCompletedToday = record.completedQada.values.fold(
+              0,
+              (sum, val) => sum + val,
+            );
+
+            return InkWell(
+              onTap: onTap,
+              onLongPress: onLongPress,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 12.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Date badge
+                    Container(
+                      width: 44.0,
+                      padding: const EdgeInsets.symmetric(vertical: 6.0),
+                      decoration: BoxDecoration(
+                        color: isToday
+                            ? context.primaryContainerColor
+                                .withValues(alpha: 0.15)
+                            : context.surfaceContainerHighestColor,
+                        borderRadius: BorderRadius.circular(10.0),
+                        border: isToday
+                            ? Border.all(
+                                color: context.primaryContainerColor.withValues(
+                                  alpha: 0.40,
+                                ),
+                              )
+                            : Border.all(color: Colors.transparent, width: 0.0),
                       ),
-                      if (settings.isQadaEnabled && qadaCompletedToday > 0)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6.0,
-                            vertical: 2.0,
-                          ),
-                          decoration: BoxDecoration(
-                            color: context.primaryContainerColor.withValues(
-                              alpha: 0.15,
-                            ),
-                            borderRadius: BorderRadius.circular(6.0),
-                          ),
-                          child: Text(
-                            '${l10n.localeName == 'ar' ? 'قضاء' : 'Qada'} $qadaCompletedToday',
-                            style: GoogleFonts.amiri(
-                              color: context.primaryContainerColor,
-                              fontSize: 11.0,
-                              fontWeight: FontWeight.bold,
+                      child: Column(
+                        children: [
+                          Text(
+                            '${record.date.day}',
+                            style: GoogleFonts.outfit(
+                              color: isToday
+                                  ? context.primaryContainerColor
+                                  : context.onSurfaceColor,
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
-                        ),
-                      if (actualMissedCount > 0)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6.0,
-                            vertical: 2.0,
-                          ),
-                          decoration: BoxDecoration(
-                            color: context.errorColor.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(6.0),
-                          ),
-                          child: Text(
-                            l10n.missedCount(actualMissedCount),
-                            style: GoogleFonts.amiri(
-                              color: context.errorColor,
-                              fontSize: 11.0,
-                            ),
-                          ),
-                        ),
-
-                      if (settings.isQadaEnabled)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 4.0),
-                          child: Text(
-                            '${l10n.remaining}: $totalQada',
+                          Text(
+                            '${record.date.month}/${record.date.year % 100}',
                             style: GoogleFonts.outfit(
                               color: context.onSurfaceVariantColor,
-                              fontSize: 12.0,
-                              fontWeight: FontWeight.w500,
+                              fontSize: 10.0,
                             ),
                           ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 12.0),
-                  // Per-salaah mini row
-                  Wrap(
-                    spacing: 6.0,
-                    runSpacing: 6.0,
-                    children: passedPrayers.map((s) {
-                      final wasCompleted = record.completedToday.contains(s);
-                      final wasMissed = !wasCompleted;
-
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0,
-                          vertical: 4.0,
-                        ),
-                        decoration: BoxDecoration(
-                          color: wasMissed
-                              ? context.errorColor.withValues(alpha: 0.08)
-                              : context.primaryColor.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(8.0),
-                          border: Border.all(
-                            color: wasMissed
-                                ? context.errorColor.withValues(alpha: 0.20)
-                                : context.primaryColor.withValues(alpha: 0.20),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              wasMissed
-                                  ? Icons.close_rounded
-                                  : Icons.check_circle_rounded,
-                              color: wasMissed
-                                  ? context.errorColor
-                                  : context.primaryColor,
-                              size: 14.0,
-                            ),
-                            const SizedBox(width: 4.0),
-                            Text(
-                              s.localizedName(l10n),
-                              style: GoogleFonts.amiri(
-                                color: wasMissed
-                                    ? context.errorColor
-                                    : context.primaryColor,
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.bold,
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12.0),
+                    // Details
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Wrap(
+                            spacing: 6.0,
+                            runSpacing: 8.0,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              // Performed Count (Finished)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6.0,
+                                  vertical: 2.0,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: context.primaryColor
+                                      .withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(6.0),
+                                ),
+                                child: Text(
+                                  '${l10n.localeName == 'ar' ? 'تم' : 'Done'} $performedToday',
+                                  style: GoogleFonts.amiri(
+                                    color: context.primaryColor,
+                                    fontSize: 11.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
+                              if (remindersState.isQadaEnabled &&
+                                  qadaCompletedToday > 0)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6.0,
+                                    vertical: 2.0,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: context.primaryContainerColor
+                                        .withValues(
+                                      alpha: 0.15,
+                                    ),
+                                    borderRadius: BorderRadius.circular(6.0),
+                                  ),
+                                  child: Text(
+                                    '${l10n.localeName == 'ar' ? 'قضاء' : 'Qada'} $qadaCompletedToday',
+                                    style: GoogleFonts.amiri(
+                                      color: context.primaryContainerColor,
+                                      fontSize: 11.0,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              if (actualMissedCount > 0)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6.0,
+                                    vertical: 2.0,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: context.errorColor
+                                        .withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(6.0),
+                                  ),
+                                  child: Text(
+                                    l10n.missedCount(actualMissedCount),
+                                    style: GoogleFonts.amiri(
+                                      color: context.errorColor,
+                                      fontSize: 11.0,
+                                    ),
+                                  ),
+                                ),
+                              if (remindersState.isQadaEnabled)
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 4.0),
+                                  child: Text(
+                                    '${l10n.remaining}: $totalQada',
+                                    style: GoogleFonts.outfit(
+                                      color: context.onSurfaceVariantColor,
+                                      fontSize: 12.0,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 12.0),
+                          // Per-salaah mini row
+                          Wrap(
+                            spacing: 6.0,
+                            runSpacing: 6.0,
+                            children: passedPrayers.map((s) {
+                              final wasCompleted =
+                                  record.completedToday.contains(s);
+                              final wasMissed = !wasCompleted;
+
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8.0,
+                                  vertical: 4.0,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: wasMissed
+                                      ? context.errorColor
+                                          .withValues(alpha: 0.08)
+                                      : context.primaryColor
+                                          .withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  border: Border.all(
+                                    color: wasMissed
+                                        ? context.errorColor
+                                            .withValues(alpha: 0.20)
+                                        : context.primaryColor
+                                            .withValues(alpha: 0.20),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      wasMissed
+                                          ? Icons.close_rounded
+                                          : Icons.check_circle_rounded,
+                                      color: wasMissed
+                                          ? context.errorColor
+                                          : context.primaryColor,
+                                      size: 14.0,
+                                    ),
+                                    const SizedBox(width: 4.0),
+                                    Text(
+                                      s.localizedName(l10n),
+                                      style: GoogleFonts.amiri(
+                                        color: wasMissed
+                                            ? context.errorColor
+                                            : context.primaryColor,
+                                        fontSize: 12.0,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
+            );
+          },
+        );
+      },
     );
   }
 }

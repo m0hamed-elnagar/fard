@@ -6,10 +6,13 @@ import 'package:fard/features/werd/domain/repositories/werd_repository.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
+import 'package:fard/core/services/notification_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockWerdRepository extends Mock implements WerdRepository {}
+
+class MockNotificationService extends Mock implements NotificationService {}
 
 /// This test verifies the exact user flow:
 /// 1. User clicks "Continue" → Session 1 starts
@@ -19,6 +22,7 @@ class MockWerdRepository extends Mock implements WerdRepository {}
 /// Result: Should have 3 separate sessions in Today's Reading
 void main() {
   late MockWerdRepository mockRepository;
+  late MockNotificationService mockNotificationService;
   late WerdGoal testGoal;
   late WerdProgress emptyProgress;
 
@@ -42,6 +46,7 @@ void main() {
 
   setUp(() {
     mockRepository = MockWerdRepository();
+    mockNotificationService = MockNotificationService();
     testGoal = WerdGoal(
       id: 'default',
       type: WerdGoalType.fixedAmount,
@@ -75,7 +80,7 @@ void main() {
     
     blocTest<WerdBloc, WerdState>(
       'REAL USER FLOW: Clicking "Continue" 3 times creates 3 separate sessions',
-      build: () => WerdBloc(mockRepository),
+      build: () => WerdBloc(mockRepository, mockNotificationService),
       seed: () => WerdState(goal: testGoal, progress: emptyProgress),
       setUp: () {
         var currentProgress = emptyProgress;
@@ -203,7 +208,7 @@ void main() {
 
     blocTest<WerdBloc, WerdState>(
       'EDGE CASE: Session without endSession should still work',
-      build: () => WerdBloc(mockRepository),
+      build: () => WerdBloc(mockRepository, mockNotificationService),
       seed: () => WerdState(goal: testGoal, progress: emptyProgress),
       setUp: () {
         var currentProgress = emptyProgress;

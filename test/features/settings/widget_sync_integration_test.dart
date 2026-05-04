@@ -3,25 +3,26 @@ import 'package:fard/core/constants/calculation_contract.dart';
 import 'package:fard/core/services/location_service.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/core/services/widget_update_service.dart';
+import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
+import 'package:fard/features/azkar/data/azkar_repository.dart';
+import 'package:fard/features/prayer_tracking/domain/salaah.dart';
+import 'package:fard/features/settings/domain/azkar_reminder.dart';
+import 'package:fard/features/settings/domain/entities/custom_theme.dart';
+import 'package:fard/features/settings/domain/prayer_reminder_type.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
-import 'package:fard/features/settings/domain/azkar_reminder.dart';
-import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
-import 'package:fard/features/prayer_tracking/domain/salaah.dart';
-import 'package:fard/features/azkar/data/azkar_repository.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/domain/usecases/apply_theme_preset.dart';
+import 'package:fard/features/settings/domain/usecases/get_available_theme_presets.dart';
+import 'package:fard/features/settings/domain/usecases/save_custom_theme.dart';
 import 'package:fard/features/settings/domain/usecases/sync_location_settings.dart';
 import 'package:fard/features/settings/domain/usecases/sync_notification_schedule.dart';
 import 'package:fard/features/settings/domain/usecases/toggle_after_salah_azkar_usecase.dart';
 import 'package:fard/features/settings/domain/usecases/update_calculation_method_usecase.dart';
-import 'package:fard/features/settings/domain/usecases/apply_theme_preset.dart';
-import 'package:fard/features/settings/domain/usecases/save_custom_theme.dart';
-import 'package:fard/features/settings/domain/usecases/get_available_theme_presets.dart';
+import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -73,12 +74,13 @@ void main() {
 
   final List<MethodCall> methodCalls = <MethodCall>[];
 
-  setUpAll(() async {
-    await initializeDateFormatting('ar');
-    await initializeDateFormatting('en');
+  setUpAll(() {
     registerFallbackValue(const SettingsState(locale: Locale('ar')));
     registerFallbackValue(const Locale('en'));
     registerFallbackValue(AzkarReminder(category: '', time: '', title: ''));
+    registerFallbackValue(PrayerReminderType.after);
+    registerFallbackValue(CustomTheme.defaultPalette(id: '1', name: '1'));
+    registerFallbackValue(AudioQuality.low64);
   });
 
   setUp(() {
@@ -131,6 +133,17 @@ void main() {
 
     // Mock SettingsRepository
     when(() => mockRepo.audioQuality).thenReturn(AudioQuality.high192);
+    when(() => mockRepo.isAudioPlayerExpanded).thenReturn(false);
+    when(() => mockRepo.isSalahReminderEnabled).thenReturn(false);
+    when(() => mockRepo.salahReminderOffsetMinutes).thenReturn(0);
+    when(() => mockRepo.prayerReminderType).thenReturn(PrayerReminderType.after);
+    when(() => mockRepo.enabledSalahReminders).thenReturn(<Salaah>{});
+    when(() => mockRepo.isWerdReminderEnabled).thenReturn(false);
+    when(() => mockRepo.werdReminderTime).thenReturn('04:00');
+    when(() => mockRepo.isSalawatReminderEnabled).thenReturn(false);
+    when(() => mockRepo.salawatFrequencyHours).thenReturn(1);
+    when(() => mockRepo.salawatStartTime).thenReturn('08:00');
+    when(() => mockRepo.salawatEndTime).thenReturn('22:00');
     when(() => mockRepo.locale).thenReturn(const Locale('ar'));
     when(() => mockRepo.latitude).thenReturn(30.0);
     when(() => mockRepo.longitude).thenReturn(31.0);
