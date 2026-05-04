@@ -2,13 +2,12 @@ import 'dart:developer' as developer;
 
 import 'package:adhan/adhan.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:fard/core/di/injection.dart';
+import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
 import 'package:fard/features/prayer_tracking/domain/missed_counter.dart';
 import 'package:fard/features/prayer_tracking/domain/prayer_repo.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
-import 'package:fard/core/services/notification_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
@@ -29,11 +28,9 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
   PrayerTrackerBloc(
     this._repo,
     this._prefs,
-    this._prayerTimeService, [
-    NotificationService? notificationService,
-  ]) : _notificationService =
-           notificationService ?? getIt<NotificationService>(),
-       super(const PrayerTrackerState.loading()) {
+    this._prayerTimeService,
+    this._notificationService,
+  ) : super(const PrayerTrackerState.loading()) {
     on<_Load>(_onLoad, transformer: sequential());
     on<_Reload>(_onReload, transformer: sequential());
     on<_TogglePrayer>(_onTogglePrayer, transformer: sequential());
@@ -404,6 +401,7 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
           completedQadaToday: completedQada,
         );
 
+        // Re-load the record if needed or ensure recordToSave is correct
         final normalizedDate = DateTime(
           s.selectedDate.year,
           s.selectedDate.month,
@@ -417,6 +415,7 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
           qada: qada,
           completedQada: completedQada,
         );
+        
         await _repo.saveToday(recordToSave);
         await _cascadeUpdateFrom(recordToSave, oldBaseQada: oldQadaMap);
 

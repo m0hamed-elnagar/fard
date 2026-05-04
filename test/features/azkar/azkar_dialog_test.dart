@@ -3,6 +3,12 @@ import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:fard/features/prayer_tracking/presentation/screens/home_screen.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
+import 'package:fard/features/settings/presentation/blocs/theme_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/theme_state.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,6 +24,14 @@ import 'package:fard/core/services/widget_update_service.dart';
 
 class MockSettingsCubit extends MockCubit<SettingsState>
     implements SettingsCubit {}
+
+class MockLocationPrayerCubit extends MockCubit<LocationPrayerState>
+    implements LocationPrayerCubit {}
+
+class MockThemeCubit extends MockCubit<ThemeState> implements ThemeCubit {}
+
+class MockDailyRemindersCubit extends MockCubit<DailyRemindersState>
+    implements DailyRemindersCubit {}
 
 class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState>
     implements AzkarBloc {}
@@ -37,6 +51,9 @@ class MockWidgetUpdateService extends Mock implements WidgetUpdateService {
 
 void main() {
   late MockSettingsCubit mockSettingsCubit;
+  late MockLocationPrayerCubit mockLocationPrayerCubit;
+  late MockThemeCubit mockThemeCubit;
+  late MockDailyRemindersCubit mockDailyRemindersCubit;
   late MockAzkarBloc mockAzkarBloc;
   late MockPrayerTrackerBloc mockPrayerTrackerBloc;
 
@@ -47,6 +64,9 @@ void main() {
 
   setUp(() {
     mockSettingsCubit = MockSettingsCubit();
+    mockLocationPrayerCubit = MockLocationPrayerCubit();
+    mockThemeCubit = MockThemeCubit();
+    mockDailyRemindersCubit = MockDailyRemindersCubit();
     mockAzkarBloc = MockAzkarBloc();
     mockPrayerTrackerBloc = MockPrayerTrackerBloc();
 
@@ -83,12 +103,25 @@ void main() {
         history: [],
       ),
     );
+
+    when(() => mockLocationPrayerCubit.state).thenReturn(
+      const LocationPrayerState(),
+    );
+    when(() => mockThemeCubit.state).thenReturn(
+      const ThemeState(locale: Locale('en')),
+    );
+    when(() => mockDailyRemindersCubit.state).thenReturn(
+      const DailyRemindersState(),
+    );
   });
 
   Widget createWidgetUnderTest() {
     return MultiBlocProvider(
       providers: [
         BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
+        BlocProvider<LocationPrayerCubit>.value(value: mockLocationPrayerCubit),
+        BlocProvider<ThemeCubit>.value(value: mockThemeCubit),
+        BlocProvider<DailyRemindersCubit>.value(value: mockDailyRemindersCubit),
         BlocProvider<AzkarBloc>.value(value: mockAzkarBloc),
         BlocProvider<PrayerTrackerBloc>.value(value: mockPrayerTrackerBloc),
       ],
@@ -106,16 +139,19 @@ void main() {
         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
 
     when(() => mockSettingsCubit.state).thenReturn(
-      SettingsState(
-        locale: const Locale('en'),
-        morningAzkarTime: timeStr,
-        eveningAzkarTime: '23:59',
-        isAzanVoiceDownloading: false,
+      const SettingsState(
+        locale: Locale('en'),
+      ),
+    );
+
+    when(() => mockDailyRemindersCubit.state).thenReturn(
+      DailyRemindersState(
         reminders: [
           AzkarReminder(
             category: 'Morning Azkar',
             time: timeStr,
             title: 'Morning Azkar',
+            isEnabled: true,
           ),
         ],
       ),
@@ -143,16 +179,19 @@ void main() {
         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
 
     when(() => mockSettingsCubit.state).thenReturn(
-      SettingsState(
-        locale: const Locale('en'),
-        morningAzkarTime: '00:00',
-        eveningAzkarTime: timeStr,
-        isAzanVoiceDownloading: false,
+      const SettingsState(
+        locale: Locale('en'),
+      ),
+    );
+
+    when(() => mockDailyRemindersCubit.state).thenReturn(
+      DailyRemindersState(
         reminders: [
           AzkarReminder(
             category: 'Evening Azkar',
             time: timeStr,
             title: 'Evening Azkar',
+            isEnabled: true,
           ),
         ],
       ),

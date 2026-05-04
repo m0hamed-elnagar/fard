@@ -18,6 +18,15 @@ import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/widget_update_service.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
+import 'package:fard/features/settings/presentation/blocs/adhan_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/adhan_state.dart';
+import 'package:fard/features/settings/presentation/blocs/theme_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/theme_state.dart';
+import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -75,6 +84,20 @@ class MockReaderBloc extends MockBloc<ReaderEvent, ReaderState>
 class MockConnectivityBloc extends MockBloc<ConnectivityEvent, ConnectivityState>
     implements ConnectivityBloc {}
 
+class MockLocationPrayerCubit extends MockCubit<LocationPrayerState>
+    implements LocationPrayerCubit {}
+
+class MockDailyRemindersCubit extends MockCubit<DailyRemindersState>
+    implements DailyRemindersCubit {}
+
+class MockAdhanCubit extends MockCubit<AdhanState>
+    implements AdhanCubit {}
+
+class MockThemeCubit extends MockCubit<ThemeState>
+    implements ThemeCubit {}
+
+class MockQuranRepository extends Mock implements QuranRepository {}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(PrayerTrackerEvent.load(DateTime.now()));
@@ -94,6 +117,11 @@ void main() {
   late MockTasbihBloc mockTasbihBloc;
   late MockReaderBloc mockReaderBloc;
   late MockConnectivityBloc mockConnectivityBloc;
+  late MockLocationPrayerCubit mockLocationPrayerCubit;
+  late MockDailyRemindersCubit mockDailyRemindersCubit;
+  late MockAdhanCubit mockAdhanCubit;
+  late MockThemeCubit mockThemeCubit;
+  late MockQuranRepository mockQuranRepository;
 
   setUp(() {
     mockPrefs = MockSharedPreferences();
@@ -109,6 +137,11 @@ void main() {
     mockTasbihBloc = MockTasbihBloc();
     mockReaderBloc = MockReaderBloc();
     mockConnectivityBloc = MockConnectivityBloc();
+    mockLocationPrayerCubit = MockLocationPrayerCubit();
+    mockDailyRemindersCubit = MockDailyRemindersCubit();
+    mockAdhanCubit = MockAdhanCubit();
+    mockThemeCubit = MockThemeCubit();
+    mockQuranRepository = MockQuranRepository();
 
     final getIt = GetIt.instance;
     getIt.reset();
@@ -123,6 +156,12 @@ void main() {
     getIt.registerSingleton<GlobalKey<NavigatorState>>(
       GlobalKey<NavigatorState>(),
     );
+    getIt.registerSingleton<LocationPrayerCubit>(mockLocationPrayerCubit);
+    getIt.registerSingleton<DailyRemindersCubit>(mockDailyRemindersCubit);
+    getIt.registerSingleton<AdhanCubit>(mockAdhanCubit);
+    getIt.registerSingleton<ThemeCubit>(mockThemeCubit);
+    getIt.registerSingleton<QuranRepository>(mockQuranRepository);
+    
     getIt.registerFactory<QuranBloc>(() => mockQuranBloc);
     getIt.registerFactory<AudioPlayerBloc>(() => mockAudioPlayerBloc);
     getIt.registerFactory<ReciterManagerBloc>(() => mockReciterManagerBloc);
@@ -144,6 +183,16 @@ void main() {
     when(() => mockTasbihBloc.state).thenReturn(TasbihState.initial());
     when(() => mockReaderBloc.state).thenReturn(const ReaderState.initial());
     when(() => mockConnectivityBloc.state).thenReturn(const ConnectivityStatus(true));
+    when(() => mockLocationPrayerCubit.state).thenReturn(const LocationPrayerState());
+    when(() => mockLocationPrayerCubit.stream).thenAnswer((_) => const Stream.empty());
+    when(() => mockDailyRemindersCubit.state).thenReturn(const DailyRemindersState());
+    when(() => mockDailyRemindersCubit.stream).thenAnswer((_) => const Stream.empty());
+    when(() => mockAdhanCubit.state).thenReturn(const AdhanState());
+    when(() => mockAdhanCubit.stream).thenAnswer((_) => const Stream.empty());
+    when(() => mockThemeCubit.state).thenReturn(const ThemeState(locale: Locale('en')));
+    when(() => mockThemeCubit.stream).thenAnswer((_) => const Stream.empty());
+    when(() => mockThemeCubit.getAvailablePresets()).thenReturn([]);
+    when(() => mockQuranRepository.getDownloadedTextSurahIds()).thenAnswer((_) async => <int>{});
   });
 
   tearDown(() {
@@ -162,6 +211,10 @@ void main() {
         BlocProvider<QuranBloc>.value(value: mockQuranBloc),
         BlocProvider<PrayerTrackerBloc>.value(value: mockPrayerTrackerBloc),
         BlocProvider<ConnectivityBloc>.value(value: mockConnectivityBloc),
+        BlocProvider<LocationPrayerCubit>.value(value: mockLocationPrayerCubit),
+        BlocProvider<DailyRemindersCubit>.value(value: mockDailyRemindersCubit),
+        BlocProvider<AdhanCubit>.value(value: mockAdhanCubit),
+        BlocProvider<ThemeCubit>.value(value: mockThemeCubit),
       ],
       child: const MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
