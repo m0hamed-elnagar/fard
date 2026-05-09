@@ -13,7 +13,6 @@ import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/onboarding/presentation/screens/splash_screen.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/quran/presentation/bloc/quran_bloc.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:flutter/material.dart';
@@ -142,7 +141,6 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
         BlocProvider(
           create: (_) => getIt<ConnectivityBloc>(),
         ),
-        BlocProvider(create: (_) => getIt<SettingsCubit>()),
         BlocProvider(create: (_) => getIt<ThemeCubit>()),
         BlocProvider(create: (_) => getIt<LocationPrayerCubit>()),
         BlocProvider(create: (_) => getIt<AdhanCubit>()),
@@ -204,7 +202,7 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
 
 /// A StatefulWidget that manages the reactive theme and locale.
 /// 
-/// Listens to SettingsCubit and updates the theme/locale via setState.
+/// Listens to ThemeCubit and updates the theme/locale via setState.
 /// MaterialApp.theme changes trigger smooth AnimatedTheme transitions.
 class _MaterialAppWithReactiveTheme extends StatefulWidget {
   const _MaterialAppWithReactiveTheme();

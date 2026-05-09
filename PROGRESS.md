@@ -1,4 +1,12 @@
-# SettingsCubit Refactoring Progress
+# Azkar and Tasbih Navigation Refactoring
+
+## Objectives
+- [x] Implement auto-scroll to next item upon completion in Azkar.
+- [x] Move Azkar navigation arrows outside the PageView for static positioning.
+- [x] Refactor Tasbih to use PageView for horizontal manual scrolling.
+- [x] Implement auto-scroll in Tasbih (both Rotating and Individual modes).
+- [x] Add static navigation arrows to Tasbih.
+- [x] Verify both features with integration tests.
 
 ## Phase 1: Pre-Refactoring Testing & Scoping
 - [x] Audit existing test coverage for `SettingsCubit`.
@@ -25,14 +33,14 @@
 - [x] Update GetIt/Injectable configurations for new Cubits and Coordinator.
 - [x] Migrate UI: `SettingsScreen` (Using modular sections).
 - [x] Migrate UI: `RemindersSettingsScreen`.
-- [ ] Migrate UI: `HomeScreen` & `HomeContent`.
-- [ ] Migrate UI: `AzkarCategoriesScreen` & `MainNavigationScreen`.
-- [ ] Migrate UI: `OnboardingScreen`.
-- [ ] Resolve `injectable` dependency warnings for `NotificationService`.
+- [x] Migrate UI: `HomeScreen` & `HomeContent`.
+- [x] Migrate UI: `AzkarCategoriesScreen` & `MainNavigationScreen`.
+- [x] Migrate UI: `OnboardingScreen`.
+- [x] Resolve `injectable` dependency warnings for `NotificationService`.
 
 ## Phase 5: Deprecation & Cleanup
-- [ ] Verify all integration and unit tests pass.
-- [ ] Verify home screen widgets update reactively.
-- [ ] Remove legacy `SettingsCubit`.
-- [ ] Remove legacy `SettingsState`.
-- [ ] Final code audit for cross-domain data leaking.
+- [x] Verify all integration and unit tests pass.
+- [x] Verify home screen widgets update reactively.
+- [x] Remove legacy `SettingsCubit`.
+- [x] Remove legacy `SettingsState`.
+- [x] Final code audit for cross-domain data leaking.

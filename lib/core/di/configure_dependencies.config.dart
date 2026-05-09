@@ -101,8 +101,6 @@ import '../../features/settings/presentation/blocs/daily_reminders_cubit.dart'
     as _i126;
 import '../../features/settings/presentation/blocs/location_prayer_cubit.dart'
     as _i185;
-import '../../features/settings/presentation/blocs/settings_cubit.dart'
-    as _i573;
 import '../../features/settings/presentation/blocs/theme_cubit.dart' as _i984;
 import '../../features/settings/presentation/manager/widget_sync_coordinator.dart'
     as _i102;
@@ -411,20 +409,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i730.ReciterManagerBloc(
         audioRepository: gh<_i451.AudioRepository>(),
         downloadService: gh<_i224.AudioDownloadService>(),
-      ),
-    );
-    gh.factory<_i573.SettingsCubit>(
-      () => _i573.SettingsCubit(
-        gh<_i674.SettingsRepository>(),
-        gh<_i669.LocationService>(),
-        gh<_i47.SyncLocationSettings>(),
-        gh<_i760.SyncNotificationSchedule>(),
-        gh<_i769.ToggleAfterSalahAzkarUseCase>(),
-        gh<_i6.UpdateCalculationMethodUseCase>(),
-        gh<_i808.ApplyThemePreset>(),
-        gh<_i1036.SaveCustomTheme>(),
-        gh<_i494.GetAvailableThemePresets>(),
-        gh<_i682.WidgetUpdateService>(),
       ),
     );
     gh.factory<_i733.QuranBloc>(

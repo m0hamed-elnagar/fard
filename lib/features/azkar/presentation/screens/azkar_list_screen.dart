@@ -22,6 +22,7 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
   int _currentPage = 0;
   int _fontSizeLevel = 1; // 0=Small, 1=Medium, 2=Large
   bool _vibrationEnabled = true;
+  final Set<int> _completedInSession = {};
 
   @override
   void initState() {
@@ -51,7 +52,34 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AzkarBloc, AzkarState>(
+    return BlocConsumer<AzkarBloc, AzkarState>(
+      listener: (context, state) {
+        if (state.azkar.isNotEmpty && _currentPage < state.azkar.length) {
+          final currentItem = state.azkar[_currentPage];
+          final isCompleted = currentItem.currentCount >= currentItem.count;
+
+          if (isCompleted && !_completedInSession.contains(_currentPage)) {
+            _completedInSession.add(_currentPage);
+
+            // Item just completed
+            if (_vibrationEnabled && !Platform.isWindows) {
+              Vibration.vibrate(duration: 100, amplitude: 255);
+            }
+
+            // Auto-scroll to next if available
+            if (_currentPage < state.azkar.length - 1) {
+              Future.delayed(const Duration(milliseconds: 600), () {
+                if (mounted && _currentPage < state.azkar.length - 1) {
+                  _pageController.nextPage(
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeInOut,
+                  );
+                }
+              });
+            }
+          }
+        }
+      },
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
@@ -171,24 +199,24 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
       );
     }
 
-    return PageView.builder(
-      controller: _pageController,
-      onPageChanged: (index) => setState(() => _currentPage = index),
-      itemCount: azkar.length,
-      itemBuilder: (context, index) {
-        final item = azkar[index];
-        final isCompleted = item.currentCount >= item.count;
+    return Stack(
+      children: [
+        PageView.builder(
+          controller: _pageController,
+          onPageChanged: (index) => setState(() => _currentPage = index),
+          itemCount: azkar.length,
+          itemBuilder: (context, index) {
+            final item = azkar[index];
+            final isCompleted = item.currentCount >= item.count;
 
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final screenHeight = MediaQuery.of(context).size.height;
-            final isSmallScreen = screenHeight < 700;
-            final counterSize = isSmallScreen ? 180.0 : 240.0;
-            final buttonSize = isSmallScreen ? 80.0 : 100.0;
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final screenHeight = MediaQuery.of(context).size.height;
+                final isSmallScreen = screenHeight < 700;
+                final counterSize = isSmallScreen ? 180.0 : 240.0;
+                final buttonSize = isSmallScreen ? 80.0 : 100.0;
 
-            return Stack(
-              children: [
-                SingleChildScrollView(
+                return SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(minHeight: constraints.maxHeight),
@@ -231,67 +259,67 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
                       ),
                     ),
                   ),
-                ),
-                // Page navigation arrows
-                if (index > 0)
-                  PositionedDirectional(
-                    start: 4,
-                    top: 0,
-                    bottom: 0,
-                    child: Center(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: context.secondaryColor.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.arrow_back_ios_rounded,
-                            color: context.secondaryColor,
-                            size: 20,
-                          ),
-                          onPressed: () {
-                            _pageController.previousPage(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                if (index < azkar.length - 1)
-                  PositionedDirectional(
-                    end: 4,
-                    top: 0,
-                    bottom: 0,
-                    child: Center(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: context.secondaryColor.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            color: context.secondaryColor,
-                            size: 20,
-                          ),
-                          onPressed: () {
-                            _pageController.nextPage(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
+                );
+              },
             );
           },
-        );
-      },
+        ),
+        // Page navigation arrows
+        if (_currentPage > 0)
+          PositionedDirectional(
+            start: 4,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: context.secondaryColor.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.arrow_back_ios_rounded,
+                    color: context.secondaryColor,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    _pageController.previousPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        if (_currentPage < azkar.length - 1)
+          PositionedDirectional(
+            end: 4,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: context.secondaryColor.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: context.secondaryColor,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    _pageController.nextPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -449,6 +477,7 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
         IconButton(
           icon: const Icon(Icons.refresh_rounded, size: 36),
           onPressed: () {
+            setState(() => _completedInSession.remove(_currentPage));
             context.read<AzkarBloc>().add(AzkarEvent.resetItem(_currentPage));
           },
           color: context.onSurfaceVariantColor,
@@ -497,38 +526,9 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
     final azkarBloc = context.read<AzkarBloc>();
     azkarBloc.add(AzkarEvent.incrementCount(index));
 
-    final state = azkarBloc.state;
-    final azkar = state.azkar;
-    if (index >= azkar.length) return;
-    final updatedItem = azkar[index];
-
-    if (_vibrationEnabled && !Platform.isWindows && await Vibration.hasVibrator() == true) {
-      if (updatedItem.currentCount >= updatedItem.count) {
-        Vibration.vibrate(duration: 100, amplitude: 255);
-        if (index < azkar.length - 1) {
-          Future.delayed(const Duration(milliseconds: 500), () {
-            if (mounted) {
-              _pageController.nextPage(
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeInOut,
-              );
-            }
-          });
-        }
-      } else {
-        Vibration.vibrate(duration: 30);
-      }
-    } else if (updatedItem.currentCount >= updatedItem.count) {
-      if (index < azkar.length - 1) {
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            _pageController.nextPage(
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeInOut,
-            );
-          }
-        });
-      }
+    if (_vibrationEnabled && !Platform.isWindows) {
+      Vibration.vibrate(duration: 30);
     }
   }
+
 }

@@ -148,14 +148,15 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
       if (nextTotalCount > completionTrigger) {
         emit(state.copyWith(showCompletionDua: true));
       } else {
-        final nextCycleCount = (nextTotalCount - 1) % countsPerCycle + 1;
-        final nextCycleIndex = (nextTotalCount - 1) ~/ countsPerCycle;
+        // Advance index at countsPerCycle
+        final nextCycleCount = nextTotalCount % countsPerCycle;
+        final nextCycleIndex = nextTotalCount ~/ countsPerCycle;
 
         emit(
           state.copyWith(
             totalCount: nextTotalCount,
             currentCycleCount: nextCycleCount,
-            currentCycleIndex: nextCycleIndex,
+            currentCycleIndex: nextCycleIndex.clamp(0, state.currentCategory.items.length - 1),
           ),
         );
 
@@ -192,12 +193,12 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
             ),
           );
         } else {
-          // Auto-advance to next item in individual mode?
-          // For now, let's just keep the count and let user finish
+          // Auto-advance to next item in individual mode
           emit(
             state.copyWith(
-              totalCount: nextTotalCount,
-              currentCycleCount: nextTotalCount,
+              totalCount: 0, // Reset for next item
+              currentCycleCount: 0,
+              currentCycleIndex: state.currentCycleIndex + 1,
             ),
           );
         }
