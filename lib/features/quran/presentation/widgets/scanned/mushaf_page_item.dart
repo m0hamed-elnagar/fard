@@ -7,13 +7,11 @@ import 'package:fard/core/theme/app_colors.dart';
 class MushafPageItem extends StatefulWidget {
   final int pageNumber;
   final MushafDownloadService downloadService;
-  final bool isDarkMode;
 
   const MushafPageItem({
     super.key,
     required this.pageNumber,
     required this.downloadService,
-    required this.isDarkMode,
   });
 
   @override
@@ -66,9 +64,8 @@ class _MushafPageItemState extends State<MushafPageItem> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final primaryColor = widget.isDarkMode
-        ? context.onSurfaceColor
-        : context.primaryColor;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = context.primaryColor;
 
     return FutureBuilder<File?>(
       future: _pageFileFuture,
@@ -122,29 +119,16 @@ class _MushafPageItemState extends State<MushafPageItem> {
           child: Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: widget.isDarkMode
+              child: isDarkMode
                   ? ColorFiltered(
+                      // Smart Inversion Matrix:
+                      // Inverts Lightness (White -> Black, Black -> White)
+                      // while preserving Hue (Green stays Greenish, Gold stays Goldish).
                       colorFilter: const ColorFilter.matrix([
-                        -0.85,
-                        0,
-                        0,
-                        0,
-                        235,
-                        0,
-                        -0.85,
-                        0,
-                        0,
-                        235,
-                        0,
-                        -0.85,
-                        0,
-                        0,
-                        235,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
+                        0.333, -0.667, -0.667, 0, 255,
+                        -0.667, 0.333, -0.667, 0, 255,
+                        -0.667, -0.667, 0.333, 0, 255,
+                        0, 0, 0, 1, 0,
                       ]),
                       child: Image.file(file, fit: BoxFit.contain),
                     )

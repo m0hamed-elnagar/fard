@@ -187,38 +187,6 @@ void main() {
     expect(findDigit(tester, '2'), isTrue);
   });
 
-  testWidgets('Dark mode toggle updates UI and saves preference', (
-    tester,
-  ) async {
-    await tester.pumpWidget(createWidgetUnderTest(initialPage: 1));
-    await tester.pump(const Duration(seconds: 1));
-
-    final darkModeButton = find.byIcon(Icons.dark_mode_rounded);
-    await tester.tap(darkModeButton);
-    await tester.pump(const Duration(seconds: 1));
-
-    expect(find.byIcon(Icons.light_mode_rounded), findsOneWidget);
-
-    final pageItem = tester.widget<MushafPageItem>(find.byType(MushafPageItem));
-    expect(pageItem.isDarkMode, true);
-    verify(
-      () => mockSharedPreferences.setBool('scanned_mushaf_dark_mode', true),
-    ).called(1);
-  });
-
-  testWidgets('Loads dark mode preference on init', (tester) async {
-    when(
-      () => mockSharedPreferences.getBool('scanned_mushaf_dark_mode'),
-    ).thenReturn(true);
-
-    await tester.pumpWidget(createWidgetUnderTest(initialPage: 1));
-    await tester.pump(const Duration(seconds: 1));
-
-    expect(find.byIcon(Icons.light_mode_rounded), findsOneWidget);
-    final pageItem = tester.widget<MushafPageItem>(find.byType(MushafPageItem));
-    expect(pageItem.isDarkMode, true);
-  });
-
   testWidgets('MushafPageItem handles retry on failure', (tester) async {
     // 1. Initial failure
     final mockFileFailure = MockFile();
