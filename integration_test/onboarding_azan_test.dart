@@ -24,7 +24,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(Salaah.fajr);
-    registerFallbackValue(const ThemeSt~ate(locale: Locale('ar')));
+    registerFallbackValue(const ThemeState(locale: Locale('ar')));
   });
 
   group('Onboarding Azan Integration Test', () {
