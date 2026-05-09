@@ -547,7 +547,6 @@ class _TasbihPageItem extends StatelessWidget {
 
   void _showCategorySheet(BuildContext context, TasbihState state) {
     final tasbihBloc = context.read<TasbihBloc>();
-    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -633,7 +632,6 @@ class _TasbihPageItem extends StatelessWidget {
     TasbihState state,
     double buttonSize,
   ) {
-    final l10n = AppLocalizations.of(context)!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [

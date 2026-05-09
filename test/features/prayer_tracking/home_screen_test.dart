@@ -176,7 +176,8 @@ void main() {
     when(() => mockWerdBloc.state).thenReturn(WerdState.initial());
 
     await tester.pumpWidget(createWidgetUnderTest());
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
     final l10n = AppLocalizations.of(tester.element(find.byType(HomeScreen)))!;
 
@@ -252,7 +253,8 @@ void main() {
     ).thenReturn(null);
 
     await tester.pumpWidget(createWidgetUnderTest());
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
     // Drag to see SalaahTiles
     final timeFinder = find.textContaining('5:00');

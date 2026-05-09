@@ -209,6 +209,7 @@ void main() {
       child: const MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        locale: Locale('en'),
         home: Scaffold(
           body: SizedBox(width: 1080, height: 1920, child: RootScreen()),
         ),
@@ -219,6 +220,12 @@ void main() {
   testWidgets('RootScreen shows OnboardingScreen when first time', (
     tester,
   ) async {
+    // Set fixed size
+    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     when(() => mockPrefs.getBool('onboarding_complete')).thenReturn(false);
 
     await tester.pumpWidget(createWidgetUnderTest());
@@ -230,6 +237,12 @@ void main() {
   testWidgets(
     'RootScreen shows MainNavigationScreen when onboarding complete',
     (tester) async {
+      // Set fixed size
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       when(() => mockPrefs.getBool('onboarding_complete')).thenReturn(true);
       when(() => mockPrayerTrackerBloc.state).thenReturn(
         PrayerTrackerState.loaded(
@@ -243,6 +256,7 @@ void main() {
 
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100)); // Allow for any initial animations
 
       expect(find.byType(MainNavigationScreen), findsOneWidget);
     },
