@@ -60,14 +60,12 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   void _scrollToAddQada() {
-    // Scroll to top to make DashboardCarousel visible
     _scrollController.animateTo(
       0,
       duration: const Duration(milliseconds: 600),
       curve: Curves.easeOutQuart,
     );
 
-    // Change PageView to index 1 (PrayerTrackingCard)
     if (_pageController.hasClients) {
       _pageController.animateToPage(
         1,
@@ -92,62 +90,58 @@ class _HomeContentState extends State<HomeContent> {
     final bloc = context.read<PrayerTrackerBloc>();
     final l10n = AppLocalizations.of(context)!;
 
-    return BlocBuilder<LocationPrayerCubit, LocationPrayerState>(
-      builder: (context, locationState) {
-        return BlocBuilder<DailyRemindersCubit, DailyRemindersState>(
-          builder: (context, remindersState) {
-            // Calculate today's prayer times for countdown (always uses DateTime.now())
-            final todayPrayerTimes = (locationState.latitude != null &&
-                    locationState.longitude != null)
-                ? getIt<PrayerTimeService>().getPrayerTimes(
-                    latitude: locationState.latitude!,
-                    longitude: locationState.longitude!,
-                    method: locationState.calculationMethod,
-                    madhab: locationState.madhab,
-                    date: DateTime.now(),
-                  )
-                : null;
+    return Scaffold(
+      backgroundColor: context.backgroundColor,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          l10n.appName,
+          style: GoogleFonts.amiri(
+            color: context.onSurfaceColor,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () => RemindersSettingsDialog.show(context),
+            icon: const Icon(Icons.notifications_active_rounded),
+            color: context.secondaryColor,
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: CustomScrollView(
+          controller: _scrollController,
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            // Sliver 1: Dashboard Carousel (Optimized Rebuilds)
+            BlocBuilder<LocationPrayerCubit, LocationPrayerState>(
+              buildWhen: (prev, curr) =>
+                  prev.latitude != curr.latitude ||
+                  prev.longitude != curr.longitude ||
+                  prev.calculationMethod != curr.calculationMethod ||
+                  prev.madhab != curr.madhab ||
+                  prev.cityName != curr.cityName,
+              builder: (context, locationState) {
+                return BlocBuilder<DailyRemindersCubit, DailyRemindersState>(
+                  buildWhen: (prev, curr) =>
+                      prev.isQadaEnabled != curr.isQadaEnabled,
+                  builder: (context, remindersState) {
+                    final todayPrayerTimes = (locationState.latitude != null &&
+                            locationState.longitude != null)
+                        ? getIt<PrayerTimeService>().getPrayerTimes(
+                            latitude: locationState.latitude!,
+                            longitude: locationState.longitude!,
+                            method: locationState.calculationMethod,
+                            madhab: locationState.madhab,
+                            date: DateTime.now(),
+                          )
+                        : null;
 
-            // Calculate selected date prayer times for display in prayer list
-            final selectedDatePrayerTimes = (locationState.latitude != null &&
-                    locationState.longitude != null)
-                ? getIt<PrayerTimeService>().getPrayerTimes(
-                    latitude: locationState.latitude!,
-                    longitude: locationState.longitude!,
-                    method: locationState.calculationMethod,
-                    madhab: locationState.madhab,
-                    date: widget.selectedDate,
-                  )
-                : null;
-
-            return Scaffold(
-              backgroundColor: context.backgroundColor,
-              appBar: AppBar(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                centerTitle: true,
-                title: Text(
-                  l10n.appName,
-                  style: GoogleFonts.amiri(
-                    color: context.onSurfaceColor,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                actions: [
-                  IconButton(
-                    onPressed: () => RemindersSettingsDialog.show(context),
-                    icon: const Icon(Icons.notifications_active_rounded),
-                    color: context.secondaryColor,
-                  ),
-                ],
-              ),
-              body: SafeArea(
-                child: CustomScrollView(
-                  controller: _scrollController,
-                  physics: const BouncingScrollPhysics(),
-                  slivers: [
-                    SliverPadding(
+                    return SliverPadding(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       sliver: SliverToBoxAdapter(
                         child: DashboardCarousel(
@@ -177,8 +171,8 @@ class _HomeContentState extends State<HomeContent> {
                               builder: (_) => AddQadaDialog(
                                 title: l10n.editQada,
                                 initialCounts: currentCounts,
-                                onConfirm: (counts) => bloc
-                                    .add(PrayerTrackerEvent.updateQada(counts)),
+                                onConfirm: (counts) => bloc.add(
+                                    PrayerTrackerEvent.updateQada(counts)),
                               ),
                             );
                           },
@@ -186,37 +180,80 @@ class _HomeContentState extends State<HomeContent> {
                               _showWerdGoalDialog(context),
                         ),
                       ),
+                    );
+                  },
+                );
+              },
+            ),
+
+            // Sliver 2: Calendar Section (Optimized Rebuilds)
+            BlocSelector<LocationPrayerCubit, LocationPrayerState, int>(
+              selector: (state) => state.hijriAdjustment,
+              builder: (context, hijriAdjustment) {
+                return SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 8.0),
+                  sliver: SliverToBoxAdapter(
+                    child: CalendarWidget(
+                      selectedDate: widget.selectedDate,
+                      monthRecords: widget.monthRecords,
+                      hijriAdjustment: hijriAdjustment,
+                      onDaySelected: (date) =>
+                          bloc.add(PrayerTrackerEvent.load(date)),
+                      onMonthChanged: (year, month) =>
+                          bloc.add(PrayerTrackerEvent.loadMonth(year, month)),
                     ),
+                  ),
+                );
+              },
+            ),
 
-                    // Calendar section with subtle top padding
-                    SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 8.0),
-                      sliver: SliverToBoxAdapter(
-                        child: CalendarWidget(
-                          selectedDate: widget.selectedDate,
-                          monthRecords: widget.monthRecords,
-                          hijriAdjustment: locationState.hijriAdjustment,
-                          onDaySelected: (date) =>
-                              bloc.add(PrayerTrackerEvent.load(date)),
-                          onMonthChanged: (year, month) => bloc
-                              .add(PrayerTrackerEvent.loadMonth(year, month)),
-                        ),
-                      ),
-                    ),
+            // Sliver 3: Suggested Azkar Section (Optimized Rebuilds)
+            BlocBuilder<DailyRemindersCubit, DailyRemindersState>(
+              builder: (context, remindersState) {
+                return SuggestedAzkarSection(settings: remindersState);
+              },
+            ),
 
-                    // Suggested Azkar Section
-                    SuggestedAzkarSection(settings: remindersState),
+            // Sliver 4: Location Warning (Optimized Rebuilds)
+            BlocBuilder<LocationPrayerCubit, LocationPrayerState>(
+              buildWhen: (prev, curr) =>
+                  (prev.latitude == null) != (curr.latitude == null) ||
+                  (prev.longitude == null) != (curr.longitude == null),
+              builder: (context, locationState) {
+                if (locationState.latitude == null ||
+                    locationState.longitude == null) {
+                  return _LocationWarning(
+                    givePermissionLabel: l10n.givePermission,
+                    locationWarningLabel: l10n.locationWarning,
+                  );
+                }
+                return const SliverToBoxAdapter(child: SizedBox.shrink());
+              },
+            ),
 
-                    // Location Warning
-                    if (locationState.latitude == null ||
-                        locationState.longitude == null)
-                      _LocationWarning(
-                        givePermissionLabel: l10n.givePermission,
-                        locationWarningLabel: l10n.locationWarning,
-                      ),
+            // Sliver 5: Daily Prayers Section (Optimized Rebuilds)
+            BlocBuilder<LocationPrayerCubit, LocationPrayerState>(
+              buildWhen: (prev, curr) =>
+                  prev.latitude != curr.latitude ||
+                  prev.longitude != curr.longitude ||
+                  prev.calculationMethod != curr.calculationMethod ||
+                  prev.madhab != curr.madhab,
+              builder: (context, locationState) {
+                return BlocBuilder<DailyRemindersCubit, DailyRemindersState>(
+                  builder: (context, remindersState) {
+                    final selectedDatePrayerTimes =
+                        (locationState.latitude != null &&
+                                locationState.longitude != null)
+                            ? getIt<PrayerTimeService>().getPrayerTimes(
+                                latitude: locationState.latitude!,
+                                longitude: locationState.longitude!,
+                                method: locationState.calculationMethod,
+                                madhab: locationState.madhab,
+                                date: widget.selectedDate,
+                              )
+                            : null;
 
-                    // Unified Today's Prayers Section (Header + List) inside a Frame
-                    _DailyPrayersSection(
+                    return _DailyPrayersSection(
                       locationState: locationState,
                       remindersState: remindersState,
                       selectedDate: widget.selectedDate,
@@ -226,26 +263,26 @@ class _HomeContentState extends State<HomeContent> {
                       qadaStatus: widget.qadaStatus,
                       completedQadaToday: widget.completedQadaToday,
                       onScrollToAddQada: _scrollToAddQada,
-                    ),
+                    );
+                  },
+                );
+              },
+            ),
 
-                    // History section
-                    SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 40.0),
-                      sliver: SliverToBoxAdapter(
-                        child: HistoryList(
-                          records: widget.history,
-                          onDelete: (date) =>
-                              bloc.add(PrayerTrackerEvent.deleteRecord(date)),
-                        ),
-                      ),
-                    ),
-                  ],
+            // Sliver 6: History section
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 40.0),
+              sliver: SliverToBoxAdapter(
+                child: HistoryList(
+                  records: widget.history,
+                  onDelete: (date) =>
+                      bloc.add(PrayerTrackerEvent.deleteRecord(date)),
                 ),
               ),
-            );
-          },
-        );
-      },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -397,7 +434,6 @@ class _DailyPrayersSectionState extends State<_DailyPrayersSection> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
-    final bloc = context.read<PrayerTrackerBloc>();
 
     return SliverPadding(
       padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 12.0),
@@ -422,7 +458,6 @@ class _DailyPrayersSectionState extends State<_DailyPrayersSection> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Header (Inside the frame)
                 InkWell(
                   onTap: () => setState(() => _isExpanded = !_isExpanded),
                   borderRadius: BorderRadius.vertical(
@@ -490,8 +525,6 @@ class _DailyPrayersSectionState extends State<_DailyPrayersSection> {
                     ),
                   ),
                 ),
-
-                // Collapsible List
                 if (_isExpanded) ...[
                   const Divider(height: 1.0),
                   Padding(
@@ -535,15 +568,15 @@ class _DailyPrayersSectionState extends State<_DailyPrayersSection> {
                                         .contains(
                                       Salaah.values[index],
                                     ),
-                            onAdd: () => bloc.add(
+                            onAdd: () => context.read<PrayerTrackerBloc>().add(
                               PrayerTrackerEvent.addQada(Salaah.values[index]),
                             ),
-                            onRemove: () => bloc.add(
+                            onRemove: () => context.read<PrayerTrackerBloc>().add(
                               PrayerTrackerEvent.removeQada(
                                 Salaah.values[index],
                               ),
                             ),
-                            onToggleMissed: () => bloc.add(
+                            onToggleMissed: () => context.read<PrayerTrackerBloc>().add(
                               PrayerTrackerEvent.togglePrayer(
                                 Salaah.values[index],
                               ),

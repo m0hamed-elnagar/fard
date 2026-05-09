@@ -59,7 +59,7 @@ class AzkarRepository implements IAzkarSource {
         return [];
       }
 
-      final data = await json.decode(response);
+      final data = await compute(_parseAzkarJson, response);
       final List<dynamic>? rows = data['rows'];
 
       if (rows == null) {
@@ -93,6 +93,10 @@ class AzkarRepository implements IAzkarSource {
     } finally {
       _loadingCompleter = null;
     }
+  }
+
+  static Map<String, dynamic> _parseAzkarJson(String jsonStr) {
+    return json.decode(jsonStr) as Map<String, dynamic>;
   }
 
   @override

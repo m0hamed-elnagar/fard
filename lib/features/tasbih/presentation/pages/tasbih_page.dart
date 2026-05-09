@@ -53,7 +53,7 @@ class _TasbihViewState extends State<TasbihView> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return BlocConsumer<TasbihBloc, TasbihState>(
+    return BlocListener<TasbihBloc, TasbihState>(
       listener: (context, state) {
         if (state.currentCycleCount == 0) {
           _completedInSession.remove(state.currentCycleIndex);
@@ -105,221 +105,165 @@ class _TasbihViewState extends State<TasbihView> {
           );
         }
       },
-      builder: (context, state) {
-        if (state.isLoading) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
+      child: BlocBuilder<TasbihBloc, TasbihState>(
+        buildWhen: (prev, curr) =>
+            prev.isLoading != curr.isLoading ||
+            prev.error != curr.error ||
+            prev.currentCategory.id != curr.currentCategory.id,
+        builder: (context, state) {
+          if (state.isLoading) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
 
-        if (state.error != null) {
-          return _buildErrorView(context, state.error!, l10n);
-        }
+          if (state.error != null) {
+            return _buildErrorView(context, state.error!, l10n);
+          }
 
-        final title =
-            _getLocalizedCategoryName(state.currentCategory.id, l10n) ??
-            state.currentCategory.name;
+          final title =
+              _getLocalizedCategoryName(state.currentCategory.id, l10n) ??
+              state.currentCategory.name;
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              title,
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.settings_outlined),
-                onPressed: () => _showSettings(context),
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(
+                title,
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
               ),
-            ],
-          ),
-          body: LayoutBuilder(
-            builder: (context, constraints) {
-              final maxHeight = constraints.maxHeight;
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.settings_outlined),
+                  onPressed: () => _showSettings(context),
+                ),
+              ],
+            ),
+            body: LayoutBuilder(
+              builder: (context, constraints) {
+                final maxHeight = constraints.maxHeight;
 
-              // Responsive sizes
-              final screenHeight = MediaQuery.of(context).size.height;
-              final isSmallScreen = screenHeight < 700;
-              final counterSize = isSmallScreen ? 180.0 : 240.0;
-              final buttonSize = isSmallScreen ? 80.0 : 100.0;
+                // Responsive sizes
+                final screenHeight = MediaQuery.of(context).size.height;
+                final isSmallScreen = screenHeight < 700;
+                final counterSize = isSmallScreen ? 180.0 : 240.0;
+                final buttonSize = isSmallScreen ? 80.0 : 100.0;
 
-              return Stack(
-                children: [
-                  PageView.builder(
-                    controller: _pageController,
-                    onPageChanged: (index) {
-                      if (index != state.currentCycleIndex) {
-                        context
-                            .read<TasbihBloc>()
-                            .add(TasbihEvent.changeItem(index));
-                      }
-                    },
-                    itemCount: state.showCompletionDua ? 1 : state.currentCategory.items.length,
-                    itemBuilder: (context, index) {
-                      final currentDhikr = state.currentCategory.items.isNotEmpty
-                          ? state.currentCategory.items[index.clamp(
-                              0,
-                              state.currentCategory.items.length - 1,
-                            )]
-                          : null;
-
-                      final itemCount = currentDhikr != null
-                          ? (state.itemProgress[currentDhikr.id] ?? 0)
-                          : 0;
-
-                      return SingleChildScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(minHeight: maxHeight),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24.0,
-                              vertical: 16.0,
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                // Top Section: Category & Text
-                                Column(
-                                  children: [
-                                    _buildCategorySelector(context, state, l10n),
-                                    const SizedBox(height: 20),
-                                    if (state.currentCategory.sequenceMode ==
-                                        'rotating' && !state.showCompletionDua) ...[
-                                      CycleProgressIndicator(
-                                        currentIndex: state.currentCycleIndex,
-                                        totalCycles: state.currentCategory.cycles,
-                                      ),
-                                      const SizedBox(height: 16),
-                                    ],
-                                    if (state.showCompletionDua &&
-                                        state.currentCompletionDua != null)
-                                      CompletionDuaCard(state: state)
-                                    else if (currentDhikr != null)
-                                      DhikrDisplayCard(
-                                        arabic: currentDhikr.arabic,
-                                        transliteration: currentDhikr.transliteration,
-                                        translation: currentDhikr.translation,
-                                        showTransliteration:
-                                            state.data.settings.showTransliteration,
-                                        showTranslation:
-                                            state.data.settings.showTranslation,
-                                      ),
-                                  ],
-                                ),
-
-                                // Bottom Section: Counter & Button
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 32.0),
-                                  child: Column(
-                                    children: [
-                                      Stack(
-                                        alignment: Alignment.center,
-                                        children: [
-                                          CounterCircle(
-                                            count: itemCount,
-                                            targetCount:
-                                                state.customTasbihTarget ??
-                                                (state.currentCategory.sequenceMode ==
-                                                        'rotating'
-                                                    ? state
-                                                          .currentCategory
-                                                          .countsPerCycle
-                                                    : (currentDhikr?.targetCount ?? 33)),
-                                            size: counterSize,
-                                          ),
-                                          if (!state.showCompletionDua)
-                                            Positioned(
-                                              right: 0,
-                                              top: 0,
-                                              child: Material(
-                                                color: context.surfaceContainerHighestColor,
-                                                shape: const CircleBorder(),
-                                                child: IconButton(
-                                                  icon: const Icon(
-                                                    Icons.edit_note_rounded,
-                                                  ),
-                                                  onPressed: () =>
-                                                      _showCustomTargetDialog(
-                                                        context,
-                                                        state,
-                                                      ),
-                                                  tooltip: l10n.customTasbihTarget,
-                                                ),
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 32),
-                                      _buildControlBar(context, state, buttonSize),
-                                    ],
+                return Stack(
+                  children: [
+                    BlocBuilder<TasbihBloc, TasbihState>(
+                      buildWhen: (prev, curr) =>
+                          prev.showCompletionDua != curr.showCompletionDua ||
+                          prev.currentCategory.items.length !=
+                              curr.currentCategory.items.length,
+                      builder: (context, state) {
+                        return PageView.builder(
+                          controller: _pageController,
+                          onPageChanged: (index) {
+                            final bloc = context.read<TasbihBloc>();
+                            if (index != bloc.state.currentCycleIndex) {
+                              bloc.add(TasbihEvent.changeItem(index));
+                            }
+                          },
+                          itemCount: state.showCompletionDua
+                              ? 1
+                              : state.currentCategory.items.length,
+                          itemBuilder: (context, index) {
+                            return _TasbihPageItem(
+                              index: index,
+                              maxHeight: maxHeight,
+                              counterSize: counterSize,
+                              buttonSize: buttonSize,
+                              getName: (id) =>
+                                  _getLocalizedCategoryName(id, l10n),
+                              getDesc: (id) =>
+                                  _getLocalizedCategoryDesc(id, l10n),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    // Navigation arrows
+                    BlocBuilder<TasbihBloc, TasbihState>(
+                      buildWhen: (prev, curr) =>
+                          prev.showCompletionDua != curr.showCompletionDua ||
+                          prev.currentCycleIndex != curr.currentCycleIndex ||
+                          prev.currentCategory.items.length !=
+                              curr.currentCategory.items.length,
+                      builder: (context, state) {
+                        if (state.showCompletionDua ||
+                            state.currentCategory.items.length <= 1) {
+                          return const SizedBox.shrink();
+                        }
+                        return Stack(
+                          children: [
+                            if (state.currentCycleIndex > 0)
+                              PositionedDirectional(
+                                start: 4,
+                                top: 0,
+                                bottom: 0,
+                                child: Center(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: context.secondaryColor
+                                          .withValues(alpha: 0.1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: IconButton(
+                                      icon: const Icon(
+                                          Icons.arrow_back_ios_rounded,
+                                          size: 20),
+                                      color: context.secondaryColor,
+                                      onPressed: () {
+                                        _pageController.previousPage(
+                                          duration:
+                                              const Duration(milliseconds: 300),
+                                          curve: Curves.easeInOut,
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  // Navigation arrows
-                  if (!state.showCompletionDua && state.currentCategory.items.length > 1) ...[
-                    if (state.currentCycleIndex > 0)
-                      PositionedDirectional(
-                        start: 4,
-                        top: 0,
-                        bottom: 0,
-                        child: Center(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: context.secondaryColor.withValues(alpha: 0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                              icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
-                              color: context.secondaryColor,
-                              onPressed: () {
-                                _pageController.previousPage(
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut,
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                    if (state.currentCycleIndex <
-                        state.currentCategory.items.length - 1)
-                      PositionedDirectional(
-                        end: 4,
-                        top: 0,
-                        bottom: 0,
-                        child: Center(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: context.secondaryColor.withValues(alpha: 0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                              icon: const Icon(Icons.arrow_forward_ios_rounded, size: 20),
-                              color: context.secondaryColor,
-                              onPressed: () {
-                                _pageController.nextPage(
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut,
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
+                              ),
+                            if (state.currentCycleIndex <
+                                state.currentCategory.items.length - 1)
+                              PositionedDirectional(
+                                end: 4,
+                                top: 0,
+                                bottom: 0,
+                                child: Center(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: context.secondaryColor
+                                          .withValues(alpha: 0.1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: IconButton(
+                                      icon: const Icon(
+                                          Icons.arrow_forward_ios_rounded,
+                                          size: 20),
+                                      color: context.secondaryColor,
+                                      onPressed: () {
+                                        _pageController.nextPage(
+                                          duration:
+                                              const Duration(milliseconds: 300),
+                                          curve: Curves.easeInOut,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
                   ],
-                ],
-              );
-            },
-          ),
-        );
-      },
+                );
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -361,45 +305,6 @@ class _TasbihViewState extends State<TasbihView> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildControlBar(
-    BuildContext context,
-    TasbihState state,
-    double buttonSize,
-  ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        IconButton(
-          icon: const Icon(Icons.refresh_rounded, size: 36),
-          onPressed: () {
-            setState(() => _completedInSession.remove(state.currentCycleIndex));
-            _confirmReset(context);
-          },
-          color: context.onSurfaceVariantColor,
-        ),
-        TasbihButton(
-          size: buttonSize,
-          onTap: () =>
-              context.read<TasbihBloc>().add(const TasbihEvent.increment()),
-        ),
-        IconButton(
-          icon: Icon(
-            state.data.settings.hapticFeedback
-                ? Icons.vibration_rounded
-                : Icons.phonelink_ring_rounded,
-            size: 32,
-          ),
-          onPressed: () => context.read<TasbihBloc>().add(
-            const TasbihEvent.toggleVibration(),
-          ),
-          color: state.data.settings.hapticFeedback
-              ? context.secondaryColor
-              : context.onSurfaceVariantColor,
-        ),
-      ],
     );
   }
 
@@ -445,30 +350,152 @@ class _TasbihViewState extends State<TasbihView> {
     }
   }
 
-  void _confirmReset(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    showDialog(
+  void _showSettings(BuildContext context) {
+    final tasbihBloc = context.read<TasbihBloc>();
+    showModalBottomSheet(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text(l10n.resetCounter),
-        content: Text(l10n.resetProgressWarning),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () {
-              context.read<TasbihBloc>().add(const TasbihEvent.reset());
-              Navigator.pop(context);
-            },
-            child: Text(
-              l10n.delete,
-              style: TextStyle(color: context.errorColor),
+      backgroundColor: context.surfaceContainerColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) {
+        return BlocProvider.value(
+          value: tasbihBloc,
+          child: const TasbihSettingsSheet(),
+        );
+      },
+    );
+  }
+}
+
+class _TasbihPageItem extends StatelessWidget {
+  final int index;
+  final double maxHeight;
+  final double counterSize;
+  final double buttonSize;
+  final String? Function(String) getName;
+  final String? Function(String) getDesc;
+
+  const _TasbihPageItem({
+    required this.index,
+    required this.maxHeight,
+    required this.counterSize,
+    required this.buttonSize,
+    required this.getName,
+    required this.getDesc,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return BlocBuilder<TasbihBloc, TasbihState>(
+      buildWhen: (prev, curr) =>
+          prev.showCompletionDua != curr.showCompletionDua ||
+          prev.currentCategory.id != curr.currentCategory.id ||
+          prev.currentCycleIndex != curr.currentCycleIndex ||
+          prev.itemProgress != curr.itemProgress ||
+          prev.data.settings != curr.data.settings ||
+          prev.customTasbihTarget != curr.customTasbihTarget,
+      builder: (context, state) {
+        final currentDhikr = state.currentCategory.items.isNotEmpty
+            ? state.currentCategory.items[index.clamp(
+                0,
+                state.currentCategory.items.length - 1,
+              )]
+            : null;
+
+        final itemCount =
+            currentDhikr != null ? (state.itemProgress[currentDhikr.id] ?? 0) : 0;
+
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: maxHeight),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 16.0,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Top Section: Category & Text
+                  Column(
+                    children: [
+                      _buildCategorySelector(context, state, l10n),
+                      const SizedBox(height: 20),
+                      if (state.currentCategory.sequenceMode == 'rotating' &&
+                          !state.showCompletionDua) ...[
+                        CycleProgressIndicator(
+                          currentIndex: index,
+                          totalCycles: state.currentCategory.cycles,
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      if (state.showCompletionDua &&
+                          state.currentCompletionDua != null)
+                        CompletionDuaCard(state: state)
+                      else if (currentDhikr != null)
+                        DhikrDisplayCard(
+                          arabic: currentDhikr.arabic,
+                          transliteration: currentDhikr.transliteration,
+                          translation: currentDhikr.translation,
+                          showTransliteration:
+                              state.data.settings.showTransliteration,
+                          showTranslation: state.data.settings.showTranslation,
+                        ),
+                    ],
+                  ),
+
+                  // Bottom Section: Counter & Button
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 32.0),
+                    child: Column(
+                      children: [
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            CounterCircle(
+                              count: itemCount,
+                              targetCount: state.customTasbihTarget ??
+                                  (state.currentCategory.sequenceMode ==
+                                          'rotating'
+                                      ? state.currentCategory.countsPerCycle
+                                      : (currentDhikr?.targetCount ?? 33)),
+                              size: counterSize,
+                            ),
+                            if (!state.showCompletionDua)
+                              Positioned(
+                                right: 0,
+                                top: 0,
+                                child: Material(
+                                  color: context.surfaceContainerHighestColor,
+                                  shape: const CircleBorder(),
+                                  child: IconButton(
+                                    icon: const Icon(
+                                      Icons.edit_note_rounded,
+                                    ),
+                                    onPressed: () => _showCustomTargetDialog(
+                                      context,
+                                      state,
+                                    ),
+                                    tooltip: l10n.customTasbihTarget,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 32),
+                        _buildControlBar(context, state, buttonSize),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -497,8 +524,7 @@ class _TasbihViewState extends State<TasbihView> {
             const SizedBox(width: 12),
             Flexible(
               child: Text(
-                _getLocalizedCategoryName(state.currentCategory.id, l10n) ??
-                    state.currentCategory.name,
+                getName(state.currentCategory.id) ?? state.currentCategory.name,
                 style: GoogleFonts.outfit(
                   fontWeight: FontWeight.w600,
                   fontSize: 15,
@@ -516,6 +542,38 @@ class _TasbihViewState extends State<TasbihView> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showCategorySheet(BuildContext context, TasbihState state) {
+    final tasbihBloc = context.read<TasbihBloc>();
+    final l10n = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: context.surfaceContainerColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            return BlocProvider.value(
+              value: tasbihBloc,
+              child: CategorySelectionSheet(
+                state: state,
+                scrollController: scrollController,
+                getName: getName,
+                getDesc: getDesc,
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -570,52 +628,67 @@ class _TasbihViewState extends State<TasbihView> {
     );
   }
 
-  void _showCategorySheet(BuildContext context, TasbihState state) {
-    final tasbihBloc = context.read<TasbihBloc>();
+  Widget _buildControlBar(
+    BuildContext context,
+    TasbihState state,
+    double buttonSize,
+  ) {
     final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: context.surfaceContainerColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.6,
-          minChildSize: 0.4,
-          maxChildSize: 0.9,
-          expand: false,
-          builder: (context, scrollController) {
-            return BlocProvider.value(
-              value: tasbihBloc,
-              child: CategorySelectionSheet(
-                state: state,
-                scrollController: scrollController,
-                getName: (id) => _getLocalizedCategoryName(id, l10n),
-                getDesc: (id) => _getLocalizedCategoryDesc(id, l10n),
-              ),
-            );
-          },
-        );
-      },
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.refresh_rounded, size: 36),
+          onPressed: () => _confirmReset(context, state),
+          color: context.onSurfaceVariantColor,
+        ),
+        TasbihButton(
+          size: buttonSize,
+          onTap: () =>
+              context.read<TasbihBloc>().add(const TasbihEvent.increment()),
+        ),
+        IconButton(
+          icon: Icon(
+            state.data.settings.hapticFeedback
+                ? Icons.vibration_rounded
+                : Icons.phonelink_ring_rounded,
+            size: 32,
+          ),
+          onPressed: () => context.read<TasbihBloc>().add(
+            const TasbihEvent.toggleVibration(),
+          ),
+          color: state.data.settings.hapticFeedback
+              ? context.secondaryColor
+              : context.onSurfaceVariantColor,
+        ),
+      ],
     );
   }
 
-  void _showSettings(BuildContext context) {
-    final tasbihBloc = context.read<TasbihBloc>();
-    showModalBottomSheet(
+  void _confirmReset(BuildContext context, TasbihState state) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
       context: context,
-      backgroundColor: context.surfaceContainerColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      builder: (_) => AlertDialog(
+        title: Text(l10n.resetCounter),
+        content: Text(l10n.resetProgressWarning),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              context.read<TasbihBloc>().add(const TasbihEvent.reset());
+              Navigator.pop(context);
+            },
+            child: Text(
+              l10n.delete,
+              style: TextStyle(color: context.errorColor),
+            ),
+          ),
+        ],
       ),
-      builder: (_) {
-        return BlocProvider.value(
-          value: tasbihBloc,
-          child: const TasbihSettingsSheet(),
-        );
-      },
     );
   }
 }

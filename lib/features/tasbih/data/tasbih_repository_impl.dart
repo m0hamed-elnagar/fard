@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:fard/features/tasbih/domain/tasbih_models.dart';
 import 'package:fard/features/tasbih/domain/tasbih_repository.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,7 +26,11 @@ class TasbihRepositoryImpl implements TasbihRepository {
     final String response = await rootBundle.loadString(
       'assets/tasbih_data.json',
     );
-    final data = await json.decode(response);
+    return compute(_parseTasbihJson, response);
+  }
+
+  static TasbihData _parseTasbihJson(String jsonStr) {
+    final data = json.decode(jsonStr);
     return TasbihData.fromJson(data);
   }
 

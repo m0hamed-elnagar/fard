@@ -126,6 +126,7 @@ void main() {
       child: const MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        locale: Locale('en'),
         home: HomeScreen(),
       ),
     );
@@ -147,6 +148,12 @@ void main() {
   });
 
   testWidgets('HomeScreen shows loaded content', (tester) async {
+    // Set fixed size to avoid overflow/visibility issues in CI
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     final now = DateTime.now();
     when(() => mockPrayerTrackerBloc.state).thenReturn(
       PrayerTrackerState.loaded(
@@ -171,12 +178,14 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
 
-    expect(find.text('Fard'), findsOneWidget);
-    expect(find.text('Total Qada'), findsOneWidget);
+    final l10n = AppLocalizations.of(tester.element(find.byType(HomeScreen)))!;
+
+    expect(find.text(l10n.appName), findsOneWidget);
+    expect(find.text(l10n.totalQada), findsOneWidget);
     expect(find.text('Test City'), findsAtLeast(1));
 
     // Use dragUntilVisible for slivers
-    final dailyPrayersFinder = find.text('Daily Prayers');
+    final dailyPrayersFinder = find.text(l10n.dailyPrayers);
     await tester.dragUntilVisible(
       dailyPrayersFinder,
       find.byType(CustomScrollView),
@@ -186,6 +195,12 @@ void main() {
   });
 
   testWidgets('SalaahTile displays time', (tester) async {
+    // Set fixed size
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     final now = DateTime.now();
     final time = DateTime(now.year, now.month, now.day, 5, 0); // 5:00 AM
 
