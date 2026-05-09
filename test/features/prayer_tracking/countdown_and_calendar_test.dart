@@ -41,6 +41,7 @@ void main() {
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           theme: AppTheme.darkTheme,
           home: Scaffold(
             body: PrayerTimesCard(
@@ -52,7 +53,8 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
 
       // Assert: Widget should have received TODAY's prayer times
       final card = tester.widget<PrayerTimesCard>(find.byType(PrayerTimesCard));
@@ -94,6 +96,7 @@ void main() {
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           theme: AppTheme.darkTheme,
           home: Scaffold(
             body: PrayerTimesCard(
@@ -105,7 +108,8 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
 
       final card = tester.widget<PrayerTimesCard>(find.byType(PrayerTimesCard));
 
@@ -162,7 +166,7 @@ void main() {
       );
 
       // Let the timer run for a moment
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+      await tester.pump(const Duration(seconds: 2));
 
       final card = tester.widget<PrayerTimesCard>(find.byType(PrayerTimesCard));
 

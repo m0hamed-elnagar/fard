@@ -1,3 +1,4 @@
+import 'package:fard/features/prayer_tracking/presentation/widgets/salaah_tile.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
@@ -256,13 +257,17 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // Drag to see SalaahTiles
-    final timeFinder = find.textContaining('5:00');
+    // Drag to see SalaahTiles - use a more specific finder to avoid dashboard duplicates
+    final fajrTileFinder = find.byWidgetPredicate(
+      (widget) => widget is SalaahTile && widget.salaah == Salaah.fajr,
+    );
+    
     await tester.dragUntilVisible(
-      timeFinder,
+      fajrTileFinder,
       find.byType(CustomScrollView),
       const Offset(0, -200),
     );
-    expect(timeFinder, findsAtLeast(1));
+    
+    expect(find.descendant(of: fajrTileFinder, matching: find.textContaining('5:00')), findsAtLeast(1));
   });
 }
