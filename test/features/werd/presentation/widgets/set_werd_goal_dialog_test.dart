@@ -16,14 +16,14 @@ import 'package:mocktail/mocktail.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/presentation/blocs/theme_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/theme_state.dart';
 
 class MockWerdBloc extends MockBloc<WerdEvent, WerdState> implements WerdBloc {}
 
 class MockQuranBloc extends MockBloc<QuranEvent, QuranState> implements QuranBloc {}
 
-class MockSettingsCubit extends MockBloc<dynamic, SettingsState> implements SettingsCubit {}
+class MockThemeCubit extends MockCubit<ThemeState> implements ThemeCubit {}
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 
@@ -32,19 +32,20 @@ class FakeRoute extends Fake implements Route<dynamic> {}
 void main() {
   late MockWerdBloc mockWerdBloc;
   late MockQuranBloc mockQuranBloc;
-  late MockSettingsCubit mockSettingsCubit;
+  late MockThemeCubit mockThemeCubit;
   late MockNavigatorObserver mockNavigatorObserver;
 
   setUp(() {
     mockWerdBloc = MockWerdBloc();
     mockQuranBloc = MockQuranBloc();
-    mockSettingsCubit = MockSettingsCubit();
+    mockThemeCubit = MockThemeCubit();
     mockNavigatorObserver = MockNavigatorObserver();
 
-    // Mock Settings state
-    when(() => mockSettingsCubit.state).thenReturn(
-      SettingsState(locale: const Locale('en')),
+    // Mock Theme state
+    when(() => mockThemeCubit.state).thenReturn(
+      const ThemeState(locale: Locale('en')),
     );
+    when(() => mockThemeCubit.stream).thenAnswer((_) => const Stream.empty());
 
     registerFallbackValue(FakeRoute());
     registerFallbackValue(
@@ -105,9 +106,9 @@ void main() {
   });
 
   Widget createDialogUnderTest({Locale locale = const Locale('en')}) {
-    // Update settings state to match requested locale
-    when(() => mockSettingsCubit.state).thenReturn(
-      SettingsState(locale: locale),
+    // Update theme state to match requested locale
+    when(() => mockThemeCubit.state).thenReturn(
+      ThemeState(locale: locale),
     );
 
     return MaterialApp(
@@ -131,7 +132,7 @@ void main() {
                     providers: [
                       BlocProvider<WerdBloc>.value(value: mockWerdBloc),
                       BlocProvider<QuranBloc>.value(value: mockQuranBloc),
-                      BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
+                      BlocProvider<ThemeCubit>.value(value: mockThemeCubit),
                     ],
                     child: const SetWerdGoalDialog(),
                   ),

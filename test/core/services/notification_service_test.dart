@@ -5,7 +5,7 @@ import 'package:fard/core/services/notification/sound_manager.dart';
 import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/presentation/blocs/theme_state.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -73,7 +73,7 @@ void main() {
     registerFallbackValue(Salaah.fajr);
     registerFallbackValue((NotificationResponse details) {});
     registerFallbackValue(MockFlutterLocalNotificationsPlugin());
-    registerFallbackValue(const SettingsState(locale: Locale('en')));
+    registerFallbackValue(const ThemeState(locale: Locale('en')));
     registerFallbackValue(MockSettingsRepository());
   });
 

@@ -1,8 +1,6 @@
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:fard/features/prayer_tracking/presentation/screens/home_screen.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
 import 'package:fard/features/settings/presentation/blocs/theme_cubit.dart';
@@ -21,9 +19,6 @@ import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/core/services/widget_update_service.dart';
-
-class MockSettingsCubit extends MockCubit<SettingsState>
-    implements SettingsCubit {}
 
 class MockLocationPrayerCubit extends MockCubit<LocationPrayerState>
     implements LocationPrayerCubit {}
@@ -50,7 +45,6 @@ class MockWidgetUpdateService extends Mock implements WidgetUpdateService {
 }
 
 void main() {
-  late MockSettingsCubit mockSettingsCubit;
   late MockLocationPrayerCubit mockLocationPrayerCubit;
   late MockThemeCubit mockThemeCubit;
   late MockDailyRemindersCubit mockDailyRemindersCubit;
@@ -63,7 +57,6 @@ void main() {
   });
 
   setUp(() {
-    mockSettingsCubit = MockSettingsCubit();
     mockLocationPrayerCubit = MockLocationPrayerCubit();
     mockThemeCubit = MockThemeCubit();
     mockDailyRemindersCubit = MockDailyRemindersCubit();
@@ -118,7 +111,6 @@ void main() {
   Widget createWidgetUnderTest() {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
         BlocProvider<LocationPrayerCubit>.value(value: mockLocationPrayerCubit),
         BlocProvider<ThemeCubit>.value(value: mockThemeCubit),
         BlocProvider<DailyRemindersCubit>.value(value: mockDailyRemindersCubit),
@@ -137,12 +129,6 @@ void main() {
     final now = DateTime.now();
     final timeStr =
         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-
-    when(() => mockSettingsCubit.state).thenReturn(
-      const SettingsState(
-        locale: Locale('en'),
-      ),
-    );
 
     when(() => mockDailyRemindersCubit.state).thenReturn(
       DailyRemindersState(
@@ -177,12 +163,6 @@ void main() {
     final now = DateTime.now();
     final timeStr =
         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-
-    when(() => mockSettingsCubit.state).thenReturn(
-      const SettingsState(
-        locale: Locale('en'),
-      ),
-    );
 
     when(() => mockDailyRemindersCubit.state).thenReturn(
       DailyRemindersState(

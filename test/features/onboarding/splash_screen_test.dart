@@ -4,8 +4,6 @@ import 'package:fard/features/audio/domain/services/audio_download_service.dart'
 import 'package:fard/features/onboarding/presentation/screens/splash_screen.dart';
 import 'package:fard/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:fard/features/azkar/presentation/screens/main_navigation_screen.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/audio/presentation/blocs/player/audio_player_bloc.dart';
@@ -36,9 +34,6 @@ import 'package:get_it/get_it.dart';
 import 'package:bloc_test/bloc_test.dart';
 
 class MockSharedPreferences extends Mock implements SharedPreferences {}
-
-class MockSettingsCubit extends MockCubit<SettingsState>
-    implements SettingsCubit {}
 
 class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState>
     implements AzkarBloc {}
@@ -106,7 +101,6 @@ void main() {
   });
 
   late MockSharedPreferences mockPrefs;
-  late MockSettingsCubit mockSettingsCubit;
   late MockAzkarBloc mockAzkarBloc;
   late MockPrayerTrackerBloc mockPrayerTrackerBloc;
   late MockPrayerTimeService mockPrayerTimeService;
@@ -125,8 +119,6 @@ void main() {
 
   setUp(() {
     mockPrefs = MockSharedPreferences();
-    mockSettingsCubit = MockSettingsCubit();
-    when(() => mockSettingsCubit.state).thenReturn(const SettingsState(locale: Locale('en')));
     mockAzkarBloc = MockAzkarBloc();
     mockPrayerTrackerBloc = MockPrayerTrackerBloc();
     mockPrayerTimeService = MockPrayerTimeService();
@@ -172,7 +164,6 @@ void main() {
     when(() => mockNotificationService.canScheduleExactNotifications()).thenAnswer((_) async => true);
     when(() => mockPrayerTimeService.isUpcoming(any(), prayerTimes: any(named: 'prayerTimes'), date: any(named: 'date'))).thenReturn(false);
     when(() => mockPrayerTimeService.isPassed(any(), prayerTimes: any(named: 'prayerTimes'), date: any(named: 'date'))).thenReturn(true);
-    when(() => mockSettingsCubit.getAvailablePresets()).thenReturn([]);
     when(() => mockAzkarBloc.state).thenReturn(AzkarState.initial());
     when(
       () => mockPrayerTrackerBloc.state,
@@ -202,7 +193,6 @@ void main() {
   Widget createWidgetUnderTest() {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
         BlocProvider<AzkarBloc>.value(value: mockAzkarBloc),
         BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
         BlocProvider<ReciterManagerBloc>.value(value: mockReciterManagerBloc),

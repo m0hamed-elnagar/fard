@@ -3,12 +3,14 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/prayer_tracking/presentation/screens/home_screen.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/presentation/blocs/theme_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/theme_state.dart';
 import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
+import 'package:fard/features/settings/presentation/blocs/adhan_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/adhan_state.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_event.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_state.dart';
@@ -28,14 +30,17 @@ class MockPrayerTrackerBloc
     extends MockBloc<PrayerTrackerEvent, PrayerTrackerState>
     implements PrayerTrackerBloc {}
 
-class MockSettingsCubit extends MockCubit<SettingsState>
-    implements SettingsCubit {}
-
 class MockLocationPrayerCubit extends MockCubit<LocationPrayerState>
     implements LocationPrayerCubit {}
 
 class MockDailyRemindersCubit extends MockCubit<DailyRemindersState>
     implements DailyRemindersCubit {}
+
+class MockThemeCubit extends MockCubit<ThemeState>
+    implements ThemeCubit {}
+
+class MockAdhanCubit extends MockCubit<AdhanState>
+    implements AdhanCubit {}
 
 class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState>
     implements AzkarBloc {}
@@ -65,18 +70,20 @@ void main() {
   });
 
   late MockPrayerTrackerBloc mockPrayerTrackerBloc;
-  late MockSettingsCubit mockSettingsCubit;
   late MockLocationPrayerCubit mockLocationPrayerCubit;
   late MockDailyRemindersCubit mockDailyRemindersCubit;
+  late MockThemeCubit mockThemeCubit;
+  late MockAdhanCubit mockAdhanCubit;
   late MockAzkarBloc mockAzkarBloc;
   late MockWerdBloc mockWerdBloc;
   late MockPrayerTimeService mockPrayerTimeService;
 
   setUp(() {
     mockPrayerTrackerBloc = MockPrayerTrackerBloc();
-    mockSettingsCubit = MockSettingsCubit();
     mockLocationPrayerCubit = MockLocationPrayerCubit();
     mockDailyRemindersCubit = MockDailyRemindersCubit();
+    mockThemeCubit = MockThemeCubit();
+    mockAdhanCubit = MockAdhanCubit();
     mockAzkarBloc = MockAzkarBloc();
     mockWerdBloc = MockWerdBloc();
     mockPrayerTimeService = MockPrayerTimeService();
@@ -109,9 +116,10 @@ void main() {
     return MultiBlocProvider(
       providers: [
         BlocProvider<PrayerTrackerBloc>.value(value: mockPrayerTrackerBloc),
-        BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
         BlocProvider<LocationPrayerCubit>.value(value: mockLocationPrayerCubit),
         BlocProvider<DailyRemindersCubit>.value(value: mockDailyRemindersCubit),
+        BlocProvider<ThemeCubit>.value(value: mockThemeCubit),
+        BlocProvider<AdhanCubit>.value(value: mockAdhanCubit),
         BlocProvider<AzkarBloc>.value(value: mockAzkarBloc),
         BlocProvider<WerdBloc>.value(value: mockWerdBloc),
       ],
@@ -127,11 +135,10 @@ void main() {
     when(
       () => mockPrayerTrackerBloc.state,
     ).thenReturn(const PrayerTrackerState.loading());
-    when(
-      () => mockSettingsCubit.state,
-    ).thenReturn(SettingsState(locale: const Locale('en')));
-    when(() => mockLocationPrayerCubit.state).thenReturn(LocationPrayerState());
-    when(() => mockDailyRemindersCubit.state).thenReturn(DailyRemindersState());
+    when(() => mockThemeCubit.state).thenReturn(const ThemeState(locale: Locale('en')));
+    when(() => mockLocationPrayerCubit.state).thenReturn(const LocationPrayerState());
+    when(() => mockDailyRemindersCubit.state).thenReturn(const DailyRemindersState());
+    when(() => mockAdhanCubit.state).thenReturn(const AdhanState());
     when(() => mockAzkarBloc.state).thenReturn(AzkarState.initial());
     when(() => mockWerdBloc.state).thenReturn(WerdState.initial());
 
@@ -152,13 +159,12 @@ void main() {
         history: [],
       ),
     );
-    when(() => mockSettingsCubit.state).thenReturn(
-      SettingsState(locale: const Locale('en'), cityName: 'Test City'),
-    );
+    when(() => mockThemeCubit.state).thenReturn(const ThemeState(locale: Locale('en')));
     when(() => mockLocationPrayerCubit.state).thenReturn(
-      LocationPrayerState(cityName: 'Test City'),
+      const LocationPrayerState(cityName: 'Test City'),
     );
-    when(() => mockDailyRemindersCubit.state).thenReturn(DailyRemindersState());
+    when(() => mockDailyRemindersCubit.state).thenReturn(const DailyRemindersState());
+    when(() => mockAdhanCubit.state).thenReturn(const AdhanState());
     when(() => mockAzkarBloc.state).thenReturn(AzkarState.initial());
     when(() => mockWerdBloc.state).thenReturn(WerdState.initial());
 
@@ -194,18 +200,12 @@ void main() {
         history: [],
       ),
     );
-    when(() => mockSettingsCubit.state).thenReturn(
-      SettingsState(
-        locale: const Locale('en'),
-        cityName: 'Test City',
-        latitude: 10,
-        longitude: 10,
-      ),
-    );
+    when(() => mockThemeCubit.state).thenReturn(const ThemeState(locale: Locale('en')));
     when(() => mockLocationPrayerCubit.state).thenReturn(
-      LocationPrayerState(latitude: 10, longitude: 10, cityName: 'Test City'),
+      const LocationPrayerState(latitude: 10, longitude: 10, cityName: 'Test City'),
     );
-    when(() => mockDailyRemindersCubit.state).thenReturn(DailyRemindersState());
+    when(() => mockDailyRemindersCubit.state).thenReturn(const DailyRemindersState());
+    when(() => mockAdhanCubit.state).thenReturn(const AdhanState());
     when(() => mockAzkarBloc.state).thenReturn(AzkarState.initial());
     when(() => mockWerdBloc.state).thenReturn(WerdState.initial());
 

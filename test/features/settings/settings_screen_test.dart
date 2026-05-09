@@ -10,8 +10,6 @@ import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.
 import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/settings/presentation/blocs/theme_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/theme_state.dart';
 import 'package:fard/features/settings/presentation/screens/settings_screen.dart';
@@ -21,7 +19,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockSettingsCubit extends Mock implements SettingsCubit {}
 class MockLocationPrayerCubit extends Mock implements LocationPrayerCubit {}
 class MockThemeCubit extends Mock implements ThemeCubit {}
 class MockAdhanCubit extends Mock implements AdhanCubit {}
@@ -32,7 +29,6 @@ class MockAzkarBloc extends Mock implements AzkarBloc {}
 class MockWidgetUpdateService extends Mock implements WidgetUpdateService {}
 
 void main() {
-  late MockSettingsCubit mockSettingsCubit;
   late MockLocationPrayerCubit mockLocationPrayerCubit;
   late MockThemeCubit mockThemeCubit;
   late MockAdhanCubit mockAdhanCubit;
@@ -43,7 +39,6 @@ void main() {
   late MockWidgetUpdateService mockWidgetUpdateService;
 
   setUp(() {
-    mockSettingsCubit = MockSettingsCubit();
     mockLocationPrayerCubit = MockLocationPrayerCubit();
     mockThemeCubit = MockThemeCubit();
     mockAdhanCubit = MockAdhanCubit();
@@ -58,7 +53,6 @@ void main() {
     getIt.registerSingleton<NotificationService>(mockNotificationService);
     getIt.registerSingleton<VoiceDownloadService>(mockVoiceDownloadService);
     getIt.registerSingleton<WidgetUpdateService>(mockWidgetUpdateService);
-    getIt.registerSingleton<SettingsCubit>(mockSettingsCubit);
     getIt.registerSingleton<LocationPrayerCubit>(mockLocationPrayerCubit);
     getIt.registerSingleton<ThemeCubit>(mockThemeCubit);
     getIt.registerSingleton<AdhanCubit>(mockAdhanCubit);
@@ -72,10 +66,6 @@ void main() {
     });
     when(() => mockNotificationService.canScheduleExactNotifications()).thenAnswer((_) async => true);
     when(() => mockWidgetUpdateService.getWidgetTheme()).thenAnswer((_) async => null);
-
-    when(() => mockSettingsCubit.getAvailablePresets()).thenReturn(ThemePresets.all);
-    when(() => mockSettingsCubit.state).thenReturn(const SettingsState(locale: Locale('en')));
-    when(() => mockSettingsCubit.stream).thenAnswer((_) => const Stream.empty());
 
     when(() => mockLocationPrayerCubit.state).thenReturn(const LocationPrayerState(
       cityName: 'London',
@@ -102,7 +92,6 @@ void main() {
   Widget createWidgetUnderTest() {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
         BlocProvider<LocationPrayerCubit>.value(value: mockLocationPrayerCubit),
         BlocProvider<ThemeCubit>.value(value: mockThemeCubit),
         BlocProvider<AdhanCubit>.value(value: mockAdhanCubit),

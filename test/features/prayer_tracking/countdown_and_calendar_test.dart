@@ -4,7 +4,6 @@ import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/calendar_widget.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/prayer_times_card.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -14,7 +13,6 @@ import 'package:mocktail/mocktail.dart';
 
 // Mocks
 class MockPrayerTrackerBloc extends Mock implements PrayerTrackerBloc {}
-class MockSettingsCubit extends Mock implements SettingsCubit {}
 class MockWerdBloc extends Mock implements WerdBloc {}
 
 void main() {

@@ -7,8 +7,6 @@ import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/prayer_tracking/domain/prayer_repo.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/salaah_tile.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,15 +23,11 @@ class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
 class MockNotificationService extends Mock implements NotificationService {}
 
-class MockSettingsCubit extends MockCubit<SettingsState>
-    implements SettingsCubit {}
-
 void main() {
   late MockPrayerRepo repo;
   late MockSharedPreferences prefs;
   late MockPrayerTimeService prayerTimeService;
   late MockNotificationService notificationService;
-  late MockSettingsCubit settingsCubit;
 
   final today = DateTime.now();
   final dummyPrayerTimes = PrayerTimes(
@@ -63,21 +57,10 @@ void main() {
     prefs = MockSharedPreferences();
     prayerTimeService = MockPrayerTimeService();
     notificationService = MockNotificationService();
-    settingsCubit = MockSettingsCubit();
 
     getIt.registerSingleton<SharedPreferences>(prefs);
     getIt.registerSingleton<PrayerTimeService>(prayerTimeService);
     getIt.registerSingleton<NotificationService>(notificationService);
-
-    when(() => settingsCubit.state).thenReturn(
-      const SettingsState(
-        locale: Locale('en'),
-        latitude: 30.0,
-        longitude: 31.0,
-        isQadaEnabled: true,
-      ),
-    );
-    when(() => settingsCubit.stream).thenAnswer((_) => const Stream.empty());
 
     when(
       () => prayerTimeService.isPassed(

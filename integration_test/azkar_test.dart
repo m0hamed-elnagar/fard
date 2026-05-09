@@ -44,8 +44,8 @@ void main() {
       await tester.pumpWidget(app.QadaTrackerApp(hivePath: tempDir.path));
       await tester.pumpAndSettle();
 
-      // Tap Azkar tab using Icon (index 1 in NavigationBar)
-      final azkarTabIcon = find.byIcon(Icons.menu_book_outlined);
+      // Tap Azkar tab using Icon (index 2 in NavigationBar)
+      final azkarTabIcon = find.byIcon(Icons.auto_stories_outlined);
       await tester.tap(azkarTabIcon);
       await tester.pumpAndSettle();
 

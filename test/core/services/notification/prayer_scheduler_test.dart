@@ -10,7 +10,7 @@ import 'package:fard/features/settings/domain/azkar_reminder.dart';
 import 'package:fard/features/settings/domain/prayer_reminder_type.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/presentation/blocs/theme_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -68,7 +68,7 @@ void main() {
     registerFallbackValue(DateTimeComponents.time);
     registerFallbackValue(const AndroidNotificationChannel('id', 'name'));
     registerFallbackValue(Salaah.fajr);
-    registerFallbackValue(const SettingsState(locale: Locale('en')));
+    registerFallbackValue(const ThemeState(locale: Locale('en')));
     registerFallbackValue(MockFlutterLocalNotificationsPlugin());
     registerFallbackValue(FakePrayerTimes());
     registerFallbackValue(MockSettingsRepository());

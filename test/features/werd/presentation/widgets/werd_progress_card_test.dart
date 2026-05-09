@@ -13,14 +13,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
 
 class MockWerdBloc extends MockBloc<WerdEvent, WerdState> implements WerdBloc {}
-
-class MockSettingsCubit extends MockBloc<dynamic, SettingsState> implements SettingsCubit {}
 
 class MockDailyRemindersCubit extends MockBloc<dynamic, DailyRemindersState>
     implements DailyRemindersCubit {}
@@ -31,7 +27,6 @@ class FakeRoute extends Fake implements Route<dynamic> {}
 
 void main() {
   late MockWerdBloc mockWerdBloc;
-  late MockSettingsCubit mockSettingsCubit;
   late MockDailyRemindersCubit mockDailyRemindersCubit;
   late MockNavigatorObserver mockNavigatorObserver;
 
@@ -42,26 +37,17 @@ void main() {
 
   setUp(() {
     mockWerdBloc = MockWerdBloc();
-    mockSettingsCubit = MockSettingsCubit();
     mockDailyRemindersCubit = MockDailyRemindersCubit();
     mockNavigatorObserver = MockNavigatorObserver();
     registerFallbackValue(FakeRoute());
 
-    // Mock Settings state
-    when(() => mockSettingsCubit.state).thenReturn(
-      SettingsState(locale: const Locale('en')),
-    );
+    // Mock state
     when(() => mockDailyRemindersCubit.state).thenReturn(
       const DailyRemindersState(),
     );
   });
 
   Widget createWidgetUnderTest({Locale locale = const Locale('en')}) {
-    // Update settings state to match requested locale
-    when(() => mockSettingsCubit.state).thenReturn(
-      SettingsState(locale: locale),
-    );
-
     return MaterialApp(
       locale: locale,
       supportedLocales: const [Locale('en'), Locale('ar')],
@@ -75,7 +61,6 @@ void main() {
         body: MultiBlocProvider(
           providers: [
             BlocProvider<WerdBloc>.value(value: mockWerdBloc),
-            BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
             BlocProvider<DailyRemindersCubit>.value(value: mockDailyRemindersCubit),
           ],
           child: WerdProgressCard(onSetGoalPressed: () {}),

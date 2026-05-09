@@ -7,7 +7,7 @@ import 'package:fard/core/services/voice_download_service.dart';
 import 'package:fard/core/widgets/custom_toggle.dart';
 import 'package:fard/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
+import 'package:fard/features/settings/presentation/blocs/theme_state.dart';
 import 'package:fard/main.dart' as app;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,7 +24,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(Salaah.fajr);
-    registerFallbackValue(const SettingsState(locale: Locale('ar')));
+    registerFallbackValue(const ThemeSt~ate(locale: Locale('ar')));
   });
 
   group('Onboarding Azan Integration Test', () {

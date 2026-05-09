@@ -5,8 +5,6 @@ import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
 import 'package:fard/features/prayer_tracking/domain/missed_counter.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/history_list.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
 import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
@@ -21,9 +19,6 @@ import 'package:bloc_test/bloc_test.dart';
 
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
-class MockSettingsCubit extends MockCubit<SettingsState>
-    implements SettingsCubit {}
-
 class MockLocationPrayerCubit extends MockCubit<LocationPrayerState>
     implements LocationPrayerCubit {}
 
@@ -32,7 +27,6 @@ class MockDailyRemindersCubit extends MockCubit<DailyRemindersState>
 
 void main() {
   late MockPrayerTimeService mockPrayerTimeService;
-  late MockSettingsCubit mockSettingsCubit;
   late MockLocationPrayerCubit mockLocationPrayerCubit;
   late MockDailyRemindersCubit mockDailyRemindersCubit;
 
@@ -43,25 +37,12 @@ void main() {
 
   setUp(() async {
     mockPrayerTimeService = MockPrayerTimeService();
-    mockSettingsCubit = MockSettingsCubit();
     mockLocationPrayerCubit = MockLocationPrayerCubit();
     mockDailyRemindersCubit = MockDailyRemindersCubit();
 
     final getIt = GetIt.instance;
     await getIt.reset();
     getIt.registerSingleton<PrayerTimeService>(mockPrayerTimeService);
-
-    when(() => mockSettingsCubit.state).thenReturn(
-      const SettingsState(
-        locale: Locale('en'),
-        isQadaEnabled: true,
-        latitude: 0,
-        longitude: 0,
-      ),
-    );
-    when(
-      () => mockSettingsCubit.stream,
-    ).thenAnswer((_) => const Stream.empty());
 
     when(() => mockLocationPrayerCubit.state).thenReturn(
       const LocationPrayerState(
@@ -124,7 +105,6 @@ void main() {
       home: Scaffold(
         body: MultiBlocProvider(
           providers: [
-            BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
             BlocProvider<LocationPrayerCubit>.value(value: mockLocationPrayerCubit),
             BlocProvider<DailyRemindersCubit>.value(value: mockDailyRemindersCubit),
           ],

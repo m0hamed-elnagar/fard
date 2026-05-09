@@ -4,14 +4,14 @@ import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/azkar/presentation/screens/azkar_categories_screen.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_cubit.dart';
-import 'package:fard/features/settings/presentation/blocs/settings_state.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
 import 'package:fard/features/settings/presentation/blocs/theme_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/theme_state.dart';
 import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
+import 'package:fard/features/settings/presentation/blocs/adhan_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/adhan_state.dart';
 import 'package:fard/features/settings/presentation/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,9 +21,6 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 
-class MockSettingsCubit extends MockCubit<SettingsState>
-    implements SettingsCubit {}
-
 class MockLocationPrayerCubit extends MockCubit<LocationPrayerState>
     implements LocationPrayerCubit {}
 
@@ -31,6 +28,8 @@ class MockThemeCubit extends MockCubit<ThemeState> implements ThemeCubit {}
 
 class MockDailyRemindersCubit extends MockCubit<DailyRemindersState>
     implements DailyRemindersCubit {}
+
+class MockAdhanCubit extends MockCubit<AdhanState> implements AdhanCubit {}
 
 class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState>
     implements AzkarBloc {}
@@ -58,19 +57,19 @@ void main() {
     registerFallbackValue(Salaah.fajr);
   });
 
-  late MockSettingsCubit mockSettingsCubit;
   late MockLocationPrayerCubit mockLocationPrayerCubit;
   late MockThemeCubit mockThemeCubit;
   late MockDailyRemindersCubit mockDailyRemindersCubit;
+  late MockAdhanCubit mockAdhanCubit;
   late MockAzkarBloc mockAzkarBloc;
   late MockNotificationService mockNotificationService;
   late MockVoiceDownloadService mockVoiceDownloadService;
 
   setUp(() {
-    mockSettingsCubit = MockSettingsCubit();
     mockLocationPrayerCubit = MockLocationPrayerCubit();
     mockThemeCubit = MockThemeCubit();
     mockDailyRemindersCubit = MockDailyRemindersCubit();
+    mockAdhanCubit = MockAdhanCubit();
     mockAzkarBloc = MockAzkarBloc();
     mockNotificationService = MockNotificationService();
     mockVoiceDownloadService = MockVoiceDownloadService();
@@ -88,17 +87,6 @@ void main() {
       () => mockNotificationService.testReminder(any(), any()),
     ).thenAnswer((_) async {});
 
-    when(() => mockSettingsCubit.getAvailablePresets()).thenReturn([]);
-    when(() => mockSettingsCubit.state).thenReturn(
-      const SettingsState(
-        locale: Locale('en'),
-        morningAzkarTime: '05:00',
-        eveningAzkarTime: '18:00',
-        reminders: [],
-        isAzanVoiceDownloading: false,
-      ),
-    );
-
     when(() => mockLocationPrayerCubit.state).thenReturn(
       const LocationPrayerState(),
     );
@@ -110,6 +98,10 @@ void main() {
 
     when(() => mockDailyRemindersCubit.state).thenReturn(
       const DailyRemindersState(),
+    );
+
+    when(() => mockAdhanCubit.state).thenReturn(
+      const AdhanState(),
     );
 
     when(() => mockAzkarBloc.state).thenReturn(
@@ -137,11 +129,11 @@ void main() {
       }
       return MultiBlocProvider(
         providers: [
-          BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
           BlocProvider<AzkarBloc>.value(value: mockAzkarBloc),
           BlocProvider<LocationPrayerCubit>.value(value: mockLocationPrayerCubit),
           BlocProvider<ThemeCubit>.value(value: mockThemeCubit),
           BlocProvider<DailyRemindersCubit>.value(value: mockDailyRemindersCubit),
+          BlocProvider<AdhanCubit>.value(value: mockAdhanCubit),
         ],
         child: const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -200,11 +192,11 @@ void main() {
       }
       return MultiBlocProvider(
         providers: [
-          BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
           BlocProvider<AzkarBloc>.value(value: mockAzkarBloc),
           BlocProvider<LocationPrayerCubit>.value(value: mockLocationPrayerCubit),
           BlocProvider<ThemeCubit>.value(value: mockThemeCubit),
           BlocProvider<DailyRemindersCubit>.value(value: mockDailyRemindersCubit),
+          BlocProvider<AdhanCubit>.value(value: mockAdhanCubit),
         ],
         child: const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
