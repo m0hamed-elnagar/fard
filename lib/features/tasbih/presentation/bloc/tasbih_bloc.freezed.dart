@@ -760,7 +760,7 @@ as int,
 /// @nodoc
 mixin _$TasbihState {
 
- TasbihData get data; TasbihCategory get currentCategory; CompletionDua? get currentCompletionDua; int get totalCount; int get currentCycleCount; int get currentCycleIndex; bool get showCompletionDua; bool get isLoading; String? get error; bool get duaRemembered; int? get customTasbihTarget;
+ TasbihData get data; TasbihCategory get currentCategory; CompletionDua? get currentCompletionDua; int get totalCount; int get currentCycleCount; int get currentCycleIndex; Map<String, int> get itemProgress; bool get showCompletionDua; bool get isLoading; String? get error; bool get duaRemembered; int? get customTasbihTarget;
 /// Create a copy of TasbihState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -771,16 +771,16 @@ $TasbihStateCopyWith<TasbihState> get copyWith => _$TasbihStateCopyWithImpl<Tasb
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TasbihState&&(identical(other.data, data) || other.data == data)&&(identical(other.currentCategory, currentCategory) || other.currentCategory == currentCategory)&&(identical(other.currentCompletionDua, currentCompletionDua) || other.currentCompletionDua == currentCompletionDua)&&(identical(other.totalCount, totalCount) || other.totalCount == totalCount)&&(identical(other.currentCycleCount, currentCycleCount) || other.currentCycleCount == currentCycleCount)&&(identical(other.currentCycleIndex, currentCycleIndex) || other.currentCycleIndex == currentCycleIndex)&&(identical(other.showCompletionDua, showCompletionDua) || other.showCompletionDua == showCompletionDua)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error)&&(identical(other.duaRemembered, duaRemembered) || other.duaRemembered == duaRemembered)&&(identical(other.customTasbihTarget, customTasbihTarget) || other.customTasbihTarget == customTasbihTarget));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TasbihState&&(identical(other.data, data) || other.data == data)&&(identical(other.currentCategory, currentCategory) || other.currentCategory == currentCategory)&&(identical(other.currentCompletionDua, currentCompletionDua) || other.currentCompletionDua == currentCompletionDua)&&(identical(other.totalCount, totalCount) || other.totalCount == totalCount)&&(identical(other.currentCycleCount, currentCycleCount) || other.currentCycleCount == currentCycleCount)&&(identical(other.currentCycleIndex, currentCycleIndex) || other.currentCycleIndex == currentCycleIndex)&&const DeepCollectionEquality().equals(other.itemProgress, itemProgress)&&(identical(other.showCompletionDua, showCompletionDua) || other.showCompletionDua == showCompletionDua)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error)&&(identical(other.duaRemembered, duaRemembered) || other.duaRemembered == duaRemembered)&&(identical(other.customTasbihTarget, customTasbihTarget) || other.customTasbihTarget == customTasbihTarget));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,data,currentCategory,currentCompletionDua,totalCount,currentCycleCount,currentCycleIndex,showCompletionDua,isLoading,error,duaRemembered,customTasbihTarget);
+int get hashCode => Object.hash(runtimeType,data,currentCategory,currentCompletionDua,totalCount,currentCycleCount,currentCycleIndex,const DeepCollectionEquality().hash(itemProgress),showCompletionDua,isLoading,error,duaRemembered,customTasbihTarget);
 
 @override
 String toString() {
-  return 'TasbihState(data: $data, currentCategory: $currentCategory, currentCompletionDua: $currentCompletionDua, totalCount: $totalCount, currentCycleCount: $currentCycleCount, currentCycleIndex: $currentCycleIndex, showCompletionDua: $showCompletionDua, isLoading: $isLoading, error: $error, duaRemembered: $duaRemembered, customTasbihTarget: $customTasbihTarget)';
+  return 'TasbihState(data: $data, currentCategory: $currentCategory, currentCompletionDua: $currentCompletionDua, totalCount: $totalCount, currentCycleCount: $currentCycleCount, currentCycleIndex: $currentCycleIndex, itemProgress: $itemProgress, showCompletionDua: $showCompletionDua, isLoading: $isLoading, error: $error, duaRemembered: $duaRemembered, customTasbihTarget: $customTasbihTarget)';
 }
 
 
@@ -791,7 +791,7 @@ abstract mixin class $TasbihStateCopyWith<$Res>  {
   factory $TasbihStateCopyWith(TasbihState value, $Res Function(TasbihState) _then) = _$TasbihStateCopyWithImpl;
 @useResult
 $Res call({
- TasbihData data, TasbihCategory currentCategory, CompletionDua? currentCompletionDua, int totalCount, int currentCycleCount, int currentCycleIndex, bool showCompletionDua, bool isLoading, String? error, bool duaRemembered, int? customTasbihTarget
+ TasbihData data, TasbihCategory currentCategory, CompletionDua? currentCompletionDua, int totalCount, int currentCycleCount, int currentCycleIndex, Map<String, int> itemProgress, bool showCompletionDua, bool isLoading, String? error, bool duaRemembered, int? customTasbihTarget
 });
 
 
@@ -808,7 +808,7 @@ class _$TasbihStateCopyWithImpl<$Res>
 
 /// Create a copy of TasbihState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? data = null,Object? currentCategory = null,Object? currentCompletionDua = freezed,Object? totalCount = null,Object? currentCycleCount = null,Object? currentCycleIndex = null,Object? showCompletionDua = null,Object? isLoading = null,Object? error = freezed,Object? duaRemembered = null,Object? customTasbihTarget = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? data = null,Object? currentCategory = null,Object? currentCompletionDua = freezed,Object? totalCount = null,Object? currentCycleCount = null,Object? currentCycleIndex = null,Object? itemProgress = null,Object? showCompletionDua = null,Object? isLoading = null,Object? error = freezed,Object? duaRemembered = null,Object? customTasbihTarget = freezed,}) {
   return _then(_self.copyWith(
 data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
 as TasbihData,currentCategory: null == currentCategory ? _self.currentCategory : currentCategory // ignore: cast_nullable_to_non_nullable
@@ -816,7 +816,8 @@ as TasbihCategory,currentCompletionDua: freezed == currentCompletionDua ? _self.
 as CompletionDua?,totalCount: null == totalCount ? _self.totalCount : totalCount // ignore: cast_nullable_to_non_nullable
 as int,currentCycleCount: null == currentCycleCount ? _self.currentCycleCount : currentCycleCount // ignore: cast_nullable_to_non_nullable
 as int,currentCycleIndex: null == currentCycleIndex ? _self.currentCycleIndex : currentCycleIndex // ignore: cast_nullable_to_non_nullable
-as int,showCompletionDua: null == showCompletionDua ? _self.showCompletionDua : showCompletionDua // ignore: cast_nullable_to_non_nullable
+as int,itemProgress: null == itemProgress ? _self.itemProgress : itemProgress // ignore: cast_nullable_to_non_nullable
+as Map<String, int>,showCompletionDua: null == showCompletionDua ? _self.showCompletionDua : showCompletionDua // ignore: cast_nullable_to_non_nullable
 as bool,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,duaRemembered: null == duaRemembered ? _self.duaRemembered : duaRemembered // ignore: cast_nullable_to_non_nullable
@@ -933,10 +934,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( TasbihData data,  TasbihCategory currentCategory,  CompletionDua? currentCompletionDua,  int totalCount,  int currentCycleCount,  int currentCycleIndex,  bool showCompletionDua,  bool isLoading,  String? error,  bool duaRemembered,  int? customTasbihTarget)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( TasbihData data,  TasbihCategory currentCategory,  CompletionDua? currentCompletionDua,  int totalCount,  int currentCycleCount,  int currentCycleIndex,  Map<String, int> itemProgress,  bool showCompletionDua,  bool isLoading,  String? error,  bool duaRemembered,  int? customTasbihTarget)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TasbihState() when $default != null:
-return $default(_that.data,_that.currentCategory,_that.currentCompletionDua,_that.totalCount,_that.currentCycleCount,_that.currentCycleIndex,_that.showCompletionDua,_that.isLoading,_that.error,_that.duaRemembered,_that.customTasbihTarget);case _:
+return $default(_that.data,_that.currentCategory,_that.currentCompletionDua,_that.totalCount,_that.currentCycleCount,_that.currentCycleIndex,_that.itemProgress,_that.showCompletionDua,_that.isLoading,_that.error,_that.duaRemembered,_that.customTasbihTarget);case _:
   return orElse();
 
 }
@@ -954,10 +955,10 @@ return $default(_that.data,_that.currentCategory,_that.currentCompletionDua,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( TasbihData data,  TasbihCategory currentCategory,  CompletionDua? currentCompletionDua,  int totalCount,  int currentCycleCount,  int currentCycleIndex,  bool showCompletionDua,  bool isLoading,  String? error,  bool duaRemembered,  int? customTasbihTarget)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( TasbihData data,  TasbihCategory currentCategory,  CompletionDua? currentCompletionDua,  int totalCount,  int currentCycleCount,  int currentCycleIndex,  Map<String, int> itemProgress,  bool showCompletionDua,  bool isLoading,  String? error,  bool duaRemembered,  int? customTasbihTarget)  $default,) {final _that = this;
 switch (_that) {
 case _TasbihState():
-return $default(_that.data,_that.currentCategory,_that.currentCompletionDua,_that.totalCount,_that.currentCycleCount,_that.currentCycleIndex,_that.showCompletionDua,_that.isLoading,_that.error,_that.duaRemembered,_that.customTasbihTarget);}
+return $default(_that.data,_that.currentCategory,_that.currentCompletionDua,_that.totalCount,_that.currentCycleCount,_that.currentCycleIndex,_that.itemProgress,_that.showCompletionDua,_that.isLoading,_that.error,_that.duaRemembered,_that.customTasbihTarget);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -971,10 +972,10 @@ return $default(_that.data,_that.currentCategory,_that.currentCompletionDua,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( TasbihData data,  TasbihCategory currentCategory,  CompletionDua? currentCompletionDua,  int totalCount,  int currentCycleCount,  int currentCycleIndex,  bool showCompletionDua,  bool isLoading,  String? error,  bool duaRemembered,  int? customTasbihTarget)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( TasbihData data,  TasbihCategory currentCategory,  CompletionDua? currentCompletionDua,  int totalCount,  int currentCycleCount,  int currentCycleIndex,  Map<String, int> itemProgress,  bool showCompletionDua,  bool isLoading,  String? error,  bool duaRemembered,  int? customTasbihTarget)?  $default,) {final _that = this;
 switch (_that) {
 case _TasbihState() when $default != null:
-return $default(_that.data,_that.currentCategory,_that.currentCompletionDua,_that.totalCount,_that.currentCycleCount,_that.currentCycleIndex,_that.showCompletionDua,_that.isLoading,_that.error,_that.duaRemembered,_that.customTasbihTarget);case _:
+return $default(_that.data,_that.currentCategory,_that.currentCompletionDua,_that.totalCount,_that.currentCycleCount,_that.currentCycleIndex,_that.itemProgress,_that.showCompletionDua,_that.isLoading,_that.error,_that.duaRemembered,_that.customTasbihTarget);case _:
   return null;
 
 }
@@ -986,7 +987,7 @@ return $default(_that.data,_that.currentCategory,_that.currentCompletionDua,_tha
 
 
 class _TasbihState implements TasbihState {
-  const _TasbihState({required this.data, required this.currentCategory, this.currentCompletionDua, this.totalCount = 0, this.currentCycleCount = 0, this.currentCycleIndex = 0, this.showCompletionDua = false, this.isLoading = false, this.error, this.duaRemembered = false, this.customTasbihTarget});
+  const _TasbihState({required this.data, required this.currentCategory, this.currentCompletionDua, this.totalCount = 0, this.currentCycleCount = 0, this.currentCycleIndex = 0, final  Map<String, int> itemProgress = const {}, this.showCompletionDua = false, this.isLoading = false, this.error, this.duaRemembered = false, this.customTasbihTarget}): _itemProgress = itemProgress;
   
 
 @override final  TasbihData data;
@@ -995,6 +996,13 @@ class _TasbihState implements TasbihState {
 @override@JsonKey() final  int totalCount;
 @override@JsonKey() final  int currentCycleCount;
 @override@JsonKey() final  int currentCycleIndex;
+ final  Map<String, int> _itemProgress;
+@override@JsonKey() Map<String, int> get itemProgress {
+  if (_itemProgress is EqualUnmodifiableMapView) return _itemProgress;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_itemProgress);
+}
+
 @override@JsonKey() final  bool showCompletionDua;
 @override@JsonKey() final  bool isLoading;
 @override final  String? error;
@@ -1011,16 +1019,16 @@ _$TasbihStateCopyWith<_TasbihState> get copyWith => __$TasbihStateCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TasbihState&&(identical(other.data, data) || other.data == data)&&(identical(other.currentCategory, currentCategory) || other.currentCategory == currentCategory)&&(identical(other.currentCompletionDua, currentCompletionDua) || other.currentCompletionDua == currentCompletionDua)&&(identical(other.totalCount, totalCount) || other.totalCount == totalCount)&&(identical(other.currentCycleCount, currentCycleCount) || other.currentCycleCount == currentCycleCount)&&(identical(other.currentCycleIndex, currentCycleIndex) || other.currentCycleIndex == currentCycleIndex)&&(identical(other.showCompletionDua, showCompletionDua) || other.showCompletionDua == showCompletionDua)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error)&&(identical(other.duaRemembered, duaRemembered) || other.duaRemembered == duaRemembered)&&(identical(other.customTasbihTarget, customTasbihTarget) || other.customTasbihTarget == customTasbihTarget));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TasbihState&&(identical(other.data, data) || other.data == data)&&(identical(other.currentCategory, currentCategory) || other.currentCategory == currentCategory)&&(identical(other.currentCompletionDua, currentCompletionDua) || other.currentCompletionDua == currentCompletionDua)&&(identical(other.totalCount, totalCount) || other.totalCount == totalCount)&&(identical(other.currentCycleCount, currentCycleCount) || other.currentCycleCount == currentCycleCount)&&(identical(other.currentCycleIndex, currentCycleIndex) || other.currentCycleIndex == currentCycleIndex)&&const DeepCollectionEquality().equals(other._itemProgress, _itemProgress)&&(identical(other.showCompletionDua, showCompletionDua) || other.showCompletionDua == showCompletionDua)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error)&&(identical(other.duaRemembered, duaRemembered) || other.duaRemembered == duaRemembered)&&(identical(other.customTasbihTarget, customTasbihTarget) || other.customTasbihTarget == customTasbihTarget));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,data,currentCategory,currentCompletionDua,totalCount,currentCycleCount,currentCycleIndex,showCompletionDua,isLoading,error,duaRemembered,customTasbihTarget);
+int get hashCode => Object.hash(runtimeType,data,currentCategory,currentCompletionDua,totalCount,currentCycleCount,currentCycleIndex,const DeepCollectionEquality().hash(_itemProgress),showCompletionDua,isLoading,error,duaRemembered,customTasbihTarget);
 
 @override
 String toString() {
-  return 'TasbihState(data: $data, currentCategory: $currentCategory, currentCompletionDua: $currentCompletionDua, totalCount: $totalCount, currentCycleCount: $currentCycleCount, currentCycleIndex: $currentCycleIndex, showCompletionDua: $showCompletionDua, isLoading: $isLoading, error: $error, duaRemembered: $duaRemembered, customTasbihTarget: $customTasbihTarget)';
+  return 'TasbihState(data: $data, currentCategory: $currentCategory, currentCompletionDua: $currentCompletionDua, totalCount: $totalCount, currentCycleCount: $currentCycleCount, currentCycleIndex: $currentCycleIndex, itemProgress: $itemProgress, showCompletionDua: $showCompletionDua, isLoading: $isLoading, error: $error, duaRemembered: $duaRemembered, customTasbihTarget: $customTasbihTarget)';
 }
 
 
@@ -1031,7 +1039,7 @@ abstract mixin class _$TasbihStateCopyWith<$Res> implements $TasbihStateCopyWith
   factory _$TasbihStateCopyWith(_TasbihState value, $Res Function(_TasbihState) _then) = __$TasbihStateCopyWithImpl;
 @override @useResult
 $Res call({
- TasbihData data, TasbihCategory currentCategory, CompletionDua? currentCompletionDua, int totalCount, int currentCycleCount, int currentCycleIndex, bool showCompletionDua, bool isLoading, String? error, bool duaRemembered, int? customTasbihTarget
+ TasbihData data, TasbihCategory currentCategory, CompletionDua? currentCompletionDua, int totalCount, int currentCycleCount, int currentCycleIndex, Map<String, int> itemProgress, bool showCompletionDua, bool isLoading, String? error, bool duaRemembered, int? customTasbihTarget
 });
 
 
@@ -1048,7 +1056,7 @@ class __$TasbihStateCopyWithImpl<$Res>
 
 /// Create a copy of TasbihState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? data = null,Object? currentCategory = null,Object? currentCompletionDua = freezed,Object? totalCount = null,Object? currentCycleCount = null,Object? currentCycleIndex = null,Object? showCompletionDua = null,Object? isLoading = null,Object? error = freezed,Object? duaRemembered = null,Object? customTasbihTarget = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? data = null,Object? currentCategory = null,Object? currentCompletionDua = freezed,Object? totalCount = null,Object? currentCycleCount = null,Object? currentCycleIndex = null,Object? itemProgress = null,Object? showCompletionDua = null,Object? isLoading = null,Object? error = freezed,Object? duaRemembered = null,Object? customTasbihTarget = freezed,}) {
   return _then(_TasbihState(
 data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
 as TasbihData,currentCategory: null == currentCategory ? _self.currentCategory : currentCategory // ignore: cast_nullable_to_non_nullable
@@ -1056,7 +1064,8 @@ as TasbihCategory,currentCompletionDua: freezed == currentCompletionDua ? _self.
 as CompletionDua?,totalCount: null == totalCount ? _self.totalCount : totalCount // ignore: cast_nullable_to_non_nullable
 as int,currentCycleCount: null == currentCycleCount ? _self.currentCycleCount : currentCycleCount // ignore: cast_nullable_to_non_nullable
 as int,currentCycleIndex: null == currentCycleIndex ? _self.currentCycleIndex : currentCycleIndex // ignore: cast_nullable_to_non_nullable
-as int,showCompletionDua: null == showCompletionDua ? _self.showCompletionDua : showCompletionDua // ignore: cast_nullable_to_non_nullable
+as int,itemProgress: null == itemProgress ? _self._itemProgress : itemProgress // ignore: cast_nullable_to_non_nullable
+as Map<String, int>,showCompletionDua: null == showCompletionDua ? _self.showCompletionDua : showCompletionDua // ignore: cast_nullable_to_non_nullable
 as bool,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,duaRemembered: null == duaRemembered ? _self.duaRemembered : duaRemembered // ignore: cast_nullable_to_non_nullable

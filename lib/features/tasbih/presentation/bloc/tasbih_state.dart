@@ -9,6 +9,7 @@ sealed class TasbihState with _$TasbihState {
     @Default(0) int totalCount,
     @Default(0) int currentCycleCount,
     @Default(0) int currentCycleIndex,
+    @Default({}) Map<String, int> itemProgress,
     @Default(false) bool showCompletionDua,
     @Default(false) bool isLoading,
     String? error,

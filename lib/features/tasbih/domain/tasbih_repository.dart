@@ -5,6 +5,8 @@ abstract class TasbihRepository {
   Future<void> saveSettings(TasbihSettings settings);
   Future<int> getSessionProgress(String categoryId);
   Future<void> saveSessionProgress(String categoryId, int progress);
+  Future<int> getItemProgress(String categoryId, String itemId);
+  Future<void> saveItemProgress(String categoryId, String itemId, int progress);
   Future<void> incrementHistory(String dhikrId);
   Future<Map<String, int>> getHistory();
   Future<String?> getPreferredCompletionDuaId(String categoryId);

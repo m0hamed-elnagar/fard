@@ -6,6 +6,7 @@
 - [x] Refactor Tasbih to use PageView for horizontal manual scrolling.
 - [x] Implement auto-scroll in Tasbih (both Rotating and Individual modes).
 - [x] Add static navigation arrows to Tasbih.
+- [x] Fix Tasbih manual navigation sync and auto-scroll direction weirdness.
 - [x] Verify both features with integration tests.
 
 ## Phase 1: Pre-Refactoring Testing & Scoping

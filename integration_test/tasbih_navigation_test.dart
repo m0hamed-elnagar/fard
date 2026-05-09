@@ -81,5 +81,56 @@ void main() {
       // Should have auto-scrolled to Alhamdulillah
       expect(find.text('ٱلْحَمْدُ لِلَّٰهِ'), findsOneWidget);
     });
+
+    testWidgets('Tasbih Progress Memory across items', (tester) async {
+      await tester.pumpWidget(app.QadaTrackerApp(hivePath: tempDir.path));
+      await tester.pumpAndSettle();
+
+      // Tap Tasbih tab
+      await tester.tap(find.byIcon(Icons.touch_app_outlined));
+      await tester.pumpAndSettle();
+
+      // We should be on index 0 (SubhanAllah)
+      expect(find.text('سُبْحَانَ ٱللَّٰهِ'), findsOneWidget);
+
+      final tapButton = find.byType(TasbihButton);
+      
+      // Tap 5 times on index 0
+      for (int i = 0; i < 5; i++) {
+        await tester.tap(tapButton);
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+      expect(find.text('5'), findsOneWidget);
+
+      // Navigate to index 1 (Alhamdulillah) using the arrow
+      await tester.tap(find.byIcon(Icons.arrow_forward_ios_rounded));
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+      // Should be on index 1 with 0 count
+      expect(find.text('ٱلْحَمْدُ لِلَّٰهِ'), findsOneWidget);
+      expect(find.text('0'), findsOneWidget);
+
+      // Tap 10 times on index 1
+      for (int i = 0; i < 10; i++) {
+        await tester.tap(tapButton);
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+      expect(find.text('10'), findsOneWidget);
+
+      // Navigate back to index 0 (SubhanAllah) using the arrow
+      await tester.tap(find.byIcon(Icons.arrow_back_ios_rounded));
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+      // Should REMEMBER 5 for index 0!
+      expect(find.text('سُبْحَانَ ٱللَّٰهِ'), findsOneWidget);
+      expect(find.text('5'), findsOneWidget);
+
+      // Navigate to index 1 again
+      await tester.tap(find.byIcon(Icons.arrow_forward_ios_rounded));
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+      // Should REMEMBER 10 for index 1!
+      expect(find.text('10'), findsOneWidget);
+    });
   });
 }

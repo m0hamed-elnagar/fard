@@ -45,6 +45,20 @@ class TasbihRepositoryImpl implements TasbihRepository {
   }
 
   @override
+  Future<int> getItemProgress(String categoryId, String itemId) async {
+    return _progressBox.get('${categoryId}_$itemId', defaultValue: 0) ?? 0;
+  }
+
+  @override
+  Future<void> saveItemProgress(
+    String categoryId,
+    String itemId,
+    int progress,
+  ) async {
+    await _progressBox.put('${categoryId}_$itemId', progress);
+  }
+
+  @override
   Future<void> incrementHistory(String dhikrId) async {
     final current = _historyBox.get(dhikrId, defaultValue: 0) ?? 0;
     await _historyBox.put(dhikrId, current + 1);

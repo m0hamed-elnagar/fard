@@ -275,6 +275,11 @@ class FakeTasbihRepository implements TasbihRepository {
   @override
   Future<void> saveSessionProgress(String categoryId, int progress) async {}
   @override
+  Future<int> getItemProgress(String categoryId, String itemId) async => 0;
+  @override
+  Future<void> saveItemProgress(
+      String categoryId, String itemId, int progress) async {}
+  @override
   Future<void> incrementHistory(String dhikrId) async {}
   @override
   Future<String?> getPreferredCompletionDuaId(String categoryId) async => null;

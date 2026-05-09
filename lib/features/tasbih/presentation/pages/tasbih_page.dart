@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
@@ -8,6 +9,7 @@ import 'package:fard/features/tasbih/presentation/widgets/completion_dua_card.da
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:vibration/vibration.dart';
 
 class TasbihPage extends StatelessWidget {
   const TasbihPage({super.key});
@@ -32,6 +34,7 @@ class TasbihView extends StatefulWidget {
 class _TasbihViewState extends State<TasbihView> {
   final ScrollController _scrollController = ScrollController();
   late PageController _pageController;
+  final Set<int> _completedInSession = {};
 
   @override
   void initState() {
@@ -52,6 +55,47 @@ class _TasbihViewState extends State<TasbihView> {
 
     return BlocConsumer<TasbihBloc, TasbihState>(
       listener: (context, state) {
+        if (state.currentCycleCount == 0) {
+          _completedInSession.remove(state.currentCycleIndex);
+        }
+
+        final isRotating = state.currentCategory.sequenceMode == 'rotating';
+        final currentDhikr = state.currentCategory.items.isNotEmpty
+            ? state.currentCategory.items[state.currentCycleIndex.clamp(
+                0,
+                state.currentCategory.items.length - 1,
+              )]
+            : null;
+        final targetCount =
+            state.customTasbihTarget ??
+            (isRotating
+                ? state.currentCategory.countsPerCycle
+                : (currentDhikr?.targetCount ?? 33));
+
+        final isCompleted = state.currentCycleCount >= targetCount;
+        final currentIndex = state.currentCycleIndex;
+
+        if (isCompleted && !_completedInSession.contains(currentIndex)) {
+          _completedInSession.add(currentIndex);
+
+          // Vibration on completion (heavy)
+          if (state.data.settings.hapticFeedback && !Platform.isWindows) {
+            Vibration.vibrate(duration: 100, amplitude: 255);
+          }
+
+          // Auto-scroll to next if available
+          if (currentIndex < state.currentCategory.items.length - 1) {
+            Future.delayed(const Duration(milliseconds: 600), () {
+              if (mounted && _pageController.hasClients) {
+                _pageController.nextPage(
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeInOut,
+                );
+              }
+            });
+          }
+        }
+
         if (_pageController.hasClients &&
             _pageController.page?.round() != state.currentCycleIndex) {
           _pageController.animateToPage(
@@ -119,6 +163,10 @@ class _TasbihViewState extends State<TasbihView> {
                             )]
                           : null;
 
+                      final itemCount = currentDhikr != null
+                          ? (state.itemProgress[currentDhikr.id] ?? 0)
+                          : 0;
+
                       return SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         child: ConstrainedBox(
@@ -169,7 +217,7 @@ class _TasbihViewState extends State<TasbihView> {
                                         alignment: Alignment.center,
                                         children: [
                                           CounterCircle(
-                                            count: state.currentCycleCount,
+                                            count: itemCount,
                                             targetCount:
                                                 state.customTasbihTarget ??
                                                 (state.currentCategory.sequenceMode ==
@@ -326,7 +374,10 @@ class _TasbihViewState extends State<TasbihView> {
       children: [
         IconButton(
           icon: const Icon(Icons.refresh_rounded, size: 36),
-          onPressed: () => _confirmReset(context),
+          onPressed: () {
+            setState(() => _completedInSession.remove(state.currentCycleIndex));
+            _confirmReset(context);
+          },
           color: context.onSurfaceVariantColor,
         ),
         TasbihButton(

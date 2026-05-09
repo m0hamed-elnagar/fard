@@ -30,14 +30,31 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
   }
 
   Future<void> _onChangeItem(_ChangeItem event, Emitter<TasbihState> emit) async {
-    // In rotating mode, changing item changes currentCycleIndex
-    // In individual mode, this might not apply the same way, but let's implement it
-    // based on index-based category navigation.
-    emit(state.copyWith(
-      currentCycleIndex: event.newIndex,
-      currentCycleCount: 0, // Reset count for the new item?
-      showCompletionDua: false,
-    ));
+    final item = state.currentCategory.items.isNotEmpty
+        ? state.currentCategory.items[event.newIndex.clamp(0, state.currentCategory.items.length - 1)]
+        : null;
+
+    final currentItemCount = item != null ? (state.itemProgress[item.id] ?? 0) : 0;
+
+    if (state.currentCategory.sequenceMode == 'rotating') {
+      // In rotating mode, we still want to keep totalCount somewhat synced for the completion trigger
+      // but the immediate count should come from the item itself if we want to "remember"
+      final newTotalCount = event.newIndex * state.currentCategory.countsPerCycle + currentItemCount;
+      
+      emit(state.copyWith(
+        currentCycleIndex: event.newIndex,
+        totalCount: newTotalCount,
+        currentCycleCount: currentItemCount,
+        showCompletionDua: false,
+      ));
+      await _repository.saveSessionProgress(state.currentCategory.id, newTotalCount);
+    } else {
+      emit(state.copyWith(
+        currentCycleIndex: event.newIndex,
+        currentCycleCount: currentItemCount,
+        showCompletionDua: false,
+      ));
+    }
   }
 
   Future<void> _onLoadData(_LoadData event, Emitter<TasbihState> emit) async {
@@ -60,6 +77,22 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
         preferredDuaId,
       );
 
+      // Load progress for all items in the category
+      final Map<String, int> itemProgress = {};
+      for (final item in defaultCategory.items) {
+        itemProgress[item.id] = await _repository.getItemProgress(
+          defaultCategory.id,
+          item.id,
+        );
+      }
+
+      final cycleIndex = progress == 0 ? 0 : (progress - 1) ~/ defaultCategory.countsPerCycle;
+      final currentItem = defaultCategory.items.isNotEmpty 
+          ? defaultCategory.items[cycleIndex.clamp(0, defaultCategory.items.length - 1)]
+          : null;
+      
+      final currentCount = currentItem != null ? (itemProgress[currentItem.id] ?? 0) : 0;
+
       emit(
         state.copyWith(
           isLoading: false,
@@ -67,12 +100,9 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
           currentCategory: defaultCategory,
           currentCompletionDua: currentDua,
           totalCount: progress,
-          currentCycleCount: progress == 0
-              ? 0
-              : (progress - 1) % defaultCategory.countsPerCycle + 1,
-          currentCycleIndex: progress == 0
-              ? 0
-              : (progress - 1) ~/ defaultCategory.countsPerCycle,
+          itemProgress: itemProgress,
+          currentCycleCount: currentCount,
+          currentCycleIndex: cycleIndex.clamp(0, defaultCategory.items.length - 1),
           customTasbihTarget: data.settings.customTasbihTarget,
         ),
       );
@@ -112,23 +142,33 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
       preferredDuaId,
     );
 
+    // Load progress for all items
+    final Map<String, int> itemProgress = {};
+    for (final item in category.items) {
+      itemProgress[item.id] = await _repository.getItemProgress(
+        category.id,
+        item.id,
+      );
+    }
+
+    final cycleIndex = progress == 0 ? 0 : (progress - 1) ~/ category.countsPerCycle;
+    final currentItem = category.items.isNotEmpty 
+        ? category.items[cycleIndex.clamp(0, category.items.length - 1)]
+        : null;
+    
+    final currentCount = currentItem != null ? (itemProgress[currentItem.id] ?? 0) : 0;
+
     emit(
       state.copyWith(
         currentCategory: category,
         currentCompletionDua: currentDua,
         totalCount: progress,
-        currentCycleCount: progress == 0
-            ? 0
-            : (progress - 1) % category.countsPerCycle + 1,
-        currentCycleIndex: progress == 0
-            ? 0
-            : (progress - 1) ~/ category.countsPerCycle,
+        itemProgress: itemProgress,
+        currentCycleCount: currentCount,
+        currentCycleIndex: cycleIndex.clamp(0, category.items.length - 1),
         showCompletionDua: false,
         duaRemembered: false,
-        customTasbihTarget: state
-            .data
-            .settings
-            .customTasbihTarget, // Keep the custom target across categories
+        customTasbihTarget: state.data.settings.customTasbihTarget,
       ),
     );
   }
@@ -139,24 +179,32 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
       return;
     }
 
+    final currentDhikr = state.currentCategory.items.isNotEmpty
+        ? state.currentCategory.items[state.currentCycleIndex.clamp(
+            0,
+            state.currentCategory.items.length - 1,
+          )]
+        : null;
+
+    if (currentDhikr == null) return;
+
+    final nextItemCount = (state.itemProgress[currentDhikr.id] ?? 0) + 1;
     final nextTotalCount = state.totalCount + 1;
 
+    final newItemProgress = Map<String, int>.from(state.itemProgress);
+    newItemProgress[currentDhikr.id] = nextItemCount;
+
     if (state.currentCategory.sequenceMode == 'rotating') {
-      final countsPerCycle = state.currentCategory.countsPerCycle;
       final completionTrigger = state.currentCategory.completionTrigger;
 
       if (nextTotalCount > completionTrigger) {
         emit(state.copyWith(showCompletionDua: true));
       } else {
-        // Advance index at countsPerCycle
-        final nextCycleCount = nextTotalCount % countsPerCycle;
-        final nextCycleIndex = nextTotalCount ~/ countsPerCycle;
-
         emit(
           state.copyWith(
             totalCount: nextTotalCount,
-            currentCycleCount: nextCycleCount,
-            currentCycleIndex: nextCycleIndex.clamp(0, state.currentCategory.items.length - 1),
+            currentCycleCount: nextItemCount,
+            itemProgress: newItemProgress,
           ),
         );
 
@@ -165,19 +213,11 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
         }
       }
     } else {
-      // Individual mode - each item can have its own target count
-      final currentDhikr = state.currentCategory.items.isNotEmpty
-          ? state.currentCategory.items[state.currentCycleIndex.clamp(
-              0,
-              state.currentCategory.items.length - 1,
-            )]
-          : null;
-
+      // Individual mode
       final targetCount =
-          state.customTasbihTarget ??
-          (currentDhikr != null ? currentDhikr.targetCount : 33);
+          state.customTasbihTarget ?? currentDhikr.targetCount;
 
-      if (nextTotalCount >= targetCount) {
+      if (nextItemCount >= targetCount) {
         // Current item completed
         final isLastItem =
             state.currentCycleIndex >= state.currentCategory.items.length - 1;
@@ -186,19 +226,20 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
           emit(
             state.copyWith(
               totalCount: nextTotalCount,
-              currentCycleCount: nextTotalCount,
+              currentCycleCount: nextItemCount,
+              itemProgress: newItemProgress,
               showCompletionDua:
                   state.currentCategory.allowCompletionDua ||
                   state.currentCompletionDua != null,
             ),
           );
         } else {
-          // Auto-advance to next item in individual mode
+          // Hold state on completion, let UI handle auto-advance
           emit(
             state.copyWith(
-              totalCount: 0, // Reset for next item
-              currentCycleCount: 0,
-              currentCycleIndex: state.currentCycleIndex + 1,
+              totalCount: nextTotalCount,
+              currentCycleCount: targetCount, // Cap for display
+              itemProgress: newItemProgress,
             ),
           );
         }
@@ -206,28 +247,26 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
         emit(
           state.copyWith(
             totalCount: nextTotalCount,
-            currentCycleCount: nextTotalCount,
+            currentCycleCount: nextItemCount,
+            itemProgress: newItemProgress,
           ),
         );
       }
     }
 
+    // Persist changes
+    await _repository.saveItemProgress(
+      state.currentCategory.id,
+      currentDhikr.id,
+      nextItemCount,
+    );
+    
     await _repository.saveSessionProgress(
       state.currentCategory.id,
       state.totalCount,
     );
 
-    if (state.currentCategory.items.isNotEmpty) {
-      final itemIndex = state.currentCategory.sequenceMode == 'rotating'
-          ? state.currentCycleIndex.clamp(
-              0,
-              state.currentCategory.items.length - 1,
-            )
-          : 0;
-      await _repository.incrementHistory(
-        state.currentCategory.items[itemIndex].id,
-      );
-    }
+    await _repository.incrementHistory(currentDhikr.id);
 
     if (state.data.settings.hapticFeedback && !Platform.isWindows) {
       Vibration.vibrate(duration: 50);
@@ -236,11 +275,19 @@ class TasbihBloc extends Bloc<TasbihEvent, TasbihState> {
 
   Future<void> _onReset(_Reset event, Emitter<TasbihState> emit) async {
     await _repository.saveSessionProgress(state.currentCategory.id, 0);
+    
+    final Map<String, int> newItemProgress = Map.from(state.itemProgress);
+    for (final item in state.currentCategory.items) {
+      newItemProgress[item.id] = 0;
+      await _repository.saveItemProgress(state.currentCategory.id, item.id, 0);
+    }
+
     emit(
       state.copyWith(
         totalCount: 0,
         currentCycleCount: 0,
         currentCycleIndex: 0,
+        itemProgress: newItemProgress,
         showCompletionDua: false,
         duaRemembered: false,
       ),
