@@ -61,14 +61,6 @@ class _GeneralSectionState extends State<GeneralSection> {
           },
         ),
         const Divider(height: 1),
-        _buildActionTile(
-          context,
-          title: l10n.language,
-          subtitle: l10n.languageDesc,
-          icon: Icons.language_rounded,
-          onTap: () => _showLanguagePicker(context),
-        ),
-        const Divider(height: 1),
         ListTile(
           contentPadding: EdgeInsets.zero,
           leading: Icon(Icons.info_outline_rounded,
@@ -185,37 +177,6 @@ class _GeneralSectionState extends State<GeneralSection> {
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
       subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
       onTap: onTap,
-    );
-  }
-
-  void _showLanguagePicker(BuildContext context) {
-    // This will be implemented in ThemeCubit or a dedicated LanguageCubit
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: const Text('العربية', textAlign: TextAlign.center),
-              onTap: () {
-                // context.read<ThemeCubit>().updateLocale('ar');
-                Navigator.pop(context);
-              },
-            ),
-            const Divider(height: 1),
-            ListTile(
-              title: const Text('English', textAlign: TextAlign.center),
-              onTap: () {
-                // context.read<ThemeCubit>().updateLocale('en');
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-      ),
     );
   }
 

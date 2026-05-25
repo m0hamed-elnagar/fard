@@ -17,7 +17,7 @@ class RemindersSettingsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          l10n.remindersNotifications,
+          l10n.azanSettings,
           style: GoogleFonts.amiri(fontWeight: FontWeight.bold, fontSize: 24),
         ),
         backgroundColor: Colors.transparent,

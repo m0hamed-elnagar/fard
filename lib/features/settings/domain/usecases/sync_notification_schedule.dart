@@ -14,14 +14,22 @@ import '../../../azkar/data/azkar_source.dart';
 class SyncNotificationSchedule {
   final NotificationService _notificationService;
   final IAzkarSource _azkarRepository;
+  bool _isSyncing = false;
 
   SyncNotificationSchedule(this._notificationService, this._azkarRepository);
 
   /// Schedules both prayer notifications and azkar reminders.
   Future<void> execute() async {
-    final azkar = await _azkarRepository.getAllAzkar();
-    await _notificationService.scheduleAzkarReminders(allAzkar: azkar);
-    await _notificationService.schedulePrayerNotifications();
+    if (_isSyncing) return;
+    _isSyncing = true;
+    try {
+      await _notificationService.ensureInitialized();
+      final azkar = await _azkarRepository.getAllAzkar();
+      await _notificationService.scheduleAzkarReminders(allAzkar: azkar);
+      await _notificationService.schedulePrayerNotifications();
+    } finally {
+      _isSyncing = false;
+    }
   }
 
   /// Initializes reminders with a small delay to avoid blocking the main thread.

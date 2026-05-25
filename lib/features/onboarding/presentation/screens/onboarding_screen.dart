@@ -366,23 +366,55 @@ class _AzanSelectionPage extends StatelessWidget {
                   cubit.updateAllAzanSound(null);
                   return;
                 }
-                onDownloadingChanged(true);
-                final downloader = getIt<VoiceDownloadService>();
-                final path = await downloader.downloadAzan(val);
-                if (path != null) {
-                  cubit.updateAllAzanSound(path);
+                
+                try {
+                  onDownloadingChanged(true);
+                  final downloader = getIt<VoiceDownloadService>();
+                  final path = await downloader.downloadAzan(val);
+                  
+                  if (path != null) {
+                    cubit.updateAllAzanSound(val);
+                  } else {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(l10n.azanDownloadError),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  }
+                } catch (e) {
+                  debugPrint('Onboarding: Error selecting azan: $e');
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('حدث خطأ أثناء تحميل الأذان'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                } finally {
+                  onDownloadingChanged(false);
                 }
-                onDownloadingChanged(false);
               },
             ),
             const SizedBox(height: 16.0),
             TextButton.icon(
               onPressed: isDownloading
                   ? null
-                  : () => getIt<NotificationService>().testAzan(
-                      Salaah.fajr,
-                      currentSound,
-                    ),
+                  : () async {
+                      final ns = getIt<NotificationService>();
+                      if (!await ns.requestPermissions()) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(l10n.errorOccurred)),
+                          );
+                        }
+                        return;
+                      }
+                      await ns.testAzan(Salaah.fajr, currentSound);
+                    },
               icon: const Icon(Icons.play_circle_filled_rounded),
               label: Text(l10n.testAzan),
               style: TextButton.styleFrom(foregroundColor: AppTheme.accent),
@@ -395,10 +427,16 @@ class _AzanSelectionPage extends StatelessWidget {
 
   String? _getDisplayName(String? path) {
     if (path == null || path == 'default') return null;
+    
+    // Check if it's already a key
+    if (VoiceDownloadService.azanVoices.containsKey(path)) return path;
+    
+    // Fallback: Resolve key from path (for backward compatibility)
     final fileName = path.split(Platform.isWindows ? '\\' : '/').last;
     for (var entry in VoiceDownloadService.azanVoices.entries) {
       final uri = Uri.parse(entry.value);
-      if (fileName == 'voice_${uri.pathSegments.last}') {
+      if (fileName == 'voice_${uri.pathSegments.last}' || 
+          path.contains(entry.key.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_'))) {
         return entry.key;
       }
     }

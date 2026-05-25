@@ -20,6 +20,7 @@ import 'settings_storage.dart';
 @LazySingleton(as: SettingsRepository)
 class SettingsRepositoryImpl implements SettingsRepository {
   final SettingsStorage _storage;
+  List<SalaahSettings>? _salaahSettingsCache;
 
   SettingsRepositoryImpl(this._storage) {
     _performMigration();
@@ -70,6 +71,8 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   List<SalaahSettings> get salaahSettings {
+    if (_salaahSettingsCache != null) return _salaahSettingsCache!;
+
     final defaults = Salaah.values
         .map((s) => SalaahSettings(salaah: s))
         .toList();
@@ -77,7 +80,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
       SettingsKeys.salaahSettings,
       (json) => SalaahSettings.fromJson(json),
     );
-    return list.isEmpty ? defaults : list;
+    
+    _salaahSettingsCache = list.isEmpty ? defaults : list;
+    return _salaahSettingsCache!;
   }
 
   @override
@@ -327,6 +332,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Future<void> updateSalaahSettings(List<SalaahSettings> settings) async {
+    _salaahSettingsCache = settings;
     await _storage.writeJsonList<SalaahSettings>(
       SettingsKeys.salaahSettings,
       settings,

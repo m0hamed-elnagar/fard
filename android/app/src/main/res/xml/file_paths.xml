@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <external-files-path name="external_azan" path="azan_sounds" />
+    <!-- Map the 'notifications' folder in getFilesDir() -->
+    <files-path name="app_notifications" path="Notifications/" />
+    <!-- Legacy/Fallback roots -->
     <files-path name="app_azan" path="." />
+    <external-files-path name="external_azan" path="azan_sounds" />
 </paths>

@@ -258,8 +258,9 @@ void callbackDispatcher() {
 
     try {
       if (task == _backgroundTaskKey || task == _widgetTaskKey) {
-        // 1. Initialize Bindings
+        // 1. Initialize Bindings and Identifiers
         WidgetsFlutterBinding.ensureInitialized();
+        await AppIdentifiers.initialize();
 
         // 2. Initialize Timezone
         tz.initializeTimeZones();

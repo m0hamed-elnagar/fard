@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import androidx.glance.appwidget.updateAll
+import androidx.core.content.FileProvider
 import com.qada.fard.prayer.CalculationContract
 import com.qada.fard.prayer.PrayerAlarmManager
 import com.qada.fard.prayer.PrayerTimesCalculator
@@ -19,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class MainActivity : AudioServiceActivity() {
     private val TAG = "MainActivity"
@@ -176,6 +178,52 @@ class MainActivity : AudioServiceActivity() {
                             Log.e(TAG, "Error clearing widget theme: $e")
                             result.error("THEME_ERROR", e.message, null)
                         }
+                    }
+                }
+                "grantUriPermission" -> {
+                    val uriString = call.argument<String>("uri")
+                    if (uriString != null) {
+                        try {
+                            val uri = android.net.Uri.parse(uriString)
+                            // Grant permission to system packages
+                            grantUriPermission("com.android.systemui", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            grantUriPermission("android", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            result.success(true)
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error granting URI permission: $e")
+                            result.error("URI_ERROR", e.message, null)
+                        }
+                    } else {
+                        result.error("INVALID_ARGS", "URI is null", null)
+                    }
+                }
+                "getNotificationSoundUri" -> {
+                    val filePath = call.argument<String>("filePath")
+                    if (filePath != null) {
+                        val file = File(filePath)
+                        if (file.exists()) {
+                            try {
+                                val authority = "${context.packageName}.fileprovider"
+                                val uri = FileProvider.getUriForFile(context, authority, file)
+                                
+                                // Grant permissions explicitly to system UI and Android system server
+                                // We use both FLAG_GRANT_READ_URI_PERMISSION and FLAG_GRANT_PERSISTABLE_URI_PERMISSION if possible
+                                val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                context.grantUriPermission("com.android.systemui", uri, flags)
+                                context.grantUriPermission("android", uri, flags)
+                                context.grantUriPermission("com.google.android.deskclock", uri, flags) // Some devices use this for alarms
+                                
+                                Log.d(TAG, "getNotificationSoundUri: Resolved URI and granted permissions for $filePath: $uri")
+                                result.success(uri.toString())
+                            } catch (e: Exception) {
+                                Log.e(TAG, "getNotificationSoundUri error", e)
+                                result.error("URI_ERROR", e.message, null)
+                            }
+                        } else {
+                            result.error("FILE_NOT_FOUND", "File does not exist: $filePath", null)
+                        }
+                    } else {
+                        result.error("INVALID_ARGUMENT", "File path is null", null)
                     }
                 }
                 else -> {

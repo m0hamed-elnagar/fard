@@ -31,6 +31,7 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
         final cubit = context.read<AdhanCubit>();
         final bool allAzanEnabled = state.salaahSettings.every((s) => s.isAzanEnabled);
         final String? commonVoice = _getCommonVoice(state.salaahSettings);
+        final bool notificationsDisabled = !state.notificationsEnabled || !state.exactAlarmsEnabled;
 
         return _buildSection(
           context,
@@ -38,13 +39,59 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
           icon: Icons.volume_up_rounded,
           accentColor: context.primaryColor,
           children: [
+            if (notificationsDisabled)
+              Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 20),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            l10n.notificationsRequiredDesc,
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () async {
+                          final granted = await checkAndRequestNotificationPermissions(context);
+                          if (granted) {
+                            cubit.refreshPermissions();
+                          }
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.orange,
+                          side: const BorderSide(color: Colors.orange),
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                        ),
+                        child: Text(l10n.enable),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             _buildToggleItem(
               title: l10n.enableAzan,
               value: allAzanEnabled,
               onChanged: (val) async {
-                if (val) {
+                if (val && notificationsDisabled) {
+                  if (!context.mounted) return;
                   final granted = await checkAndRequestNotificationPermissions(context);
                   if (!granted) return;
+                  cubit.refreshPermissions();
                 }
                 cubit.updateAllAzanEnabled(val);
               },
@@ -59,10 +106,29 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
                 child: TextButton.icon(
                   onPressed: _isDownloading
                       ? null
-                      : () => getIt<NotificationService>().testAzan(
+                      : () async {
+                          final granted = await checkAndRequestNotificationPermissions(context);
+                          if (!granted) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(l10n.notificationsRequiredDesc),
+                                  behavior: SnackBarBehavior.floating,
+                                  action: SnackBarAction(
+                                    label: l10n.enable,
+                                    onPressed: () => getIt<NotificationService>().openNotificationSettings(),
+                                  ),
+                                ),
+                              );
+                            }
+                            return;
+                          }
+
+                          getIt<NotificationService>().testAzan(
                             Salaah.fajr,
                             commonVoice,
-                          ),
+                          );
+                        },
                   icon: const Icon(Icons.play_arrow_rounded),
                   label: Text(l10n.testAzan),
                   style: TextButton.styleFrom(foregroundColor: context.secondaryColor),
@@ -214,16 +280,43 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
           onChanged(null);
           return;
         }
-        final downloader = getIt<VoiceDownloadService>();
-        if (!(await downloader.isDownloaded(val))) {
-          setState(() => _isDownloading = true);
-          final path = await downloader.downloadAzan(val);
-          setState(() => _isDownloading = false);
-          if (path != null) {
-            onChanged(await downloader.getAccessiblePath(val));
+        
+        try {
+          final downloader = getIt<VoiceDownloadService>();
+          if (!(await downloader.isDownloaded(val))) {
+            if (!mounted) return;
+            setState(() => _isDownloading = true);
+            final path = await downloader.downloadAzan(val);
+            
+            if (path != null) {
+              onChanged(val);
+            } else {
+              if (mounted && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(l10n.azanDownloadError),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
+            }
+          } else {
+            onChanged(val);
           }
-        } else {
-          onChanged(await downloader.getAccessiblePath(val));
+        } catch (e) {
+          debugPrint('AdhanSection: Error selecting azan: $e');
+          if (mounted && context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('حدث خطأ أثناء تحميل الأذان'),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        } finally {
+          if (mounted) {
+            setState(() => _isDownloading = false);
+          }
         }
       },
     );

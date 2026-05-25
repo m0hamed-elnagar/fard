@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:fard/features/azkar/domain/azkar_item.dart';
 import 'package:fard/features/azkar/presentation/screens/azkar_list_screen.dart';
@@ -30,6 +31,8 @@ class NotificationService {
   final SharedPreferences _prefs;
   final GlobalKey<NavigatorState> _navigatorKey;
 
+  final Completer<void> _initCompleter = Completer<void>();
+
   NotificationService(
     this._soundManager,
     this._channelManager,
@@ -41,6 +44,9 @@ class NotificationService {
     this._navigatorKey,
   );
 
+  /// Waits until the service is fully initialized.
+  Future<void> ensureInitialized() => _initCompleter.future;
+
   static const String reminderChannelId = ChannelManager.reminderChannelId;
   static const String testAzanChannelId = 'azan_test_channel';
   static String get downloadChannelId => AppIdentifiers.downloadChannelId;
@@ -51,6 +57,7 @@ class NotificationService {
   }
 
   Future<void> init() async {
+    if (_initCompleter.isCompleted) return;
     debugPrint('NotificationService: init starting');
 
     try {
@@ -103,57 +110,60 @@ class NotificationService {
 
       tz.setLocalLocation(tz.getLocation(timeZoneName));
       debugPrint('Local timezone set to: $timeZoneName');
-    } catch (e) {
-      debugPrint('Could not set local timezone location: $e');
-      tz.setLocalLocation(tz.getLocation('UTC'));
-    }
 
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+      const AndroidInitializationSettings initializationSettingsAndroid =
+          AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const DarwinInitializationSettings initializationSettingsDarwin =
-        DarwinInitializationSettings(
-          requestAlertPermission: true,
-          requestBadgePermission: true,
-          requestSoundPermission: true,
-        );
+      const DarwinInitializationSettings initializationSettingsDarwin =
+          DarwinInitializationSettings(
+            requestAlertPermission: true,
+            requestBadgePermission: true,
+            requestSoundPermission: true,
+          );
 
-    final initializationSettingsWindows = WindowsInitializationSettings(
-      appName: 'Fard',
-      appUserModelId: AppIdentifiers.windowsAppUserModelId,
-      guid: 'f0c0f0f0-0f0f-0f0f-0f0f-0f0f0f0f0f0f',
-    );
+      final initializationSettingsWindows = WindowsInitializationSettings(
+        appName: 'Fard',
+        appUserModelId: AppIdentifiers.windowsAppUserModelId,
+        guid: 'f0c0f0f0-0f0f-0f0f-0f0f-0f0f0f0f0f0f',
+      );
 
-    final initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsDarwin,
-      windows: initializationSettingsWindows,
-    );
+      final initializationSettings = InitializationSettings(
+        android: initializationSettingsAndroid,
+        iOS: initializationSettingsDarwin,
+        windows: initializationSettingsWindows,
+      );
 
-    debugPrint('NotificationService: initializing plugin...');
-    await _notificationsPlugin.initialize(
-      settings: initializationSettings,
-      onDidReceiveNotificationResponse: (details) {
-        if (details.payload != null) {
-          if (_navigatorKey.currentState != null) {
-            if (details.payload!.startsWith('category:')) {
-              final category = details.payload!.replaceFirst('category:', '');
-              _navigatorKey.currentState!.push(
-                MaterialPageRoute(
-                  builder: (_) => AzkarListScreen(category: category),
-                ),
-              );
+      debugPrint('NotificationService: initializing plugin...');
+      await _notificationsPlugin.initialize(
+        settings: initializationSettings,
+        onDidReceiveNotificationResponse: (details) {
+          if (details.payload != null) {
+            if (_navigatorKey.currentState != null) {
+              if (details.payload!.startsWith('category:')) {
+                final category = details.payload!.replaceFirst('category:', '');
+                _navigatorKey.currentState!.push(
+                  MaterialPageRoute(
+                    builder: (_) => AzkarListScreen(category: category),
+                  ),
+                );
+              }
             }
           }
-        }
-      },
-    );
+        },
+      );
 
-    // Create notification channels for Android initially
-    if (Platform.isAndroid) {
-      await _channelManager.createNotificationChannels(_notificationsPlugin);
+      // Create notification channels for Android initially
+      if (Platform.isAndroid) {
+        await _channelManager.createNotificationChannels(_notificationsPlugin);
+      }
+    } catch (e) {
+      debugPrint('NotificationService initialization error: $e');
+    } finally {
+      if (!_initCompleter.isCompleted) {
+        _initCompleter.complete();
+      }
+      debugPrint('NotificationService: init complete');
     }
-    debugPrint('NotificationService: init complete');
   }
 
   /// Request only basic notification permissions.
@@ -267,15 +277,35 @@ class NotificationService {
   }
 
   Future<void> testAzan(Salaah salaah, String? sound) async {
+    // 1. Check permissions first
+    final bool enabled = await areNotificationsEnabled();
+    final bool canSchedule = await canScheduleExactNotifications();
+    
+    if (!enabled || !canSchedule) {
+      debugPrint('testAzan: Permissions missing. Enabled: $enabled, CanSchedule: $canSchedule');
+      // The UI handles user feedback for missing permissions.
+    }
+
     final String salaahName = _getSalaahName(salaah);
     final String soundPath = sound ?? 'default';
+    
+    // Delete any old test channels to prevent Android from restoring cached sound configurations
+    final androidPlugin = _notificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    if (androidPlugin != null) {
+      final channels = await androidPlugin.getNotificationChannels();
+      for (final channel in channels ?? []) {
+        if (channel.id.startsWith('azan_test_')) {
+          await androidPlugin.deleteNotificationChannel(channelId: channel.id);
+        }
+      }
+    }
 
-    // Use a more stable but still unique-ish channel ID for testing to allow sound updates
-    final String soundHash = soundPath.hashCode.abs().toString().substring(
-      0,
-      4,
-    );
-    final String channelId = 'azan_test_channel_$soundHash';
+    // Use a completely unique channel ID for each test to bypass the Android channel cache bug.
+    // Since we delete old ones above, this won't leak channels.
+    final String channelId = 'azan_test_${DateTime.now().millisecondsSinceEpoch}';
 
     debugPrint('Testing Azan with channel: $channelId, sound: $soundPath');
 
@@ -289,9 +319,7 @@ class NotificationService {
 
     // Small delay to ensure channel is ready
     await Future.delayed(const Duration(milliseconds: 600));
-    final String? soundUri = await _soundManager.getSoundUriForChannel(
-      soundPath,
-    );
+    final String? soundUri = await _soundManager.getSoundUriForChannel(soundPath);
 
     String diagnosticInfo = '';
     if (soundUri != null && soundUri.startsWith('content:')) {
@@ -303,9 +331,12 @@ class NotificationService {
       if (soundUri != null) {
         notificationSound = UriAndroidNotificationSound(soundUri);
       } else {
-        notificationSound = RawResourceAndroidNotificationSound(
-          soundPath.split('.').first,
-        );
+        // Fallback for raw resources
+        if (!soundPath.contains('/') && !soundPath.contains('\\')) {
+          final resourceName = soundPath.split('.').first;
+          notificationSound = RawResourceAndroidNotificationSound(resourceName);
+          diagnosticInfo = '\nمحاولة استخدام مورد داخلي: $resourceName';
+        }
       }
     }
 
@@ -321,6 +352,7 @@ class NotificationService {
           playSound: true,
           sound: notificationSound,
           groupKey: groupKey,
+          fullScreenIntent: false,
         );
 
     await _notificationsPlugin.show(

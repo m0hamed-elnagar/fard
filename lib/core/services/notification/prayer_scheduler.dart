@@ -532,6 +532,8 @@ class PrayerNotificationScheduler {
       soundPath,
     );
 
+    debugPrint('Scheduling Azan for ${salaah.name} at $scheduledDate with sound: $soundPath');
+
     // ensureChannelExists already checks if it exists, but it's good to keep it deterministic
     await _channelManager.ensureChannelExists(
       notificationsPlugin,

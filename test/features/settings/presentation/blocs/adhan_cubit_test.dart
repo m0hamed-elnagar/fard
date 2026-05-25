@@ -1,23 +1,39 @@
+import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
 import 'package:fard/features/settings/presentation/blocs/adhan_cubit.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
 import 'package:fard/features/settings/domain/usecases/sync_notification_schedule.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
+import 'package:fard/core/di/injection.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockSettingsRepository extends Mock implements SettingsRepository {}
 class MockSyncNotificationSchedule extends Mock implements SyncNotificationSchedule {}
+class MockNotificationService extends Mock implements NotificationService {}
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late AdhanCubit cubit;
   late MockSettingsRepository mockRepo;
   late MockSyncNotificationSchedule mockSyncNotif;
+  late MockNotificationService mockNotifService;
+
+  setUpAll(() {
+    registerFallbackValue(AudioQuality.low64);
+  });
 
   setUp(() {
     mockRepo = MockSettingsRepository();
     mockSyncNotif = MockSyncNotificationSchedule();
+    mockNotifService = MockNotificationService();
+
+    if (getIt.isRegistered<NotificationService>()) {
+      getIt.unregister<NotificationService>();
+    }
+    getIt.registerSingleton<NotificationService>(mockNotifService);
 
     final initialSalaahSettings = Salaah.values.map((s) => SalaahSettings(salaah: s)).toList();
     when(() => mockRepo.salaahSettings).thenReturn(initialSalaahSettings);
@@ -30,6 +46,9 @@ void main() {
     when(() => mockRepo.updateAllAzanEnabled(any())).thenAnswer((_) async {});
     when(() => mockRepo.updateAllAzanSound(any())).thenAnswer((_) async {});
     when(() => mockSyncNotif.execute()).thenAnswer((_) async {});
+    
+    when(() => mockNotifService.areNotificationsEnabled()).thenAnswer((_) async => true);
+    when(() => mockNotifService.canScheduleExactNotifications()).thenAnswer((_) async => true);
 
     cubit = AdhanCubit(
       mockRepo,

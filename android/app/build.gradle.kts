@@ -66,7 +66,6 @@ android {
             manifestPlaceholders["appLabel"] = "fard"
         }
         debug {
-            applicationIdSuffix = ".debug1"
             manifestPlaceholders["appLabel"] = "fard (Debug)"
         }
         // Build type for generating baseline profiles

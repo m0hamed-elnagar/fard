@@ -7,10 +7,14 @@ plugins {
 allprojects {
     repositories {
         google()
-
-
-
         mavenCentral()
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            force("androidx.glance:glance-appwidget:1.2.0-rc01")
+            force("androidx.glance:glance-material3:1.2.0-rc01")
+        }
     }
 }
 

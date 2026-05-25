@@ -130,8 +130,14 @@ class WidgetUpdateService {
       
       await _syncNative(jsonData);
       
-      await HomeWidget.updateWidget(name: 'PrayerWidget', androidName: 'PrayerWidget');
-      await HomeWidget.updateWidget(name: 'NextPrayerCountdownWidget', androidName: 'NextPrayerCountdownWidget');
+      await HomeWidget.updateWidget(
+        name: 'PrayerWidget',
+        androidName: 'PrayerWidgetReceiver',
+      );
+      await HomeWidget.updateWidget(
+        name: 'NextPrayerCountdownWidget',
+        androidName: 'NextPrayerCountdownWidgetReceiver',
+      );
     } catch (e) {
       debugPrint('WidgetUpdateService: Error during update: $e');
     }

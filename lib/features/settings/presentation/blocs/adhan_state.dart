@@ -11,5 +11,7 @@ sealed class AdhanState with _$AdhanState {
     @Default(AudioQuality.low64) AudioQuality audioQuality,
     @Default(false) bool isAudioPlayerExpanded,
     @Default(false) bool isAzanVoiceDownloading,
+    @Default(true) bool notificationsEnabled,
+    @Default(true) bool exactAlarmsEnabled,
   }) = _AdhanState;
 }

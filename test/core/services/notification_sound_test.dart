@@ -65,6 +65,13 @@ void main() {
         .thenAnswer((_) async => true);
 
     when(
+      () => mockAndroidPlugin.areNotificationsEnabled(),
+    ).thenAnswer((_) async => true);
+    when(
+      () => mockAndroidPlugin.canScheduleExactNotifications(),
+    ).thenAnswer((_) async => true);
+
+    when(
       () => mockNotificationsPlugin
           .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/di/injection.dart';
+import '../../../../core/services/notification_service.dart';
 import '../../../audio/domain/repositories/audio_repository.dart';
 import '../../domain/repositories/settings_repository.dart';
 import '../../domain/salaah_settings.dart';
@@ -9,7 +11,7 @@ import '../../domain/usecases/sync_notification_schedule.dart';
 import 'adhan_state.dart';
 
 @injectable
-class AdhanCubit extends Cubit<AdhanState> {
+class AdhanCubit extends Cubit<AdhanState> with WidgetsBindingObserver {
   final SettingsRepository _repo;
   final SyncNotificationSchedule _syncNotif;
 
@@ -22,7 +24,33 @@ class AdhanCubit extends Cubit<AdhanState> {
             audioQuality: _repo.audioQuality,
             isAudioPlayerExpanded: _repo.isAudioPlayerExpanded,
           ),
-        );
+        ) {
+    WidgetsBinding.instance.addObserver(this);
+    refreshPermissions();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      refreshPermissions();
+    }
+  }
+
+  Future<void> refreshPermissions() async {
+    final ns = getIt<NotificationService>();
+    final notifications = await ns.areNotificationsEnabled();
+    final exactAlarms = await ns.canScheduleExactNotifications();
+    emit(state.copyWith(
+      notificationsEnabled: notifications,
+      exactAlarmsEnabled: exactAlarms,
+    ));
+  }
+
+  @override
+  Future<void> close() {
+    WidgetsBinding.instance.removeObserver(this);
+    return super.close();
+  }
 
   void updateAudioPlayerExpanded(bool expanded) {
     _updateAudioPlayerExpandedAsync(expanded);
@@ -64,8 +92,9 @@ class AdhanCubit extends Cubit<AdhanState> {
   }
 
   Future<void> _updateAllAzanEnabledAsync(bool v) async {
-    await _repo.updateAllAzanEnabled(v);
-    emit(state.copyWith(salaahSettings: _repo.salaahSettings));
+    final newList = state.salaahSettings.map((s) => s.copyWith(isAzanEnabled: v)).toList();
+    await _repo.updateSalaahSettings(newList);
+    emit(state.copyWith(salaahSettings: newList));
     _sync();
   }
 
@@ -74,8 +103,9 @@ class AdhanCubit extends Cubit<AdhanState> {
   }
 
   Future<void> _updateAllAzanSoundAsync(String? v) async {
-    await _repo.updateAllAzanSound(v);
-    emit(state.copyWith(salaahSettings: _repo.salaahSettings));
+    final newList = state.salaahSettings.map((s) => s.copyWith(azanSound: v)).toList();
+    await _repo.updateSalaahSettings(newList);
+    emit(state.copyWith(salaahSettings: newList));
     _sync();
   }
 

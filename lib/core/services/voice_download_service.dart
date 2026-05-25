@@ -10,6 +10,7 @@ import 'package:fard/core/utils/file_download_utils.dart';
 @singleton
 class VoiceDownloadService {
   final DownloadManifestService _manifestService;
+  final http.Client _client = http.Client();
 
   VoiceDownloadService(this._manifestService);
 
@@ -17,7 +18,7 @@ class VoiceDownloadService {
     'Abdul Basit - عبد الباسط':
         'https://www.ayouby.com/multimedia/Call_of_Prayer/Athan_AB.mp3',
     'Mishary Rashid Alafasy - مشاري العفاسي':
-        'https://www.islamcan.com/audio/adhan/azan7.mp3',
+        'https://media.assabile.com/media/adhan/mishary-rashid-alafasy/mishary-rashid-alafasy-1.mp3',
     'Ali Ahmed Mala (Madinah) - علي أحمد ملا':
         'https://www.islamcan.com/audio/adhan/azan20.mp3',
     'Muhammad Siddiq Al-Minshawi - محمد صديق المنشاوي':
@@ -25,7 +26,7 @@ class VoiceDownloadService {
     'Al-Aqsa Mosque (Palestine) - المسجد الأقصى':
         'https://www.islamcan.com/audio/adhan/azan2.mp3',
     'Turkish Style Adhan - أذان تركي':
-        'https://www.islamcan.com/audio/adhan/azan3.mp3',
+        'https://aladhan.com/storage/audio/mustafa_ozcan/1.mp3',
     'Makkah Haram (Beautiful) - مكة المكرمة':
         'https://www.islamcan.com/audio/adhan/azan10.mp3',
     'Bosnian Style Adhan - أذان البوسنة':
@@ -47,11 +48,11 @@ class VoiceDownloadService {
     'Makkah Haram (Old Style) - الحرم المكي':
         'https://www.islamcan.com/audio/adhan/azan8.mp3',
     'Mahmoud Khalil Al-Husary - محمود خليل الحصري':
-        'https://download.islamway.net/quran3/10/adhan.mp3',
+        'https://media.assabile.com/media/adhan/mahmoud-khalil-al-hussary/mahmoud-khalil-al-hussary-1.mp3',
     'Mansour Al-Salimi - منصور السالمي':
-        'https://download.tvquran.com/download/Adhan/Mansour-Al-Salimi.mp3',
+        'https://archive.org/download/adhan_202102/Mansour%20Al-Salimi.mp3',
     'Wadii Al-Yamani - وديع اليمني':
-        'https://media.sd.ma/assabile/adhan_3435370/091fa01b11f4.mp3',
+        'https://archive.org/download/adhan_202102/Wadih%20Al-Yamani.mp3',
   };
 
   String _getFileName(String voiceName) {
@@ -93,20 +94,41 @@ class VoiceDownloadService {
       final finalPath = '${directory.path}/$fileName';
       final file = File(finalPath);
       
-      final Map<String, String> headers = {};
-      int startByte = 0;
+      final Map<String, String> headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        'Accept': 'audio/mpeg,audio/*;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Connection': 'keep-alive',
+      };
       
+      int startByte = 0;
       if (await file.exists() && entry.downloadedBytes > 0) {
         startByte = await file.length();
-        if (startByte > 0) {
+        if (startByte > 0 && startByte < entry.expectedSize) {
           headers['Range'] = 'bytes=$startByte-';
         }
       }
 
-      // Use a client that follows redirects
-      final response = await http
-          .get(Uri.parse(url), headers: headers)
-          .timeout(const Duration(seconds: 45));
+      http.Response response;
+      int retryCount = 0;
+      const maxRetries = 2;
+
+      while (true) {
+        try {
+          response = await _client
+              .get(Uri.parse(url), headers: headers)
+              .timeout(const Duration(seconds: 45));
+          break;
+        } catch (e) {
+          if (retryCount < maxRetries && (e.toString().contains('Connection closed') || e is http.ClientException)) {
+            retryCount++;
+            debugPrint('VoiceDownloadService: Retry $retryCount for $voiceName due to connection error: $e');
+            await Future.delayed(Duration(seconds: 2 * retryCount));
+            continue;
+          }
+          rethrow;
+        }
+      }
 
       if (response.statusCode == 200 || response.statusCode == 206) {
         final isPartial = response.statusCode == 206;
@@ -223,26 +245,40 @@ class VoiceDownloadService {
     final fileName = _getFileName(voiceName);
     final localPath = await getLocalPath(voiceName);
     final file = File(localPath);
-    if (!(await file.exists())) return null;
-
-    try {
-      // For Android, we often need the file in a directory that the system notification service can access
-      // Using getExternalFilesDir(null) is often better than cache
-      final externalDir = await getExternalStorageDirectory();
-      if (externalDir != null) {
-        final dir = Directory('${externalDir.path}/azan_sounds');
-        if (!(await dir.exists())) await dir.create(recursive: true);
-
-        final accessibleFile = File('${dir.path}/$fileName');
-        if (!(await accessibleFile.exists())) {
-          await file.copy(accessibleFile.path);
-        }
-        return accessibleFile.path;
-      }
-      return localPath;
-    } catch (e) {
-      debugPrint('Error getting accessible path: $e');
-      return localPath;
+    if (!(await file.exists())) {
+      debugPrint('VoiceDownloadService: File does not exist at $localPath');
+      return null;
     }
+
+    if (Platform.isAndroid) {
+      try {
+        // On Android, we need the file in a directory that the system notification service can access.
+        // The app's external files directory (with StorageDirectory.notifications) is ideal.
+        final List<Directory>? directories = await getExternalStorageDirectories(
+          type: StorageDirectory.notifications,
+        );
+        final externalDir = directories?.firstOrNull ?? (await getExternalStorageDirectory());
+        
+        if (externalDir != null) {
+          final dir = Directory('${externalDir.path}/azan_sounds');
+          if (!(await dir.exists())) await dir.create(recursive: true);
+
+          final accessibleFile = File('${dir.path}/$fileName');
+          
+          // Copy if not exists or size mismatch (indicates update)
+          if (!(await accessibleFile.exists()) || 
+              (await accessibleFile.length() != await file.length())) {
+            debugPrint('VoiceDownloadService: Copying Azan to system-accessible path: ${accessibleFile.path}');
+            await file.copy(accessibleFile.path);
+          }
+          return accessibleFile.path;
+        }
+      } catch (e) {
+        debugPrint('VoiceDownloadService: Error preparing accessible path: $e');
+        // Fallback to local path if external storage fails
+      }
+    }
+
+    return localPath;
   }
 }

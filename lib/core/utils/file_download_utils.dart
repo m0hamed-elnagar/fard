@@ -124,13 +124,34 @@ class FileDownloadUtils {
 
   static void _validateBytes(Uint8List bytes, String fileType) {
     if (fileType == 'audio') {
-      // MP3 Header Check: Minimum size 10 KB + syncword
+      // Loosened check for MP3: 
+      // 1. Minimum size 10 KB
+      // 2. Check for 'ID3' header OR MP3 Syncword (0xFF, 0xE0 mask)
       if (bytes.length < 10240) {
         throw const FileSystemException('MP3 file too small (less than 10 KB)');
       }
-      // Check for MP3 Syncword: 0xFF, (next byte & 0xE0) == 0xE0
-      if (bytes[0] != 0xFF || (bytes[1] & 0xE0) != 0xE0) {
-        throw const FileSystemException('Invalid MP3 header (Syncword not found)');
+
+      final bool hasId3 = bytes.length > 3 && 
+                         bytes[0] == 0x49 && // I
+                         bytes[1] == 0x44 && // D
+                         bytes[2] == 0x33;   // 3
+                         
+      final bool hasSyncword = bytes[0] == 0xFF && (bytes[1] & 0xE0) == 0xE0;
+      
+      if (!hasId3 && !hasSyncword) {
+        // Search first 4KB for syncword if not at start (common in VBR/CBR with small headers)
+        bool foundSync = false;
+        final searchLimit = bytes.length > 4096 ? 4096 : bytes.length - 1;
+        for (int i = 0; i < searchLimit; i++) {
+           if (bytes[i] == 0xFF && (bytes[i+1] & 0xE0) == 0xE0) {
+             foundSync = true;
+             break;
+           }
+        }
+        
+        if (!foundSync) {
+          throw const FileSystemException('Invalid MP3 header (Syncword not found in first 4KB)');
+        }
       }
     } else if (fileType == 'image') {
       // PNG Header Check: Minimum size 1 KB + PNG signature

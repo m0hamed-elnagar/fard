@@ -161,7 +161,7 @@ class _SettingsScreenState extends State<SettingsScreen>
 
             // Section 3: Reminders & Notifications (Clickable Card)
             _buildSectionTile(
-              title: l10n.remindersNotifications,
+              title: l10n.azanSettings,
               subtitle: l10n.azanSettingsDesc,
               icon: Icons.notifications_active_rounded,
               accentColor: context.tertiaryColor,
