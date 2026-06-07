@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_toggle.dart';
+import '../../../../core/widgets/fard_list_tile.dart';
 import '../../../../core/mixins/notification_permission_mixin.dart';
 import '../../domain/azkar_reminder.dart';
 import '../blocs/daily_reminders_cubit.dart';
@@ -201,7 +202,7 @@ class _AzkarSectionState extends State<AzkarSection>
     required AzkarReminder reminder,
   }) {
     final cubit = context.read<DailyRemindersCubit>();
-    return ListTile(
+    return FardListTile(
       contentPadding: EdgeInsets.zero,
       title: Text(
         reminder.title.isNotEmpty ? reminder.title : reminder.category,
@@ -256,6 +257,7 @@ class _AzkarSectionState extends State<AzkarSection>
           ),
         ],
       ),
+      onTap: () => _showAddReminderDialog(context, index: index, reminder: reminder),
     );
   }
 
@@ -416,7 +418,7 @@ class _AzkarSectionState extends State<AzkarSection>
                 Expanded(
                   child: ListView.builder(
                     itemCount: filtered.length,
-                    itemBuilder: (context, i) => ListTile(
+                    itemBuilder: (context, i) => FardListTile(
                       title: Text(
                         filtered[i],
                         textAlign: l10n.localeName == 'ar'
@@ -444,7 +446,7 @@ class _AzkarSectionState extends State<AzkarSection>
     String time,
     Function(String) onTimeSelected,
   ) {
-    return ListTile(
+    return FardListTile(
       contentPadding: EdgeInsets.zero,
       title: Text(title),
       trailing: InkWell(

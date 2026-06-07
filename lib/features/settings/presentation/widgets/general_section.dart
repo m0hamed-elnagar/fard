@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/app_identifiers.dart';
+import '../../../../core/widgets/fard_list_tile.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:fard/features/audio/presentation/screens/offline_audio_screen.dart';
 
@@ -61,7 +62,7 @@ class _GeneralSectionState extends State<GeneralSection> {
           },
         ),
         const Divider(height: 1),
-        ListTile(
+        FardListTile(
           contentPadding: EdgeInsets.zero,
           leading: Icon(
             Icons.info_outline_rounded,
@@ -167,7 +168,7 @@ class _GeneralSectionState extends State<GeneralSection> {
     required IconData icon,
     required VoidCallback onTap,
   }) {
-    return ListTile(
+    return FardListTile(
       contentPadding: EdgeInsets.zero,
       leading: Container(
         padding: const EdgeInsets.all(8),

@@ -6,10 +6,11 @@ import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/core/theme/theme_presets.dart';
+import 'package:fard/core/widgets/fard_list_tile.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
-import 'package:fard/features/settings/presentation/screens/reminders_settings_screen.dart';
+import 'package:fard/features/settings/presentation/screens/azan_settings_screen.dart';
 import 'package:fard/features/settings/presentation/widgets/appearance_section.dart';
 import 'package:fard/features/settings/presentation/widgets/azkar_section.dart';
 import 'package:fard/features/settings/presentation/widgets/general_section.dart';
@@ -161,7 +162,7 @@ class _SettingsScreenState extends State<SettingsScreen>
 
             // Section 3: Reminders & Notifications (Clickable Card)
             _buildSectionTile(
-              title: l10n.azanSettings,
+              title: l10n.azanNotifications,
               subtitle: l10n.azanSettingsDesc,
               icon: Icons.notifications_active_rounded,
               accentColor: context.tertiaryColor,
@@ -170,7 +171,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const RemindersSettingsScreen(),
+                    builder: (_) => const AzanSettingsScreen(),
                   ),
                 );
               },
@@ -249,7 +250,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                   ),
                 ),
                 const SizedBox(height: 12),
-                ListTile(
+                FardListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Refresh Widget'),
                   trailing: ElevatedButton.icon(

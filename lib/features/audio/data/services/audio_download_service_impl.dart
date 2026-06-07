@@ -172,8 +172,9 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
             int retries = 3;
             bool success = false;
             while (retries > 0 && !success) {
-              if (_cancellationFlags[reciterId]?.contains(surahNumber) == true)
+              if (_cancellationFlags[reciterId]?.contains(surahNumber) == true) {
                 return;
+              }
               try {
                 await _manifestService.upsertEntry(
                   entry.copyWith(
@@ -195,8 +196,9 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
                     .get(Uri.parse(entry.url), headers: headers)
                     .timeout(const Duration(seconds: 25));
                 if (_cancellationFlags[reciterId]?.contains(surahNumber) ==
-                    true)
+                    true) {
                   return;
+                }
                 if (response.statusCode == 200 || response.statusCode == 206) {
                   final isPartial = response.statusCode == 206;
                   if (isPartial) {
@@ -216,8 +218,9 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
                     final contentRange = response.headers['content-range'];
                     if (contentRange != null) {
                       final parts = contentRange.split('/');
-                      if (parts.length > 1)
+                      if (parts.length > 1) {
                         totalSize = int.tryParse(parts[1]) ?? totalSize;
+                      }
                     }
                   } else {
                     totalSize =
@@ -250,7 +253,7 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
                   }
                 } else {
                   retries--;
-                  if (retries == 0)
+                  if (retries == 0) {
                     await _manifestService.upsertEntry(
                       entry.copyWith(
                         status: DownloadStatus.failed,
@@ -259,12 +262,14 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
                         attemptCount: entry.attemptCount + 1,
                       ),
                     );
-                  if (retries > 0)
+                  }
+                  if (retries > 0) {
                     await Future.delayed(const Duration(milliseconds: 1000));
+                  }
                 }
               } catch (e) {
                 retries--;
-                if (retries == 0)
+                if (retries == 0) {
                   await _manifestService.upsertEntry(
                     entry.copyWith(
                       status: DownloadStatus.failed,
@@ -273,8 +278,10 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
                       attemptCount: entry.attemptCount + 1,
                     ),
                   );
-                if (retries > 0)
+                }
+                if (retries > 0) {
                   await Future.delayed(const Duration(milliseconds: 1500));
+                }
               }
             }
           }),
@@ -297,8 +304,9 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
 
       if (finalMissing.isNotEmpty && finalMissing.length <= 5) {
         for (final entry in finalMissing) {
-          if (_cancellationFlags[reciterId]?.contains(surahNumber) == true)
+          if (_cancellationFlags[reciterId]?.contains(surahNumber) == true) {
             break;
+          }
           try {
             final response = await _client
                 .get(Uri.parse(entry.url))
@@ -484,7 +492,7 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
       ayahCount: _audioRepository.getAyahCount(surahNumber),
       quality: quality,
     );
-    if (tracksResult.isFailure)
+    if (tracksResult.isFailure) {
       return const SurahDownloadStatus(
         isDownloaded: false,
         isDownloading: false,
@@ -492,6 +500,7 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
         downloadedAyahs: 0,
         totalAyahs: 0,
       );
+    }
     final tracks = tracksResult.data!;
     int downloadedCount = 0;
     int totalSize = 0;
@@ -567,12 +576,13 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
     required String reciterId,
   }) async {
     final entries = await _manifestService.getEntriesByReciter(reciterId);
-    if (entries.isEmpty)
+    if (entries.isEmpty) {
       return const ReciterDownloadStatus(
         downloadedSurahs: 0,
         totalSurahs: 114,
         totalSizeInBytes: 0,
       );
+    }
     int downloadedSurahs = 0;
     int totalSize = 0;
     final Map<int, bool> surahStatus = {};
@@ -581,8 +591,9 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
       final currentStatus = surahStatus[entry.surahNumber!] ?? true;
       surahStatus[entry.surahNumber!] =
           currentStatus && (entry.status == DownloadStatus.completed);
-      if (entry.status == DownloadStatus.completed)
+      if (entry.status == DownloadStatus.completed) {
         totalSize += entry.expectedSize;
+      }
     }
     downloadedSurahs = surahStatus.values
         .where((completed) => completed)
@@ -613,8 +624,9 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
     for (final entry in allEntries) {
       if (entry.surahNumber != surahNumber || entry.reciterId == null) continue;
       final list = reciterStatus.putIfAbsent(entry.reciterId!, () => []);
-      if (entry.status == DownloadStatus.completed)
+      if (entry.status == DownloadStatus.completed) {
         list.add(entry.ayahNumber ?? 0);
+      }
     }
     final availableReciters = <Reciter>[];
     for (final id in reciterIds) {
@@ -629,8 +641,9 @@ class AudioDownloadServiceImpl implements AudioDownloadService {
       );
       if (reciter.identifier.isEmpty) continue;
       final downloadedAyahs = reciterStatus[id] ?? [];
-      if (downloadedAyahs.length >= _audioRepository.getAyahCount(surahNumber))
+      if (downloadedAyahs.length >= _audioRepository.getAyahCount(surahNumber)) {
         availableReciters.add(reciter);
+      }
     }
     return availableReciters;
   }

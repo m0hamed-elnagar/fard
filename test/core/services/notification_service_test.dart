@@ -77,7 +77,7 @@ void main() {
     registerFallbackValue(MockSettingsRepository());
   });
 
-  setUp(() {
+  setUp(() async {
     mockNotificationsPlugin = MockFlutterLocalNotificationsPlugin();
     mockAndroidPlugin = MockAndroidFlutterLocalNotificationsPlugin();
     mockSoundManager = MockSoundManager();
@@ -144,6 +144,18 @@ void main() {
       mockSharedPreferences,
       GlobalKey<NavigatorState>(),
     );
+
+    // Mock FlutterTimezone
+    const MethodChannel channel = MethodChannel('flutter_timezone');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+      if (methodCall.method == 'getLocalTimezone') {
+        return 'UTC';
+      }
+      return null;
+    });
+
+    await notificationService.init();
   });
 
   group('NotificationService', () {

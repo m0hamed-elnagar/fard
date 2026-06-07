@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_toggle.dart';
+import '../../../../core/widgets/fard_list_tile.dart';
 import '../../../../core/mixins/notification_permission_mixin.dart';
 import '../blocs/daily_reminders_cubit.dart';
 import '../blocs/daily_reminders_state.dart';
@@ -71,7 +72,7 @@ class SalawatReminderSection extends StatelessWidget
               Row(
                 children: [
                   Expanded(
-                    child: ListTile(
+                    child: FardListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(
                         l10n.startTime,
@@ -94,7 +95,7 @@ class SalawatReminderSection extends StatelessWidget
                     ),
                   ),
                   Expanded(
-                    child: ListTile(
+                    child: FardListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(
                         l10n.endTime,

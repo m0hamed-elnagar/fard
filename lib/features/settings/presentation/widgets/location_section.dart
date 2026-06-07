@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/fard_list_tile.dart';
 import '../blocs/location_prayer_cubit.dart';
 import '../blocs/location_prayer_state.dart';
 
@@ -46,7 +47,7 @@ class _DataAndLocationSectionState extends State<DataAndLocationSection> {
                 Icons.location_off_rounded,
                 isSmall: true,
               ),
-            ListTile(
+            FardListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(l10n.currentLocation),
               subtitle: Text(
@@ -116,7 +117,7 @@ class _DataAndLocationSectionState extends State<DataAndLocationSection> {
               (val) => cubit.updateCalculationMethod(val!),
             ),
             const Divider(height: 1),
-            ListTile(
+            FardListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(l10n.hijriAdjustment),
               subtitle: Text(
@@ -238,7 +239,7 @@ class _DataAndLocationSectionState extends State<DataAndLocationSection> {
     List<DropdownMenuItem<T>> items,
     ValueChanged<T?> onChanged,
   ) {
-    return ListTile(
+    return FardListTile(
       contentPadding: EdgeInsets.zero,
       title: Text(title),
       trailing: Container(

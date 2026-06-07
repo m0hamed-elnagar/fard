@@ -5,6 +5,7 @@ import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/extensions/number_extension.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_colors.dart';
+import 'package:fard/core/widgets/fard_list_tile.dart';
 import 'package:fard/core/widgets/fast_scroll_scrollbar.dart';
 import 'package:fard/features/audio/domain/services/audio_download_service.dart';
 import 'package:fard/features/audio/presentation/blocs/player/audio_player_bloc.dart';
@@ -112,8 +113,9 @@ class _QuranPageState extends State<QuranPage> {
     final reciter = context.read<ReciterManagerBloc>().state.currentReciter;
     if (reciter == null) return;
 
-    if (_lastReciterId == reciter.identifier && _downloadedSurahIds.isNotEmpty)
+    if (_lastReciterId == reciter.identifier && _downloadedSurahIds.isNotEmpty) {
       return;
+    }
 
     final downloaded = await getIt<AudioDownloadService>()
         .getDownloadedSurahIdsForReciter(reciter.identifier);
@@ -737,7 +739,7 @@ class _SurahListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return ListTile(
+    return FardListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       leading: CircleAvatar(
         backgroundColor: Theme.of(context).primaryColor,

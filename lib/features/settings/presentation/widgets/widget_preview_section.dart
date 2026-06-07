@@ -270,8 +270,9 @@ class _WidgetPreviewSectionState extends State<WidgetPreviewSection> {
                               );
                             }
                           } finally {
-                            if (mounted)
+                            if (mounted) {
                               setState(() => _isApplyingWidgetTheme = false);
+                            }
                           }
                         },
                   child: _isApplyingWidgetTheme

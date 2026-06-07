@@ -1,5 +1,6 @@
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_colors.dart';
+import 'package:fard/core/widgets/fard_list_tile.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/core/extensions/salaah_extension.dart';
 import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
@@ -233,7 +234,7 @@ class RemindersSettingsDialog extends StatelessWidget {
                           context,
                         ),
                         if (state.isWerdReminderEnabled)
-                          ListTile(
+                          FardListTile(
                             title: Text(isAr ? 'وقت التذكير' : 'Reminder Time'),
                             subtitle: Text(state.werdReminderTime),
                             trailing: const Icon(Icons.access_time_rounded),
@@ -290,7 +291,7 @@ class RemindersSettingsDialog extends StatelessWidget {
                           context,
                         ),
                         if (state.isSalawatReminderEnabled) ...[
-                          ListTile(
+                          FardListTile(
                             title: Text(isAr ? 'التكرار كل' : 'Frequency'),
                             subtitle: Text(
                               isAr
@@ -315,7 +316,7 @@ class RemindersSettingsDialog extends StatelessWidget {
                               },
                             ),
                           ),
-                          ListTile(
+                          FardListTile(
                             title: Text(isAr ? 'من وقت' : 'Start Time'),
                             subtitle: Text(state.salawatStartTime),
                             trailing: const Icon(Icons.access_time_rounded),
@@ -331,7 +332,7 @@ class RemindersSettingsDialog extends StatelessWidget {
                               }
                             },
                           ),
-                          ListTile(
+                          FardListTile(
                             title: Text(isAr ? 'إلى وقت' : 'End Time'),
                             subtitle: Text(state.salawatEndTime),
                             trailing: const Icon(Icons.access_time_rounded),
@@ -382,7 +383,7 @@ class RemindersSettingsDialog extends StatelessWidget {
     ValueChanged<bool> onChanged,
     BuildContext context,
   ) {
-    return SwitchListTile(
+    return FardSwitchListTile(
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text(
         subtitle,
@@ -390,7 +391,7 @@ class RemindersSettingsDialog extends StatelessWidget {
       ),
       value: value,
       onChanged: onChanged,
-      activeThumbColor: context.secondaryColor,
+      activeColor: context.secondaryColor,
     );
   }
 

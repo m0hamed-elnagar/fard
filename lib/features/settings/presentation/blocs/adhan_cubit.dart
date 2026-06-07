@@ -92,10 +92,10 @@ class AdhanCubit extends Cubit<AdhanState> with WidgetsBindingObserver {
   }
 
   Future<void> _updateAllAzanEnabledAsync(bool v) async {
+    await _repo.updateAllAzanEnabled(v);
     final newList = state.salaahSettings
         .map((s) => s.copyWith(isAzanEnabled: v))
         .toList();
-    await _repo.updateSalaahSettings(newList);
     emit(state.copyWith(salaahSettings: newList));
     _sync();
   }
@@ -105,10 +105,10 @@ class AdhanCubit extends Cubit<AdhanState> with WidgetsBindingObserver {
   }
 
   Future<void> _updateAllAzanSoundAsync(String? v) async {
+    await _repo.updateAllAzanSound(v);
     final newList = state.salaahSettings
         .map((s) => s.copyWith(azanSound: v))
         .toList();
-    await _repo.updateSalaahSettings(newList);
     emit(state.copyWith(salaahSettings: newList));
     _sync();
   }

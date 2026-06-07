@@ -7,6 +7,7 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/services/voice_download_service.dart';
 import '../../../../core/widgets/custom_toggle.dart';
+import '../../../../core/widgets/fard_list_tile.dart';
 import '../../../../core/mixins/notification_permission_mixin.dart';
 import '../../../prayer_tracking/domain/salaah.dart';
 import '../../domain/salaah_settings.dart';
@@ -184,7 +185,7 @@ class _AdhanSectionState extends State<AdhanSection>
     AppLocalizations l10n,
   ) {
     final cubit = context.read<AdhanCubit>();
-    return ListTile(
+    return FardListTile(
       contentPadding: EdgeInsets.zero,
       title: Text(_getLocalizedSalaahName(s.salaah, l10n)),
       trailing: CustomToggle(
@@ -310,7 +311,7 @@ class _AdhanSectionState extends State<AdhanSection>
     ValueChanged<String?> onChanged,
   ) {
     return DropdownButtonFormField<String?>(
-      initialValue: _resolveVoiceKey(currentVoice),
+      value: _resolveVoiceKey(currentVoice),
       decoration: InputDecoration(
         labelText: l10n.azanVoice,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

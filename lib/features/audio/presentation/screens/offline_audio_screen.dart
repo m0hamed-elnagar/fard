@@ -41,38 +41,41 @@ class OfflineAudioScreen extends StatelessWidget {
                 return '${(bytes / math.pow(1024, i)).toStringAsFixed(1)} ${suffixes[i]}';
               }
 
-              return ListTile(
-                title: Text(reciter.name),
-                subtitle: Text(
-                  '${reciter.englishName} • ${formatSize(sizeInBytes)}',
-                ),
-                leading: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    CircularProgressIndicator(
-                      value: progress,
-                      backgroundColor: context.outlineVariantColor,
-                      strokeWidth: 3,
-                    ),
-                    Text(
-                      '${(progress * 100).toInt()}',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
+              return Material(
+                color: Colors.transparent,
+                child: ListTile(
+                  title: Text(reciter.name),
+                  subtitle: Text(
+                    '${reciter.englishName} • ${formatSize(sizeInBytes)}',
+                  ),
+                  leading: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        value: progress,
+                        backgroundColor: context.outlineVariantColor,
+                        strokeWidth: 3,
                       ),
-                    ),
-                  ],
+                      Text(
+                        '${(progress * 100).toInt()}',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ReciterDownloadScreen(reciter: reciter),
+                      ),
+                    );
+                  },
                 ),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          ReciterDownloadScreen(reciter: reciter),
-                    ),
-                  );
-                },
               );
             },
           );

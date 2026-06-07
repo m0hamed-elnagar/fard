@@ -139,7 +139,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Appearance'), findsOneWidget);
-    expect(find.text('Reminders & Notifications'), findsOneWidget);
+    expect(find.text('Azan & Notifications'), findsOneWidget);
   });
 
   testWidgets('shows current location city', (WidgetTester tester) async {

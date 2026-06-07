@@ -6,6 +6,7 @@ import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -31,6 +32,7 @@ class MockSettingsRepository extends Mock implements SettingsRepository {}
 class MockSharedPreferences extends Mock implements SharedPreferences {}
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late NotificationService notificationService;
   late MockFlutterLocalNotificationsPlugin mockNotificationsPlugin;
   late MockAndroidFlutterLocalNotificationsPlugin mockAndroidPlugin;
@@ -49,7 +51,7 @@ void main() {
     registerFallbackValue(MockSettingsRepository());
   });
 
-  setUp(() {
+  setUp(() async {
     mockNotificationsPlugin = MockFlutterLocalNotificationsPlugin();
     mockAndroidPlugin = MockAndroidFlutterLocalNotificationsPlugin();
     mockSoundManager = MockSoundManager();
@@ -127,6 +129,19 @@ void main() {
       mockSharedPreferences,
       GlobalKey<NavigatorState>(),
     );
+
+    // Mock FlutterTimezone to prevent init() from hanging/failing
+    const MethodChannel channel = MethodChannel('flutter_timezone');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+      if (methodCall.method == 'getLocalTimezone') {
+        return 'UTC';
+      }
+      return null;
+    });
+
+    // Initialize to satisfy ensureInitialized() calls
+    await notificationService.init();
   });
 
   group('NotificationService Sound Testing', () {

@@ -1,6 +1,7 @@
 import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/widgets/custom_toggle.dart';
+import 'package:fard/core/widgets/fard_list_tile.dart';
 import 'package:fard/features/tasbih/presentation/bloc/tasbih_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -65,7 +66,7 @@ class CategorySelectionSheet extends StatelessWidget {
                         : context.outlineColor,
                   ),
                 ),
-                child: ListTile(
+                child: FardListTile(
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 4,
@@ -89,9 +90,7 @@ class CategorySelectionSheet extends StatelessWidget {
                   title: Text(
                     localizedName,
                     style: GoogleFonts.outfit(
-                      fontWeight: isSelected
-                          ? FontWeight.bold
-                          : FontWeight.w500,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                     ),
                   ),
                   subtitle: Text(
@@ -199,9 +198,7 @@ class TasbihSettingsSheet extends StatelessWidget {
         children: [
           Icon(
             icon,
-            color: value
-                ? context.secondaryColor
-                : context.onSurfaceVariantColor,
+            color: value ? context.secondaryColor : context.onSurfaceVariantColor,
             size: 22,
           ),
           const SizedBox(width: 16),
@@ -250,7 +247,7 @@ class DuaSelectionSheet extends StatelessWidget {
               itemBuilder: (context, index) {
                 final dua = state.data.completionDuas[index];
                 final isSelected = dua.id == state.currentCompletionDua?.id;
-                return ListTile(
+                return FardListTile(
                   leading: Icon(
                     isSelected
                         ? Icons.check_circle_rounded
@@ -262,9 +259,8 @@ class DuaSelectionSheet extends StatelessWidget {
                   title: Text(
                     dua.title,
                     style: GoogleFonts.outfit(
-                      fontWeight: isSelected
-                          ? FontWeight.bold
-                          : FontWeight.normal,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
                   onTap: () {

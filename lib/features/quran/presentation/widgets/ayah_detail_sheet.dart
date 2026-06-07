@@ -383,31 +383,34 @@ class _TafsirTab extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final tafsir = TafsirInfo.availableTafsirs[index];
                     final isArabic = tafsir.languageName == 'arabic';
-                    return ListTile(
-                      title: Text(
-                        tafsir.name,
-                        style: isArabic
-                            ? GoogleFonts.amiri(fontWeight: FontWeight.bold)
+                    return Material(
+                      color: Colors.transparent,
+                      child: ListTile(
+                        title: Text(
+                          tafsir.name,
+                          style: isArabic
+                              ? GoogleFonts.amiri(fontWeight: FontWeight.bold)
+                              : null,
+                          textAlign: isArabic ? TextAlign.right : TextAlign.left,
+                        ),
+                        subtitle: Text(
+                          tafsir.authorName,
+                          style: isArabic
+                              ? GoogleFonts.amiri(fontSize: 14)
+                              : null,
+                          textAlign: isArabic ? TextAlign.right : TextAlign.left,
+                        ),
+                        leading: !isArabic && tafsir.id == currentId
+                            ? Icon(Icons.check, color: context.primaryColor)
                             : null,
-                        textAlign: isArabic ? TextAlign.right : TextAlign.left,
-                      ),
-                      subtitle: Text(
-                        tafsir.authorName,
-                        style: isArabic
-                            ? GoogleFonts.amiri(fontSize: 14)
+                        trailing: isArabic && tafsir.id == currentId
+                            ? Icon(Icons.check, color: context.primaryColor)
                             : null,
-                        textAlign: isArabic ? TextAlign.right : TextAlign.left,
+                        onTap: () {
+                          readerBloc.add(ReaderEvent.updateTafsir(tafsir.id));
+                          Navigator.pop(modalContext);
+                        },
                       ),
-                      leading: !isArabic && tafsir.id == currentId
-                          ? Icon(Icons.check, color: context.primaryColor)
-                          : null,
-                      trailing: isArabic && tafsir.id == currentId
-                          ? Icon(Icons.check, color: context.primaryColor)
-                          : null,
-                      onTap: () {
-                        readerBloc.add(ReaderEvent.updateTafsir(tafsir.id));
-                        Navigator.pop(modalContext);
-                      },
                     );
                   },
                 ),
@@ -460,15 +463,18 @@ class _TafsirTab extends StatelessWidget {
             return ListView(
               padding: EdgeInsets.zero,
               children: [
-                ListTile(
-                  dense: true,
-                  leading: const Icon(Icons.translate, size: 20),
-                  title: Text(
-                    l10n.tafsirWithVal(selectedTafsir.name),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                Material(
+                  color: Colors.transparent,
+                  child: ListTile(
+                    dense: true,
+                    leading: const Icon(Icons.translate, size: 20),
+                    title: Text(
+                      l10n.tafsirWithVal(selectedTafsir.name),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    trailing: const Icon(Icons.edit_outlined, size: 20),
+                    onTap: () => _showTafsirSelector(context, tafsirId),
                   ),
-                  trailing: const Icon(Icons.edit_outlined, size: 20),
-                  onTap: () => _showTafsirSelector(context, tafsirId),
                 ),
                 const Divider(height: 1, thickness: 1),
                 Padding(
@@ -661,18 +667,21 @@ class _AudioTab extends StatelessWidget {
 
                 const SizedBox(height: 40),
                 const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.person_outline),
-                  title: Text(l10n.reciter),
-                  subtitle: Text(
-                    managerState.currentReciter != null
-                        ? (l10n.localeName == 'ar'
-                              ? managerState.currentReciter!.name
-                              : managerState.currentReciter!.englishName)
-                        : l10n.selectReciter,
+                Material(
+                  color: Colors.transparent,
+                  child: ListTile(
+                    leading: const Icon(Icons.person_outline),
+                    title: Text(l10n.reciter),
+                    subtitle: Text(
+                      managerState.currentReciter != null
+                          ? (l10n.localeName == 'ar'
+                                ? managerState.currentReciter!.name
+                                : managerState.currentReciter!.englishName)
+                          : l10n.selectReciter,
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _showReciterSelector(context),
                   ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _showReciterSelector(context),
                 ),
               ],
             );

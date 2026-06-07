@@ -7,8 +7,8 @@ import 'package:fard/features/settings/presentation/widgets/salawat_reminder_sec
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class RemindersSettingsScreen extends StatelessWidget {
-  const RemindersSettingsScreen({super.key});
+class AzanSettingsScreen extends StatelessWidget {
+  const AzanSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

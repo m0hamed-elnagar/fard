@@ -33,7 +33,7 @@
 ## Phase 4: UI & Dependency Injection Migration
 - [x] Update GetIt/Injectable configurations for new Cubits and Coordinator.
 - [x] Migrate UI: `SettingsScreen` (Using modular sections).
-- [x] Migrate UI: `RemindersSettingsScreen`.
+- [x] Migrate UI: `AzanSettingsScreen`.
 - [x] Migrate UI: `HomeScreen` & `HomeContent`.
 - [x] Migrate UI: `AzkarCategoriesScreen` & `MainNavigationScreen`.
 - [x] Migrate UI: `OnboardingScreen`.

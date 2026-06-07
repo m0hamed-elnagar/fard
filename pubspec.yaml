@@ -4,7 +4,7 @@ publish_to: 'none'
 version: 1.4.0+6
 
 environment:
-  sdk: ^3.11.0
+  sdk: ^3.12.0
 
 dependencies:
   flutter:
@@ -67,6 +67,7 @@ dev_dependencies:
   json_serializable: ^6.9.0
   bloc_test: ^10.0.0
   mocktail: ^1.0.4
+  flutter_local_notifications_platform_interface: ^11.0.0
   path_provider_platform_interface: ^2.1.2
   plugin_platform_interface: ^2.1.8
   injectable_generator: ^3.0.2
@@ -76,7 +77,7 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/fard_logo.png"
-  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_background: "#FAFAFA"
   adaptive_icon_foreground: "assets/fard_logo.png"
   adaptive_icon_foreground_inset: 13
   remove_alpha_ios: true

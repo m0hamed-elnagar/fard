@@ -39,9 +39,8 @@ class ConnectivityStatus extends ConnectivityState {
 class ConnectivityBloc extends Bloc<ConnectivityEvent, ConnectivityState> {
   final ConnectivityService _connectivityService;
 
-  ConnectivityBloc({required ConnectivityService connectivityService})
-    : _connectivityService = connectivityService,
-      super(ConnectivityInitial()) {
+  ConnectivityBloc({required this._connectivityService})
+    : super(ConnectivityInitial()) {
     on<ConnectivityChanged>(_onConnectivityChanged);
 
     // Initial check

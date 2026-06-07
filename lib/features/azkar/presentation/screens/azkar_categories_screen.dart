@@ -314,13 +314,16 @@ void _showAddReminderDialog(BuildContext context, String category) {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ListTile(
-                  title: Text(l10n.category),
-                  subtitle: Text(
-                    category,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                Material(
+                  color: Colors.transparent,
+                  child: ListTile(
+                    title: Text(l10n.category),
+                    subtitle: Text(
+                      category,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    contentPadding: EdgeInsets.zero,
                   ),
-                  contentPadding: EdgeInsets.zero,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -334,30 +337,33 @@ void _showAddReminderDialog(BuildContext context, String category) {
                   onChanged: (val) => customTitle = val,
                 ),
                 const SizedBox(height: 16),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(l10n.time),
-                  trailing: InkWell(
-                    onTap: () async {
-                      final time = await _selectTime(context, selectedTime);
-                      if (time != null) {
-                        setDialogState(() => selectedTime = time);
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: context.secondaryColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        selectedTime,
-                        style: TextStyle(
-                          color: context.secondaryColor,
-                          fontWeight: FontWeight.bold,
+                Material(
+                  color: Colors.transparent,
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l10n.time),
+                    trailing: InkWell(
+                      onTap: () async {
+                        final time = await _selectTime(context, selectedTime);
+                        if (time != null) {
+                          setDialogState(() => selectedTime = time);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: context.secondaryColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          selectedTime,
+                          style: TextStyle(
+                            color: context.secondaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -449,53 +455,56 @@ class _CategoryCard extends StatelessWidget {
           : null,
       child: Stack(
         children: [
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 8,
-            ),
-            title: Text(
-              category,
-              style: GoogleFonts.amiri(
-                fontSize: 18,
-                fontWeight: isRecommended ? FontWeight.bold : FontWeight.w600,
-                color: isRecommended ? context.secondaryColor : null,
+          Material(
+            color: Colors.transparent,
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 8,
               ),
-              textAlign: TextAlign.right,
-            ),
-            subtitle: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton.icon(
-                  onPressed: () => _showAddReminderDialog(context, category),
-                  icon: Icon(
-                    Icons.alarm_add_rounded,
-                    size: 16,
-                    color: context.secondaryColor,
-                  ),
-                  label: Text(
-                    l10n.addAlarm,
-                    style: TextStyle(
-                      fontSize: 12,
+              title: Text(
+                category,
+                style: GoogleFonts.amiri(
+                  fontSize: 18,
+                  fontWeight: isRecommended ? FontWeight.bold : FontWeight.w600,
+                  color: isRecommended ? context.secondaryColor : null,
+                ),
+                textAlign: TextAlign.right,
+              ),
+              subtitle: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton.icon(
+                    onPressed: () => _showAddReminderDialog(context, category),
+                    icon: Icon(
+                      Icons.alarm_add_rounded,
+                      size: 16,
                       color: context.secondaryColor,
                     ),
+                    label: Text(
+                      l10n.addAlarm,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: context.secondaryColor,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
+              trailing: Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: isRecommended ? context.secondaryColor : null,
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AzkarListScreen(category: category),
+                  ),
+                );
+              },
             ),
-            trailing: Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: isRecommended ? context.secondaryColor : null,
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AzkarListScreen(category: category),
-                ),
-              );
-            },
           ),
           if (isRecommended)
             Positioned(

@@ -180,30 +180,39 @@ class NotificationService {
   Future<bool> requestPermissions() async {
     debugPrint('NotificationService: requesting permissions...');
 
-    // Notification permission is required on both Android 13+ and iOS
-    final notificationStatus = await Permission.notification.request();
-
-    bool granted = notificationStatus.isGranted;
-
     if (Platform.isAndroid) {
-      final alarmStatus = await Permission.scheduleExactAlarm.request();
+      final androidPlugin = _notificationsPlugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+
+      final notificationGranted =
+          await androidPlugin?.requestNotificationsPermission() ?? false;
+      final alarmGranted =
+          await androidPlugin?.requestExactAlarmsPermission() ?? false;
+
       debugPrint(
-        'Permissions result: Notifications=$notificationStatus, Alarms=$alarmStatus',
+        'Permissions result: Notifications=$notificationGranted, Alarms=$alarmGranted',
       );
-      granted = notificationStatus.isGranted && alarmStatus.isGranted;
-    }
 
-    if (granted && Platform.isAndroid) {
-      // Re-create channels to ensure they are properly registered now that we have permission
-      await ensureInitialized();
-      await _channelManager.createNotificationChannels(
-        _notificationsPlugin,
-        settings: _settingsProvider,
-      );
-    }
+      final granted = notificationGranted && alarmGranted;
 
-    debugPrint('Permissions result: Notifications=$notificationStatus');
-    return granted;
+      if (granted) {
+        // Re-create channels to ensure they are properly registered now that we have permission
+        await ensureInitialized();
+        await _channelManager.createNotificationChannels(
+          _notificationsPlugin,
+          settings: _settingsProvider,
+        );
+      }
+
+      return granted;
+    } else {
+      // iOS / Other platforms
+      final notificationStatus = await Permission.notification.request();
+      debugPrint('Permissions result: Notifications=$notificationStatus');
+      return notificationStatus.isGranted;
+    }
   }
 
   Future<void> handleInitialNotification() async {
@@ -241,26 +250,24 @@ class NotificationService {
 
   Future<bool> areNotificationsEnabled() async {
     if (Platform.isAndroid) {
-      return await Permission.notification.isGranted;
+      final androidPlugin = _notificationsPlugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+      return await androidPlugin?.areNotificationsEnabled() ?? false;
     }
-    return await _notificationsPlugin
-            .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin
-            >()
-            ?.areNotificationsEnabled() ??
-        true;
+    return true; // iOS handles this differently or via request
   }
 
   Future<bool> canScheduleExactNotifications() async {
     if (Platform.isAndroid) {
-      return await Permission.scheduleExactAlarm.isGranted;
+      final androidPlugin = _notificationsPlugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+      return await androidPlugin?.canScheduleExactNotifications() ?? false;
     }
-    return await _notificationsPlugin
-            .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin
-            >()
-            ?.canScheduleExactNotifications() ??
-        true;
+    return true;
   }
 
   Future<bool> isBatteryOptimizationIgnored() async {

@@ -116,29 +116,32 @@ class HizbList extends StatelessWidget {
                     'الربع الأخير',
                   ];
 
-                  return ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-                    title: Text(
-                      quarterNames[qIndex],
-                      style: GoogleFonts.amiri(fontSize: 16),
-                    ),
-                    subtitle: Text(
-                      'سورة $rSurahName، آية ${rAyah.toArabicIndic()} (ص ${rPage.toArabicIndic()})',
-                      style: GoogleFonts.amiri(
-                        fontSize: 13,
-                        color: context.onSurfaceVariantColor,
+                  return Material(
+                    color: Colors.transparent,
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+                      title: Text(
+                        quarterNames[qIndex],
+                        style: GoogleFonts.amiri(fontSize: 16),
                       ),
-                    ),
-                    trailing: const Icon(Icons.chevron_left, size: 18),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        QuranReaderPage.route(
-                          surahNumber: rSurah,
-                          ayahNumber: rAyah,
+                      subtitle: Text(
+                        'سورة $rSurahName، آية ${rAyah.toArabicIndic()} (ص ${rPage.toArabicIndic()})',
+                        style: GoogleFonts.amiri(
+                          fontSize: 13,
+                          color: context.onSurfaceVariantColor,
                         ),
-                      );
-                    },
+                      ),
+                      trailing: const Icon(Icons.chevron_left, size: 18),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          QuranReaderPage.route(
+                            surahNumber: rSurah,
+                            ayahNumber: rAyah,
+                          ),
+                        );
+                      },
+                    ),
                   );
                 }),
               ],

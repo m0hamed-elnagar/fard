@@ -6,6 +6,13 @@ import 'package:fard/features/werd/domain/entities/werd_progress.dart';
 import 'package:fard/features/werd/domain/entities/reading_segment.dart';
 import 'package:fard/features/werd/domain/repositories/werd_repository.dart';
 import 'dart:io';
+import 'package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+
+class MockFlutterLocalNotificationsPlatform extends Mock
+    with MockPlatformInterfaceMixin
+    implements FlutterLocalNotificationsPlatform {}
 
 /// Real integration test that verifies session tracking with actual repository
 /// Tests the complete flow: Save → Load → Verify sessions are separate
@@ -17,6 +24,10 @@ void main() {
     late WerdRepository werdRepository;
 
     setUp(() async {
+      // Mock notifications platform to avoid LateInitializationError
+      final mockPlatform = MockFlutterLocalNotificationsPlatform();
+      FlutterLocalNotificationsPlatform.instance = mockPlatform;
+
       SharedPreferences.setMockInitialValues({});
       tempDir = Directory.systemTemp.createTempSync('fard_session_repo_test_');
       await getIt.reset();

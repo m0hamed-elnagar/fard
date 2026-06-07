@@ -276,118 +276,121 @@ class ReciterDownloadScreen extends StatelessWidget {
               ? status.downloadedAyahs / status.totalAyahs
               : 0.0);
 
-    return ListTile(
-      leading: CircleAvatar(child: Text('$surahNumber')),
-      title: Text(surahName),
-      subtitle: (isDownloading || hasPartial || isStopping)
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 4),
-                LinearProgressIndicator(
-                  value: isStopping ? null : progress,
-                  backgroundColor: context.outlineVariantColor,
-                  valueColor: isStopping
-                      ? AlwaysStoppedAnimation<Color>(
-                          context.onSurfaceVariantColor,
-                        )
-                      : null,
-                ),
-                const SizedBox(height: 2),
-                Text(sizeText, style: const TextStyle(fontSize: 10)),
-              ],
-            )
-          : Text(sizeText),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (isDownloaded)
-            Icon(Icons.check_circle, color: context.primaryColor)
-          else if (isStopping)
-            SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  context.onSurfaceVariantColor,
-                ),
-              ),
-            )
-          else if (isDownloading)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('${(progress * 100).toInt()}%'),
-                const SizedBox(width: 4),
-                IconButton(
-                  icon: Icon(
-                    Icons.stop_circle_outlined,
-                    color: context.secondaryColor,
-                    size: 20,
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        leading: CircleAvatar(child: Text('$surahNumber')),
+        title: Text(surahName),
+        subtitle: (isDownloading || hasPartial || isStopping)
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 4),
+                  LinearProgressIndicator(
+                    value: isStopping ? null : progress,
+                    backgroundColor: context.outlineVariantColor,
+                    valueColor: isStopping
+                        ? AlwaysStoppedAnimation<Color>(
+                            context.onSurfaceVariantColor,
+                          )
+                        : null,
                   ),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  onPressed: () {
-                    context.read<AudioDownloadCubit>().cancelDownload(
-                      reciter,
-                      surahNumber,
-                    );
-                  },
+                  const SizedBox(height: 2),
+                  Text(sizeText, style: const TextStyle(fontSize: 10)),
+                ],
+              )
+            : Text(sizeText),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isDownloaded)
+              Icon(Icons.check_circle, color: context.primaryColor)
+            else if (isStopping)
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    context.onSurfaceVariantColor,
+                  ),
                 ),
-              ],
-            )
-          else
-            IconButton(
-              icon: Icon(
-                hasPartial
-                    ? Icons.download_for_offline
-                    : Icons.download_outlined,
-              ),
-              onPressed: () {
-                context.read<AudioDownloadCubit>().downloadSurah(
-                  reciter,
-                  surahNumber,
-                );
-              },
-            ),
-
-          if (isDownloaded || isDownloading || hasPartial || isStopping)
-            IconButton(
-              icon: Icon(Icons.delete_outline, color: context.errorColor),
-              onPressed: isStopping
-                  ? null
-                  : () {
-                      showDialog(
-                        context: context,
-                        builder: (c) => AlertDialog(
-                          title: Text(l10n.deleteSurahAudio),
-                          content: Text(l10n.deleteSurahConfirm(surahName)),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(c),
-                              child: Text(l10n.cancel),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(c);
-                                context.read<AudioDownloadCubit>().deleteSurah(
-                                  reciter,
-                                  surahNumber,
-                                );
-                              },
-                              child: Text(
-                                l10n.delete,
-                                style: TextStyle(color: context.errorColor),
-                              ),
-                            ),
-                          ],
-                        ),
+              )
+            else if (isDownloading)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('${(progress * 100).toInt()}%'),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: Icon(
+                      Icons.stop_circle_outlined,
+                      color: context.secondaryColor,
+                      size: 20,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () {
+                      context.read<AudioDownloadCubit>().cancelDownload(
+                        reciter,
+                        surahNumber,
                       );
                     },
-            ),
-        ],
+                  ),
+                ],
+              )
+            else
+              IconButton(
+                icon: Icon(
+                  hasPartial
+                      ? Icons.download_for_offline
+                      : Icons.download_outlined,
+                ),
+                onPressed: () {
+                  context.read<AudioDownloadCubit>().downloadSurah(
+                    reciter,
+                    surahNumber,
+                  );
+                },
+              ),
+    
+            if (isDownloaded || isDownloading || hasPartial || isStopping)
+              IconButton(
+                icon: Icon(Icons.delete_outline, color: context.errorColor),
+                onPressed: isStopping
+                    ? null
+                    : () {
+                        showDialog(
+                          context: context,
+                          builder: (c) => AlertDialog(
+                            title: Text(l10n.deleteSurahAudio),
+                            content: Text(l10n.deleteSurahConfirm(surahName)),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(c),
+                                child: Text(l10n.cancel),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(c);
+                                  context.read<AudioDownloadCubit>().deleteSurah(
+                                    reciter,
+                                    surahNumber,
+                                  );
+                                },
+                                child: Text(
+                                  l10n.delete,
+                                  style: TextStyle(color: context.errorColor),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+              ),
+          ],
+        ),
       ),
     );
   }

@@ -189,42 +189,45 @@ class _ReciterSelectorState extends State<ReciterSelector> {
 
                         final isArabic = l10n.localeName == 'ar';
 
-                        return ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: isSelected
-                                ? Theme.of(context).colorScheme.primaryContainer
-                                : context.outlineVariantColor,
-                            child: Text(
-                              reciter.name.isNotEmpty
-                                  ? reciter.name.substring(0, 1)
-                                  : 'A',
-                              style: TextStyle(
-                                color: isSelected
-                                    ? Theme.of(context).colorScheme.primary
-                                    : context.onSurfaceVariantColor,
+                        return Material(
+                          color: Colors.transparent,
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: isSelected
+                                  ? Theme.of(context).colorScheme.primaryContainer
+                                  : context.outlineVariantColor,
+                              child: Text(
+                                reciter.name.isNotEmpty
+                                    ? reciter.name.substring(0, 1)
+                                    : 'A',
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? Theme.of(context).colorScheme.primary
+                                      : context.onSurfaceVariantColor,
+                                ),
                               ),
                             ),
+                            title: Text(
+                              isArabic ? reciter.name : reciter.englishName,
+                            ),
+                            subtitle: Text(
+                              isArabic ? reciter.englishName : reciter.name,
+                            ),
+                            trailing: isSelected
+                                ? Icon(
+                                    Icons.check_circle,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  )
+                                : null,
+                            onTap: () {
+                              context.read<ReciterManagerBloc>().add(
+                                SelectReciter(reciter),
+                              );
+                              context.read<AudioPlayerBloc>().add(
+                                ChangeReciter(reciter),
+                              );
+                            },
                           ),
-                          title: Text(
-                            isArabic ? reciter.name : reciter.englishName,
-                          ),
-                          subtitle: Text(
-                            isArabic ? reciter.englishName : reciter.name,
-                          ),
-                          trailing: isSelected
-                              ? Icon(
-                                  Icons.check_circle,
-                                  color: Theme.of(context).colorScheme.primary,
-                                )
-                              : null,
-                          onTap: () {
-                            context.read<ReciterManagerBloc>().add(
-                              SelectReciter(reciter),
-                            );
-                            context.read<AudioPlayerBloc>().add(
-                              ChangeReciter(reciter),
-                            );
-                          },
                         );
                       },
                     ),

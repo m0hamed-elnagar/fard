@@ -2,6 +2,7 @@ import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/core/widgets/fard_list_tile.dart';
 
 /// Color picker widget for widget theme customization.
 /// Shows a color swatch grid and custom color picker.
@@ -21,7 +22,7 @@ class WidgetColorPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = _hexToColor(currentHex);
 
-    return ListTile(
+    return FardListTile(
       contentPadding: EdgeInsets.zero,
       title: Text(label, style: GoogleFonts.amiri(fontSize: 14)),
       subtitle: Text(
