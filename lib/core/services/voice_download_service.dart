@@ -17,54 +17,50 @@ class VoiceDownloadService {
   VoiceDownloadService(this._manifestService);
 
   static const Map<String, String> azanVoices = {
+    'Makkah Haram (Beautiful) - مكة المكرمة':
+        'https://www.islamcan.com/audio/adhan/azan16.mp3',
+    'Ali Ahmed Mala (Madinah) - علي أحمد ملا':
+        'https://www.islamcan.com/audio/adhan/azan20.mp3',
     'Abdul Basit - عبد الباسط':
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Abed%20Albase6.mp3',
     'Mishary Rashid Alafasy - مشاري العفاسي':
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Mishary%20Alafasi.mp3',
-    'Ali Ahmed Mala (Madinah) - علي أحمد ملا':
-        'https://www.islamcan.com/audio/adhan/azan20.mp3',
+    'Saad Al-Ghamdi - سعد الغامدي':
+        'https://www.islamcan.com/audio/adhan/azan21.mp3',
+    'Nasser Al-Qatami - ناصر القطامي':
+        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Nasser%20Alqatami.mp3',
     'Muhammad Siddiq Al-Minshawi - محمد صديق المنشاوي':
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Mohammad%20Almenshawy.mp3',
+    'Mahmoud Khalil Al-Husary - محمود خليل الحصري':
+        'https://www.islamcan.com/audio/adhan/azan3.mp3',
+    'Muhammad Refaat - محمد رفعت':
+        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Mohammad%20Ref3at.mp3',
+    'Mansour Al-Salimi - منصور السالمي':
+        'https://www.islamcan.com/audio/adhan/azan6.mp3',
+    'Muhammad Al-Luhaidan - محمد اللحيدان':
+        'https://www.islamcan.com/audio/adhan/azan14.mp3',
+    'Wadii Al-Yamani - وديع اليمني':
+        'https://www.islamcan.com/audio/adhan/azan12.mp3',
     'Al-Aqsa Mosque (Palestine) - المسجد الأقصى':
         'https://www.islamcan.com/audio/adhan/azan2.mp3',
     'Turkish Style Adhan - أذان تركي':
         'https://www.islamcan.com/audio/adhan/azan19.mp3',
-    'Makkah Haram (Beautiful) - مكة المكرمة':
-        'https://www.islamcan.com/audio/adhan/azan16.mp3',
     'Bosnian Style Adhan - أذان البوسنة':
         'https://www.islamcan.com/audio/adhan/azan5.mp3',
-    'Nasser Al-Qatami - ناصر القطامي':
-        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Nasser%20Alqatami.mp3',
-    'Muhammad Al-Luhaidan - محمد اللحيدان':
-        'https://www.islamcan.com/audio/adhan/azan14.mp3',
+    'Adhan Kuwait - أذان الكويت':
+        'https://www.islamcan.com/audio/adhan/azan8.mp3',
+    'Yasser Al-Filkawi - ياسر الفيلكاوي':
+        'https://www.islamcan.com/audio/adhan/azan11.mp3',
+    'Abdul Majid Al-Surehi - عبدالمجيد السريحي':
+        'https://www.islamcan.com/audio/adhan/azan13.mp3',
     'Makkah Haram (Fajr) - أذان الفجر من مكة':
         'https://www.islamcan.com/audio/adhan/azan17.mp3',
     'Madinah Haram (Fajr) - أذان الفجر من المدينة':
         'https://www.islamcan.com/audio/adhan/azan18.mp3',
-    'Saad Al-Ghamdi - سعد الغامدي':
-        'https://www.islamcan.com/audio/adhan/azan21.mp3',
-    'Egyptian Style Adhan - أذان مصري':
-        'https://www.islamcan.com/audio/adhan/azan4.mp3',
-    'Yusuf Islam - يوسف إسلام':
-        'https://www.islamcan.com/audio/adhan/azan10.mp3',
     'Makkah Haram (Old Style) - الحرم المكي':
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Makkah.mp3',
-    'Mahmoud Khalil Al-Husary - محمود خليل الحصري':
-        'https://www.islamcan.com/audio/adhan/azan3.mp3',
-    'Mansour Al-Salimi - منصور السالمي':
-        'https://www.islamcan.com/audio/adhan/azan6.mp3',
-    'Wadii Al-Yamani - وديع اليمني':
-        'https://www.islamcan.com/audio/adhan/azan12.mp3',
-    'Yasser Al-Filkawi - ياسر الفيلكاوي':
-        'https://www.islamcan.com/audio/adhan/azan11.mp3',
-    'Muhammad Refaat - محمد رفعت':
-        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Mohammad%20Ref3at.mp3',
-    'Adhan Kuwait - أذان الكويت':
-        'https://www.islamcan.com/audio/adhan/azan8.mp3',
-    'Abdul Majid Al-Surehi - عبدالمجيد السريحي':
-        'https://www.islamcan.com/audio/adhan/azan13.mp3',
-    'Indonesian Style Adhan - أذان إندونيسي':
-        'https://www.islamcan.com/audio/adhan/azan20.mp3',
+    'Yusuf Islam - يوسف إسلام':
+        'https://www.islamcan.com/audio/adhan/azan10.mp3',
   };
 
   String _getFileName(String voiceName) {
