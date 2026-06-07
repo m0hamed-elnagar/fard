@@ -17,6 +17,12 @@ class VoiceDownloadService {
   VoiceDownloadService(this._manifestService);
 
   static const Map<String, String> azanVoices = {
+    'Ibrahim Al-Arkani - إبراهيم الأركاني':
+    'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Ibrahim%20Al-Arkani.mp3',
+    'Majed Al-Hamathani - ماجد الهمذاني':
+    'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Majed%20Al-hamathani.mp3',
+    'Mansoor Az-Zahrani - منصور الزهراني':
+    'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Mansoor%20Az-Zahrani.mp3',
     'Makkah Haram (Beautiful) - مكة المكرمة':
         'https://www.islamcan.com/audio/adhan/azan16.mp3',
     'Ali Ahmed Mala (Madinah) - علي أحمد ملا':
@@ -25,7 +31,9 @@ class VoiceDownloadService {
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Abed%20Albase6.mp3',
     'Mishary Rashid Alafasy - مشاري العفاسي':
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Mishary%20Alafasi.mp3',
-    'Saad Al-Ghamdi - سعد الغامدي':
+     'Ahmad Al-Nufais - أحمد النفيس':
+        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Ahmad%20Nuyne3.mp3',
+   'Saad Al-Ghamdi - سعد الغامدي':
         'https://www.islamcan.com/audio/adhan/azan21.mp3',
     'Nasser Al-Qatami - ناصر القطامي':
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Nasser%20Alqatami.mp3',
@@ -37,15 +45,15 @@ class VoiceDownloadService {
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Mohammad%20Ref3at.mp3',
     'Mansour Al-Salimi - منصور السالمي':
         'https://www.islamcan.com/audio/adhan/azan6.mp3',
-    'Muhammad Al-Luhaidan - محمد اللحيدان':
+     'Muhammad Al-Luhaidan - محمد اللحيدان':
         'https://www.islamcan.com/audio/adhan/azan14.mp3',
     'Wadii Al-Yamani - وديع اليمني':
         'https://www.islamcan.com/audio/adhan/azan12.mp3',
     'Al-Aqsa Mosque (Palestine) - المسجد الأقصى':
         'https://www.islamcan.com/audio/adhan/azan2.mp3',
-    'Turkish Style Adhan - أذان تركي':
+       'Turkish Style Adhan - أذان تركي':
         'https://www.islamcan.com/audio/adhan/azan19.mp3',
-    'Bosnian Style Adhan - أذان البوسنة':
+       'Bosnian Style Adhan - أذان البوسنة':
         'https://www.islamcan.com/audio/adhan/azan5.mp3',
     'Adhan Kuwait - أذان الكويت':
         'https://www.islamcan.com/audio/adhan/azan8.mp3',
@@ -61,7 +69,11 @@ class VoiceDownloadService {
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Makkah.mp3',
     'Yusuf Islam - يوسف إسلام':
         'https://www.islamcan.com/audio/adhan/azan10.mp3',
-  };
+    'Suhaib Khatba - صهيب خطبة':
+        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Suhaib%20Khatba.mp3',
+    'Hamad Deghreri - حمد دغريري':
+        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Hamad%20Deghreri.mp3',
+   };
 
   String _getFileName(String voiceName) {
     // Extract a stable identifier from the URL to avoid re-downloading when renaming display names
