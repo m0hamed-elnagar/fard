@@ -1,4 +1,4 @@
-package com.qada.fard.prayer
+package com.khwarizmi.fard.prayer
 
 /**
  * THIS FILE IS THE SINGLE SOURCE OF TRUTH - mirror of calculation_contract.dart
@@ -30,6 +30,7 @@ object CalculationContract {
     const val HIGH_LAT_TWILIGHT_ANGLE = 2
 
     // Channel & Pref Keys
-    const val CHANNEL_NAME = "com.qada.fard/instant_updates"
+    const val CHANNEL_NAME = "com.khwarizmi.fard/instant_updates"
     const val PREF_PREFIX = "flutter."
 }
+

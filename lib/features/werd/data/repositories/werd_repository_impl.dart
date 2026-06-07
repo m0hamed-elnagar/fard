@@ -94,18 +94,20 @@ class WerdRepositoryImpl implements WerdRepository {
         final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(endAbs);
 
         // FIX #2: Use segments today, or fallback to items for compatibility
-        final segments = progress.segmentsToday.isNotEmpty 
-            ? progress.segmentsToday 
+        final segments = progress.segmentsToday.isNotEmpty
+            ? progress.segmentsToday
             : ReadingSegment.fromSet(progress.readItemsToday);
-            
-        final pagesRead = QuranHizbProvider.calculateFractionalProgressFromSegments(
-          segments,
-          WerdUnit.page,
-        );
-        final juzRead = QuranHizbProvider.calculateFractionalProgressFromSegments(
-          segments,
-          WerdUnit.juz,
-        );
+
+        final pagesRead =
+            QuranHizbProvider.calculateFractionalProgressFromSegments(
+              segments,
+              WerdUnit.page,
+            );
+        final juzRead =
+            QuranHizbProvider.calculateFractionalProgressFromSegments(
+              segments,
+              WerdUnit.juz,
+            );
 
         final startSurahName = quran.getSurahName(startPos[0]);
         final endSurahName = quran.getSurahName(endPos[0]);
@@ -131,7 +133,9 @@ class WerdRepositoryImpl implements WerdRepository {
           endSurahName: endSurahName,
           endAyahNumber: endPos[1],
           summary: summary,
-          sessions: progress.segmentsToday.isNotEmpty ? progress.segmentsToday : null,
+          sessions: progress.segmentsToday.isNotEmpty
+              ? progress.segmentsToday
+              : null,
         );
 
         final newHistory = Map<String, WerdHistoryEntry>.from(progress.history);

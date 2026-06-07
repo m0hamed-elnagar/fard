@@ -100,7 +100,12 @@ void main() {
   group('PrayerTrackerBloc - Edge Cases', () {
     blocTest<PrayerTrackerBloc, PrayerTrackerState>(
       'Load when no previous record exists and all prayers passed',
-      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService),
+      build: () => PrayerTrackerBloc(
+        repo,
+        prefs,
+        prayerTimeService,
+        notificationService,
+      ),
       setUp: () {
         when(
           () => prayerTimeService.isPassed(
@@ -126,7 +131,12 @@ void main() {
 
     blocTest<PrayerTrackerBloc, PrayerTrackerState>(
       'Delete record should trigger cascade update',
-      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService),
+      build: () => PrayerTrackerBloc(
+        repo,
+        prefs,
+        prayerTimeService,
+        notificationService,
+      ),
       setUp: () {
         final r1 = DailyRecord(
           id: '2026-02-25',
@@ -160,7 +170,12 @@ void main() {
 
     blocTest<PrayerTrackerBloc, PrayerTrackerState>(
       'History should be sorted descending by date',
-      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService),
+      build: () => PrayerTrackerBloc(
+        repo,
+        prefs,
+        prayerTimeService,
+        notificationService,
+      ),
       setUp: () {
         final r1 = DailyRecord(
           id: '2026-02-24',
@@ -200,7 +215,12 @@ void main() {
 
     blocTest<PrayerTrackerBloc, PrayerTrackerState>(
       'Acknowledge missed days should bulk add correctly',
-      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService),
+      build: () => PrayerTrackerBloc(
+        repo,
+        prefs,
+        prayerTimeService,
+        notificationService,
+      ),
       setUp: () {
         final lastRecord = DailyRecord(
           id: 'last',
@@ -234,7 +254,12 @@ void main() {
 
     blocTest<PrayerTrackerBloc, PrayerTrackerState>(
       'Check missed days should emit prompt if gap > 1 day',
-      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService),
+      build: () => PrayerTrackerBloc(
+        repo,
+        prefs,
+        prayerTimeService,
+        notificationService,
+      ),
       setUp: () {
         final lastRecord = DailyRecord(
           id: 'gap-record',
@@ -260,7 +285,12 @@ void main() {
 
     blocTest<PrayerTrackerBloc, PrayerTrackerState>(
       'Remove Qada when already at zero should not go negative',
-      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService),
+      build: () => PrayerTrackerBloc(
+        repo,
+        prefs,
+        prayerTimeService,
+        notificationService,
+      ),
       act: (bloc) async {
         bloc.add(PrayerTrackerEvent.load(today));
         await Future.delayed(Duration.zero);

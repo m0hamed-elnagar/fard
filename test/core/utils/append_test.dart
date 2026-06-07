@@ -18,16 +18,16 @@ void main() {
 
     test('appends bytes correctly to an existing file', () async {
       final file = File(path.join(tempDir.path, 'test.bin'));
-      
+
       // 1. Initial write
       await file.writeAsBytes(Uint8List.fromList([1, 2, 3]));
-      
+
       // 2. Append
       await FileDownloadUtils.appendToFile(
         bytes: Uint8List.fromList([4, 5, 6]),
         path: file.path,
       );
-      
+
       final result = await file.readAsBytes();
       expect(result, equals([1, 2, 3, 4, 5, 6]));
     });

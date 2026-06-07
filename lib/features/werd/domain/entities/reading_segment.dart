@@ -56,10 +56,7 @@ class ReadingSegment extends Equatable {
 
   /// Extend this segment to include new ayah
   ReadingSegment extend(int newEndAyah) {
-    return copyWith(
-      endAyah: newEndAyah,
-      endTime: DateTime.now(),
-    );
+    return copyWith(endAyah: newEndAyah, endTime: DateTime.now());
   }
 
   ReadingSegment copyWith({
@@ -121,7 +118,9 @@ class ReadingSegment extends Equatable {
   /// Merges segments but respects session boundaries
   /// Sessions that have ended (endTime != null) should NOT merge with new sessions
   /// This allows multiple separate sessions per day
-  static List<ReadingSegment> mergeSegmentsWithSessionAwareness(List<ReadingSegment> segments) {
+  static List<ReadingSegment> mergeSegmentsWithSessionAwareness(
+    List<ReadingSegment> segments,
+  ) {
     if (segments.isEmpty) return [];
     if (segments.length == 1) return segments;
 
@@ -148,13 +147,18 @@ class ReadingSegment extends Equatable {
       final isLastActive = last.endTime == null;
       final isAdjacent = current.startAyah <= last.endAyah + 1;
       final isOverlapping = current.startAyah <= last.endAyah;
-      
+
       // Check if segments are from the same time period (within 5 minutes)
-      // Exception: If the previous segment is still active (endTime == null), 
+      // Exception: If the previous segment is still active (endTime == null),
       // we allow merging regardless of time to support long reading sessions.
       bool isSameTimePeriod = true;
-      if (last.startTime != null && current.startTime != null && last.endTime != null) {
-        final timeDiff = current.startTime!.difference(last.startTime!).inMinutes.abs();
+      if (last.startTime != null &&
+          current.startTime != null &&
+          last.endTime != null) {
+        final timeDiff = current.startTime!
+            .difference(last.startTime!)
+            .inMinutes
+            .abs();
         isSameTimePeriod = timeDiff <= 5;
       }
 
@@ -198,48 +202,52 @@ class ReadingSegment extends Equatable {
         end = sorted[i];
       } else {
         // Start new segment
-        segments.add(ReadingSegment(
-          startAyah: start, 
-          endAyah: end,
-          startTime: sessionStart,
-          endTime: null,
-        ));
+        segments.add(
+          ReadingSegment(
+            startAyah: start,
+            endAyah: end,
+            startTime: sessionStart,
+            endTime: null,
+          ),
+        );
         start = sorted[i];
         end = sorted[i];
       }
     }
-    segments.add(ReadingSegment(
-      startAyah: start, 
-      endAyah: end,
-      startTime: sessionStart,
-      endTime: null,
-    ));
+    segments.add(
+      ReadingSegment(
+        startAyah: start,
+        endAyah: end,
+        startTime: sessionStart,
+        endTime: null,
+      ),
+    );
 
     return segments;
   }
 
   Map<String, dynamic> toJson() => {
-        'startAyah': startAyah,
-        'endAyah': endAyah,
-        'startTime': startTime?.toIso8601String(),
-        'endTime': endTime?.toIso8601String(),
-      };
+    'startAyah': startAyah,
+    'endAyah': endAyah,
+    'startTime': startTime?.toIso8601String(),
+    'endTime': endTime?.toIso8601String(),
+  };
 
-  factory ReadingSegment.fromJson(Map<String, dynamic> json) =>
-      ReadingSegment(
-        startAyah: json['startAyah'] as int,
-        endAyah: json['endAyah'] as int,
-        startTime: json['startTime'] != null
-            ? DateTime.parse(json['startTime'] as String)
-            : null,
-        endTime: json['endTime'] != null
-            ? DateTime.parse(json['endTime'] as String)
-            : null,
-      );
+  factory ReadingSegment.fromJson(Map<String, dynamic> json) => ReadingSegment(
+    startAyah: json['startAyah'] as int,
+    endAyah: json['endAyah'] as int,
+    startTime: json['startTime'] != null
+        ? DateTime.parse(json['startTime'] as String)
+        : null,
+    endTime: json['endTime'] != null
+        ? DateTime.parse(json['endTime'] as String)
+        : null,
+  );
 
   @override
   List<Object?> get props => [startAyah, endAyah, startTime, endTime];
 
   @override
-  String toString() => 'ReadingSegment($startAyah-$endAyah, ${startTime?.toLocal()} to ${endTime?.toLocal()})';
+  String toString() =>
+      'ReadingSegment($startAyah-$endAyah, ${startTime?.toLocal()} to ${endTime?.toLocal()})';
 }

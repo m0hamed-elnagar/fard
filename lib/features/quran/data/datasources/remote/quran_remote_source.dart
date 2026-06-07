@@ -27,10 +27,12 @@ class QuranRemoteSourceImpl implements QuranRemoteSource {
   @override
   Future<List<SurahModel>> getAllSurahs() async {
     try {
-      final response = await client.get(
-        Uri.parse('$baseUrl/chapters'),
-        headers: {'Accept': 'application/json'},
-      ).timeout(const Duration(seconds: 30));
+      final response = await client
+          .get(
+            Uri.parse('$baseUrl/chapters'),
+            headers: {'Accept': 'application/json'},
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -51,16 +53,20 @@ class QuranRemoteSourceImpl implements QuranRemoteSource {
   @override
   Future<SurahModel> getSurahDetail(int surahNumber) async {
     try {
-      final response = await client.get(
-        Uri.parse('$baseUrl/chapters/$surahNumber'),
-        headers: {'Accept': 'application/json'},
-      ).timeout(const Duration(seconds: 30));
+      final response = await client
+          .get(
+            Uri.parse('$baseUrl/chapters/$surahNumber'),
+            headers: {'Accept': 'application/json'},
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return SurahModel.fromJson(data['chapter']);
       } else {
-        throw ServerFailure('Failed to load surah details: ${response.statusCode}');
+        throw ServerFailure(
+          'Failed to load surah details: ${response.statusCode}',
+        );
       }
     } on SocketException {
       throw const NoInternetFailure();
@@ -93,18 +99,21 @@ class QuranRemoteSourceImpl implements QuranRemoteSource {
 
     try {
       while (hasMore) {
-        final response = await client.get(
-          Uri.parse(
-            '$baseUrl/verses/by_chapter/$surahNumber?language=en&words=true&fields=$fields&per_page=50&page=$currentPage&audio=7',
-          ),
-          headers: {'Accept': 'application/json'},
-        ).timeout(const Duration(seconds: 60));
+        final response = await client
+            .get(
+              Uri.parse(
+                '$baseUrl/verses/by_chapter/$surahNumber?language=en&words=true&fields=$fields&per_page=50&page=$currentPage&audio=7',
+              ),
+              headers: {'Accept': 'application/json'},
+            )
+            .timeout(const Duration(seconds: 60));
 
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
           final List versesJson = data['verses'];
-          final List<AyahModel> verses =
-              versesJson.map((json) => AyahModel.fromJson(json)).toList();
+          final List<AyahModel> verses = versesJson
+              .map((json) => AyahModel.fromJson(json))
+              .toList();
           allVerses.addAll(verses);
 
           final pagination = data['pagination'];
@@ -120,7 +129,9 @@ class QuranRemoteSourceImpl implements QuranRemoteSource {
     } on SocketException {
       throw const NoInternetFailure();
     } on TimeoutException {
-      throw const ServerFailure('Connection timed out while downloading verses');
+      throw const ServerFailure(
+        'Connection timed out while downloading verses',
+      );
     } catch (e) {
       throw ServerFailure(e.toString());
     }
@@ -136,10 +147,12 @@ class QuranRemoteSourceImpl implements QuranRemoteSource {
   }) async {
     final id = tafsirId ?? 16;
     try {
-      final response = await client.get(
-        Uri.parse('$baseUrl/tafsirs/$id/by_ayah/$surahNumber:$ayahNumber'),
-        headers: {'Accept': 'application/json'},
-      ).timeout(const Duration(seconds: 30));
+      final response = await client
+          .get(
+            Uri.parse('$baseUrl/tafsirs/$id/by_ayah/$surahNumber:$ayahNumber'),
+            headers: {'Accept': 'application/json'},
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);

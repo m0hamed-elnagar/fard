@@ -1,4 +1,4 @@
-package com.qada.fard.widget
+package com.khwarizmi.fard.widget
 
 import androidx.compose.ui.graphics.Color
 
@@ -67,3 +67,4 @@ data class CountdownData(
     val isRtl: Boolean,
     val lastUpdated: Long = 0
 )
+

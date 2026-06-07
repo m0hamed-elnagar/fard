@@ -26,7 +26,9 @@ class ReadingSegment {
       if (current.startAyah <= last.endAyah + 1) {
         merged[merged.length - 1] = ReadingSegment(
           startAyah: last.startAyah,
-          endAyah: current.endAyah > last.endAyah ? current.endAyah : last.endAyah,
+          endAyah: current.endAyah > last.endAyah
+              ? current.endAyah
+              : last.endAyah,
         );
       } else {
         merged.add(current);
@@ -110,17 +112,20 @@ void main() {
       expect(merged[1], const ReadingSegment(startAyah: 10, endAyah: 15));
     });
 
-    test('multiple segments merge correctly: {1,3}, {5,7}, {8,10} → {1,3}, {5,10}', () {
-      final segments = const [
-        ReadingSegment(startAyah: 1, endAyah: 3),
-        ReadingSegment(startAyah: 5, endAyah: 7),
-        ReadingSegment(startAyah: 8, endAyah: 10),
-      ];
-      final merged = ReadingSegment.mergeSegments(segments);
-      expect(merged.length, 2);
-      expect(merged[0], const ReadingSegment(startAyah: 1, endAyah: 3));
-      expect(merged[1], const ReadingSegment(startAyah: 5, endAyah: 10));
-    });
+    test(
+      'multiple segments merge correctly: {1,3}, {5,7}, {8,10} → {1,3}, {5,10}',
+      () {
+        final segments = const [
+          ReadingSegment(startAyah: 1, endAyah: 3),
+          ReadingSegment(startAyah: 5, endAyah: 7),
+          ReadingSegment(startAyah: 8, endAyah: 10),
+        ];
+        final merged = ReadingSegment.mergeSegments(segments);
+        expect(merged.length, 2);
+        expect(merged[0], const ReadingSegment(startAyah: 1, endAyah: 3));
+        expect(merged[1], const ReadingSegment(startAyah: 5, endAyah: 10));
+      },
+    );
 
     test('merge handles unsorted input', () {
       final segments = const [

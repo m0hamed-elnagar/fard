@@ -5,11 +5,7 @@ class PageNavButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onPressed;
 
-  const PageNavButton({
-    super.key,
-    required this.icon,
-    this.onPressed,
-  });
+  const PageNavButton({super.key, required this.icon, this.onPressed});
 
   @override
   Widget build(BuildContext context) {

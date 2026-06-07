@@ -84,25 +84,24 @@ class _SalaahTileState extends State<SalaahTile> {
               end: Alignment.bottomRight,
               colors: widget.isUpcoming
                   ? [
-                    context.surfaceContainerColor,
-                    context.surfaceContainerColor,
-                  ]
+                      context.surfaceContainerColor,
+                      context.surfaceContainerColor,
+                    ]
                   : widget.isCompletedToday
                   ? [
-                    context.primaryLight.withValues(alpha: 0.15),
-                    context.primaryLight.withValues(alpha: 0.05),
-                  ]
+                      context.primaryLight.withValues(alpha: 0.15),
+                      context.primaryLight.withValues(alpha: 0.05),
+                    ]
                   : [
-                    context.missedColor.withValues(alpha: 0.15),
-                    context.missedColor.withValues(alpha: 0.05),
-                  ],
+                      context.missedColor.withValues(alpha: 0.15),
+                      context.missedColor.withValues(alpha: 0.05),
+                    ],
             ),
             borderRadius: BorderRadius.circular(16.0),
             border: Border.all(
-              color:
-                  widget.isUpcoming
-                      ? context.outlineColor.withValues(alpha: 0.4)
-                      : context.outlineColor.withValues(alpha: 0.05),
+              color: widget.isUpcoming
+                  ? context.outlineColor.withValues(alpha: 0.4)
+                  : context.outlineColor.withValues(alpha: 0.05),
               width: 1.0,
             ),
             boxShadow: [
@@ -110,9 +109,9 @@ class _SalaahTileState extends State<SalaahTile> {
                 BoxShadow(
                   color:
                       (widget.isCompletedToday
-                                ? context.primaryLight
-                                : context.missedColor)
-                            .withValues(alpha: 0.06),
+                              ? context.primaryLight
+                              : context.missedColor)
+                          .withValues(alpha: 0.06),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -122,18 +121,17 @@ class _SalaahTileState extends State<SalaahTile> {
             color: Colors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(16.0),
-              onTap:
-                  widget.isUpcoming
-                      ? null
-                      : () {
-                        HapticFeedback.lightImpact();
-                        if (widget.isCompletedToday && _removedInSession > 0) {
-                          setState(() {
-                            _removedInSession--;
-                          });
-                        }
-                        widget.onToggleMissed();
-                      },
+              onTap: widget.isUpcoming
+                  ? null
+                  : () {
+                      HapticFeedback.lightImpact();
+                      if (widget.isCompletedToday && _removedInSession > 0) {
+                        setState(() {
+                          _removedInSession--;
+                        });
+                      }
+                      widget.onToggleMissed();
+                    },
               child: Opacity(
                 opacity: widget.isUpcoming ? 0.6 : 1.0,
                 child: Padding(
@@ -148,19 +146,18 @@ class _SalaahTileState extends State<SalaahTile> {
                         isCompleted: widget.isCompletedToday,
                         isUpcoming: widget.isUpcoming,
                         size: isNarrow ? 40.0 : 48.0,
-                        onTap:
-                            widget.isUpcoming
-                                ? () {}
-                                : () {
-                                  HapticFeedback.mediumImpact();
-                                  if (widget.isCompletedToday &&
-                                      _removedInSession > 0) {
-                                    setState(() {
-                                      _removedInSession--;
-                                    });
-                                  }
-                                  widget.onToggleMissed();
-                                },
+                        onTap: widget.isUpcoming
+                            ? () {}
+                            : () {
+                                HapticFeedback.mediumImpact();
+                                if (widget.isCompletedToday &&
+                                    _removedInSession > 0) {
+                                  setState(() {
+                                    _removedInSession--;
+                                  });
+                                }
+                                widget.onToggleMissed();
+                              },
                       ),
                       SizedBox(width: isNarrow ? 10.0 : 16.0),
 
@@ -183,76 +180,72 @@ class _SalaahTileState extends State<SalaahTile> {
                                 icon: Icons.add_rounded,
                                 size: isNarrow ? 20 : 24,
                                 padding: isNarrow ? 6 : 10,
-                                onPressed:
-                                    widget.isUpcoming
-                                        ? null
-                                        : () {
-                                          HapticFeedback.lightImpact();
-                                          if (_removedInSession > 0 ||
-                                              widget.completedQadaCount > 0) {
-                                            widget.onAdd();
-                                            if (_removedInSession > 0) {
-                                              setState(() {
-                                                _removedInSession--;
-                                              });
-                                            }
-                                          } else {
-                                            widget.onLimitExceeded?.call();
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).clearSnackBars();
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                content: Row(
-                                                  children: [
-                                                    const Icon(
-                                                      Icons.arrow_upward_rounded,
-                                                      color: Colors.white,
-                                                      size: 20,
-                                                    ),
-                                                    const SizedBox(width: 12),
-                                                    Expanded(
-                                                      child: Text(
-                                                        l10n.useAddQadaToNewPrayers,
-                                                        style: GoogleFonts.outfit(
-                                                          color:
-                                                              context
-                                                                  .onSurfaceColor,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                        ),
+                                onPressed: widget.isUpcoming
+                                    ? null
+                                    : () {
+                                        HapticFeedback.lightImpact();
+                                        if (_removedInSession > 0 ||
+                                            widget.completedQadaCount > 0) {
+                                          widget.onAdd();
+                                          if (_removedInSession > 0) {
+                                            setState(() {
+                                              _removedInSession--;
+                                            });
+                                          }
+                                        } else {
+                                          widget.onLimitExceeded?.call();
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).clearSnackBars();
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.arrow_upward_rounded,
+                                                    color: Colors.white,
+                                                    size: 20,
+                                                  ),
+                                                  const SizedBox(width: 12),
+                                                  Expanded(
+                                                    child: Text(
+                                                      l10n.useAddQadaToNewPrayers,
+                                                      style: GoogleFonts.outfit(
+                                                        color: context
+                                                            .onSurfaceColor,
+                                                        fontWeight:
+                                                            FontWeight.w500,
                                                       ),
                                                     ),
-                                                  ],
-                                                ),
-                                                backgroundColor:
-                                                    context.secondaryColor,
-                                                behavior:
-                                                    SnackBarBehavior.floating,
-                                                margin: const EdgeInsets.all(
-                                                  16,
-                                                ),
-                                                elevation: 4,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(12),
-                                                ),
-                                                duration: const Duration(
-                                                  seconds: 3,
-                                                ),
+                                                  ),
+                                                ],
                                               ),
-                                            );
-                                          }
-                                        },
+                                              backgroundColor:
+                                                  context.secondaryColor,
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                              margin: const EdgeInsets.all(16),
+                                              elevation: 4,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              duration: const Duration(
+                                                seconds: 3,
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      },
                                 color:
                                     (_removedInSession > 0 &&
-                                            !widget.isUpcoming)
-                                        ? context.primaryLight
-                                        : context.neutralColor.withValues(
-                                          alpha: 0.5,
-                                        ),
+                                        !widget.isUpcoming)
+                                    ? context.primaryLight
+                                    : context.neutralColor.withValues(
+                                        alpha: 0.5,
+                                      ),
                               ),
                               Container(
                                 width: 16,
@@ -267,14 +260,14 @@ class _SalaahTileState extends State<SalaahTile> {
                                 padding: isNarrow ? 6 : 10,
                                 onPressed:
                                     (widget.qadaCount > 0 && !widget.isUpcoming)
-                                        ? () {
-                                          HapticFeedback.lightImpact();
-                                          widget.onRemove();
-                                          setState(() {
-                                            _removedInSession++;
-                                          });
-                                        }
-                                        : null,
+                                    ? () {
+                                        HapticFeedback.lightImpact();
+                                        widget.onRemove();
+                                        setState(() {
+                                          _removedInSession++;
+                                        });
+                                      }
+                                    : null,
                                 color: context.missedColor,
                               ),
                             ],
@@ -312,12 +305,11 @@ class _SalaahTileState extends State<SalaahTile> {
                                     widget.isReminderEnabled
                                         ? Icons.notifications_active_rounded
                                         : Icons.notifications_none_rounded,
-                                    color:
-                                        widget.isReminderEnabled
-                                            ? context.secondaryColor
-                                            : context.neutralColor.withValues(
-                                              alpha: 0.5,
-                                            ),
+                                    color: widget.isReminderEnabled
+                                        ? context.secondaryColor
+                                        : context.neutralColor.withValues(
+                                            alpha: 0.5,
+                                          ),
                                   ),
                                 ),
                               ],
@@ -401,22 +393,20 @@ class _SalaahTileState extends State<SalaahTile> {
                                 vertical: isNarrow ? 6.0 : 8.0,
                               ),
                               decoration: BoxDecoration(
-                                color:
-                                    widget.qadaCount > 0
-                                        ? context.secondaryColor.withValues(
-                                          alpha: 0.1,
-                                        )
-                                        : context.surfaceContainerColor,
+                                color: widget.qadaCount > 0
+                                    ? context.secondaryColor.withValues(
+                                        alpha: 0.1,
+                                      )
+                                    : context.surfaceContainerColor,
                                 borderRadius: BorderRadius.circular(14.0),
                                 border: Border.all(
-                                  color:
-                                      widget.qadaCount > 0
-                                          ? context.secondaryColor.withValues(
-                                            alpha: 0.3,
-                                          )
-                                          : context.outlineColor.withValues(
-                                            alpha: 0.5,
-                                          ),
+                                  color: widget.qadaCount > 0
+                                      ? context.secondaryColor.withValues(
+                                          alpha: 0.3,
+                                        )
+                                      : context.outlineColor.withValues(
+                                          alpha: 0.5,
+                                        ),
                                 ),
                               ),
                               child: Column(
@@ -425,10 +415,9 @@ class _SalaahTileState extends State<SalaahTile> {
                                   Text(
                                     '${widget.qadaCount}',
                                     style: GoogleFonts.outfit(
-                                      color:
-                                          widget.qadaCount > 0
-                                              ? context.secondaryColor
-                                              : context.onSurfaceVariantColor,
+                                      color: widget.qadaCount > 0
+                                          ? context.secondaryColor
+                                          : context.onSurfaceVariantColor,
                                       fontSize: isNarrow ? 18.0 : 24.0,
                                       fontWeight: FontWeight.w800,
                                     ),
@@ -438,10 +427,9 @@ class _SalaahTileState extends State<SalaahTile> {
                                         ? 'rem.'
                                         : l10n.remaining.toLowerCase(),
                                     style: GoogleFonts.outfit(
-                                      color:
-                                          widget.qadaCount > 0
-                                              ? context.secondaryColor
-                                              : context.neutralColor,
+                                      color: widget.qadaCount > 0
+                                          ? context.secondaryColor
+                                          : context.neutralColor,
                                       fontSize: isNarrow ? 7.0 : 10.0,
                                       fontWeight: FontWeight.w600,
                                     ),

@@ -85,7 +85,10 @@ class CustomTheme {
   }
 
   /// Creates a theme with default Emerald-derived palette.
-  static CustomTheme defaultPalette({required String id, required String name}) {
+  static CustomTheme defaultPalette({
+    required String id,
+    required String name,
+  }) {
     return CustomTheme(
       id: id,
       name: name,

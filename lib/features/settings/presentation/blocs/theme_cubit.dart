@@ -25,14 +25,14 @@ class ThemeCubit extends Cubit<ThemeState> {
     this._saveCustomTheme,
     this._getPresets,
   ) : super(
-          ThemeState(
-            locale: _repo.locale,
-            themePresetId: _repo.themePresetId,
-            customThemeColors: _repo.customThemeColors,
-            savedCustomThemes: _repo.savedCustomThemes,
-            activeCustomThemeId: _repo.activeCustomThemeId,
-          ),
-        );
+        ThemeState(
+          locale: _repo.locale,
+          themePresetId: _repo.themePresetId,
+          customThemeColors: _repo.customThemeColors,
+          savedCustomThemes: _repo.savedCustomThemes,
+          activeCustomThemeId: _repo.activeCustomThemeId,
+        ),
+      );
 
   void updateLocale(Locale loc) {
     _updateLocaleAsync(loc);
@@ -44,8 +44,8 @@ class ThemeCubit extends Cubit<ThemeState> {
   }
 
   void toggleLocale() => updateLocale(
-        state.locale.languageCode == 'ar' ? const Locale('en') : const Locale('ar'),
-      );
+    state.locale.languageCode == 'ar' ? const Locale('en') : const Locale('ar'),
+  );
 
   List<ThemePreset> getAvailablePresets() {
     return _getPresets.execute();
@@ -76,12 +76,7 @@ class ThemeCubit extends Cubit<ThemeState> {
     try {
       await _applyTheme.execute(presetId);
 
-      emit(
-        state.copyWith(
-          themePresetId: presetId,
-          customThemeColors: null,
-        ),
-      );
+      emit(state.copyWith(themePresetId: presetId, customThemeColors: null));
     } catch (e) {
       debugPrint('ThemeCubit: Error selecting theme preset: $e');
     }
@@ -91,12 +86,7 @@ class ThemeCubit extends Cubit<ThemeState> {
     try {
       await _saveCustomTheme.execute(colors);
 
-      emit(
-        state.copyWith(
-          themePresetId: 'custom',
-          customThemeColors: colors,
-        ),
-      );
+      emit(state.copyWith(themePresetId: 'custom', customThemeColors: colors));
     } catch (e) {
       debugPrint('ThemeCubit: Error saving custom theme: $e');
     }
@@ -118,7 +108,10 @@ class ThemeCubit extends Cubit<ThemeState> {
     }
   }
 
-  Future<void> updateCustomTheme(String themeId, Map<String, String> colors) async {
+  Future<void> updateCustomTheme(
+    String themeId,
+    Map<String, String> colors,
+  ) async {
     try {
       await _repo.updateCustomTheme(themeId, colors);
       final updated = state.savedCustomThemes.map((t) {
@@ -127,7 +120,9 @@ class ThemeCubit extends Cubit<ThemeState> {
       emit(
         state.copyWith(
           savedCustomThemes: updated,
-          customThemeColors: state.activeCustomThemeId == themeId ? colors : state.customThemeColors,
+          customThemeColors: state.activeCustomThemeId == themeId
+              ? colors
+              : state.customThemeColors,
         ),
       );
     } catch (e) {
@@ -138,11 +133,15 @@ class ThemeCubit extends Cubit<ThemeState> {
   Future<void> deleteCustomTheme(String themeId) async {
     try {
       await _repo.deleteCustomTheme(themeId);
-      final updated = state.savedCustomThemes.where((t) => t.id != themeId).toList();
+      final updated = state.savedCustomThemes
+          .where((t) => t.id != themeId)
+          .toList();
       emit(
         state.copyWith(
           savedCustomThemes: updated,
-          activeCustomThemeId: state.activeCustomThemeId == themeId ? null : state.activeCustomThemeId,
+          activeCustomThemeId: state.activeCustomThemeId == themeId
+              ? null
+              : state.activeCustomThemeId,
         ),
       );
     } catch (e) {
@@ -171,13 +170,14 @@ class ThemeCubit extends Cubit<ThemeState> {
   }
 
   void refresh() {
-    emit(state.copyWith(
-      locale: _repo.locale,
-      themePresetId: _repo.themePresetId,
-      customThemeColors: _repo.customThemeColors,
-      savedCustomThemes: _repo.savedCustomThemes,
-      activeCustomThemeId: _repo.activeCustomThemeId,
-    ));
+    emit(
+      state.copyWith(
+        locale: _repo.locale,
+        themePresetId: _repo.themePresetId,
+        customThemeColors: _repo.customThemeColors,
+        savedCustomThemes: _repo.savedCustomThemes,
+        activeCustomThemeId: _repo.activeCustomThemeId,
+      ),
+    );
   }
 }
-

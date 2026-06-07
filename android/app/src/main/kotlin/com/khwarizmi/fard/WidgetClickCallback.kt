@@ -1,4 +1,4 @@
-package com.qada.fard
+package com.khwarizmi.fard
 
 import android.content.Context
 import android.content.Intent
@@ -27,3 +27,4 @@ class WidgetClickCallback : ActionCallback {
         context.startActivity(intent)
     }
 }
+

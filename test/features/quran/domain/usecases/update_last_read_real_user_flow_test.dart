@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockQuranRepository extends Mock implements QuranRepository {}
+
 class MockWerdRepository extends Mock implements WerdRepository {}
 
 /// This test EXACTLY matches what the user does:
@@ -24,18 +25,25 @@ void main() {
   late UpdateLastRead updateLastRead;
 
   setUpAll(() {
-    registerFallbackValue(LastReadPosition(
-      ayahNumber: AyahNumber.create(surahNumber: 1, ayahNumberInSurah: 1).data!,
-      updatedAt: DateTime.now(),
-    ));
-    registerFallbackValue(WerdProgress(
-      goalId: 'default',
-      totalAmountReadToday: 0,
-      segmentsToday: const [],
-      lastUpdated: DateTime.now(),
-      streak: 0,
-      completedCycles: 0,
-    ));
+    registerFallbackValue(
+      LastReadPosition(
+        ayahNumber: AyahNumber.create(
+          surahNumber: 1,
+          ayahNumberInSurah: 1,
+        ).data!,
+        updatedAt: DateTime.now(),
+      ),
+    );
+    registerFallbackValue(
+      WerdProgress(
+        goalId: 'default',
+        totalAmountReadToday: 0,
+        segmentsToday: const [],
+        lastUpdated: DateTime.now(),
+        streak: 0,
+        completedCycles: 0,
+      ),
+    );
   });
 
   setUp(() {
@@ -56,11 +64,15 @@ void main() {
       completedCycles: 0,
     );
 
-    when(() => mockQuranRepo.updateLastReadPosition(any()))
-        .thenAnswer((_) async => Result<void>.success(null));
-    when(() => mockWerdRepo.getProgress())
-        .thenAnswer((_) async => Result.success(currentProgress));
-    when(() => mockWerdRepo.updateProgress(any())).thenAnswer((invocation) async {
+    when(
+      () => mockQuranRepo.updateLastReadPosition(any()),
+    ).thenAnswer((_) async => Result<void>.success(null));
+    when(
+      () => mockWerdRepo.getProgress(),
+    ).thenAnswer((_) async => Result.success(currentProgress));
+    when(() => mockWerdRepo.updateProgress(any())).thenAnswer((
+      invocation,
+    ) async {
       currentProgress = invocation.positionalArguments[0] as WerdProgress;
       return Result.success(null);
     });
@@ -83,26 +95,41 @@ void main() {
 
       // User clicks "Mark Last Read" on ayah 1
       print('=== Mark Last Read: Ayah 1 ===');
-      final result1 = await updateLastRead.call(LastReadPosition(
-        ayahNumber: AyahNumber.create(surahNumber: 1, ayahNumberInSurah: 1).data!,
-        updatedAt: DateTime.now(),
-      ));
+      final result1 = await updateLastRead.call(
+        LastReadPosition(
+          ayahNumber: AyahNumber.create(
+            surahNumber: 1,
+            ayahNumberInSurah: 1,
+          ).data!,
+          updatedAt: DateTime.now(),
+        ),
+      );
       expect(result1.isFailure, false, reason: 'First mark should not fail');
 
       // User clicks "Mark Last Read" on ayah 2
       print('=== Mark Last Read: Ayah 2 ===');
-      final result2 = await updateLastRead.call(LastReadPosition(
-        ayahNumber: AyahNumber.create(surahNumber: 1, ayahNumberInSurah: 2).data!,
-        updatedAt: DateTime.now(),
-      ));
+      final result2 = await updateLastRead.call(
+        LastReadPosition(
+          ayahNumber: AyahNumber.create(
+            surahNumber: 1,
+            ayahNumberInSurah: 2,
+          ).data!,
+          updatedAt: DateTime.now(),
+        ),
+      );
       expect(result2.isFailure, false, reason: 'Second mark should not fail');
 
       // User clicks "Mark Last Read" on ayah 3
       print('=== Mark Last Read: Ayah 3 ===');
-      final result3 = await updateLastRead.call(LastReadPosition(
-        ayahNumber: AyahNumber.create(surahNumber: 1, ayahNumberInSurah: 3).data!,
-        updatedAt: DateTime.now(),
-      ));
+      final result3 = await updateLastRead.call(
+        LastReadPosition(
+          ayahNumber: AyahNumber.create(
+            surahNumber: 1,
+            ayahNumberInSurah: 3,
+          ).data!,
+          updatedAt: DateTime.now(),
+        ),
+      );
       expect(result3.isFailure, false, reason: 'Third mark should not fail');
 
       // Verify updateProgress was called (3 times)
@@ -123,7 +150,9 @@ void main() {
       for (var i = 0; i < finalProgress.segmentsToday.length; i++) {
         final seg = finalProgress.segmentsToday[i];
         print('  Session ${i + 1}:');
-        print('    Ayahs: ${seg.startAyah}-${seg.endAyah} (${seg.ayahsCount} ayahs)');
+        print(
+          '    Ayahs: ${seg.startAyah}-${seg.endAyah} (${seg.ayahsCount} ayahs)',
+        );
         print('    Start: ${seg.formattedStartTime}');
         print('    End: ${seg.formattedEndTime}');
         if (seg.durationMinutes != null) {
@@ -141,7 +170,9 @@ void main() {
       } else if (finalProgress.segmentsToday.length == 3) {
         print('❌ FAILURE: Created 3 separate single-ayah segments!');
         print('');
-        print('This is the bug - each "Mark Last Read" created its own segment');
+        print(
+          'This is the bug - each "Mark Last Read" created its own segment',
+        );
         print('instead of extending the same session!');
       } else {
         print('❌ UNEXPECTED RESULT');
@@ -149,16 +180,31 @@ void main() {
       print('╚════════════════════════════════════════════════════╝');
 
       // SHOULD HAVE ONE SESSION WITH 3 AYAHS
-      expect(finalProgress.segmentsToday.length, 1,
-          reason: 'Should have ONE session after marking 3 sequential ayahs');
-      expect(finalProgress.segmentsToday[0].ayahsCount, 3,
-          reason: 'Session should have 3 ayahs (1-3)');
-      expect(finalProgress.segmentsToday[0].startAyah, 1,
-          reason: 'Session should start at ayah 1');
-      expect(finalProgress.segmentsToday[0].endAyah, 3,
-          reason: 'Session should end at ayah 3');
-      expect(finalProgress.totalAmountReadToday, 3,
-          reason: 'Total should be 3 ayahs');
+      expect(
+        finalProgress.segmentsToday.length,
+        1,
+        reason: 'Should have ONE session after marking 3 sequential ayahs',
+      );
+      expect(
+        finalProgress.segmentsToday[0].ayahsCount,
+        3,
+        reason: 'Session should have 3 ayahs (1-3)',
+      );
+      expect(
+        finalProgress.segmentsToday[0].startAyah,
+        1,
+        reason: 'Session should start at ayah 1',
+      );
+      expect(
+        finalProgress.segmentsToday[0].endAyah,
+        3,
+        reason: 'Session should end at ayah 3',
+      );
+      expect(
+        finalProgress.totalAmountReadToday,
+        3,
+        reason: 'Total should be 3 ayahs',
+      );
     },
   );
 }

@@ -40,15 +40,12 @@ void main() {
       // Trigger day rollover
       final result = await repository.getProgress(goalId: 'default');
 
-      result.fold(
-        (failure) => fail('Should not fail'),
-        (updatedProgress) {
-          // Should have created history entry
-          expect(updatedProgress.history.length, greaterThanOrEqualTo(1));
-          // SegmentsToday should be cleared for new day
-          // expect(updatedProgress.segmentsToday, isEmpty);
-        },
-      );
+      result.fold((failure) => fail('Should not fail'), (updatedProgress) {
+        // Should have created history entry
+        expect(updatedProgress.history.length, greaterThanOrEqualTo(1));
+        // SegmentsToday should be cleared for new day
+        // expect(updatedProgress.segmentsToday, isEmpty);
+      });
     });
 
     test('history stores segmentCount for display', () async {
@@ -109,13 +106,10 @@ void main() {
 
       final result = await repository.getProgress(goalId: 'default');
 
-      result.fold(
-        (failure) => fail('Should not fail'),
-        (progress) {
-          expect(progress.history.containsKey('2024-01-01'), isTrue);
-          expect(progress.history['2024-01-01']!.totalAyahsRead, 20);
-        },
-      );
+      result.fold((failure) => fail('Should not fail'), (progress) {
+        expect(progress.history.containsKey('2024-01-01'), isTrue);
+        expect(progress.history['2024-01-01']!.totalAyahsRead, 20);
+      });
     });
 
     test('monthly totals calculate from history correctly', () async {

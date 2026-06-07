@@ -7,12 +7,7 @@ class AppSvgIcon extends StatelessWidget {
   final double size;
   final Color? color;
 
-  const AppSvgIcon({
-    super.key,
-    required this.name,
-    this.size = 24,
-    this.color,
-  });
+  const AppSvgIcon({super.key, required this.name, this.size = 24, this.color});
 
   @override
   Widget build(BuildContext context) {

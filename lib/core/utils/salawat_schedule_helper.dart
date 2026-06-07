@@ -1,4 +1,3 @@
-
 class SalawatScheduleHelper {
   /// Generates scheduled times for Salawat reminders over a specific number of days.
   ///
@@ -30,7 +29,7 @@ class SalawatScheduleHelper {
 
     for (int i = 0; i < daysToSchedule; i++) {
       final currentDay = now.add(Duration(days: i));
-      
+
       DateTime start = DateTime(
         currentDay.year,
         currentDay.month,

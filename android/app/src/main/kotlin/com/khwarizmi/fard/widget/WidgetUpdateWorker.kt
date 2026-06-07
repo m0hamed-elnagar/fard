@@ -1,4 +1,4 @@
-package com.qada.fard.widget
+package com.khwarizmi.fard.widget
 
 import android.content.Context
 import android.content.Intent
@@ -8,10 +8,10 @@ import androidx.glance.appwidget.updateAll
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.batoulapps.adhan.PrayerTimes
-import com.qada.fard.NextPrayerCountdownWidgetReceiver
-import com.qada.fard.PrayerWidget
-import com.qada.fard.prayer.PrayerTimesCalculator
-import com.qada.fard.prayer.SettingsRepository
+import com.khwarizmi.fard.NextPrayerCountdownWidgetReceiver
+import com.khwarizmi.fard.PrayerWidget
+import com.khwarizmi.fard.prayer.PrayerTimesCalculator
+import com.khwarizmi.fard.prayer.SettingsRepository
 import org.json.JSONObject
 import java.util.Calendar
 import java.util.Locale
@@ -213,3 +213,4 @@ class WidgetUpdateWorker(
         return format.format(calendar.time)
     }
 }
+

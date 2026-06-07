@@ -50,7 +50,8 @@ class ThemePreset {
   }
 
   /// Creates a ThemePreset from a hex string map.
-  factory ThemePreset.fromHexMap(Map<String, String> hexMap, {
+  factory ThemePreset.fromHexMap(
+    Map<String, String> hexMap, {
     required String id,
     required String name,
     required String nameAr,
@@ -68,19 +69,13 @@ class ThemePreset {
         int.parse(hexMap['accent']!.replaceFirst('#', '0xFF'), radix: 16),
       ),
       backgroundColor: Color(
-        int.parse(
-          hexMap['background']!.replaceFirst('#', '0xFF'),
-          radix: 16,
-        ),
+        int.parse(hexMap['background']!.replaceFirst('#', '0xFF'), radix: 16),
       ),
       surfaceColor: Color(
         int.parse(hexMap['surface']!.replaceFirst('#', '0xFF'), radix: 16),
       ),
       surfaceLightColor: Color(
-        int.parse(
-          hexMap['surfaceLight']!.replaceFirst('#', '0xFF'),
-          radix: 16,
-        ),
+        int.parse(hexMap['surfaceLight']!.replaceFirst('#', '0xFF'), radix: 16),
       ),
       cardBorderColor: Color(
         int.parse(hexMap['cardBorder']!.replaceFirst('#', '0xFF'), radix: 16),

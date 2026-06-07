@@ -20,7 +20,7 @@ class WidgetPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = theme.toColors();
     final l10n = AppLocalizations.of(context);
-    
+
     return Container(
       key: ValueKey('${widgetType.index}_${theme.hashCode}'),
       height: 200,
@@ -33,12 +33,15 @@ class WidgetPreview extends StatelessWidget {
       child: l10n == null
           ? const SizedBox.shrink()
           : (widgetType == WidgetPreviewType.prayerSchedule
-              ? _buildPrayerSchedulePreview(colors, l10n)
-              : _buildCountdownPreview(colors, l10n)),
+                ? _buildPrayerSchedulePreview(colors, l10n)
+                : _buildCountdownPreview(colors, l10n)),
     );
   }
 
-  Widget _buildPrayerSchedulePreview(WidgetColors colors, AppLocalizations l10n) {
+  Widget _buildPrayerSchedulePreview(
+    WidgetColors colors,
+    AppLocalizations l10n,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -54,26 +57,31 @@ class WidgetPreview extends StatelessWidget {
         ),
         Text(
           l10n.widgetPreviewHijriDate,
-          style: TextStyle(
-            color: colors.text,
-            fontSize: 10,
-          ),
+          style: TextStyle(color: colors.text, fontSize: 10),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 6),
-        
+
         // Divider
-        Container(
-          height: 1,
-          color: colors.accent,
-        ),
+        Container(height: 1, color: colors.accent),
         const SizedBox(height: 6),
-        
+
         // Prayer rows
         _buildPrayerRow(l10n.fajr, '05:30 AM', false, colors),
-        _buildPrayerRow(l10n.sunrise, '06:15 AM', false, colors, isSecondary: true),
+        _buildPrayerRow(
+          l10n.sunrise,
+          '06:15 AM',
+          false,
+          colors,
+          isSecondary: true,
+        ),
         _buildPrayerRow(l10n.dhuhr, '12:30 PM', false, colors),
-        _buildPrayerRow(l10n.asr, '03:45 PM', true, colors), // Highlighted as next prayer
+        _buildPrayerRow(
+          l10n.asr,
+          '03:45 PM',
+          true,
+          colors,
+        ), // Highlighted as next prayer
         const Spacer(),
       ],
     );
@@ -100,9 +108,13 @@ class WidgetPreview extends StatelessWidget {
                 Text(
                   time,
                   style: TextStyle(
-                    color: isHighlighted ? Colors.white : (isSecondary ? colors.textSecondary : colors.text),
+                    color: isHighlighted
+                        ? Colors.white
+                        : (isSecondary ? colors.textSecondary : colors.text),
                     fontSize: 11,
-                    fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: isHighlighted
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                   ),
                 ),
                 if (isHighlighted)
@@ -118,9 +130,13 @@ class WidgetPreview extends StatelessWidget {
                   child: Text(
                     name,
                     style: TextStyle(
-                      color: isHighlighted ? Colors.white : (isSecondary ? colors.textSecondary : colors.text),
+                      color: isHighlighted
+                          ? Colors.white
+                          : (isSecondary ? colors.textSecondary : colors.text),
                       fontSize: 11,
-                      fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isHighlighted
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                     textAlign: TextAlign.end,
                   ),
@@ -130,9 +146,13 @@ class WidgetPreview extends StatelessWidget {
                 Text(
                   name,
                   style: TextStyle(
-                    color: isHighlighted ? Colors.white : (isSecondary ? colors.textSecondary : colors.text),
+                    color: isHighlighted
+                        ? Colors.white
+                        : (isSecondary ? colors.textSecondary : colors.text),
                     fontSize: 11,
-                    fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: isHighlighted
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                   ),
                 ),
                 if (isHighlighted)
@@ -147,9 +167,13 @@ class WidgetPreview extends StatelessWidget {
                 Text(
                   time,
                   style: TextStyle(
-                    color: isHighlighted ? Colors.white : (isSecondary ? colors.textSecondary : colors.text),
+                    color: isHighlighted
+                        ? Colors.white
+                        : (isSecondary ? colors.textSecondary : colors.text),
                     fontSize: 11,
-                    fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: isHighlighted
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                   ),
                 ),
               ],
@@ -163,10 +187,7 @@ class WidgetPreview extends StatelessWidget {
       children: [
         Text(
           l10n.nextPrayer,
-          style: TextStyle(
-            color: colors.text,
-            fontSize: 10,
-          ),
+          style: TextStyle(color: colors.text, fontSize: 10),
         ),
         const SizedBox(height: 8),
         Text(
@@ -178,11 +199,7 @@ class WidgetPreview extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Container(
-          width: 40,
-          height: 1,
-          color: colors.accent,
-        ),
+        Container(width: 40, height: 1, color: colors.accent),
         const SizedBox(height: 8),
         Text(
           l10n.widgetPreviewCountdown,
@@ -196,4 +213,3 @@ class WidgetPreview extends StatelessWidget {
     );
   }
 }
-

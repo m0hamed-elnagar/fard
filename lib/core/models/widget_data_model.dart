@@ -13,7 +13,7 @@ class WidgetDataModel {
   final String? nextPrayerName;
   final int? nextPrayerTime; // Timestamp in milliseconds
   final int lastUpdated; // Timestamp in milliseconds
-  
+
   // Theme-related fields
   final String primaryColorHex;
   final String accentColorHex;

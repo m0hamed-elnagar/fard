@@ -89,7 +89,8 @@ class PrayerNotificationScheduler {
 
     final List<
       ({DateTime time, bool isAzan, Future<void> Function(int?) schedule})
-    > events = [];
+    >
+    events = [];
 
     for (int day = 0; day < maxScheduledDays; day++) {
       final date = DateTime.now().add(Duration(days: day));
@@ -172,7 +173,7 @@ class PrayerNotificationScheduler {
           }
         }
 
-    // 3. After Salah Azkar Event
+        // 3. After Salah Azkar Event
         if (_settingsProvider.isAfterSalahAzkarEnabled &&
             salaahSetting.isAfterSalahAzkarEnabled) {
           final azkarTime = tzSalaahTime.add(
@@ -192,7 +193,9 @@ class PrayerNotificationScheduler {
                     timeoutAfter: timeout,
                   );
                 } catch (e) {
-                  debugPrint('PrayerNotificationScheduler: Error scheduling After-Salah Azkar: $e');
+                  debugPrint(
+                    'PrayerNotificationScheduler: Error scheduling After-Salah Azkar: $e',
+                  );
                 }
               },
             ));
@@ -265,8 +268,10 @@ class PrayerNotificationScheduler {
 
     // 5. Werd Reminder
     if (_settingsProvider.isWerdReminderEnabled) {
-      final werdTime =
-          _parseTime(_settingsProvider.werdReminderTime, DateTime.now());
+      final werdTime = _parseTime(
+        _settingsProvider.werdReminderTime,
+        DateTime.now(),
+      );
       await _scheduleWerdReminder(notificationsPlugin, scheduledDate: werdTime);
     }
 
@@ -532,7 +537,9 @@ class PrayerNotificationScheduler {
       soundPath,
     );
 
-    debugPrint('Scheduling Azan for ${salaah.name} at $scheduledDate with sound: $soundPath');
+    debugPrint(
+      'Scheduling Azan for ${salaah.name} at $scheduledDate with sound: $soundPath',
+    );
 
     // ensureChannelExists already checks if it exists, but it's good to keep it deterministic
     await _channelManager.ensureChannelExists(

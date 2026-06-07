@@ -92,14 +92,18 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
     return formatted;
   }
 
-  void _showReminderSnackBar(String title, bool enabled, {String? customMessage}) {
+  void _showReminderSnackBar(
+    String title,
+    bool enabled, {
+    String? customMessage,
+  }) {
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
-    final String status =
-        enabled
-            ? (isAr ? 'مفعل' : 'Enabled')
-            : (isAr ? 'معطل' : 'Disabled');
+    final String status = enabled
+        ? (isAr ? 'مفعل' : 'Enabled')
+        : (isAr ? 'معطل' : 'Disabled');
 
-    final String message = customMessage ?? (enabled ? '$title: $status' : '$title: $status');
+    final String message =
+        customMessage ?? (enabled ? '$title: $status' : '$title: $status');
 
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -394,11 +398,11 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                             newState,
                             customMessage: newState
                                 ? (isAr
-                                    ? 'سنذكرك بوردك اليومي في الساعة ${settings.werdReminderTime}'
-                                    : 'Daily Werd reminder set for ${settings.werdReminderTime}')
+                                      ? 'سنذكرك بوردك اليومي في الساعة ${settings.werdReminderTime}'
+                                      : 'Daily Werd reminder set for ${settings.werdReminderTime}')
                                 : (isAr
-                                    ? 'تم إيقاف تذكير الورد اليومي'
-                                    : 'Daily Werd reminder disabled'),
+                                      ? 'تم إيقاف تذكير الورد اليومي'
+                                      : 'Daily Werd reminder disabled'),
                           );
                         },
                         visualDensity: VisualDensity.compact,
@@ -409,10 +413,9 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                           settings.isWerdReminderEnabled
                               ? Icons.notifications_active_rounded
                               : Icons.notifications_none_rounded,
-                          color:
-                              settings.isWerdReminderEnabled
-                                  ? context.secondaryColor
-                                  : context.neutralColor.withValues(alpha: 0.5),
+                          color: settings.isWerdReminderEnabled
+                              ? context.secondaryColor
+                              : context.neutralColor.withValues(alpha: 0.5),
                         ),
                       );
                     },
@@ -503,7 +506,9 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
         child: Text(
           label,
           style: GoogleFonts.amiri(
-            color: isSelected ? context.onAccentColor : context.onSurfaceVariantColor,
+            color: isSelected
+                ? context.onAccentColor
+                : context.onSurfaceVariantColor,
             fontSize: isShort ? 10 : 11,
             fontWeight: FontWeight.bold,
           ),
@@ -538,7 +543,9 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
       decoration: BoxDecoration(
         color: context.secondaryColor.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.secondaryColor.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: context.secondaryColor.withValues(alpha: 0.3),
+        ),
       ),
       child: Row(
         children: [
@@ -561,14 +568,22 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
     );
   }
 
-  Widget _buildEditButton(BuildContext context, WerdProgress progress, bool isAr) {
+  Widget _buildEditButton(
+    BuildContext context,
+    WerdProgress progress,
+    bool isAr,
+  ) {
     return Tooltip(
       message: isAr ? 'تعديل القراءة' : 'Edit Reading',
       child: Material(
         color: Colors.transparent,
         child: IconButton(
           onPressed: () => _showEditDialog(context, progress, isAr),
-          icon: Icon(Icons.edit_rounded, size: 20, color: context.secondaryColor),
+          icon: Icon(
+            Icons.edit_rounded,
+            size: 20,
+            color: context.secondaryColor,
+          ),
           constraints: const BoxConstraints(),
           padding: const EdgeInsets.all(6),
           visualDensity: VisualDensity.compact,
@@ -577,7 +592,11 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
     );
   }
 
-  Future<void> _showEditDialog(BuildContext context, WerdProgress progress, bool isAr) async {
+  Future<void> _showEditDialog(
+    BuildContext context,
+    WerdProgress progress,
+    bool isAr,
+  ) async {
     final l10n = AppLocalizations.of(context)!;
 
     await showDialog(
@@ -595,8 +614,13 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                   final index = entry.key;
                   final segment = entry.value;
 
-                  final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(segment.startAyah);
-                  final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(segment.endAyah);
+                  final startPos =
+                      QuranHizbProvider.getSurahAndAyahFromAbsolute(
+                        segment.startAyah,
+                      );
+                  final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(
+                    segment.endAyah,
+                  );
 
                   final startName = isAr
                       ? quran.getSurahNameArabic(startPos[0])
@@ -606,14 +630,14 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                       : quran.getSurahName(endPos[0]);
 
                   final isSingleAyah = segment.startAyah == segment.endAyah;
-                  final fromText = isAr 
-                      ? '$startName، ${startPos[1].toArabicIndic()}' 
+                  final fromText = isAr
+                      ? '$startName، ${startPos[1].toArabicIndic()}'
                       : '$startName ${startPos[1]}';
                   final toText = isSingleAyah
                       ? l10n.werdSame
-                      : (isAr 
-                          ? '$endName، ${endPos[1].toArabicIndic()}' 
-                          : '$endName ${endPos[1]}');
+                      : (isAr
+                            ? '$endName، ${endPos[1].toArabicIndic()}'
+                            : '$endName ${endPos[1]}');
 
                   return Container(
                     margin: const EdgeInsets.symmetric(vertical: 4),
@@ -623,7 +647,10 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                       border: Border.all(color: context.outlineColor, width: 1),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -632,15 +659,24 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: context.secondaryColor.withValues(alpha: 0.15),
+                                  color: context.secondaryColor.withValues(
+                                    alpha: 0.15,
+                                  ),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.schedule_rounded, size: 10, color: context.secondaryColor),
+                                    Icon(
+                                      Icons.schedule_rounded,
+                                      size: 10,
+                                      color: context.secondaryColor,
+                                    ),
                                     const SizedBox(width: 4),
                                     Text(
                                       l10n.werdSession(index + 1),
@@ -668,12 +704,18 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                Icon(Icons.access_time_rounded, color: context.onSurfaceVariantColor.withValues(alpha: 0.6), size: 14),
+                                Icon(
+                                  Icons.access_time_rounded,
+                                  color: context.onSurfaceVariantColor
+                                      .withValues(alpha: 0.6),
+                                  size: 14,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   '${segment.formattedStartTime} - ${segment.formattedEndTime}',
                                   style: GoogleFonts.outfit(
-                                    color: context.onSurfaceVariantColor.withValues(alpha: 0.6),
+                                    color: context.onSurfaceVariantColor
+                                        .withValues(alpha: 0.6),
                                     fontSize: 11,
                                   ),
                                 ),
@@ -682,7 +724,8 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                                   Text(
                                     '(${segment.durationMinutes} min)',
                                     style: GoogleFonts.outfit(
-                                      color: context.onSurfaceVariantColor.withValues(alpha: 0.6),
+                                      color: context.onSurfaceVariantColor
+                                          .withValues(alpha: 0.6),
                                       fontSize: 11,
                                     ),
                                   ),
@@ -694,17 +737,28 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                           // From row
                           Row(
                             children: [
-                              Icon(Icons.back_hand_rounded, color: context.secondaryColor, size: 18),
+                              Icon(
+                                Icons.back_hand_rounded,
+                                color: context.secondaryColor,
+                                size: 18,
+                              ),
                               const SizedBox(width: 8),
                               Text(
                                 l10n.werdFrom,
-                                style: TextStyle(fontSize: 11, color: context.onSurfaceVariantColor, fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: context.onSurfaceVariantColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  fromText, 
-                                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                                  fromText,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ),
                             ],
@@ -713,17 +767,28 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                             const SizedBox(height: 6),
                             Row(
                               children: [
-                                Icon(Icons.arrow_forward_rounded, color: context.secondaryColor, size: 16),
+                                Icon(
+                                  Icons.arrow_forward_rounded,
+                                  color: context.secondaryColor,
+                                  size: 16,
+                                ),
                                 const SizedBox(width: 8),
                                 Text(
                                   l10n.werdTo,
-                                  style: TextStyle(fontSize: 11, color: context.onSurfaceVariantColor, fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: context.onSurfaceVariantColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    toText, 
-                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                                    toText,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -739,7 +804,13 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                                 onPressed: () {
                                   // Pop dialog first then open edit
                                   Navigator.of(dialogContext).pop();
-                                  _showEditSegmentDialog(context, progress, index, segment, isAr);
+                                  _showEditSegmentDialog(
+                                    context,
+                                    progress,
+                                    index,
+                                    segment,
+                                    isAr,
+                                  );
                                 },
                                 tooltip: l10n.werdEditSegment,
                                 padding: EdgeInsets.zero,
@@ -748,14 +819,23 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                               const SizedBox(width: 4),
                               // DELETE button
                               IconButton(
-                                icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                                icon: const Icon(
+                                  Icons.delete_outline_rounded,
+                                  size: 18,
+                                ),
                                 color: context.missedColor,
                                 onPressed: () {
                                   // Perform action BEFORE popping dialog
-                                  context.read<WerdBloc>().add(WerdEvent.removeSegment(index));
+                                  context.read<WerdBloc>().add(
+                                    WerdEvent.removeSegment(index),
+                                  );
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text(isAr ? 'تم حذف الجلسة' : 'Session removed'),
+                                      content: Text(
+                                        isAr
+                                            ? 'تم حذف الجلسة'
+                                            : 'Session removed',
+                                      ),
                                       duration: const Duration(seconds: 2),
                                     ),
                                   );
@@ -817,8 +897,12 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
     final startSurahs = List.generate(114, (i) => i + 1);
     final endSurahs = List.generate(114, (i) => i + 1);
 
-    final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(segment.startAyah);
-    final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(segment.endAyah);
+    final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(
+      segment.startAyah,
+    );
+    final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(
+      segment.endAyah,
+    );
 
     int selectedStartSurah = startPos[0];
     int startAyah = startPos[1];
@@ -831,8 +915,14 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
         builder: (context, setDialogState) {
           final startAyahCount = quran.getVerseCount(selectedStartSurah);
           final endAyahCount = quran.getVerseCount(selectedEndSurah);
-          final fromAbs = QuranHizbProvider.getAbsoluteAyahNumber(selectedStartSurah, startAyah);
-          final toAbs = QuranHizbProvider.getAbsoluteAyahNumber(selectedEndSurah, endAyah);
+          final fromAbs = QuranHizbProvider.getAbsoluteAyahNumber(
+            selectedStartSurah,
+            startAyah,
+          );
+          final toAbs = QuranHizbProvider.getAbsoluteAyahNumber(
+            selectedEndSurah,
+            endAyah,
+          );
           final isReversed = fromAbs > toAbs;
 
           return AlertDialog(
@@ -842,14 +932,28 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // FROM section
-                  Text(l10n.werdFrom, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14)),
+                  Text(
+                    l10n.werdFrom,
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<int>(
                     initialValue: selectedStartSurah,
                     decoration: InputDecoration(labelText: l10n.surah),
                     items: startSurahs.map((s) {
-                      final name = isAr ? quran.getSurahNameArabic(s) : quran.getSurahName(s);
-                      return DropdownMenuItem(value: s, child: Text('${s.toString().padLeft(3, '0')} | $name', overflow: TextOverflow.ellipsis));
+                      final name = isAr
+                          ? quran.getSurahNameArabic(s)
+                          : quran.getSurahName(s);
+                      return DropdownMenuItem(
+                        value: s,
+                        child: Text(
+                          '${s.toString().padLeft(3, '0')} | $name',
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
                     }).toList(),
                     onChanged: (v) => setDialogState(() {
                       selectedStartSurah = v!;
@@ -867,14 +971,28 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                   ),
                   const SizedBox(height: 16),
                   // TO section
-                  Text(l10n.werdTo, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14)),
+                  Text(
+                    l10n.werdTo,
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<int>(
                     initialValue: selectedEndSurah,
                     decoration: InputDecoration(labelText: l10n.surah),
                     items: endSurahs.map((s) {
-                      final name = isAr ? quran.getSurahNameArabic(s) : quran.getSurahName(s);
-                      return DropdownMenuItem(value: s, child: Text('${s.toString().padLeft(3, '0')} | $name', overflow: TextOverflow.ellipsis));
+                      final name = isAr
+                          ? quran.getSurahNameArabic(s)
+                          : quran.getSurahName(s);
+                      return DropdownMenuItem(
+                        value: s,
+                        child: Text(
+                          '${s.toString().padLeft(3, '0')} | $name',
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
                     }).toList(),
                     onChanged: (v) => setDialogState(() {
                       selectedEndSurah = v!;
@@ -894,7 +1012,11 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        Icon(Icons.warning_amber_rounded, size: 16, color: context.secondaryColor),
+                        Icon(
+                          Icons.warning_amber_rounded,
+                          size: 16,
+                          color: context.secondaryColor,
+                        ),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
@@ -919,21 +1041,33 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  final newFromAbs = QuranHizbProvider.getAbsoluteAyahNumber(selectedStartSurah, startAyah);
-                  final newToAbs = QuranHizbProvider.getAbsoluteAyahNumber(selectedEndSurah, endAyah);
+                  final newFromAbs = QuranHizbProvider.getAbsoluteAyahNumber(
+                    selectedStartSurah,
+                    startAyah,
+                  );
+                  final newToAbs = QuranHizbProvider.getAbsoluteAyahNumber(
+                    selectedEndSurah,
+                    endAyah,
+                  );
 
                   // Remove old segment
-                  context.read<WerdBloc>().add(WerdEvent.removeSegment(segmentIndex));
+                  context.read<WerdBloc>().add(
+                    WerdEvent.removeSegment(segmentIndex),
+                  );
 
                   // Add new segment (allow from > to for backward reading)
                   final start = newFromAbs < newToAbs ? newFromAbs : newToAbs;
                   final end = newFromAbs < newToAbs ? newToAbs : newFromAbs;
-                  context.read<WerdBloc>().add(WerdEvent.trackRangeRead(start, end));
+                  context.read<WerdBloc>().add(
+                    WerdEvent.trackRangeRead(start, end),
+                  );
 
                   // Show SnackBar BEFORE popping dialog
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(isAr ? 'تم تحديث الجلسة' : 'Segment updated'),
+                      content: Text(
+                        isAr ? 'تم تحديث الجلسة' : 'Segment updated',
+                      ),
                       duration: const Duration(seconds: 2),
                     ),
                   );
@@ -950,7 +1084,11 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
     );
   }
 
-  Future<void> _showAddRangeDialog(BuildContext context, WerdProgress progress, bool isAr) async {
+  Future<void> _showAddRangeDialog(
+    BuildContext context,
+    WerdProgress progress,
+    bool isAr,
+  ) async {
     final l10n = AppLocalizations.of(context)!;
     int selectedStartSurah = 1;
     int startAyah = 1;
@@ -963,19 +1101,33 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
         builder: (context, setDialogState) {
           final startAyahCount = quran.getVerseCount(selectedStartSurah);
           final endAyahCount = quran.getVerseCount(selectedEndSurah);
-          final fromAbs = QuranHizbProvider.getAbsoluteAyahNumber(selectedStartSurah, startAyah);
-          final toAbs = QuranHizbProvider.getAbsoluteAyahNumber(selectedEndSurah, endAyah);
+          final fromAbs = QuranHizbProvider.getAbsoluteAyahNumber(
+            selectedStartSurah,
+            startAyah,
+          );
+          final toAbs = QuranHizbProvider.getAbsoluteAyahNumber(
+            selectedEndSurah,
+            endAyah,
+          );
           final isReversed = fromAbs > toAbs;
           final effectiveFrom = isReversed ? toAbs : fromAbs;
           final effectiveTo = isReversed ? fromAbs : toAbs;
           final ayahCount = (toAbs - fromAbs).abs() + 1;
 
           final fromSurahName = isAr
-              ? quran.getSurahNameArabic(isReversed ? selectedEndSurah : selectedStartSurah)
-              : quran.getSurahName(isReversed ? selectedEndSurah : selectedStartSurah);
+              ? quran.getSurahNameArabic(
+                  isReversed ? selectedEndSurah : selectedStartSurah,
+                )
+              : quran.getSurahName(
+                  isReversed ? selectedEndSurah : selectedStartSurah,
+                );
           final toSurahName = isAr
-              ? quran.getSurahNameArabic(isReversed ? selectedStartSurah : selectedEndSurah)
-              : quran.getSurahName(isReversed ? selectedStartSurah : selectedEndSurah);
+              ? quran.getSurahNameArabic(
+                  isReversed ? selectedStartSurah : selectedEndSurah,
+                )
+              : quran.getSurahName(
+                  isReversed ? selectedStartSurah : selectedEndSurah,
+                );
 
           return AlertDialog(
             title: Text(l10n.werdAddRange),
@@ -990,13 +1142,20 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                     decoration: BoxDecoration(
                       color: context.secondaryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: context.secondaryColor.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: context.secondaryColor.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          l10n.werdRangePreview(fromSurahName, startAyah, toSurahName, endAyah),
+                          l10n.werdRangePreview(
+                            fromSurahName,
+                            startAyah,
+                            toSurahName,
+                            endAyah,
+                          ),
                           style: GoogleFonts.outfit(
                             fontWeight: FontWeight.w600,
                             color: context.secondaryColor,
@@ -1007,7 +1166,11 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                           const SizedBox(height: 8),
                           Row(
                             children: [
-                              Icon(Icons.warning_amber_rounded, size: 16, color: context.secondaryColor),
+                              Icon(
+                                Icons.warning_amber_rounded,
+                                size: 16,
+                                color: context.secondaryColor,
+                              ),
                               const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
@@ -1036,14 +1199,25 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                   ),
                   const SizedBox(height: 16),
                   // FROM section
-                  Text(l10n.werdFrom, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    l10n.werdFrom,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<int>(
                     initialValue: selectedStartSurah,
                     decoration: InputDecoration(labelText: l10n.surah),
                     items: List.generate(114, (i) => i + 1).map((s) {
-                      final name = isAr ? quran.getSurahNameArabic(s) : quran.getSurahName(s);
-                      return DropdownMenuItem(value: s, child: Text('${s.toString().padLeft(3, '0')} | $name', overflow: TextOverflow.ellipsis));
+                      final name = isAr
+                          ? quran.getSurahNameArabic(s)
+                          : quran.getSurahName(s);
+                      return DropdownMenuItem(
+                        value: s,
+                        child: Text(
+                          '${s.toString().padLeft(3, '0')} | $name',
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
                     }).toList(),
                     onChanged: (v) => setDialogState(() {
                       selectedStartSurah = v!;
@@ -1061,14 +1235,25 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                   ),
                   const SizedBox(height: 16),
                   // TO section
-                  Text(l10n.werdTo, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    l10n.werdTo,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<int>(
                     initialValue: selectedEndSurah,
                     decoration: InputDecoration(labelText: l10n.surah),
                     items: List.generate(114, (i) => i + 1).map((s) {
-                      final name = isAr ? quran.getSurahNameArabic(s) : quran.getSurahName(s);
-                      return DropdownMenuItem(value: s, child: Text('${s.toString().padLeft(3, '0')} | $name', overflow: TextOverflow.ellipsis));
+                      final name = isAr
+                          ? quran.getSurahNameArabic(s)
+                          : quran.getSurahName(s);
+                      return DropdownMenuItem(
+                        value: s,
+                        child: Text(
+                          '${s.toString().padLeft(3, '0')} | $name',
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
                     }).toList(),
                     onChanged: (v) => setDialogState(() {
                       selectedEndSurah = v!;
@@ -1097,17 +1282,21 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                   final start = effectiveFrom;
                   final end = effectiveTo;
 
-                  context.read<WerdBloc>().add(WerdEvent.trackRangeRead(start, end));
-                  
+                  context.read<WerdBloc>().add(
+                    WerdEvent.trackRangeRead(start, end),
+                  );
+
                   // Show SnackBar BEFORE popping dialog
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        isAr ? 'تمت إضافة $ayahCount آية' : 'Added $ayahCount ayahs',
+                        isAr
+                            ? 'تمت إضافة $ayahCount آية'
+                            : 'Added $ayahCount ayahs',
                       ),
                     ),
                   );
-                  
+
                   // THEN pop the dialog
                   Navigator.of(dialogContext).pop();
                 },
@@ -1155,7 +1344,9 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                     Text(
                       '/ $total $label',
                       style: GoogleFonts.amiri(
-                        color: context.onSurfaceVariantColor.withValues(alpha: 0.6),
+                        color: context.onSurfaceVariantColor.withValues(
+                          alpha: 0.6,
+                        ),
                         fontSize: isShort ? 14 : 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1318,17 +1509,24 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: isToday
-                                ? [context.secondaryColor, context.secondaryColor]
+                                ? [
+                                    context.secondaryColor,
+                                    context.secondaryColor,
+                                  ]
                                 : [
                                     context.secondaryColor,
-                                    context.secondaryColor.withValues(alpha: 0.7),
+                                    context.secondaryColor.withValues(
+                                      alpha: 0.7,
+                                    ),
                                   ],
                           ),
                           borderRadius: BorderRadius.circular(5),
                           boxShadow: isToday
                               ? [
                                   BoxShadow(
-                                    color: context.secondaryColor.withValues(alpha: 0.3),
+                                    color: context.secondaryColor.withValues(
+                                      alpha: 0.3,
+                                    ),
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
                                   ),
@@ -1350,7 +1548,9 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
                         style: GoogleFonts.outfit(
                           color: isToday
                               ? context.onSurfaceColor
-                              : context.onSurfaceVariantColor.withValues(alpha: 0.6),
+                              : context.onSurfaceVariantColor.withValues(
+                                  alpha: 0.6,
+                                ),
                           fontSize: 10,
                           fontWeight: isToday
                               ? FontWeight.bold
@@ -1388,7 +1588,9 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
     final sessions = progress?.segmentsToday ?? [];
     final sessionStart = progress?.sessionStartAbsolute;
 
-    if (completedCycles > 0 && sessions.isNotEmpty && sessions.last.endAyah == 6236) {
+    if (completedCycles > 0 &&
+        sessions.isNotEmpty &&
+        sessions.last.endAyah == 6236) {
       // Just finished Quran, start new cycle
       targetAbs = 1;
     } else if (sessions.isNotEmpty) {
@@ -1441,10 +1643,10 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
               final pos = QuranHizbProvider.getSurahAndAyahFromAbsolute(
                 targetAbs,
               );
-              
+
               // Start a new session when clicking Continue
               context.read<WerdBloc>().add(WerdEvent.startSession(targetAbs));
-              
+
               Navigator.push(
                 context,
                 QuranReaderPage.route(surahNumber: pos[0], ayahNumber: pos[1]),

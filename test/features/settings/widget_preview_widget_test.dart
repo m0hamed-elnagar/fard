@@ -31,11 +31,7 @@ void main() {
 
       testWidgets('renders prayer schedule layout by default', (tester) async {
         await tester.pumpWidget(
-          _wrapWithL10n(
-            const WidgetPreview(
-              theme: WidgetPreviewTheme(),
-            ),
-          ),
+          _wrapWithL10n(const WidgetPreview(theme: WidgetPreviewTheme())),
         );
 
         // Verify prayer names are displayed
@@ -44,7 +40,9 @@ void main() {
         expect(find.text('Asr'), findsOneWidget);
       });
 
-      testWidgets('renders countdown layout when widgetType is countdown', (tester) async {
+      testWidgets('renders countdown layout when widgetType is countdown', (
+        tester,
+      ) async {
         await tester.pumpWidget(
           _wrapWithL10n(
             const WidgetPreview(
@@ -126,7 +124,9 @@ void main() {
     });
 
     group('RTL mode', () {
-      testWidgets('shows Arabic text in RTL mode for prayer schedule', (tester) async {
+      testWidgets('shows Arabic text in RTL mode for prayer schedule', (
+        tester,
+      ) async {
         await tester.pumpWidget(
           _wrapWithL10n(
             const WidgetPreview(
@@ -143,7 +143,9 @@ void main() {
         expect(find.textContaining('١٤٤٧'), findsOneWidget);
       });
 
-      testWidgets('shows Arabic text in RTL mode for countdown', (tester) async {
+      testWidgets('shows Arabic text in RTL mode for countdown', (
+        tester,
+      ) async {
         await tester.pumpWidget(
           _wrapWithL10n(
             const WidgetPreview(
@@ -180,7 +182,11 @@ void main() {
 
         // Find container with ValueKey
         final prayerScheduleContainer = tester.widget<Container>(
-          find.byWidgetPredicate((widget) => widget is Container && widget.key is ValueKey).first,
+          find
+              .byWidgetPredicate(
+                (widget) => widget is Container && widget.key is ValueKey,
+              )
+              .first,
         );
         final prayerScheduleKey = prayerScheduleContainer.key;
 
@@ -198,7 +204,11 @@ void main() {
         );
 
         final countdownContainer = tester.widget<Container>(
-          find.byWidgetPredicate((widget) => widget is Container && widget.key is ValueKey).first,
+          find
+              .byWidgetPredicate(
+                (widget) => widget is Container && widget.key is ValueKey,
+              )
+              .first,
         );
         final countdownKey = countdownContainer.key;
 
@@ -225,7 +235,11 @@ void main() {
         );
 
         final container1 = tester.widget<Container>(
-          find.byWidgetPredicate((widget) => widget is Container && widget.key is ValueKey).first,
+          find
+              .byWidgetPredicate(
+                (widget) => widget is Container && widget.key is ValueKey,
+              )
+              .first,
         );
         final key1 = container1.key;
 
@@ -242,7 +256,11 @@ void main() {
         );
 
         final container2 = tester.widget<Container>(
-          find.byWidgetPredicate((widget) => widget is Container && widget.key is ValueKey).first,
+          find
+              .byWidgetPredicate(
+                (widget) => widget is Container && widget.key is ValueKey,
+              )
+              .first,
         );
         final key2 = container2.key;
 
@@ -279,9 +297,7 @@ void main() {
       });
 
       testWidgets('background color is applied', (tester) async {
-        const customTheme = WidgetPreviewTheme(
-          backgroundColorHex: '#123456',
-        );
+        const customTheme = WidgetPreviewTheme(backgroundColorHex: '#123456');
 
         await tester.pumpWidget(
           MaterialApp(

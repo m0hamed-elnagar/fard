@@ -20,10 +20,8 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
   final NotificationService? _notificationService;
   StreamSubscription? _progressSubscription;
 
-  WerdBloc(
-    this._repository,
-    this._notificationService,
-  ) : super(WerdState.initial()) {
+  WerdBloc(this._repository, this._notificationService)
+    : super(WerdState.initial()) {
     on<WerdEvent>((event, emit) async {
       await event.map(
         load: (e) async {
@@ -33,29 +31,35 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           _progressSubscription = _repository
               .watchProgress(goalId: e.id)
               .listen((result) {
-                result.fold(
-                  (_) => null,
-                  (progress) {
-                    debugPrint('📡 [WerdBloc] WatchProgress emitted progress update');
-                    add(WerdEvent.progressUpdated(progress));
-                  },
-                );
+                result.fold((_) => null, (progress) {
+                  debugPrint(
+                    '📡 [WerdBloc] WatchProgress emitted progress update',
+                  );
+                  add(WerdEvent.progressUpdated(progress));
+                });
               });
 
           final goalRes = await _repository.getGoal(id: e.id);
           final progressRes = await _repository.getProgress(goalId: e.id);
-          
+
           // DEBUG: Log what we loaded
           debugPrint('📦 [WerdBloc] Loaded from storage:');
           progressRes.fold(
-            (failure) => debugPrint('   ❌ Failed to load progress: ${failure.message}'),
+            (failure) =>
+                debugPrint('   ❌ Failed to load progress: ${failure.message}'),
             (progress) {
               debugPrint('   ✅ Progress loaded');
-              debugPrint('   - Segments today: ${progress.segmentsToday.length}');
-              debugPrint('   - Total ayahs today: ${progress.totalAmountReadToday}');
+              debugPrint(
+                '   - Segments today: ${progress.segmentsToday.length}',
+              );
+              debugPrint(
+                '   - Total ayahs today: ${progress.totalAmountReadToday}',
+              );
               for (var i = 0; i < progress.segmentsToday.length; i++) {
                 final seg = progress.segmentsToday[i];
-                debugPrint('   - Segment $i: ${seg.startAyah}-${seg.endAyah} (${seg.ayahsCount} ayahs, ${seg.formattedStartTime} - ${seg.formattedEndTime})');
+                debugPrint(
+                  '   - Segment $i: ${seg.startAyah}-${seg.endAyah} (${seg.ayahsCount} ayahs, ${seg.formattedStartTime} - ${seg.formattedEndTime})',
+                );
               }
             },
           );
@@ -89,39 +93,57 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           // FIX #4: Save today's sessions to history BEFORE resetting
           // This prevents data loss when changing goals
           var progressToSave = currentProgress;
-          
+
           debugPrint('🔍 [Goal Change] Before saving to history:');
-          debugPrint('   totalAmountReadToday: ${currentProgress.totalAmountReadToday}');
-          debugPrint('   segmentsToday: ${currentProgress.segmentsToday.length}');
+          debugPrint(
+            '   totalAmountReadToday: ${currentProgress.totalAmountReadToday}',
+          );
+          debugPrint(
+            '   segmentsToday: ${currentProgress.segmentsToday.length}',
+          );
           debugPrint('   history entries: ${currentProgress.history.length}');
-          
-          if (currentProgress.totalAmountReadToday > 0 || currentProgress.segmentsToday.isNotEmpty) {
+
+          if (currentProgress.totalAmountReadToday > 0 ||
+              currentProgress.segmentsToday.isNotEmpty) {
             final dateKey = DateTime.now().toIso8601String().split('T')[0];
-            
+
             debugPrint('💾 [Goal Change] Saving to history with key: $dateKey');
-            
+
             // Calculate history entry from current segments
-            final startAbs = currentProgress.sessionStartAbsolute ?? 
-                             (currentProgress.segmentsToday.isNotEmpty ? currentProgress.segmentsToday.first.startAyah : 1);
-            final endAbs = currentProgress.lastReadAbsolute ?? 
-                           (currentProgress.segmentsToday.isNotEmpty ? currentProgress.segmentsToday.last.endAyah : startAbs);
-            
-            final pagesRead = QuranHizbProvider.calculateFractionalProgressFromSegments(
-              currentProgress.segmentsToday,
-              WerdUnit.page,
+            final startAbs =
+                currentProgress.sessionStartAbsolute ??
+                (currentProgress.segmentsToday.isNotEmpty
+                    ? currentProgress.segmentsToday.first.startAyah
+                    : 1);
+            final endAbs =
+                currentProgress.lastReadAbsolute ??
+                (currentProgress.segmentsToday.isNotEmpty
+                    ? currentProgress.segmentsToday.last.endAyah
+                    : startAbs);
+
+            final pagesRead =
+                QuranHizbProvider.calculateFractionalProgressFromSegments(
+                  currentProgress.segmentsToday,
+                  WerdUnit.page,
+                );
+            final juzRead =
+                QuranHizbProvider.calculateFractionalProgressFromSegments(
+                  currentProgress.segmentsToday,
+                  WerdUnit.juz,
+                );
+
+            final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(
+              startAbs,
             );
-            final juzRead = QuranHizbProvider.calculateFractionalProgressFromSegments(
-              currentProgress.segmentsToday,
-              WerdUnit.juz,
+            final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(
+              endAbs,
             );
-            
-            final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(startAbs);
-            final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(endAbs);
             final startSurahName = quran.getSurahName(startPos[0]);
             final endSurahName = quran.getSurahName(endPos[0]);
-            
-            final summary = "Read ${currentProgress.totalAmountReadToday} ayahs (${pagesRead.toStringAsFixed(1)} pages) from $startSurahName ${startPos[1]} to $endSurahName ${endPos[1]}";
-            
+
+            final summary =
+                "Read ${currentProgress.totalAmountReadToday} ayahs (${pagesRead.toStringAsFixed(1)} pages) from $startSurahName ${startPos[1]} to $endSurahName ${endPos[1]}";
+
             final historyEntry = WerdHistoryEntry(
               totalAyahsRead: currentProgress.totalAmountReadToday,
               startAbsolute: startAbs,
@@ -134,21 +156,27 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
               endSurahName: endSurahName,
               endAyahNumber: endPos[1],
               summary: summary,
-              sessions: currentProgress.segmentsToday.isNotEmpty ? currentProgress.segmentsToday : null,
+              sessions: currentProgress.segmentsToday.isNotEmpty
+                  ? currentProgress.segmentsToday
+                  : null,
             );
-            
+
             // Add to history
-            final newHistory = Map<String, WerdHistoryEntry>.from(currentProgress.history);
-            newHistory[dateKey] = historyEntry;
-            
-            debugPrint('💾 [Goal Change] Saved today\'s sessions to history: $dateKey - ${currentProgress.totalAmountReadToday} ayahs');
-            debugPrint('   History entries now: ${newHistory.length}');
-            
-            progressToSave = currentProgress.copyWith(
-              history: newHistory,
+            final newHistory = Map<String, WerdHistoryEntry>.from(
+              currentProgress.history,
             );
+            newHistory[dateKey] = historyEntry;
+
+            debugPrint(
+              '💾 [Goal Change] Saved today\'s sessions to history: $dateKey - ${currentProgress.totalAmountReadToday} ayahs',
+            );
+            debugPrint('   History entries now: ${newHistory.length}');
+
+            progressToSave = currentProgress.copyWith(history: newHistory);
           } else {
-            debugPrint('⚠️ [Goal Change] No sessions to save (totalAmountReadToday=0, segmentsToday=0)');
+            debugPrint(
+              '⚠️ [Goal Change] No sessions to save (totalAmountReadToday=0, segmentsToday=0)',
+            );
           }
 
           // NOW reset progress for the new goal
@@ -162,17 +190,23 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
             readItemsToday: const {}, // ✅ Reset read items
             lastUpdated: DateTime.now(),
           );
-          
+
           debugPrint('📊 [Goal Change] After reset:');
-          debugPrint('   totalAmountReadToday: ${updatedProgress.totalAmountReadToday}');
-          debugPrint('   segmentsToday: ${updatedProgress.segmentsToday.length}');
+          debugPrint(
+            '   totalAmountReadToday: ${updatedProgress.totalAmountReadToday}',
+          );
+          debugPrint(
+            '   segmentsToday: ${updatedProgress.segmentsToday.length}',
+          );
           debugPrint('   history entries: ${updatedProgress.history.length}');
-          
+
           await _repository.updateProgress(updatedProgress);
           debugPrint('✅ [Goal Change] Progress reset for new goal');
 
           if (state.goal?.id != e.goal.id) {
-            debugPrint('🔄 [Goal Change] Loading progress for new goal: ${e.goal.id}');
+            debugPrint(
+              '🔄 [Goal Change] Loading progress for new goal: ${e.goal.id}',
+            );
             add(WerdEvent.load(id: e.goal.id));
           } else {
             emit(
@@ -188,7 +222,9 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           // Clicked "Continue": Create a new explicit reading session
           // NOTE: We don't update totalAmountReadToday or lastReadAbsolute here.
           // Those are only updated when the user actually reads (trackItemRead).
-          debugPrint('🎬 [WerdBloc] Continue button - starting session at ayah ${e.startAyah}');
+          debugPrint(
+            '🎬 [WerdBloc] Continue button - starting session at ayah ${e.startAyah}',
+          );
 
           final goalId = state.goal?.id ?? 'default';
           final progressRes = await _repository.getProgress(goalId: goalId);
@@ -203,7 +239,9 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
             (p) => p,
           );
 
-          final segments = List<ReadingSegment>.from(currentProgress.segmentsToday);
+          final segments = List<ReadingSegment>.from(
+            currentProgress.segmentsToday,
+          );
 
           // Find the last active session (endTime == null)
           int? activeIndex;
@@ -223,22 +261,30 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
             // → Remove it to avoid ghost sessions from accidental double-Continue
             if (ayahsRead <= 1 && sessionAge.inMinutes < 5) {
               segments.removeAt(activeIndex);
-              debugPrint('🗑️ Removed empty session at ${activeSeg.startAyah} (${sessionAge.inMinutes} min old)');
+              debugPrint(
+                '🗑️ Removed empty session at ${activeSeg.startAyah} (${sessionAge.inMinutes} min old)',
+              );
             } else {
               // User actually read something or it's an older session → end it properly
               segments[activeIndex] = activeSeg.endSession();
-              debugPrint('✅ Ended previous session: ${activeSeg.startAyah}-${activeSeg.endAyah} (${activeSeg.durationMinutes} min)');
+              debugPrint(
+                '✅ Ended previous session: ${activeSeg.startAyah}-${activeSeg.endAyah} (${activeSeg.durationMinutes} min)',
+              );
             }
           }
 
           // Create the NEW session for this Continue click
-          segments.add(ReadingSegment(
-            startAyah: e.startAyah,
-            endAyah: e.startAyah,
-            startTime: DateTime.now(),
-          ));
+          segments.add(
+            ReadingSegment(
+              startAyah: e.startAyah,
+              endAyah: e.startAyah,
+              startTime: DateTime.now(),
+            ),
+          );
 
-          debugPrint('📖 Created new session: ayah ${e.startAyah} (Total sessions: ${segments.length})');
+          debugPrint(
+            '📖 Created new session: ayah ${e.startAyah} (Total sessions: ${segments.length})',
+          );
 
           // Recalculate total to ensure consistency
           final newTotal = segments.fold(0, (sum, seg) => sum + seg.ayahsCount);
@@ -261,13 +307,10 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
 
           final goalId = state.goal?.id ?? 'default';
           final progressRes = await _repository.getProgress(goalId: goalId);
-          final currentProgress = progressRes.fold(
-            (_) {
-              debugPrint('⚠️ No progress found, nothing to end');
-              return null;
-            },
-            (p) => p,
-          );
+          final currentProgress = progressRes.fold((_) {
+            debugPrint('⚠️ No progress found, nothing to end');
+            return null;
+          }, (p) => p);
 
           if (currentProgress == null) return;
           if (currentProgress.segmentsToday.isEmpty) {
@@ -276,9 +319,11 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           }
 
           // Find and end the active session
-          final segments = List<ReadingSegment>.from(currentProgress.segmentsToday);
+          final segments = List<ReadingSegment>.from(
+            currentProgress.segmentsToday,
+          );
           int activeIndex = -1;
-          
+
           for (int i = segments.length - 1; i >= 0; i--) {
             if (segments[i].endTime == null) {
               activeIndex = i;
@@ -288,10 +333,14 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
 
           if (activeIndex >= 0) {
             segments[activeIndex] = segments[activeIndex].endSession();
-            debugPrint('✅ Daily session ended: ${segments[activeIndex].startAyah} → ${segments[activeIndex].endAyah} (${segments[activeIndex].durationMinutes} min)');
+            debugPrint(
+              '✅ Daily session ended: ${segments[activeIndex].startAyah} → ${segments[activeIndex].endAyah} (${segments[activeIndex].durationMinutes} min)',
+            );
 
             // Remove empty segments (where no ayahs were actually read)
-            segments.removeWhere((seg) => seg.startAyah == seg.endAyah && seg.endTime != null);
+            segments.removeWhere(
+              (seg) => seg.startAyah == seg.endAyah && seg.endTime != null,
+            );
           } else {
             debugPrint('⚠️ No active session to end');
           }
@@ -306,7 +355,7 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           );
 
           await _repository.updateProgress(updatedProgress);
-          
+
           // Emit updated state
           await _emitUpdatedState(goalId);
         },
@@ -314,7 +363,8 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           emit(state.copyWith(progress: e.progress));
           // Smart cancellation: if goal is completed today, cancel the reminder
           final goal = state.goal;
-          if (goal != null && e.progress.totalAmountReadToday >= goal.valueInAyahs) {
+          if (goal != null &&
+              e.progress.totalAmountReadToday >= goal.valueInAyahs) {
             _notificationService?.cancelWerdReminder(forTodayOnly: true);
           }
         },
@@ -331,15 +381,17 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           debugPrint('📨 [WerdBloc] Received trackRangeRead event:');
           debugPrint('   e.startAbsolute = ${e.startAbsolute}');
           debugPrint('   e.endAbsolute = ${e.endAbsolute}');
-          
+
           // FIXED: Use _handleRangeTracking to properly create segment with both start and end
           // Previously was calling _handleBookmarkUpdate(e.endAbsolute) which only tracked the end ayah
           await _handleRangeTracking(e.startAbsolute, e.endAbsolute);
         },
         trackItemReadMarkAll: (e) async {
           // Jump dialog "Mark All": Extend daily session with full range
-          debugPrint('📖 [WerdBloc] Jump dialog: Marking range ${e.startAbsolute}-${e.endAbsolute} as read');
-          
+          debugPrint(
+            '📖 [WerdBloc] Jump dialog: Marking range ${e.startAbsolute}-${e.endAbsolute} as read',
+          );
+
           final goalId = state.goal?.id ?? 'default';
           final progressRes = await _repository.getProgress(goalId: goalId);
           final currentProgress = progressRes.fold(
@@ -354,11 +406,17 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           );
 
           // Normalize the range
-          final normalizedStart = e.startAbsolute < e.endAbsolute ? e.startAbsolute : e.endAbsolute;
-          final normalizedEnd = e.startAbsolute < e.endAbsolute ? e.endAbsolute : e.startAbsolute;
+          final normalizedStart = e.startAbsolute < e.endAbsolute
+              ? e.startAbsolute
+              : e.endAbsolute;
+          final normalizedEnd = e.startAbsolute < e.endAbsolute
+              ? e.endAbsolute
+              : e.startAbsolute;
 
           // Find or create daily session
-          final segments = List<ReadingSegment>.from(currentProgress.segmentsToday);
+          final segments = List<ReadingSegment>.from(
+            currentProgress.segmentsToday,
+          );
           int activeSessionIndex = -1;
           for (int i = segments.length - 1; i >= 0; i--) {
             if (segments[i].endTime == null) {
@@ -370,8 +428,12 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           if (activeSessionIndex >= 0) {
             // Extend existing daily session to include this range
             final activeSeg = segments[activeSessionIndex];
-            final newStart = activeSeg.startAyah < normalizedStart ? activeSeg.startAyah : normalizedStart;
-            final newEnd = activeSeg.endAyah > normalizedEnd ? activeSeg.endAyah : normalizedEnd;
+            final newStart = activeSeg.startAyah < normalizedStart
+                ? activeSeg.startAyah
+                : normalizedStart;
+            final newEnd = activeSeg.endAyah > normalizedEnd
+                ? activeSeg.endAyah
+                : normalizedEnd;
             segments[activeSessionIndex] = ReadingSegment(
               startAyah: newStart,
               endAyah: newEnd,
@@ -381,36 +443,41 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
             debugPrint('📖 Extended daily session: $newStart → $newEnd');
           } else {
             // Create first session for today
-            segments.add(ReadingSegment(
-              startAyah: normalizedStart,
-              endAyah: normalizedEnd,
-              startTime: DateTime.now(),
-            ));
-            debugPrint('📖 Created daily session: $normalizedStart → $normalizedEnd');
+            segments.add(
+              ReadingSegment(
+                startAyah: normalizedStart,
+                endAyah: normalizedEnd,
+                startTime: DateTime.now(),
+              ),
+            );
+            debugPrint(
+              '📖 Created daily session: $normalizedStart → $normalizedEnd',
+            );
           }
 
           final newTotal = segments.fold(0, (sum, seg) => sum + seg.ayahsCount);
-          
+
           // FIX #1: Populate readItemsToday from segments for fractional calculations
           final readItems = _segmentsToReadItems(segments);
 
           final newProgress = currentProgress.copyWith(
             totalAmountReadToday: newTotal,
             segmentsToday: segments,
-            readItemsToday: readItems,  // ✅ FIX: Populate from segments
+            readItemsToday: readItems, // ✅ FIX: Populate from segments
             lastReadAbsolute: normalizedEnd,
             lastUpdated: DateTime.now(),
           );
 
           await _repository.updateProgress(newProgress);
           debugPrint('✅ Daily session updated - Total: $newTotal ayahs');
-          
+
           // Emit updated state
           await _emitUpdatedState(goalId);
         },
         jumpToNewSession: (e) async {
           debugPrint(
-              '🚀 [WerdBloc] Jump to New Session triggered: target ${e.targetAbsoluteIndex}');
+            '🚀 [WerdBloc] Jump to New Session triggered: target ${e.targetAbsoluteIndex}',
+          );
 
           final goalId = state.goal?.id ?? 'default';
           final progressRes = await _repository.getProgress(goalId: goalId);
@@ -425,8 +492,9 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
             (p) => p,
           );
 
-          final segments =
-              List<ReadingSegment>.from(currentProgress.segmentsToday);
+          final segments = List<ReadingSegment>.from(
+            currentProgress.segmentsToday,
+          );
 
           // 1. End any active session
           int activeIndex = -1;
@@ -442,11 +510,14 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
             // If it's a "ghost" session (just a start point without progress), remove it
             if (activeSeg.startAyah == activeSeg.endAyah) {
               segments.removeAt(activeIndex);
-              debugPrint('🗑️ Removed empty active session at ${activeSeg.startAyah}');
+              debugPrint(
+                '🗑️ Removed empty active session at ${activeSeg.startAyah}',
+              );
             } else {
               segments[activeIndex] = activeSeg.endSession();
               debugPrint(
-                  '✅ Ended previous session: ${activeSeg.startAyah}-${activeSeg.endAyah}');
+                '✅ Ended previous session: ${activeSeg.startAyah}-${activeSeg.endAyah}',
+              );
             }
           }
 
@@ -462,7 +533,8 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
 
           await _repository.updateProgress(newProgress);
           debugPrint(
-              '📖 Jumped to new session at ${e.targetAbsoluteIndex}. lastReadAbsolute updated.');
+            '📖 Jumped to new session at ${e.targetAbsoluteIndex}. lastReadAbsolute updated.',
+          );
 
           // Emit updated state
           await _emitUpdatedState(goalId);
@@ -510,7 +582,7 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
     );
 
     final segments = List<ReadingSegment>.from(currentProgress.segmentsToday);
-    
+
     // Find the LAST active session (no endTime) to extend it
     int activeSessionIndex = -1;
     for (int i = segments.length - 1; i >= 0; i--) {
@@ -529,33 +601,37 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
         startTime: activeSeg.startTime,
         endTime: null,
       );
-      debugPrint('📖 Extended session ${activeSessionIndex + 1}: ${activeSeg.startAyah} → $bookmarkAbs');
+      debugPrint(
+        '📖 Extended session ${activeSessionIndex + 1}: ${activeSeg.startAyah} → $bookmarkAbs',
+      );
     } else {
       // No active session - create first one
-      segments.add(ReadingSegment(
-        startAyah: bookmarkAbs,
-        endAyah: bookmarkAbs,
-        startTime: DateTime.now(),
-      ));
+      segments.add(
+        ReadingSegment(
+          startAyah: bookmarkAbs,
+          endAyah: bookmarkAbs,
+          startTime: DateTime.now(),
+        ),
+      );
       debugPrint('📖 Created first session: ayah $bookmarkAbs');
     }
 
     // Calculate total from all segments
     final newTotal = segments.fold(0, (sum, seg) => sum + seg.ayahsCount);
-    
+
     // FIX #1: Populate readItemsToday from segments for fractional calculations
     final readItems = _segmentsToReadItems(segments);
 
     final newProgress = currentProgress.copyWith(
       totalAmountReadToday: newTotal,
       segmentsToday: segments,
-      readItemsToday: readItems,  // ✅ FIX: Populate from segments
+      readItemsToday: readItems, // ✅ FIX: Populate from segments
       lastReadAbsolute: bookmarkAbs,
       lastUpdated: DateTime.now(),
     );
 
     await _repository.updateProgress(newProgress);
-    
+
     // Emit updated state
     await _emitUpdatedState(goalId);
   }
@@ -598,21 +674,23 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
     final finalSegments = [...endedSegments, newSegment];
 
     final newTotal = currentProgress.totalAmountReadToday + rangeCount;
-    
+
     // FIX #1: Populate readItemsToday from segments for fractional calculations
     final readItems = _segmentsToReadItems(finalSegments);
 
     final newProgress = currentProgress.copyWith(
       totalAmountReadToday: newTotal,
       segmentsToday: finalSegments,
-      readItemsToday: readItems,  // ✅ FIX: Populate from segments
+      readItemsToday: readItems, // ✅ FIX: Populate from segments
       lastReadAbsolute: normalizedEnd,
       lastUpdated: DateTime.now(),
     );
 
     await _repository.updateProgress(newProgress);
-    debugPrint('📖 Created range session: $normalizedStart → $normalizedEnd ($rangeCount ayahs)');
-    
+    debugPrint(
+      '📖 Created range session: $normalizedStart → $normalizedEnd ($rangeCount ayahs)',
+    );
+
     // Emit updated state
     await _emitUpdatedState(goalId);
   }
@@ -634,32 +712,41 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
     // FIX #3: Save current sessions to history BEFORE clearing
     // This prevents data loss when completing a cycle
     var progressToSave = currentProgress;
-    
-    if (currentProgress.totalAmountReadToday > 0 || currentProgress.segmentsToday.isNotEmpty) {
+
+    if (currentProgress.totalAmountReadToday > 0 ||
+        currentProgress.segmentsToday.isNotEmpty) {
       final dateKey = DateTime.now().toIso8601String().split('T')[0];
-      
+
       // Calculate history entry from segments
-      final startAbs = currentProgress.sessionStartAbsolute ?? 
-                       (currentProgress.segmentsToday.isNotEmpty ? currentProgress.segmentsToday.first.startAyah : 1);
-      final endAbs = currentProgress.lastReadAbsolute ?? 
-                     (currentProgress.segmentsToday.isNotEmpty ? currentProgress.segmentsToday.last.endAyah : startAbs);
-      
-      final pagesRead = QuranHizbProvider.calculateFractionalProgressFromSegments(
-        currentProgress.segmentsToday,
-        WerdUnit.page,
-      );
+      final startAbs =
+          currentProgress.sessionStartAbsolute ??
+          (currentProgress.segmentsToday.isNotEmpty
+              ? currentProgress.segmentsToday.first.startAyah
+              : 1);
+      final endAbs =
+          currentProgress.lastReadAbsolute ??
+          (currentProgress.segmentsToday.isNotEmpty
+              ? currentProgress.segmentsToday.last.endAyah
+              : startAbs);
+
+      final pagesRead =
+          QuranHizbProvider.calculateFractionalProgressFromSegments(
+            currentProgress.segmentsToday,
+            WerdUnit.page,
+          );
       final juzRead = QuranHizbProvider.calculateFractionalProgressFromSegments(
         currentProgress.segmentsToday,
         WerdUnit.juz,
       );
-      
+
       final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(startAbs);
       final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(endAbs);
       final startSurahName = quran.getSurahName(startPos[0]);
       final endSurahName = quran.getSurahName(endPos[0]);
-      
-      final summary = "Read ${currentProgress.totalAmountReadToday} ayahs (${pagesRead.toStringAsFixed(1)} pages) from $startSurahName ${startPos[1]} to $endSurahName ${endPos[1]}";
-      
+
+      final summary =
+          "Read ${currentProgress.totalAmountReadToday} ayahs (${pagesRead.toStringAsFixed(1)} pages) from $startSurahName ${startPos[1]} to $endSurahName ${endPos[1]}";
+
       final historyEntry = WerdHistoryEntry(
         totalAyahsRead: currentProgress.totalAmountReadToday,
         startAbsolute: startAbs,
@@ -672,18 +759,22 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
         endSurahName: endSurahName,
         endAyahNumber: endPos[1],
         summary: summary,
-        sessions: currentProgress.segmentsToday.isNotEmpty ? currentProgress.segmentsToday : null,
+        sessions: currentProgress.segmentsToday.isNotEmpty
+            ? currentProgress.segmentsToday
+            : null,
       );
-      
+
       // Add to history
-      final newHistory = Map<String, WerdHistoryEntry>.from(currentProgress.history);
-      newHistory[dateKey] = historyEntry;
-      
-      debugPrint('💾 [Cycle Completion] Saved session to history: $dateKey - ${currentProgress.totalAmountReadToday} ayahs');
-      
-      progressToSave = currentProgress.copyWith(
-        history: newHistory,
+      final newHistory = Map<String, WerdHistoryEntry>.from(
+        currentProgress.history,
       );
+      newHistory[dateKey] = historyEntry;
+
+      debugPrint(
+        '💾 [Cycle Completion] Saved session to history: $dateKey - ${currentProgress.totalAmountReadToday} ayahs',
+      );
+
+      progressToSave = currentProgress.copyWith(history: newHistory);
     }
 
     // NOW complete the cycle
@@ -697,7 +788,9 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
     );
 
     await _repository.updateProgress(newProgress);
-    debugPrint('✅ [Cycle Completion] Cycle completed: ${newProgress.completedCycles} total cycles');
+    debugPrint(
+      '✅ [Cycle Completion] Cycle completed: ${newProgress.completedCycles} total cycles',
+    );
 
     // Emit updated state
     await _emitUpdatedState(goalId);
@@ -742,7 +835,7 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
       );
 
       await _repository.updateProgress(newProgress);
-      
+
       // Emit updated state
       await _emitUpdatedState(goalId);
     }
@@ -764,7 +857,7 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
 
     final segments = List<ReadingSegment>.from(currentProgress.segmentsToday);
     int segmentIndex = -1;
-    
+
     // Check if ayah is already in a segment
     for (int i = 0; i < segments.length; i++) {
       if (ayahAbs >= segments[i].startAyah && ayahAbs <= segments[i].endAyah) {
@@ -772,11 +865,11 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
         break;
       }
     }
-    
+
     if (segmentIndex >= 0) {
       // Ayah is already marked - REMOVE it (unmark)
       final segment = segments[segmentIndex];
-      
+
       if (segment.startAyah == segment.endAyah) {
         // Single ayah segment - remove entirely
         segments.removeAt(segmentIndex);
@@ -809,27 +902,31 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
       // Ayah is not marked - MARK it
       segments.add(ReadingSegment(startAyah: ayahAbs, endAyah: ayahAbs));
     }
-    
+
     // Merge segments with session awareness
-    final mergedSegments = ReadingSegment.mergeSegmentsWithSessionAwareness(segments);
+    final mergedSegments = ReadingSegment.mergeSegmentsWithSessionAwareness(
+      segments,
+    );
     final newTotal = mergedSegments.fold(0, (sum, seg) => sum + seg.ayahsCount);
-    
+
     // FIX #1: Populate readItemsToday from segments for fractional calculations
     final readItems = _segmentsToReadItems(mergedSegments);
 
     // Update lastReadAbsolute to last marked ayah
-    final newLastRead = mergedSegments.isNotEmpty ? mergedSegments.last.endAyah : null;
+    final newLastRead = mergedSegments.isNotEmpty
+        ? mergedSegments.last.endAyah
+        : null;
 
     final newProgress = currentProgress.copyWith(
       segmentsToday: mergedSegments,
       totalAmountReadToday: newTotal,
-      readItemsToday: readItems,  // ✅ FIX: Populate from segments
+      readItemsToday: readItems, // ✅ FIX: Populate from segments
       lastReadAbsolute: newLastRead,
       lastUpdated: DateTime.now(),
     );
 
     await _repository.updateProgress(newProgress);
-    
+
     // Emit updated state
     await _emitUpdatedState(goalId);
   }
@@ -854,23 +951,25 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
 
       // Recalculate total
       final newTotal = segments.fold(0, (sum, seg) => sum + seg.ayahsCount);
-      
+
       // FIX #1: Populate readItemsToday from segments for fractional calculations
       final readItems = _segmentsToReadItems(segments);
 
       // Update lastReadAbsolute
-      final newLastRead = segments.isNotEmpty ? segments.last.endAyah : currentProgress.sessionStartAbsolute;
+      final newLastRead = segments.isNotEmpty
+          ? segments.last.endAyah
+          : currentProgress.sessionStartAbsolute;
 
       final newProgress = currentProgress.copyWith(
         segmentsToday: segments,
         totalAmountReadToday: newTotal,
-        readItemsToday: readItems,  // ✅ FIX: Populate from segments
+        readItemsToday: readItems, // ✅ FIX: Populate from segments
         lastReadAbsolute: newLastRead,
         lastUpdated: DateTime.now(),
       );
 
       await _repository.updateProgress(newProgress);
-      
+
       // Emit updated state
       await _emitUpdatedState(goalId);
     }
@@ -897,10 +996,7 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
   /// Helper: Emit updated state after repository update
   Future<void> _emitUpdatedState(String goalId) async {
     final progressRes = await _repository.getProgress(goalId: goalId);
-    final progress = progressRes.fold(
-      (_) => state.progress,
-      (p) => p,
-    );
+    final progress = progressRes.fold((_) => state.progress, (p) => p);
     if (progress != null) {
       // ignore: invalid_use_of_visible_for_testing_member
       emit(state.copyWith(progress: progress));

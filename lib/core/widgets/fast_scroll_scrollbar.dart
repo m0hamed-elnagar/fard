@@ -72,16 +72,15 @@ class _FastScrollScrollbarState extends State<FastScrollScrollbar> {
     if (renderBox == null) return;
 
     final screenHeight = renderBox.size.height;
-    final newDragPosition =
-        (_dragPosition + details.delta.dy / screenHeight).clamp(0.0, 1.0);
+    final newDragPosition = (_dragPosition + details.delta.dy / screenHeight)
+        .clamp(0.0, 1.0);
 
     setState(() {
       _dragPosition = newDragPosition;
-      _currentIndex =
-          (newDragPosition * (widget.itemCount - 1)).round().clamp(
-                0,
-                widget.itemCount - 1,
-              );
+      _currentIndex = (newDragPosition * (widget.itemCount - 1)).round().clamp(
+        0,
+        widget.itemCount - 1,
+      );
     });
 
     final maxScroll = widget.scrollController.position.maxScrollExtent;
@@ -98,13 +97,13 @@ class _FastScrollScrollbarState extends State<FastScrollScrollbar> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isLight = theme.brightness == Brightness.light;
-    
+
     // Use more vibrant colors for better visibility
     final trackColor = isLight
         ? AppTheme.textSecondary.withValues(alpha: 0.3)
         : AppTheme.textSecondary.withValues(alpha: 0.2);
-    final thumbColor = _isDragging 
-        ? theme.primaryColor 
+    final thumbColor = _isDragging
+        ? theme.primaryColor
         : theme.primaryColor.withValues(alpha: 0.85);
     final thumbWidth = _isDragging ? 10.0 : 8.0;
 
@@ -182,9 +181,7 @@ class _FastScrollScrollbarState extends State<FastScrollScrollbar> {
                         horizontal: 16,
                         vertical: 12,
                       ),
-                      constraints: const BoxConstraints(
-                        maxWidth: 200,
-                      ),
+                      constraints: const BoxConstraints(maxWidth: 200),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(

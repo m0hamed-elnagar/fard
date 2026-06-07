@@ -59,63 +59,61 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
         final bookmarksRes = settings[3] as Result<List<Bookmark>>;
         final bookmarks = bookmarksRes.fold((_) => <Bookmark>[], (v) => v);
 
-        result.fold(
-          (failure) => emit(ReaderState.error(failure.message)),
-          (surah) {
-            Ayah? highlightedAyah;
-            if (event.initialAyahNumber != null) {
-              highlightedAyah = surah.ayahs.firstWhere(
-                (a) => a.number.ayahNumberInSurah == event.initialAyahNumber,
-                orElse: () => surah.ayahs.first,
-              );
-            }
-
-            emit(
-              ReaderState.loaded(
-                surah: surah,
-                separator: separator,
-                textScale: textScale,
-                fontFamily: fontFamily,
-                bookmarks: bookmarks,
-                highlightedAyah: highlightedAyah,
-              ),
+        result.fold((failure) => emit(ReaderState.error(failure.message)), (
+          surah,
+        ) {
+          Ayah? highlightedAyah;
+          if (event.initialAyahNumber != null) {
+            highlightedAyah = surah.ayahs.firstWhere(
+              (a) => a.number.ayahNumberInSurah == event.initialAyahNumber,
+              orElse: () => surah.ayahs.first,
             );
+          }
 
-            _lastReadSubscription?.cancel();
-            _lastReadSubscription = watchLastRead().listen((result) {
-              result.fold((_) => null, (position) {
-                state.mapOrNull(
-                  loaded: (s) {
-                    if (position.ayahNumber.surahNumber ==
-                        s.surah.number.value) {
-                      final ayah = s.surah.ayahs.firstWhere(
-                        (a) =>
-                            a.number.ayahNumberInSurah ==
-                            position.ayahNumber.ayahNumberInSurah,
-                        orElse: () => s.surah.ayahs.first,
-                      );
+          emit(
+            ReaderState.loaded(
+              surah: surah,
+              separator: separator,
+              textScale: textScale,
+              fontFamily: fontFamily,
+              bookmarks: bookmarks,
+              highlightedAyah: highlightedAyah,
+            ),
+          );
 
-                      // FIX: Only auto-select if NOTHING is highlighted yet
-                      if (s.lastReadAyah == null && s.highlightedAyah == null) {
-                        add(ReaderEvent.selectAyah(ayah));
-                      }
+          _lastReadSubscription?.cancel();
+          _lastReadSubscription = watchLastRead().listen((result) {
+            result.fold((_) => null, (position) {
+              state.mapOrNull(
+                loaded: (s) {
+                  if (position.ayahNumber.surahNumber == s.surah.number.value) {
+                    final ayah = s.surah.ayahs.firstWhere(
+                      (a) =>
+                          a.number.ayahNumberInSurah ==
+                          position.ayahNumber.ayahNumberInSurah,
+                      orElse: () => s.surah.ayahs.first,
+                    );
+
+                    // FIX: Only auto-select if NOTHING is highlighted yet
+                    if (s.lastReadAyah == null && s.highlightedAyah == null) {
+                      add(ReaderEvent.selectAyah(ayah));
                     }
-                  },
-                );
-              });
-            });
-
-            _bookmarksSubscription?.cancel();
-            _bookmarksSubscription = bookmarkRepository
-                .watchBookmarks()
-                .listen((result) {
-              result.fold(
-                (_) => null,
-                (bookmarks) => add(ReaderEvent.bookmarksUpdated(bookmarks)),
+                  }
+                },
               );
             });
-          },
-        );
+          });
+
+          _bookmarksSubscription?.cancel();
+          _bookmarksSubscription = bookmarkRepository.watchBookmarks().listen((
+            result,
+          ) {
+            result.fold(
+              (_) => null,
+              (bookmarks) => add(ReaderEvent.bookmarksUpdated(bookmarks)),
+            );
+          });
+        });
       } catch (e) {
         emit(ReaderState.error(e.toString()));
       }

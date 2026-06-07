@@ -9,7 +9,8 @@ import '../../domain/prayer_reminder_type.dart';
 import '../blocs/daily_reminders_cubit.dart';
 import '../blocs/daily_reminders_state.dart';
 
-class PrayerRemindersSection extends StatelessWidget with NotificationPermissionMixin {
+class PrayerRemindersSection extends StatelessWidget
+    with NotificationPermissionMixin {
   const PrayerRemindersSection({super.key});
 
   @override
@@ -29,7 +30,9 @@ class PrayerRemindersSection extends StatelessWidget with NotificationPermission
               value: state.isSalahReminderEnabled,
               onChanged: (val) async {
                 if (val) {
-                  final granted = await checkAndRequestNotificationPermissions(context);
+                  final granted = await checkAndRequestNotificationPermissions(
+                    context,
+                  );
                   if (!granted) return;
                 }
                 cubit.toggleSalahReminder(val);
@@ -40,7 +43,10 @@ class PrayerRemindersSection extends StatelessWidget with NotificationPermission
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(l10n.reminderType, style: const TextStyle(fontWeight: FontWeight.w500)),
+                  Text(
+                    l10n.reminderType,
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
                   SegmentedButton<PrayerReminderType>(
                     segments: [
                       ButtonSegment(
@@ -53,12 +59,15 @@ class PrayerRemindersSection extends StatelessWidget with NotificationPermission
                       ),
                     ],
                     selected: {state.prayerReminderType},
-                    onSelectionChanged: (set) => cubit.setPrayerReminderType(set.first),
+                    onSelectionChanged: (set) =>
+                        cubit.setPrayerReminderType(set.first),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              Text("${l10n.offset}: ${state.salahReminderOffsetMinutes} ${l10n.werdMinSuffix}"),
+              Text(
+                "${l10n.offset}: ${state.salahReminderOffsetMinutes} ${l10n.werdMinSuffix}",
+              ),
               Slider(
                 value: state.salahReminderOffsetMinutes.toDouble(),
                 min: 0,
@@ -76,7 +85,9 @@ class PrayerRemindersSection extends StatelessWidget with NotificationPermission
                     label: Text(_getLocalizedSalaahName(s, l10n)),
                     selected: isEnabled,
                     onSelected: (_) => cubit.toggleSpecificSalahReminder(s),
-                    selectedColor: context.primaryContainerColor.withValues(alpha: 0.2),
+                    selectedColor: context.primaryContainerColor.withValues(
+                      alpha: 0.2,
+                    ),
                     checkmarkColor: context.primaryColor,
                   );
                 }).toList(),
@@ -124,7 +135,10 @@ class PrayerRemindersSection extends StatelessWidget with NotificationPermission
                 const SizedBox(width: 16),
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -142,7 +156,11 @@ class PrayerRemindersSection extends StatelessWidget with NotificationPermission
     );
   }
 
-  Widget _buildToggleItem({required String title, required bool value, required ValueChanged<bool> onChanged}) {
+  Widget _buildToggleItem({
+    required String title,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -154,11 +172,16 @@ class PrayerRemindersSection extends StatelessWidget with NotificationPermission
 
   String _getLocalizedSalaahName(Salaah salaah, AppLocalizations l10n) {
     switch (salaah) {
-      case Salaah.fajr: return l10n.fajr;
-      case Salaah.dhuhr: return l10n.dhuhr;
-      case Salaah.asr: return l10n.asr;
-      case Salaah.maghrib: return l10n.maghrib;
-      case Salaah.isha: return l10n.isha;
+      case Salaah.fajr:
+        return l10n.fajr;
+      case Salaah.dhuhr:
+        return l10n.dhuhr;
+      case Salaah.asr:
+        return l10n.asr;
+      case Salaah.maghrib:
+        return l10n.maghrib;
+      case Salaah.isha:
+        return l10n.isha;
     }
   }
 }

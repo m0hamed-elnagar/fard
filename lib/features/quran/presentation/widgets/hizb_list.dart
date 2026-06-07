@@ -33,7 +33,11 @@ class HizbList extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.grid_view_rounded, size: 64, color: context.onSurfaceVariantColor),
+            Icon(
+              Icons.grid_view_rounded,
+              size: 64,
+              color: context.onSurfaceVariantColor,
+            ),
             const SizedBox(height: 16),
             Text(l10n.noSearchResults, style: GoogleFonts.amiri(fontSize: 20)),
           ],
@@ -88,7 +92,10 @@ class HizbList extends StatelessWidget {
               ),
               subtitle: Text(
                 'يبدأ من $surahName (ص ${pageNum.toArabicIndic()})',
-                style: GoogleFonts.amiri(fontSize: 14, color: context.onSurfaceVariantColor),
+                style: GoogleFonts.amiri(
+                  fontSize: 14,
+                  color: context.onSurfaceVariantColor,
+                ),
               ),
               children: [
                 const Divider(height: 1, indent: 16, endIndent: 16),

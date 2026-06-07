@@ -110,8 +110,12 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
   }
 
   Widget _buildProgressBar(List<AzkarItem> azkar) {
-    final completedCount = azkar.where((item) => item.currentCount >= item.count).length;
-    final progressValue = azkar.isNotEmpty ? completedCount.toDouble() / azkar.length : 0.0;
+    final completedCount = azkar
+        .where((item) => item.currentCount >= item.count)
+        .length;
+    final progressValue = azkar.isNotEmpty
+        ? completedCount.toDouble() / azkar.length
+        : 0.0;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -123,7 +127,9 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
               child: LinearProgressIndicator(
                 value: progressValue,
                 backgroundColor: context.surfaceContainerHighestColor,
-                valueColor: AlwaysStoppedAnimation<Color>(context.secondaryColor),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  context.secondaryColor,
+                ),
                 minHeight: 6,
               ),
             ),
@@ -156,7 +162,10 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel, style: TextStyle(color: context.onSurfaceVariantColor)),
+            child: Text(
+              l10n.cancel,
+              style: TextStyle(color: context.onSurfaceVariantColor),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -193,7 +202,10 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
           children: [
             const Icon(Icons.info_outline, size: 48),
             const SizedBox(height: 16),
-            Text(l10n.noItemsFound, style: TextStyle(color: context.onSurfaceVariantColor)),
+            Text(
+              l10n.noItemsFound,
+              style: TextStyle(color: context.onSurfaceVariantColor),
+            ),
           ],
         ),
       );
@@ -219,9 +231,14 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
                 return SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                        vertical: 16.0,
+                      ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -251,7 +268,12 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
                                   ],
                                 ),
                                 const SizedBox(height: 32),
-                                _buildControlBar(context, item, isCompleted, buttonSize),
+                                _buildControlBar(
+                                  context,
+                                  item,
+                                  isCompleted,
+                                  buttonSize,
+                                ),
                               ],
                             ),
                           ),
@@ -357,10 +379,7 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  labels[i],
-                  style: GoogleFonts.amiri(fontSize: sizes[i]),
-                ),
+                Text(labels[i], style: GoogleFonts.amiri(fontSize: sizes[i])),
                 const SizedBox(width: 8),
                 Text(
                   ['Small', 'Medium', 'Large'][i],
@@ -512,7 +531,8 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
                 : Icons.phonelink_ring_rounded,
             size: 32,
           ),
-          onPressed: () => setState(() => _vibrationEnabled = !_vibrationEnabled),
+          onPressed: () =>
+              setState(() => _vibrationEnabled = !_vibrationEnabled),
           color: _vibrationEnabled
               ? context.secondaryColor
               : context.onSurfaceVariantColor,
@@ -530,5 +550,4 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
       Vibration.vibrate(duration: 30);
     }
   }
-
 }

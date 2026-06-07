@@ -206,10 +206,7 @@ class _MissedDaysDialogState extends State<MissedDaysDialog> {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: context.onSurfaceVariantColor,
                       padding: const EdgeInsets.symmetric(vertical: 14.0),
-                      side: BorderSide(
-                        color: context.outlineColor,
-                        width: 1.5,
-                      ),
+                      side: BorderSide(color: context.outlineColor, width: 1.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.0),
                       ),
@@ -300,7 +297,9 @@ class _CalendarDayItem extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           margin: const EdgeInsets.all(4.0),
           decoration: BoxDecoration(
-            color: isSelected ? context.errorColor : context.surfaceContainerHighestColor,
+            color: isSelected
+                ? context.errorColor
+                : context.surfaceContainerHighestColor,
             borderRadius: BorderRadius.circular(12.0),
             boxShadow: isSelected
                 ? [

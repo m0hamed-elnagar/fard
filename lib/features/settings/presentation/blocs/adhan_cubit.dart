@@ -15,16 +15,14 @@ class AdhanCubit extends Cubit<AdhanState> with WidgetsBindingObserver {
   final SettingsRepository _repo;
   final SyncNotificationSchedule _syncNotif;
 
-  AdhanCubit(
-    this._repo,
-    this._syncNotif,
-  ) : super(
-          AdhanState(
-            salaahSettings: _repo.salaahSettings,
-            audioQuality: _repo.audioQuality,
-            isAudioPlayerExpanded: _repo.isAudioPlayerExpanded,
-          ),
-        ) {
+  AdhanCubit(this._repo, this._syncNotif)
+    : super(
+        AdhanState(
+          salaahSettings: _repo.salaahSettings,
+          audioQuality: _repo.audioQuality,
+          isAudioPlayerExpanded: _repo.isAudioPlayerExpanded,
+        ),
+      ) {
     WidgetsBinding.instance.addObserver(this);
     refreshPermissions();
   }
@@ -40,10 +38,12 @@ class AdhanCubit extends Cubit<AdhanState> with WidgetsBindingObserver {
     final ns = getIt<NotificationService>();
     final notifications = await ns.areNotificationsEnabled();
     final exactAlarms = await ns.canScheduleExactNotifications();
-    emit(state.copyWith(
-      notificationsEnabled: notifications,
-      exactAlarmsEnabled: exactAlarms,
-    ));
+    emit(
+      state.copyWith(
+        notificationsEnabled: notifications,
+        exactAlarmsEnabled: exactAlarms,
+      ),
+    );
   }
 
   @override
@@ -92,7 +92,9 @@ class AdhanCubit extends Cubit<AdhanState> with WidgetsBindingObserver {
   }
 
   Future<void> _updateAllAzanEnabledAsync(bool v) async {
-    final newList = state.salaahSettings.map((s) => s.copyWith(isAzanEnabled: v)).toList();
+    final newList = state.salaahSettings
+        .map((s) => s.copyWith(isAzanEnabled: v))
+        .toList();
     await _repo.updateSalaahSettings(newList);
     emit(state.copyWith(salaahSettings: newList));
     _sync();
@@ -103,27 +105,30 @@ class AdhanCubit extends Cubit<AdhanState> with WidgetsBindingObserver {
   }
 
   Future<void> _updateAllAzanSoundAsync(String? v) async {
-    final newList = state.salaahSettings.map((s) => s.copyWith(azanSound: v)).toList();
+    final newList = state.salaahSettings
+        .map((s) => s.copyWith(azanSound: v))
+        .toList();
     await _repo.updateSalaahSettings(newList);
     emit(state.copyWith(salaahSettings: newList));
     _sync();
   }
 
   void _sync() => Future.microtask(() async {
-        try {
-          await _syncNotif.execute();
-        } catch (e, stack) {
-          debugPrint('AdhanCubit: Error syncing notifications: $e\n$stack');
-        }
-      });
+    try {
+      await _syncNotif.execute();
+    } catch (e, stack) {
+      debugPrint('AdhanCubit: Error syncing notifications: $e\n$stack');
+    }
+  });
 
   void refresh() {
-    emit(state.copyWith(
-      salaahSettings: _repo.salaahSettings,
-      audioQuality: _repo.audioQuality,
-      isAudioPlayerExpanded: _repo.isAudioPlayerExpanded,
-    ));
+    emit(
+      state.copyWith(
+        salaahSettings: _repo.salaahSettings,
+        audioQuality: _repo.audioQuality,
+        isAudioPlayerExpanded: _repo.isAudioPlayerExpanded,
+      ),
+    );
     _sync();
   }
 }
-

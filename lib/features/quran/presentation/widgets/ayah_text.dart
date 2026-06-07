@@ -447,19 +447,19 @@ class _AyahTextState extends State<AyahText> {
 
   void _invokeCallback(String type, Ayah ayah) {
     switch (type) {
-        case 'tap':
-            widget.onAyahTap(ayah);
-            break;
-        case 'longPress':
-            widget.onAyahLongPress?.call(ayah);
-            break;
-        case 'doubleTap':
-            if (widget.onAyahDoubleTap != null) {
-                widget.onAyahDoubleTap!(ayah);
-            } else {
-                widget.onAyahLongPress?.call(ayah);
-            }
-            break;
+      case 'tap':
+        widget.onAyahTap(ayah);
+        break;
+      case 'longPress':
+        widget.onAyahLongPress?.call(ayah);
+        break;
+      case 'doubleTap':
+        if (widget.onAyahDoubleTap != null) {
+          widget.onAyahDoubleTap!(ayah);
+        } else {
+          widget.onAyahLongPress?.call(ayah);
+        }
+        break;
     }
   }
 }

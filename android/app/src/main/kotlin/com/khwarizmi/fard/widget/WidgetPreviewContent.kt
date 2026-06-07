@@ -1,4 +1,4 @@
-package com.qada.fard.widget
+package com.khwarizmi.fard.widget
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -17,7 +17,7 @@ import androidx.glance.text.TextAlign
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.qada.fard.MainActivity
+import com.khwarizmi.fard.MainActivity
 
 /**
  * Sample prayer data for preview mode.
@@ -589,3 +589,4 @@ fun WidgetErrorContent(
         )
     }
 }
+

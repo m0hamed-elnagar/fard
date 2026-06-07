@@ -25,10 +25,7 @@ class JuzMarker extends StatelessWidget {
       if (juzData.containsKey(surahNumber)) {
         final firstAyah = juzData[surahNumber]!.first;
         if (firstAyah <= totalAyahs) {
-          markers.add(JuzMarkerData(
-            juzNumber: juz,
-            ayahNumber: firstAyah,
-          ));
+          markers.add(JuzMarkerData(juzNumber: juz, ayahNumber: firstAyah));
         }
       }
     }
@@ -45,12 +42,7 @@ class JuzMarker extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       child: Row(
         children: [
-          Expanded(
-            child: Container(
-              height: 1,
-              color: theme.dividerColor,
-            ),
-          ),
+          Expanded(child: Container(height: 1, color: theme.dividerColor)),
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -86,22 +78,17 @@ class JuzMarker extends StatelessWidget {
             TextButton(
               onPressed: onTap,
               style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              child: Text(
-                l10n.go,
-                style: const TextStyle(fontSize: 11),
-              ),
+              child: Text(l10n.go, style: const TextStyle(fontSize: 11)),
             ),
           const SizedBox(width: 8),
-          Expanded(
-            child: Container(
-              height: 1,
-              color: theme.dividerColor,
-            ),
-          ),
+          Expanded(child: Container(height: 1, color: theme.dividerColor)),
         ],
       ),
     );
@@ -112,8 +99,5 @@ class JuzMarkerData {
   final int juzNumber;
   final int ayahNumber;
 
-  const JuzMarkerData({
-    required this.juzNumber,
-    required this.ayahNumber,
-  });
+  const JuzMarkerData({required this.juzNumber, required this.ayahNumber});
 }

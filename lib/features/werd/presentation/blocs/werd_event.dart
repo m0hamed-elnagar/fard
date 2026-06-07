@@ -34,10 +34,10 @@ class WerdEvent with _$WerdEvent {
 
   // NEW: Undo last action
   const factory WerdEvent.undoLastAction() = _UndoLastAction;
-  
+
   // NEW: Toggle ayah mark (unmark if already marked)
   const factory WerdEvent.toggleAyahMark(int absoluteIndex) = _ToggleAyahMark;
-  
+
   // NEW: Remove specific segment from edit dialog
   const factory WerdEvent.removeSegment(int segmentIndex) = _RemoveSegment;
 

@@ -32,10 +32,13 @@ class WidgetUpdateService {
 
   Future<void> updateWidget() async {
     final now = DateTime.now();
-    
+
     // Reduced throttling for better responsiveness during theme changes
-    if (_lastUpdate != null && now.difference(_lastUpdate!) < const Duration(milliseconds: 500)) {
-      debugPrint('WidgetUpdateService: Throttling update - too soon since last update');
+    if (_lastUpdate != null &&
+        now.difference(_lastUpdate!) < const Duration(milliseconds: 500)) {
+      debugPrint(
+        'WidgetUpdateService: Throttling update - too soon since last update',
+      );
       return;
     }
 
@@ -86,7 +89,8 @@ class WidgetUpdateService {
     );
 
     // Use WidgetThemeResolver
-    final targetBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    final targetBrightness =
+        WidgetsBinding.instance.platformDispatcher.platformBrightness;
     final themeColors = WidgetThemeResolver.resolve(
       themePresetId: _settingsProvider.themePresetId,
       customColors: _settingsProvider.customThemeColors,
@@ -123,13 +127,16 @@ class WidgetUpdateService {
     try {
       await HomeWidget.saveWidgetData(key, jsonData);
       await _prefs.setString(key, jsonData);
-      
+
       final hijriKey = '${CalculationContract.prefPrefix}hijri_date_cache';
       await _prefs.setString(hijriKey, data.hijriDate);
-      await HomeWidget.saveWidgetData('${CalculationContract.prefPrefix}hijri_date', data.hijriDate);
-      
+      await HomeWidget.saveWidgetData(
+        '${CalculationContract.prefPrefix}hijri_date',
+        data.hijriDate,
+      );
+
       await _syncNative(jsonData);
-      
+
       await HomeWidget.updateWidget(
         name: 'PrayerWidget',
         androidName: 'PrayerWidgetReceiver',
@@ -162,10 +169,9 @@ class WidgetUpdateService {
         ),
         'latitude': _settingsProvider.latitude,
         'longitude': _settingsProvider.longitude,
-        'madhab':
-            _settingsProvider.madhab == 'hanafi'
-                ? CalculationContract.madhabHanafi
-                : CalculationContract.madhabShafi,
+        'madhab': _settingsProvider.madhab == 'hanafi'
+            ? CalculationContract.madhabHanafi
+            : CalculationContract.madhabShafi,
         'locale': _settingsProvider.locale.languageCode,
         'prayer_data': prayerDataJson,
         'hijri_date': _prefs.getString('flutter.hijri_date_cache') ?? '',
@@ -184,26 +190,39 @@ class WidgetUpdateService {
 
   int _mapMethodToContract(String method) {
     switch (method) {
-      case 'muslim_league': return CalculationContract.methodMuslimWorldLeague;
-      case 'egyptian': return CalculationContract.methodEgyptian;
-      case 'karachi': return CalculationContract.methodKarachi;
-      case 'umm_al_qura': return CalculationContract.methodUmmAlQura;
-      case 'dubai': return CalculationContract.methodDubai;
-      case 'moonsighting_committee': return CalculationContract.methodMoonSightingCommittee;
-      case 'north_america': return CalculationContract.methodNorthAmerica;
-      case 'kuwait': return CalculationContract.methodKuwait;
-      case 'qatar': return CalculationContract.methodQatar;
-      case 'singapore': return CalculationContract.methodSingapore;
-      case 'tehran': return CalculationContract.methodTehran;
-      case 'turkey': return CalculationContract.methodTurkey;
-      default: return CalculationContract.methodMuslimWorldLeague;
+      case 'muslim_league':
+        return CalculationContract.methodMuslimWorldLeague;
+      case 'egyptian':
+        return CalculationContract.methodEgyptian;
+      case 'karachi':
+        return CalculationContract.methodKarachi;
+      case 'umm_al_qura':
+        return CalculationContract.methodUmmAlQura;
+      case 'dubai':
+        return CalculationContract.methodDubai;
+      case 'moonsighting_committee':
+        return CalculationContract.methodMoonSightingCommittee;
+      case 'north_america':
+        return CalculationContract.methodNorthAmerica;
+      case 'kuwait':
+        return CalculationContract.methodKuwait;
+      case 'qatar':
+        return CalculationContract.methodQatar;
+      case 'singapore':
+        return CalculationContract.methodSingapore;
+      case 'tehran':
+        return CalculationContract.methodTehran;
+      case 'turkey':
+        return CalculationContract.methodTurkey;
+      default:
+        return CalculationContract.methodMuslimWorldLeague;
     }
   }
 
   // Native theme management methods retained as they are orchestration, not logic
   Future<Map<String, String>?> getWidgetTheme() async {
     try {
-      const channel = MethodChannel('com.qada.fard/widget_theme');
+      const channel = MethodChannel('com.khwarizmi.fard/widget_theme');
       return await channel.invokeMapMethod<String, String>('getWidgetTheme');
     } catch (e) {
       debugPrint('WidgetUpdateService: Error getting widget theme: $e');
@@ -213,7 +232,7 @@ class WidgetUpdateService {
 
   Future<void> applyWidgetTheme(Map<String, String> themeMap) async {
     try {
-      const channel = MethodChannel('com.qada.fard/widget_theme');
+      const channel = MethodChannel('com.khwarizmi.fard/widget_theme');
       await channel.invokeMethod('applyWidgetTheme', themeMap);
     } catch (e) {
       debugPrint('WidgetUpdateService: Error applying widget theme: $e');
@@ -223,8 +242,10 @@ class WidgetUpdateService {
 
   Future<void> clearWidgetTheme({bool triggerUpdate = true}) async {
     try {
-      const channel = MethodChannel('com.qada.fard/widget_theme');
-      await channel.invokeMethod('clearWidgetTheme', {'trigger_update': triggerUpdate});
+      const channel = MethodChannel('com.khwarizmi.fard/widget_theme');
+      await channel.invokeMethod('clearWidgetTheme', {
+        'trigger_update': triggerUpdate,
+      });
     } catch (e) {
       debugPrint('WidgetUpdateService: Error clearing widget theme: $e');
       rethrow;

@@ -46,8 +46,12 @@ void main() {
     registerFallbackValue(FakeRoute());
 
     // Default mock states
-    when(() => mockThemeCubit.state).thenReturn(const ThemeState(locale: Locale('en')));
-    when(() => mockDailyRemindersCubit.state).thenReturn(const DailyRemindersState());
+    when(
+      () => mockThemeCubit.state,
+    ).thenReturn(const ThemeState(locale: Locale('en')));
+    when(
+      () => mockDailyRemindersCubit.state,
+    ).thenReturn(const DailyRemindersState());
   });
 
   Widget createWidgetUnderTest({Locale locale = const Locale('en')}) {
@@ -66,7 +70,9 @@ void main() {
         body: MultiBlocProvider(
           providers: [
             BlocProvider<WerdBloc>.value(value: mockWerdBloc),
-            BlocProvider<DailyRemindersCubit>.value(value: mockDailyRemindersCubit),
+            BlocProvider<DailyRemindersCubit>.value(
+              value: mockDailyRemindersCubit,
+            ),
             BlocProvider<ThemeCubit>.value(value: mockThemeCubit),
           ],
           child: WerdProgressCard(onSetGoalPressed: () {}),

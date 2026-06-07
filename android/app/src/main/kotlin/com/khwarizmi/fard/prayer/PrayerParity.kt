@@ -1,4 +1,4 @@
-package com.qada.fard.prayer
+package com.khwarizmi.fard.prayer
 
 import android.util.Log
 import com.batoulapps.adhan.PrayerTimes
@@ -37,3 +37,4 @@ object PrayerParity {
         }
     }
 }
+

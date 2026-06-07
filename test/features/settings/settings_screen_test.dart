@@ -20,12 +20,19 @@ import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockLocationPrayerCubit extends Mock implements LocationPrayerCubit {}
+
 class MockThemeCubit extends Mock implements ThemeCubit {}
+
 class MockAdhanCubit extends Mock implements AdhanCubit {}
+
 class MockDailyRemindersCubit extends Mock implements DailyRemindersCubit {}
+
 class MockNotificationService extends Mock implements NotificationService {}
+
 class MockVoiceDownloadService extends Mock implements VoiceDownloadService {}
+
 class MockAzkarBloc extends Mock implements AzkarBloc {}
+
 class MockWidgetUpdateService extends Mock implements WidgetUpdateService {}
 
 void main() {
@@ -59,31 +66,49 @@ void main() {
     getIt.registerSingleton<DailyRemindersCubit>(mockDailyRemindersCubit);
     getIt.registerSingleton<AzkarBloc>(mockAzkarBloc);
 
-    when(() => mockNotificationService.runDiagnostics()).thenAnswer((_) async => {
-      'notifications_enabled': true,
-      'exact_alarm_permission': true,
-      'battery_optimization_ignored': true,
-    });
-    when(() => mockNotificationService.canScheduleExactNotifications()).thenAnswer((_) async => true);
-    when(() => mockWidgetUpdateService.getWidgetTheme()).thenAnswer((_) async => null);
+    when(() => mockNotificationService.runDiagnostics()).thenAnswer(
+      (_) async => {
+        'notifications_enabled': true,
+        'exact_alarm_permission': true,
+        'battery_optimization_ignored': true,
+      },
+    );
+    when(
+      () => mockNotificationService.canScheduleExactNotifications(),
+    ).thenAnswer((_) async => true);
+    when(
+      () => mockWidgetUpdateService.getWidgetTheme(),
+    ).thenAnswer((_) async => null);
 
-    when(() => mockLocationPrayerCubit.state).thenReturn(const LocationPrayerState(
-      cityName: 'London',
-      latitude: 51.5,
-      longitude: -0.1,
-      calculationMethod: 'muslim_league',
-    ));
-    when(() => mockLocationPrayerCubit.stream).thenAnswer((_) => const Stream.empty());
+    when(() => mockLocationPrayerCubit.state).thenReturn(
+      const LocationPrayerState(
+        cityName: 'London',
+        latitude: 51.5,
+        longitude: -0.1,
+        calculationMethod: 'muslim_league',
+      ),
+    );
+    when(
+      () => mockLocationPrayerCubit.stream,
+    ).thenAnswer((_) => const Stream.empty());
 
-    when(() => mockThemeCubit.state).thenReturn(ThemeState(themePresetId: 'emerald', locale: const Locale('en')));
-    when(() => mockThemeCubit.getAvailablePresets()).thenReturn(ThemePresets.all);
+    when(() => mockThemeCubit.state).thenReturn(
+      ThemeState(themePresetId: 'emerald', locale: const Locale('en')),
+    );
+    when(
+      () => mockThemeCubit.getAvailablePresets(),
+    ).thenReturn(ThemePresets.all);
     when(() => mockThemeCubit.stream).thenAnswer((_) => const Stream.empty());
 
     when(() => mockAdhanCubit.state).thenReturn(const AdhanState());
     when(() => mockAdhanCubit.stream).thenAnswer((_) => const Stream.empty());
 
-    when(() => mockDailyRemindersCubit.state).thenReturn(const DailyRemindersState());
-    when(() => mockDailyRemindersCubit.stream).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockDailyRemindersCubit.state,
+    ).thenReturn(const DailyRemindersState());
+    when(
+      () => mockDailyRemindersCubit.stream,
+    ).thenAnswer((_) => const Stream.empty());
 
     when(() => mockAzkarBloc.state).thenReturn(AzkarState.initial());
     when(() => mockAzkarBloc.stream).thenAnswer((_) => const Stream.empty());
@@ -107,7 +132,9 @@ void main() {
     );
   }
 
-  testWidgets('renders settings screen with all sections', (WidgetTester tester) async {
+  testWidgets('renders settings screen with all sections', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
     expect(find.text('Settings'), findsOneWidget);
@@ -119,7 +146,11 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
     final dataLocationFinder = find.text('Data & Location');
-    await tester.scrollUntilVisible(dataLocationFinder, 500, scrollable: find.byType(Scrollable).first);
+    await tester.scrollUntilVisible(
+      dataLocationFinder,
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(dataLocationFinder);
     await tester.pumpAndSettle();
     expect(find.text('London'), findsOneWidget);

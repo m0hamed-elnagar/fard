@@ -1,11 +1,11 @@
-package com.qada.fard.widget
+package com.khwarizmi.fard.widget
 
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import androidx.core.content.edit
 import androidx.glance.appwidget.updateAll
-import com.qada.fard.PrayerWidget
+import com.khwarizmi.fard.PrayerWidget
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
@@ -61,3 +61,4 @@ object WidgetCommitHelper {
         }
     }
 }
+

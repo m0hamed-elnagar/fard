@@ -86,8 +86,10 @@ void main() {
       // Toggle language switch (Arabic -> English)
       // Scroll until dropdown is visible
       final dropdownFinder = find.byType(DropdownButton<String>);
-      final scrollableFinder = find.byType(Scrollable).at(1); // Settings list scrollable
-      
+      final scrollableFinder = find
+          .byType(Scrollable)
+          .at(1); // Settings list scrollable
+
       await tester.dragUntilVisible(
         dropdownFinder.first,
         scrollableFinder,
@@ -108,7 +110,7 @@ void main() {
       // Go back to Prayer tab
       final prayerTab = find.text('Prayer');
       final prayerTabAr = find.text('الصلاة');
-      
+
       if (prayerTab.evaluate().isNotEmpty) {
         await tester.ensureVisible(prayerTab.last);
         await tester.tap(prayerTab.last, warnIfMissed: false);

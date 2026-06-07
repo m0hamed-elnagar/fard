@@ -33,7 +33,10 @@ class WidgetThemeResolver {
       try {
         currentPreset = ThemePresets.getById(themePresetId);
       } catch (e) {
-        developer.log('WidgetThemeResolver: Theme preset not found: $themePresetId', error: e);
+        developer.log(
+          'WidgetThemeResolver: Theme preset not found: $themePresetId',
+          error: e,
+        );
       }
     }
 
@@ -49,7 +52,9 @@ class WidgetThemeResolver {
     } else {
       Color seedColor = const Color(0xFF2E7D32);
 
-      if (themePresetId == 'custom' && customColors != null && customColors['primary'] != null) {
+      if (themePresetId == 'custom' &&
+          customColors != null &&
+          customColors['primary'] != null) {
         seedColor = hexToColor(customColors['primary']!);
       }
 

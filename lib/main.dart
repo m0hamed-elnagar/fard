@@ -38,18 +38,21 @@ void main() async {
   debugPrint('[STARTUP] App starting...');
   WidgetsFlutterBinding.ensureInitialized();
   debugPrint(
-      '[STARTUP] WidgetsFlutterBinding initialized (${startupTimer.elapsedMilliseconds}ms)');
+    '[STARTUP] WidgetsFlutterBinding initialized (${startupTimer.elapsedMilliseconds}ms)',
+  );
 
   // 0. Initialize app-specific identifiers (for debug/release separation)
   await AppIdentifiers.initialize();
   debugPrint(
-      '[STARTUP] App identifiers initialized: ${AppIdentifiers.packageName} (${startupTimer.elapsedMilliseconds}ms)');
+    '[STARTUP] App identifiers initialized: ${AppIdentifiers.packageName} (${startupTimer.elapsedMilliseconds}ms)',
+  );
 
   // 1. CRITICAL: Configure Dependencies (Hive, GetIt, SharedPreferences)
   // This must finish before runApp because widgets depend on getIt.
   await configureDependencies();
   debugPrint(
-      '[STARTUP] Dependencies configured (${startupTimer.elapsedMilliseconds}ms)');
+    '[STARTUP] Dependencies configured (${startupTimer.elapsedMilliseconds}ms)',
+  );
 
   // 1.5 Initialize Widget Sync Coordinator
   getIt<WidgetSyncCoordinator>().init();
@@ -64,7 +67,8 @@ void main() async {
 
   startupTimer.stop();
   debugPrint(
-      '[STARTUP] ===== Critical startup path finished: ${startupTimer.elapsedMilliseconds}ms =====');
+    '[STARTUP] ===== Critical startup path finished: ${startupTimer.elapsedMilliseconds}ms =====',
+  );
 }
 
 /// Initializes services that don't need to block the initial UI frame.
@@ -86,7 +90,8 @@ Future<void> _initializeBackgroundServices(Stopwatch timer) async {
       // JustAudio & Workmanager
       if (Platform.isAndroid || Platform.isIOS) ...[
         JustAudioBackground.init(
-          androidNotificationChannelId: AppIdentifiers.audioNotificationChannelId,
+          androidNotificationChannelId:
+              AppIdentifiers.audioNotificationChannelId,
           androidNotificationChannelName: 'Quran Audio Playback',
           androidNotificationOngoing: true,
           androidNotificationIcon: 'mipmap/ic_launcher',
@@ -95,7 +100,8 @@ Future<void> _initializeBackgroundServices(Stopwatch timer) async {
       ],
     ]);
     debugPrint(
-        '[STARTUP] All background services initialized (${timer.elapsedMilliseconds}ms)');
+      '[STARTUP] All background services initialized (${timer.elapsedMilliseconds}ms)',
+    );
   } catch (e) {
     debugPrint('[STARTUP] Background initialization error: $e');
   }
@@ -138,9 +144,7 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (_) => getIt<ConnectivityBloc>(),
-        ),
+        BlocProvider(create: (_) => getIt<ConnectivityBloc>()),
         BlocProvider(create: (_) => getIt<ThemeCubit>()),
         BlocProvider(create: (_) => getIt<LocationPrayerCubit>()),
         BlocProvider(create: (_) => getIt<AdhanCubit>()),
@@ -201,7 +205,7 @@ class _QadaTrackerAppState extends State<QadaTrackerApp> {
 }
 
 /// A StatefulWidget that manages the reactive theme and locale.
-/// 
+///
 /// Listens to ThemeCubit and updates the theme/locale via setState.
 /// MaterialApp.theme changes trigger smooth AnimatedTheme transitions.
 class _MaterialAppWithReactiveTheme extends StatefulWidget {
@@ -260,16 +264,13 @@ class _MaterialAppWithReactiveThemeState
             state.customThemeColors!.map(
               (key, value) => MapEntry(
                 key,
-                Color(
-                  int.parse(
-                    'FF${value.replaceFirst('#', '')}',
-                    radix: 16,
-                  ),
-                ),
+                Color(int.parse('FF${value.replaceFirst('#', '')}', radix: 16)),
               ),
             ),
           )
-        : ThemePresets.buildThemeData(ThemePresets.getById(state.themePresetId));
+        : ThemePresets.buildThemeData(
+            ThemePresets.getById(state.themePresetId),
+          );
   }
 
   @override

@@ -66,16 +66,10 @@ class _DataAndLocationSectionState extends State<DataAndLocationSection> {
               ),
             ),
             const Divider(height: 1),
-            _buildDropdownItem(
-              context,
-              l10n.madhab,
-              state.madhab,
-              [
-                DropdownMenuItem(value: 'shafi', child: Text(l10n.shafiMadhab)),
-                DropdownMenuItem(value: 'hanafi', child: Text(l10n.hanafiMadhab)),
-              ],
-              (val) => cubit.updateMadhab(val!),
-            ),
+            _buildDropdownItem(context, l10n.madhab, state.madhab, [
+              DropdownMenuItem(value: 'shafi', child: Text(l10n.shafiMadhab)),
+              DropdownMenuItem(value: 'hanafi', child: Text(l10n.hanafiMadhab)),
+            ], (val) => cubit.updateMadhab(val!)),
             const Divider(height: 1),
             _buildDropdownItem(
               context,
@@ -83,28 +77,41 @@ class _DataAndLocationSectionState extends State<DataAndLocationSection> {
               state.calculationMethod,
               [
                 DropdownMenuItem(
-                    value: 'muslim_league',
-                    child: Text(l10n.muslimWorldLeague)),
+                  value: 'muslim_league',
+                  child: Text(l10n.muslimWorldLeague),
+                ),
                 DropdownMenuItem(
-                    value: 'egyptian', child: Text(l10n.egyptianGeneralAuthority)),
+                  value: 'egyptian',
+                  child: Text(l10n.egyptianGeneralAuthority),
+                ),
                 DropdownMenuItem(
-                    value: 'karachi',
-                    child: Text(l10n.universityOfIslamicSciencesKarachi)),
+                  value: 'karachi',
+                  child: Text(l10n.universityOfIslamicSciencesKarachi),
+                ),
                 DropdownMenuItem(
-                    value: 'umm_al_qura',
-                    child: Text(l10n.ummAlQuraUniversityMakkah)),
+                  value: 'umm_al_qura',
+                  child: Text(l10n.ummAlQuraUniversityMakkah),
+                ),
                 DropdownMenuItem(
-                    value: 'north_america', child: Text(l10n.isnaNorthAmerica)),
+                  value: 'north_america',
+                  child: Text(l10n.isnaNorthAmerica),
+                ),
                 DropdownMenuItem(
-                    value: 'moonsighting_committee',
-                    child: Text(l10n.moonsightingCommittee)),
+                  value: 'moonsighting_committee',
+                  child: Text(l10n.moonsightingCommittee),
+                ),
                 DropdownMenuItem(value: 'dubai', child: Text(l10n.dubai)),
                 DropdownMenuItem(value: 'qatar', child: Text(l10n.qatar)),
                 DropdownMenuItem(value: 'kuwait', child: Text(l10n.kuwait)),
-                DropdownMenuItem(value: 'singapore', child: Text(l10n.singapore)),
+                DropdownMenuItem(
+                  value: 'singapore',
+                  child: Text(l10n.singapore),
+                ),
                 DropdownMenuItem(value: 'turkey', child: Text(l10n.turkey)),
                 DropdownMenuItem(
-                    value: 'tehran', child: Text(l10n.instituteOfGeophysicsTehran)),
+                  value: 'tehran',
+                  child: Text(l10n.instituteOfGeophysicsTehran),
+                ),
               ],
               (val) => cubit.updateCalculationMethod(val!),
             ),
@@ -112,8 +119,10 @@ class _DataAndLocationSectionState extends State<DataAndLocationSection> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(l10n.hijriAdjustment),
-              subtitle: Text(l10n.hijriAdjustmentDesc,
-                  style: TextStyle(fontSize: 12)),
+              subtitle: Text(
+                l10n.hijriAdjustmentDesc,
+                style: TextStyle(fontSize: 12),
+              ),
               trailing: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
@@ -123,9 +132,12 @@ class _DataAndLocationSectionState extends State<DataAndLocationSection> {
                 child: DropdownButton<int>(
                   value: state.hijriAdjustment,
                   items: List.generate(
-                      5,
-                      (i) => DropdownMenuItem(
-                          value: i - 2, child: Text((i - 2).toString()))),
+                    5,
+                    (i) => DropdownMenuItem(
+                      value: i - 2,
+                      child: Text((i - 2).toString()),
+                    ),
+                  ),
                   onChanged: (val) => cubit.updateHijriAdjustment(val!),
                   underline: const SizedBox(),
                 ),
@@ -209,8 +221,9 @@ class _DataAndLocationSectionState extends State<DataAndLocationSection> {
                 ),
               ],
             ),
-            crossFadeState:
-                isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            crossFadeState: isExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
             duration: const Duration(milliseconds: 250),
           ),
         ],
@@ -266,8 +279,9 @@ class _DataAndLocationSectionState extends State<DataAndLocationSection> {
         border: Border.all(color: context.errorColor.withValues(alpha: 0.2)),
       ),
       child: Row(
-        crossAxisAlignment:
-            isSmall ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+        crossAxisAlignment: isSmall
+            ? CrossAxisAlignment.center
+            : CrossAxisAlignment.start,
         children: [
           Icon(icon, color: context.errorColor, size: isSmall ? 20 : 24),
           const SizedBox(width: 12),

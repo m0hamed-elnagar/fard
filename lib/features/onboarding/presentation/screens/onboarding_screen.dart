@@ -26,7 +26,8 @@ class OnboardingScreen extends StatefulWidget {
   State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> with NotificationPermissionMixin {
+class _OnboardingScreenState extends State<OnboardingScreen>
+    with NotificationPermissionMixin {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   bool _isQadaEnabled = true;
@@ -100,7 +101,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> with NotificationPe
                         ),
                         _QadaSelectionPage(
                           isEnabled: _isQadaEnabled,
-                          onChanged: (val) => setState(() => _isQadaEnabled = val),
+                          onChanged: (val) =>
+                              setState(() => _isQadaEnabled = val),
                           bottomPadding: bottomPadding,
                         ),
                       ],
@@ -288,7 +290,9 @@ class _AzanSelectionPage extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<AdhanCubit>();
     final isAzanEnabled = state.salaahSettings.any((s) => s.isAzanEnabled);
-    final currentSound = state.salaahSettings.isNotEmpty ? state.salaahSettings.first.azanSound : null;
+    final currentSound = state.salaahSettings.isNotEmpty
+        ? state.salaahSettings.first.azanSound
+        : null;
 
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(24.0, 40.0, 24.0, bottomPadding),
@@ -340,8 +344,13 @@ class _AzanSelectionPage extends StatelessWidget {
                   value: isAzanEnabled,
                   onChanged: (val) async {
                     if (val) {
-                      final granted = await (context.findAncestorStateOfType<_OnboardingScreenState>() as _OnboardingScreenState)
-                          .checkAndRequestNotificationPermissions(context);
+                      final granted =
+                          await (context
+                                      .findAncestorStateOfType<
+                                        _OnboardingScreenState
+                                      >()
+                                  as _OnboardingScreenState)
+                              .checkAndRequestNotificationPermissions(context);
                       if (!granted) return;
                     }
                     cubit.updateAllAzanEnabled(val);
@@ -366,12 +375,12 @@ class _AzanSelectionPage extends StatelessWidget {
                   cubit.updateAllAzanSound(null);
                   return;
                 }
-                
+
                 try {
                   onDownloadingChanged(true);
                   final downloader = getIt<VoiceDownloadService>();
                   final path = await downloader.downloadAzan(val);
-                  
+
                   if (path != null) {
                     cubit.updateAllAzanSound(val);
                   } else {
@@ -427,16 +436,18 @@ class _AzanSelectionPage extends StatelessWidget {
 
   String? _getDisplayName(String? path) {
     if (path == null || path == 'default') return null;
-    
+
     // Check if it's already a key
     if (VoiceDownloadService.azanVoices.containsKey(path)) return path;
-    
+
     // Fallback: Resolve key from path (for backward compatibility)
     final fileName = path.split(Platform.isWindows ? '\\' : '/').last;
     for (var entry in VoiceDownloadService.azanVoices.entries) {
       final uri = Uri.parse(entry.value);
-      if (fileName == 'voice_${uri.pathSegments.last}' || 
-          path.contains(entry.key.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_'))) {
+      if (fileName == 'voice_${uri.pathSegments.last}' ||
+          path.contains(
+            entry.key.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_'),
+          )) {
         return entry.key;
       }
     }

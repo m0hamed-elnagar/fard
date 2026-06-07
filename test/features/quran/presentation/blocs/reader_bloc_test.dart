@@ -68,9 +68,7 @@ void main() {
       () => mockQuranRepository.getReaderSeparator(),
     ).thenAnswer((_) async => 0);
 
-    when(
-      () => mockQuranRepository.getTextScale(),
-    ).thenAnswer((_) async => 1.0);
+    when(() => mockQuranRepository.getTextScale()).thenAnswer((_) async => 1.0);
 
     when(
       () => mockQuranRepository.getFontFamily(),
@@ -121,10 +119,7 @@ void main() {
     );
 
     final tAyah = Ayah(
-      number: AyahNumber.create(
-        surahNumber: 1,
-        ayahNumberInSurah: 1,
-      ).data!,
+      number: AyahNumber.create(surahNumber: 1, ayahNumberInSurah: 1).data!,
       uthmaniText: 'Bismillah',
       page: 1,
       juz: 1,
@@ -145,23 +140,18 @@ void main() {
         );
         return readerBloc;
       },
-      act:
-          (bloc) => bloc.add(
-            ReaderEvent.loadSurah(
-              surahNumber: tSurahNumber,
-              initialAyahNumber: 1,
-            ),
-          ),
-      expect:
-          () => [
-            const ReaderState.loading(),
-            ReaderState.loaded(
-              surah: tSurahWithAyah,
-              highlightedAyah: tAyah,
-              lastReadAyah: null,
-              bookmarks: [],
-            ),
-          ],
+      act: (bloc) => bloc.add(
+        ReaderEvent.loadSurah(surahNumber: tSurahNumber, initialAyahNumber: 1),
+      ),
+      expect: () => [
+        const ReaderState.loading(),
+        ReaderState.loaded(
+          surah: tSurahWithAyah,
+          highlightedAyah: tAyah,
+          lastReadAyah: null,
+          bookmarks: [],
+        ),
+      ],
     );
 
     blocTest<ReaderBloc, ReaderState>(
@@ -185,23 +175,18 @@ void main() {
         );
         return readerBloc;
       },
-      act:
-          (bloc) => bloc.add(
-            ReaderEvent.loadSurah(
-              surahNumber: tSurahNumber,
-              initialAyahNumber: 1,
-            ),
-          ),
-      expect:
-          () => [
-            const ReaderState.loading(),
-            ReaderState.loaded(
-              surah: tSurahWithAyah,
-              highlightedAyah: tAyah,
-              lastReadAyah: null,
-              bookmarks: [],
-            ),
-          ],
+      act: (bloc) => bloc.add(
+        ReaderEvent.loadSurah(surahNumber: tSurahNumber, initialAyahNumber: 1),
+      ),
+      expect: () => [
+        const ReaderState.loading(),
+        ReaderState.loaded(
+          surah: tSurahWithAyah,
+          highlightedAyah: tAyah,
+          lastReadAyah: null,
+          bookmarks: [],
+        ),
+      ],
       verify: (bloc) {
         // Should NOT have added selectAyah event again from subscription
         // because highlightedAyah was already set

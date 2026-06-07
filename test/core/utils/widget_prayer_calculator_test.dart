@@ -4,6 +4,7 @@ import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
+
 class MockPrayerTimes extends Mock {
   DateTime get fajr => DateTime(2026, 4, 24, 4, 30);
   DateTime get dhuhr => DateTime(2026, 4, 24, 12, 15);
@@ -55,7 +56,10 @@ void main() {
     });
 
     test('getPrayerName returns Arabic names', () {
-      expect(WidgetPrayerCalculator.getPrayerName('fajr', 'ar'), equals('الفجر'));
+      expect(
+        WidgetPrayerCalculator.getPrayerName('fajr', 'ar'),
+        equals('الفجر'),
+      );
     });
   });
 }

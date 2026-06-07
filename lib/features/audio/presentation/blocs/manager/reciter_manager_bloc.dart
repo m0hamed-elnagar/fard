@@ -10,7 +10,8 @@ part 'reciter_manager_event.dart';
 part 'reciter_manager_state.dart';
 
 @injectable
-class ReciterManagerBloc extends Bloc<ReciterManagerEvent, ReciterManagerState> {
+class ReciterManagerBloc
+    extends Bloc<ReciterManagerEvent, ReciterManagerState> {
   final AudioRepository audioRepository;
   final AudioDownloadService downloadService;
 

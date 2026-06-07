@@ -91,7 +91,7 @@
           </intent-filter>
         </receiver>
 
-        <receiver android:name="com.qada.fard.PrayerWidgetReceiver"
+        <receiver android:name="com.khwarizmi.fard.PrayerWidgetReceiver"
             android:label="Prayer Schedule"
             android:exported="true">
             <intent-filter>
@@ -106,7 +106,7 @@
                 android:resource="@xml/prayer_widget_info" />
         </receiver>
 
-        <receiver android:name="com.qada.fard.NextPrayerCountdownWidgetReceiver"
+        <receiver android:name="com.khwarizmi.fard.NextPrayerCountdownWidgetReceiver"
             android:label="Next Prayer Countdown"
             android:exported="true">
             <intent-filter>
@@ -125,7 +125,7 @@
 
         <!-- Time change broadcast receiver for widget updates -->
         <receiver
-            android:name="com.qada.fard.TimeChangedReceiver"
+            android:name="com.khwarizmi.fard.TimeChangedReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.TIME_SET" />
@@ -136,7 +136,7 @@
 
         <!-- Boot completed receiver for widget refresh after reboot -->
         <receiver
-            android:name="com.qada.fard.BootReceiver"
+            android:name="com.khwarizmi.fard.BootReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -147,7 +147,7 @@
 
         <!-- Exact alarm permission change receiver -->
         <receiver
-            android:name="com.qada.fard.ExactAlarmPermissionReceiver"
+            android:name="com.khwarizmi.fard.ExactAlarmPermissionReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>

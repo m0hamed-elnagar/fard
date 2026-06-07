@@ -9,7 +9,9 @@ import 'package:path_provider/path_provider.dart';
 
 @singleton
 class SoundManager {
-  static const MethodChannel _channel = MethodChannel('com.qada.fard/widget_theme');
+  static const MethodChannel _channel = MethodChannel(
+    'com.khwarizmi.fard/widget_theme',
+  );
 
   /// Resolves a sound string (key or path) into a platform-appropriate URI.
   Future<String?> getSoundUriForChannel(String sound) async {
@@ -31,7 +33,9 @@ class SoundManager {
     // 2. Check if the file actually exists
     final file = File(finalPath);
     if (!await file.exists() || await file.length() == 0) {
-      debugPrint('SoundManager: File does not exist or is empty at path: $finalPath');
+      debugPrint(
+        'SoundManager: File does not exist or is empty at path: $finalPath',
+      );
       return null;
     }
 
@@ -79,12 +83,14 @@ class SoundManager {
         final destFile = File('${azanDir.path}/$fileName');
 
         // Ensure file exists in the external path mapped by FileProvider
-        if (!await destFile.exists() || (await destFile.length() != await file.length())) {
+        if (!await destFile.exists() ||
+            (await destFile.length() != await file.length())) {
           await file.copy(destFile.path);
         }
 
         final String authority = AppIdentifiers.fileProviderAuthority;
-        final String fallbackUri = 'content://$authority/external_azan/$fileName';
+        final String fallbackUri =
+            'content://$authority/external_azan/$fileName';
         debugPrint('SoundManager: FALLBACK Android Content URI: $fallbackUri');
         return fallbackUri;
       }

@@ -1,15 +1,15 @@
-package com.qada.fard
+package com.khwarizmi.fard
 
 import android.content.Context
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.provideContent
-import com.qada.fard.prayer.SettingsRepository
-import com.qada.fard.widget.PrayerScheduleContent
-import com.qada.fard.widget.WidgetParser
+import com.khwarizmi.fard.prayer.SettingsRepository
+import com.khwarizmi.fard.widget.CountdownContent
+import com.khwarizmi.fard.widget.WidgetParser
 
-class PrayerWidget : GlanceAppWidget() {
+class NextPrayerCountdownWidget : GlanceAppWidget() {
 
     override val sizeMode: SizeMode = SizeMode.Exact
 
@@ -18,18 +18,18 @@ class PrayerWidget : GlanceAppWidget() {
         val prayerDataJson = repository.getPrayerDataJson()
 
         val widgetData = if (prayerDataJson != null) {
-            WidgetParser.parsePrayerScheduleData(prayerDataJson)
+            WidgetParser.parseCountdownData(prayerDataJson)
         } else null
 
         val fallbackTheme = if (prayerDataJson != null) {
             WidgetParser.parseTheme(prayerDataJson)
-        } else com.qada.fard.widget.WidgetTheme()
+        } else com.khwarizmi.fard.widget.WidgetTheme()
 
         provideContent {
             if (widgetData != null) {
                 val themeToUse = repository.resolveWidgetTheme(fallbackTheme)
                 
-                PrayerScheduleContent(
+                CountdownContent(
                     data = widgetData,
                     theme = themeToUse,
                     isPreview = false
@@ -38,3 +38,4 @@ class PrayerWidget : GlanceAppWidget() {
         }
     }
 }
+

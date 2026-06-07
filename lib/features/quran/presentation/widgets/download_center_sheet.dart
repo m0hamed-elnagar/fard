@@ -134,7 +134,8 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
         setState(() {
           _mushafProgress = progress;
         });
-        if (progress >= 1.0 || _mushafProgress == progress && !_isMushafDownloading) {
+        if (progress >= 1.0 ||
+            _mushafProgress == progress && !_isMushafDownloading) {
           setState(() {
             _isMushafDownloading = false;
           });
@@ -323,7 +324,10 @@ class _AudioDownloadItem extends StatelessWidget {
                   ),
                   Text(
                     subtitle,
-                    style: TextStyle(fontSize: 12, color: context.onSurfaceVariantColor),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.onSurfaceVariantColor,
+                    ),
                   ),
                 ],
               ),
@@ -378,7 +382,10 @@ class _DownloadItem extends StatelessWidget {
                   ),
                   Text(
                     subtitle,
-                    style: TextStyle(fontSize: 12, color: context.onSurfaceVariantColor),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.onSurfaceVariantColor,
+                    ),
                   ),
                 ],
               ),
@@ -411,7 +418,9 @@ class _DownloadItem extends StatelessWidget {
           child: LinearProgressIndicator(
             value: progress,
             backgroundColor: context.outlineVariantColor,
-            color: progress >= 1.0 ? context.primaryColor : context.primaryColor,
+            color: progress >= 1.0
+                ? context.primaryColor
+                : context.primaryColor,
             minHeight: 8,
           ),
         ),

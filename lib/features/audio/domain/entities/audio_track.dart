@@ -5,10 +5,7 @@ class AudioTrack extends Equatable {
   final String remoteUrl;
   final String localPath;
 
-  const AudioTrack({
-    required this.remoteUrl,
-    required this.localPath,
-  });
+  const AudioTrack({required this.remoteUrl, required this.localPath});
 
   bool get isDownloaded => File(localPath).existsSync();
 

@@ -54,7 +54,7 @@ void main() {
         channelManager.getChannelId('fajr', 'default'),
         'azan_channel_fajr',
       );
-      
+
       final String sound = 'path/to/sound.mp3';
       final String hashPart = sound.hashCode.abs().toString().substring(0, 4);
       expect(

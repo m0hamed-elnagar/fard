@@ -17,16 +17,22 @@ void main() {
   });
 
   testWidgets('Madhab dropdown should update when changed', (tester) async {
-    when(() => mockCubit.state).thenReturn(const LocationPrayerState(
-      madhab: 'shafi',
-      calculationMethod: 'muslim_league',
-      hijriAdjustment: 0,
-    ));
-    when(() => mockCubit.stream).thenAnswer((_) => Stream.value(const LocationPrayerState(
-      madhab: 'shafi',
-      calculationMethod: 'muslim_league',
-      hijriAdjustment: 0,
-    )));
+    when(() => mockCubit.state).thenReturn(
+      const LocationPrayerState(
+        madhab: 'shafi',
+        calculationMethod: 'muslim_league',
+        hijriAdjustment: 0,
+      ),
+    );
+    when(() => mockCubit.stream).thenAnswer(
+      (_) => Stream.value(
+        const LocationPrayerState(
+          madhab: 'shafi',
+          calculationMethod: 'muslim_league',
+          hijriAdjustment: 0,
+        ),
+      ),
+    );
     when(() => mockCubit.updateMadhab(any())).thenAnswer((_) async {});
 
     await tester.pumpWidget(

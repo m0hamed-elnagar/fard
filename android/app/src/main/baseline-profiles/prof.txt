@@ -37,11 +37,11 @@ HSPLio/flutter/embedding/android/FlutterActivityAndFragmentDelegate;->doDetach
 HSPLio/flutter/embedding/android/FlutterActivityAndFragmentDelegate;->setupFlutterPlugins
 
 # App Specific Classes - Startup Path
-HSPLcom/qada/fard/MainActivity;-><init>
-HSPLcom/qada/fard/MainActivity;->onCreate
-HSPLcom/qada/fard/MainActivity;->configureFlutterEngine
-HSPLcom/qada/fard/FardApplication;-><init>
-HSPLcom/qada/fard/FardApplication;->onCreate
+HSPLcom/khwarizmi/fard/MainActivity;-><init>
+HSPLcom/khwarizmi/fard/MainActivity;->onCreate
+HSPLcom/khwarizmi/fard/MainActivity;->configureFlutterEngine
+HSPLcom/khwarizmi/fard/FardApplication;-><init>
+HSPLcom/khwarizmi/fard/FardApplication;->onCreate
 
 # Dart Generated Classes
 HSPLcom/example/generated/GeneratedPluginRegistrant;->registerWith

@@ -1,5 +1,5 @@
 // THIS FILE IS THE SINGLE SOURCE OF TRUTH - mirror of CalculationContract.kt
-// Do not change values without updating the mirror file in android/app/src/main/kotlin/com/qada/fard/prayer/CalculationContract.kt
+// Do not change values without updating the mirror file in android/app/src/main/kotlin/com/khwarizmi/fard/prayer/CalculationContract.kt
 abstract class CalculationContract {
   // Calculation Methods
   static const int methodMuslimWorldLeague = 0;
@@ -25,6 +25,6 @@ abstract class CalculationContract {
   static const int highLatTwilightAngle = 2;
 
   // Channel & Pref Keys
-  static const String channelName = 'com.qada.fard/instant_updates';
+  static const String channelName = 'com.khwarizmi.fard/instant_updates';
   static const String prefPrefix = 'flutter.';
 }

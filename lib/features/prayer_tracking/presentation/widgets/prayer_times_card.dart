@@ -162,7 +162,11 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
               top: -30,
               child: Opacity(
                 opacity: 0.03,
-                child: Icon(Icons.mosque, size: 180, color: context.onSurfaceColor),
+                child: Icon(
+                  Icons.mosque,
+                  size: 180,
+                  color: context.onSurfaceColor,
+                ),
               ),
             ),
             LayoutBuilder(
@@ -263,9 +267,8 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                               child: Text(
                                 l10n.remainingTime,
                                 style: GoogleFonts.amiri(
-                                  color: context.onSurfaceVariantColor.withValues(
-                                    alpha: 0.7,
-                                  ),
+                                  color: context.onSurfaceVariantColor
+                                      .withValues(alpha: 0.7),
                                   fontSize: 13,
                                 ),
                               ),
@@ -274,7 +277,10 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                         ),
                       ),
                       const Spacer(flex: 2),
-                      Divider(height: 1, color: context.outlineColor.withValues(alpha: 0.12)),
+                      Divider(
+                        height: 1,
+                        color: context.outlineColor.withValues(alpha: 0.12),
+                      ),
                       const Spacer(flex: 1),
                       LayoutBuilder(
                         builder: (context, gridConstraints) {
@@ -295,8 +301,14 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                           ];
 
                           final itemWidth = useSingleRow
-                              ? math.max(0.0, (gridConstraints.maxWidth - 40) / 6)
-                              : math.max(0.0, (gridConstraints.maxWidth - 16) / 3);
+                              ? math.max(
+                                  0.0,
+                                  (gridConstraints.maxWidth - 40) / 6,
+                                )
+                              : math.max(
+                                  0.0,
+                                  (gridConstraints.maxWidth - 16) / 3,
+                                );
 
                           return Wrap(
                             spacing: 8,
@@ -321,14 +333,18 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: isNext
-                                      ? context.secondaryColor.withValues(alpha: 0.1)
+                                      ? context.secondaryColor.withValues(
+                                          alpha: 0.1,
+                                        )
                                       : context.outlineColor.withValues(
                                           alpha: 0.3,
                                         ),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
                                     color: isNext
-                                        ? context.secondaryColor.withValues(alpha: 0.4)
+                                        ? context.secondaryColor.withValues(
+                                            alpha: 0.4,
+                                          )
                                         : context.outlineColor.withValues(
                                             alpha: 0.5,
                                           ),
@@ -365,9 +381,8 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                                         style: GoogleFonts.outfit(
                                           color: isNext
                                               ? context.onSurfaceColor
-                                              : context.onSurfaceColor.withValues(
-                                                  alpha: 0.9,
-                                                ),
+                                              : context.onSurfaceColor
+                                                    .withValues(alpha: 0.9),
                                           fontSize: isVeryNarrow ? 11 : 13,
                                           fontWeight: isNext
                                               ? FontWeight.bold

@@ -40,8 +40,8 @@ class ConnectivityBloc extends Bloc<ConnectivityEvent, ConnectivityState> {
   final ConnectivityService _connectivityService;
 
   ConnectivityBloc({required ConnectivityService connectivityService})
-      : _connectivityService = connectivityService,
-        super(ConnectivityInitial()) {
+    : _connectivityService = connectivityService,
+      super(ConnectivityInitial()) {
     on<ConnectivityChanged>(_onConnectivityChanged);
 
     // Initial check
@@ -56,7 +56,9 @@ class ConnectivityBloc extends Bloc<ConnectivityEvent, ConnectivityState> {
   }
 
   void _onConnectivityChanged(
-      ConnectivityChanged event, Emitter<ConnectivityState> emit) async {
+    ConnectivityChanged event,
+    Emitter<ConnectivityState> emit,
+  ) async {
     final isConnected = await _connectivityService.hasNetwork();
     emit(ConnectivityStatus(isConnected));
   }

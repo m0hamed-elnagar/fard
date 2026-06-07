@@ -42,9 +42,9 @@ void main() {
     registerFallbackValue(FakeRoute());
 
     // Mock state
-    when(() => mockDailyRemindersCubit.state).thenReturn(
-      const DailyRemindersState(),
-    );
+    when(
+      () => mockDailyRemindersCubit.state,
+    ).thenReturn(const DailyRemindersState());
   });
 
   Widget createWidgetUnderTest({Locale locale = const Locale('en')}) {
@@ -61,7 +61,9 @@ void main() {
         body: MultiBlocProvider(
           providers: [
             BlocProvider<WerdBloc>.value(value: mockWerdBloc),
-            BlocProvider<DailyRemindersCubit>.value(value: mockDailyRemindersCubit),
+            BlocProvider<DailyRemindersCubit>.value(
+              value: mockDailyRemindersCubit,
+            ),
           ],
           child: WerdProgressCard(onSetGoalPressed: () {}),
         ),
@@ -145,13 +147,19 @@ void main() {
       // Should show progress values (may be formatted differently, use partial match)
       expect(
         find.byWidgetPredicate(
-          (widget) => widget is Text && widget.data != null && widget.data!.contains('0'),
+          (widget) =>
+              widget is Text &&
+              widget.data != null &&
+              widget.data!.contains('0'),
         ),
         findsWidgets,
       );
       expect(
         find.byWidgetPredicate(
-          (widget) => widget is Text && widget.data != null && widget.data!.contains('10'),
+          (widget) =>
+              widget is Text &&
+              widget.data != null &&
+              widget.data!.contains('10'),
         ),
         findsWidgets,
       );
@@ -184,13 +192,19 @@ void main() {
 
       expect(
         find.byWidgetPredicate(
-          (widget) => widget is Text && widget.data != null && widget.data!.contains('5'),
+          (widget) =>
+              widget is Text &&
+              widget.data != null &&
+              widget.data!.contains('5'),
         ),
         findsWidgets,
       );
       expect(
         find.byWidgetPredicate(
-          (widget) => widget is Text && widget.data != null && widget.data!.contains('10'),
+          (widget) =>
+              widget is Text &&
+              widget.data != null &&
+              widget.data!.contains('10'),
         ),
         findsWidgets,
       );
@@ -225,13 +239,19 @@ void main() {
 
       expect(
         find.byWidgetPredicate(
-          (widget) => widget is Text && widget.data != null && widget.data!.contains('15'),
+          (widget) =>
+              widget is Text &&
+              widget.data != null &&
+              widget.data!.contains('15'),
         ),
         findsWidgets,
       );
       expect(
         find.byWidgetPredicate(
-          (widget) => widget is Text && widget.data != null && widget.data!.contains('10'),
+          (widget) =>
+              widget is Text &&
+              widget.data != null &&
+              widget.data!.contains('10'),
         ),
         findsWidgets,
       );
@@ -239,7 +259,9 @@ void main() {
       expect(find.byIcon(Icons.check_circle), findsOneWidget);
     });
 
-    testWidgets('progress bar reflects correct percentage (50%)', (tester) async {
+    testWidgets('progress bar reflects correct percentage (50%)', (
+      tester,
+    ) async {
       when(() => mockWerdBloc.state).thenReturn(
         WerdState(
           goal: WerdGoal(
@@ -337,37 +359,36 @@ void main() {
       },
     );
 
-    testWidgets(
-      'Continue button navigates to lastRead when progress exists',
-      (tester) async {
-        when(() => mockWerdBloc.state).thenReturn(
-          WerdState(
-            goal: WerdGoal(
-              id: 'default',
-              type: WerdGoalType.fixedAmount,
-              value: 10,
-              unit: WerdUnit.ayah,
-              startDate: DateTime.now(),
-              startAbsolute: 100,
-            ),
-            progress: WerdProgress(
-              goalId: 'default',
-              totalAmountReadToday: 5,
-              sessionStartAbsolute: 100,
-              lastReadAbsolute: 105,
-              lastUpdated: DateTime.now(),
-              streak: 0,
-            ),
+    testWidgets('Continue button navigates to lastRead when progress exists', (
+      tester,
+    ) async {
+      when(() => mockWerdBloc.state).thenReturn(
+        WerdState(
+          goal: WerdGoal(
+            id: 'default',
+            type: WerdGoalType.fixedAmount,
+            value: 10,
+            unit: WerdUnit.ayah,
+            startDate: DateTime.now(),
+            startAbsolute: 100,
           ),
-        );
+          progress: WerdProgress(
+            goalId: 'default',
+            totalAmountReadToday: 5,
+            sessionStartAbsolute: 100,
+            lastReadAbsolute: 105,
+            lastUpdated: DateTime.now(),
+            streak: 0,
+          ),
+        ),
+      );
 
-        await tester.pumpWidget(createWidgetUnderTest());
-        await tester.pumpAndSettle();
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pumpAndSettle();
 
-        // Current position should show ayah 105 (lastRead)
-        expect(find.textContaining('Current Position'), findsOneWidget);
-      },
-    );
+      // Current position should show ayah 105 (lastRead)
+      expect(find.textContaining('Current Position'), findsOneWidget);
+    });
   });
 
   group('WerdProgressCard Display Unit Switching', () {
@@ -652,13 +673,19 @@ void main() {
       // Should show Arabic numerals (checking for Arabic digit characters)
       expect(
         find.byWidgetPredicate(
-          (widget) => widget is Text && widget.data != null && widget.data!.contains('٥'),
+          (widget) =>
+              widget is Text &&
+              widget.data != null &&
+              widget.data!.contains('٥'),
         ),
         findsWidgets,
       );
       expect(
         find.byWidgetPredicate(
-          (widget) => widget is Text && widget.data != null && widget.data!.contains('١٠'),
+          (widget) =>
+              widget is Text &&
+              widget.data != null &&
+              widget.data!.contains('١٠'),
         ),
         findsWidgets,
       );

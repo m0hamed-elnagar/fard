@@ -151,7 +151,11 @@ class SuggestedAzkarSection extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            child: Icon(icon, color: context.onSurfaceColor, size: 28),
+                            child: Icon(
+                              icon,
+                              color: context.onSurfaceColor,
+                              size: 28,
+                            ),
                           ),
                           const SizedBox(width: 20),
                           Expanded(

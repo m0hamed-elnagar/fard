@@ -20,7 +20,8 @@ class AdhanSection extends StatefulWidget {
   State<AdhanSection> createState() => _AdhanSectionState();
 }
 
-class _AdhanSectionState extends State<AdhanSection> with NotificationPermissionMixin {
+class _AdhanSectionState extends State<AdhanSection>
+    with NotificationPermissionMixin {
   bool _isDownloading = false;
 
   @override
@@ -29,9 +30,12 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
     return BlocBuilder<AdhanCubit, AdhanState>(
       builder: (context, state) {
         final cubit = context.read<AdhanCubit>();
-        final bool allAzanEnabled = state.salaahSettings.every((s) => s.isAzanEnabled);
+        final bool allAzanEnabled = state.salaahSettings.every(
+          (s) => s.isAzanEnabled,
+        );
         final String? commonVoice = _getCommonVoice(state.salaahSettings);
-        final bool notificationsDisabled = !state.notificationsEnabled || !state.exactAlarmsEnabled;
+        final bool notificationsDisabled =
+            !state.notificationsEnabled || !state.exactAlarmsEnabled;
 
         return _buildSection(
           context,
@@ -46,18 +50,27 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
                 decoration: BoxDecoration(
                   color: Colors.orange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: Colors.orange.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Column(
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 20),
+                        const Icon(
+                          Icons.warning_amber_rounded,
+                          color: Colors.orange,
+                          size: 20,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             l10n.notificationsRequiredDesc,
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                       ],
@@ -67,7 +80,10 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
                       width: double.infinity,
                       child: OutlinedButton(
                         onPressed: () async {
-                          final granted = await checkAndRequestNotificationPermissions(context);
+                          final granted =
+                              await checkAndRequestNotificationPermissions(
+                                context,
+                              );
                           if (granted) {
                             cubit.refreshPermissions();
                           }
@@ -89,7 +105,9 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
               onChanged: (val) async {
                 if (val && notificationsDisabled) {
                   if (!context.mounted) return;
-                  final granted = await checkAndRequestNotificationPermissions(context);
+                  final granted = await checkAndRequestNotificationPermissions(
+                    context,
+                  );
                   if (!granted) return;
                   cubit.refreshPermissions();
                 }
@@ -107,7 +125,10 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
                   onPressed: _isDownloading
                       ? null
                       : () async {
-                          final granted = await checkAndRequestNotificationPermissions(context);
+                          final granted =
+                              await checkAndRequestNotificationPermissions(
+                                context,
+                              );
                           if (!granted) {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -116,7 +137,9 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
                                   behavior: SnackBarBehavior.floating,
                                   action: SnackBarAction(
                                     label: l10n.enable,
-                                    onPressed: () => getIt<NotificationService>().openNotificationSettings(),
+                                    onPressed: () =>
+                                        getIt<NotificationService>()
+                                            .openNotificationSettings(),
                                   ),
                                 ),
                               );
@@ -131,16 +154,23 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
                         },
                   icon: const Icon(Icons.play_arrow_rounded),
                   label: Text(l10n.testAzan),
-                  style: TextButton.styleFrom(foregroundColor: context.secondaryColor),
+                  style: TextButton.styleFrom(
+                    foregroundColor: context.secondaryColor,
+                  ),
                 ),
               ),
               const Divider(height: 24),
               Text(
                 l10n.individualSettings,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
               ),
               const SizedBox(height: 8),
-              ...state.salaahSettings.map((s) => _buildIndividualAzanTile(context, s, l10n)),
+              ...state.salaahSettings.map(
+                (s) => _buildIndividualAzanTile(context, s, l10n),
+              ),
             ],
           ],
         );
@@ -148,7 +178,11 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
     );
   }
 
-  Widget _buildIndividualAzanTile(BuildContext context, SalaahSettings s, AppLocalizations l10n) {
+  Widget _buildIndividualAzanTile(
+    BuildContext context,
+    SalaahSettings s,
+    AppLocalizations l10n,
+  ) {
     final cubit = context.read<AdhanCubit>();
     return ListTile(
       contentPadding: EdgeInsets.zero,
@@ -163,7 +197,11 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
     );
   }
 
-  void _showIndividualAzanDialog(BuildContext context, SalaahSettings s, AppLocalizations l10n) {
+  void _showIndividualAzanDialog(
+    BuildContext context,
+    SalaahSettings s,
+    AppLocalizations l10n,
+  ) {
     final cubit = context.read<AdhanCubit>();
     showDialog(
       context: context,
@@ -178,7 +216,10 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.close)),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.close),
+          ),
         ],
       ),
     );
@@ -242,7 +283,11 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
     );
   }
 
-  Widget _buildToggleItem({required String title, required bool value, required ValueChanged<bool> onChanged}) {
+  Widget _buildToggleItem({
+    required String title,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -258,7 +303,12 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
     return settings.every((s) => s.azanSound == first) ? first : null;
   }
 
-  Widget _buildVoiceDropdown(BuildContext context, String? currentVoice, AppLocalizations l10n, ValueChanged<String?> onChanged) {
+  Widget _buildVoiceDropdown(
+    BuildContext context,
+    String? currentVoice,
+    AppLocalizations l10n,
+    ValueChanged<String?> onChanged,
+  ) {
     return DropdownButtonFormField<String?>(
       initialValue: _resolveVoiceKey(currentVoice),
       decoration: InputDecoration(
@@ -271,7 +321,9 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
         DropdownMenuItem(value: null, child: Text(l10n.defaultVal)),
         ...VoiceDownloadService.azanVoices.keys.map((v) {
           final parts = v.split(' - ');
-          final displayName = l10n.localeName == 'ar' ? (parts.length > 1 ? parts[1] : parts[0]) : parts[0];
+          final displayName = l10n.localeName == 'ar'
+              ? (parts.length > 1 ? parts[1] : parts[0])
+              : parts[0];
           return DropdownMenuItem(value: v, child: Text(displayName));
         }),
       ],
@@ -280,14 +332,14 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
           onChanged(null);
           return;
         }
-        
+
         try {
           final downloader = getIt<VoiceDownloadService>();
           if (!(await downloader.isDownloaded(val))) {
             if (!mounted) return;
             setState(() => _isDownloading = true);
             final path = await downloader.downloadAzan(val);
-            
+
             if (path != null) {
               onChanged(val);
             } else {
@@ -328,7 +380,10 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
       if (path == entry.key) return entry.key;
       final uri = Uri.parse(entry.value);
       if (path.contains('voice_${uri.pathSegments.last}')) return entry.key;
-      final sanitized = entry.key.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
+      final sanitized = entry.key.toLowerCase().replaceAll(
+        RegExp(r'[^a-z0-9]'),
+        '_',
+      );
       if (path.contains('${sanitized}_azan.mp3')) return entry.key;
     }
     return null;
@@ -336,11 +391,16 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
 
   String _getLocalizedSalaahName(Salaah salaah, AppLocalizations l10n) {
     switch (salaah) {
-      case Salaah.fajr: return l10n.fajr;
-      case Salaah.dhuhr: return l10n.dhuhr;
-      case Salaah.asr: return l10n.asr;
-      case Salaah.maghrib: return l10n.maghrib;
-      case Salaah.isha: return l10n.isha;
+      case Salaah.fajr:
+        return l10n.fajr;
+      case Salaah.dhuhr:
+        return l10n.dhuhr;
+      case Salaah.asr:
+        return l10n.asr;
+      case Salaah.maghrib:
+        return l10n.maghrib;
+      case Salaah.isha:
+        return l10n.isha;
     }
   }
 }

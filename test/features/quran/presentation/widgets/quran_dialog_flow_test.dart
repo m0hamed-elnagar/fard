@@ -42,32 +42,43 @@ void main() {
       ),
     );
 
-    when(() => mockRepository.getGoal(id: any(named: 'id')))
-        .thenAnswer((_) async => Result.success(testGoal));
-    when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
-        .thenAnswer((_) async => Result.success(
-              WerdProgress(
-                goalId: 'default',
-                totalAmountReadToday: 0,
-                lastReadAbsolute: null,
-                lastUpdated: DateTime.now(),
-                streak: 0,
-              ),
-            ));
-    when(() => mockRepository.watchProgress(goalId: any(named: 'goalId')))
-        .thenAnswer((_) => Stream.value(Result.success(
-              WerdProgress(
-                goalId: 'default',
-                totalAmountReadToday: 0,
-                lastReadAbsolute: null,
-                lastUpdated: DateTime.now(),
-                streak: 0,
-              ),
-            )));
-    when(() => mockRepository.setGoal(any()))
-        .thenAnswer((_) async => Result.success(null));
-    when(() => mockRepository.updateProgress(any()))
-        .thenAnswer((_) async => Result.success(null));
+    when(
+      () => mockRepository.getGoal(id: any(named: 'id')),
+    ).thenAnswer((_) async => Result.success(testGoal));
+    when(
+      () => mockRepository.getProgress(goalId: any(named: 'goalId')),
+    ).thenAnswer(
+      (_) async => Result.success(
+        WerdProgress(
+          goalId: 'default',
+          totalAmountReadToday: 0,
+          lastReadAbsolute: null,
+          lastUpdated: DateTime.now(),
+          streak: 0,
+        ),
+      ),
+    );
+    when(
+      () => mockRepository.watchProgress(goalId: any(named: 'goalId')),
+    ).thenAnswer(
+      (_) => Stream.value(
+        Result.success(
+          WerdProgress(
+            goalId: 'default',
+            totalAmountReadToday: 0,
+            lastReadAbsolute: null,
+            lastUpdated: DateTime.now(),
+            streak: 0,
+          ),
+        ),
+      ),
+    );
+    when(
+      () => mockRepository.setGoal(any()),
+    ).thenAnswer((_) async => Result.success(null));
+    when(
+      () => mockRepository.updateProgress(any()),
+    ).thenAnswer((_) async => Result.success(null));
   });
 
   group('Jump Dialog - Mark All Range Tracking', () {
@@ -75,19 +86,22 @@ void main() {
       'jump from 100 to 6236: mark all creates segment 101-6236, total = 6136',
       build: () => WerdBloc(mockRepository, mockNotificationService),
       setUp: () {
-        when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
-            .thenAnswer((_) async => Result.success(
-                  WerdProgress(
-                    goalId: 'default',
-                    totalAmountReadToday: 5,
-                    lastReadAbsolute: 100,
-                    segmentsToday: const [
-                      ReadingSegment(startAyah: 96, endAyah: 100),
-                    ],
-                    lastUpdated: DateTime.now(),
-                    streak: 2,
-                  ),
-                ));
+        when(
+          () => mockRepository.getProgress(goalId: any(named: 'goalId')),
+        ).thenAnswer(
+          (_) async => Result.success(
+            WerdProgress(
+              goalId: 'default',
+              totalAmountReadToday: 5,
+              lastReadAbsolute: 100,
+              segmentsToday: const [
+                ReadingSegment(startAyah: 96, endAyah: 100),
+              ],
+              lastUpdated: DateTime.now(),
+              streak: 2,
+            ),
+          ),
+        );
       },
       act: (bloc) => bloc.add(
         const WerdEvent.trackItemReadMarkAll(
@@ -101,11 +115,9 @@ void main() {
             any(
               that: isA<WerdProgress>()
                   .having((p) => p.totalAmountReadToday, 'total', 6141)
-                  .having(
-                    (p) => p.segmentsToday,
-                    'segments',
-                    const [ReadingSegment(startAyah: 96, endAyah: 6236)],
-                  )
+                  .having((p) => p.segmentsToday, 'segments', const [
+                    ReadingSegment(startAyah: 96, endAyah: 6236),
+                  ])
                   .having((p) => p.lastReadAbsolute, 'lastRead', 6236),
             ),
           ),
@@ -117,19 +129,22 @@ void main() {
       'jump from 6100 to 6236: mark all creates segment 6101-6236, total = 186',
       build: () => WerdBloc(mockRepository, mockNotificationService),
       setUp: () {
-        when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
-            .thenAnswer((_) async => Result.success(
-                  WerdProgress(
-                    goalId: 'default',
-                    totalAmountReadToday: 50,
-                    lastReadAbsolute: 6100,
-                    segmentsToday: const [
-                      ReadingSegment(startAyah: 6051, endAyah: 6100),
-                    ],
-                    lastUpdated: DateTime.now(),
-                    streak: 5,
-                  ),
-                ));
+        when(
+          () => mockRepository.getProgress(goalId: any(named: 'goalId')),
+        ).thenAnswer(
+          (_) async => Result.success(
+            WerdProgress(
+              goalId: 'default',
+              totalAmountReadToday: 50,
+              lastReadAbsolute: 6100,
+              segmentsToday: const [
+                ReadingSegment(startAyah: 6051, endAyah: 6100),
+              ],
+              lastUpdated: DateTime.now(),
+              streak: 5,
+            ),
+          ),
+        );
       },
       act: (bloc) => bloc.add(
         const WerdEvent.trackItemReadMarkAll(
@@ -143,11 +158,9 @@ void main() {
             any(
               that: isA<WerdProgress>()
                   .having((p) => p.totalAmountReadToday, 'total', 186)
-                  .having(
-                    (p) => p.segmentsToday,
-                    'segments',
-                    const [ReadingSegment(startAyah: 6051, endAyah: 6236)],
-                  ),
+                  .having((p) => p.segmentsToday, 'segments', const [
+                    ReadingSegment(startAyah: 6051, endAyah: 6236),
+                  ]),
             ),
           ),
         ).called(1);
@@ -158,19 +171,20 @@ void main() {
       'jump from 1 to 6236: mark all creates segment 1-6236 (entire Quran)',
       build: () => WerdBloc(mockRepository, mockNotificationService),
       setUp: () {
-        when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
-            .thenAnswer((_) async => Result.success(
-                  WerdProgress(
-                    goalId: 'default',
-                    totalAmountReadToday: 0,
-                    lastReadAbsolute: 1,
-                    segmentsToday: const [
-                      ReadingSegment(startAyah: 1, endAyah: 1),
-                    ],
-                    lastUpdated: DateTime.now(),
-                    streak: 0,
-                  ),
-                ));
+        when(
+          () => mockRepository.getProgress(goalId: any(named: 'goalId')),
+        ).thenAnswer(
+          (_) async => Result.success(
+            WerdProgress(
+              goalId: 'default',
+              totalAmountReadToday: 0,
+              lastReadAbsolute: 1,
+              segmentsToday: const [ReadingSegment(startAyah: 1, endAyah: 1)],
+              lastUpdated: DateTime.now(),
+              streak: 0,
+            ),
+          ),
+        );
       },
       act: (bloc) => bloc.add(
         const WerdEvent.trackItemReadMarkAll(
@@ -184,11 +198,9 @@ void main() {
             any(
               that: isA<WerdProgress>()
                   .having((p) => p.totalAmountReadToday, 'total', 6236)
-                  .having(
-                    (p) => p.segmentsToday,
-                    'segments',
-                    const [ReadingSegment(startAyah: 1, endAyah: 6236)],
-                  ),
+                  .having((p) => p.segmentsToday, 'segments', const [
+                    ReadingSegment(startAyah: 1, endAyah: 6236),
+                  ]),
             ),
           ),
         ).called(1);
@@ -199,19 +211,22 @@ void main() {
       'jump from 6000 to 6236: mark all adds 236 ayahs',
       build: () => WerdBloc(mockRepository, mockNotificationService),
       setUp: () {
-        when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
-            .thenAnswer((_) async => Result.success(
-                  WerdProgress(
-                    goalId: 'default',
-                    totalAmountReadToday: 50,
-                    lastReadAbsolute: 6000,
-                    segmentsToday: const [
-                      ReadingSegment(startAyah: 5951, endAyah: 6000),
-                    ],
-                    lastUpdated: DateTime.now(),
-                    streak: 3,
-                  ),
-                ));
+        when(
+          () => mockRepository.getProgress(goalId: any(named: 'goalId')),
+        ).thenAnswer(
+          (_) async => Result.success(
+            WerdProgress(
+              goalId: 'default',
+              totalAmountReadToday: 50,
+              lastReadAbsolute: 6000,
+              segmentsToday: const [
+                ReadingSegment(startAyah: 5951, endAyah: 6000),
+              ],
+              lastUpdated: DateTime.now(),
+              streak: 3,
+            ),
+          ),
+        );
       },
       act: (bloc) => bloc.add(
         const WerdEvent.trackItemReadMarkAll(
@@ -225,11 +240,9 @@ void main() {
             any(
               that: isA<WerdProgress>()
                   .having((p) => p.totalAmountReadToday, 'total', 286)
-                  .having(
-                    (p) => p.segmentsToday,
-                    'segments',
-                    const [ReadingSegment(startAyah: 5951, endAyah: 6236)],
-                  ),
+                  .having((p) => p.segmentsToday, 'segments', const [
+                    ReadingSegment(startAyah: 5951, endAyah: 6236),
+                  ]),
             ),
           ),
         ).called(1);
@@ -256,20 +269,23 @@ void main() {
       'after restart: lastReadAbsolute = 1, totalAmountReadToday = 0',
       build: () => WerdBloc(mockRepository, mockNotificationService),
       setUp: () {
-        when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
-            .thenAnswer((_) async => Result.success(
-                  WerdProgress(
-                    goalId: 'default',
-                    totalAmountReadToday: 100,
-                    lastReadAbsolute: 6236,
-                    segmentsToday: const [
-                      ReadingSegment(startAyah: 6137, endAyah: 6236),
-                    ],
-                    lastUpdated: DateTime.now(),
-                    streak: 10,
-                    completedCycles: 0,
-                  ),
-                ));
+        when(
+          () => mockRepository.getProgress(goalId: any(named: 'goalId')),
+        ).thenAnswer(
+          (_) async => Result.success(
+            WerdProgress(
+              goalId: 'default',
+              totalAmountReadToday: 100,
+              lastReadAbsolute: 6236,
+              segmentsToday: const [
+                ReadingSegment(startAyah: 6137, endAyah: 6236),
+              ],
+              lastUpdated: DateTime.now(),
+              streak: 10,
+              completedCycles: 0,
+            ),
+          ),
+        );
       },
       act: (bloc) => bloc.add(const WerdEvent.completeCycleAndRestart()),
       verify: (_) {
@@ -291,20 +307,23 @@ void main() {
       'after stay: lastReadAbsolute = 6236, totalAmountReadToday = 0',
       build: () => WerdBloc(mockRepository, mockNotificationService),
       setUp: () {
-        when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
-            .thenAnswer((_) async => Result.success(
-                  WerdProgress(
-                    goalId: 'default',
-                    totalAmountReadToday: 100,
-                    lastReadAbsolute: 6236,
-                    segmentsToday: const [
-                      ReadingSegment(startAyah: 6137, endAyah: 6236),
-                    ],
-                    lastUpdated: DateTime.now(),
-                    streak: 10,
-                    completedCycles: 0,
-                  ),
-                ));
+        when(
+          () => mockRepository.getProgress(goalId: any(named: 'goalId')),
+        ).thenAnswer(
+          (_) async => Result.success(
+            WerdProgress(
+              goalId: 'default',
+              totalAmountReadToday: 100,
+              lastReadAbsolute: 6236,
+              segmentsToday: const [
+                ReadingSegment(startAyah: 6137, endAyah: 6236),
+              ],
+              lastUpdated: DateTime.now(),
+              streak: 10,
+              completedCycles: 0,
+            ),
+          ),
+        );
       },
       act: (bloc) => bloc.add(const WerdEvent.completeCycleStayHere()),
       verify: (_) {
@@ -326,20 +345,23 @@ void main() {
       'second cycle completion: completedCycles = 2',
       build: () => WerdBloc(mockRepository, mockNotificationService),
       setUp: () {
-        when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
-            .thenAnswer((_) async => Result.success(
-                  WerdProgress(
-                    goalId: 'default',
-                    totalAmountReadToday: 100,
-                    lastReadAbsolute: 6236,
-                    segmentsToday: const [
-                      ReadingSegment(startAyah: 6137, endAyah: 6236),
-                    ],
-                    lastUpdated: DateTime.now(),
-                    streak: 10,
-                    completedCycles: 1,
-                  ),
-                ));
+        when(
+          () => mockRepository.getProgress(goalId: any(named: 'goalId')),
+        ).thenAnswer(
+          (_) async => Result.success(
+            WerdProgress(
+              goalId: 'default',
+              totalAmountReadToday: 100,
+              lastReadAbsolute: 6236,
+              segmentsToday: const [
+                ReadingSegment(startAyah: 6137, endAyah: 6236),
+              ],
+              lastUpdated: DateTime.now(),
+              streak: 10,
+              completedCycles: 1,
+            ),
+          ),
+        );
       },
       act: (bloc) => bloc.add(const WerdEvent.completeCycleAndRestart()),
       verify: (_) {
@@ -361,19 +383,22 @@ void main() {
       'jump from 6185 to 6236 (51 ayah gap): mark all tracks 51 ayahs',
       build: () => WerdBloc(mockRepository, mockNotificationService),
       setUp: () {
-        when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
-            .thenAnswer((_) async => Result.success(
-                  WerdProgress(
-                    goalId: 'default',
-                    totalAmountReadToday: 50,
-                    lastReadAbsolute: 6185,
-                    segmentsToday: const [
-                      ReadingSegment(startAyah: 6136, endAyah: 6185),
-                    ],
-                    lastUpdated: DateTime.now(),
-                    streak: 5,
-                  ),
-                ));
+        when(
+          () => mockRepository.getProgress(goalId: any(named: 'goalId')),
+        ).thenAnswer(
+          (_) async => Result.success(
+            WerdProgress(
+              goalId: 'default',
+              totalAmountReadToday: 50,
+              lastReadAbsolute: 6185,
+              segmentsToday: const [
+                ReadingSegment(startAyah: 6136, endAyah: 6185),
+              ],
+              lastUpdated: DateTime.now(),
+              streak: 5,
+            ),
+          ),
+        );
       },
       act: (bloc) => bloc.add(
         const WerdEvent.trackItemReadMarkAll(
@@ -387,11 +412,9 @@ void main() {
             any(
               that: isA<WerdProgress>()
                   .having((p) => p.totalAmountReadToday, 'total', 101)
-                  .having(
-                    (p) => p.segmentsToday,
-                    'segments',
-                    const [ReadingSegment(startAyah: 6136, endAyah: 6236)],
-                  ),
+                  .having((p) => p.segmentsToday, 'segments', const [
+                    ReadingSegment(startAyah: 6136, endAyah: 6236),
+                  ]),
             ),
           ),
         ).called(1);

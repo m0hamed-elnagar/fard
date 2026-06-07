@@ -21,15 +21,30 @@ class WidgetPrayerCalculator {
     required String lang,
   }) {
     if (now.isBefore(prayerTimes.fajr)) {
-      return NextPrayerInfo(name: getPrayerName('fajr', lang), time: prayerTimes.fajr);
+      return NextPrayerInfo(
+        name: getPrayerName('fajr', lang),
+        time: prayerTimes.fajr,
+      );
     } else if (now.isBefore(prayerTimes.dhuhr)) {
-      return NextPrayerInfo(name: getPrayerName('dhuhr', lang), time: prayerTimes.dhuhr);
+      return NextPrayerInfo(
+        name: getPrayerName('dhuhr', lang),
+        time: prayerTimes.dhuhr,
+      );
     } else if (now.isBefore(prayerTimes.asr)) {
-      return NextPrayerInfo(name: getPrayerName('asr', lang), time: prayerTimes.asr);
+      return NextPrayerInfo(
+        name: getPrayerName('asr', lang),
+        time: prayerTimes.asr,
+      );
     } else if (now.isBefore(prayerTimes.maghrib)) {
-      return NextPrayerInfo(name: getPrayerName('maghrib', lang), time: prayerTimes.maghrib);
+      return NextPrayerInfo(
+        name: getPrayerName('maghrib', lang),
+        time: prayerTimes.maghrib,
+      );
     } else if (now.isBefore(prayerTimes.isha)) {
-      return NextPrayerInfo(name: getPrayerName('isha', lang), time: prayerTimes.isha);
+      return NextPrayerInfo(
+        name: getPrayerName('isha', lang),
+        time: prayerTimes.isha,
+      );
     } else {
       // After Isha - calculate tomorrow's Fajr
       final tomorrowPrayerTimes = prayerTimeService.getPrayerTimes(
@@ -39,28 +54,43 @@ class WidgetPrayerCalculator {
         madhab: madhab,
         date: now.add(const Duration(days: 1)),
       );
-      return NextPrayerInfo(name: getPrayerName('fajr', lang), time: tomorrowPrayerTimes.fajr);
+      return NextPrayerInfo(
+        name: getPrayerName('fajr', lang),
+        time: tomorrowPrayerTimes.fajr,
+      );
     }
   }
 
   static String getPrayerName(String id, String lang) {
     if (lang == 'ar') {
       switch (id) {
-        case 'fajr': return 'الفجر';
-        case 'dhuhr': return 'الظهر';
-        case 'asr': return 'العصر';
-        case 'maghrib': return 'المغرب';
-        case 'isha': return 'العشاء';
-        default: return id;
+        case 'fajr':
+          return 'الفجر';
+        case 'dhuhr':
+          return 'الظهر';
+        case 'asr':
+          return 'العصر';
+        case 'maghrib':
+          return 'المغرب';
+        case 'isha':
+          return 'العشاء';
+        default:
+          return id;
       }
     } else {
       switch (id) {
-        case 'fajr': return 'Fajr';
-        case 'dhuhr': return 'Dhuhr';
-        case 'asr': return 'Asr';
-        case 'maghrib': return 'Maghrib';
-        case 'isha': return 'Isha';
-        default: return id;
+        case 'fajr':
+          return 'Fajr';
+        case 'dhuhr':
+          return 'Dhuhr';
+        case 'asr':
+          return 'Asr';
+        case 'maghrib':
+          return 'Maghrib';
+        case 'isha':
+          return 'Isha';
+        default:
+          return id;
       }
     }
   }

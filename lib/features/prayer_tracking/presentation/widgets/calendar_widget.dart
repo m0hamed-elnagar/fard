@@ -71,10 +71,18 @@ class _CalendarWidgetState extends State<CalendarWidget> {
     });
   }
 
-  Widget _buildCell(DateTime day, bool isSelected, {bool isToday = false, bool isOutside = false}) {
+  Widget _buildCell(
+    DateTime day,
+    bool isSelected, {
+    bool isToday = false,
+    bool isOutside = false,
+  }) {
     final hijri = _getHijriDate(day);
     final today = DateTime.now();
-    final isTodayDate = day.year == today.year && day.month == today.month && day.day == today.day;
+    final isTodayDate =
+        day.year == today.year &&
+        day.month == today.month &&
+        day.day == today.day;
 
     // Always show BOTH calendar values for EVERY day
     final primaryValue = _hijriFocused ? '${hijri.hDay}' : '${day.day}';
@@ -88,8 +96,8 @@ class _CalendarWidgetState extends State<CalendarWidget> {
             color: isSelected
                 ? context.onSurfaceColor
                 : isTodayDate && !isSelected
-                    ? context.primaryColor
-                    : context.onSurfaceColor.withValues(alpha: cellOpacity),
+                ? context.primaryColor
+                : context.onSurfaceColor.withValues(alpha: cellOpacity),
             fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
             fontSize: isSelected ? 18.0 : 16.0,
           )
@@ -97,8 +105,8 @@ class _CalendarWidgetState extends State<CalendarWidget> {
             color: isSelected
                 ? context.onSurfaceColor
                 : isTodayDate && !isSelected
-                    ? context.primaryColor
-                    : context.onSurfaceColor.withValues(alpha: cellOpacity),
+                ? context.primaryColor
+                : context.onSurfaceColor.withValues(alpha: cellOpacity),
             fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
             fontSize: isSelected ? 16.0 : 14.0,
           );
@@ -108,10 +116,10 @@ class _CalendarWidgetState extends State<CalendarWidget> {
             color: isSelected
                 ? context.onSurfaceVariantColor
                 : isTodayDate && !isSelected
-                    ? context.primaryColor.withValues(alpha: 0.7)
-                    : context.onSurfaceVariantColor.withValues(
-                        alpha: 0.7 * cellOpacity,
-                      ),
+                ? context.primaryColor.withValues(alpha: 0.7)
+                : context.onSurfaceVariantColor.withValues(
+                    alpha: 0.7 * cellOpacity,
+                  ),
             fontWeight: FontWeight.bold,
             fontSize: isSelected ? 11.0 : 10.0,
             height: 1.1,
@@ -120,10 +128,10 @@ class _CalendarWidgetState extends State<CalendarWidget> {
             color: isSelected
                 ? context.onSurfaceVariantColor
                 : isTodayDate && !isSelected
-                    ? context.primaryColor.withValues(alpha: 0.7)
-                    : context.onSurfaceVariantColor.withValues(
-                        alpha: 0.7 * cellOpacity,
-                      ),
+                ? context.primaryColor.withValues(alpha: 0.7)
+                : context.onSurfaceVariantColor.withValues(
+                    alpha: 0.7 * cellOpacity,
+                  ),
             fontWeight: FontWeight.bold,
             fontSize: isSelected ? 12.0 : 11.0,
             height: 1.1,
@@ -134,7 +142,9 @@ class _CalendarWidgetState extends State<CalendarWidget> {
       decoration: BoxDecoration(
         color: isSelected
             ? context.primaryColor.withValues(alpha: 0.15)
-            : (isTodayDate && !isSelected ? context.primaryColor.withValues(alpha: 0.1) : null),
+            : (isTodayDate && !isSelected
+                  ? context.primaryColor.withValues(alpha: 0.1)
+                  : null),
         shape: BoxShape.circle,
         border: isTodayDate && !isSelected
             ? Border.all(
@@ -305,7 +315,9 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                           color: context.secondaryColor.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: context.secondaryColor.withValues(alpha: 0.1),
+                            color: context.secondaryColor.withValues(
+                              alpha: 0.1,
+                            ),
                           ),
                         ),
                         child: Row(
@@ -400,10 +412,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                 todayDecoration: BoxDecoration(
                   color: Colors.transparent,
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: context.primaryColor,
-                    width: 2.0,
-                  ),
+                  border: Border.all(color: context.primaryColor, width: 2.0),
                 ),
                 // Selected: primary color tint with onSurface text
                 selectedTextStyle: TextStyle(
@@ -419,7 +428,9 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                   ),
                 ),
                 defaultTextStyle: TextStyle(color: context.onSurfaceColor),
-                weekendTextStyle: TextStyle(color: context.onSurfaceVariantColor),
+                weekendTextStyle: TextStyle(
+                  color: context.onSurfaceVariantColor,
+                ),
                 cellMargin: const EdgeInsets.all(2),
                 markersMaxCount: 1,
               ),
@@ -519,8 +530,12 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                     _buildCell(day, false, isOutside: true),
                 selectedBuilder: (context, day, focusedDay) =>
                     _buildCell(day, true, isOutside: _isOutsideMonth(day)),
-                todayBuilder: (context, day, focusedDay) =>
-                    _buildCell(day, false, isToday: true, isOutside: _isOutsideMonth(day)),
+                todayBuilder: (context, day, focusedDay) => _buildCell(
+                  day,
+                  false,
+                  isToday: true,
+                  isOutside: _isOutsideMonth(day),
+                ),
                 markerBuilder: (context, date, events) {
                   final normalized = _normalize(date);
                   final record = widget.monthRecords[normalized];
@@ -533,11 +548,15 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                         height: 6.0,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: hasMissed ? context.errorColor : context.primaryColor,
+                          color: hasMissed
+                              ? context.errorColor
+                              : context.primaryColor,
                           boxShadow: [
                             BoxShadow(
                               color:
-                                  (hasMissed ? context.errorColor : context.primaryColor)
+                                  (hasMissed
+                                          ? context.errorColor
+                                          : context.primaryColor)
                                       .withValues(alpha: 0.4),
                               blurRadius: 4.0,
                             ),

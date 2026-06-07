@@ -13,7 +13,8 @@ class WerdHistoryEntry extends Equatable {
   final String endSurahName;
   final int endAyahNumber;
   final String summary;
-  final List<ReadingSegment>? sessions; // Actual session data (optional for backward compatibility)
+  final List<ReadingSegment>?
+  sessions; // Actual session data (optional for backward compatibility)
 
   const WerdHistoryEntry({
     required this.totalAyahsRead,
@@ -63,7 +64,9 @@ class WerdHistoryEntry extends Equatable {
 
   factory WerdHistoryEntry.fromJson(Map<String, dynamic> json) {
     final sessionsJson = json['sessions'] as List<dynamic>?;
-    final sessions = sessionsJson?.map((s) => ReadingSegment.fromJson(s as Map<String, dynamic>)).toList();
+    final sessions = sessionsJson
+        ?.map((s) => ReadingSegment.fromJson(s as Map<String, dynamic>))
+        .toList();
 
     return WerdHistoryEntry(
       totalAyahsRead: json['totalAyahsRead'] ?? 0,

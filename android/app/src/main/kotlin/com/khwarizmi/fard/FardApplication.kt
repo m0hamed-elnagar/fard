@@ -1,9 +1,9 @@
-package com.qada.fard
+package com.khwarizmi.fard
 
 import android.app.Application
 import android.util.Log
 import androidx.work.*
-import com.qada.fard.widget.WidgetUpdateWorker
+import com.khwarizmi.fard.widget.WidgetUpdateWorker
 import java.util.concurrent.TimeUnit
 
 class FardApplication : Application() {
@@ -37,3 +37,4 @@ class FardApplication : Application() {
         Log.d(TAG, "Scheduled 15-min safety net worker")
     }
 }
+

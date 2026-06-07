@@ -94,10 +94,12 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
                     ElevatedButton.icon(
                       onPressed: () {
                         context.read<ReaderBloc>().add(
-                              ReaderEvent.loadSurah(
-                                surahNumber: SurahNumber.create(widget.surahNumber).data!,
-                              ),
-                            );
+                          ReaderEvent.loadSurah(
+                            surahNumber: SurahNumber.create(
+                              widget.surahNumber,
+                            ).data!,
+                          ),
+                        );
                       },
                       icon: const Icon(Icons.refresh),
                       label: Text(l10n.retry),
@@ -196,10 +198,13 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
                               children: [
                                 AyahText(
                                   ayahs: s.surah.ayahs,
-                                  highlightedAyah: playingAyah ?? s.highlightedAyah,
+                                  highlightedAyah:
+                                      playingAyah ?? s.highlightedAyah,
                                   dayStartAyah: dayStartAyah,
                                   lastReadAyah:
-                                      (werdState.progress?.totalAmountReadToday ??
+                                      (werdState
+                                                  .progress
+                                                  ?.totalAmountReadToday ??
                                               0) >
                                           0
                                       ? lastReadAyah
@@ -223,7 +228,8 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
                                 ),
 
                                 // Completion Doaa Button (only for An-Nas - Surah 114)
-                                if (s.surah.number.value == 114 && widget.onCompletionDoaa != null)
+                                if (s.surah.number.value == 114 &&
+                                    widget.onCompletionDoaa != null)
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 24.0,
@@ -241,7 +247,10 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
                                         ),
                                       ),
                                       label: Text(
-                                        Localizations.localeOf(context).languageCode == 'ar'
+                                        Localizations.localeOf(
+                                                  context,
+                                                ).languageCode ==
+                                                'ar'
                                             ? l10n.completionDoaaArabic
                                             : l10n.completionDoaa,
                                         style: const TextStyle(
@@ -255,11 +264,13 @@ class _QuranReaderBodyState extends State<QuranReaderBody> {
                                           vertical: 16,
                                         ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(30),
+                                          borderRadius: BorderRadius.circular(
+                                            30,
+                                          ),
                                         ),
-                                        backgroundColor: Theme.of(context)
-                                            .colorScheme
-                                            .surfaceContainerHigh,
+                                        backgroundColor: Theme.of(
+                                          context,
+                                        ).colorScheme.surfaceContainerHigh,
                                         foregroundColor: context.secondaryColor,
                                       ),
                                     ),

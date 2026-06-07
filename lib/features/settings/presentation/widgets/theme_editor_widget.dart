@@ -52,29 +52,50 @@ class _ThemeEditorWidgetState extends State<ThemeEditorWidget> {
 
   void _updateColor(String key, Color color) {
     setState(() {
-      widget.colors[key] = '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}';
+      widget.colors[key] =
+          '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}';
       _hexControllers[key]!.text = widget.colors[key]!.substring(1);
     });
   }
 
   void _autoDeriveAll() {
     setState(() {
-      final primary = Color(int.parse(widget.colors['primary']!.replaceFirst('#', '0xFF')));
-      final accent = Color(int.parse(widget.colors['accent']!.replaceFirst('#', '0xFF')));
+      final primary = Color(
+        int.parse(widget.colors['primary']!.replaceFirst('#', '0xFF')),
+      );
+      final accent = Color(
+        int.parse(widget.colors['accent']!.replaceFirst('#', '0xFF')),
+      );
       final isDark = primary.computeLuminance() < 0.4;
       final brightness = isDark ? Brightness.dark : Brightness.light;
 
-      final primaryScheme = ColorScheme.fromSeed(seedColor: primary, brightness: brightness);
-      final accentScheme = ColorScheme.fromSeed(seedColor: accent, brightness: brightness);
+      final primaryScheme = ColorScheme.fromSeed(
+        seedColor: primary,
+        brightness: brightness,
+      );
+      final accentScheme = ColorScheme.fromSeed(
+        seedColor: accent,
+        brightness: brightness,
+      );
 
       widget.colors['background'] = primaryScheme.surface.toHex();
       widget.colors['surface'] = primaryScheme.surfaceContainer.toHex();
-      widget.colors['surfaceLight'] = primaryScheme.surfaceContainerHigh.toHex();
+      widget.colors['surfaceLight'] = primaryScheme.surfaceContainerHigh
+          .toHex();
       widget.colors['text'] = primaryScheme.onSurface.toHex();
       widget.colors['textSecondary'] = primaryScheme.onSurfaceVariant.toHex();
-      widget.colors['cardBorder'] = accentScheme.outline.withValues(alpha: 0.3).toHex();
+      widget.colors['cardBorder'] = accentScheme.outline
+          .withValues(alpha: 0.3)
+          .toHex();
 
-      for (final key in ['background', 'surface', 'surfaceLight', 'text', 'textSecondary', 'cardBorder']) {
+      for (final key in [
+        'background',
+        'surface',
+        'surfaceLight',
+        'text',
+        'textSecondary',
+        'cardBorder',
+      ]) {
         _hexControllers[key]!.text = widget.colors[key]!.substring(1);
       }
     });
@@ -82,10 +103,15 @@ class _ThemeEditorWidgetState extends State<ThemeEditorWidget> {
 
   void _autoDeriveFromPrimary(String targetKey) {
     setState(() {
-      final primary = Color(int.parse(widget.colors['primary']!.replaceFirst('#', '0xFF')));
+      final primary = Color(
+        int.parse(widget.colors['primary']!.replaceFirst('#', '0xFF')),
+      );
       final isDark = primary.computeLuminance() < 0.4;
       final brightness = isDark ? Brightness.dark : Brightness.light;
-      final scheme = ColorScheme.fromSeed(seedColor: primary, brightness: brightness);
+      final scheme = ColorScheme.fromSeed(
+        seedColor: primary,
+        brightness: brightness,
+      );
 
       final colorMap = {
         'background': scheme.surface,
@@ -97,20 +123,34 @@ class _ThemeEditorWidgetState extends State<ThemeEditorWidget> {
 
       if (colorMap.containsKey(targetKey)) {
         widget.colors[targetKey] = colorMap[targetKey]!.toHex();
-        _hexControllers[targetKey]!.text = widget.colors[targetKey]!.substring(1);
+        _hexControllers[targetKey]!.text = widget.colors[targetKey]!.substring(
+          1,
+        );
       }
     });
   }
 
   void _autoDeriveFromAccent() {
     setState(() {
-      final accent = Color(int.parse(widget.colors['accent']!.replaceFirst('#', '0xFF')));
-      final isDark = Color(int.parse(widget.colors['primary']!.replaceFirst('#', '0xFF'))).computeLuminance() < 0.4;
+      final accent = Color(
+        int.parse(widget.colors['accent']!.replaceFirst('#', '0xFF')),
+      );
+      final isDark =
+          Color(
+            int.parse(widget.colors['primary']!.replaceFirst('#', '0xFF')),
+          ).computeLuminance() <
+          0.4;
       final brightness = isDark ? Brightness.dark : Brightness.light;
-      final scheme = ColorScheme.fromSeed(seedColor: accent, brightness: brightness);
+      final scheme = ColorScheme.fromSeed(
+        seedColor: accent,
+        brightness: brightness,
+      );
 
-      widget.colors['cardBorder'] = scheme.outline.withValues(alpha: 0.3).toHex();
-      _hexControllers['cardBorder']!.text = widget.colors['cardBorder']!.substring(1);
+      widget.colors['cardBorder'] = scheme.outline
+          .withValues(alpha: 0.3)
+          .toHex();
+      _hexControllers['cardBorder']!.text = widget.colors['cardBorder']!
+          .substring(1);
     });
   }
 
@@ -130,7 +170,10 @@ class _ThemeEditorWidgetState extends State<ThemeEditorWidget> {
             children: [
               // Handle + header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     Container(
@@ -143,7 +186,9 @@ class _ThemeEditorWidgetState extends State<ThemeEditorWidget> {
                     ),
                     const Spacer(),
                     Text(
-                      widget.isEditing ? widget.l10n.editTheme : widget.l10n.createNewTheme,
+                      widget.isEditing
+                          ? widget.l10n.editTheme
+                          : widget.l10n.createNewTheme,
                       style: GoogleFonts.amiri(
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
@@ -156,7 +201,9 @@ class _ThemeEditorWidgetState extends State<ThemeEditorWidget> {
                       onPressed: _autoDeriveAll,
                       icon: const Icon(Icons.auto_awesome_rounded, size: 18),
                       label: Text(widget.l10n.autoDerive),
-                      style: TextButton.styleFrom(foregroundColor: context.secondaryColor),
+                      style: TextButton.styleFrom(
+                        foregroundColor: context.secondaryColor,
+                      ),
                     ),
                   ],
                 ),
@@ -174,7 +221,13 @@ class _ThemeEditorWidgetState extends State<ThemeEditorWidget> {
                       int.parse(hex.replaceFirst('#', '0xFF')),
                     );
                     // Auto buttons for derived colors (they derive from primary or accent)
-                    final derivesFromPrimary = ['background', 'surface', 'surfaceLight', 'text', 'textSecondary'].contains(key);
+                    final derivesFromPrimary = [
+                      'background',
+                      'surface',
+                      'surfaceLight',
+                      'text',
+                      'textSecondary',
+                    ].contains(key);
                     final derivesFromAccent = key == 'cardBorder';
 
                     return Padding(
@@ -198,7 +251,10 @@ class _ThemeEditorWidgetState extends State<ThemeEditorWidget> {
                                             content: SingleChildScrollView(
                                               child: ColorPicker(
                                                 color: selectedColor,
-                                                onColorChanged: (c) => setDialogState(() => selectedColor = c),
+                                                onColorChanged: (c) =>
+                                                    setDialogState(
+                                                      () => selectedColor = c,
+                                                    ),
                                                 showColorName: true,
                                                 showColorCode: true,
                                                 pickersEnabled: const {
@@ -209,11 +265,15 @@ class _ThemeEditorWidgetState extends State<ThemeEditorWidget> {
                                             ),
                                             actions: [
                                               TextButton(
-                                                onPressed: () => Navigator.pop(d),
+                                                onPressed: () =>
+                                                    Navigator.pop(d),
                                                 child: Text(widget.l10n.cancel),
                                               ),
                                               ElevatedButton(
-                                                onPressed: () => Navigator.pop(d, selectedColor),
+                                                onPressed: () => Navigator.pop(
+                                                  d,
+                                                  selectedColor,
+                                                ),
                                                 child: Text(widget.l10n.select),
                                               ),
                                             ],
@@ -259,14 +319,20 @@ class _ThemeEditorWidgetState extends State<ThemeEditorWidget> {
                               if (derivesFromPrimary)
                                 IconButton(
                                   onPressed: () => _autoDeriveFromPrimary(key),
-                                  icon: const Icon(Icons.auto_awesome_rounded, size: 18),
+                                  icon: const Icon(
+                                    Icons.auto_awesome_rounded,
+                                    size: 18,
+                                  ),
                                   tooltip: 'Auto-derive from Primary color',
                                   color: context.secondaryColor,
                                 ),
                               if (derivesFromAccent)
                                 IconButton(
                                   onPressed: _autoDeriveFromAccent,
-                                  icon: const Icon(Icons.auto_awesome_rounded, size: 18),
+                                  icon: const Icon(
+                                    Icons.auto_awesome_rounded,
+                                    size: 18,
+                                  ),
                                   tooltip: 'Auto-derive from Accent color',
                                   color: context.secondaryColor,
                                 ),
@@ -354,7 +420,9 @@ class _ThemeEditorWidgetState extends State<ThemeEditorWidget> {
                     },
                     icon: const Icon(Icons.save_rounded),
                     label: Text(
-                      widget.isEditing ? widget.l10n.updateTheme : widget.l10n.saveTheme,
+                      widget.isEditing
+                          ? widget.l10n.updateTheme
+                          : widget.l10n.saveTheme,
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: context.secondaryColor,

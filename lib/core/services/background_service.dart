@@ -192,7 +192,8 @@ class _BackgroundSettingsProvider implements SettingsRepository {
   Future<void> addCustomTheme(CustomTheme theme) => Future.value();
 
   @override
-  Future<void> updateCustomTheme(String themeId, Map<String, String> colors) => Future.value();
+  Future<void> updateCustomTheme(String themeId, Map<String, String> colors) =>
+      Future.value();
 
   @override
   Future<void> deleteCustomTheme(String themeId) => Future.value();
@@ -213,10 +214,12 @@ class _BackgroundSettingsProvider implements SettingsRepository {
   Future<void> updateSalahReminderOffset(int minutes) => Future.value();
 
   @override
-  Future<void> updatePrayerReminderType(PrayerReminderType type) => Future.value();
+  Future<void> updatePrayerReminderType(PrayerReminderType type) =>
+      Future.value();
 
   @override
-  Future<void> updateEnabledSalahReminders(Set<Salaah> enabledSalahs) => Future.value();
+  Future<void> updateEnabledSalahReminders(Set<Salaah> enabledSalahs) =>
+      Future.value();
 
   @override
   Future<void> updateWerdReminderEnabled(bool enabled) => Future.value();

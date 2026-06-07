@@ -21,7 +21,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../widgets/bookmark_list.dart';
 
-
 import '../widgets/download_center_sheet.dart';
 import '../widgets/hizb_list.dart';
 import '../widgets/juz_list.dart';
@@ -56,27 +55,32 @@ class _QuranPageState extends State<QuranPage> {
   void _initDownloadTracking() {
     _updateDownloadedSurahs();
     _updateDownloadedTextSurahs();
-    _downloadSubscription = getIt<AudioDownloadService>().progressStream.listen((progress) {
-      if (!mounted) return;
-      
-      final currentReciter = context.read<ReciterManagerBloc>().state.currentReciter;
-      if (progress.reciterId != currentReciter?.identifier) return;
+    _downloadSubscription = getIt<AudioDownloadService>().progressStream.listen(
+      (progress) {
+        if (!mounted) return;
 
-      if (progress.isCompleted && progress.surahNumber != null) {
-        if (mounted) {
-          setState(() {
-            _downloadedSurahIds.add(progress.surahNumber!);
-            _downloadingSurahs.remove(progress.surahNumber);
-          });
+        final currentReciter = context
+            .read<ReciterManagerBloc>()
+            .state
+            .currentReciter;
+        if (progress.reciterId != currentReciter?.identifier) return;
+
+        if (progress.isCompleted && progress.surahNumber != null) {
+          if (mounted) {
+            setState(() {
+              _downloadedSurahIds.add(progress.surahNumber!);
+              _downloadingSurahs.remove(progress.surahNumber);
+            });
+          }
+        } else if (progress.surahNumber != null) {
+          if (mounted) {
+            setState(() {
+              _downloadingSurahs[progress.surahNumber!] = progress.percentage;
+            });
+          }
         }
-      } else if (progress.surahNumber != null) {
-        if (mounted) {
-          setState(() {
-            _downloadingSurahs[progress.surahNumber!] = progress.percentage;
-          });
-        }
-      }
-    });
+      },
+    );
   }
 
   Future<void> _downloadSurah(int surahNumber) async {
@@ -97,9 +101,9 @@ class _QuranPageState extends State<QuranPage> {
         setState(() {
           _downloadingSurahs.remove(surahNumber);
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
   }
@@ -108,11 +112,12 @@ class _QuranPageState extends State<QuranPage> {
     final reciter = context.read<ReciterManagerBloc>().state.currentReciter;
     if (reciter == null) return;
 
-    if (_lastReciterId == reciter.identifier && _downloadedSurahIds.isNotEmpty) return;
+    if (_lastReciterId == reciter.identifier && _downloadedSurahIds.isNotEmpty)
+      return;
 
     final downloaded = await getIt<AudioDownloadService>()
         .getDownloadedSurahIdsForReciter(reciter.identifier);
-    
+
     if (mounted) {
       setState(() {
         _downloadedSurahIds = downloaded;
@@ -122,7 +127,8 @@ class _QuranPageState extends State<QuranPage> {
   }
 
   Future<void> _updateDownloadedTextSurahs() async {
-    final downloaded = await getIt<QuranRepository>().getDownloadedTextSurahIds();
+    final downloaded = await getIt<QuranRepository>()
+        .getDownloadedTextSurahIds();
     if (mounted) {
       setState(() {
         _downloadedTextSurahIds = downloaded;
@@ -179,7 +185,11 @@ class _QuranPageState extends State<QuranPage> {
                   decoration: InputDecoration(
                     hintText: l10n.searchSurah,
                     border: InputBorder.none,
-                    hintStyle: TextStyle(color: context.onSurfaceColor).copyWith(fontSize: 14, color: context.onSurfaceColor.withValues(alpha: 0.7)),
+                    hintStyle: TextStyle(color: context.onSurfaceColor)
+                        .copyWith(
+                          fontSize: 14,
+                          color: context.onSurfaceColor.withValues(alpha: 0.7),
+                        ),
                   ),
                   style: TextStyle(color: context.onSurfaceColor, fontSize: 18),
                   onChanged: (value) {
@@ -247,20 +257,27 @@ class _QuranPageState extends State<QuranPage> {
         ),
         body: BlocBuilder<ConnectivityBloc, ConnectivityState>(
           builder: (context, connState) {
-            final isConnected = connState is ConnectivityStatus ? connState.isConnected : true;
+            final isConnected = connState is ConnectivityStatus
+                ? connState.isConnected
+                : true;
 
             return Column(
               children: [
                 if (!isConnected)
                   Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 16,
+                    ),
                     color: Colors.amber.shade700,
-                child:
-                Text(
-                    l10n.offlineModeBanner,
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
+                    child: Text(
+                      l10n.offlineModeBanner,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
 
@@ -268,7 +285,9 @@ class _QuranPageState extends State<QuranPage> {
                   child: MultiBlocListener(
                     listeners: [
                       BlocListener<ReciterManagerBloc, ReciterManagerState>(
-                        listenWhen: (prev, curr) => prev.currentReciter?.identifier != curr.currentReciter?.identifier,
+                        listenWhen: (prev, curr) =>
+                            prev.currentReciter?.identifier !=
+                            curr.currentReciter?.identifier,
                         listener: (context, state) => _updateDownloadedSurahs(),
                       ),
                     ],
@@ -281,7 +300,10 @@ class _QuranPageState extends State<QuranPage> {
                               children: [
                                 const CircularProgressIndicator(),
                                 const SizedBox(height: 16),
-                                Text(l10n.loadingQuran, style: GoogleFonts.amiri()),
+                                Text(
+                                  l10n.loadingQuran,
+                                  style: GoogleFonts.amiri(),
+                                ),
                               ],
                             ),
                           );
@@ -312,13 +334,15 @@ class _QuranPageState extends State<QuranPage> {
                                   Text(
                                     state.error!,
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(color: context.onSurfaceVariantColor),
+                                    style: TextStyle(
+                                      color: context.onSurfaceVariantColor,
+                                    ),
                                   ),
                                   const SizedBox(height: 24),
                                   ElevatedButton.icon(
-                                    onPressed: () => context.read<QuranBloc>().add(
-                                      const QuranEvent.loadSurahs(),
-                                    ),
+                                    onPressed: () => context
+                                        .read<QuranBloc>()
+                                        .add(const QuranEvent.loadSurahs()),
                                     icon: const Icon(Icons.refresh),
                                     label: Text(l10n.retry),
                                   ),
@@ -330,16 +354,21 @@ class _QuranPageState extends State<QuranPage> {
 
                         final filteredSurahs = state.surahs.where((surah) {
                           return surah.name.contains(_searchQuery) ||
-                              surah.number.value.toString().contains(_searchQuery);
+                              surah.number.value.toString().contains(
+                                _searchQuery,
+                              );
                         }).toList();
 
                         final lastRead = state.lastReadPosition;
-                        final hasLastRead = lastRead != null && state.surahs.isNotEmpty;
+                        final hasLastRead =
+                            lastRead != null && state.surahs.isNotEmpty;
                         Surah? lastReadSurah;
                         if (hasLastRead) {
                           try {
                             lastReadSurah = state.surahs.firstWhere(
-                              (s) => s.number.value == lastRead.ayahNumber.surahNumber,
+                              (s) =>
+                                  s.number.value ==
+                                  lastRead.ayahNumber.surahNumber,
                             );
                           } catch (_) {}
                         }
@@ -358,7 +387,9 @@ class _QuranPageState extends State<QuranPage> {
                                         physics: const ScrollPhysics(),
                                         itemCount:
                                             filteredSurahs.length +
-                                            (hasLastRead && _searchQuery.isEmpty ? 1 : 0),
+                                            (hasLastRead && _searchQuery.isEmpty
+                                                ? 1
+                                                : 0),
                                         separatorBuilder: (context, index) =>
                                             const Divider(height: 1),
                                         itemBuilder: (context, index) {
@@ -367,15 +398,23 @@ class _QuranPageState extends State<QuranPage> {
                                               index == 0) {
                                             return _ContinueReadingCard(
                                               surah: lastReadSurah!,
-                                              ayahNumber: lastRead.ayahNumber.ayahNumberInSurah,
-                                              isDownloaded: _downloadedSurahIds.contains(lastReadSurah.number.value),
+                                              ayahNumber: lastRead
+                                                  .ayahNumber
+                                                  .ayahNumberInSurah,
+                                              isDownloaded: _downloadedSurahIds
+                                                  .contains(
+                                                    lastReadSurah.number.value,
+                                                  ),
                                               onTap: () {
                                                 Navigator.push(
                                                   context,
                                                   QuranReaderPage.route(
-                                                    surahNumber: lastReadSurah!.number.value,
-                                                    ayahNumber:
-                                                        lastRead.ayahNumber.ayahNumberInSurah,
+                                                    surahNumber: lastReadSurah!
+                                                        .number
+                                                        .value,
+                                                    ayahNumber: lastRead
+                                                        .ayahNumber
+                                                        .ayahNumberInSurah,
                                                     allSurahs: state.surahs,
                                                   ),
                                                 );
@@ -383,39 +422,81 @@ class _QuranPageState extends State<QuranPage> {
                                               onPlayTap: () {
                                                 OfflineAudioHelper.handlePlayRequest(
                                                   context: context,
-                                                  surahNumber: lastReadSurah!.number.value,
-                                                  startAyah: lastRead.ayahNumber.ayahNumberInSurah,
-                                                  isDownloaded: _downloadedSurahIds.contains(lastReadSurah.number.value),
+                                                  surahNumber: lastReadSurah!
+                                                      .number
+                                                      .value,
+                                                  startAyah: lastRead
+                                                      .ayahNumber
+                                                      .ayahNumberInSurah,
+                                                  isDownloaded:
+                                                      _downloadedSurahIds
+                                                          .contains(
+                                                            lastReadSurah
+                                                                .number
+                                                                .value,
+                                                          ),
                                                 );
                                               },
                                             );
                                           }
 
-                                          final surahIndex = hasLastRead && _searchQuery.isEmpty
+                                          final surahIndex =
+                                              hasLastRead &&
+                                                  _searchQuery.isEmpty
                                               ? index - 1
                                               : index;
-                                          final surah = filteredSurahs[surahIndex];
-                                          final isAudioDownloaded = _downloadedSurahIds.contains(surah.number.value);
-                                          final isTextDownloaded = _downloadedTextSurahIds.contains(surah.number.value);
+                                          final surah =
+                                              filteredSurahs[surahIndex];
+                                          final isAudioDownloaded =
+                                              _downloadedSurahIds.contains(
+                                                surah.number.value,
+                                              );
+                                          final isTextDownloaded =
+                                              _downloadedTextSurahIds.contains(
+                                                surah.number.value,
+                                              );
 
                                           return _SurahListTile(
                                             surah: surah,
-                                            isAudioDownloaded: isAudioDownloaded,
+                                            isAudioDownloaded:
+                                                isAudioDownloaded,
                                             isTextDownloaded: isTextDownloaded,
-                                            isDownloadingAudio: _downloadingSurahs.containsKey(surah.number.value),
-                                            audioDownloadProgress: _downloadingSurahs[surah.number.value],
-                                            isDownloadingText: _downloadingTextSurahs.contains(surah.number.value),
+                                            isDownloadingAudio:
+                                                _downloadingSurahs.containsKey(
+                                                  surah.number.value,
+                                                ),
+                                            audioDownloadProgress:
+                                                _downloadingSurahs[surah
+                                                    .number
+                                                    .value],
+                                            isDownloadingText:
+                                                _downloadingTextSurahs.contains(
+                                                  surah.number.value,
+                                                ),
                                             isConnected: isConnected,
-                                            lastReadAyahNumber: (lastRead?.ayahNumber.surahNumber == surah.number.value)
-                                                ? lastRead?.ayahNumber.ayahNumberInSurah
+                                            lastReadAyahNumber:
+                                                (lastRead
+                                                        ?.ayahNumber
+                                                        .surahNumber ==
+                                                    surah.number.value)
+                                                ? lastRead
+                                                      ?.ayahNumber
+                                                      .ayahNumberInSurah
                                                 : null,
-                                            onDownloadAudio: () => _downloadSurah(surah.number.value),
-                                            onDownloadText: () => _downloadSurahText(surah.number.value),
+                                            onDownloadAudio: () =>
+                                                _downloadSurah(
+                                                  surah.number.value,
+                                                ),
+                                            onDownloadText: () =>
+                                                _downloadSurahText(
+                                                  surah.number.value,
+                                                ),
                                             onTap: () async {
                                               await Navigator.push(
                                                 context,
                                                 QuranReaderPage.route(
-                                                  surahNumber: surah.number.value,
+                                                  surahNumber:
+                                                      surah.number.value,
                                                   allSurahs: state.surahs,
                                                 ),
                                               );
@@ -427,47 +508,64 @@ class _QuranPageState extends State<QuranPage> {
                                           );
                                         },
                                       ),
-                                    // Fast scroll scrollbar
-                                    FastScrollScrollbar(
-                                      scrollController: _surahScrollController,
-                                      itemCount: filteredSurahs.length +
-                                          (hasLastRead && _searchQuery.isEmpty ? 1 : 0),
-                                      labelBuilder: (context, index) {
-                                        if (hasLastRead && _searchQuery.isEmpty && index == 0) {
-                                          return Text(
-                                            'Continue',
-                                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                                          );
-                                        }
-                                        final surahIndex = hasLastRead && _searchQuery.isEmpty
-                                            ? index - 1
-                                            : index;
-                                        if (surahIndex >= 0 && surahIndex < filteredSurahs.length) {
-                                          final surah = filteredSurahs[surahIndex];
-                                          return Text(
-                                            '${surah.number.value}. ${surah.name}',
-                                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                                          );
-                                        }
-                                        return const SizedBox.shrink();
-                                      },
-                                    ),
-                                  ],
-                                ),
+                                      // Fast scroll scrollbar
+                                      FastScrollScrollbar(
+                                        scrollController:
+                                            _surahScrollController,
+                                        itemCount:
+                                            filteredSurahs.length +
+                                            (hasLastRead && _searchQuery.isEmpty
+                                                ? 1
+                                                : 0),
+                                        labelBuilder: (context, index) {
+                                          if (hasLastRead &&
+                                              _searchQuery.isEmpty &&
+                                              index == 0) {
+                                            return Text(
+                                              'Continue',
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            );
+                                          }
+                                          final surahIndex =
+                                              hasLastRead &&
+                                                  _searchQuery.isEmpty
+                                              ? index - 1
+                                              : index;
+                                          if (surahIndex >= 0 &&
+                                              surahIndex <
+                                                  filteredSurahs.length) {
+                                            final surah =
+                                                filteredSurahs[surahIndex];
+                                            return Text(
+                                              '${surah.number.value}. ${surah.name}',
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            );
+                                          }
+                                          return const SizedBox.shrink();
+                                        },
+                                      ),
+                                    ],
+                                  ),
 
-                          // Juz Tab
-                          JuzList(searchQuery: _searchQuery),
+                            // Juz Tab
+                            JuzList(searchQuery: _searchQuery),
 
-                          // Hizb Tab
-                          HizbList(searchQuery: _searchQuery),
+                            // Hizb Tab
+                            HizbList(searchQuery: _searchQuery),
 
-                          // Bookmarks Tab
-                          BookmarkList(searchQuery: _searchQuery),
-                        ],
-                      );
-                    },
+                            // Bookmarks Tab
+                            BookmarkList(searchQuery: _searchQuery),
+                          ],
+                        );
+                      },
+                    ),
                   ),
-                ),
                 ),
               ],
             );
@@ -534,7 +632,9 @@ class _ContinueReadingCard extends StatelessWidget {
                           Text(
                             l10n.continueReading,
                             style: GoogleFonts.amiri(
-                              color: context.onSurfaceColor.withValues(alpha: 0.9),
+                              color: context.onSurfaceColor.withValues(
+                                alpha: 0.9,
+                              ),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -562,7 +662,8 @@ class _ContinueReadingCard extends StatelessWidget {
                 ),
                 BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
                   builder: (context, audioState) {
-                    final isThisSurah = audioState.currentSurah == surah.number.value;
+                    final isThisSurah =
+                        audioState.currentSurah == surah.number.value;
                     final isPlaying = audioState.isPlaying && isThisSurah;
                     final isLoading = audioState.isLoading && isThisSurah;
 
@@ -580,11 +681,15 @@ class _ContinueReadingCard extends StatelessWidget {
                                 height: 32,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 3,
-                                  valueColor: AlwaysStoppedAnimation<Color>(context.onSurfaceColor),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    context.onSurfaceColor,
+                                  ),
                                 ),
                               )
                             : Icon(
-                                isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                                isPlaying
+                                    ? Icons.pause_rounded
+                                    : Icons.play_arrow_rounded,
                                 color: context.onSurfaceColor,
                                 size: 32,
                               ),
@@ -631,12 +736,9 @@ class _SurahListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 4,
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       leading: CircleAvatar(
         backgroundColor: Theme.of(context).primaryColor,
         child: Text(
@@ -669,10 +771,7 @@ class _SurahListTile extends StatelessWidget {
         alignment: Alignment.centerRight,
         child: Text(
           '${surah.numberOfAyahs.toArabicIndic()} ${l10n.ayah}',
-          style: TextStyle(
-            fontSize: 12,
-            color: context.onSurfaceVariantColor,
-          ),
+          style: TextStyle(fontSize: 12, color: context.onSurfaceVariantColor),
           textAlign: TextAlign.right,
         ),
       ),
@@ -689,14 +788,20 @@ class _SurahListTile extends StatelessWidget {
                   )
                 : IconButton(
                     icon: Icon(
-                      !isConnected ? Icons.text_snippet_outlined : Icons.file_download_outlined,
+                      !isConnected
+                          ? Icons.text_snippet_outlined
+                          : Icons.file_download_outlined,
                       size: 18,
-                      color: !isConnected ? context.onSurfaceVariantColor.withValues(alpha: 0.5) : context.onSurfaceVariantColor,
+                      color: !isConnected
+                          ? context.onSurfaceVariantColor.withValues(alpha: 0.5)
+                          : context.onSurfaceVariantColor,
                     ),
                     onPressed: !isConnected
                         ? () {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(l10n.noInternetConnection)),
+                              SnackBar(
+                                content: Text(l10n.noInternetConnection),
+                              ),
                             );
                           }
                         : onDownloadText,
@@ -725,18 +830,26 @@ class _SurahListTile extends StatelessWidget {
                   )
                 : IconButton(
                     icon: Icon(
-                      !isConnected ? Icons.cloud_off_outlined : Icons.download_for_offline_outlined,
+                      !isConnected
+                          ? Icons.cloud_off_outlined
+                          : Icons.download_for_offline_outlined,
                       size: 20,
-                      color: !isConnected ? context.onSurfaceVariantColor.withValues(alpha: 0.5) : null,
+                      color: !isConnected
+                          ? context.onSurfaceVariantColor.withValues(alpha: 0.5)
+                          : null,
                     ),
                     onPressed: !isConnected
                         ? () {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(l10n.noInternetConnection)),
+                              SnackBar(
+                                content: Text(l10n.noInternetConnection),
+                              ),
                             );
                           }
                         : onDownloadAudio,
-                    tooltip: !isConnected ? l10n.noInternetConnection : l10n.startDownload,
+                    tooltip: !isConnected
+                        ? l10n.noInternetConnection
+                        : l10n.startDownload,
                   )
           else
             Padding(
@@ -747,7 +860,7 @@ class _SurahListTile extends StatelessWidget {
                 color: Theme.of(context).primaryColor.withValues(alpha: 0.7),
               ),
             ),
-          
+
           // Play / Pause Button
           BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
             builder: (context, audioState) {

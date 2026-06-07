@@ -1,4 +1,4 @@
-package com.qada.fard.baselineprofile
+package com.khwarizmi.fard.baselineprofile
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -34,7 +34,7 @@ class StartupBenchmark {
 
     @Test
     fun startupColdStart() = benchmarkRule.measureRepeated(
-        packageName = "com.qada.fard",
+        packageName = "com.khwarizmi.fard",
         metrics = listOf(StartupTimingMetric()),
         iterations = 5,
         startupMode = StartupMode.COLD,
@@ -47,16 +47,16 @@ class StartupBenchmark {
         // Wait for the Flutter UI to render
         // We wait for some content to appear. Since it's a Flutter app, 
         // we can wait for the root view or any identifiable text.
-        device.wait(Until.hasObject(By.pkg("com.qada.fard").depth(0)), 5000)
+        device.wait(Until.hasObject(By.pkg("com.khwarizmi.fard").depth(0)), 5000)
         
         // Wait a bit more for the framework to initialize
         Thread.sleep(2000)
 
         // Basic interactions to capture more code
         // 1. Scroll main screen
-        device.findObject(By.pkg("com.qada.fard"))?.scroll(Direction.DOWN, 0.8f)
+        device.findObject(By.pkg("com.khwarizmi.fard"))?.scroll(Direction.DOWN, 0.8f)
         Thread.sleep(1000)
-        device.findObject(By.pkg("com.qada.fard"))?.scroll(Direction.UP, 0.8f)
+        device.findObject(By.pkg("com.khwarizmi.fard"))?.scroll(Direction.UP, 0.8f)
         Thread.sleep(1000)
 
         // 2. Navigate through tabs
@@ -66,16 +66,16 @@ class StartupBenchmark {
         // Tab 2: Quran List
         device.click(width * 3 / 8, height - 100)
         Thread.sleep(2000)
-        device.findObject(By.pkg("com.qada.fard"))?.scroll(Direction.DOWN, 0.5f)
+        device.findObject(By.pkg("com.khwarizmi.fard"))?.scroll(Direction.DOWN, 0.5f)
         
         // Click a surah (approximate position for first item)
         device.click(width / 2, height / 3)
         Thread.sleep(3000) // Wait for Quran reader to load
         
         // Scroll in Quran reader to warm up text rendering
-        device.findObject(By.pkg("com.qada.fard"))?.scroll(Direction.DOWN, 0.8f)
+        device.findObject(By.pkg("com.khwarizmi.fard"))?.scroll(Direction.DOWN, 0.8f)
         Thread.sleep(1000)
-        device.findObject(By.pkg("com.qada.fard"))?.scroll(Direction.DOWN, 0.8f)
+        device.findObject(By.pkg("com.khwarizmi.fard"))?.scroll(Direction.DOWN, 0.8f)
         Thread.sleep(1000)
         
         // Go back
@@ -95,3 +95,4 @@ class StartupBenchmark {
         Thread.sleep(1000)
     }
 }
+

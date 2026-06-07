@@ -16,7 +16,10 @@ abstract class DownloadManifestService {
   Future<void> deleteEntriesByReciter(String reciterId);
   Future<void> deleteEntriesByContentType(String contentType);
   Future<void> deleteEntriesBySurah(String reciterId, int surahNumber);
-  Future<List<DownloadEntry>> getEntriesBySurah(String reciterId, int surahNumber);
+  Future<List<DownloadEntry>> getEntriesBySurah(
+    String reciterId,
+    int surahNumber,
+  );
   Future<void> clearAll();
   Future<bool> verifyIntegrity(String fileId);
   Stream<DownloadEntry?> watchEntry(String fileId);
@@ -45,7 +48,9 @@ class DownloadManifestServiceImpl implements DownloadManifestService {
   }
 
   @override
-  Future<List<DownloadEntry>> getEntriesByContentType(String contentType) async {
+  Future<List<DownloadEntry>> getEntriesByContentType(
+    String contentType,
+  ) async {
     return _box.values.where((e) => e.contentType == contentType).toList();
   }
 
@@ -55,7 +60,10 @@ class DownloadManifestServiceImpl implements DownloadManifestService {
   }
 
   @override
-  Future<List<DownloadEntry>> getEntriesBySurah(String reciterId, int surahNumber) async {
+  Future<List<DownloadEntry>> getEntriesBySurah(
+    String reciterId,
+    int surahNumber,
+  ) async {
     return _box.values
         .where((e) => e.reciterId == reciterId && e.surahNumber == surahNumber)
         .toList();
@@ -105,34 +113,41 @@ class DownloadManifestServiceImpl implements DownloadManifestService {
 
     final directory = await getApplicationSupportDirectory();
     final file = File('${directory.path}/audio/${entry.relativePath}');
-    
+
     if (!await file.exists()) {
       if (entry.status == DownloadStatus.completed) {
-        await upsertEntry(entry.copyWith(
-          status: DownloadStatus.pending,
-          downloadedBytes: 0,
-        ));
+        await upsertEntry(
+          entry.copyWith(status: DownloadStatus.pending, downloadedBytes: 0),
+        );
       }
       return false;
     }
 
     final actualSize = await file.length();
-    
+
     // If it's supposed to be completed, verify strictly
     if (entry.status == DownloadStatus.completed) {
       if (actualSize != entry.expectedSize) {
-        await upsertEntry(entry.copyWith(
-          status: DownloadStatus.failed,
-          errorMessage: 'Size mismatch: expected ${entry.expectedSize}, got $actualSize',
-        ));
+        await upsertEntry(
+          entry.copyWith(
+            status: DownloadStatus.failed,
+            errorMessage:
+                'Size mismatch: expected ${entry.expectedSize}, got $actualSize',
+          ),
+        );
         return false;
       }
-      
+
       // Content specific checks
       if (entry.contentType == 'audio') {
         final isValid = await FileDownloadUtils.isValidAudioFile(file.path);
         if (!isValid) {
-          await upsertEntry(entry.copyWith(status: DownloadStatus.failed, errorMessage: 'Invalid audio header'));
+          await upsertEntry(
+            entry.copyWith(
+              status: DownloadStatus.failed,
+              errorMessage: 'Invalid audio header',
+            ),
+          );
           return false;
         }
       }
@@ -148,7 +163,9 @@ class DownloadManifestServiceImpl implements DownloadManifestService {
 
   @override
   Stream<DownloadEntry?> watchEntry(String fileId) {
-    return _box.watch(key: fileId).map((event) => event.value as DownloadEntry?);
+    return _box
+        .watch(key: fileId)
+        .map((event) => event.value as DownloadEntry?);
   }
 
   @override

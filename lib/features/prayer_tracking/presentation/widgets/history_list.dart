@@ -253,14 +253,18 @@ class _HistoryRecordTile extends StatelessWidget {
       builder: (context, locationState) {
         return BlocBuilder<DailyRemindersCubit, DailyRemindersState>(
           builder: (context, remindersState) {
-            var totalQada = record.qada.values.fold(0, (sum, c) => sum + c.value);
+            var totalQada = record.qada.values.fold(
+              0,
+              (sum, c) => sum + c.value,
+            );
             final today = DateTime.now();
             final isToday =
                 record.date.year == today.year &&
                 record.date.month == today.month &&
                 record.date.day == today.day;
 
-            final prayerTimes = (isToday &&
+            final prayerTimes =
+                (isToday &&
                     locationState.latitude != null &&
                     locationState.longitude != null)
                 ? prayerTimeService.getPrayerTimes(
@@ -298,7 +302,9 @@ class _HistoryRecordTile extends StatelessWidget {
               onLongPress: onLongPress,
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 12.0),
+                  horizontal: 16.0,
+                  vertical: 12.0,
+                ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -308,8 +314,9 @@ class _HistoryRecordTile extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 6.0),
                       decoration: BoxDecoration(
                         color: isToday
-                            ? context.primaryContainerColor
-                                .withValues(alpha: 0.15)
+                            ? context.primaryContainerColor.withValues(
+                                alpha: 0.15,
+                              )
                             : context.surfaceContainerHighestColor,
                         borderRadius: BorderRadius.circular(10.0),
                         border: isToday
@@ -360,8 +367,9 @@ class _HistoryRecordTile extends StatelessWidget {
                                   vertical: 2.0,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: context.primaryColor
-                                      .withValues(alpha: 0.15),
+                                  color: context.primaryColor.withValues(
+                                    alpha: 0.15,
+                                  ),
                                   borderRadius: BorderRadius.circular(6.0),
                                 ),
                                 child: Text(
@@ -382,9 +390,7 @@ class _HistoryRecordTile extends StatelessWidget {
                                   ),
                                   decoration: BoxDecoration(
                                     color: context.primaryContainerColor
-                                        .withValues(
-                                      alpha: 0.15,
-                                    ),
+                                        .withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(6.0),
                                   ),
                                   child: Text(
@@ -403,8 +409,9 @@ class _HistoryRecordTile extends StatelessWidget {
                                     vertical: 2.0,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: context.errorColor
-                                        .withValues(alpha: 0.15),
+                                    color: context.errorColor.withValues(
+                                      alpha: 0.15,
+                                    ),
                                     borderRadius: BorderRadius.circular(6.0),
                                   ),
                                   child: Text(
@@ -435,8 +442,8 @@ class _HistoryRecordTile extends StatelessWidget {
                             spacing: 6.0,
                             runSpacing: 6.0,
                             children: passedPrayers.map((s) {
-                              final wasCompleted =
-                                  record.completedToday.contains(s);
+                              final wasCompleted = record.completedToday
+                                  .contains(s);
                               final wasMissed = !wasCompleted;
 
                               return Container(
@@ -446,17 +453,21 @@ class _HistoryRecordTile extends StatelessWidget {
                                 ),
                                 decoration: BoxDecoration(
                                   color: wasMissed
-                                      ? context.errorColor
-                                          .withValues(alpha: 0.08)
-                                      : context.primaryColor
-                                          .withValues(alpha: 0.08),
+                                      ? context.errorColor.withValues(
+                                          alpha: 0.08,
+                                        )
+                                      : context.primaryColor.withValues(
+                                          alpha: 0.08,
+                                        ),
                                   borderRadius: BorderRadius.circular(8.0),
                                   border: Border.all(
                                     color: wasMissed
-                                        ? context.errorColor
-                                            .withValues(alpha: 0.20)
-                                        : context.primaryColor
-                                            .withValues(alpha: 0.20),
+                                        ? context.errorColor.withValues(
+                                            alpha: 0.20,
+                                          )
+                                        : context.primaryColor.withValues(
+                                            alpha: 0.20,
+                                          ),
                                   ),
                                 ),
                                 child: Row(

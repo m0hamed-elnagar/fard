@@ -14,10 +14,15 @@ import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 
 class MockAudioRepository extends Mock implements AudioRepository {}
+
 class MockHttpClient extends Mock implements http.Client {}
+
 class MockNotificationService extends Mock implements NotificationService {}
+
 class MockSettingsRepository extends Mock implements SettingsRepository {}
-class MockDownloadManifestService extends Mock implements DownloadManifestService {}
+
+class MockDownloadManifestService extends Mock
+    implements DownloadManifestService {}
 
 class DownloadEntryFake extends Fake implements DownloadEntry {}
 
@@ -51,7 +56,9 @@ void main() {
       mockManifestService,
     );
 
-    when(() => mockSettingsRepository.audioQuality).thenReturn(AudioQuality.medium128);
+    when(
+      () => mockSettingsRepository.audioQuality,
+    ).thenReturn(AudioQuality.medium128);
     when(() => mockAudioRepository.getAyahCount(any())).thenReturn(7);
   });
 
@@ -60,66 +67,80 @@ void main() {
   });
 
   group('AudioDownloadServiceImpl._syncManifestForSurah', () {
-    test('marks partial files as paused and sets correct downloadedBytes', () async {
-      final reciterId = 'test_reciter';
-      final surahNumber = 1;
-      
-      final partialFilePath = path.join(tempDir.path, 'partial.mp3');
-      final completeFilePath = path.join(tempDir.path, 'complete.mp3');
-      final missingFilePath = path.join(tempDir.path, 'missing.mp3');
+    test(
+      'marks partial files as paused and sets correct downloadedBytes',
+      () async {
+        final reciterId = 'test_reciter';
+        final surahNumber = 1;
 
-      // Create partial file (50KB, no syncword)
-      await File(partialFilePath).create(recursive: true);
-      await File(partialFilePath).writeAsBytes(List.filled(50 * 1024, 0));
+        final partialFilePath = path.join(tempDir.path, 'partial.mp3');
+        final completeFilePath = path.join(tempDir.path, 'complete.mp3');
+        final missingFilePath = path.join(tempDir.path, 'missing.mp3');
 
-      // Create complete file (15KB, with syncword)
-      final completeData = List<int>.filled(15 * 1024, 0);
-      completeData[0] = 0xFF;
-      completeData[1] = 0xE0;
-      await File(completeFilePath).writeAsBytes(completeData);
+        // Create partial file (50KB, no syncword)
+        await File(partialFilePath).create(recursive: true);
+        await File(partialFilePath).writeAsBytes(List.filled(50 * 1024, 0));
 
-      final tracks = [
-        AudioTrack(remoteUrl: 'url1', localPath: partialFilePath),
-        AudioTrack(remoteUrl: 'url2', localPath: completeFilePath),
-        AudioTrack(remoteUrl: 'url3', localPath: missingFilePath),
-      ];
+        // Create complete file (15KB, with syncword)
+        final completeData = List<int>.filled(15 * 1024, 0);
+        completeData[0] = 0xFF;
+        completeData[1] = 0xE0;
+        await File(completeFilePath).writeAsBytes(completeData);
 
-      when(() => mockAudioRepository.getSurahAudioTracks(
-        reciterId: any(named: 'reciterId'),
-        surahNumber: any(named: 'surahNumber'),
-        ayahCount: any(named: 'ayahCount'),
-        quality: any(named: 'quality'),
-      )).thenAnswer((_) async => Result.success(tracks));
+        final tracks = [
+          AudioTrack(remoteUrl: 'url1', localPath: partialFilePath),
+          AudioTrack(remoteUrl: 'url2', localPath: completeFilePath),
+          AudioTrack(remoteUrl: 'url3', localPath: missingFilePath),
+        ];
 
-      when(() => mockManifestService.upsertEntry(any())).thenAnswer((_) async {});
+        when(
+          () => mockAudioRepository.getSurahAudioTracks(
+            reciterId: any(named: 'reciterId'),
+            surahNumber: any(named: 'surahNumber'),
+            ayahCount: any(named: 'ayahCount'),
+            quality: any(named: 'quality'),
+          ),
+        ).thenAnswer((_) async => Result.success(tracks));
 
-      // Call getSurahStatus which triggers _syncManifestForSurah if manifest is empty
-      when(() => mockManifestService.getEntriesBySurah(any(), any())).thenAnswer((_) async => []);
+        when(
+          () => mockManifestService.upsertEntry(any()),
+        ).thenAnswer((_) async {});
 
-      await service.getSurahStatus(reciterId: reciterId, surahNumber: surahNumber);
+        // Call getSurahStatus which triggers _syncManifestForSurah if manifest is empty
+        when(
+          () => mockManifestService.getEntriesBySurah(any(), any()),
+        ).thenAnswer((_) async => []);
 
-      // Verify upsertEntry calls
-      final captured = verify(() => mockManifestService.upsertEntry(captureAny())).captured;
-      expect(captured.length, equals(3));
+        await service.getSurahStatus(
+          reciterId: reciterId,
+          surahNumber: surahNumber,
+        );
 
-      final partialEntry = captured[0] as DownloadEntry;
-      final completeEntry = captured[1] as DownloadEntry;
-      final missingEntry = captured[2] as DownloadEntry;
+        // Verify upsertEntry calls
+        final captured = verify(
+          () => mockManifestService.upsertEntry(captureAny()),
+        ).captured;
+        expect(captured.length, equals(3));
 
-      // Partial file
-      expect(partialEntry.downloadedBytes, equals(50 * 1024));
-      expect(partialEntry.status, equals(DownloadStatus.paused));
-      expect(partialEntry.expectedSize, equals(0));
+        final partialEntry = captured[0] as DownloadEntry;
+        final completeEntry = captured[1] as DownloadEntry;
+        final missingEntry = captured[2] as DownloadEntry;
 
-      // Complete file
-      expect(completeEntry.downloadedBytes, equals(15 * 1024));
-      expect(completeEntry.status, equals(DownloadStatus.completed));
-      expect(completeEntry.expectedSize, equals(15 * 1024));
+        // Partial file
+        expect(partialEntry.downloadedBytes, equals(50 * 1024));
+        expect(partialEntry.status, equals(DownloadStatus.paused));
+        expect(partialEntry.expectedSize, equals(0));
 
-      // Missing file
-      expect(missingEntry.downloadedBytes, equals(0));
-      expect(missingEntry.status, equals(DownloadStatus.pending));
-      expect(missingEntry.expectedSize, equals(0));
-    });
+        // Complete file
+        expect(completeEntry.downloadedBytes, equals(15 * 1024));
+        expect(completeEntry.status, equals(DownloadStatus.completed));
+        expect(completeEntry.expectedSize, equals(15 * 1024));
+
+        // Missing file
+        expect(missingEntry.downloadedBytes, equals(0));
+        expect(missingEntry.status, equals(DownloadStatus.pending));
+        expect(missingEntry.expectedSize, equals(0));
+      },
+    );
   });
 }

@@ -70,7 +70,9 @@ abstract final class ThemePresets {
     accentColor: TwilightThemeColors.accent,
     backgroundColor: TwilightThemeColors.background,
     surfaceColor: TwilightThemeColors.surface,
-    surfaceLightColor: const Color(0xFF282D3D), // Slightly lighter for surface variants
+    surfaceLightColor: const Color(
+      0xFF282D3D,
+    ), // Slightly lighter for surface variants
     cardBorderColor: const Color(0xFF383E50),
     textColor: TwilightThemeColors.text,
     textSecondaryColor: TwilightThemeColors.textSecondary,
@@ -83,10 +85,7 @@ abstract final class ThemePresets {
 
   /// Get preset by ID
   static ThemePreset getById(String id) {
-    return all.firstWhere(
-      (p) => p.id == id,
-      orElse: () => emerald,
-    );
+    return all.firstWhere((p) => p.id == id, orElse: () => emerald);
   }
 
   // ==================== THEME BUILDERS ====================
@@ -102,9 +101,13 @@ abstract final class ThemePresets {
       colorScheme: ColorScheme(
         brightness: brightness,
         primary: preset.primaryColor,
-        onPrimary: preset.isDark ? const Color(0xFF003300) : preset.backgroundColor,
+        onPrimary: preset.isDark
+            ? const Color(0xFF003300)
+            : preset.backgroundColor,
         secondary: preset.accentColor,
-        onSecondary: preset.isDark ? const Color(0xFF3E2723) : preset.backgroundColor,
+        onSecondary: preset.isDark
+            ? const Color(0xFF3E2723)
+            : preset.backgroundColor,
         surface: preset.surfaceColor,
         onSurface: preset.textColor,
         error: const Color(0xFFF85149),
@@ -188,10 +191,7 @@ abstract final class ThemePresets {
           if (states.contains(WidgetState.selected)) {
             return IconThemeData(color: preset.accentColor, size: 24);
           }
-          return IconThemeData(
-            color: preset.textSecondaryColor,
-            size: 24,
-          );
+          return IconThemeData(color: preset.textSecondaryColor, size: 24);
         }),
       ),
       cardTheme: CardThemeData(
@@ -237,12 +237,11 @@ abstract final class ThemePresets {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: preset.primaryColor,
-          foregroundColor: preset.isDark ? const Color(0xFF003300) : AppTheme.textPrimary,
+          foregroundColor: preset.isDark
+              ? const Color(0xFF003300)
+              : AppTheme.textPrimary,
           elevation: 0.0,
-          padding: const EdgeInsets.symmetric(
-            horizontal: 24.0,
-            vertical: 14.0,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 14.0),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.0),
           ),
@@ -285,7 +284,8 @@ abstract final class ThemePresets {
   /// Requires at least primary and accent colors.
   /// Auto-derives remaining colors using Material 3 ColorScheme.fromSeed()
   /// if only 2 colors are provided.
-  static ThemeData buildCustomThemeData(Map<String, Color> colors, {
+  static ThemeData buildCustomThemeData(
+    Map<String, Color> colors, {
     Color? primary,
     Color? accent,
     Color? backgroundColor,
@@ -308,16 +308,24 @@ abstract final class ThemePresets {
     final primaryColor = primaryColorRaw;
     final accentColor = accentColorRaw;
 
-    final bgColor = backgroundColor ?? colors['background'] ??
+    final bgColor =
+        backgroundColor ??
+        colors['background'] ??
         (isDark ? const Color(0xFF0D1117) : const Color(0xFFF5F5F5));
     final surfaceClr = surfaceColor ?? colors['surface'] ?? seedScheme2.surface;
-    final surfaceLight = surfaceLightColor ?? colors['surfaceLight'] ??
+    final surfaceLight =
+        surfaceLightColor ??
+        colors['surfaceLight'] ??
         seedScheme2.surfaceContainerHigh;
-    final borderClr = cardBorderColor ?? colors['cardBorder'] ??
-        seedScheme2.outlineVariant;
-    final textClr = textColor ?? colors['text'] ??
+    final borderClr =
+        cardBorderColor ?? colors['cardBorder'] ?? seedScheme2.outlineVariant;
+    final textClr =
+        textColor ??
+        colors['text'] ??
         (isDark ? const Color(0xFFF0F6FC) : const Color(0xFF212121));
-    final textSecClr = textSecondaryColor ?? colors['textSecondary'] ??
+    final textSecClr =
+        textSecondaryColor ??
+        colors['textSecondary'] ??
         (isDark ? const Color(0xFFD1D5DA) : const Color(0xFF757575));
 
     final brightness = isDark ? Brightness.dark : Brightness.light;
@@ -436,10 +444,7 @@ abstract final class ThemePresets {
           fontWeight: FontWeight.w500,
           color: textClr,
         ),
-        subtitleTextStyle: TextStyle(
-          fontSize: 14,
-          color: textSecClr,
-        ),
+        subtitleTextStyle: TextStyle(fontSize: 14, color: textSecClr),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20.0,
           vertical: 8.0,
@@ -462,7 +467,9 @@ abstract final class ThemePresets {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
-          foregroundColor: isDark ? const Color(0xFF003300) : AppTheme.textPrimary,
+          foregroundColor: isDark
+              ? const Color(0xFF003300)
+              : AppTheme.textPrimary,
           elevation: 0.0,
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 14.0),
           shape: RoundedRectangleBorder(

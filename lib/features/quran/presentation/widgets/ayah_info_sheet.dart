@@ -11,8 +11,8 @@ class AyahInfoSheet extends StatefulWidget {
   final SymbolDetectorService detector;
 
   const AyahInfoSheet({
-    super.key, 
-    required this.ayahText, 
+    super.key,
+    required this.ayahText,
     required this.repository,
     required this.detector,
   });
@@ -85,14 +85,18 @@ class _AyahInfoSheetState extends State<AyahInfoSheet> {
                   height: 48,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: Color(int.parse(symbol.color.replaceFirst('#', '0xFF'))).withValues(alpha: 0.1),
+                    color: Color(
+                      int.parse(symbol.color.replaceFirst('#', '0xFF')),
+                    ).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     symbol.char,
                     style: TextStyle(
                       fontSize: 28,
-                      color: Color(int.parse(symbol.color.replaceFirst('#', '0xFF'))),
+                      color: Color(
+                        int.parse(symbol.color.replaceFirst('#', '0xFF')),
+                      ),
                     ),
                   ),
                 ),

@@ -30,7 +30,11 @@ class JuzList extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.grid_view_rounded, size: 64, color: context.onSurfaceVariantColor),
+            Icon(
+              Icons.grid_view_rounded,
+              size: 64,
+              color: context.onSurfaceVariantColor,
+            ),
             const SizedBox(height: 16),
             Text('لا توجد نتائج', style: GoogleFonts.amiri(fontSize: 20)),
           ],

@@ -59,10 +59,7 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
       final surahNum = pageData.first['surah'] as int;
       final ayahNum = pageData.first['start'] as int;
       context.read<AudioPlayerBloc>().add(
-        UpdateCurrentPosition(
-          surahNumber: surahNum,
-          ayahNumber: ayahNum,
-        ),
+        UpdateCurrentPosition(surahNumber: surahNum, ayahNumber: ayahNum),
       );
     }
   }
@@ -149,7 +146,10 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.text_format_rounded, color: context.onSurfaceColor),
+            icon: Icon(
+              Icons.text_format_rounded,
+              color: context.onSurfaceColor,
+            ),
             tooltip: l10n.textMushaf,
             onPressed: () {
               if (pageData.isNotEmpty) {
@@ -231,7 +231,9 @@ class _ScannedMushafReaderPageState extends State<ScannedMushafReaderPage> {
                   color: navBarColor,
                   boxShadow: [
                     BoxShadow(
-                      color: context.surfaceContainerColor.withValues(alpha: 0.05),
+                      color: context.surfaceContainerColor.withValues(
+                        alpha: 0.05,
+                      ),
                       blurRadius: 4,
                       offset: const Offset(0, -2),
                     ),

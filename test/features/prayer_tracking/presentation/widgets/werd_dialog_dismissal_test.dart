@@ -5,12 +5,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Werd Dialog Button Color Tests', () {
-    
     testWidgets(
       'Mark All button in JumpDialog should be GREEN (AppTheme.accent)',
       (WidgetTester tester) async {
         Color? markAllButtonColor;
-        
+
         await tester.pumpWidget(
           MaterialApp(
             locale: const Locale('en'),
@@ -33,16 +32,19 @@ void main() {
 
         // Find the ElevatedButton that contains the Text 'Mark All'
         final elevatedButtonFinder = find.byWidgetPredicate(
-          (widget) => widget is ElevatedButton &&
-                     widget.child is Text &&
-                     (widget.child as Text).data == 'Mark All',
+          (widget) =>
+              widget is ElevatedButton &&
+              widget.child is Text &&
+              (widget.child as Text).data == 'Mark All',
         );
-        
+
         expect(elevatedButtonFinder, findsOneWidget);
-        
-        final elevatedButton = tester.widget<ElevatedButton>(elevatedButtonFinder);
+
+        final elevatedButton = tester.widget<ElevatedButton>(
+          elevatedButtonFinder,
+        );
         markAllButtonColor = elevatedButton.style?.backgroundColor?.resolve({});
-        
+
         expect(
           markAllButtonColor,
           equals(AppTheme.accent),
@@ -55,7 +57,7 @@ void main() {
       'New Session button in JumpDialog should be YELLOW (Colors.amber)',
       (WidgetTester tester) async {
         Color? newSessionButtonColor;
-        
+
         await tester.pumpWidget(
           MaterialApp(
             locale: const Locale('en'),
@@ -78,16 +80,21 @@ void main() {
 
         // Find the ElevatedButton that contains the Text 'New Session'
         final elevatedButtonFinder = find.byWidgetPredicate(
-          (widget) => widget is ElevatedButton &&
-                     widget.child is Text &&
-                     (widget.child as Text).data == 'New Session',
+          (widget) =>
+              widget is ElevatedButton &&
+              widget.child is Text &&
+              (widget.child as Text).data == 'New Session',
         );
-        
+
         expect(elevatedButtonFinder, findsOneWidget);
-        
-        final elevatedButton = tester.widget<ElevatedButton>(elevatedButtonFinder);
-        newSessionButtonColor = elevatedButton.style?.backgroundColor?.resolve({});
-        
+
+        final elevatedButton = tester.widget<ElevatedButton>(
+          elevatedButtonFinder,
+        );
+        newSessionButtonColor = elevatedButton.style?.backgroundColor?.resolve(
+          {},
+        );
+
         expect(
           newSessionButtonColor,
           equals(Colors.amber),
@@ -98,12 +105,11 @@ void main() {
   });
 
   group('Werd Dialog Dismissal - Single Press Verification', () {
-    
     testWidgets(
       'Dialog should dismiss after SINGLE button press (Close button)',
       (WidgetTester tester) async {
         bool dialogVisible = true;
-        
+
         await tester.pumpWidget(
           MaterialApp(
             locale: const Locale('en'),
@@ -138,8 +144,7 @@ void main() {
                         },
                         child: const Text('Show Dialog'),
                       ),
-                      if (!dialogVisible)
-                        const Text('Dialog Dismissed'),
+                      if (!dialogVisible) const Text('Dialog Dismissed'),
                     ],
                   ),
                 );
@@ -165,76 +170,76 @@ void main() {
           findsNothing,
           reason: 'Dialog MUST be dismissed after a SINGLE tap on Close button',
         );
-        
+
         // Verify the dismissal message is shown
         expect(find.text('Dialog Dismissed'), findsOneWidget);
       },
     );
 
-    testWidgets(
-      'Dialog with SnackBar should dismiss after SINGLE button press',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            locale: const Locale('en'),
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: Builder(
-              builder: (context) {
-                return Scaffold(
-                  body: Center(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        await showDialog(
-                          context: context,
-                          builder: (dialogContext) => AlertDialog(
-                            title: const Text('Test Dialog'),
-                            content: const Text('This is a test dialog'),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  // FIXED: Show SnackBar BEFORE popping
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Action completed'),
-                                    ),
-                                  );
-                                  // THEN pop the dialog
-                                  Navigator.of(dialogContext).pop();
-                                },
-                                child: const Text('OK'),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      child: const Text('Show Dialog'),
-                    ),
+    testWidgets('Dialog with SnackBar should dismiss after SINGLE button press', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('en'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (context) {
+              return Scaffold(
+                body: Center(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await showDialog(
+                        context: context,
+                        builder: (dialogContext) => AlertDialog(
+                          title: const Text('Test Dialog'),
+                          content: const Text('This is a test dialog'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                // FIXED: Show SnackBar BEFORE popping
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Action completed'),
+                                  ),
+                                );
+                                // THEN pop the dialog
+                                Navigator.of(dialogContext).pop();
+                              },
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    child: const Text('Show Dialog'),
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
-        );
+        ),
+      );
 
-        // Tap to show dialog
-        await tester.tap(find.text('Show Dialog'));
-        await tester.pumpAndSettle();
+      // Tap to show dialog
+      await tester.tap(find.text('Show Dialog'));
+      await tester.pumpAndSettle();
 
-        // Verify dialog is showing
-        expect(find.text('Test Dialog'), findsOneWidget);
+      // Verify dialog is showing
+      expect(find.text('Test Dialog'), findsOneWidget);
 
-        // Tap OK button ONCE
-        await tester.tap(find.text('OK'));
-        await tester.pumpAndSettle();
+      // Tap OK button ONCE
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
 
-        // Verify dialog is dismissed
-        expect(
-          find.text('Test Dialog'),
-          findsNothing,
-          reason: 'Dialog MUST be dismissed after a SINGLE tap on OK button even when showing SnackBar',
-        );
-      },
-    );
+      // Verify dialog is dismissed
+      expect(
+        find.text('Test Dialog'),
+        findsNothing,
+        reason:
+            'Dialog MUST be dismissed after a SINGLE tap on OK button even when showing SnackBar',
+      );
+    });
   });
 }

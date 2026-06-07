@@ -7,13 +7,13 @@ import 'reading_segment.dart';
 class WerdProgress extends Equatable {
   final String goalId;
   final int totalAmountReadToday;
-  
+
   // DAILY SESSION TRACKING (simplified)
-  final DateTime? sessionStartTime;    // When you clicked Continue
-  final DateTime? sessionEndTime;      // When you went back
-  final int? firstAyahToday;           // First ayah you started at
-  final int? lastAyahToday;            // Last ayah you read to
-  
+  final DateTime? sessionStartTime; // When you clicked Continue
+  final DateTime? sessionEndTime; // When you went back
+  final int? firstAyahToday; // First ayah you started at
+  final int? lastAyahToday; // Last ayah you read to
+
   // Kept for backward compatibility
   final Set<int> readItemsToday;
   final List<ReadingSegment> segmentsToday;
@@ -44,7 +44,8 @@ class WerdProgress extends Equatable {
   });
 
   /// Cumulative total ayahs including completed cycles
-  int get cumulativeTotalAyahs => (completedCycles * 6236) + totalAmountReadToday;
+  int get cumulativeTotalAyahs =>
+      (completedCycles * 6236) + totalAmountReadToday;
 
   /// Session duration
   Duration? get sessionDuration {
@@ -128,7 +129,7 @@ class WerdProgress extends Equatable {
       segmentsToday = (json['segmentsToday'] as List)
           .map((s) => ReadingSegment.fromJson(s as Map<String, dynamic>))
           .toList();
-      
+
       // Extract daily session from segments
       if (segmentsToday.isNotEmpty) {
         firstAyahToday = segmentsToday.first.startAyah;
@@ -145,11 +146,11 @@ class WerdProgress extends Equatable {
       goalId: json['goalId'] ?? 'default',
       totalAmountReadToday: json['totalAmountReadToday'] ?? 0,
       // Daily session fields
-      sessionStartTime: json['sessionStartTime'] != null 
-          ? DateTime.parse(json['sessionStartTime']) 
+      sessionStartTime: json['sessionStartTime'] != null
+          ? DateTime.parse(json['sessionStartTime'])
           : sessionStartTime,
-      sessionEndTime: json['sessionEndTime'] != null 
-          ? DateTime.parse(json['sessionEndTime']) 
+      sessionEndTime: json['sessionEndTime'] != null
+          ? DateTime.parse(json['sessionEndTime'])
           : sessionEndTime,
       firstAyahToday: json['firstAyahToday'] ?? firstAyahToday,
       lastAyahToday: json['lastAyahToday'] ?? lastAyahToday,

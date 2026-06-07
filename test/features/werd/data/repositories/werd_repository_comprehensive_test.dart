@@ -24,7 +24,7 @@ void main() {
   group('WerdRepository Goal Management', () {
     test('getGoal returns null when no goal is saved', () async {
       final result = await repository.getGoal(id: 'default');
-      
+
       expect(result.isSuccess, isTrue);
       result.fold(
         (failure) => fail('Should not fail'),
@@ -45,23 +45,20 @@ void main() {
       await repository.setGoal(goal);
       final result = await repository.getGoal(id: 'default');
 
-      result.fold(
-        (failure) => fail('Should not fail'),
-        (savedGoal) {
-          expect(savedGoal, isNotNull);
-          expect(savedGoal!.id, goal.id);
-          expect(savedGoal.value, goal.value);
-          expect(savedGoal.unit, goal.unit);
-          expect(savedGoal.startAbsolute, goal.startAbsolute);
-        },
-      );
+      result.fold((failure) => fail('Should not fail'), (savedGoal) {
+        expect(savedGoal, isNotNull);
+        expect(savedGoal!.id, goal.id);
+        expect(savedGoal.value, goal.value);
+        expect(savedGoal.unit, goal.unit);
+        expect(savedGoal.startAbsolute, goal.startAbsolute);
+      });
     });
 
     test('getGoal returns failure for invalid JSON', () async {
       await sharedPreferences.setString('werd_goal_default', 'invalid json');
-      
+
       final result = await repository.getGoal(id: 'default');
-      
+
       expect(result.isFailure, isTrue);
     });
 
@@ -120,24 +117,23 @@ void main() {
 
       final result = await repository.getAllGoals();
 
-      result.fold(
-        (_) => fail('Should not fail'),
-        (goals) {
-          expect(goals.length, 2);
-          expect(goals.map((g) => g.id), containsAll(['goal1', 'goal2']));
-        },
-      );
+      result.fold((_) => fail('Should not fail'), (goals) {
+        expect(goals.length, 2);
+        expect(goals.map((g) => g.id), containsAll(['goal1', 'goal2']));
+      });
     });
 
     test('importGoals clears existing goals and imports new ones', () async {
       // Setup existing goal
-      await repository.setGoal(WerdGoal(
-        id: 'old',
-        type: WerdGoalType.fixedAmount,
-        value: 5,
-        unit: WerdUnit.ayah,
-        startDate: DateTime.now(),
-      ));
+      await repository.setGoal(
+        WerdGoal(
+          id: 'old',
+          type: WerdGoalType.fixedAmount,
+          value: 5,
+          unit: WerdUnit.ayah,
+          startDate: DateTime.now(),
+        ),
+      );
 
       final newGoals = [
         WerdGoal(
@@ -181,14 +177,11 @@ void main() {
     test('getProgress returns default when no progress is saved', () async {
       final result = await repository.getProgress(goalId: 'default');
 
-      result.fold(
-        (failure) => fail('Should not fail'),
-        (progress) {
-          expect(progress, isNotNull);
-          expect(progress.totalAmountReadToday, 0);
-          expect(progress.streak, 0);
-        },
-      );
+      result.fold((failure) => fail('Should not fail'), (progress) {
+        expect(progress, isNotNull);
+        expect(progress.totalAmountReadToday, 0);
+        expect(progress.streak, 0);
+      });
     });
 
     test('updateProgress and getProgress persist progress correctly', () async {
@@ -205,16 +198,13 @@ void main() {
       await repository.updateProgress(progress);
       final result = await repository.getProgress(goalId: 'default');
 
-      result.fold(
-        (failure) => fail('Should not fail'),
-        (savedProgress) {
-          expect(savedProgress.totalAmountReadToday, 15);
-          expect(savedProgress.lastReadAbsolute, 15);
-          expect(savedProgress.sessionStartAbsolute, 1);
-          expect(savedProgress.streak, 3);
-          expect(savedProgress.readItemsToday.length, 5);
-        },
-      );
+      result.fold((failure) => fail('Should not fail'), (savedProgress) {
+        expect(savedProgress.totalAmountReadToday, 15);
+        expect(savedProgress.lastReadAbsolute, 15);
+        expect(savedProgress.sessionStartAbsolute, 1);
+        expect(savedProgress.streak, 3);
+        expect(savedProgress.readItemsToday.length, 5);
+      });
     });
 
     test('getProgress returns failure for invalid JSON', () async {
@@ -284,22 +274,21 @@ void main() {
 
       final result = await repository.getAllProgress();
 
-      result.fold(
-        (_) => fail('Should not fail'),
-        (progressList) {
-          expect(progressList.length, 2);
-        },
-      );
+      result.fold((_) => fail('Should not fail'), (progressList) {
+        expect(progressList.length, 2);
+      });
     });
 
     test('importProgress clears existing and imports new', () async {
       // Setup existing progress
-      await repository.updateProgress(WerdProgress(
-        goalId: 'old',
-        totalAmountReadToday: 5,
-        lastUpdated: DateTime.now(),
-        streak: 0,
-      ));
+      await repository.updateProgress(
+        WerdProgress(
+          goalId: 'old',
+          totalAmountReadToday: 5,
+          lastUpdated: DateTime.now(),
+          streak: 0,
+        ),
+      );
 
       final newProgressList = [
         WerdProgress(
@@ -319,14 +308,11 @@ void main() {
       await repository.importProgress(newProgressList);
 
       final oldResult = await repository.getProgress(goalId: 'old');
-      oldResult.fold(
-        (_) => fail('Should not fail'),
-        (progress) {
-          // Should return default empty progress if 'old' was cleared
-          expect(progress.goalId, 'old');
-          expect(progress.totalAmountReadToday, 0);
-        },
-      );
+      oldResult.fold((_) => fail('Should not fail'), (progress) {
+        // Should return default empty progress if 'old' was cleared
+        expect(progress.goalId, 'old');
+        expect(progress.totalAmountReadToday, 0);
+      });
     });
   });
 
@@ -351,21 +337,18 @@ void main() {
 
       final result = await repository.getProgress(goalId: 'default');
 
-      result.fold(
-        (failure) => fail('Should not fail'),
-        (updatedProgress) {
-          final yesterdayKey =
-              "${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}";
+      result.fold((failure) => fail('Should not fail'), (updatedProgress) {
+        final yesterdayKey =
+            "${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}";
 
-          expect(updatedProgress.history.containsKey(yesterdayKey), isTrue);
+        expect(updatedProgress.history.containsKey(yesterdayKey), isTrue);
 
-          final entry = updatedProgress.history[yesterdayKey]!;
-          expect(entry.totalAyahsRead, 10);
-          expect(entry.startAbsolute, 1);
-          expect(entry.endAbsolute, 10);
-          expect(entry.pagesRead, greaterThan(0));
-        },
-      );
+        final entry = updatedProgress.history[yesterdayKey]!;
+        expect(entry.totalAyahsRead, 10);
+        expect(entry.startAbsolute, 1);
+        expect(entry.endAbsolute, 10);
+        expect(entry.pagesRead, greaterThan(0));
+      });
     });
 
     test('day rollover resets daily progress', () async {
@@ -387,14 +370,11 @@ void main() {
 
       final result = await repository.getProgress(goalId: 'default');
 
-      result.fold(
-        (failure) => fail('Should not fail'),
-        (updatedProgress) {
-          expect(updatedProgress.totalAmountReadToday, 0);
-          expect(updatedProgress.readItemsToday, isEmpty);
-          expect(updatedProgress.sessionStartAbsolute, 16); // lastRead + 1
-        },
-      );
+      result.fold((failure) => fail('Should not fail'), (updatedProgress) {
+        expect(updatedProgress.totalAmountReadToday, 0);
+        expect(updatedProgress.readItemsToday, isEmpty);
+        expect(updatedProgress.sessionStartAbsolute, 16); // lastRead + 1
+      });
     });
 
     test('day rollover maintains streak for consecutive days', () async {
@@ -415,12 +395,9 @@ void main() {
 
       final result = await repository.getProgress(goalId: 'default');
 
-      result.fold(
-        (failure) => fail('Should not fail'),
-        (updatedProgress) {
-          expect(updatedProgress.streak, 5); // Should maintain streak
-        },
-      );
+      result.fold((failure) => fail('Should not fail'), (updatedProgress) {
+        expect(updatedProgress.streak, 5); // Should maintain streak
+      });
     });
 
     test('day rollover resets streak for gap > 1 day', () async {
@@ -441,12 +418,9 @@ void main() {
 
       final result = await repository.getProgress(goalId: 'default');
 
-      result.fold(
-        (failure) => fail('Should not fail'),
-        (updatedProgress) {
-          expect(updatedProgress.streak, 0); // Should reset streak
-        },
-      );
+      result.fold((failure) => fail('Should not fail'), (updatedProgress) {
+        expect(updatedProgress.streak, 0); // Should reset streak
+      });
     });
 
     // BUG EXPOSURE: Multiple getProgress calls overwrite history
@@ -473,18 +447,15 @@ void main() {
         await repository.getProgress(goalId: 'default');
         final result3 = await repository.getProgress(goalId: 'default');
 
-        result3.fold(
-          (failure) => fail('Should not fail'),
-          (updatedProgress) {
-            final yesterdayKey =
-                "${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}";
+        result3.fold((failure) => fail('Should not fail'), (updatedProgress) {
+          final yesterdayKey =
+              "${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}";
 
-            // BUG: Each call overwrites the history entry for yesterday
-            // The entry should only be created once, not overwritten
-            expect(updatedProgress.history.containsKey(yesterdayKey), isTrue);
-            // After fix, this should still pass but entry should be idempotent
-          },
-        );
+          // BUG: Each call overwrites the history entry for yesterday
+          // The entry should only be created once, not overwritten
+          expect(updatedProgress.history.containsKey(yesterdayKey), isTrue);
+          // After fix, this should still pass but entry should be idempotent
+        });
       },
     );
 
@@ -509,14 +480,11 @@ void main() {
 
         final result = await repository.getProgress(goalId: 'default');
 
-        result.fold(
-          (failure) => fail('Should not fail'),
-          (updatedProgress) {
-            // BUG: sessionStartAbsolute will be 6237 (6236 + 1), which is out of bounds!
-            expect(updatedProgress.sessionStartAbsolute, 6237);
-            // After fix, this should be clamped to 6236
-          },
-        );
+        result.fold((failure) => fail('Should not fail'), (updatedProgress) {
+          // BUG: sessionStartAbsolute will be 6237 (6236 + 1), which is out of bounds!
+          expect(updatedProgress.sessionStartAbsolute, 6237);
+          // After fix, this should be clamped to 6236
+        });
       },
     );
 
@@ -539,18 +507,15 @@ void main() {
 
       final result = await repository.getProgress(goalId: 'default');
 
-      result.fold(
-        (failure) => fail('Should not fail'),
-        (updatedProgress) {
-          final yesterdayKey =
-              "${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}";
+      result.fold((failure) => fail('Should not fail'), (updatedProgress) {
+        final yesterdayKey =
+            "${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}";
 
-          final entry = updatedProgress.history[yesterdayKey]!;
-          expect(entry.startSurahName, isNotEmpty);
-          expect(entry.endSurahName, isNotEmpty);
-          expect(entry.summary, contains('Read 10 ayahs'));
-        },
-      );
+        final entry = updatedProgress.history[yesterdayKey]!;
+        expect(entry.startSurahName, isNotEmpty);
+        expect(entry.endSurahName, isNotEmpty);
+        expect(entry.summary, contains('Read 10 ayahs'));
+      });
     });
 
     test('day rollover calculates fractional pages and juz', () async {
@@ -572,17 +537,14 @@ void main() {
 
       final result = await repository.getProgress(goalId: 'default');
 
-      result.fold(
-        (failure) => fail('Should not fail'),
-        (updatedProgress) {
-          final yesterdayKey =
-              "${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}";
+      result.fold((failure) => fail('Should not fail'), (updatedProgress) {
+        final yesterdayKey =
+            "${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}";
 
-          final entry = updatedProgress.history[yesterdayKey]!;
-          expect(entry.pagesRead, greaterThan(0));
-          expect(entry.juzRead, greaterThan(0));
-        },
-      );
+        final entry = updatedProgress.history[yesterdayKey]!;
+        expect(entry.pagesRead, greaterThan(0));
+        expect(entry.juzRead, greaterThan(0));
+      });
     });
 
     test('no progress day creates appropriate history entry', () async {
@@ -603,17 +565,14 @@ void main() {
 
       final result = await repository.getProgress(goalId: 'default');
 
-      result.fold(
-        (failure) => fail('Should not fail'),
-        (updatedProgress) {
-          final yesterdayKey =
-              "${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}";
+      result.fold((failure) => fail('Should not fail'), (updatedProgress) {
+        final yesterdayKey =
+            "${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}";
 
-          final entry = updatedProgress.history[yesterdayKey]!;
-          expect(entry.totalAyahsRead, 0);
-          expect(entry.summary, contains('No progress'));
-        },
-      );
+        final entry = updatedProgress.history[yesterdayKey]!;
+        expect(entry.totalAyahsRead, 0);
+        expect(entry.summary, contains('No progress'));
+      });
     });
   });
 
@@ -629,10 +588,7 @@ void main() {
 
       await repository.setGoal(goal);
 
-      expect(
-        sharedPreferences.containsKey('werd_goal_test_goal'),
-        isTrue,
-      );
+      expect(sharedPreferences.containsKey('werd_goal_test_goal'), isTrue);
     });
 
     test('progress uses correct key format', () async {
@@ -645,10 +601,7 @@ void main() {
 
       await repository.updateProgress(progress);
 
-      expect(
-        sharedPreferences.containsKey('werd_progress_test_goal'),
-        isTrue,
-      );
+      expect(sharedPreferences.containsKey('werd_progress_test_goal'), isTrue);
     });
 
     test('default goal id uses correct key', () async {
@@ -707,14 +660,11 @@ void main() {
       await repository.updateProgress(progress);
       final result = await repository.getProgress(goalId: 'default');
 
-      result.fold(
-        (failure) => fail('Should not fail'),
-        (savedProgress) {
-          expect(savedProgress.history.containsKey('2026-04-01'), isTrue);
-          final entry = savedProgress.history['2026-04-01']!;
-          expect(entry.totalAyahsRead, 15);
-        },
-      );
+      result.fold((failure) => fail('Should not fail'), (savedProgress) {
+        expect(savedProgress.history.containsKey('2026-04-01'), isTrue);
+        final entry = savedProgress.history['2026-04-01']!;
+        expect(entry.totalAyahsRead, 15);
+      });
     });
 
     test('multiple history entries can be stored', () async {
@@ -768,15 +718,12 @@ void main() {
       await repository.updateProgress(progress);
       final result = await repository.getProgress(goalId: 'default');
 
-      result.fold(
-        (failure) => fail('Should not fail'),
-        (savedProgress) {
-          expect(savedProgress.history.length, 3);
-          expect(savedProgress.history.containsKey('2026-04-01'), isTrue);
-          expect(savedProgress.history.containsKey('2026-04-02'), isTrue);
-          expect(savedProgress.history.containsKey('2026-04-03'), isTrue);
-        },
-      );
+      result.fold((failure) => fail('Should not fail'), (savedProgress) {
+        expect(savedProgress.history.length, 3);
+        expect(savedProgress.history.containsKey('2026-04-01'), isTrue);
+        expect(savedProgress.history.containsKey('2026-04-02'), isTrue);
+        expect(savedProgress.history.containsKey('2026-04-03'), isTrue);
+      });
     });
 
     test('history entries maintain backward compatibility', () async {
@@ -788,35 +735,19 @@ void main() {
         'sessionStartAbsolute': 1,
         'lastUpdated': DateTime.now().toIso8601String(),
         'streak': 5,
-        'history': {
-          '2024-01-01': 20,
-          '2024-01-02': 15,
-          '2024-01-03': 25,
-        },
+        'history': {'2024-01-01': 20, '2024-01-02': 15, '2024-01-03': 25},
       });
 
       await sharedPreferences.setString('werd_progress_default', json);
 
       final result = await repository.getProgress(goalId: 'default');
 
-      result.fold(
-        (failure) => fail('Should not fail'),
-        (progress) {
-          expect(progress.history.length, 3);
-          expect(
-            progress.history['2024-01-01']!.totalAyahsRead,
-            20,
-          );
-          expect(
-            progress.history['2024-01-02']!.totalAyahsRead,
-            15,
-          );
-          expect(
-            progress.history['2024-01-03']!.totalAyahsRead,
-            25,
-          );
-        },
-      );
+      result.fold((failure) => fail('Should not fail'), (progress) {
+        expect(progress.history.length, 3);
+        expect(progress.history['2024-01-01']!.totalAyahsRead, 20);
+        expect(progress.history['2024-01-02']!.totalAyahsRead, 15);
+        expect(progress.history['2024-01-03']!.totalAyahsRead, 25);
+      });
     });
   });
 }

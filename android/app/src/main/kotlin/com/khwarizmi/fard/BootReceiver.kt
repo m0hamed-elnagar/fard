@@ -1,13 +1,13 @@
-package com.qada.fard
+package com.khwarizmi.fard
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.glance.appwidget.updateAll
-import com.qada.fard.prayer.PrayerAlarmManager
-import com.qada.fard.prayer.PrayerTimesCalculator
-import com.qada.fard.prayer.SettingsRepository
+import com.khwarizmi.fard.prayer.PrayerAlarmManager
+import com.khwarizmi.fard.prayer.PrayerTimesCalculator
+import com.khwarizmi.fard.prayer.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -48,3 +48,4 @@ class BootReceiver : BroadcastReceiver() {
         Log.i("BootReceiver", "All widgets and alarms refreshed")
     }
 }
+

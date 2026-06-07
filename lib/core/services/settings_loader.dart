@@ -63,7 +63,8 @@ class SettingsLoader {
       enabledSalahReminders: _loadEnabledSalahReminders(prefs),
       isWerdReminderEnabled:
           prefs.getBool(SettingsKeys.isWerdReminderEnabled) ?? false,
-      werdReminderTime: prefs.getString(SettingsKeys.werdReminderTime) ?? '20:00',
+      werdReminderTime:
+          prefs.getString(SettingsKeys.werdReminderTime) ?? '20:00',
       isSalawatReminderEnabled:
           prefs.getBool(SettingsKeys.isSalawatReminderEnabled) ?? false,
       salawatFrequencyHours:
@@ -145,7 +146,9 @@ class SettingsLoader {
     final background = prefs.getString(SettingsKeys.customBackgroundColor);
     final surface = prefs.getString(SettingsKeys.customSurfaceColor);
     final text = prefs.getString(SettingsKeys.customTextColor);
-    final textSecondary = prefs.getString(SettingsKeys.customTextSecondaryColor);
+    final textSecondary = prefs.getString(
+      SettingsKeys.customTextSecondaryColor,
+    );
     final cardBorder = prefs.getString(SettingsKeys.customCardBorderColor);
     final surfaceLight = prefs.getString(SettingsKeys.customSurfaceLightColor);
 

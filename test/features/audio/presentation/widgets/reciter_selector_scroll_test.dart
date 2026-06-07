@@ -15,7 +15,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 class MockAudioPlayerBloc extends MockBloc<AudioPlayerEvent, AudioPlayerState>
     implements AudioPlayerBloc {}
 
-class MockReciterManagerBloc extends MockBloc<ReciterManagerEvent, ReciterManagerState>
+class MockReciterManagerBloc
+    extends MockBloc<ReciterManagerEvent, ReciterManagerState>
     implements ReciterManagerBloc {}
 
 void main() {
@@ -26,9 +27,9 @@ void main() {
     mockAudioPlayerBloc = MockAudioPlayerBloc();
     mockReciterManagerBloc = MockReciterManagerBloc();
 
-    when(() => mockAudioPlayerBloc.state).thenReturn(
-      const AudioPlayerState(quality: AudioQuality.medium128),
-    );
+    when(
+      () => mockAudioPlayerBloc.state,
+    ).thenReturn(const AudioPlayerState(quality: AudioQuality.medium128));
   });
 
   Widget createWidgetUnderTest() {
@@ -72,11 +73,9 @@ void main() {
     tester,
   ) async {
     // Set initial state
-    when(() => mockReciterManagerBloc.state).thenReturn(
-      ReciterManagerState(
-        availableReciters: tReciters,
-      ),
-    );
+    when(
+      () => mockReciterManagerBloc.state,
+    ).thenReturn(ReciterManagerState(availableReciters: tReciters));
 
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();

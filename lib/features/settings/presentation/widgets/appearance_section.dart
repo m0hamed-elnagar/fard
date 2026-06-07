@@ -44,7 +44,8 @@ class _AppearanceSectionState extends State<AppearanceSection> {
           icon: Icons.palette_rounded,
           accentColor: context.primaryColor,
           isExpanded: _isAppearanceExpanded,
-          onToggle: () => setState(() => _isAppearanceExpanded = !_isAppearanceExpanded),
+          onToggle: () =>
+              setState(() => _isAppearanceExpanded = !_isAppearanceExpanded),
           children: [
             SizedBox(
               height: 160,
@@ -69,7 +70,8 @@ class _AppearanceSectionState extends State<AppearanceSection> {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: () => _showThemeEditorSheet(context, state, l10n, null),
+                onPressed: () =>
+                    _showThemeEditorSheet(context, state, l10n, null),
                 icon: const Icon(Icons.add_circle_outline_rounded),
                 label: Text(l10n.createNewTheme),
                 style: OutlinedButton.styleFrom(
@@ -85,7 +87,9 @@ class _AppearanceSectionState extends State<AppearanceSection> {
             if (savedThemes.isNotEmpty) ...[
               const SizedBox(height: 20),
               InkWell(
-                onTap: () => setState(() => _isThemeListExpanded = !_isThemeListExpanded),
+                onTap: () => setState(
+                  () => _isThemeListExpanded = !_isThemeListExpanded,
+                ),
                 borderRadius: BorderRadius.circular(12),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
@@ -93,7 +97,9 @@ class _AppearanceSectionState extends State<AppearanceSection> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        _isThemeListExpanded ? l10n.hideSavedThemes : l10n.showSavedThemes(savedThemes.length),
+                        _isThemeListExpanded
+                            ? l10n.hideSavedThemes
+                            : l10n.showSavedThemes(savedThemes.length),
                         style: GoogleFonts.amiri(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -116,19 +122,24 @@ class _AppearanceSectionState extends State<AppearanceSection> {
                 firstChild: const SizedBox.shrink(),
                 secondChild: Column(
                   children: savedThemes.map((theme) {
-                    final isActive = currentPresetId == 'custom' && state.activeCustomThemeId == theme.id;
+                    final isActive =
+                        currentPresetId == 'custom' &&
+                        state.activeCustomThemeId == theme.id;
                     return _buildSavedThemeCard(
                       context,
                       theme: theme,
                       isActive: isActive,
                       l10n: l10n,
                       onTap: () => cubit.activateCustomTheme(theme.id),
-                      onEdit: () => _showThemeEditorSheet(context, state, l10n, theme),
+                      onEdit: () =>
+                          _showThemeEditorSheet(context, state, l10n, theme),
                       onDelete: () => _confirmDeleteTheme(context, theme, l10n),
                     );
                   }).toList(),
                 ),
-                crossFadeState: _isThemeListExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                crossFadeState: _isThemeListExpanded
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
                 duration: const Duration(milliseconds: 200),
               ),
             ],
@@ -239,7 +250,9 @@ class _AppearanceSectionState extends State<AppearanceSection> {
                 ),
               ],
             ),
-            crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            crossFadeState: isExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
             duration: const Duration(milliseconds: 250),
             sizeCurve: Curves.easeInOut,
           ),
@@ -379,8 +392,12 @@ class _AppearanceSectionState extends State<AppearanceSection> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        Color(int.parse(theme.primary.replaceFirst('#', '0xFF'))),
-                        Color(int.parse(theme.accent.replaceFirst('#', '0xFF'))),
+                        Color(
+                          int.parse(theme.primary.replaceFirst('#', '0xFF')),
+                        ),
+                        Color(
+                          int.parse(theme.accent.replaceFirst('#', '0xFF')),
+                        ),
                       ],
                     ),
                   ),
@@ -511,7 +528,11 @@ class _AppearanceSectionState extends State<AppearanceSection> {
       cubit.updateCustomTheme(existingTheme.id, result);
     } else {
       if (!context.mounted) return;
-      final name = await _showThemeNameDialog(context, l10n, state.savedCustomThemes);
+      final name = await _showThemeNameDialog(
+        context,
+        l10n,
+        state.savedCustomThemes,
+      );
       if (name == null) return;
 
       final theme = CustomTheme(

@@ -1,4 +1,4 @@
-package com.qada.fard.widget
+package com.khwarizmi.fard.widget
 
 import androidx.core.graphics.toColorInt
 import android.util.Log
@@ -47,3 +47,4 @@ object ColorUtils {
         }
     }
 }
+

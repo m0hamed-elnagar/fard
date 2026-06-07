@@ -116,7 +116,9 @@ void main() {
 
     when(() => mockSettingsProvider.isSalahReminderEnabled).thenReturn(false);
     when(() => mockSettingsProvider.salahReminderOffsetMinutes).thenReturn(0);
-    when(() => mockSettingsProvider.prayerReminderType).thenReturn(PrayerReminderType.after);
+    when(
+      () => mockSettingsProvider.prayerReminderType,
+    ).thenReturn(PrayerReminderType.after);
     when(() => mockSettingsProvider.enabledSalahReminders).thenReturn({});
     when(() => mockSettingsProvider.isAfterSalahAzkarEnabled).thenReturn(false);
     when(() => mockSettingsProvider.isWerdReminderEnabled).thenReturn(false);
@@ -133,7 +135,7 @@ void main() {
       if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
         return;
       }
-      
+
       // Cairo coordinates
       const lat = 30.0444;
       const lon = 31.2357;
@@ -185,12 +187,12 @@ void main() {
   );
 
   test('Verification: Azan timing with Umm Al-Qura in Makkah', () async {
-      // Skip on desktop platforms (WorkManager not available)
-      if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-        return;
-      }
-      
-      tz.setLocalLocation(tz.getLocation('Asia/Riyadh'));
+    // Skip on desktop platforms (WorkManager not available)
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      return;
+    }
+
+    tz.setLocalLocation(tz.getLocation('Asia/Riyadh'));
 
     const lat = 21.4225;
     const lon = 39.8262;

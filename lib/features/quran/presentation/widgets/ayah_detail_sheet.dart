@@ -158,11 +158,10 @@ class AyahDetailSheet extends StatelessWidget {
                                                             ),
                                                         child: Text(
                                                           'إلغاء',
-                                                          style:
-                                                              GoogleFonts.amiri(
-                                                                color:
-                                                                    context.onSurfaceVariantColor,
-                                                              ),
+                                                          style: GoogleFonts.amiri(
+                                                            color: context
+                                                                .onSurfaceVariantColor,
+                                                          ),
                                                         ),
                                                       ),
                                                       TextButton(
@@ -175,8 +174,8 @@ class AyahDetailSheet extends StatelessWidget {
                                                           'حذف',
                                                           style:
                                                               GoogleFonts.amiri(
-                                                                color:
-                                                                    context.errorColor,
+                                                                color: context
+                                                                    .errorColor,
                                                               ),
                                                         ),
                                                       ),
@@ -564,12 +563,12 @@ class _AudioTab extends StatelessWidget {
                       label: l10n.ayahBtn,
                       onPressed: () {
                         context.read<AudioPlayerBloc>().add(
-                              PlayAyah(
-                                surahNumber: ayah.number.surahNumber,
-                                ayahNumber: ayah.number.ayahNumberInSurah,
-                                reciter: managerState.currentReciter,
-                              ),
-                            );
+                          PlayAyah(
+                            surahNumber: ayah.number.surahNumber,
+                            ayahNumber: ayah.number.ayahNumberInSurah,
+                            reciter: managerState.currentReciter,
+                          ),
+                        );
                       },
                     ),
                     Column(
@@ -585,10 +584,13 @@ class _AudioTab extends StatelessWidget {
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: (isError
-                                        ? context.errorColor
-                                        : Theme.of(context).colorScheme.primary)
-                                    .withValues(alpha: 0.3),
+                                color:
+                                    (isError
+                                            ? context.errorColor
+                                            : Theme.of(
+                                                context,
+                                              ).colorScheme.primary)
+                                        .withValues(alpha: 0.3),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
@@ -607,33 +609,31 @@ class _AudioTab extends StatelessWidget {
                                     isError
                                         ? Icons.refresh_rounded
                                         : (isPlaying
-                                            ? Icons.pause_rounded
-                                            : Icons.play_arrow_rounded),
+                                              ? Icons.pause_rounded
+                                              : Icons.play_arrow_rounded),
                                     size: 40,
                                     color: context.onSurfaceColor,
                                   ),
                                   onPressed: () {
                                     if (isPlaying) {
                                       context.read<AudioPlayerBloc>().add(
-                                            const Pause(),
-                                          );
+                                        const Pause(),
+                                      );
                                     } else if (status == AudioStatus.paused &&
                                         isCurrentAyah) {
                                       context.read<AudioPlayerBloc>().add(
-                                            const Resume(),
-                                          );
+                                        const Resume(),
+                                      );
                                     } else {
                                       context.read<AudioPlayerBloc>().add(
-                                            PlaySurah(
-                                              surahNumber:
-                                                  ayah.number.surahNumber,
-                                              startAyah: ayah
-                                                  .number.ayahNumberInSurah,
-                                              ayahCount: surahAyahCount,
-                                              reciter:
-                                                  managerState.currentReciter,
-                                            ),
-                                          );
+                                        PlaySurah(
+                                          surahNumber: ayah.number.surahNumber,
+                                          startAyah:
+                                              ayah.number.ayahNumberInSurah,
+                                          ayahCount: surahAyahCount,
+                                          reciter: managerState.currentReciter,
+                                        ),
+                                      );
                                     }
                                   },
                                 ),
@@ -667,8 +667,8 @@ class _AudioTab extends StatelessWidget {
                   subtitle: Text(
                     managerState.currentReciter != null
                         ? (l10n.localeName == 'ar'
-                            ? managerState.currentReciter!.name
-                            : managerState.currentReciter!.englishName)
+                              ? managerState.currentReciter!.name
+                              : managerState.currentReciter!.englishName)
                         : l10n.selectReciter,
                   ),
                   trailing: const Icon(Icons.chevron_right),
@@ -795,11 +795,9 @@ class _MarkAsLastReadButtonState extends State<_MarkAsLastReadButton> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(l10n.werdUndoTitle),
-        content: Text(l10n.werdUndoMessage(
-          lastSegment.ayahsCount,
-          startSurah,
-          endSurah,
-        )),
+        content: Text(
+          l10n.werdUndoMessage(lastSegment.ayahsCount, startSurah, endSurah),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
@@ -879,16 +877,14 @@ class _MarkAsLastReadButtonState extends State<_MarkAsLastReadButton> {
         // User chose "Mark All" - save the ayah and track the range
         if (choice == 1 && mounted) {
           debugPrint('📖 [MarkAsRead] Mark All - saving ayah $absAyah');
-          context.read<ReaderBloc>().add(
-                ReaderEvent.saveLastRead(widget.ayah),
-              );
+          context.read<ReaderBloc>().add(ReaderEvent.saveLastRead(widget.ayah));
 
           context.read<WerdBloc>().add(
-                WerdEvent.trackItemReadMarkAll(
-                  startAbsolute: lastReadAbs,
-                  endAbsolute: absAyah,
-                ),
-              );
+            WerdEvent.trackItemReadMarkAll(
+              startAbsolute: lastReadAbs,
+              endAbsolute: absAyah,
+            ),
+          );
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -902,13 +898,9 @@ class _MarkAsLastReadButtonState extends State<_MarkAsLastReadButton> {
         // User chose "Start New Session" - mark only current ayah, don't count gap
         if (choice == 2 && mounted) {
           debugPrint('🚀 [MarkAsRead] New Session - jumping to ayah $absAyah');
-          context.read<ReaderBloc>().add(
-                ReaderEvent.saveLastRead(widget.ayah),
-              );
+          context.read<ReaderBloc>().add(ReaderEvent.saveLastRead(widget.ayah));
 
-          context.read<WerdBloc>().add(
-                WerdEvent.jumpToNewSession(absAyah),
-              );
+          context.read<WerdBloc>().add(WerdEvent.jumpToNewSession(absAyah));
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -918,16 +910,15 @@ class _MarkAsLastReadButtonState extends State<_MarkAsLastReadButton> {
           );
           _lastMarkTapTime = DateTime.now();
         }
-        } else {        // Gap is small (< 50 ayahs) - save normally without jump dialog
-        debugPrint('📖 [MarkAsRead] Gap too small ($gap < $jumpThreshold) - saving normally');
-        context.read<ReaderBloc>().add(
-          ReaderEvent.saveLastRead(widget.ayah),
+      } else {
+        // Gap is small (< 50 ayahs) - save normally without jump dialog
+        debugPrint(
+          '📖 [MarkAsRead] Gap too small ($gap < $jumpThreshold) - saving normally',
         );
-        
+        context.read<ReaderBloc>().add(ReaderEvent.saveLastRead(widget.ayah));
+
         // Ensure WerdBloc is informed to track the progress for this ayah
-        context.read<WerdBloc>().add(
-          WerdEvent.trackItemRead(absAyah),
-        );
+        context.read<WerdBloc>().add(WerdEvent.trackItemRead(absAyah));
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -940,14 +931,10 @@ class _MarkAsLastReadButtonState extends State<_MarkAsLastReadButton> {
     } else {
       // No previous position - save normally
       debugPrint('📖 [MarkAsRead] No previous position - saving ayah $absAyah');
-      context.read<ReaderBloc>().add(
-        ReaderEvent.saveLastRead(widget.ayah),
-      );
-      
+      context.read<ReaderBloc>().add(ReaderEvent.saveLastRead(widget.ayah));
+
       // Ensure WerdBloc is informed to track the progress for this ayah
-      context.read<WerdBloc>().add(
-        WerdEvent.trackItemRead(absAyah),
-      );
+      context.read<WerdBloc>().add(WerdEvent.trackItemRead(absAyah));
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -963,12 +950,8 @@ class _MarkAsLastReadButtonState extends State<_MarkAsLastReadButton> {
   Widget build(BuildContext context) {
     return IconButton(
       icon: Icon(
-        widget.isLastRead
-            ? Icons.menu_book_rounded
-            : Icons.menu_book_outlined,
-        color: widget.isLastRead
-            ? Theme.of(context).colorScheme.primary
-            : null,
+        widget.isLastRead ? Icons.menu_book_rounded : Icons.menu_book_outlined,
+        color: widget.isLastRead ? Theme.of(context).colorScheme.primary : null,
       ),
       tooltip: AppLocalizations.of(context)!.markAsLastRead,
       onPressed: () {

@@ -1,4 +1,4 @@
-package com.qada.fard
+package com.khwarizmi.fard
 
 import android.appwidget.AppWidgetManager
 import android.content.Context
@@ -7,9 +7,9 @@ import android.util.Log
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.updateAll
-import com.qada.fard.prayer.PrayerAlarmManager
-import com.qada.fard.prayer.PrayerTimesCalculator
-import com.qada.fard.prayer.SettingsRepository
+import com.khwarizmi.fard.prayer.PrayerAlarmManager
+import com.khwarizmi.fard.prayer.PrayerTimesCalculator
+import com.khwarizmi.fard.prayer.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,7 +32,7 @@ class PrayerWidgetReceiver : GlanceAppWidgetReceiver() {
             Intent.ACTION_TIMEZONE_CHANGED,
             Intent.ACTION_LOCALE_CHANGED,
             Intent.ACTION_BOOT_COMPLETED,
-            "com.qada.fard.UPDATE_WIDGET" -> {
+            "com.khwarizmi.fard.UPDATE_WIDGET" -> {
                 receiverScope.launch {
                     updateAll(context)
                 }
@@ -61,3 +61,4 @@ class PrayerWidgetReceiver : GlanceAppWidgetReceiver() {
         }
     }
 }
+

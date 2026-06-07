@@ -123,14 +123,17 @@ class SurahHeader extends StatelessWidget {
                             context: context,
                             surahNumber: surah.number.value,
                             startAyah: currentAyahNumber ?? 1,
-                            isDownloaded: false, // Will be checked inside if needed
+                            isDownloaded:
+                                false, // Will be checked inside if needed
                           );
                         },
                         icon: isLoading && isThisSurah
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : Icon(
                                 isPlaying && isThisSurah

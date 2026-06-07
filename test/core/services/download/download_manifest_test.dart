@@ -13,7 +13,9 @@ void main() {
     Hive.init(tempDir.path);
     Hive.registerAdapter(DownloadEntryAdapter());
     Hive.registerAdapter(DownloadStatusAdapter());
-    box = await Hive.openBox<DownloadEntry>(DownloadManifestServiceImpl.boxName);
+    box = await Hive.openBox<DownloadEntry>(
+      DownloadManifestServiceImpl.boxName,
+    );
   });
 
   tearDownAll(() async {
@@ -74,13 +76,15 @@ void main() {
       await manifestService.upsertEntry(entry1);
       await manifestService.upsertEntry(entry2);
 
-      final completed = await manifestService.getEntriesByStatus(DownloadStatus.completed);
+      final completed = await manifestService.getEntriesByStatus(
+        DownloadStatus.completed,
+      );
       expect(completed.length, equals(1));
       expect(completed.first.fileId, equals('file1'));
     });
 
     test('deleteEntriesByReciter should work', () async {
-       final entry1 = DownloadEntry(
+      final entry1 = DownloadEntry(
         fileId: 'file1',
         relativePath: 'path1',
         contentType: 'audio',
@@ -105,12 +109,12 @@ void main() {
       await manifestService.upsertEntry(entry2);
 
       await manifestService.deleteEntriesByReciter('reciter1');
-      
+
       final all = box.values.toList();
       expect(all.length, equals(1));
       expect(all.first.reciterId, equals('reciter2'));
     });
-   group('Watch entry tests', () {
+    group('Watch entry tests', () {
       test('watchEntry should emit events', () async {
         final entry = DownloadEntry(
           fileId: 'watch_test',
@@ -123,12 +127,12 @@ void main() {
         );
 
         final stream = manifestService.watchEntry('watch_test');
-        
+
         // Use a future to wait for the update
         final future = stream.first;
 
         await manifestService.upsertEntry(entry);
-        
+
         final retrievedEntry = await future;
         expect(retrievedEntry?.fileId, equals('watch_test'));
         expect(retrievedEntry?.status, equals(DownloadStatus.pending));

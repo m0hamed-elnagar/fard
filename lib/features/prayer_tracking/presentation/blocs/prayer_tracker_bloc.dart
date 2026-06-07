@@ -143,10 +143,9 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
     originalChain.sort((a, b) => a.date.compareTo(b.date));
 
     // Get all future records (including today) to cascade updates
-    final futureRecords = allRecords
-        .where((r) => r.date.isAfter(updatedBaseRecord.date))
-        .toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
+    final futureRecords =
+        allRecords.where((r) => r.date.isAfter(updatedBaseRecord.date)).toList()
+          ..sort((a, b) => a.date.compareTo(b.date));
 
     if (futureRecords.isEmpty) return;
 
@@ -218,17 +217,18 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
   Future<void> _onLoad(_Load e, Emitter<PrayerTrackerState> em) async {
     try {
       final normalizedDate = DateTime(e.date.year, e.date.month, e.date.day);
-      
+
       // Check if we already have cached data for this date
       final existingState = state;
-      final hasCachedData = existingState is _Loaded && 
-                            isSameDay(existingState.selectedDate, normalizedDate);
-      
+      final hasCachedData =
+          existingState is _Loaded &&
+          isSameDay(existingState.selectedDate, normalizedDate);
+
       // Only show loading state if we don't have cached data
       if (!hasCachedData) {
         em(const PrayerTrackerState.loading());
       }
-      
+
       final record = await _repo.loadRecord(normalizedDate);
       final lastSavedBefore = await _repo.loadLastRecordBefore(normalizedDate);
 
@@ -383,7 +383,10 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
           completed.add(e.prayer);
           qada[e.prayer] = (qada[e.prayer] ?? const MissedCounter(0))
               .removeMissed();
-          _notificationService.cancelPrayerReminder(e.prayer, forTodayOnly: true);
+          _notificationService.cancelPrayerReminder(
+            e.prayer,
+            forTodayOnly: true,
+          );
         } else if (completed.contains(e.prayer)) {
           completed.remove(e.prayer);
           missed.add(e.prayer);
@@ -415,7 +418,7 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
           qada: qada,
           completedQada: completedQada,
         );
-        
+
         await _repo.saveToday(recordToSave);
         await _cascadeUpdateFrom(recordToSave, oldBaseQada: oldQadaMap);
 

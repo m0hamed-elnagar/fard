@@ -63,8 +63,10 @@ class _GeneralSectionState extends State<GeneralSection> {
         const Divider(height: 1),
         ListTile(
           contentPadding: EdgeInsets.zero,
-          leading: Icon(Icons.info_outline_rounded,
-              color: context.onSurfaceVariantColor),
+          leading: Icon(
+            Icons.info_outline_rounded,
+            color: context.onSurfaceVariantColor,
+          ),
           title: Text(l10n.appName),
           subtitle: Text('Version $_version'),
           trailing: TextButton(
@@ -148,8 +150,9 @@ class _GeneralSectionState extends State<GeneralSection> {
                 ),
               ],
             ),
-            crossFadeState:
-                isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            crossFadeState: isExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
             duration: const Duration(milliseconds: 250),
           ),
         ],

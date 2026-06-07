@@ -3,7 +3,8 @@ part of 'reciter_manager_bloc.dart';
 class ReciterManagerState extends Equatable {
   final List<Reciter> availableReciters;
   final Reciter? currentReciter;
-  final Map<String, double> reciterDownloadProgress; // reciterId -> percentage (0.0 to 1.0)
+  final Map<String, double>
+  reciterDownloadProgress; // reciterId -> percentage (0.0 to 1.0)
   final Map<String, int> reciterDownloadSizes; // reciterId -> size in bytes
   final String? error;
 
@@ -38,10 +39,10 @@ class ReciterManagerState extends Equatable {
 
   @override
   List<Object?> get props => [
-        availableReciters,
-        currentReciter,
-        reciterDownloadProgress,
-        reciterDownloadSizes,
-        error,
-      ];
+    availableReciters,
+    currentReciter,
+    reciterDownloadProgress,
+    reciterDownloadSizes,
+    error,
+  ];
 }

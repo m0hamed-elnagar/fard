@@ -466,10 +466,7 @@ class _DatePickerRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8.0),
-            const Icon(
-              Icons.calendar_today_rounded,
-              size: 18.0,
-            ),
+            const Icon(Icons.calendar_today_rounded, size: 18.0),
           ],
         ),
       ),

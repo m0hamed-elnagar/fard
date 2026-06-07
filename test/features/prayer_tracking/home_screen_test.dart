@@ -37,11 +37,9 @@ class MockLocationPrayerCubit extends MockCubit<LocationPrayerState>
 class MockDailyRemindersCubit extends MockCubit<DailyRemindersState>
     implements DailyRemindersCubit {}
 
-class MockThemeCubit extends MockCubit<ThemeState>
-    implements ThemeCubit {}
+class MockThemeCubit extends MockCubit<ThemeState> implements ThemeCubit {}
 
-class MockAdhanCubit extends MockCubit<AdhanState>
-    implements AdhanCubit {}
+class MockAdhanCubit extends MockCubit<AdhanState> implements AdhanCubit {}
 
 class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState>
     implements AzkarBloc {}
@@ -137,9 +135,15 @@ void main() {
     when(
       () => mockPrayerTrackerBloc.state,
     ).thenReturn(const PrayerTrackerState.loading());
-    when(() => mockThemeCubit.state).thenReturn(const ThemeState(locale: Locale('en')));
-    when(() => mockLocationPrayerCubit.state).thenReturn(const LocationPrayerState());
-    when(() => mockDailyRemindersCubit.state).thenReturn(const DailyRemindersState());
+    when(
+      () => mockThemeCubit.state,
+    ).thenReturn(const ThemeState(locale: Locale('en')));
+    when(
+      () => mockLocationPrayerCubit.state,
+    ).thenReturn(const LocationPrayerState());
+    when(
+      () => mockDailyRemindersCubit.state,
+    ).thenReturn(const DailyRemindersState());
     when(() => mockAdhanCubit.state).thenReturn(const AdhanState());
     when(() => mockAzkarBloc.state).thenReturn(AzkarState.initial());
     when(() => mockWerdBloc.state).thenReturn(WerdState.initial());
@@ -167,11 +171,15 @@ void main() {
         history: [],
       ),
     );
-    when(() => mockThemeCubit.state).thenReturn(const ThemeState(locale: Locale('en')));
-    when(() => mockLocationPrayerCubit.state).thenReturn(
-      const LocationPrayerState(cityName: 'Test City'),
-    );
-    when(() => mockDailyRemindersCubit.state).thenReturn(const DailyRemindersState());
+    when(
+      () => mockThemeCubit.state,
+    ).thenReturn(const ThemeState(locale: Locale('en')));
+    when(
+      () => mockLocationPrayerCubit.state,
+    ).thenReturn(const LocationPrayerState(cityName: 'Test City'));
+    when(
+      () => mockDailyRemindersCubit.state,
+    ).thenReturn(const DailyRemindersState());
     when(() => mockAdhanCubit.state).thenReturn(const AdhanState());
     when(() => mockAzkarBloc.state).thenReturn(AzkarState.initial());
     when(() => mockWerdBloc.state).thenReturn(WerdState.initial());
@@ -217,11 +225,19 @@ void main() {
         history: [],
       ),
     );
-    when(() => mockThemeCubit.state).thenReturn(const ThemeState(locale: Locale('en')));
+    when(
+      () => mockThemeCubit.state,
+    ).thenReturn(const ThemeState(locale: Locale('en')));
     when(() => mockLocationPrayerCubit.state).thenReturn(
-      const LocationPrayerState(latitude: 10, longitude: 10, cityName: 'Test City'),
+      const LocationPrayerState(
+        latitude: 10,
+        longitude: 10,
+        cityName: 'Test City',
+      ),
     );
-    when(() => mockDailyRemindersCubit.state).thenReturn(const DailyRemindersState());
+    when(
+      () => mockDailyRemindersCubit.state,
+    ).thenReturn(const DailyRemindersState());
     when(() => mockAdhanCubit.state).thenReturn(const AdhanState());
     when(() => mockAzkarBloc.state).thenReturn(AzkarState.initial());
     when(() => mockWerdBloc.state).thenReturn(WerdState.initial());
@@ -261,13 +277,19 @@ void main() {
     final fajrTileFinder = find.byWidgetPredicate(
       (widget) => widget is SalaahTile && widget.salaah == Salaah.fajr,
     );
-    
+
     await tester.dragUntilVisible(
       fajrTileFinder,
       find.byType(CustomScrollView),
       const Offset(0, -200),
     );
-    
-    expect(find.descendant(of: fajrTileFinder, matching: find.textContaining('5:00')), findsAtLeast(1));
+
+    expect(
+      find.descendant(
+        of: fajrTileFinder,
+        matching: find.textContaining('5:00'),
+      ),
+      findsAtLeast(1),
+    );
   });
 }

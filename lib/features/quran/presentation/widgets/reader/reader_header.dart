@@ -49,7 +49,9 @@ class QuranReaderHeader extends StatelessWidget {
                   currentAyahNumber: currentAyahNumber,
                   onNext: onNextSurah,
                   onPrevious: onPreviousSurah,
-                  onCompletionDoaa: surahNumber == 114 ? onCompletionDoaa : null,
+                  onCompletionDoaa: surahNumber == 114
+                      ? onCompletionDoaa
+                      : null,
                   textScale: s.textScale,
                   fontFamily: s.fontFamily,
                 ),

@@ -1,4 +1,4 @@
-package com.qada.fard
+package com.khwarizmi.fard
 
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
@@ -6,9 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.glance.appwidget.updateAll
-import com.qada.fard.prayer.PrayerAlarmManager
-import com.qada.fard.prayer.PrayerTimesCalculator
-import com.qada.fard.prayer.SettingsRepository
+import com.khwarizmi.fard.prayer.PrayerAlarmManager
+import com.khwarizmi.fard.prayer.PrayerTimesCalculator
+import com.khwarizmi.fard.prayer.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,7 +27,7 @@ class TimeChangedReceiver : BroadcastReceiver() {
                 updateAll(context)
                 
                 // 🛡️ Trigger Flutter side to reschedule Azan notifications immediately
-                val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.qada.fard.widget.WidgetUpdateWorker>()
+                val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.khwarizmi.fard.widget.WidgetUpdateWorker>()
                     .addTag("time_change_reschedule")
                     .build()
                 
@@ -59,3 +59,4 @@ class TimeChangedReceiver : BroadcastReceiver() {
         NextPrayerCountdownWidget().updateAll(context)
     }
 }
+

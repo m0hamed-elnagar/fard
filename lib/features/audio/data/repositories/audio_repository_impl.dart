@@ -332,10 +332,7 @@ class AudioRepositoryImpl implements AudioRepository {
       quality: quality,
     );
 
-    return AudioTrack(
-      remoteUrl: remoteUrl,
-      localPath: localPath,
-    );
+    return AudioTrack(remoteUrl: remoteUrl, localPath: localPath);
   }
 
   @override

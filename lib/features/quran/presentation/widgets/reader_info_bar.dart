@@ -286,18 +286,27 @@ class ReaderInfoBar extends StatelessWidget {
             const Divider(),
             Text(
               'بداية ورد اليوم:',
-              style: GoogleFonts.amiri(fontSize: 14, color: context.onSurfaceVariantColor),
+              style: GoogleFonts.amiri(
+                fontSize: 14,
+                color: context.onSurfaceVariantColor,
+              ),
               textAlign: TextAlign.right,
             ),
             Text(
               todayStartInfo,
-              style: GoogleFonts.amiri(fontSize: 16, color: context.primaryColor),
+              style: GoogleFonts.amiri(
+                fontSize: 16,
+                color: context.primaryColor,
+              ),
               textAlign: TextAlign.right,
             ),
             const SizedBox(height: 8),
             Text(
               'بداية الورد القادمة:',
-              style: GoogleFonts.amiri(fontSize: 14, color: context.onSurfaceVariantColor),
+              style: GoogleFonts.amiri(
+                fontSize: 14,
+                color: context.onSurfaceVariantColor,
+              ),
               textAlign: TextAlign.right,
             ),
             Text(

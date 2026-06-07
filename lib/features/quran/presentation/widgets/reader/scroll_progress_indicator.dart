@@ -60,11 +60,14 @@ class _ScrollProgressIndicatorState extends State<ScrollProgressIndicator> {
     // Calculate approximate ayah based on scroll position
     final offset = widget.scrollController.offset;
     final maxScroll = widget.scrollController.position.maxScrollExtent;
-    
+
     if (maxScroll > 0) {
       final progress = offset / maxScroll;
-      final estimatedAyah = (progress * widget.totalAyahs).round().clamp(1, widget.totalAyahs);
-      
+      final estimatedAyah = (progress * widget.totalAyahs).round().clamp(
+        1,
+        widget.totalAyahs,
+      );
+
       if (estimatedAyah != _visibleAyah) {
         setState(() {
           _visibleAyah = estimatedAyah;
@@ -77,10 +80,10 @@ class _ScrollProgressIndicatorState extends State<ScrollProgressIndicator> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    
+
     final juzNumber = quran.getJuzNumber(widget.surahNumber, _visibleAyah);
-    final progress = widget.totalAyahs > 0 
-        ? _visibleAyah / widget.totalAyahs 
+    final progress = widget.totalAyahs > 0
+        ? _visibleAyah / widget.totalAyahs
         : 0.0;
 
     return Container(
@@ -102,9 +105,7 @@ class _ScrollProgressIndicatorState extends State<ScrollProgressIndicator> {
           LinearProgressIndicator(
             value: progress,
             backgroundColor: theme.colorScheme.surfaceContainerHighest,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              theme.primaryColor,
-            ),
+            valueColor: AlwaysStoppedAnimation<Color>(theme.primaryColor),
             minHeight: 3,
           ),
           const SizedBox(height: 6),
@@ -114,10 +115,7 @@ class _ScrollProgressIndicatorState extends State<ScrollProgressIndicator> {
             children: [
               // Juz info
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(8),

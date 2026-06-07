@@ -516,7 +516,7 @@ class QuranHizbProvider {
     WerdUnit unit,
   ) {
     if (segments.isEmpty) return 0.0;
-    
+
     // Convert segments to readItems Set first (handles overlaps/deduplication)
     final readItems = <int>{};
     for (final seg in segments) {
@@ -524,12 +524,12 @@ class QuranHizbProvider {
         readItems.add(i);
       }
     }
-    
+
     // Now calculate based on unit
     if (unit == WerdUnit.ayah) {
       return readItems.length.toDouble();
     }
-    
+
     // Reuse existing calculation for other units
     return calculateFractionalProgress(readItems, unit);
   }

@@ -1,4 +1,4 @@
-package com.qada.fard.widget
+package com.khwarizmi.fard.widget
 
 import org.json.JSONObject
 import android.util.Log
@@ -71,3 +71,4 @@ object WidgetParser {
         }
     }
 }
+

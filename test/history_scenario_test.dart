@@ -57,7 +57,12 @@ void main() {
     getIt.registerSingleton<SharedPreferences>(prefs);
     getIt.registerSingleton<PrayerTimeService>(prayerTimeService);
 
-    bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
+    bloc = PrayerTrackerBloc(
+      repo,
+      prefs,
+      prayerTimeService,
+      notificationService,
+    );
 
     when(() => repo.loadMonth(any(), any())).thenAnswer((_) async => {});
     when(() => repo.saveToday(any())).thenAnswer((_) async {});
@@ -89,7 +94,12 @@ void main() {
     blocTest<PrayerTrackerBloc, PrayerTrackerState>(
       'Day 2 load correctly carries over missed prayers from Day 1 mid-day save',
       build: () {
-        final b = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
+        final b = PrayerTrackerBloc(
+          repo,
+          prefs,
+          prayerTimeService,
+          notificationService,
+        );
         return b;
       },
       setUp: () {

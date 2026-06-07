@@ -1,4 +1,4 @@
-package com.qada.fard
+package com.khwarizmi.fard
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -137,8 +137,9 @@ class NextPrayerCountdownWidgetReceiver : GlanceAppWidgetReceiver() {
     }
 
     companion object {
-        const val ACTION_FORCE_UPDATE = "com.qada.fard.ACTION_FORCE_UPDATE"
-        const val ACTION_MINUTE_UPDATE = "com.qada.fard.ACTION_MINUTE_UPDATE"
+        const val ACTION_FORCE_UPDATE = "com.khwarizmi.fard.ACTION_FORCE_UPDATE"
+        const val ACTION_MINUTE_UPDATE = "com.khwarizmi.fard.ACTION_MINUTE_UPDATE"
         private const val MINUTE_UPDATE_REQUEST_CODE = 2001
     }
 }
+

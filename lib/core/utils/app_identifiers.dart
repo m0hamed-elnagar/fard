@@ -17,14 +17,14 @@ class AppIdentifiers {
   static Future<void> initialize() async {
     final packageInfo = await PackageInfo.fromPlatform();
     _packageName = packageInfo.packageName;
-    // Release build uses com.qada.fard package name
-    _isReleaseBuild = _packageName == 'com.qada.fard';
+    // Release build uses com.khwarizmi.fard package name
+    _isReleaseBuild = _packageName == 'com.khwarizmi.fard';
   }
 
   /// Get the current package name.
   /// Falls back to release package name if not initialized.
   static String get packageName {
-    return _packageName ?? 'com.qada.fard';
+    return _packageName ?? 'com.khwarizmi.fard';
   }
 
   /// Check if this is a release build.

@@ -136,7 +136,10 @@ void main() {
       test('converts default primary color', () {
         const theme = WidgetPreviewTheme();
         final colors = theme.toColors();
-        expect(colors.primary.toARGB32().toRadixString(16).toUpperCase(), 'FF2E7D32');
+        expect(
+          colors.primary.toARGB32().toRadixString(16).toUpperCase(),
+          'FF2E7D32',
+        );
       });
 
       test('handles lowercase hex', () {

@@ -1,4 +1,4 @@
-package com.qada.fard.prayer
+package com.khwarizmi.fard.prayer
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -8,7 +8,7 @@ import android.os.Build
 import android.util.Log
 import com.batoulapps.adhan.Prayer
 import com.batoulapps.adhan.PrayerTimes
-import com.qada.fard.PrayerWidgetReceiver
+import com.khwarizmi.fard.PrayerWidgetReceiver
 import java.util.*
 
 object PrayerAlarmManager {
@@ -37,7 +37,7 @@ object PrayerAlarmManager {
     private fun scheduleExactAlarm(context: Context, timeMillis: Long) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, PrayerWidgetReceiver::class.java).apply {
-            action = "com.qada.fard.UPDATE_WIDGET"
+            action = "com.khwarizmi.fard.UPDATE_WIDGET"
         }
         
         val pendingIntent = PendingIntent.getBroadcast(
@@ -71,3 +71,4 @@ object PrayerAlarmManager {
         } else true
     }
 }
+

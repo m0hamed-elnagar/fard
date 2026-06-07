@@ -37,7 +37,9 @@ class JumpDialog extends StatelessWidget {
   /// Get localized surah name
   String _getSurahName(int absoluteAyah, bool isArabic) {
     final surahNum = _getSurahNumber(absoluteAyah);
-    return isArabic ? quran.getSurahNameArabic(surahNum) : quran.getSurahName(surahNum);
+    return isArabic
+        ? quran.getSurahNameArabic(surahNum)
+        : quran.getSurahName(surahNum);
   }
 
   @override
@@ -91,10 +93,14 @@ class JumpDialog extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: context.primaryContainerColor.withValues(alpha: 0.2),
+                      color: context.primaryContainerColor.withValues(
+                        alpha: 0.2,
+                      ),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: context.primaryContainerColor.withValues(alpha: 0.4),
+                        color: context.primaryContainerColor.withValues(
+                          alpha: 0.4,
+                        ),
                         width: 2.0,
                       ),
                     ),
@@ -118,12 +124,19 @@ class JumpDialog extends StatelessWidget {
                   // Starting position
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
-                      color: context.onSurfaceVariantColor.withValues(alpha: 0.08),
+                      color: context.onSurfaceVariantColor.withValues(
+                        alpha: 0.08,
+                      ),
                       borderRadius: BorderRadius.circular(10.0),
                       border: Border.all(
-                        color: context.onSurfaceVariantColor.withValues(alpha: 0.2),
+                        color: context.onSurfaceVariantColor.withValues(
+                          alpha: 0.2,
+                        ),
                         width: 1.0,
                       ),
                     ),
@@ -158,12 +171,19 @@ class JumpDialog extends StatelessWidget {
                   // Target position
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
-                      color: context.onSurfaceVariantColor.withValues(alpha: 0.08),
+                      color: context.onSurfaceVariantColor.withValues(
+                        alpha: 0.08,
+                      ),
                       borderRadius: BorderRadius.circular(10.0),
                       border: Border.all(
-                        color: context.onSurfaceVariantColor.withValues(alpha: 0.2),
+                        color: context.onSurfaceVariantColor.withValues(
+                          alpha: 0.2,
+                        ),
                         width: 1.0,
                       ),
                     ),
@@ -232,8 +252,12 @@ class JumpDialog extends StatelessWidget {
               icon: Icons.play_circle_outline_rounded,
               label: l10n.jumpOptionNewSession,
               description: l10n.jumpNewSessionDesc(
-                isAr ? currentTotalToday.toArabicIndic() : currentTotalToday.toString(),
-                isAr ? (currentTotalToday + 1).toArabicIndic() : (currentTotalToday + 1).toString(),
+                isAr
+                    ? currentTotalToday.toArabicIndic()
+                    : currentTotalToday.toString(),
+                isAr
+                    ? (currentTotalToday + 1).toArabicIndic()
+                    : (currentTotalToday + 1).toString(),
               ),
               color: context.tertiaryColor,
               onTap: () => Navigator.of(context).pop(2), // New Session = 2

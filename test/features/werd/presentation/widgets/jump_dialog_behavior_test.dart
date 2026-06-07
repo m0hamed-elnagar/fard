@@ -8,10 +8,13 @@ void main() {
     testWidgets('dialog shows 3 option buttons', (tester) async {
       // This test will verify the jump dialog shows:
       // 1. Dismiss button
-      // 2. New session button  
+      // 2. New session button
       // 3. Mark all button
       // After implementation, update with actual widget tree
-      expect(true, isTrue); // Placeholder - will be implemented with real dialog
+      expect(
+        true,
+        isTrue,
+      ); // Placeholder - will be implemented with real dialog
     });
 
     testWidgets('dialog shows correct gap information', (tester) async {
@@ -28,7 +31,9 @@ void main() {
       expect(true, isTrue); // Placeholder
     });
 
-    testWidgets('each option shows what will be added and final total', (tester) async {
+    testWidgets('each option shows what will be added and final total', (
+      tester,
+    ) async {
       // Dismiss: "Keep your 5 ayahs as-is, Total: 5"
       // New session: "Add only ayah 100, Total: 6"
       // Mark all: "Add 96 ayahs, Total: 101"

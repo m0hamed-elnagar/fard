@@ -324,7 +324,9 @@ class WerdProgressBar extends StatelessWidget {
                         context,
                       ).dividerColor.withValues(alpha: 0.1),
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        isCompleted ? context.secondaryColor : context.primaryContainerColor,
+                        isCompleted
+                            ? context.secondaryColor
+                            : context.primaryContainerColor,
                       ),
                     ),
                   ),

@@ -40,14 +40,20 @@ class OfflineAudioHelper {
     // Real-time download check if caller didn't specify or passed false
     bool effectivelyDownloaded = isDownloaded;
     if (!effectivelyDownloaded && currentReciter != null) {
-      final status = await getIt<AudioDownloadService>()
-          .getSurahStatus(reciterId: currentReciter.identifier, surahNumber: surahNumber);
+      final status = await getIt<AudioDownloadService>().getSurahStatus(
+        reciterId: currentReciter.identifier,
+        surahNumber: surahNumber,
+      );
       effectivelyDownloaded = status.isDownloaded;
     }
 
     if (effectivelyDownloaded) {
       playerBloc.add(
-        PlaySurah(surahNumber: surahNumber, startAyah: startAyah, reciter: currentReciter),
+        PlaySurah(
+          surahNumber: surahNumber,
+          startAyah: startAyah,
+          reciter: currentReciter,
+        ),
       );
       playerBloc.add(const ShowBanner());
       return;
@@ -58,7 +64,11 @@ class OfflineAudioHelper {
 
     if (hasNetwork) {
       playerBloc.add(
-        PlaySurah(surahNumber: surahNumber, startAyah: startAyah, reciter: currentReciter),
+        PlaySurah(
+          surahNumber: surahNumber,
+          startAyah: startAyah,
+          reciter: currentReciter,
+        ),
       );
       playerBloc.add(const ShowBanner());
       return;

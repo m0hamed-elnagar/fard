@@ -89,8 +89,9 @@ void main() {
 
     // Mock SharedPreferences
     when(() => mockSharedPreferences.getString(any())).thenReturn(null);
-    when(() => mockSharedPreferences.setString(any(), any()))
-        .thenAnswer((_) async => true);
+    when(
+      () => mockSharedPreferences.setString(any(), any()),
+    ).thenAnswer((_) async => true);
 
     when(
       () => mockNotificationsPlugin
@@ -146,21 +147,18 @@ void main() {
   });
 
   group('NotificationService', () {
-    test(
-      'init initializes plugin and creates channels',
-      () async {
-        await notificationService.init();
+    test('init initializes plugin and creates channels', () async {
+      await notificationService.init();
 
-        verify(
-          () => mockNotificationsPlugin.initialize(
-            settings: any(named: 'settings'),
-            onDidReceiveNotificationResponse: any(
-              named: 'onDidReceiveNotificationResponse',
-            ),
+      verify(
+        () => mockNotificationsPlugin.initialize(
+          settings: any(named: 'settings'),
+          onDidReceiveNotificationResponse: any(
+            named: 'onDidReceiveNotificationResponse',
           ),
-        ).called(1);
-      },
-    );
+        ),
+      ).called(1);
+    });
 
     test(
       'schedulePrayerNotifications delegates to scheduler and updates widget',

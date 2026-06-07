@@ -50,7 +50,8 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
 
     // PRIORITY 1: If user has been reading, show "from where stopped"
     // Check both lastReadAbsolute and that they've actually read something (totalAmountReadToday > 0)
-    if (progress?.lastReadAbsolute != null && progress!.totalAmountReadToday > 0) {
+    if (progress?.lastReadAbsolute != null &&
+        progress!.totalAmountReadToday > 0) {
       _startPointType = 1; // "From last read" - shows current position
     }
     // PRIORITY 2: Check if there's a saved goal with specific start
@@ -194,7 +195,9 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
                             : 'Remaining Quran will be divided over the selected days.',
                         style: TextStyle(
                           fontSize: 12,
-                          color: context.onSurfaceVariantColor.withValues(alpha: 0.7),
+                          color: context.onSurfaceVariantColor.withValues(
+                            alpha: 0.7,
+                          ),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -308,15 +311,23 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
           items: [
             DropdownMenuItem(
               value: 0,
-              child: Text(isAr ? 'من البداية (الفاتحة)' : 'Start from Al-Fatihah (beginning)'),
+              child: Text(
+                isAr
+                    ? 'من البداية (الفاتحة)'
+                    : 'Start from Al-Fatihah (beginning)',
+              ),
             ),
             DropdownMenuItem(
               value: 1,
-              child: Text(isAr ? 'متابعة من حيث توقفت' : 'Continue where I stopped'),
+              child: Text(
+                isAr ? 'متابعة من حيث توقفت' : 'Continue where I stopped',
+              ),
             ),
             DropdownMenuItem(
               value: 2,
-              child: Text(isAr ? 'اختيار سورة وآية محددة' : 'Choose specific surah/ayah'),
+              child: Text(
+                isAr ? 'اختيار سورة وآية محددة' : 'Choose specific surah/ayah',
+              ),
             ),
           ],
           onChanged: (v) => setState(() => _startPointType = v ?? 0),
@@ -423,7 +434,9 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
           },
           selectedColor: context.secondaryColor,
           labelStyle: TextStyle(
-            color: isSelected ? context.theme.colorScheme.onSecondary : context.onSurfaceColor,
+            color: isSelected
+                ? context.theme.colorScheme.onSecondary
+                : context.onSurfaceColor,
             fontWeight: FontWeight.bold,
           ),
           shape: RoundedRectangleBorder(

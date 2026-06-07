@@ -1,4 +1,4 @@
-package com.qada.fard.prayer
+package com.khwarizmi.fard.prayer
 
 data class CalculationSettings(
     val latitude: Double,
@@ -10,3 +10,4 @@ data class CalculationSettings(
     val timeFormat: String = "12h",
     val locale: String = "ar"
 )
+

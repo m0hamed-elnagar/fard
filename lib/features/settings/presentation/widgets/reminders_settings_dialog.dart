@@ -25,8 +25,9 @@ class RemindersSettingsDialog extends StatelessWidget {
     String? customMessage,
   }) {
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
-    final String status =
-        enabled ? (isAr ? 'مفعل' : 'Enabled') : (isAr ? 'معطل' : 'Disabled');
+    final String status = enabled
+        ? (isAr ? 'مفعل' : 'Enabled')
+        : (isAr ? 'معطل' : 'Disabled');
 
     final String message =
         customMessage ?? (enabled ? '$title: $status' : '$title: $status');
@@ -74,8 +75,9 @@ class RemindersSettingsDialog extends StatelessWidget {
       builder: (context, state) {
         return Dialog(
           backgroundColor: context.surfaceColor,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
           clipBehavior: Clip.antiAlias,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 500),
@@ -120,11 +122,11 @@ class RemindersSettingsDialog extends StatelessWidget {
                               val,
                               customMessage: val
                                   ? (isAr
-                                      ? 'سنذكرك بتسجيل صلواتك بعد الأذان بـ ${state.salahReminderOffsetMinutes} دقيقة'
-                                      : 'We will remind you to log prayers ${state.salahReminderOffsetMinutes}m after Azan')
+                                        ? 'سنذكرك بتسجيل صلواتك بعد الأذان بـ ${state.salahReminderOffsetMinutes} دقيقة'
+                                        : 'We will remind you to log prayers ${state.salahReminderOffsetMinutes}m after Azan')
                                   : (isAr
-                                      ? 'تم إيقاف تذكيرات تسجيل الصلاة'
-                                      : 'Post-prayer logging reminders disabled'),
+                                        ? 'تم إيقاف تذكيرات تسجيل الصلاة'
+                                        : 'Post-prayer logging reminders disabled'),
                             );
                           },
                           context,
@@ -146,17 +148,15 @@ class RemindersSettingsDialog extends StatelessWidget {
                                   ),
                                 ),
                                 Slider(
-                                  value:
-                                      state.salahReminderOffsetMinutes
-                                          .toDouble(),
+                                  value: state.salahReminderOffsetMinutes
+                                      .toDouble(),
                                   min: 5,
                                   max: 60,
                                   divisions: 11,
                                   activeColor: context.secondaryColor,
-                                  onChanged:
-                                      (val) => context
-                                          .read<DailyRemindersCubit>()
-                                          .setSalahReminderOffset(val.round()),
+                                  onChanged: (val) => context
+                                      .read<DailyRemindersCubit>()
+                                      .setSalahReminderOffset(val.round()),
                                 ),
                               ],
                             ),
@@ -165,44 +165,40 @@ class RemindersSettingsDialog extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Wrap(
                               spacing: 8,
-                              children:
-                                  Salaah.values.map((s) {
-                                    final isEnabled = state
-                                        .enabledSalahReminders
-                                        .contains(s);
-                                    return FilterChip(
-                                      label: Text(s.localizedName(l10n)),
-                                      selected: isEnabled,
-                                      onSelected: (val) {
-                                        context
-                                            .read<DailyRemindersCubit>()
-                                            .toggleSpecificSalahReminder(s);
-                                        _showReminderSnackBar(
-                                          context,
-                                          s.localizedName(l10n),
-                                          val,
-                                          customMessage:
-                                              val
-                                                  ? (isAr
-                                                      ? 'سنذكرك بتسجيل ${s.localizedName(l10n)} بعد الأذان'
-                                                      : 'We will remind you to log ${s.localizedName(l10n)} after Azan')
-                                                  : (isAr
-                                                      ? 'تم إيقاف تذكير ${s.localizedName(l10n)}'
-                                                      : 'Reminder for ${s.localizedName(l10n)} disabled'),
-                                        );
-                                      },
-                                      selectedColor: context.secondaryColor
-                                          .withValues(alpha: 0.2),
-                                      checkmarkColor: context.secondaryColor,
-                                      labelStyle: TextStyle(
-                                        fontSize: 12,
-                                        color:
-                                            isEnabled
-                                                ? context.secondaryColor
-                                                : context.onSurfaceColor,
-                                      ),
+                              children: Salaah.values.map((s) {
+                                final isEnabled = state.enabledSalahReminders
+                                    .contains(s);
+                                return FilterChip(
+                                  label: Text(s.localizedName(l10n)),
+                                  selected: isEnabled,
+                                  onSelected: (val) {
+                                    context
+                                        .read<DailyRemindersCubit>()
+                                        .toggleSpecificSalahReminder(s);
+                                    _showReminderSnackBar(
+                                      context,
+                                      s.localizedName(l10n),
+                                      val,
+                                      customMessage: val
+                                          ? (isAr
+                                                ? 'سنذكرك بتسجيل ${s.localizedName(l10n)} بعد الأذان'
+                                                : 'We will remind you to log ${s.localizedName(l10n)} after Azan')
+                                          : (isAr
+                                                ? 'تم إيقاف تذكير ${s.localizedName(l10n)}'
+                                                : 'Reminder for ${s.localizedName(l10n)} disabled'),
                                     );
-                                  }).toList(),
+                                  },
+                                  selectedColor: context.secondaryColor
+                                      .withValues(alpha: 0.2),
+                                  checkmarkColor: context.secondaryColor,
+                                  labelStyle: TextStyle(
+                                    fontSize: 12,
+                                    color: isEnabled
+                                        ? context.secondaryColor
+                                        : context.onSurfaceColor,
+                                  ),
+                                );
+                              }).toList(),
                             ),
                           ),
                         ],
@@ -225,14 +221,13 @@ class RemindersSettingsDialog extends StatelessWidget {
                               context,
                               isAr ? 'تذكير الورد' : 'Werd Reminder',
                               val,
-                              customMessage:
-                                  val
-                                      ? (isAr
-                                          ? 'سنذكرك بوردك اليومي في الساعة ${state.werdReminderTime}'
-                                          : 'Daily Werd reminder set for ${state.werdReminderTime}')
-                                      : (isAr
-                                          ? 'تم إيقاف تذكير الورد اليومي'
-                                          : 'Daily Werd reminder disabled'),
+                              customMessage: val
+                                  ? (isAr
+                                        ? 'سنذكرك بوردك اليومي في الساعة ${state.werdReminderTime}'
+                                        : 'Daily Werd reminder set for ${state.werdReminderTime}')
+                                  : (isAr
+                                        ? 'تم إيقاف تذكير الورد اليومي'
+                                        : 'Daily Werd reminder disabled'),
                             );
                           },
                           context,
@@ -255,10 +250,9 @@ class RemindersSettingsDialog extends StatelessWidget {
                                   context,
                                   isAr ? 'وقت الورد' : 'Werd Time',
                                   true,
-                                  customMessage:
-                                      isAr
-                                          ? 'تم تحديث وقت تذكير الورد إلى $time'
-                                          : 'Werd reminder time updated to $time',
+                                  customMessage: isAr
+                                      ? 'تم تحديث وقت تذكير الورد إلى $time'
+                                      : 'Werd reminder time updated to $time',
                                 );
                               }
                             },
@@ -284,14 +278,13 @@ class RemindersSettingsDialog extends StatelessWidget {
                               context,
                               isAr ? 'الصلاة على النبي' : 'Salawat Reminder',
                               val,
-                              customMessage:
-                                  val
-                                      ? (isAr
-                                          ? 'تذكير دوري بالصلاة على النبي ﷺ كل ${state.salawatFrequencyHours} ساعات'
-                                          : 'Periodic Salawat reminders enabled every ${state.salawatFrequencyHours} hours')
-                                      : (isAr
-                                          ? 'تم إيقاف تذكير الصلاة على النبي'
-                                          : 'Salawat reminders disabled'),
+                              customMessage: val
+                                  ? (isAr
+                                        ? 'تذكير دوري بالصلاة على النبي ﷺ كل ${state.salawatFrequencyHours} ساعات'
+                                        : 'Periodic Salawat reminders enabled every ${state.salawatFrequencyHours} hours')
+                                  : (isAr
+                                        ? 'تم إيقاف تذكير الصلاة على النبي'
+                                        : 'Salawat reminders disabled'),
                             );
                           },
                           context,
@@ -307,15 +300,12 @@ class RemindersSettingsDialog extends StatelessWidget {
                             trailing: DropdownButton<int>(
                               value: state.salawatFrequencyHours,
                               underline: const SizedBox(),
-                              items:
-                                  [1, 2, 3, 4, 6].map((h) {
-                                    return DropdownMenuItem(
-                                      value: h,
-                                      child: Text(
-                                        isAr ? '$h ساعات' : '$h hours',
-                                      ),
-                                    );
-                                  }).toList(),
+                              items: [1, 2, 3, 4, 6].map((h) {
+                                return DropdownMenuItem(
+                                  value: h,
+                                  child: Text(isAr ? '$h ساعات' : '$h hours'),
+                                );
+                              }).toList(),
                               onChanged: (val) {
                                 if (val != null) {
                                   context

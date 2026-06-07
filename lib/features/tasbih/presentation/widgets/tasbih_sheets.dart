@@ -199,7 +199,9 @@ class TasbihSettingsSheet extends StatelessWidget {
         children: [
           Icon(
             icon,
-            color: value ? context.secondaryColor : context.onSurfaceVariantColor,
+            color: value
+                ? context.secondaryColor
+                : context.onSurfaceVariantColor,
             size: 22,
           ),
           const SizedBox(width: 16),

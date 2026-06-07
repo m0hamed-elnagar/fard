@@ -7,7 +7,8 @@ import '../../../../core/mixins/notification_permission_mixin.dart';
 import '../blocs/daily_reminders_cubit.dart';
 import '../blocs/daily_reminders_state.dart';
 
-class WerdReminderSection extends StatelessWidget with NotificationPermissionMixin {
+class WerdReminderSection extends StatelessWidget
+    with NotificationPermissionMixin {
   const WerdReminderSection({super.key});
 
   @override
@@ -27,7 +28,9 @@ class WerdReminderSection extends StatelessWidget with NotificationPermissionMix
               value: state.isWerdReminderEnabled,
               onChanged: (val) async {
                 if (val) {
-                  final granted = await checkAndRequestNotificationPermissions(context);
+                  final granted = await checkAndRequestNotificationPermissions(
+                    context,
+                  );
                   if (!granted) return;
                 }
                 cubit.toggleWerdReminder(val);
@@ -38,7 +41,10 @@ class WerdReminderSection extends StatelessWidget with NotificationPermissionMix
                 contentPadding: EdgeInsets.zero,
                 title: Text(l10n.time),
                 trailing: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: context.secondaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
@@ -53,7 +59,10 @@ class WerdReminderSection extends StatelessWidget with NotificationPermissionMix
                   ),
                 ),
                 onTap: () async {
-                  final time = await _selectTime(context, state.werdReminderTime);
+                  final time = await _selectTime(
+                    context,
+                    state.werdReminderTime,
+                  );
                   if (time != null) cubit.setWerdReminderTime(time);
                 },
               ),
@@ -99,7 +108,10 @@ class WerdReminderSection extends StatelessWidget with NotificationPermissionMix
                 const SizedBox(width: 16),
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -117,7 +129,11 @@ class WerdReminderSection extends StatelessWidget with NotificationPermissionMix
     );
   }
 
-  Widget _buildToggleItem({required String title, required bool value, required ValueChanged<bool> onChanged}) {
+  Widget _buildToggleItem({
+    required String title,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -129,8 +145,14 @@ class WerdReminderSection extends StatelessWidget with NotificationPermissionMix
 
   Future<String?> _selectTime(BuildContext context, String currentTime) async {
     final parts = currentTime.split(':');
-    final initialTime = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
-    final picked = await showTimePicker(context: context, initialTime: initialTime);
+    final initialTime = TimeOfDay(
+      hour: int.parse(parts[0]),
+      minute: int.parse(parts[1]),
+    );
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initialTime,
+    );
     if (picked != null) {
       return '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
     }

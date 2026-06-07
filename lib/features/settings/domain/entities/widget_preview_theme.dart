@@ -161,7 +161,4 @@ class WidgetColors {
 }
 
 /// Widget types for preview
-enum WidgetPreviewType {
-  prayerSchedule,
-  countdown,
-}
+enum WidgetPreviewType { prayerSchedule, countdown }

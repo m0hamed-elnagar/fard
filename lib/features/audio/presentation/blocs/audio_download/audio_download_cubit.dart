@@ -113,7 +113,7 @@ class AudioDownloadCubit extends Cubit<AudioDownloadState> {
     // Optimistic "Stopping" state
     final newStatuses = Map<int, SurahDownloadStatus>.from(state.surahStatuses);
     bool changed = false;
-    
+
     if (surahNumber != null) {
       final s = newStatuses[surahNumber];
       if (s != null && s.isDownloading) {
@@ -129,7 +129,7 @@ class AudioDownloadCubit extends Cubit<AudioDownloadState> {
         }
       }
     }
-    
+
     if (changed) emit(state.copyWith(surahStatuses: newStatuses));
 
     await _downloadService.cancelDownload(reciter.identifier, surahNumber);

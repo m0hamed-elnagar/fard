@@ -11,8 +11,12 @@ class MockQuranSymbolsRepository implements QuranSymbolsRepository {
   Future<CategorizedSymbols> getCategorizedSymbols() async {
     return CategorizedSymbols(
       waqfSymbols: symbols.where((s) => s.id.startsWith('waqf_')).toList(),
-      tajweedSymbols: symbols.where((s) => s.id.startsWith('tajweed_')).toList(),
-      structureSymbols: symbols.where((s) => s.id.startsWith('structure_')).toList(),
+      tajweedSymbols: symbols
+          .where((s) => s.id.startsWith('tajweed_'))
+          .toList(),
+      structureSymbols: symbols
+          .where((s) => s.id.startsWith('structure_'))
+          .toList(),
     );
   }
 
@@ -51,9 +55,9 @@ void main() {
       final repository = MockQuranSymbolsRepository(mockSymbols);
       final detector = SymbolDetectorService(repository);
       final ayah = 'إِلَى ٱلتَّهْلُكَةِ ۖ وَأَحْسِنُوٓا۟ ۗ';
-      
+
       final detectedIds = await detector.detectSymbols(ayah);
-      
+
       expect(detectedIds, contains('waqf_lazim'));
       expect(detectedIds, contains('waqf_mamnu'));
       expect(detectedIds.length, 2);
@@ -63,9 +67,9 @@ void main() {
       final repository = MockQuranSymbolsRepository(mockSymbols);
       final detector = SymbolDetectorService(repository);
       final ayah = 'بسم الله الرحمن الرحيم';
-      
+
       final detectedIds = await detector.detectSymbols(ayah);
-      
+
       expect(detectedIds, isEmpty);
     });
   });

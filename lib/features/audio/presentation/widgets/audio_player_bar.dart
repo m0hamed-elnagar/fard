@@ -57,20 +57,27 @@ class AudioPlayerBar extends StatelessWidget {
                       _buildCollapsedView(context, state, isNarrow, l10n)
                     else
                       _buildExpandedView(context, state, isNarrow, l10n),
-                    
+
                     // Error Display - Ultra compact footer
                     if (state.hasError)
                       Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.error.withValues(alpha: 0.1),
                           borderRadius: const BorderRadius.vertical(
                             bottom: Radius.circular(24),
                           ),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
                         child: Text(
-                          state.lastErrorMessage ?? state.error ?? l10n.errorOccurred,
+                          state.lastErrorMessage ??
+                              state.error ??
+                              l10n.errorOccurred,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.error,
                             fontSize: 10,
@@ -91,8 +98,8 @@ class AudioPlayerBar extends StatelessWidget {
   }
 
   Widget _buildCollapsedView(
-    BuildContext context, 
-    AudioPlayerState state, 
+    BuildContext context,
+    AudioPlayerState state,
     bool isNarrow,
     AppLocalizations l10n,
   ) {
@@ -121,15 +128,17 @@ class AudioPlayerBar extends StatelessWidget {
                                   ? state.currentAyah!.toArabicIndic()
                                   : state.currentAyah!.toString(),
                               isArabic
-                                  ? quran.getSurahNameArabic(state.currentSurah!)
+                                  ? quran.getSurahNameArabic(
+                                      state.currentSurah!,
+                                    )
                                   : quran.getSurahName(state.currentSurah!),
                             )
                           : l10n.readyToPlay,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: isNarrow ? 14 : 16,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
+                        fontWeight: FontWeight.bold,
+                        fontSize: isNarrow ? 14 : 16,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -151,7 +160,7 @@ class AudioPlayerBar extends StatelessWidget {
                   _buildPlayPauseButton(context, state, isNarrow),
                   _buildActionButton(
                     icon: const Icon(Icons.expand_less_rounded),
-                    tooltip: "Expand", 
+                    tooltip: "Expand",
                     onPressed: () => context.read<AudioPlayerBloc>().add(
                       const TogglePlayerExpanded(),
                     ),
@@ -159,9 +168,8 @@ class AudioPlayerBar extends StatelessWidget {
                   _buildActionButton(
                     icon: const Icon(Icons.close_rounded),
                     tooltip: l10n.close,
-                    onPressed: () => context.read<AudioPlayerBloc>().add(
-                      const HideBanner(),
-                    ),
+                    onPressed: () =>
+                        context.read<AudioPlayerBloc>().add(const HideBanner()),
                   ),
                 ],
               ),
@@ -173,8 +181,8 @@ class AudioPlayerBar extends StatelessWidget {
   }
 
   Widget _buildExpandedView(
-    BuildContext context, 
-    AudioPlayerState state, 
+    BuildContext context,
+    AudioPlayerState state,
     bool isNarrow,
     AppLocalizations l10n,
   ) {
@@ -192,9 +200,12 @@ class AudioPlayerBar extends StatelessWidget {
                 onTap: () => _showReciterSelector(context),
                 child: CircleAvatar(
                   radius: 20,
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer,
                   child: Text(
-                    state.currentReciter != null && state.currentReciter!.name.isNotEmpty
+                    state.currentReciter != null &&
+                            state.currentReciter!.name.isNotEmpty
                         ? state.currentReciter!.name.substring(0, 1)
                         : 'A',
                     style: TextStyle(
@@ -217,22 +228,26 @@ class AudioPlayerBar extends StatelessWidget {
                                   ? state.currentAyah!.toArabicIndic()
                                   : state.currentAyah!.toString(),
                               isArabic
-                                  ? quran.getSurahNameArabic(state.currentSurah!)
+                                  ? quran.getSurahNameArabic(
+                                      state.currentSurah!,
+                                    )
                                   : quran.getSurahName(state.currentSurah!),
                             )
                           : l10n.readyToPlay,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                     Text(
                       state.currentReciter != null
-                          ? (isArabic ? state.currentReciter!.name : state.currentReciter!.englishName)
+                          ? (isArabic
+                                ? state.currentReciter!.name
+                                : state.currentReciter!.englishName)
                           : l10n.selectReciter,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
@@ -255,14 +270,20 @@ class AudioPlayerBar extends StatelessWidget {
             children: [
               Text(
                 _formatDuration(state.position),
-                style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
-              Expanded(
-                child: _buildProgressBar(context, state),
-              ),
+              Expanded(child: _buildProgressBar(context, state)),
               Text(
-                state.duration > Duration.zero ? _formatDuration(state.duration) : "--:--",
-                style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                state.duration > Duration.zero
+                    ? _formatDuration(state.duration)
+                    : "--:--",
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -282,29 +303,37 @@ class AudioPlayerBar extends StatelessWidget {
                 ),
               _buildActionButton(
                 icon: Icon(
-                  state.isRepeating ? Icons.repeat_one_on_rounded : Icons.repeat_one_rounded,
-                  color: state.isRepeating ? Theme.of(context).colorScheme.primary : null,
+                  state.isRepeating
+                      ? Icons.repeat_one_on_rounded
+                      : Icons.repeat_one_rounded,
+                  color: state.isRepeating
+                      ? Theme.of(context).colorScheme.primary
+                      : null,
                 ),
                 tooltip: l10n.repeatAyah,
-                onPressed: () => context.read<AudioPlayerBloc>().add(const ToggleRepeat()),
+                onPressed: () =>
+                    context.read<AudioPlayerBloc>().add(const ToggleRepeat()),
               ),
               _buildActionButton(
                 // NOTE: ICON DIRECTIONS ARE SWAPPED DELIBERATELY TO LOOK CORRECT IN THE UI. DO NOT CHANGE.
                 icon: const Icon(Icons.skip_next_rounded),
                 iconSize: 24,
-                onPressed: () => context.read<AudioPlayerBloc>().add(const SkipToPrevious()),
+                onPressed: () =>
+                    context.read<AudioPlayerBloc>().add(const SkipToPrevious()),
               ),
               _buildPlayPauseButton(context, state, isNarrow, size: 48),
               _buildActionButton(
                 // NOTE: ICON DIRECTIONS ARE SWAPPED DELIBERATELY TO LOOK CORRECT IN THE UI. DO NOT CHANGE.
                 icon: const Icon(Icons.skip_previous_rounded),
                 iconSize: 24,
-                onPressed: () => context.read<AudioPlayerBloc>().add(const SkipToNext()),
+                onPressed: () =>
+                    context.read<AudioPlayerBloc>().add(const SkipToNext()),
               ),
               _buildActionButton(
                 icon: const Icon(Icons.close_rounded),
                 tooltip: l10n.close,
-                onPressed: () => context.read<AudioPlayerBloc>().add(const HideBanner()),
+                onPressed: () =>
+                    context.read<AudioPlayerBloc>().add(const HideBanner()),
               ),
             ],
           ),
@@ -313,16 +342,13 @@ class AudioPlayerBar extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressBar(
-    BuildContext context, 
-    AudioPlayerState state, 
-  ) {
+  Widget _buildProgressBar(BuildContext context, AudioPlayerState state) {
     return SizedBox(
       height: 32, // Large hit area for fingers (32dp)
       child: SliderTheme(
         data: SliderTheme.of(context).copyWith(
           trackHeight: 2, // Thin bar
-          thumbShape: state.duration > Duration.zero 
+          thumbShape: state.duration > Duration.zero
               ? const RoundSliderThumbShape(
                   enabledThumbRadius: 7, // Big circle
                   elevation: 2,
@@ -330,16 +356,25 @@ class AudioPlayerBar extends StatelessWidget {
               : SliderComponentShape.noThumb,
           overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
           activeTrackColor: Theme.of(context).colorScheme.primary,
-          inactiveTrackColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+          inactiveTrackColor: Theme.of(
+            context,
+          ).colorScheme.primary.withValues(alpha: 0.1),
           thumbColor: Theme.of(context).colorScheme.primary,
         ),
         child: Slider(
           value: state.duration > Duration.zero
-              ? state.position.inMilliseconds.toDouble().clamp(0.0, state.duration.inMilliseconds.toDouble())
+              ? state.position.inMilliseconds.toDouble().clamp(
+                  0.0,
+                  state.duration.inMilliseconds.toDouble(),
+                )
               : 0.0,
-          max: state.duration > Duration.zero ? state.duration.inMilliseconds.toDouble() : 1.0,
+          max: state.duration > Duration.zero
+              ? state.duration.inMilliseconds.toDouble()
+              : 1.0,
           onChanged: state.duration > Duration.zero
-              ? (value) => context.read<AudioPlayerBloc>().add(SeekTo(Duration(milliseconds: value.toInt())))
+              ? (value) => context.read<AudioPlayerBloc>().add(
+                  SeekTo(Duration(milliseconds: value.toInt())),
+                )
               : null,
         ),
       ),
@@ -347,11 +382,11 @@ class AudioPlayerBar extends StatelessWidget {
   }
 
   Widget _buildPlayPauseButton(
-    BuildContext context, 
-    AudioPlayerState state, 
-    bool isNarrow,
-    {double size = 42}
-  ) {
+    BuildContext context,
+    AudioPlayerState state,
+    bool isNarrow, {
+    double size = 42,
+  }) {
     return Container(
       width: size,
       height: size,
@@ -361,7 +396,9 @@ class AudioPlayerBar extends StatelessWidget {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
+            color: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.25),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -370,14 +407,22 @@ class AudioPlayerBar extends StatelessWidget {
       child: state.isLoading
           ? Padding(
               padding: EdgeInsets.all(size * 0.25),
-              child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+              child: const CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
             )
           : IconButton(
               padding: EdgeInsets.zero,
               iconSize: size * 0.6,
               color: Colors.white,
-              icon: Icon(state.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded),
-              onPressed: () => context.read<AudioPlayerBloc>().add(const TogglePlayback()),
+              icon: Icon(
+                state.isPlaying
+                    ? Icons.pause_rounded
+                    : Icons.play_arrow_rounded,
+              ),
+              onPressed: () =>
+                  context.read<AudioPlayerBloc>().add(const TogglePlayback()),
             ),
     );
   }
@@ -391,10 +436,7 @@ class AudioPlayerBar extends StatelessWidget {
     return IconButton(
       iconSize: iconSize,
       padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(
-        minWidth: 44,
-        minHeight: 44,
-      ),
+      constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
       tooltip: tooltip,
       icon: icon,
       onPressed: onPressed,
@@ -407,8 +449,9 @@ class AudioPlayerBar extends StatelessWidget {
       return;
     }
     final currentRoute = ModalRoute.of(context);
-    final bool isAlreadyOnReader = currentRoute?.settings.name == 'QuranReaderPage';
-    
+    final bool isAlreadyOnReader =
+        currentRoute?.settings.name == 'QuranReaderPage';
+
     if (isAlreadyOnReader) {
       Navigator.pushReplacement(
         context,

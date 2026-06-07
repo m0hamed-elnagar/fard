@@ -150,23 +150,25 @@ void main() {
       // The logic to throw exception should be in ExportImportService
     });
 
-    test('Should handle missing new fields in v1 backup (backward compatibility)',
-        () {
-      final jsonData = {
-        'version': 1,
-        'appVersion': '1.0.0',
-        'timestamp': DateTime.now().toIso8601String(),
-        'prayerRecords': [],
-        'werdGoals': [],
-        'werdProgress': [],
-      };
+    test(
+      'Should handle missing new fields in v1 backup (backward compatibility)',
+      () {
+        final jsonData = {
+          'version': 1,
+          'appVersion': '1.0.0',
+          'timestamp': DateTime.now().toIso8601String(),
+          'prayerRecords': [],
+          'werdGoals': [],
+          'werdProgress': [],
+        };
 
-      final backup = AppBackup.fromJson(jsonData);
-      expect(backup.preferences, isEmpty);
-      expect(backup.tasbihHistory, isEmpty);
-      expect(backup.tasbihProgress, isEmpty);
-      expect(backup.tasbihPreferredDuas, isEmpty);
-      expect(backup.bookmarks, isEmpty);
-    });
+        final backup = AppBackup.fromJson(jsonData);
+        expect(backup.preferences, isEmpty);
+        expect(backup.tasbihHistory, isEmpty);
+        expect(backup.tasbihProgress, isEmpty);
+        expect(backup.tasbihPreferredDuas, isEmpty);
+        expect(backup.bookmarks, isEmpty);
+      },
+    );
   });
 }

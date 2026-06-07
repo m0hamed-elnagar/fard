@@ -14,17 +14,17 @@ void main() {
 
   testWidgets('AyahText triggers onAyahTap', (WidgetTester tester) async {
     Ayah? tappedAyah;
-    
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Directionality(
             textDirection: TextDirection.rtl,
             child: AyahText(
-              ayahs: [testAyah1], 
+              ayahs: [testAyah1],
               onAyahTap: (a) {
                 tappedAyah = a;
-              }
+              },
             ),
           ),
         ),

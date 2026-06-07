@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockAudioRepository extends Mock implements AudioRepository {}
+
 class MockAudioDownloadService extends Mock implements AudioDownloadService {}
 
 void main() {
@@ -25,14 +26,26 @@ void main() {
     mockRepository = MockAudioRepository();
     mockDownloadService = MockAudioDownloadService();
 
-    when(() => mockRepository.getCachedReciters()).thenAnswer((_) async => Result.success([tReciter]));
-    when(() => mockRepository.getAvailableReciters()).thenAnswer((_) async => Result.success([tReciter]));
-    when(() => mockRepository.getCachedReciterData()).thenAnswer((_) async => const ReciterData(progress: {}, sizes: {}));
-    when(() => mockRepository.cacheReciterData(any(), any())).thenAnswer((_) async {});
+    when(
+      () => mockRepository.getCachedReciters(),
+    ).thenAnswer((_) async => Result.success([tReciter]));
+    when(
+      () => mockRepository.getAvailableReciters(),
+    ).thenAnswer((_) async => Result.success([tReciter]));
+    when(
+      () => mockRepository.getCachedReciterData(),
+    ).thenAnswer((_) async => const ReciterData(progress: {}, sizes: {}));
+    when(
+      () => mockRepository.cacheReciterData(any(), any()),
+    ).thenAnswer((_) async {});
     when(() => mockRepository.cacheReciters(any())).thenAnswer((_) async {});
 
-    when(() => mockDownloadService.getReciterDownloadPercentage(any())).thenAnswer((_) async => 0.0);
-    when(() => mockDownloadService.getReciterDownloadedSize(any())).thenAnswer((_) async => 0);
+    when(
+      () => mockDownloadService.getReciterDownloadPercentage(any()),
+    ).thenAnswer((_) async => 0.0);
+    when(
+      () => mockDownloadService.getReciterDownloadedSize(any()),
+    ).thenAnswer((_) async => 0);
   });
 
   ReciterManagerBloc buildBloc() {

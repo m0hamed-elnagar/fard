@@ -232,4 +232,3 @@ abstract interface class SettingsRepository {
   /// Import all settings from a map
   Future<void> importSettings(Map<String, dynamic> settings);
 }
-

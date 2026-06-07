@@ -10,12 +10,12 @@
 -keepattributes SourceFile,LineNumberTable
 
 # Keep specific application classes (replaces overly permissive `-keep public class *`)
--keep class com.qada.fard.FardApplication { *; }
--keep class com.qada.fard.MainActivity { *; }
--keep class com.qada.fard.**_HiveAdapter
--keep class com.qada.fard.**_HiveAdapterCreator
--keep class com.qada.fard.**_HiveEnumAdapter
--keep class com.qada.fard.di.** { *; }
+-keep class com.khwarizmi.fard.FardApplication { *; }
+-keep class com.khwarizmi.fard.MainActivity { *; }
+-keep class com.khwarizmi.fard.**_HiveAdapter
+-keep class com.khwarizmi.fard.**_HiveAdapterCreator
+-keep class com.khwarizmi.fard.**_HiveEnumAdapter
+-keep class com.khwarizmi.fard.di.** { *; }
 
 # Keep native methods
 -keepclasseswithmembernames,includedescriptorclasses class * {
@@ -37,14 +37,14 @@
 -dontwarn com.hivewallet.hive.ce.**
 
 # Keep all entity classes (prevent field obfuscation)
--keep class com.qada.fard.features.prayer_tracking.data.** { *; }
--keep class com.qada.fard.features.quran.data.datasources.local.entities.** { *; }
--keep class com.qada.fard.features.azker.data.** { *; }
--keep class com.qada.fard.features.tasbih.data.** { *; }
+-keep class com.khwarizmi.fard.features.prayer_tracking.data.** { *; }
+-keep class com.khwarizmi.fard.features.quran.data.datasources.local.entities.** { *; }
+-keep class com.khwarizmi.fard.features.azker.data.** { *; }
+-keep class com.khwarizmi.fard.features.tasbih.data.** { *; }
 
 # Keep Hive registrar
--keep class com.qada.fard.HiveRegistrar
--keep class com.qada.fard.hive_registrar
+-keep class com.khwarizmi.fard.HiveRegistrar
+-keep class com.khwarizmi.fard.hive_registrar
 
 # ===========================
 # BLOC / STATE MANAGEMENT
@@ -63,8 +63,8 @@
 # Keep Freezed generated classes
 -keep class * implements org.freezed.Union
 -keep class * extends org.freezed.Union
--keep class * extends com.qada.fard.**_FreezedUnion
--keep class com.qada.fard.**$* { *; }
+-keep class * extends com.khwarizmi.fard.**_FreezedUnion
+-keep class com.khwarizmi.fard.**$* { *; }
 
 # Keep Equatable classes
 -keep class * extends equatable.Equatable { *; }
@@ -110,7 +110,7 @@
 -keep class be.tramckrijte.workmanager.BackgroundWorker
 
 # Keep background service implementation
--keep class com.qada.fard.core.services.background.** { *; }
+-keep class com.khwarizmi.fard.core.services.background.** { *; }
 
 # ===========================
 # FLUTTER BINDINGS
@@ -121,16 +121,16 @@
 -dontwarn io.flutter.**
 
 # Keep Flutter application
--keep class com.qada.fard.FardApplication
+-keep class com.khwarizmi.fard.FardApplication
 
 # Keep MainActivity
--keep class com.qada.fard.MainActivity
+-keep class com.khwarizmi.fard.MainActivity
 
 # Keep Widget Receivers
--keep class com.qada.fard.PrayerWidgetReceiver
--keep class com.qada.fard.NextPrayerCountdownWidgetReceiver
--keep class com.qada.fard.TimeChangedReceiver
--keep class com.qada.fard.BootReceiver
+-keep class com.khwarizmi.fard.PrayerWidgetReceiver
+-keep class com.khwarizmi.fard.NextPrayerCountdownWidgetReceiver
+-keep class com.khwarizmi.fard.TimeChangedReceiver
+-keep class com.khwarizmi.fard.BootReceiver
 
 # ===========================
 # GLANCE WIDGETS
@@ -204,13 +204,13 @@
 # ===========================
 
 # Keep all data classes in domain layer
--keep class com.qada.fard.features.**.domain.** { *; }
+-keep class com.khwarizmi.fard.features.**.domain.** { *; }
 
 # Keep all data models in data layer
--keep class com.qada.fard.features.**.data.models.** { *; }
--keep class com.qada.fard.features.**.data.entities.** { *; }
--keep class com.qada.fard.core.models.** { *; }
--keep class com.qada.fard.core.domain.** { *; }
+-keep class com.khwarizmi.fard.features.**.data.models.** { *; }
+-keep class com.khwarizmi.fard.features.**.data.entities.** { *; }
+-keep class com.khwarizmi.fard.core.models.** { *; }
+-keep class com.khwarizmi.fard.core.domain.** { *; }
 
 # ===========================
 # KEEP ENUMS

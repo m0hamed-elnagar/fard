@@ -52,7 +52,12 @@ void main() {
     getIt.registerSingleton<PrayerTimeService>(prayerTimeService);
     getIt.registerSingleton<NotificationService>(notificationService);
 
-    bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
+    bloc = PrayerTrackerBloc(
+      repo,
+      prefs,
+      prayerTimeService,
+      notificationService,
+    );
 
     // Common Stubs
     when(() => repo.loadRecord(any())).thenAnswer((_) async => null);
@@ -406,12 +411,12 @@ void main() {
                     : const MissedCounter(0),
             },
           );
-          when(() => repo.loadLastSavedRecord()).thenAnswer(
-            (_) async => lastRecord,
-          );
-          when(() => repo.loadMonth(any(), any())).thenAnswer(
-            (_) async => {date: dummyRecord},
-          );
+          when(
+            () => repo.loadLastSavedRecord(),
+          ).thenAnswer((_) async => lastRecord);
+          when(
+            () => repo.loadMonth(any(), any()),
+          ).thenAnswer((_) async => {date: dummyRecord});
           // Mock saveToday to capture all saves
           when(() => repo.saveToday(any())).thenAnswer((_) async {});
         },

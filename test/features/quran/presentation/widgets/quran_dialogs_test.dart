@@ -23,9 +23,7 @@ Future<void> _pumpDialog(
             return ElevatedButton(
               onPressed: () => showDialog(
                 context: context,
-                builder: (_) => SingleChildScrollView(
-                  child: dialog,
-                ),
+                builder: (_) => SingleChildScrollView(child: dialog),
               ),
               child: const Text('Show Dialog'),
             );
@@ -82,7 +80,10 @@ void main() {
       // Verify descriptions
       expect(find.text('Navigate to completion supplications'), findsOneWidget);
       expect(find.text('Reset to Surah Al-Fatihah (Ayah 1)'), findsOneWidget);
-      expect(find.text('Keep current position at Surah An-Nas'), findsOneWidget);
+      expect(
+        find.text('Keep current position at Surah An-Nas'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('dialog has correct visual styling', (tester) async {
@@ -171,7 +172,10 @@ void main() {
       expect(find.text('إتمام القرآن الكريم'), findsOneWidget);
 
       // Verify Arabic subtitle
-      expect(find.text('لقد أتممت قراءة القرآن الكريم بالكامل'), findsOneWidget);
+      expect(
+        find.text('لقد أتممت قراءة القرآن الكريم بالكامل'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows Arabic option labels', (tester) async {
@@ -197,7 +201,10 @@ void main() {
       // Verify Arabic descriptions
       expect(find.text('الانتقال إلى صفحة الأذكار'), findsOneWidget);
       expect(find.text('العودة إلى سورة الفاتحة (الآية 1)'), findsOneWidget);
-      expect(find.text('الإبقاء على الموضع الحالي عند سورة الناس'), findsOneWidget);
+      expect(
+        find.text('الإبقاء على الموضع الحالي عند سورة الناس'),
+        findsOneWidget,
+      );
     });
   });
 
@@ -264,9 +271,18 @@ void main() {
       );
 
       // Verify icons
-      expect(find.byIcon(Icons.close_rounded, skipOffstage: false), findsOneWidget);
-      expect(find.byIcon(Icons.play_circle_outline_rounded, skipOffstage: false), findsOneWidget);
-      expect(find.byIcon(Icons.check_circle_rounded, skipOffstage: false), findsOneWidget);
+      expect(
+        find.byIcon(Icons.close_rounded, skipOffstage: false),
+        findsOneWidget,
+      );
+      expect(
+        find.byIcon(Icons.play_circle_outline_rounded, skipOffstage: false),
+        findsOneWidget,
+      );
+      expect(
+        find.byIcon(Icons.check_circle_rounded, skipOffstage: false),
+        findsOneWidget,
+      );
     });
 
     testWidgets('dismiss option shows current total', (tester) async {
@@ -430,7 +446,9 @@ void main() {
       expect(dialog.pages, 5);
     });
 
-    testWidgets('calculates correct new total if mark all (95)', (tester) async {
+    testWidgets('calculates correct new total if mark all (95)', (
+      tester,
+    ) async {
       const dialog = JumpDialog(
         lastReadAyah: 10,
         targetAyah: 100,

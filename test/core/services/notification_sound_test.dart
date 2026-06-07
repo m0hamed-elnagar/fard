@@ -61,8 +61,9 @@ void main() {
 
     // Mock SharedPreferences
     when(() => mockSharedPreferences.getString(any())).thenReturn(null);
-    when(() => mockSharedPreferences.setString(any(), any()))
-        .thenAnswer((_) async => true);
+    when(
+      () => mockSharedPreferences.setString(any(), any()),
+    ).thenAnswer((_) async => true);
 
     when(
       () => mockAndroidPlugin.areNotificationsEnabled(),

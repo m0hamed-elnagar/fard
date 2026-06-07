@@ -22,21 +22,25 @@ void main() {
   late WerdProgress initialProgress;
 
   setUpAll(() {
-    registerFallbackValue(WerdProgress(
-      goalId: 'default',
-      totalAmountReadToday: 0,
-      segmentsToday: const [],
-      lastUpdated: DateTime.now(),
-      streak: 0,
-    ));
-    registerFallbackValue(WerdGoal(
-      id: 'default',
-      type: WerdGoalType.fixedAmount,
-      value: 20,
-      unit: WerdUnit.ayah,
-      startDate: DateTime.now(),
-      startAbsolute: 1,
-    ));
+    registerFallbackValue(
+      WerdProgress(
+        goalId: 'default',
+        totalAmountReadToday: 0,
+        segmentsToday: const [],
+        lastUpdated: DateTime.now(),
+        streak: 0,
+      ),
+    );
+    registerFallbackValue(
+      WerdGoal(
+        id: 'default',
+        type: WerdGoalType.fixedAmount,
+        value: 20,
+        unit: WerdUnit.ayah,
+        startDate: DateTime.now(),
+        startAbsolute: 1,
+      ),
+    );
   });
 
   setUp(() {
@@ -60,7 +64,7 @@ void main() {
           endAyah: 10,
           startTime: DateTime.now(),
           endTime: DateTime.now(),
-        )
+        ),
       ],
       lastReadAbsolute: 10,
       sessionStartAbsolute: 1,
@@ -69,14 +73,18 @@ void main() {
       completedCycles: 0,
     );
 
-    when(() => mockRepository.getGoal(id: any(named: 'id')))
-        .thenAnswer((_) async => Result.success(testGoal));
-    when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
-        .thenAnswer((_) async => Result.success(initialProgress));
-    when(() => mockRepository.watchProgress(goalId: any(named: 'goalId')))
-        .thenAnswer((_) => Stream.value(Result.success(initialProgress)));
-    when(() => mockRepository.updateProgress(any()))
-        .thenAnswer((_) async => Result.success(null));
+    when(
+      () => mockRepository.getGoal(id: any(named: 'id')),
+    ).thenAnswer((_) async => Result.success(testGoal));
+    when(
+      () => mockRepository.getProgress(goalId: any(named: 'goalId')),
+    ).thenAnswer((_) async => Result.success(initialProgress));
+    when(
+      () => mockRepository.watchProgress(goalId: any(named: 'goalId')),
+    ).thenAnswer((_) => Stream.value(Result.success(initialProgress)));
+    when(
+      () => mockRepository.updateProgress(any()),
+    ).thenAnswer((_) async => Result.success(null));
   });
 
   group('WerdBloc: Jump to New Session', () {
@@ -86,29 +94,34 @@ void main() {
       seed: () => WerdState(goal: testGoal, progress: initialProgress),
       setUp: () {
         var currentProgress = initialProgress;
-        when(() => mockRepository.getProgress(goalId: any(named: 'goalId'))).thenAnswer(
-          (_) async => Result.success(currentProgress),
-        );
-        when(() => mockRepository.updateProgress(any())).thenAnswer((invocation) async {
+        when(
+          () => mockRepository.getProgress(goalId: any(named: 'goalId')),
+        ).thenAnswer((_) async => Result.success(currentProgress));
+        when(() => mockRepository.updateProgress(any())).thenAnswer((
+          invocation,
+        ) async {
           currentProgress = invocation.positionalArguments[0] as WerdProgress;
           return Result.success(null);
         });
       },
       act: (bloc) => bloc.add(const WerdEvent.jumpToNewSession(100)),
       expect: () => [
-        isA<WerdState>().having(
-          (s) => s.progress?.lastReadAbsolute,
-          'lastReadAbsolute',
-          100,
-        ).having(
-          (s) => s.progress?.sessionStartAbsolute,
-          'sessionStartAbsolute',
-          100,
-        ).having(
-          (s) => s.progress?.totalAmountReadToday,
-          'totalAmountReadToday',
-          10, // Unchanged! Correct.
-        ),
+        isA<WerdState>()
+            .having(
+              (s) => s.progress?.lastReadAbsolute,
+              'lastReadAbsolute',
+              100,
+            )
+            .having(
+              (s) => s.progress?.sessionStartAbsolute,
+              'sessionStartAbsolute',
+              100,
+            )
+            .having(
+              (s) => s.progress?.totalAmountReadToday,
+              'totalAmountReadToday',
+              10, // Unchanged! Correct.
+            ),
       ],
     );
 
@@ -118,10 +131,12 @@ void main() {
       seed: () => WerdState(goal: testGoal, progress: initialProgress),
       setUp: () {
         var currentProgress = initialProgress;
-        when(() => mockRepository.getProgress(goalId: any(named: 'goalId'))).thenAnswer(
-          (_) async => Result.success(currentProgress),
-        );
-        when(() => mockRepository.updateProgress(any())).thenAnswer((invocation) async {
+        when(
+          () => mockRepository.getProgress(goalId: any(named: 'goalId')),
+        ).thenAnswer((_) async => Result.success(currentProgress));
+        when(() => mockRepository.updateProgress(any())).thenAnswer((
+          invocation,
+        ) async {
           currentProgress = invocation.positionalArguments[0] as WerdProgress;
           return Result.success(null);
         });
@@ -153,7 +168,7 @@ void main() {
               endAyah: 10,
               startTime: DateTime.now(),
               // No endTime = active
-            )
+            ),
           ],
         ),
       ),
@@ -164,12 +179,15 @@ void main() {
               startAyah: 1,
               endAyah: 10,
               startTime: DateTime.now(),
-            )
+            ),
           ],
         );
-        when(() => mockRepository.getProgress(goalId: any(named: 'goalId')))
-            .thenAnswer((_) async => Result.success(currentProgress));
-        when(() => mockRepository.updateProgress(any())).thenAnswer((invocation) async {
+        when(
+          () => mockRepository.getProgress(goalId: any(named: 'goalId')),
+        ).thenAnswer((_) async => Result.success(currentProgress));
+        when(() => mockRepository.updateProgress(any())).thenAnswer((
+          invocation,
+        ) async {
           currentProgress = invocation.positionalArguments[0] as WerdProgress;
           return Result.success(null);
         });
@@ -191,4 +209,3 @@ void main() {
     );
   });
 }
-

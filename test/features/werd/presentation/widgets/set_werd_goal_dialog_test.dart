@@ -21,7 +21,8 @@ import 'package:fard/features/settings/presentation/blocs/theme_state.dart';
 
 class MockWerdBloc extends MockBloc<WerdEvent, WerdState> implements WerdBloc {}
 
-class MockQuranBloc extends MockBloc<QuranEvent, QuranState> implements QuranBloc {}
+class MockQuranBloc extends MockBloc<QuranEvent, QuranState>
+    implements QuranBloc {}
 
 class MockThemeCubit extends MockCubit<ThemeState> implements ThemeCubit {}
 
@@ -42,9 +43,9 @@ void main() {
     mockNavigatorObserver = MockNavigatorObserver();
 
     // Mock Theme state
-    when(() => mockThemeCubit.state).thenReturn(
-      const ThemeState(locale: Locale('en')),
-    );
+    when(
+      () => mockThemeCubit.state,
+    ).thenReturn(const ThemeState(locale: Locale('en')));
     when(() => mockThemeCubit.stream).thenAnswer((_) => const Stream.empty());
 
     registerFallbackValue(FakeRoute());
@@ -58,14 +59,18 @@ void main() {
         startAbsolute: 1,
       ),
     );
-    registerFallbackValue(WerdEvent.setGoal(WerdGoal(
-      id: 'fallback',
-      type: WerdGoalType.fixedAmount,
-      value: 1,
-      unit: WerdUnit.ayah,
-      startDate: DateTime.now(),
-      startAbsolute: 1,
-    )));
+    registerFallbackValue(
+      WerdEvent.setGoal(
+        WerdGoal(
+          id: 'fallback',
+          type: WerdGoalType.fixedAmount,
+          value: 1,
+          unit: WerdUnit.ayah,
+          startDate: DateTime.now(),
+          startAbsolute: 1,
+        ),
+      ),
+    );
     registerFallbackValue(const QuranState());
     registerFallbackValue(
       WerdGoal(
@@ -107,9 +112,7 @@ void main() {
 
   Widget createDialogUnderTest({Locale locale = const Locale('en')}) {
     // Update theme state to match requested locale
-    when(() => mockThemeCubit.state).thenReturn(
-      ThemeState(locale: locale),
-    );
+    when(() => mockThemeCubit.state).thenReturn(ThemeState(locale: locale));
 
     return MaterialApp(
       locale: locale,
@@ -170,7 +173,7 @@ void main() {
       when(() => mockQuranBloc.state).thenReturn(QuranState.initial());
 
       await tester.pumpWidget(createDialogUnderTest());
-      
+
       // Open dialog
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
@@ -179,7 +182,9 @@ void main() {
       expect(find.text('Daily'), findsOneWidget);
     });
 
-    testWidgets('switching to finishInDays changes value to 30', (tester) async {
+    testWidgets('switching to finishInDays changes value to 30', (
+      tester,
+    ) async {
       when(() => mockWerdBloc.state).thenReturn(
         WerdState(
           goal: WerdGoal(
@@ -232,7 +237,9 @@ void main() {
   });
 
   group('SetWerdGoalDialog Start Point Selection', () {
-    testWidgets('defaults to "Start from Al-Fatihah (beginning)"', (tester) async {
+    testWidgets('defaults to "Start from Al-Fatihah (beginning)"', (
+      tester,
+    ) async {
       when(() => mockWerdBloc.state).thenReturn(
         WerdState(
           goal: WerdGoal(
@@ -299,9 +306,9 @@ void main() {
           ),
         );
         // No last read position
-        when(() => mockQuranBloc.state).thenReturn(
-          QuranState.initial().copyWith(lastReadPosition: null),
-        );
+        when(
+          () => mockQuranBloc.state,
+        ).thenReturn(QuranState.initial().copyWith(lastReadPosition: null));
 
         await tester.pumpWidget(createDialogUnderTest());
         await tester.tap(find.byType(FloatingActionButton));
@@ -322,8 +329,11 @@ void main() {
       tester,
     ) async {
       // Note: AyahNumber uses factory constructor, create via Result
-      final ayahResult = AyahNumber.create(surahNumber: 2, ayahNumberInSurah: 50);
-      
+      final ayahResult = AyahNumber.create(
+        surahNumber: 2,
+        ayahNumberInSurah: 50,
+      );
+
       await ayahResult.fold(
         (failure) async => fail('Should create valid AyahNumber'),
         (ayahNumber) async {
@@ -364,7 +374,9 @@ void main() {
       );
     });
 
-    testWidgets('Choose specific surah/ayah selector shows surah dropdown', (tester) async {
+    testWidgets('Choose specific surah/ayah selector shows surah dropdown', (
+      tester,
+    ) async {
       when(() => mockWerdBloc.state).thenReturn(
         WerdState(
           goal: WerdGoal(
@@ -421,9 +433,11 @@ void main() {
       // Change surah to Al-Baqarah: Tap the surah dropdown
       await tester.tap(find.byKey(const ValueKey('surah_dropdown')));
       await tester.pumpAndSettle();
-      
+
       // Tap Al-Baqarah (the 2nd surah) using value predicate
-      final baqarahItem = find.byWidgetPredicate((w) => w is DropdownMenuItem<int> && w.value == 2).last;
+      final baqarahItem = find
+          .byWidgetPredicate((w) => w is DropdownMenuItem<int> && w.value == 2)
+          .last;
       await tester.tap(baqarahItem);
       await tester.pumpAndSettle();
 
@@ -557,7 +571,10 @@ void main() {
 
       // Assuming start value 10, should be 11
       expect(find.byType(TextField), findsOneWidget);
-      expect((tester.widget(find.byType(TextField)) as TextField).controller!.text, '11');
+      expect(
+        (tester.widget(find.byType(TextField)) as TextField).controller!.text,
+        '11',
+      );
     });
 
     testWidgets('decrement button decreases value (min 1)', (tester) async {
@@ -586,7 +603,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(TextField), findsOneWidget);
-      expect((tester.widget(find.byType(TextField)) as TextField).controller!.text, '9');
+      expect(
+        (tester.widget(find.byType(TextField)) as TextField).controller!.text,
+        '9',
+      );
     });
 
     testWidgets('value respects max limit for juz (30)', (tester) async {
@@ -674,9 +694,7 @@ void main() {
 
       // Verify event was dispatched by checking that goal was saved
       // (We verify the side effect since WerdEvent.setGoal is a constructor, not a type)
-      verify(
-        () => mockWerdBloc.add(any(that: isA<WerdEvent>())),
-      ).called(1);
+      verify(() => mockWerdBloc.add(any(that: isA<WerdEvent>()))).called(1);
     });
 
     testWidgets('Save button creates goal with correct startAbsolute', (
@@ -709,10 +727,12 @@ void main() {
       // Need to tap the surah dropdown first to open
       await tester.tap(find.byKey(const ValueKey('surah_dropdown')));
       await tester.pumpAndSettle();
-      
+
       // Tap the surah 'Al-Baqarah'
       // We look for the item in the list of dropdown items
-      final surahItem = find.byWidgetPredicate((w) => w is DropdownMenuItem<int> && w.value == 2).last;
+      final surahItem = find
+          .byWidgetPredicate((w) => w is DropdownMenuItem<int> && w.value == 2)
+          .last;
       await tester.tap(surahItem);
       await tester.pumpAndSettle();
 
@@ -721,9 +741,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify event was dispatched (verify side effect since setGoal is constructor)
-      verify(
-        () => mockWerdBloc.add(any(that: isA<WerdEvent>())),
-      ).called(1);
+      verify(() => mockWerdBloc.add(any(that: isA<WerdEvent>()))).called(1);
     });
 
     testWidgets('Cancel button closes dialog', (tester) async {
@@ -796,7 +814,9 @@ void main() {
       );
       when(() => mockQuranBloc.state).thenReturn(QuranState.initial());
 
-      await tester.pumpWidget(createDialogUnderTest(locale: const Locale('ar')));
+      await tester.pumpWidget(
+        createDialogUnderTest(locale: const Locale('ar')),
+      );
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
@@ -819,7 +839,9 @@ void main() {
       );
       when(() => mockQuranBloc.state).thenReturn(QuranState.initial());
 
-      await tester.pumpWidget(createDialogUnderTest(locale: const Locale('ar')));
+      await tester.pumpWidget(
+        createDialogUnderTest(locale: const Locale('ar')),
+      );
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
@@ -846,7 +868,9 @@ void main() {
       );
       when(() => mockQuranBloc.state).thenReturn(QuranState.initial());
 
-      await tester.pumpWidget(createDialogUnderTest(locale: const Locale('ar')));
+      await tester.pumpWidget(
+        createDialogUnderTest(locale: const Locale('ar')),
+      );
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 

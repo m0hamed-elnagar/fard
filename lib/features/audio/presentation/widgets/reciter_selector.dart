@@ -45,8 +45,9 @@ class _ReciterSelectorState extends State<ReciterSelector> {
               height: MediaQuery.of(context).size.height * 0.8,
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
               ),
               child: Column(
                 children: [
@@ -140,7 +141,8 @@ class _ReciterSelectorState extends State<ReciterSelector> {
                           final reciter = managerState.availableReciters
                               .firstWhere(
                                 (r) => r.identifier == id,
-                                orElse: () => managerState.availableReciters.first,
+                                orElse: () =>
+                                    managerState.availableReciters.first,
                               );
                           // Only show if it matches the id
                           if (reciter.identifier != id) {
@@ -268,7 +270,9 @@ class _PopularReciterCard extends StatelessWidget {
               child: Text(
                 reciter.name.isNotEmpty ? reciter.name.substring(0, 1) : 'A',
                 style: TextStyle(
-                  color: isSelected ? context.onSurfaceColor : context.onSurfaceVariantColor,
+                  color: isSelected
+                      ? context.onSurfaceColor
+                      : context.onSurfaceVariantColor,
                   fontSize: 24,
                 ),
               ),

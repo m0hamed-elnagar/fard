@@ -9,7 +9,7 @@ void main() {
   setUpAll(() {
     PackageInfo.setMockInitialValues(
       appName: 'Fard',
-      packageName: 'com.qada.fard',
+      packageName: 'com.khwarizmi.fard',
       version: '1.0',
       buildNumber: '1',
       buildSignature: '',

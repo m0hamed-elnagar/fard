@@ -90,9 +90,7 @@ void main() {
       () => mockQuranRepository.getReaderSeparator(),
     ).thenAnswer((_) async => 0);
 
-    when(
-      () => mockQuranRepository.getTextScale(),
-    ).thenAnswer((_) async => 1.0);
+    when(() => mockQuranRepository.getTextScale()).thenAnswer((_) async => 1.0);
 
     when(
       () => mockQuranRepository.getFontFamily(),

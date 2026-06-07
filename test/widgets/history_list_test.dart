@@ -44,19 +44,16 @@ void main() {
     await getIt.reset();
     getIt.registerSingleton<PrayerTimeService>(mockPrayerTimeService);
 
-    when(() => mockLocationPrayerCubit.state).thenReturn(
-      const LocationPrayerState(
-        latitude: 0,
-        longitude: 0,
-      ),
-    );
+    when(
+      () => mockLocationPrayerCubit.state,
+    ).thenReturn(const LocationPrayerState(latitude: 0, longitude: 0));
     when(
       () => mockLocationPrayerCubit.stream,
     ).thenAnswer((_) => const Stream.empty());
 
-    when(() => mockDailyRemindersCubit.state).thenReturn(
-      const DailyRemindersState(),
-    );
+    when(
+      () => mockDailyRemindersCubit.state,
+    ).thenReturn(const DailyRemindersState());
     when(
       () => mockDailyRemindersCubit.stream,
     ).thenAnswer((_) => const Stream.empty());
@@ -104,8 +101,12 @@ void main() {
       home: Scaffold(
         body: MultiBlocProvider(
           providers: [
-            BlocProvider<LocationPrayerCubit>.value(value: mockLocationPrayerCubit),
-            BlocProvider<DailyRemindersCubit>.value(value: mockDailyRemindersCubit),
+            BlocProvider<LocationPrayerCubit>.value(
+              value: mockLocationPrayerCubit,
+            ),
+            BlocProvider<DailyRemindersCubit>.value(
+              value: mockDailyRemindersCubit,
+            ),
           ],
           child: child,
         ),

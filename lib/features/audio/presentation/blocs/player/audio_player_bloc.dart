@@ -28,7 +28,11 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
     required this.audioRepository,
     required this.playerService,
     required this.settingsRepository,
-  }) : super(AudioPlayerState(isPlayerExpanded: settingsRepository.isAudioPlayerExpanded)) {
+  }) : super(
+         AudioPlayerState(
+           isPlayerExpanded: settingsRepository.isAudioPlayerExpanded,
+         ),
+       ) {
     on<PlayAyah>(_onPlayAyah);
     on<PlaySurah>(_onPlaySurah);
     on<TogglePlayback>(_onTogglePlayback);
@@ -159,7 +163,8 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
                 'album': surahName,
               },
               {
-                'title': '$surahLabel $surahName: $ayahLabel ${event.ayahNumber}',
+                'title':
+                    '$surahLabel $surahName: $ayahLabel ${event.ayahNumber}',
                 'artist': reciterName,
                 'album': surahName,
               },
@@ -255,7 +260,9 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
 
         int initialIndex = (event.startAyah ?? 1) - 1;
         if (isPrependActive) {
-          initialIndex = (event.startAyah == null || event.startAyah == 1) ? 0 : event.startAyah!;
+          initialIndex = (event.startAyah == null || event.startAyah == 1)
+              ? 0
+              : event.startAyah!;
         }
 
         final currentLanguage = settingsRepository.locale.languageCode;
@@ -325,7 +332,10 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
     );
   }
 
-  Future<void> _onTogglePlayback(TogglePlayback event, Emitter<AudioPlayerState> emit) async {
+  Future<void> _onTogglePlayback(
+    TogglePlayback event,
+    Emitter<AudioPlayerState> emit,
+  ) async {
     if (state.isPlaying) {
       await playerService.pause();
     } else if (state.status == AudioStatus.paused) {
@@ -370,15 +380,24 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
     await playerService.seek(event.position);
   }
 
-  Future<void> _onSkipToNext(SkipToNext event, Emitter<AudioPlayerState> emit) async {
+  Future<void> _onSkipToNext(
+    SkipToNext event,
+    Emitter<AudioPlayerState> emit,
+  ) async {
     await playerService.skipToNext();
   }
 
-  Future<void> _onSkipToPrevious(SkipToPrevious event, Emitter<AudioPlayerState> emit) async {
+  Future<void> _onSkipToPrevious(
+    SkipToPrevious event,
+    Emitter<AudioPlayerState> emit,
+  ) async {
     await playerService.skipToPrevious();
   }
 
-  Future<void> _onHideBanner(HideBanner event, Emitter<AudioPlayerState> emit) async {
+  Future<void> _onHideBanner(
+    HideBanner event,
+    Emitter<AudioPlayerState> emit,
+  ) async {
     emit(
       state.copyWith(
         isBannerVisible: false,
@@ -389,23 +408,34 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
     );
   }
 
-  Future<void> _onShowBanner(ShowBanner event, Emitter<AudioPlayerState> emit) async {
+  Future<void> _onShowBanner(
+    ShowBanner event,
+    Emitter<AudioPlayerState> emit,
+  ) async {
     emit(state.copyWith(isBannerVisible: true));
   }
 
-  Future<void> _onTogglePlayerExpanded(TogglePlayerExpanded event, Emitter<AudioPlayerState> emit) async {
+  Future<void> _onTogglePlayerExpanded(
+    TogglePlayerExpanded event,
+    Emitter<AudioPlayerState> emit,
+  ) async {
     final newValue = !state.isPlayerExpanded;
     emit(state.copyWith(isPlayerExpanded: newValue));
     await settingsRepository.updateAudioPlayerExpanded(newValue);
   }
 
-
-  Future<void> _onChangeSpeed(ChangeSpeed event, Emitter<AudioPlayerState> emit) async {
+  Future<void> _onChangeSpeed(
+    ChangeSpeed event,
+    Emitter<AudioPlayerState> emit,
+  ) async {
     emit(state.copyWith(speed: event.speed));
     await playerService.setSpeed(event.speed);
   }
 
-  Future<void> _onToggleRepeat(ToggleRepeat event, Emitter<AudioPlayerState> emit) async {
+  Future<void> _onToggleRepeat(
+    ToggleRepeat event,
+    Emitter<AudioPlayerState> emit,
+  ) async {
     final newValue = !state.isRepeating;
     emit(state.copyWith(isRepeating: newValue));
     await playerService.setLoopMode(newValue);
@@ -497,15 +527,24 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
     );
   }
 
-  void _onLastErrorChanged(LastErrorChanged event, Emitter<AudioPlayerState> emit) {
+  void _onLastErrorChanged(
+    LastErrorChanged event,
+    Emitter<AudioPlayerState> emit,
+  ) {
     emit(state.copyWith(lastErrorMessage: event.error));
   }
 
-  void _onPositionChanged(PositionChanged event, Emitter<AudioPlayerState> emit) {
+  void _onPositionChanged(
+    PositionChanged event,
+    Emitter<AudioPlayerState> emit,
+  ) {
     emit(state.copyWith(position: event.position));
   }
 
-  void _onDurationChanged(DurationChanged event, Emitter<AudioPlayerState> emit) {
+  void _onDurationChanged(
+    DurationChanged event,
+    Emitter<AudioPlayerState> emit,
+  ) {
     emit(state.copyWith(duration: event.duration));
   }
 
@@ -539,10 +578,16 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
       return;
     }
 
-    if (state.currentSurah == event.surahNumber && state.currentAyah == event.ayahNumber) {
+    if (state.currentSurah == event.surahNumber &&
+        state.currentAyah == event.ayahNumber) {
       return;
     }
-    emit(state.copyWith(currentSurah: event.surahNumber, currentAyah: event.ayahNumber));
+    emit(
+      state.copyWith(
+        currentSurah: event.surahNumber,
+        currentAyah: event.ayahNumber,
+      ),
+    );
   }
 
   @override

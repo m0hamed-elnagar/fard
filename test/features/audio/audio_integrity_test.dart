@@ -56,21 +56,30 @@ void main() {
 
     test('returns 0 for non-existent file', () async {
       final filePath = path.join(tempDir.path, 'missing.mp3');
-      expect(await FileDownloadUtils.getExistingFileSizeBytes(filePath), equals(0));
+      expect(
+        await FileDownloadUtils.getExistingFileSizeBytes(filePath),
+        equals(0),
+      );
     });
 
     test('returns correct size for existing file', () async {
       final file = File(path.join(tempDir.path, 'test.mp3'));
       final data = List<int>.filled(500, 1);
       await file.writeAsBytes(data);
-      expect(await FileDownloadUtils.getExistingFileSizeBytes(file.path), equals(500));
+      expect(
+        await FileDownloadUtils.getExistingFileSizeBytes(file.path),
+        equals(500),
+      );
     });
 
     test('returns correct size for larger file', () async {
       final file = File(path.join(tempDir.path, 'large.mp3'));
       final data = List<int>.filled(1024 * 50, 2); // 50KB
       await file.writeAsBytes(data);
-      expect(await FileDownloadUtils.getExistingFileSizeBytes(file.path), equals(1024 * 50));
+      expect(
+        await FileDownloadUtils.getExistingFileSizeBytes(file.path),
+        equals(1024 * 50),
+      );
     });
   });
 }

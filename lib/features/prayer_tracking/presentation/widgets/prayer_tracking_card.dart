@@ -126,7 +126,10 @@ class PrayerTrackingCard extends StatelessWidget {
                         ],
                       ),
                       const Spacer(flex: 1),
-                      Divider(height: 1, color: context.outlineColor.withValues(alpha: 0.12)),
+                      Divider(
+                        height: 1,
+                        color: context.outlineColor.withValues(alpha: 0.12),
+                      ),
                       const Spacer(flex: 1),
                       LayoutBuilder(
                         builder: (context, gridConstraints) {

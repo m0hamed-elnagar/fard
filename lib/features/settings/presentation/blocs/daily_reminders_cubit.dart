@@ -17,29 +17,26 @@ class DailyRemindersCubit extends Cubit<DailyRemindersState> {
   final SyncNotificationSchedule _syncNotif;
   final ToggleAfterSalahAzkarUseCase _toggleAzkar;
 
-  DailyRemindersCubit(
-    this._repo,
-    this._syncNotif,
-    this._toggleAzkar,
-  ) : super(
-          DailyRemindersState(
-            morningAzkarTime: _repo.morningAzkarTime,
-            eveningAzkarTime: _repo.eveningAzkarTime,
-            isAfterSalahAzkarEnabled: _repo.isAfterSalahAzkarEnabled,
-            reminders: _repo.reminders,
-            isQadaEnabled: _repo.isQadaEnabled,
-            isSalahReminderEnabled: _repo.isSalahReminderEnabled,
-            salahReminderOffsetMinutes: _repo.salahReminderOffsetMinutes,
-            prayerReminderType: _repo.prayerReminderType,
-            enabledSalahReminders: _repo.enabledSalahReminders,
-            isWerdReminderEnabled: _repo.isWerdReminderEnabled,
-            werdReminderTime: _repo.werdReminderTime,
-            isSalawatReminderEnabled: _repo.isSalawatReminderEnabled,
-            salawatFrequencyHours: _repo.salawatFrequencyHours,
-            salawatStartTime: _repo.salawatStartTime,
-            salawatEndTime: _repo.salawatEndTime,
-          ),
-        );
+  DailyRemindersCubit(this._repo, this._syncNotif, this._toggleAzkar)
+    : super(
+        DailyRemindersState(
+          morningAzkarTime: _repo.morningAzkarTime,
+          eveningAzkarTime: _repo.eveningAzkarTime,
+          isAfterSalahAzkarEnabled: _repo.isAfterSalahAzkarEnabled,
+          reminders: _repo.reminders,
+          isQadaEnabled: _repo.isQadaEnabled,
+          isSalahReminderEnabled: _repo.isSalahReminderEnabled,
+          salahReminderOffsetMinutes: _repo.salahReminderOffsetMinutes,
+          prayerReminderType: _repo.prayerReminderType,
+          enabledSalahReminders: _repo.enabledSalahReminders,
+          isWerdReminderEnabled: _repo.isWerdReminderEnabled,
+          werdReminderTime: _repo.werdReminderTime,
+          isSalawatReminderEnabled: _repo.isSalawatReminderEnabled,
+          salawatFrequencyHours: _repo.salawatFrequencyHours,
+          salawatStartTime: _repo.salawatStartTime,
+          salawatEndTime: _repo.salawatEndTime,
+        ),
+      );
 
   void toggleSalahReminder(bool enabled) {
     _toggleSalahReminderAsync(enabled);
@@ -89,10 +86,12 @@ class DailyRemindersCubit extends Cubit<DailyRemindersState> {
       }
     }
 
-    emit(state.copyWith(
-      enabledSalahReminders: set,
-      isSalahReminderEnabled: masterEnabled,
-    ));
+    emit(
+      state.copyWith(
+        enabledSalahReminders: set,
+        isSalahReminderEnabled: masterEnabled,
+      ),
+    );
 
     if (masterEnabled != oldMasterEnabled) {
       await _repo.updateSalahReminderEnabled(masterEnabled);
@@ -268,31 +267,35 @@ class DailyRemindersCubit extends Cubit<DailyRemindersState> {
   }
 
   void _sync() => Future.microtask(() async {
-        try {
-          await _syncNotif.execute();
-        } catch (e, stack) {
-          debugPrint('DailyRemindersCubit: Error syncing notifications: $e\n$stack');
-        }
-      });
+    try {
+      await _syncNotif.execute();
+    } catch (e, stack) {
+      debugPrint(
+        'DailyRemindersCubit: Error syncing notifications: $e\n$stack',
+      );
+    }
+  });
 
   void refresh() {
-    emit(state.copyWith(
-      morningAzkarTime: _repo.morningAzkarTime,
-      eveningAzkarTime: _repo.eveningAzkarTime,
-      isAfterSalahAzkarEnabled: _repo.isAfterSalahAzkarEnabled,
-      reminders: _repo.reminders,
-      isQadaEnabled: _repo.isQadaEnabled,
-      isSalahReminderEnabled: _repo.isSalahReminderEnabled,
-      salahReminderOffsetMinutes: _repo.salahReminderOffsetMinutes,
-      prayerReminderType: _repo.prayerReminderType,
-      enabledSalahReminders: _repo.enabledSalahReminders,
-      isWerdReminderEnabled: _repo.isWerdReminderEnabled,
-      werdReminderTime: _repo.werdReminderTime,
-      isSalawatReminderEnabled: _repo.isSalawatReminderEnabled,
-      salawatFrequencyHours: _repo.salawatFrequencyHours,
-      salawatStartTime: _repo.salawatStartTime,
-      salawatEndTime: _repo.salawatEndTime,
-    ));
+    emit(
+      state.copyWith(
+        morningAzkarTime: _repo.morningAzkarTime,
+        eveningAzkarTime: _repo.eveningAzkarTime,
+        isAfterSalahAzkarEnabled: _repo.isAfterSalahAzkarEnabled,
+        reminders: _repo.reminders,
+        isQadaEnabled: _repo.isQadaEnabled,
+        isSalahReminderEnabled: _repo.isSalahReminderEnabled,
+        salahReminderOffsetMinutes: _repo.salahReminderOffsetMinutes,
+        prayerReminderType: _repo.prayerReminderType,
+        enabledSalahReminders: _repo.enabledSalahReminders,
+        isWerdReminderEnabled: _repo.isWerdReminderEnabled,
+        werdReminderTime: _repo.werdReminderTime,
+        isSalawatReminderEnabled: _repo.isSalawatReminderEnabled,
+        salawatFrequencyHours: _repo.salawatFrequencyHours,
+        salawatStartTime: _repo.salawatStartTime,
+        salawatEndTime: _repo.salawatEndTime,
+      ),
+    );
     _sync();
   }
 }

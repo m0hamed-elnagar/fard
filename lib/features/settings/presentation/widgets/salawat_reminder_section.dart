@@ -7,7 +7,8 @@ import '../../../../core/mixins/notification_permission_mixin.dart';
 import '../blocs/daily_reminders_cubit.dart';
 import '../blocs/daily_reminders_state.dart';
 
-class SalawatReminderSection extends StatelessWidget with NotificationPermissionMixin {
+class SalawatReminderSection extends StatelessWidget
+    with NotificationPermissionMixin {
   const SalawatReminderSection({super.key});
 
   @override
@@ -27,7 +28,9 @@ class SalawatReminderSection extends StatelessWidget with NotificationPermission
               value: state.isSalawatReminderEnabled,
               onChanged: (val) async {
                 if (val) {
-                  final granted = await checkAndRequestNotificationPermissions(context);
+                  final granted = await checkAndRequestNotificationPermissions(
+                    context,
+                  );
                   if (!granted) return;
                 }
                 cubit.toggleSalawatReminder(val);
@@ -47,23 +50,45 @@ class SalawatReminderSection extends StatelessWidget with NotificationPermission
                       child: Text(l10n.everyHour(h)),
                     );
                   }).toList(),
-                  onChanged: (val) => val != null ? cubit.setSalawatFrequency(val) : null,
+                  onChanged: (val) =>
+                      val != null ? cubit.setSalawatFrequency(val) : null,
                   underline: const SizedBox(),
                 ),
               ),
               const Divider(height: 24),
-              Text(l10n.activeWindow, style: const TextStyle(fontWeight: FontWeight.bold)),
-              Text(l10n.activeWindowDesc, style: TextStyle(fontSize: 12, color: context.onSurfaceVariantColor)),
+              Text(
+                l10n.activeWindow,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                l10n.activeWindowDesc,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: context.onSurfaceVariantColor,
+                ),
+              ),
               const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
                     child: ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: Text(l10n.startTime, style: const TextStyle(fontSize: 13)),
-                      subtitle: Text(state.salawatStartTime, style: TextStyle(color: context.secondaryColor, fontWeight: FontWeight.bold)),
+                      title: Text(
+                        l10n.startTime,
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                      subtitle: Text(
+                        state.salawatStartTime,
+                        style: TextStyle(
+                          color: context.secondaryColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       onTap: () async {
-                        final time = await _selectTime(context, state.salawatStartTime);
+                        final time = await _selectTime(
+                          context,
+                          state.salawatStartTime,
+                        );
                         if (time != null) cubit.setSalawatStartTime(time);
                       },
                     ),
@@ -71,10 +96,22 @@ class SalawatReminderSection extends StatelessWidget with NotificationPermission
                   Expanded(
                     child: ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: Text(l10n.endTime, style: const TextStyle(fontSize: 13)),
-                      subtitle: Text(state.salawatEndTime, style: TextStyle(color: context.secondaryColor, fontWeight: FontWeight.bold)),
+                      title: Text(
+                        l10n.endTime,
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                      subtitle: Text(
+                        state.salawatEndTime,
+                        style: TextStyle(
+                          color: context.secondaryColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       onTap: () async {
-                        final time = await _selectTime(context, state.salawatEndTime);
+                        final time = await _selectTime(
+                          context,
+                          state.salawatEndTime,
+                        );
                         if (time != null) cubit.setSalawatEndTime(time);
                       },
                     ),
@@ -124,7 +161,10 @@ class SalawatReminderSection extends StatelessWidget with NotificationPermission
                 const SizedBox(width: 16),
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -142,7 +182,11 @@ class SalawatReminderSection extends StatelessWidget with NotificationPermission
     );
   }
 
-  Widget _buildToggleItem({required String title, required bool value, required ValueChanged<bool> onChanged}) {
+  Widget _buildToggleItem({
+    required String title,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -152,7 +196,12 @@ class SalawatReminderSection extends StatelessWidget with NotificationPermission
     );
   }
 
-  Widget _buildSettingItem(BuildContext context, {required String title, required String description, required Widget trailing}) {
+  Widget _buildSettingItem(
+    BuildContext context, {
+    required String title,
+    required String description,
+    required Widget trailing,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -161,7 +210,13 @@ class SalawatReminderSection extends StatelessWidget with NotificationPermission
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
-              Text(description, style: TextStyle(fontSize: 12, color: context.onSurfaceVariantColor)),
+              Text(
+                description,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: context.onSurfaceVariantColor,
+                ),
+              ),
             ],
           ),
         ),
@@ -172,8 +227,14 @@ class SalawatReminderSection extends StatelessWidget with NotificationPermission
 
   Future<String?> _selectTime(BuildContext context, String currentTime) async {
     final parts = currentTime.split(':');
-    final initialTime = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
-    final picked = await showTimePicker(context: context, initialTime: initialTime);
+    final initialTime = TimeOfDay(
+      hour: int.parse(parts[0]),
+      minute: int.parse(parts[1]),
+    );
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initialTime,
+    );
     if (picked != null) {
       return '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
     }

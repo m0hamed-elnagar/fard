@@ -33,19 +33,19 @@ class AppBackup {
   });
 
   Map<String, dynamic> toJson() => {
-        'version': version,
-        'appVersion': appVersion,
-        'timestamp': timestamp.toIso8601String(),
-        'prayerRecords': prayerRecords.map((e) => e.toJson()).toList(),
-        'werdGoals': werdGoals.map((e) => e.toJson()).toList(),
-        'werdProgress': werdProgress.map((e) => e.toJson()).toList(),
-        'preferences': preferences,
-        'tasbihHistory': tasbihHistory,
-        'tasbihProgress': tasbihProgress,
-        'tasbihPreferredDuas': tasbihPreferredDuas,
-        'azkarProgress': azkarProgress,
-        'bookmarks': bookmarks.map((e) => e.toJson()).toList(),
-      };
+    'version': version,
+    'appVersion': appVersion,
+    'timestamp': timestamp.toIso8601String(),
+    'prayerRecords': prayerRecords.map((e) => e.toJson()).toList(),
+    'werdGoals': werdGoals.map((e) => e.toJson()).toList(),
+    'werdProgress': werdProgress.map((e) => e.toJson()).toList(),
+    'preferences': preferences,
+    'tasbihHistory': tasbihHistory,
+    'tasbihProgress': tasbihProgress,
+    'tasbihPreferredDuas': tasbihPreferredDuas,
+    'azkarProgress': azkarProgress,
+    'bookmarks': bookmarks.map((e) => e.toJson()).toList(),
+  };
 
   factory AppBackup.fromJson(Map<String, dynamic> json) {
     return AppBackup(
@@ -64,10 +64,12 @@ class AppBackup {
       preferences: Map<String, dynamic>.from(json['preferences'] ?? {}),
       tasbihHistory: Map<String, int>.from(json['tasbihHistory'] ?? {}),
       tasbihProgress: Map<String, int>.from(json['tasbihProgress'] ?? {}),
-      tasbihPreferredDuas:
-          Map<String, String>.from(json['tasbihPreferredDuas'] ?? {}),
+      tasbihPreferredDuas: Map<String, String>.from(
+        json['tasbihPreferredDuas'] ?? {},
+      ),
       azkarProgress: Map<String, int>.from(json['azkarProgress'] ?? {}),
-      bookmarks: (json['bookmarks'] as List?)
+      bookmarks:
+          (json['bookmarks'] as List?)
               ?.map((e) => Bookmark.fromJson(e))
               .toList() ??
           [],

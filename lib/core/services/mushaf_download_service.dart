@@ -10,7 +10,7 @@ import 'package:injectable/injectable.dart';
 @singleton
 class MushafDownloadService {
   final DownloadManifestService _manifestService;
-  
+
   MushafDownloadService(this._manifestService);
 
   // Reliable GitHub Raw Source
@@ -44,7 +44,7 @@ class MushafDownloadService {
         await directory.delete(recursive: true);
         await directory.create(recursive: true);
       }
-      
+
       // Clear manifest entries for mushaf_page
       await _manifestService.deleteEntriesByContentType('mushaf_page');
     } catch (e) {
@@ -129,21 +129,28 @@ class MushafDownloadService {
   Future<String?> _performDownload(int pageNumber) async {
     final fileId = 'mushaf_page_$pageNumber';
     final url = '$baseUrl$pageNumber.png';
-    
+
     try {
       final file = await getLocalFile(pageNumber);
 
       // Update status to downloading
       final currentEntry = await _manifestService.getEntry(fileId);
-      await _manifestService.upsertEntry((currentEntry ?? DownloadEntry(
-        fileId: fileId,
-        relativePath: 'mushaf_pages/$pageNumber.png',
-        contentType: 'mushaf_page',
-        url: url,
-        expectedSize: 50 * 1024,
-        status: DownloadStatus.downloading,
-        updatedAt: DateTime.now(),
-      )).copyWith(status: DownloadStatus.downloading, updatedAt: DateTime.now()));
+      await _manifestService.upsertEntry(
+        (currentEntry ??
+                DownloadEntry(
+                  fileId: fileId,
+                  relativePath: 'mushaf_pages/$pageNumber.png',
+                  contentType: 'mushaf_page',
+                  url: url,
+                  expectedSize: 50 * 1024,
+                  status: DownloadStatus.downloading,
+                  updatedAt: DateTime.now(),
+                ))
+            .copyWith(
+              status: DownloadStatus.downloading,
+              updatedAt: DateTime.now(),
+            ),
+      );
 
       // Try primary API (GitHub)
       debugPrint('Downloading page $pageNumber from $url');
@@ -158,16 +165,18 @@ class MushafDownloadService {
           finalPath: file.path,
           fileType: 'image',
         );
-        
+
         // Update manifest to completed
         final entry = await _manifestService.getEntry(fileId);
         if (entry != null) {
-          await _manifestService.upsertEntry(entry.copyWith(
-            status: DownloadStatus.completed,
-            downloadedBytes: response.bodyBytes.length,
-            expectedSize: response.bodyBytes.length,
-            updatedAt: DateTime.now(),
-          ));
+          await _manifestService.upsertEntry(
+            entry.copyWith(
+              status: DownloadStatus.completed,
+              downloadedBytes: response.bodyBytes.length,
+              expectedSize: response.bodyBytes.length,
+              updatedAt: DateTime.now(),
+            ),
+          );
         }
 
         debugPrint('Successfully downloaded page $pageNumber from GitHub');
@@ -180,18 +189,20 @@ class MushafDownloadService {
       }
     } catch (e) {
       debugPrint('Error downloading page $pageNumber: $e');
-      
+
       // Update manifest to failed
       final entry = await _manifestService.getEntry(fileId);
       if (entry != null) {
-        await _manifestService.upsertEntry(entry.copyWith(
-          status: DownloadStatus.failed,
-          errorMessage: e.toString(),
-          updatedAt: DateTime.now(),
-          attemptCount: entry.attemptCount + 1,
-        ));
+        await _manifestService.upsertEntry(
+          entry.copyWith(
+            status: DownloadStatus.failed,
+            errorMessage: e.toString(),
+            updatedAt: DateTime.now(),
+            attemptCount: entry.attemptCount + 1,
+          ),
+        );
       }
-      
+
       return await _downloadFromFallback(pageNumber);
     }
   }

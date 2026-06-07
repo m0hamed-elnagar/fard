@@ -54,7 +54,8 @@ class QuranReaderPage extends StatefulWidget {
   State<QuranReaderPage> createState() => _QuranReaderPageState();
 }
 
-class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingObserver {
+class _QuranReaderPageState extends State<QuranReaderPage>
+    with WidgetsBindingObserver {
   late final ReaderScrollController _scrollController;
   bool _hasHandledPlayOnLoad = false;
   bool _hasShownCycleCompletionDialog = false;
@@ -84,7 +85,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingOb
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     // End session when app goes to background
-    if (state == AppLifecycleState.paused || 
+    if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
       _werdBloc.add(const WerdEvent.endSession());
     }
@@ -108,13 +109,12 @@ class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingOb
         BlocProvider(
           create: (context) {
             final surahNumResult = SurahNumber.create(widget.surahNumber);
-            return getIt<ReaderBloc>()
-              ..add(
-                ReaderEvent.loadSurah(
-                  surahNumber: surahNumResult.data!,
-                  initialAyahNumber: widget.initialAyahNumber,
-                ),
-              );
+            return getIt<ReaderBloc>()..add(
+              ReaderEvent.loadSurah(
+                surahNumber: surahNumResult.data!,
+                initialAyahNumber: widget.initialAyahNumber,
+              ),
+            );
           },
         ),
       ],
@@ -201,14 +201,17 @@ class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingOb
                         listener: (context, state) async {
                           if (!_hasShownCycleCompletionDialog) {
                             _hasShownCycleCompletionDialog = true;
-                            final choice = await CycleCompletionDialog.show(context);
+                            final choice = await CycleCompletionDialog.show(
+                              context,
+                            );
 
                             if (!context.mounted) return;
 
                             final werdBloc = context.read<WerdBloc>();
                             if (choice == 'restart') {
                               werdBloc.add(WerdEvent.completeCycleAndRestart());
-                              final werdGoalId = werdBloc.state.goal?.id ?? 'default';
+                              final werdGoalId =
+                                  werdBloc.state.goal?.id ?? 'default';
                               werdBloc.add(WerdEvent.load(id: werdGoalId));
 
                               if (context.mounted) {
@@ -223,11 +226,13 @@ class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingOb
                               }
                             } else if (choice == 'stay') {
                               werdBloc.add(WerdEvent.completeCycleStayHere());
-                              final werdGoalId = werdBloc.state.goal?.id ?? 'default';
+                              final werdGoalId =
+                                  werdBloc.state.goal?.id ?? 'default';
                               werdBloc.add(WerdEvent.load(id: werdGoalId));
                             } else if (choice == 'doaa') {
                               werdBloc.add(const WerdEvent.completeCycle());
-                              final werdGoalId = werdBloc.state.goal?.id ?? 'default';
+                              final werdGoalId =
+                                  werdBloc.state.goal?.id ?? 'default';
                               werdBloc.add(WerdEvent.load(id: werdGoalId));
                               Navigator.push(
                                 context,
@@ -259,7 +264,9 @@ class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingOb
                         CustomScrollView(
                           controller: _scrollController.scrollController,
                           slivers: [
-                            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                            const SliverToBoxAdapter(
+                              child: SizedBox(height: 16),
+                            ),
                             QuranReaderHeader(
                               surahNumber: widget.surahNumber,
                               allSurahs: widget.allSurahs ?? [],
@@ -284,7 +291,8 @@ class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingOb
                                   : null,
                             ),
                             ValueListenableBuilder<int?>(
-                              valueListenable: _scrollController.currentVisibleAyah,
+                              valueListenable:
+                                  _scrollController.currentVisibleAyah,
                               builder: (context, visibleAyah, child) {
                                 return QuranReaderBody(
                                   scrollController: _scrollController,
@@ -294,9 +302,10 @@ class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingOb
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (_) => const AzkarListScreen(
-                                                category: 'دعاء ختم القران',
-                                              ),
+                                              builder: (_) =>
+                                                  const AzkarListScreen(
+                                                    category: 'دعاء ختم القران',
+                                                  ),
                                             ),
                                           );
                                         }
@@ -312,13 +321,17 @@ class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingOb
                           builder: (context, state) {
                             return state.maybeMap(
                               loaded: (s) => FastScrollScrollbar(
-                                scrollController: _scrollController.scrollController,
+                                scrollController:
+                                    _scrollController.scrollController,
                                 itemCount: s.surah.numberOfAyahs,
                                 labelBuilder: (context, index) {
                                   final ayahNum = index + 1;
                                   return Text(
                                     'Ayah $ayahNum',
-                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   );
                                 },
                               ),
@@ -331,7 +344,8 @@ class _QuranReaderPageState extends State<QuranReaderPage> with WidgetsBindingOb
                           right: 16,
                           bottom: 100,
                           child: ScrollToTopFAB(
-                            scrollController: _scrollController.scrollController,
+                            scrollController:
+                                _scrollController.scrollController,
                           ),
                         ),
                       ],

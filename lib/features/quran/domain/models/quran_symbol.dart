@@ -20,7 +20,8 @@ abstract class QuranSymbol with _$QuranSymbol {
     @Default([]) List<SymbolExample> examples,
   }) = _QuranSymbol;
 
-  factory QuranSymbol.fromJson(Map<String, dynamic> json) => _$QuranSymbolFromJson(json);
+  factory QuranSymbol.fromJson(Map<String, dynamic> json) =>
+      _$QuranSymbolFromJson(json);
 }
 
 @freezed
@@ -30,12 +31,14 @@ abstract class SymbolSource with _$SymbolSource {
   @JsonSerializable(fieldRename: FieldRename.snake)
   const factory SymbolSource({
     required String name,
-    @JsonKey(name: 'type') required String sourceType, // 'book', 'website', 'video'
-    @JsonKey(name: 'text') required String content,    // text or url
+    @JsonKey(name: 'type')
+    required String sourceType, // 'book', 'website', 'video'
+    @JsonKey(name: 'text') required String content, // text or url
     String? url,
   }) = _SymbolSource;
 
-  factory SymbolSource.fromJson(Map<String, dynamic> json) => _$SymbolSourceFromJson(json);
+  factory SymbolSource.fromJson(Map<String, dynamic> json) =>
+      _$SymbolSourceFromJson(json);
 }
 
 @freezed
@@ -49,5 +52,6 @@ abstract class SymbolExample with _$SymbolExample {
     String? context,
   }) = _SymbolExample;
 
-  factory SymbolExample.fromJson(Map<String, dynamic> json) => _$SymbolExampleFromJson(json);
+  factory SymbolExample.fromJson(Map<String, dynamic> json) =>
+      _$SymbolExampleFromJson(json);
 }

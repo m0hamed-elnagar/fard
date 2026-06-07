@@ -60,8 +60,10 @@ class ExportImportService {
       final tasbihPreferredDuas = await tasbihRepo.getAllPreferredDuas();
       final azkarProgress = await azkarRepo.getAllProgress();
       final bookmarksResult = await bookmarkRepo.getBookmarks();
-      final List<Bookmark> bookmarks =
-          bookmarksResult.fold((l) => <Bookmark>[], (r) => r);
+      final List<Bookmark> bookmarks = bookmarksResult.fold(
+        (l) => <Bookmark>[],
+        (r) => r,
+      );
 
       final backup = AppBackup(
         version: currentBackupVersion,

@@ -68,14 +68,9 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                 decoration: InputDecoration(
                   hintText: l10n.search,
                   border: InputBorder.none,
-                  hintStyle: TextStyle(
-                    color: context.onSurfaceColor,
-                  ),
+                  hintStyle: TextStyle(color: context.onSurfaceColor),
                 ),
-                style: TextStyle(
-                  color: context.onSurfaceColor,
-                  fontSize: 18,
-                ),
+                style: TextStyle(color: context.onSurfaceColor, fontSize: 18),
               )
             : Text(
                 l10n.azkar,
@@ -161,10 +156,7 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 64,
-                    ),
+                    const Icon(Icons.error_outline, size: 64),
                     const SizedBox(height: 16),
                     Text(
                       l10n.errorLoadingAzkar,
@@ -203,10 +195,7 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.inventory_2_outlined,
-                    size: 64,
-                  ),
+                  const Icon(Icons.inventory_2_outlined, size: 64),
                   const SizedBox(height: 16),
                   Text(
                     _searchQuery.isEmpty
@@ -455,7 +444,9 @@ class _CategoryCard extends StatelessWidget {
             ? BorderSide(color: context.secondaryColor, width: 2)
             : const BorderSide(color: Colors.transparent),
       ),
-      color: isRecommended ? context.secondaryColor.withValues(alpha: 0.05) : null,
+      color: isRecommended
+          ? context.secondaryColor.withValues(alpha: 0.05)
+          : null,
       child: Stack(
         children: [
           ListTile(

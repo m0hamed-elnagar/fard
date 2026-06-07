@@ -45,7 +45,7 @@ class WidgetSyncCoordinator {
       // Some native components might need to know about Azan status changes
       _widgetUpdateService.updateWidget();
     });
-    
+
     // Daily Reminders changes
     _remindersSubscription = _dailyRemindersCubit.stream.listen((state) {
       // Reminders might affect some widget data in the future

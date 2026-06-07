@@ -1,4 +1,4 @@
-package com.qada.fard
+package com.khwarizmi.fard
 
 import android.content.Context
 import android.content.Intent
@@ -8,11 +8,11 @@ import android.provider.Settings
 import android.util.Log
 import androidx.glance.appwidget.updateAll
 import androidx.core.content.FileProvider
-import com.qada.fard.prayer.CalculationContract
-import com.qada.fard.prayer.PrayerAlarmManager
-import com.qada.fard.prayer.PrayerTimesCalculator
-import com.qada.fard.prayer.SettingsRepository
-import com.qada.fard.prayer.PrayerParity
+import com.khwarizmi.fard.prayer.CalculationContract
+import com.khwarizmi.fard.prayer.PrayerAlarmManager
+import com.khwarizmi.fard.prayer.PrayerTimesCalculator
+import com.khwarizmi.fard.prayer.SettingsRepository
+import com.khwarizmi.fard.prayer.PrayerParity
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -26,7 +26,7 @@ class MainActivity : AudioServiceActivity() {
     private val TAG = "MainActivity"
     
     // MethodChannel for widget theme persistence
-    private val WIDGET_THEME_CHANNEL = "com.qada.fard/widget_theme"
+    private val WIDGET_THEME_CHANNEL = "com.khwarizmi.fard/widget_theme"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -245,9 +245,9 @@ class MainActivity : AudioServiceActivity() {
         if (Build.VERSION.SDK_INT >= 35) { // Build.VERSION_CODES.VANILLA_ICE_CREAM
             try {
                 val manager = androidx.glance.appwidget.GlanceAppWidgetManager(this@MainActivity)
-                manager.setWidgetPreviews(receiver = PrayerWidgetReceiver::class)
-                manager.setWidgetPreviews(receiver = NextPrayerCountdownWidgetReceiver::class)
-                Log.d(TAG, "Android 15+ widget previews synchronized")
+                val p1 = manager.setWidgetPreviews(receiver = PrayerWidgetReceiver::class)
+                val p2 = manager.setWidgetPreviews(receiver = NextPrayerCountdownWidgetReceiver::class)
+                Log.d(TAG, "Android 15+ widget previews synchronized (Results: $p1, $p2)")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to synchronize widget previews", e)
             }
@@ -288,7 +288,7 @@ class MainActivity : AudioServiceActivity() {
 
                 // 2.1 Explicitly sync app theme to widget theme keys if not manual
                 if (prayerData != null) {
-                    val appTheme = com.qada.fard.widget.WidgetParser.parseTheme(prayerData)
+                    val appTheme = com.khwarizmi.fard.widget.WidgetParser.parseTheme(prayerData)
                     repository.syncAppTheme(appTheme)
                 }
 
@@ -335,24 +335,24 @@ class MainActivity : AudioServiceActivity() {
 
                     // Robust update via Receivers (handles alarms, etc)
                     val prayerIntent = Intent(this@MainActivity, PrayerWidgetReceiver::class.java).apply {
-                        action = "com.qada.fard.UPDATE_WIDGET"
+                        action = "com.khwarizmi.fard.UPDATE_WIDGET"
                     }
                     sendBroadcast(prayerIntent)
 
                     val countdownIntent = Intent(this@MainActivity, NextPrayerCountdownWidgetReceiver::class.java).apply {
-                        action = "com.qada.fard.ACTION_FORCE_UPDATE"
+                        action = "com.khwarizmi.fard.ACTION_FORCE_UPDATE"
                     }
                     sendBroadcast(countdownIntent)
 
                     // 9. Absolute safety net: Enqueue OneTimeWorkRequest to refresh widgets from background
                     try {
-                        val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.qada.fard.widget.WidgetUpdateWorker>()
+                        val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.khwarizmi.fard.widget.WidgetUpdateWorker>()
                             .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                             .build()
                         androidx.work.WorkManager.getInstance(this@MainActivity).enqueue(workRequest)
                     } catch (e: Exception) {
                         Log.w(TAG, "Failed to enqueue expedited work, falling back to normal", e)
-                        val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.qada.fard.widget.WidgetUpdateWorker>().build()
+                        val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.khwarizmi.fard.widget.WidgetUpdateWorker>().build()
                         androidx.work.WorkManager.getInstance(this@MainActivity).enqueue(workRequest)
                     }
                 }
@@ -363,3 +363,4 @@ class MainActivity : AudioServiceActivity() {
         }
     }
 }
+

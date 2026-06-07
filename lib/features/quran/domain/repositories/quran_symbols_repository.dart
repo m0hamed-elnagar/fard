@@ -16,4 +16,3 @@ abstract class QuranSymbolsRepository {
   Future<CategorizedSymbols> getCategorizedSymbols();
   Future<List<QuranSymbol>> getSymbolsByIds(List<String> ids);
 }
-

@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.qada.fard.baselineprofile"
+    namespace = "com.khwarizmi.fard.baselineprofile"
     compileSdk = 35
 
     compileOptions {
@@ -46,3 +46,4 @@ dependencies {
     implementation("androidx.test.uiautomator:uiautomator:2.3.0")
     implementation("androidx.benchmark:benchmark-macro-junit4:1.3.3")
 }
+

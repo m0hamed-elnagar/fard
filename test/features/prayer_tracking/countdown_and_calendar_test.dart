@@ -13,6 +13,7 @@ import 'package:mocktail/mocktail.dart';
 
 // Mocks
 class MockPrayerTrackerBloc extends Mock implements PrayerTrackerBloc {}
+
 class MockWerdBloc extends Mock implements WerdBloc {}
 
 void main() {
@@ -20,118 +21,123 @@ void main() {
 
   group('COUNTDOWN TIMER TESTS - Verify it uses TODAY not selected date', () {
     testWidgets(
-        'PrayerTimesCard receives correct prayerTimes when selectedDate is in PAST',
-        (WidgetTester tester) async {
-      // Arrange: Create a past date
-      final today = DateTime.now();
-      final pastDate = today.subtract(const Duration(days: 10));
+      'PrayerTimesCard receives correct prayerTimes when selectedDate is in PAST',
+      (WidgetTester tester) async {
+        // Arrange: Create a past date
+        final today = DateTime.now();
+        final pastDate = today.subtract(const Duration(days: 10));
 
-      // Create mock prayer times for TODAY
-      final todayPrayerTimes = _createMockPrayerTimes(today);
+        // Create mock prayer times for TODAY
+        final todayPrayerTimes = _createMockPrayerTimes(today);
 
-      // Create a mock PrayerTimesCard to capture what's passed
+        // Create a mock PrayerTimesCard to capture what's passed
 
-      // Act: Build PrayerTimesCard directly with today's prayer times
-      await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: AppLocalizations.supportedLocales,
-          locale: const Locale('en'),
-          theme: AppTheme.darkTheme,
-          home: Scaffold(
-            body: PrayerTimesCard(
-              prayerTimes: todayPrayerTimes,
-              selectedDate: pastDate,
-              cityName: 'Test City',
+        // Act: Build PrayerTimesCard directly with today's prayer times
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
+            theme: AppTheme.darkTheme,
+            home: Scaffold(
+              body: PrayerTimesCard(
+                prayerTimes: todayPrayerTimes,
+                selectedDate: pastDate,
+                cityName: 'Test City',
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
 
-      // Assert: Widget should have received TODAY's prayer times
-      final card = tester.widget<PrayerTimesCard>(find.byType(PrayerTimesCard));
-      
-      debugPrint('=== TEST: PrayerTimesCard with past selected date ===');
-      debugPrint('Selected Date: ${card.selectedDate}');
-      debugPrint('Prayer Times received: ${card.prayerTimes != null}');
-      if (card.prayerTimes != null) {
-        debugPrint('Fajr: ${card.prayerTimes!.fajr}');
-        debugPrint('Dhuhr: ${card.prayerTimes!.dhuhr}');
-        debugPrint('Asr: ${card.prayerTimes!.asr}');
-        debugPrint('Maghrib: ${card.prayerTimes!.maghrib}');
-        debugPrint('Isha: ${card.prayerTimes!.isha}');
-      }
+        // Assert: Widget should have received TODAY's prayer times
+        final card = tester.widget<PrayerTimesCard>(
+          find.byType(PrayerTimesCard),
+        );
 
-      // The prayerTimes should match today's times, not the selected date's times
-      expect(card.prayerTimes, isNotNull);
-      expect(
-        card.prayerTimes!.fajr.day,
-        equals(today.day),
-        reason: 'Fajr should be from TODAY, not the selected past date',
-      );
-    });
+        debugPrint('=== TEST: PrayerTimesCard with past selected date ===');
+        debugPrint('Selected Date: ${card.selectedDate}');
+        debugPrint('Prayer Times received: ${card.prayerTimes != null}');
+        if (card.prayerTimes != null) {
+          debugPrint('Fajr: ${card.prayerTimes!.fajr}');
+          debugPrint('Dhuhr: ${card.prayerTimes!.dhuhr}');
+          debugPrint('Asr: ${card.prayerTimes!.asr}');
+          debugPrint('Maghrib: ${card.prayerTimes!.maghrib}');
+          debugPrint('Isha: ${card.prayerTimes!.isha}');
+        }
+
+        // The prayerTimes should match today's times, not the selected date's times
+        expect(card.prayerTimes, isNotNull);
+        expect(
+          card.prayerTimes!.fajr.day,
+          equals(today.day),
+          reason: 'Fajr should be from TODAY, not the selected past date',
+        );
+      },
+    );
 
     testWidgets(
-        'PrayerTimesCard receives correct prayerTimes when selectedDate is in FUTURE',
-        (WidgetTester tester) async {
-      final today = DateTime.now();
-      final futureDate = today.add(const Duration(days: 5));
+      'PrayerTimesCard receives correct prayerTimes when selectedDate is in FUTURE',
+      (WidgetTester tester) async {
+        final today = DateTime.now();
+        final futureDate = today.add(const Duration(days: 5));
 
-      final todayPrayerTimes = _createMockPrayerTimes(today);
+        final todayPrayerTimes = _createMockPrayerTimes(today);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: AppLocalizations.supportedLocales,
-          locale: const Locale('en'),
-          theme: AppTheme.darkTheme,
-          home: Scaffold(
-            body: PrayerTimesCard(
-              prayerTimes: todayPrayerTimes,
-              selectedDate: futureDate,
-              cityName: 'Test City',
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
+            theme: AppTheme.darkTheme,
+            home: Scaffold(
+              body: PrayerTimesCard(
+                prayerTimes: todayPrayerTimes,
+                selectedDate: futureDate,
+                cityName: 'Test City',
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
 
-      final card = tester.widget<PrayerTimesCard>(find.byType(PrayerTimesCard));
+        final card = tester.widget<PrayerTimesCard>(
+          find.byType(PrayerTimesCard),
+        );
 
-      debugPrint('=== TEST: PrayerTimesCard with future selected date ===');
-      debugPrint('Selected Date: ${card.selectedDate}');
-      if (card.prayerTimes != null) {
-        debugPrint('Fajr day: ${card.prayerTimes!.fajr.day}');
-        debugPrint('Today is: ${today.day}');
-      }
+        debugPrint('=== TEST: PrayerTimesCard with future selected date ===');
+        debugPrint('Selected Date: ${card.selectedDate}');
+        if (card.prayerTimes != null) {
+          debugPrint('Fajr day: ${card.prayerTimes!.fajr.day}');
+          debugPrint('Today is: ${today.day}');
+        }
 
-      expect(card.prayerTimes, isNotNull);
-      expect(
-        card.prayerTimes!.fajr.day,
-        equals(today.day),
-        reason: 'Fajr should be from TODAY, not the selected future date',
-      );
-    });
+        expect(card.prayerTimes, isNotNull);
+        expect(
+          card.prayerTimes!.fajr.day,
+          equals(today.day),
+          reason: 'Fajr should be from TODAY, not the selected future date',
+        );
+      },
+    );
 
-    testWidgets(
-        'Countdown calculates from NOW not from selectedDate', (
-          WidgetTester tester,
-        ) async {
+    testWidgets('Countdown calculates from NOW not from selectedDate', (
+      WidgetTester tester,
+    ) async {
       final today = DateTime.now();
       final pastDate = today.subtract(const Duration(days: 30));
 
@@ -140,11 +146,7 @@ void main() {
       final dateComponents = DateComponents.from(today);
       final params = CalculationMethod.muslim_world_league.getParameters();
 
-      final todayPrayerTimes = PrayerTimes(
-        coordinates,
-        dateComponents,
-        params,
-      );
+      final todayPrayerTimes = PrayerTimes(coordinates, dateComponents, params);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -182,9 +184,9 @@ void main() {
   });
 
   group('CALENDAR DUAL DISPLAY TESTS', () {
-    testWidgets(
-        'Collapsed header shows BOTH Gregorian and Hijri calendars',
-        (WidgetTester tester) async {
+    testWidgets('Collapsed header shows BOTH Gregorian and Hijri calendars', (
+      WidgetTester tester,
+    ) async {
       final testDate = DateTime(2026, 3, 3); // March 3, 2026 = Ramadan 1447
 
       await tester.pumpWidget(
@@ -222,22 +224,25 @@ void main() {
 
       // Check for Hijri secondary (should now be visible in collapsed mode)
       final hijriTexts = find.byWidgetPredicate(
-        (widget) => widget is Text && (widget.data?.contains('Ramadan') ?? false),
+        (widget) =>
+            widget is Text && (widget.data?.contains('Ramadan') ?? false),
       );
-      
+
       if (hijriTexts.evaluate().isNotEmpty) {
         debugPrint('✓ Hijri calendar found in collapsed header');
       } else {
-        debugPrint('✗ Hijri calendar NOT found in collapsed header - THIS IS THE BUG');
+        debugPrint(
+          '✗ Hijri calendar NOT found in collapsed header - THIS IS THE BUG',
+        );
       }
 
       // Dump the widget tree to see what's rendered
       debugDumpApp();
     });
 
-    testWidgets(
-        'Calendar cells show secondary calendar text',
-        (WidgetTester tester) async {
+    testWidgets('Calendar cells show secondary calendar text', (
+      WidgetTester tester,
+    ) async {
       final testDate = DateTime(2026, 3, 3);
 
       await tester.pumpWidget(
@@ -283,7 +288,9 @@ void main() {
       debugPrint('Expected: At least 60+ (2 per day for 30 days + headers)');
 
       if (textCount < 50) {
-        debugPrint('⚠ LOW TEXT COUNT - Secondary calendar may not be rendering');
+        debugPrint(
+          '⚠ LOW TEXT COUNT - Secondary calendar may not be rendering',
+        );
       } else {
         debugPrint('✓ Text count seems reasonable');
       }

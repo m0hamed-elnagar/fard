@@ -12,16 +12,22 @@ class MockLocationPrayerCubit extends Mock implements LocationPrayerCubit {}
 void main() {
   testWidgets('Location dropdown interaction test', (tester) async {
     final mockCubit = MockLocationPrayerCubit();
-    when(() => mockCubit.state).thenReturn(const LocationPrayerState(
-      madhab: 'shafi',
-      calculationMethod: 'muslim_league',
-      hijriAdjustment: 0,
-    ));
-    when(() => mockCubit.stream).thenAnswer((_) => Stream.value(const LocationPrayerState(
-      madhab: 'shafi',
-      calculationMethod: 'muslim_league',
-      hijriAdjustment: 0,
-    )));
+    when(() => mockCubit.state).thenReturn(
+      const LocationPrayerState(
+        madhab: 'shafi',
+        calculationMethod: 'muslim_league',
+        hijriAdjustment: 0,
+      ),
+    );
+    when(() => mockCubit.stream).thenAnswer(
+      (_) => Stream.value(
+        const LocationPrayerState(
+          madhab: 'shafi',
+          calculationMethod: 'muslim_league',
+          hijriAdjustment: 0,
+        ),
+      ),
+    );
 
     await tester.pumpWidget(
       MaterialApp(
@@ -53,16 +59,22 @@ void main() {
 
   testWidgets('Calculation method dropdown interaction test', (tester) async {
     final mockCubit = MockLocationPrayerCubit();
-    when(() => mockCubit.state).thenReturn(const LocationPrayerState(
-      madhab: 'shafi',
-      calculationMethod: 'muslim_league',
-      hijriAdjustment: 0,
-    ));
-    when(() => mockCubit.stream).thenAnswer((_) => Stream.value(const LocationPrayerState(
-      madhab: 'shafi',
-      calculationMethod: 'muslim_league',
-      hijriAdjustment: 0,
-    )));
+    when(() => mockCubit.state).thenReturn(
+      const LocationPrayerState(
+        madhab: 'shafi',
+        calculationMethod: 'muslim_league',
+        hijriAdjustment: 0,
+      ),
+    );
+    when(() => mockCubit.stream).thenAnswer(
+      (_) => Stream.value(
+        const LocationPrayerState(
+          madhab: 'shafi',
+          calculationMethod: 'muslim_league',
+          hijriAdjustment: 0,
+        ),
+      ),
+    );
 
     await tester.pumpWidget(
       MaterialApp(

@@ -92,10 +92,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
             );
           }
 
-          final coordinates = Coordinates(
-            state.latitude!,
-            state.longitude!,
-          );
+          final coordinates = Coordinates(state.latitude!, state.longitude!);
           final qiblaDirection = Qibla(coordinates).direction;
 
           return StreamBuilder<CompassEvent>(

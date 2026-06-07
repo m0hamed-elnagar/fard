@@ -1,4 +1,4 @@
-package com.qada.fard.prayer
+package com.khwarizmi.fard.prayer
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -121,7 +121,7 @@ class SettingsRepository(private val context: Context) {
      * This allows widgets to read independent theme colors.
      */
     fun saveWidgetTheme(themeData: Map<String, Any>) {
-        val cu = com.qada.fard.widget.ColorUtils
+        val cu = com.khwarizmi.fard.widget.ColorUtils
         prefs.edit().apply {
             val primary = themeData["primaryColorHex"] as? String
             putString("flutter.widget_theme_primary", if (cu.isValidHex(primary)) primary else "#2E7D32")
@@ -151,7 +151,7 @@ class SettingsRepository(private val context: Context) {
      * Save the app's current theme to the widget theme keys, but marked as non-manual.
      * This makes "Follow App Theme" just as fast and effective as manual changes.
      */
-    fun syncAppTheme(theme: com.qada.fard.widget.WidgetTheme) {
+    fun syncAppTheme(theme: com.khwarizmi.fard.widget.WidgetTheme) {
         if (hasWidgetThemeOverride()) return // Don't overwrite manual settings
 
         prefs.edit().apply {
@@ -170,8 +170,8 @@ class SettingsRepository(private val context: Context) {
      * Get widget theme from SharedPreferences.
      * Returns a WidgetTheme object.
      */
-    fun getWidgetTheme(): com.qada.fard.widget.WidgetTheme {
-        return com.qada.fard.widget.WidgetTheme(
+    fun getWidgetTheme(): com.khwarizmi.fard.widget.WidgetTheme {
+        return com.khwarizmi.fard.widget.WidgetTheme(
             primaryColorHex = prefs.getString("flutter.widget_theme_primary", "#2E7D32")
                 ?: "#2E7D32",
             accentColorHex = prefs.getString("flutter.widget_theme_accent", "#FFD54F") ?: "#FFD54F",
@@ -187,7 +187,7 @@ class SettingsRepository(private val context: Context) {
         )
     }
 
-    fun resolveWidgetTheme(fallback: com.qada.fard.widget.WidgetTheme): com.qada.fard.widget.WidgetTheme {
+    fun resolveWidgetTheme(fallback: com.khwarizmi.fard.widget.WidgetTheme): com.khwarizmi.fard.widget.WidgetTheme {
         // Now that presets also sync to the direct keys, we always prioritize the direct keys.
         // This ensures presets are just as 'effective' as manual changes.
         return if (prefs.contains("flutter.widget_theme_primary")) {
@@ -250,3 +250,4 @@ class SettingsRepository(private val context: Context) {
         }
     }
 }
+

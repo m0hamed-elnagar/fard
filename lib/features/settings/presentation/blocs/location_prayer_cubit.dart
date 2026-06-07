@@ -26,15 +26,15 @@ class LocationPrayerCubit extends Cubit<LocationPrayerState> {
     this._syncNotif,
     this._updateMethod,
   ) : super(
-          LocationPrayerState(
-            latitude: _repo.latitude,
-            longitude: _repo.longitude,
-            cityName: _repo.cityName,
-            calculationMethod: _repo.calculationMethod,
-            madhab: _repo.madhab,
-            hijriAdjustment: _repo.hijriAdjustment,
-          ),
-        );
+        LocationPrayerState(
+          latitude: _repo.latitude,
+          longitude: _repo.longitude,
+          cityName: _repo.cityName,
+          calculationMethod: _repo.calculationMethod,
+          madhab: _repo.madhab,
+          hijriAdjustment: _repo.hijriAdjustment,
+        ),
+      );
 
   Future<void> refreshLocation() async {
     final r = await _syncLoc.execute();
@@ -89,23 +89,26 @@ class LocationPrayerCubit extends Cubit<LocationPrayerState> {
   }
 
   void _sync() => Future.microtask(() async {
-        try {
-          await _syncNotif.execute();
-        } catch (e, stack) {
-          debugPrint('LocationPrayerCubit: Error syncing notifications: $e\n$stack');
-        }
-      });
+    try {
+      await _syncNotif.execute();
+    } catch (e, stack) {
+      debugPrint(
+        'LocationPrayerCubit: Error syncing notifications: $e\n$stack',
+      );
+    }
+  });
 
   void refresh() {
-    emit(state.copyWith(
-      latitude: _repo.latitude,
-      longitude: _repo.longitude,
-      cityName: _repo.cityName,
-      calculationMethod: _repo.calculationMethod,
-      madhab: _repo.madhab,
-      hijriAdjustment: _repo.hijriAdjustment,
-    ));
+    emit(
+      state.copyWith(
+        latitude: _repo.latitude,
+        longitude: _repo.longitude,
+        cityName: _repo.cityName,
+        calculationMethod: _repo.calculationMethod,
+        madhab: _repo.madhab,
+        hijriAdjustment: _repo.hijriAdjustment,
+      ),
+    );
     _sync();
   }
 }
-

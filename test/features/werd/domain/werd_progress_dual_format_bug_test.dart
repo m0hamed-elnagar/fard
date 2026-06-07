@@ -50,8 +50,8 @@ void main() {
       print('segmentsToday count: ${newProgress.segmentsToday.length}');
       print('totalAmountReadToday: ${newProgress.totalAmountReadToday}');
       print('');
-      
-      if (newProgress.readItemsToday.isNotEmpty && 
+
+      if (newProgress.readItemsToday.isNotEmpty &&
           newProgress.segmentsToday.isEmpty) {
         print('❌❌❌ BUG CONFIRMED! ❌❌❌');
         print('');
@@ -65,10 +65,16 @@ void main() {
       print('╚════════════════════════════════════════════════════╝');
 
       // THE BUG: readItemsToday has data, but segmentsToday is empty!
-      expect(newProgress.readItemsToday.length, 7,
-          reason: 'readItemsToday should have 7 ayahs');
-      expect(newProgress.segmentsToday.length, 0,
-          reason: 'segmentsToday is EMPTY (this is the bug!)');
+      expect(
+        newProgress.readItemsToday.length,
+        7,
+        reason: 'readItemsToday should have 7 ayahs',
+      );
+      expect(
+        newProgress.segmentsToday.length,
+        0,
+        reason: 'segmentsToday is EMPTY (this is the bug!)',
+      );
     },
   );
 
@@ -91,7 +97,7 @@ void main() {
       // CORRECT APPROACH: Set BOTH formats
       final readItems = {1, 2, 3, 4, 5, 6, 7};
       final segments = ReadingSegment.fromSet(readItems);
-      
+
       final newProgress = initialProgress.copyWith(
         totalAmountReadToday: 7,
         readItemsToday: readItems,
@@ -104,23 +110,28 @@ void main() {
       print('╔════════════════════════════════════════════════════╗');
       print('✅ EXPECTED BEHAVIOR TEST');
       print('╠════════════════════════════════════════════════════╣');
-      
+
       // Both should be set
       expect(newProgress.readItemsToday.length, 7);
-      
+
       // segmentsToday should have ONE segment {1-7}
-      expect(newProgress.segmentsToday.length, 1,
-          reason: 'Should have ONE segment covering ayahs 1-7');
+      expect(
+        newProgress.segmentsToday.length,
+        1,
+        reason: 'Should have ONE segment covering ayahs 1-7',
+      );
       expect(newProgress.segmentsToday[0].startAyah, 1);
       expect(newProgress.segmentsToday[0].endAyah, 7);
       expect(newProgress.segmentsToday[0].ayahsCount, 7);
-      
+
       print('readItemsToday: ${newProgress.readItemsToday.length} ayahs');
       print('segmentsToday: ${newProgress.segmentsToday.length} segment(s)');
-      
+
       if (newProgress.segmentsToday.isNotEmpty) {
         final seg = newProgress.segmentsToday[0];
-        print('Segment 0: ${seg.startAyah}-${seg.endAyah} (${seg.ayahsCount} ayahs)');
+        print(
+          'Segment 0: ${seg.startAyah}-${seg.endAyah} (${seg.ayahsCount} ayahs)',
+        );
         print('✅ Both formats are in sync!');
       }
       print('╚════════════════════════════════════════════════════╝');

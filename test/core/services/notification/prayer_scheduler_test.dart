@@ -84,16 +84,22 @@ void main() {
     mockAndroidPlugin = MockAndroidFlutterLocalNotificationsPlugin();
 
     when(() => mockSettingsRepository.isWerdReminderEnabled).thenReturn(false);
-    when(() => mockSettingsRepository.isSalawatReminderEnabled).thenReturn(false);
+    when(
+      () => mockSettingsRepository.isSalawatReminderEnabled,
+    ).thenReturn(false);
     when(() => mockSettingsRepository.reminders).thenReturn([]);
     when(() => mockSettingsRepository.morningAzkarTime).thenReturn('05:00');
     when(() => mockSettingsRepository.eveningAzkarTime).thenReturn('18:00');
-    when(() => mockSettingsRepository.isAfterSalahAzkarEnabled).thenReturn(false);
+    when(
+      () => mockSettingsRepository.isAfterSalahAzkarEnabled,
+    ).thenReturn(false);
     when(() => mockSettingsRepository.latitude).thenReturn(51.5);
     when(() => mockSettingsRepository.longitude).thenReturn(-0.1);
-    when(() => mockSettingsRepository.calculationMethod).thenReturn('muslim_league');
+    when(
+      () => mockSettingsRepository.calculationMethod,
+    ).thenReturn('muslim_league');
     when(() => mockSettingsRepository.madhab).thenReturn('shafi');
-    
+
     scheduler = PrayerNotificationScheduler(
       mockPrayerTimeService,
       mockAzkarRepository,

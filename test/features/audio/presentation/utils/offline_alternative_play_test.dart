@@ -14,10 +14,19 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockAudioPlayerBloc extends MockBloc<AudioPlayerEvent, AudioPlayerState> implements AudioPlayerBloc {}
-class MockReciterManagerBloc extends MockBloc<ReciterManagerEvent, ReciterManagerState> implements ReciterManagerBloc {}
-class MockConnectivityBloc extends MockBloc<ConnectivityEvent, ConnectivityState> implements ConnectivityBloc {}
+class MockAudioPlayerBloc extends MockBloc<AudioPlayerEvent, AudioPlayerState>
+    implements AudioPlayerBloc {}
+
+class MockReciterManagerBloc
+    extends MockBloc<ReciterManagerEvent, ReciterManagerState>
+    implements ReciterManagerBloc {}
+
+class MockConnectivityBloc
+    extends MockBloc<ConnectivityEvent, ConnectivityState>
+    implements ConnectivityBloc {}
+
 class MockAudioDownloadService extends Mock implements AudioDownloadService {}
+
 class MockConnectivityService extends Mock implements ConnectivityService {}
 
 void main() {
@@ -61,84 +70,113 @@ void main() {
     getIt.registerSingleton<ConnectivityService>(mockConnectivityService);
 
     when(() => mockAudioPlayerBloc.state).thenReturn(const AudioPlayerState());
-    when(() => mockReciterManagerBloc.state).thenReturn(const ReciterManagerState(currentReciter: alafasy));
-    when(() => mockConnectivityBloc.state).thenReturn(const ConnectivityStatus(false));
-    when(() => mockConnectivityService.hasInternet()).thenAnswer((_) async => false);
-    when(() => mockConnectivityService.hasNetwork()).thenAnswer((_) async => false);
+    when(
+      () => mockReciterManagerBloc.state,
+    ).thenReturn(const ReciterManagerState(currentReciter: alafasy));
+    when(
+      () => mockConnectivityBloc.state,
+    ).thenReturn(const ConnectivityStatus(false));
+    when(
+      () => mockConnectivityService.hasInternet(),
+    ).thenAnswer((_) async => false);
+    when(
+      () => mockConnectivityService.hasNetwork(),
+    ).thenAnswer((_) async => false);
   });
 
-  testWidgets('showAlternativeReciterDialog switches reciter and plays on "Play" click', (tester) async {
-    // 1. Arrange: Alternative exists
-    when(() => mockDownloadService.getRecitersWithDownloadedSurah(18))
-        .thenAnswer((_) async => [husary]);
-    
-    when(() => mockDownloadService.getSurahStatus(
-      reciterId: any(named: 'reciterId'),
-      surahNumber: any(named: 'surahNumber'),
-    )).thenAnswer((_) async => const SurahDownloadStatus(
-      isDownloaded: false,
-      isDownloading: false,
-      sizeInBytes: 0,
-      downloadedAyahs: 0,
-      totalAyahs: 110,
-    ));
+  testWidgets(
+    'showAlternativeReciterDialog switches reciter and plays on "Play" click',
+    (tester) async {
+      // 1. Arrange: Alternative exists
+      when(
+        () => mockDownloadService.getRecitersWithDownloadedSurah(18),
+      ).thenAnswer((_) async => [husary]);
 
-    await tester.pumpWidget(
-      MultiBlocProvider(
-        providers: [
-          BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
-          BlocProvider<ReciterManagerBloc>.value(value: mockReciterManagerBloc),
-          BlocProvider<ConnectivityBloc>.value(value: mockConnectivityBloc),
-        ],
-        child: const MaterialApp(
-          localizationsDelegates: [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: [Locale('en'), Locale('ar')],
-          locale: Locale('ar'),
-          home: Scaffold(body: Center(child: Text('Test'))),
+      when(
+        () => mockDownloadService.getSurahStatus(
+          reciterId: any(named: 'reciterId'),
+          surahNumber: any(named: 'surahNumber'),
         ),
-      ),
-    );
+      ).thenAnswer(
+        (_) async => const SurahDownloadStatus(
+          isDownloaded: false,
+          isDownloading: false,
+          sizeInBytes: 0,
+          downloadedAyahs: 0,
+          totalAyahs: 110,
+        ),
+      );
 
-    final BuildContext context = tester.element(find.text('Test'));
+      await tester.pumpWidget(
+        MultiBlocProvider(
+          providers: [
+            BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
+            BlocProvider<ReciterManagerBloc>.value(
+              value: mockReciterManagerBloc,
+            ),
+            BlocProvider<ConnectivityBloc>.value(value: mockConnectivityBloc),
+          ],
+          child: const MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: [Locale('en'), Locale('ar')],
+            locale: Locale('ar'),
+            home: Scaffold(body: Center(child: Text('Test'))),
+          ),
+        ),
+      );
 
-    // 2. Act: Trigger Dialog
-    await OfflineAudioHelper.handlePlayRequest(
-      context: context,
-      surahNumber: 18,
-      startAyah: 1,
-      isDownloaded: false,
-    );
+      final BuildContext context = tester.element(find.text('Test'));
 
-    await tester.pumpAndSettle();
+      // 2. Act: Trigger Dialog
+      await OfflineAudioHelper.handlePlayRequest(
+        context: context,
+        surahNumber: 18,
+        startAyah: 1,
+        isDownloaded: false,
+      );
 
-    // 3. Assert: Dialog is shown
-    expect(find.byType(AlertDialog), findsOneWidget);
-    expect(find.textContaining('الحصري'), findsOneWidget);
+      await tester.pumpAndSettle();
 
-    // 4. Act: Click "Play" (تشغيل السورة in Arabic locale)
-    final playBtn = find.text('تشغيل السورة');
-    expect(playBtn, findsOneWidget);
-    await tester.tap(playBtn);
-    await tester.pumpAndSettle();
+      // 3. Assert: Dialog is shown
+      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.textContaining('الحصري'), findsOneWidget);
 
-    // 5. Assert: Dialog dismissed and events added
-    expect(find.byType(AlertDialog), findsNothing);
-    
-    // Verify and check specific values directly using capture
-    final selectReciterEvent = verify(() => mockReciterManagerBloc.add(captureAny(that: isA<SelectReciter>())))
-        .captured.last as SelectReciter;
-    expect(selectReciterEvent.reciter.identifier, husary.identifier);
+      // 4. Act: Click "Play" (تشغيل السورة in Arabic locale)
+      final playBtn = find.text('تشغيل السورة');
+      expect(playBtn, findsOneWidget);
+      await tester.tap(playBtn);
+      await tester.pumpAndSettle();
 
-    final playSurahEvent = verify(() => mockAudioPlayerBloc.add(captureAny(that: isA<PlaySurah>())))
-        .captured.last as PlaySurah;
-    expect(playSurahEvent.surahNumber, 18);
-    expect(playSurahEvent.startAyah, 1);
+      // 5. Assert: Dialog dismissed and events added
+      expect(find.byType(AlertDialog), findsNothing);
 
-    verify(() => mockAudioPlayerBloc.add(any(that: isA<ShowBanner>()))).called(1);
-  });
+      // Verify and check specific values directly using capture
+      final selectReciterEvent =
+          verify(
+                () => mockReciterManagerBloc.add(
+                  captureAny(that: isA<SelectReciter>()),
+                ),
+              ).captured.last
+              as SelectReciter;
+      expect(selectReciterEvent.reciter.identifier, husary.identifier);
+
+      final playSurahEvent =
+          verify(
+                () =>
+                    mockAudioPlayerBloc.add(captureAny(that: isA<PlaySurah>())),
+              ).captured.last
+              as PlaySurah;
+      expect(playSurahEvent.surahNumber, 18);
+      expect(playSurahEvent.startAyah, 1);
+
+      verify(
+        () => mockAudioPlayerBloc.add(any(that: isA<ShowBanner>())),
+      ).called(1);
+    },
+  );
 }

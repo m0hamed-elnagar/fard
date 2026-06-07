@@ -23,10 +23,7 @@ class WidgetColorPicker extends StatelessWidget {
 
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      title: Text(
-        label,
-        style: GoogleFonts.amiri(fontSize: 14),
-      ),
+      title: Text(label, style: GoogleFonts.amiri(fontSize: 14)),
       subtitle: Text(
         currentHex,
         style: TextStyle(

@@ -9,9 +9,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockSettingsRepository extends Mock implements SettingsRepository {}
+
 class MockApplyThemePreset extends Mock implements ApplyThemePreset {}
+
 class MockSaveCustomTheme extends Mock implements SaveCustomTheme {}
-class MockGetAvailableThemePresets extends Mock implements GetAvailableThemePresets {}
+
+class MockGetAvailableThemePresets extends Mock
+    implements GetAvailableThemePresets {}
 
 void main() {
   late ThemeCubit cubit;
@@ -31,7 +35,7 @@ void main() {
     when(() => mockRepo.customThemeColors).thenReturn(null);
     when(() => mockRepo.savedCustomThemes).thenReturn([]);
     when(() => mockRepo.activeCustomThemeId).thenReturn(null);
-    
+
     when(() => mockRepo.updateLocale(any())).thenAnswer((_) async {});
     when(() => mockRepo.updateThemePreset(any())).thenAnswer((_) async {});
     when(() => mockApplyTheme.execute(any())).thenAnswer((_) async {});
@@ -66,16 +70,19 @@ void main() {
       cubit.toggleLocale();
       await Future.delayed(const Duration(milliseconds: 100));
       expect(cubit.state.locale, const Locale('en'));
-      
+
       cubit.toggleLocale();
       await Future.delayed(const Duration(milliseconds: 100));
       expect(cubit.state.locale, const Locale('ar'));
     });
 
-    test('selectThemePreset calls applyTheme usecase and updates state', () async {
-      await cubit.selectThemePreset('ocean_blue');
-      expect(cubit.state.themePresetId, 'ocean_blue');
-      verify(() => mockApplyTheme.execute('ocean_blue')).called(1);
-    });
+    test(
+      'selectThemePreset calls applyTheme usecase and updates state',
+      () async {
+        await cubit.selectThemePreset('ocean_blue');
+        expect(cubit.state.themePresetId, 'ocean_blue');
+        verify(() => mockApplyTheme.execute('ocean_blue')).called(1);
+      },
+    );
   });
 }

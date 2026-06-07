@@ -183,16 +183,27 @@ class NotificationService {
     // Notification permission is required on both Android 13+ and iOS
     final notificationStatus = await Permission.notification.request();
 
+    bool granted = notificationStatus.isGranted;
+
     if (Platform.isAndroid) {
       final alarmStatus = await Permission.scheduleExactAlarm.request();
       debugPrint(
         'Permissions result: Notifications=$notificationStatus, Alarms=$alarmStatus',
       );
-      return notificationStatus.isGranted && alarmStatus.isGranted;
+      granted = notificationStatus.isGranted && alarmStatus.isGranted;
+    }
+
+    if (granted && Platform.isAndroid) {
+      // Re-create channels to ensure they are properly registered now that we have permission
+      await ensureInitialized();
+      await _channelManager.createNotificationChannels(
+        _notificationsPlugin,
+        settings: _settingsProvider,
+      );
     }
 
     debugPrint('Permissions result: Notifications=$notificationStatus');
-    return notificationStatus.isGranted;
+    return granted;
   }
 
   Future<void> handleInitialNotification() async {
@@ -270,6 +281,7 @@ class NotificationService {
   }
 
   Future<void> schedulePrayerNotifications() async {
+    await ensureInitialized();
     // Update widget data
     await _widgetUpdateService.updateWidget();
 
@@ -277,19 +289,22 @@ class NotificationService {
   }
 
   Future<void> testAzan(Salaah salaah, String? sound) async {
+    await ensureInitialized();
     try {
       // 1. Check permissions first
       final bool enabled = await areNotificationsEnabled();
       final bool canSchedule = await canScheduleExactNotifications();
-      
+
       if (!enabled || !canSchedule) {
-        debugPrint('testAzan: Permissions missing. Enabled: $enabled, CanSchedule: $canSchedule');
+        debugPrint(
+          'testAzan: Permissions missing. Enabled: $enabled, CanSchedule: $canSchedule',
+        );
         // The UI handles user feedback for missing permissions.
       }
 
       final String salaahName = _getSalaahName(salaah);
       final String soundPath = sound ?? 'default';
-      
+
       // Delete any old test channels to prevent Android from restoring cached sound configurations
       final androidPlugin = _notificationsPlugin
           .resolvePlatformSpecificImplementation<
@@ -299,14 +314,17 @@ class NotificationService {
         final channels = await androidPlugin.getNotificationChannels();
         for (final channel in channels ?? []) {
           if (channel.id.startsWith('azan_test_')) {
-            await androidPlugin.deleteNotificationChannel(channelId: channel.id);
+            await androidPlugin.deleteNotificationChannel(
+              channelId: channel.id,
+            );
           }
         }
       }
 
       // Use a completely unique channel ID for each test to bypass the Android channel cache bug.
       // Since we delete old ones above, this won't leak channels.
-      final String channelId = 'azan_test_${DateTime.now().millisecondsSinceEpoch}';
+      final String channelId =
+          'azan_test_${DateTime.now().millisecondsSinceEpoch}';
 
       debugPrint('Testing Azan with channel: $channelId, sound: $soundPath');
 
@@ -320,7 +338,9 @@ class NotificationService {
 
       // Small delay to ensure channel is ready
       await Future.delayed(const Duration(milliseconds: 600));
-      final String? soundUri = await _soundManager.getSoundUriForChannel(soundPath);
+      final String? soundUri = await _soundManager.getSoundUriForChannel(
+        soundPath,
+      );
 
       String diagnosticInfo = '';
       if (soundUri != null && soundUri.startsWith('content:')) {
@@ -335,7 +355,9 @@ class NotificationService {
           // Fallback for raw resources
           if (!soundPath.contains('/') && !soundPath.contains('\\')) {
             final resourceName = soundPath.split('.').first;
-            notificationSound = RawResourceAndroidNotificationSound(resourceName);
+            notificationSound = RawResourceAndroidNotificationSound(
+              resourceName,
+            );
             diagnosticInfo = '\nمحاولة استخدام مورد داخلي: $resourceName';
           }
         }
@@ -376,6 +398,7 @@ class NotificationService {
   }
 
   Future<void> testReminder(Salaah salaah, int minutesBefore) async {
+    await ensureInitialized();
     try {
       final String salaahName = _getSalaahName(salaah);
 

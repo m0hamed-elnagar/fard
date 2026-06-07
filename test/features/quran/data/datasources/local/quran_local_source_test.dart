@@ -59,21 +59,26 @@ void main() {
     ],
   );
 
-  test('cacheSurahs should preserve existing ayahs if new data has none', () async {
-    // Arrange
-    when(() => mockBox.get(1)).thenReturn(tExistingEntity);
-    when(() => mockBox.putAll(any())).thenAnswer((_) async => {});
+  test(
+    'cacheSurahs should preserve existing ayahs if new data has none',
+    () async {
+      // Arrange
+      when(() => mockBox.get(1)).thenReturn(tExistingEntity);
+      when(() => mockBox.putAll(any())).thenAnswer((_) async => {});
 
-    // Act
-    await localSource.cacheSurahs([tSurahBasic]);
+      // Act
+      await localSource.cacheSurahs([tSurahBasic]);
 
-    // Assert
-    final captured = verify(() => mockBox.putAll(captureAny())).captured.first as Map<int, SurahEntity>;
-    
-    expect(captured[1]!.ayahs, isNotEmpty);
-    expect(captured[1]!.ayahs.length, tExistingEntity.ayahs.length);
-    expect(captured[1]!.name, tSurahBasic.name);
-  });
+      // Assert
+      final captured =
+          verify(() => mockBox.putAll(captureAny())).captured.first
+              as Map<int, SurahEntity>;
+
+      expect(captured[1]!.ayahs, isNotEmpty);
+      expect(captured[1]!.ayahs.length, tExistingEntity.ayahs.length);
+      expect(captured[1]!.name, tSurahBasic.name);
+    },
+  );
 
   test('cacheSurahs should overwrite ayahs if new data HAS ayahs', () async {
     // Arrange
@@ -94,9 +99,11 @@ void main() {
     await localSource.cacheSurahs([tSurahWithNewAyahs]);
 
     // Assert
-    final captured = verify(() => mockBox.putAll(captureAny())).captured.first as Map<int, SurahEntity>;
-    
-    // In this case, _toEntity is used, which might return empty if our mock list is empty, 
+    final captured =
+        verify(() => mockBox.putAll(captureAny())).captured.first
+            as Map<int, SurahEntity>;
+
+    // In this case, _toEntity is used, which might return empty if our mock list is empty,
     // but the point is it shouldn't use the 'existing' logic.
     expect(captured[1]!.ayahs.length, tSurahWithNewAyahs.ayahs.length);
   });

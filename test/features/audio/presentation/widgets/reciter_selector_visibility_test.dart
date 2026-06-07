@@ -14,7 +14,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 class MockAudioPlayerBloc extends MockBloc<AudioPlayerEvent, AudioPlayerState>
     implements AudioPlayerBloc {}
 
-class MockReciterManagerBloc extends MockBloc<ReciterManagerEvent, ReciterManagerState>
+class MockReciterManagerBloc
+    extends MockBloc<ReciterManagerEvent, ReciterManagerState>
     implements ReciterManagerBloc {}
 
 void main() {
@@ -71,9 +72,9 @@ void main() {
   testWidgets('ReciterSelector should display Alafasy and Husary', (
     tester,
   ) async {
-    when(() => mockReciterManagerBloc.state).thenReturn(
-      const ReciterManagerState(availableReciters: tReciters),
-    );
+    when(
+      () => mockReciterManagerBloc.state,
+    ).thenReturn(const ReciterManagerState(availableReciters: tReciters));
 
     await tester.pumpWidget(createWidgetUnderTest());
 

@@ -130,7 +130,8 @@ class _HomeContentState extends State<HomeContent> {
                   buildWhen: (prev, curr) =>
                       prev.isQadaEnabled != curr.isQadaEnabled,
                   builder: (context, remindersState) {
-                    final todayPrayerTimes = (locationState.latitude != null &&
+                    final todayPrayerTimes =
+                        (locationState.latitude != null &&
                             locationState.longitude != null)
                         ? getIt<PrayerTimeService>().getPrayerTimes(
                             latitude: locationState.latitude!,
@@ -172,7 +173,8 @@ class _HomeContentState extends State<HomeContent> {
                                 title: l10n.editQada,
                                 initialCounts: currentCounts,
                                 onConfirm: (counts) => bloc.add(
-                                    PrayerTrackerEvent.updateQada(counts)),
+                                  PrayerTrackerEvent.updateQada(counts),
+                                ),
                               ),
                             );
                           },
@@ -243,15 +245,15 @@ class _HomeContentState extends State<HomeContent> {
                   builder: (context, remindersState) {
                     final selectedDatePrayerTimes =
                         (locationState.latitude != null &&
-                                locationState.longitude != null)
-                            ? getIt<PrayerTimeService>().getPrayerTimes(
-                                latitude: locationState.latitude!,
-                                longitude: locationState.longitude!,
-                                method: locationState.calculationMethod,
-                                madhab: locationState.madhab,
-                                date: widget.selectedDate,
-                              )
-                            : null;
+                            locationState.longitude != null)
+                        ? getIt<PrayerTimeService>().getPrayerTimes(
+                            latitude: locationState.latitude!,
+                            longitude: locationState.longitude!,
+                            method: locationState.calculationMethod,
+                            madhab: locationState.madhab,
+                            date: widget.selectedDate,
+                          )
+                        : null;
 
                     return _DailyPrayersSection(
                       locationState: locationState,
@@ -489,9 +491,7 @@ class _DailyPrayersSectionState extends State<_DailyPrayersSection> {
                                 !widget.remindersState.isSalahReminderEnabled;
                             context
                                 .read<DailyRemindersCubit>()
-                                .toggleSalahReminder(
-                                  newState,
-                                );
+                                .toggleSalahReminder(newState);
                             _showReminderSnackBar(
                               isAr ? 'تذكيرات الصلاة' : 'Salah Reminders',
                               newState,
@@ -539,11 +539,14 @@ class _DailyPrayersSectionState extends State<_DailyPrayersSection> {
                           SalaahTile(
                             salaah: Salaah.values[index],
                             qadaCount:
-                                widget.qadaStatus[Salaah.values[index]]?.value ??
-                                    0,
+                                widget
+                                    .qadaStatus[Salaah.values[index]]
+                                    ?.value ??
+                                0,
                             completedQadaCount:
-                                widget.completedQadaToday[Salaah.values[index]] ??
-                                    0,
+                                widget.completedQadaToday[Salaah
+                                    .values[index]] ??
+                                0,
                             isMissedToday: widget.missedToday.contains(
                               Salaah.values[index],
                             ),
@@ -564,26 +567,27 @@ class _DailyPrayersSectionState extends State<_DailyPrayersSection> {
                             isQadaEnabled: widget.remindersState.isQadaEnabled,
                             isReminderEnabled:
                                 widget.remindersState.isSalahReminderEnabled &&
-                                    widget.remindersState.enabledSalahReminders
-                                        .contains(
-                                      Salaah.values[index],
-                                    ),
+                                widget.remindersState.enabledSalahReminders
+                                    .contains(Salaah.values[index]),
                             onAdd: () => context.read<PrayerTrackerBloc>().add(
                               PrayerTrackerEvent.addQada(Salaah.values[index]),
                             ),
-                            onRemove: () => context.read<PrayerTrackerBloc>().add(
-                              PrayerTrackerEvent.removeQada(
-                                Salaah.values[index],
-                              ),
-                            ),
-                            onToggleMissed: () => context.read<PrayerTrackerBloc>().add(
-                              PrayerTrackerEvent.togglePrayer(
-                                Salaah.values[index],
-                              ),
-                            ),
+                            onRemove: () =>
+                                context.read<PrayerTrackerBloc>().add(
+                                  PrayerTrackerEvent.removeQada(
+                                    Salaah.values[index],
+                                  ),
+                                ),
+                            onToggleMissed: () =>
+                                context.read<PrayerTrackerBloc>().add(
+                                  PrayerTrackerEvent.togglePrayer(
+                                    Salaah.values[index],
+                                  ),
+                                ),
                             onToggleReminder: () {
                               final salaah = Salaah.values[index];
-                              final isEnabled = widget.remindersState
+                              final isEnabled = widget
+                                  .remindersState
                                   .enabledSalahReminders
                                   .contains(salaah);
                               context

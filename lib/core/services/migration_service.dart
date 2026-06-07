@@ -14,7 +14,9 @@ class MigrationService {
       return;
     }
 
-    debugPrint('[MIGRATION] Starting asset migration v1 (Support -> Documents)...');
+    debugPrint(
+      '[MIGRATION] Starting asset migration v1 (Support -> Documents)...',
+    );
     final supportDir = await getApplicationSupportDirectory();
     final docsDir = await getApplicationDocumentsDirectory();
 
@@ -30,7 +32,9 @@ class MigrationService {
           if (!await newDir.exists()) {
             await oldDir.rename(newDir.path);
           } else {
-            final List<FileSystemEntity> entities = await oldDir.list().toList();
+            final List<FileSystemEntity> entities = await oldDir
+                .list()
+                .toList();
             for (final entity in entities) {
               final newPath = '${newDir.path}/${entity.uri.pathSegments.last}';
               await entity.rename(newPath);
@@ -54,7 +58,9 @@ class MigrationService {
       return;
     }
 
-    debugPrint('[MIGRATION] Starting asset migration v2 (Documents -> Support)...');
+    debugPrint(
+      '[MIGRATION] Starting asset migration v2 (Documents -> Support)...',
+    );
     final supportDir = await getApplicationSupportDirectory();
     final docsDir = await getApplicationDocumentsDirectory();
 
@@ -73,17 +79,17 @@ class MigrationService {
 
           // Use recursive list to catch all sub-directories (like reciter folders)
           final entities = await oldDir.list(recursive: true).toList();
-          
+
           // Filter only files to move them individually (safer than renaming the whole dir if target exists)
           for (final entity in entities) {
             if (entity is File) {
               final relativePath = entity.path.replaceFirst(oldDir.path, '');
               final targetFile = File('${newDir.path}$relativePath');
-              
+
               if (!await targetFile.parent.exists()) {
                 await targetFile.parent.create(recursive: true);
               }
-              
+
               if (await targetFile.exists()) {
                 await targetFile.delete();
               }

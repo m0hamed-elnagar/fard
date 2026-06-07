@@ -204,19 +204,22 @@ class _TasbihViewState extends State<TasbihView> {
                                 child: Center(
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      color: context.secondaryColor
-                                          .withValues(alpha: 0.1),
+                                      color: context.secondaryColor.withValues(
+                                        alpha: 0.1,
+                                      ),
                                       shape: BoxShape.circle,
                                     ),
                                     child: IconButton(
                                       icon: const Icon(
-                                          Icons.arrow_back_ios_rounded,
-                                          size: 20),
+                                        Icons.arrow_back_ios_rounded,
+                                        size: 20,
+                                      ),
                                       color: context.secondaryColor,
                                       onPressed: () {
                                         _pageController.previousPage(
-                                          duration:
-                                              const Duration(milliseconds: 300),
+                                          duration: const Duration(
+                                            milliseconds: 300,
+                                          ),
                                           curve: Curves.easeInOut,
                                         );
                                       },
@@ -233,19 +236,22 @@ class _TasbihViewState extends State<TasbihView> {
                                 child: Center(
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      color: context.secondaryColor
-                                          .withValues(alpha: 0.1),
+                                      color: context.secondaryColor.withValues(
+                                        alpha: 0.1,
+                                      ),
                                       shape: BoxShape.circle,
                                     ),
                                     child: IconButton(
                                       icon: const Icon(
-                                          Icons.arrow_forward_ios_rounded,
-                                          size: 20),
+                                        Icons.arrow_forward_ios_rounded,
+                                        size: 20,
+                                      ),
                                       color: context.secondaryColor,
                                       onPressed: () {
                                         _pageController.nextPage(
-                                          duration:
-                                              const Duration(milliseconds: 300),
+                                          duration: const Duration(
+                                            milliseconds: 300,
+                                          ),
                                           curve: Curves.easeInOut,
                                         );
                                       },
@@ -404,8 +410,9 @@ class _TasbihPageItem extends StatelessWidget {
               )]
             : null;
 
-        final itemCount =
-            currentDhikr != null ? (state.itemProgress[currentDhikr.id] ?? 0) : 0;
+        final itemCount = currentDhikr != null
+            ? (state.itemProgress[currentDhikr.id] ?? 0)
+            : 0;
 
         return SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -457,7 +464,8 @@ class _TasbihPageItem extends StatelessWidget {
                           children: [
                             CounterCircle(
                               count: itemCount,
-                              targetCount: state.customTasbihTarget ??
+                              targetCount:
+                                  state.customTasbihTarget ??
                                   (state.currentCategory.sequenceMode ==
                                           'rotating'
                                       ? state.currentCategory.countsPerCycle
@@ -472,13 +480,9 @@ class _TasbihPageItem extends StatelessWidget {
                                   color: context.surfaceContainerHighestColor,
                                   shape: const CircleBorder(),
                                   child: IconButton(
-                                    icon: const Icon(
-                                      Icons.edit_note_rounded,
-                                    ),
-                                    onPressed: () => _showCustomTargetDialog(
-                                      context,
-                                      state,
-                                    ),
+                                    icon: const Icon(Icons.edit_note_rounded),
+                                    onPressed: () =>
+                                        _showCustomTargetDialog(context, state),
                                     tooltip: l10n.customTasbihTarget,
                                   ),
                                 ),
@@ -517,10 +521,7 @@ class _TasbihPageItem extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.collections_bookmark_rounded,
-              size: 20,
-            ),
+            const Icon(Icons.collections_bookmark_rounded, size: 20),
             const SizedBox(width: 12),
             Flexible(
               child: Text(

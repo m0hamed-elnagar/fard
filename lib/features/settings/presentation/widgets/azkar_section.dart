@@ -49,7 +49,9 @@ class _AzkarSectionState extends State<AzkarSection>
                   child: Text(
                     l10n.azkarSettingsDesc,
                     style: TextStyle(
-                        color: context.onSurfaceVariantColor, fontSize: 13),
+                      color: context.onSurfaceVariantColor,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
                 TextButton.icon(
@@ -61,7 +63,8 @@ class _AzkarSectionState extends State<AzkarSection>
                   icon: const Icon(Icons.add, size: 20),
                   label: Text(l10n.add),
                   style: TextButton.styleFrom(
-                      foregroundColor: context.secondaryColor),
+                    foregroundColor: context.secondaryColor,
+                  ),
                 ),
               ],
             ),
@@ -74,14 +77,16 @@ class _AzkarSectionState extends State<AzkarSection>
                     children: [
                       Icon(
                         Icons.notifications_none_rounded,
-                        color:
-                            context.onSurfaceVariantColor.withValues(alpha: 0.3),
+                        color: context.onSurfaceVariantColor.withValues(
+                          alpha: 0.3,
+                        ),
                         size: 40,
                       ),
                       const SizedBox(height: 8),
-                      Text(l10n.noRemindersSet,
-                          style: TextStyle(
-                              color: context.onSurfaceVariantColor)),
+                      Text(
+                        l10n.noRemindersSet,
+                        style: TextStyle(color: context.onSurfaceVariantColor),
+                      ),
                     ],
                   ),
                 ),
@@ -180,8 +185,9 @@ class _AzkarSectionState extends State<AzkarSection>
                 ),
               ],
             ),
-            crossFadeState:
-                isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            crossFadeState: isExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
             duration: const Duration(milliseconds: 250),
           ),
         ],
@@ -209,7 +215,9 @@ class _AzkarSectionState extends State<AzkarSection>
       subtitle: Text(
         reminder.time,
         style: TextStyle(
-            color: context.secondaryColor, fontWeight: FontWeight.bold),
+          color: context.secondaryColor,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -218,22 +226,32 @@ class _AzkarSectionState extends State<AzkarSection>
             value: reminder.isEnabled,
             onChanged: (val) async {
               if (val) {
-                final granted =
-                    await checkAndRequestNotificationPermissions(context);
+                final granted = await checkAndRequestNotificationPermissions(
+                  context,
+                );
                 if (!granted) return;
               }
               cubit.toggleReminder(index);
             },
           ),
           IconButton(
-            icon: Icon(Icons.edit_outlined,
-                size: 20, color: context.onSurfaceVariantColor),
-            onPressed: () =>
-                _showAddReminderDialog(context, index: index, reminder: reminder),
+            icon: Icon(
+              Icons.edit_outlined,
+              size: 20,
+              color: context.onSurfaceVariantColor,
+            ),
+            onPressed: () => _showAddReminderDialog(
+              context,
+              index: index,
+              reminder: reminder,
+            ),
           ),
           IconButton(
-            icon: Icon(Icons.delete_outline,
-                size: 20, color: context.errorColor),
+            icon: Icon(
+              Icons.delete_outline,
+              size: 20,
+              color: context.errorColor,
+            ),
             onPressed: () => cubit.removeReminder(index),
           ),
         ],
@@ -241,8 +259,11 @@ class _AzkarSectionState extends State<AzkarSection>
     );
   }
 
-  void _showAddReminderDialog(BuildContext context,
-      {int? index, AzkarReminder? reminder}) {
+  void _showAddReminderDialog(
+    BuildContext context, {
+    int? index,
+    AzkarReminder? reminder,
+  }) {
     final cubit = context.read<DailyRemindersCubit>();
     final azkarBloc = context.read<AzkarBloc>();
     final l10n = AppLocalizations.of(context)!;
@@ -254,89 +275,110 @@ class _AzkarSectionState extends State<AzkarSection>
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => BlocBuilder<AzkarBloc, AzkarState>(
-          bloc: azkarBloc,
-          builder: (context, azkarState) {
-            if (selectedCategory.isEmpty && azkarState.categories.isNotEmpty) {
-              selectedCategory = azkarState.categories.first;
-            }
-            return AlertDialog(
-              title: Text(index == null ? l10n.addReminder : l10n.editReminder,
-                  style: GoogleFonts.amiri(fontWeight: FontWeight.bold)),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    InkWell(
-                      onTap: () => _showSearchableCategoryPicker(
-                          context,
-                          azkarState.categories,
-                          (val) => setDialogState(() => selectedCategory = val)),
-                      child: InputDecorator(
-                        decoration: InputDecoration(
-                            labelText: l10n.category,
+        builder: (context, setDialogState) =>
+            BlocBuilder<AzkarBloc, AzkarState>(
+              bloc: azkarBloc,
+              builder: (context, azkarState) {
+                if (selectedCategory.isEmpty &&
+                    azkarState.categories.isNotEmpty) {
+                  selectedCategory = azkarState.categories.first;
+                }
+                return AlertDialog(
+                  title: Text(
+                    index == null ? l10n.addReminder : l10n.editReminder,
+                    style: GoogleFonts.amiri(fontWeight: FontWeight.bold),
+                  ),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        InkWell(
+                          onTap: () => _showSearchableCategoryPicker(
+                            context,
+                            azkarState.categories,
+                            (val) =>
+                                setDialogState(() => selectedCategory = val),
+                          ),
+                          child: InputDecorator(
+                            decoration: InputDecoration(
+                              labelText: l10n.category,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              suffixIcon: const Icon(Icons.search),
+                              filled: true,
+                              fillColor: context.surfaceContainerHighestColor,
+                            ),
+                            child: Text(
+                              selectedCategory.isEmpty
+                                  ? l10n.selectCategory
+                                  : selectedCategory,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          decoration: InputDecoration(
+                            labelText: l10n.customTitleOptional,
                             border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                            suffixIcon: const Icon(Icons.search),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                             filled: true,
-                            fillColor: context.surfaceContainerHighestColor),
-                        child: Text(selectedCategory.isEmpty
-                            ? l10n.selectCategory
-                            : selectedCategory),
-                      ),
+                            fillColor: context.surfaceContainerHighestColor,
+                          ),
+                          initialValue: customTitle,
+                          onChanged: (val) => customTitle = val,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildTimePickerItem(
+                          context,
+                          l10n.time,
+                          selectedTime,
+                          (time) => setDialogState(() => selectedTime = time),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      decoration: InputDecoration(
-                          labelText: l10n.customTitleOptional,
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          filled: true,
-                          fillColor: context.surfaceContainerHighestColor),
-                      initialValue: customTitle,
-                      onChanged: (val) => customTitle = val,
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(l10n.cancel),
                     ),
-                    const SizedBox(height: 16),
-                    _buildTimePickerItem(context, l10n.time, selectedTime,
-                        (time) => setDialogState(() => selectedTime = time)),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (selectedCategory.isEmpty) {
+                          return;
+                        }
+                        final newReminder = AzkarReminder(
+                          category: selectedCategory,
+                          time: selectedTime,
+                          title: customTitle.isNotEmpty
+                              ? customTitle
+                              : selectedCategory,
+                          isEnabled: reminder?.isEnabled ?? true,
+                        );
+                        if (index == null) {
+                          cubit.addReminder(newReminder);
+                        } else {
+                          cubit.updateReminder(index, newReminder);
+                        }
+                        Navigator.pop(context);
+                      },
+                      child: Text(l10n.yes),
+                    ),
                   ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(l10n.cancel)),
-                ElevatedButton(
-                  onPressed: () {
-                    if (selectedCategory.isEmpty) {
-                      return;
-                    }
-                    final newReminder = AzkarReminder(
-                      category: selectedCategory,
-                      time: selectedTime,
-                      title:
-                          customTitle.isNotEmpty ? customTitle : selectedCategory,
-                      isEnabled: reminder?.isEnabled ?? true,
-                    );
-                    if (index == null) {
-                      cubit.addReminder(newReminder);
-                    } else {
-                      cubit.updateReminder(index, newReminder);
-                    }
-                    Navigator.pop(context);
-                  },
-                  child: Text(l10n.yes),
-                ),
-              ],
-            );
-          },
-        ),
+                );
+              },
+            ),
       ),
     );
   }
 
   void _showSearchableCategoryPicker(
-      BuildContext context, List<String> categories, Function(String) onSelected) {
+    BuildContext context,
+    List<String> categories,
+    Function(String) onSelected,
+  ) {
     final l10n = AppLocalizations.of(context)!;
     String query = '';
     showModalBottomSheet(
@@ -346,23 +388,27 @@ class _AzkarSectionState extends State<AzkarSection>
         builder: (context, setSheetState) {
           final filtered = categories
               .where(
-                  (cat) => query.isEmpty || cat.toLowerCase().contains(query))
+                (cat) => query.isEmpty || cat.toLowerCase().contains(query),
+              )
               .toList();
           return Container(
             padding: EdgeInsets.only(
-                top: 12,
-                left: 16,
-                right: 16,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 20),
+              top: 12,
+              left: 16,
+              right: 16,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+            ),
             height: MediaQuery.of(context).size.height * 0.75,
             child: Column(
               children: [
                 TextField(
                   decoration: InputDecoration(
-                      hintText: l10n.searchCategory,
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16))),
+                    hintText: l10n.searchCategory,
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
                   onChanged: (val) =>
                       setSheetState(() => query = val.toLowerCase()),
                 ),
@@ -371,10 +417,12 @@ class _AzkarSectionState extends State<AzkarSection>
                   child: ListView.builder(
                     itemCount: filtered.length,
                     itemBuilder: (context, i) => ListTile(
-                      title: Text(filtered[i],
-                          textAlign: l10n.localeName == 'ar'
-                              ? TextAlign.right
-                              : TextAlign.left),
+                      title: Text(
+                        filtered[i],
+                        textAlign: l10n.localeName == 'ar'
+                            ? TextAlign.right
+                            : TextAlign.left,
+                      ),
                       onTap: () {
                         onSelected(filtered[i]);
                         Navigator.pop(context);
@@ -391,7 +439,11 @@ class _AzkarSectionState extends State<AzkarSection>
   }
 
   Widget _buildTimePickerItem(
-      BuildContext context, String title, String time, Function(String) onTimeSelected) {
+    BuildContext context,
+    String title,
+    String time,
+    Function(String) onTimeSelected,
+  ) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       title: Text(title),
@@ -399,22 +451,31 @@ class _AzkarSectionState extends State<AzkarSection>
         onTap: () async {
           final parts = time.split(':');
           final picked = await showTimePicker(
-              context: context,
-              initialTime: TimeOfDay(
-                  hour: int.parse(parts[0]), minute: int.parse(parts[1])));
+            context: context,
+            initialTime: TimeOfDay(
+              hour: int.parse(parts[0]),
+              minute: int.parse(parts[1]),
+            ),
+          );
           if (picked != null) {
             onTimeSelected(
-                '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}');
+              '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}',
+            );
           }
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-              color: context.secondaryColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10)),
-          child: Text(time,
-              style: TextStyle(
-                  color: context.secondaryColor, fontWeight: FontWeight.bold)),
+            color: context.secondaryColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            time,
+            style: TextStyle(
+              color: context.secondaryColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       ),
     );

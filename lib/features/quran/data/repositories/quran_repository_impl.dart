@@ -185,7 +185,10 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   Future<void> updateReaderSeparator(int separatorIndex) async {
-    await sharedPreferences.setInt(SettingsKeys.quranReaderSeparator, separatorIndex);
+    await sharedPreferences.setInt(
+      SettingsKeys.quranReaderSeparator,
+      separatorIndex,
+    );
   }
 
   @override
@@ -200,7 +203,9 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   Future<String> getFontFamily() async {
-    final saved = sharedPreferences.getString(SettingsKeys.quranFontFamily) ?? QuranFonts.defaultFont;
+    final saved =
+        sharedPreferences.getString(SettingsKeys.quranFontFamily) ??
+        QuranFonts.defaultFont;
     // Validate against whitelist - auto-fix any invalid stored values
     return QuranFonts.safeFont(saved);
   }

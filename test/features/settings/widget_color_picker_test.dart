@@ -34,7 +34,12 @@ String testColorToHex(Color color) {
   // .substring(2) = "2e7d32"
   // .padLeft(8, '0') = "002e7d32"
   // So the result is #002E7D32 (loses alpha!)
-  final hex = color.toARGB32().toRadixString(16).substring(2).toUpperCase().padLeft(8, '0');
+  final hex = color
+      .toARGB32()
+      .toRadixString(16)
+      .substring(2)
+      .toUpperCase()
+      .padLeft(8, '0');
   return '#$hex';
 }
 

@@ -8,7 +8,9 @@ import 'package:path_provider_platform_interface/path_provider_platform_interfac
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 class MockHttpClient extends Mock implements http.Client {}
-class MockDownloadManifestService extends Mock implements DownloadManifestService {}
+
+class MockDownloadManifestService extends Mock
+    implements DownloadManifestService {}
 
 class FakePathProviderPlatform extends Fake
     with MockPlatformInterfaceMixin
@@ -26,26 +28,30 @@ void main() {
   late MockDownloadManifestService mockManifestService;
 
   setUpAll(() {
-    registerFallbackValue(DownloadEntry(
-      fileId: 'fallback',
-      relativePath: 'path',
-      contentType: 'audio',
-      url: 'url',
-      expectedSize: 0,
-      status: DownloadStatus.pending,
-      updatedAt: DateTime.now(),
-    ));
+    registerFallbackValue(
+      DownloadEntry(
+        fileId: 'fallback',
+        relativePath: 'path',
+        contentType: 'audio',
+        url: 'url',
+        expectedSize: 0,
+        status: DownloadStatus.pending,
+        updatedAt: DateTime.now(),
+      ),
+    );
   });
 
   setUp(() {
     PathProviderPlatform.instance = FakePathProviderPlatform();
     mockManifestService = MockDownloadManifestService();
-    
+
     // Default mocks
-    when(() => mockManifestService.getEntry(any()))
-        .thenAnswer((_) async => null);
-    when(() => mockManifestService.upsertEntry(any()))
-        .thenAnswer((_) async => {});
+    when(
+      () => mockManifestService.getEntry(any()),
+    ).thenAnswer((_) async => null);
+    when(
+      () => mockManifestService.upsertEntry(any()),
+    ).thenAnswer((_) async => {});
 
     service = VoiceDownloadService(mockManifestService);
   });

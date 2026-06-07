@@ -65,7 +65,8 @@ class _DownloadAllDialogState extends State<DownloadAllDialog> {
             const SizedBox(height: 10),
             TextButton.icon(
               onPressed: () async {
-                final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+                final isArabic =
+                    Localizations.localeOf(context).languageCode == 'ar';
                 final confirm = await showDialog<bool>(
                   context: context,
                   builder: (context) => AlertDialog(

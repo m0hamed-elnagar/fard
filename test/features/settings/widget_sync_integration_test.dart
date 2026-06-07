@@ -8,10 +8,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockSettingsRepository extends Mock implements SettingsRepository {}
+
 class MockLocationService extends Mock implements LocationService {}
-class MockSyncNotificationSchedule extends Mock implements SyncNotificationSchedule {}
+
+class MockSyncNotificationSchedule extends Mock
+    implements SyncNotificationSchedule {}
+
 class MockSyncLocationSettings extends Mock implements SyncLocationSettings {}
-class MockUpdateCalcMethod extends Mock implements UpdateCalculationMethodUseCase {}
+
+class MockUpdateCalcMethod extends Mock
+    implements UpdateCalculationMethodUseCase {}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

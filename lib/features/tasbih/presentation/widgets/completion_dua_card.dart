@@ -33,7 +33,9 @@ class CompletionDuaCard extends StatelessWidget {
                     l10n.changeDua,
                     style: GoogleFonts.outfit(fontSize: 12),
                   ),
-                  style: TextButton.styleFrom(foregroundColor: context.secondaryColor),
+                  style: TextButton.styleFrom(
+                    foregroundColor: context.secondaryColor,
+                  ),
                 ),
                 if (!state.duaRemembered)
                   TextButton.icon(
@@ -61,16 +63,11 @@ class CompletionDuaCard extends StatelessWidget {
                 else
                   Row(
                     children: [
-                      const Icon(
-                        Icons.check_circle_outline_rounded,
-                        size: 16,
-                      ),
+                      const Icon(Icons.check_circle_outline_rounded, size: 16),
                       const SizedBox(width: 4),
                       Text(
                         l10n.duaSaved,
-                        style: GoogleFonts.outfit(
-                          fontSize: 12,
-                        ),
+                        style: GoogleFonts.outfit(fontSize: 12),
                       ),
                     ],
                   ),

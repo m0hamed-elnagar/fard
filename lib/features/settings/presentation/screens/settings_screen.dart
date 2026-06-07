@@ -186,9 +186,7 @@ class _SettingsScreenState extends State<SettingsScreen>
             const DataAndLocationSection(),
 
             // Debug: Widget Refresh Section (only in debug mode)
-            if (!kReleaseMode) ...[
-              _buildDebugWidgetSection(context, l10n),
-            ],
+            if (!kReleaseMode) ...[_buildDebugWidgetSection(context, l10n)],
           ],
         ),
       ),
@@ -219,8 +217,11 @@ class _SettingsScreenState extends State<SettingsScreen>
                     color: context.errorColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Icon(Icons.bug_report_rounded,
-                      color: context.errorColor, size: 22),
+                  child: Icon(
+                    Icons.bug_report_rounded,
+                    color: context.errorColor,
+                    size: 22,
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Text(

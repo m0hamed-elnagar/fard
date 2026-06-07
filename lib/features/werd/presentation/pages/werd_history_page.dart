@@ -26,7 +26,8 @@ class WerdHistoryPage extends StatefulWidget {
 class _WerdHistoryPageState extends State<WerdHistoryPage> {
   WerdUnit _displayUnit = WerdUnit.page;
   DateTime _focusedDate = DateTime.now();
-  final Set<String> _expandedItems = {}; // Using date string as key instead of index
+  final Set<String> _expandedItems =
+      {}; // Using date string as key instead of index
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +60,10 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                   const SizedBox(height: 16),
                   Text(
                     l10n.werdNoHistoryYet,
-                    style: GoogleFonts.amiri(fontSize: 18, color: context.onSurfaceVariantColor),
+                    style: GoogleFonts.amiri(
+                      fontSize: 18,
+                      color: context.onSurfaceVariantColor,
+                    ),
                   ),
                 ],
               ),
@@ -111,7 +115,8 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
           }
 
           // Check if we have any data to show
-          final hasData = (todayMatches && progress.totalAmountReadToday > 0) ||
+          final hasData =
+              (todayMatches && progress.totalAmountReadToday > 0) ||
               filteredHistory.isNotEmpty;
 
           // Check if focused month is the current month
@@ -165,7 +170,8 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                               label: Text(l10n.werdStartReading),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: context.secondaryColor,
-                                foregroundColor: context.theme.colorScheme.onSecondary,
+                                foregroundColor:
+                                    context.theme.colorScheme.onSecondary,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 32,
                                   vertical: 16,
@@ -226,9 +232,13 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                       ),
                     ],
                   ),
-                  if (filteredHistory.isNotEmpty || (todayMatches && progress.totalAmountReadToday > 0))
+                  if (filteredHistory.isNotEmpty ||
+                      (todayMatches && progress.totalAmountReadToday > 0))
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: context.surfaceContainerHighestColor,
                         borderRadius: BorderRadius.circular(8),
@@ -387,10 +397,11 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
       ),
     );
   }
+
   Widget _buildMonthNavigator(AppLocalizations l10n, bool isAr) {
     final now = DateTime.now();
-    final isCurrentMonth = _focusedDate.year == now.year &&
-        _focusedDate.month == now.month;
+    final isCurrentMonth =
+        _focusedDate.year == now.year && _focusedDate.month == now.month;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -472,7 +483,9 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: isEnabled ? context.surfaceContainerHighestColor : context.surfaceContainerColor,
+            color: isEnabled
+                ? context.surfaceContainerHighestColor
+                : context.surfaceContainerColor,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isEnabled
@@ -484,7 +497,9 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
           child: Icon(
             icon,
             size: 20,
-            color: isEnabled ? context.onSurfaceColor : context.outlineVariantColor.withValues(alpha: 0.5),
+            color: isEnabled
+                ? context.onSurfaceColor
+                : context.outlineVariantColor.withValues(alpha: 0.5),
           ),
         ),
       ),
@@ -513,7 +528,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
     final readItems = progress.readItemsToday.isNotEmpty == true
         ? progress.readItemsToday
         : _segmentsToReadItems(progress.segmentsToday);
-    
+
     final pagesRead = QuranHizbProvider.calculateFractionalProgress(
       readItems,
       WerdUnit.page,
@@ -538,7 +553,9 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
       endAyahNumber: endPos[1],
       segmentCount: progress.segmentsToday.length,
       summary: "Read today ${progress.totalAmountReadToday} ayahs",
-      sessions: progress.segmentsToday.isNotEmpty ? progress.segmentsToday : null,
+      sessions: progress.segmentsToday.isNotEmpty
+          ? progress.segmentsToday
+          : null,
     );
   }
 
@@ -752,7 +769,9 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
           children: [
             Icon(
               icon,
-              color: isSelected ? context.secondaryColor : context.outlineVariantColor,
+              color: isSelected
+                  ? context.secondaryColor
+                  : context.outlineVariantColor,
               size: isSelected ? 26 : 22,
             ),
             const SizedBox(height: 8),
@@ -764,7 +783,9 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
                 style: GoogleFonts.outfit(
                   fontSize: 30,
                   fontWeight: FontWeight.w900,
-                  color: isSelected ? context.secondaryColor : context.onSurfaceColor,
+                  color: isSelected
+                      ? context.secondaryColor
+                      : context.onSurfaceColor,
                   letterSpacing: -0.5,
                 ),
               ),
@@ -837,7 +858,9 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
     }
 
     final isCompleted = goalValue > 0 && amount >= (goalValue - 0.01);
-    final progressPercent = goalValue > 0 ? (amount / goalValue).clamp(0.0, 1.0) : 0.0;
+    final progressPercent = goalValue > 0
+        ? (amount / goalValue).clamp(0.0, 1.0)
+        : 0.0;
     final startSurah = _getLocalizedSurahName(
       entry.startSurahName,
       entry.startAbsolute,
@@ -853,7 +876,7 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
     Color accentColor;
     Color backgroundColor;
     Color borderColor;
-    
+
     if (isCompleted) {
       // Completed: GREEN (success)
       accentColor = context.primaryColor;
@@ -875,15 +898,17 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
     final canExpand = entry.segmentCount > 1;
 
     return GestureDetector(
-      onTap: canExpand ? () {
-        setState(() {
-          if (isExpanded) {
-            _expandedItems.remove(dateKey);
-          } else {
-            _expandedItems.add(dateKey);
-          }
-        });
-      } : null,
+      onTap: canExpand
+          ? () {
+              setState(() {
+                if (isExpanded) {
+                  _expandedItems.remove(dateKey);
+                } else {
+                  _expandedItems.add(dateKey);
+                }
+              });
+            }
+          : null,
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
@@ -903,285 +928,388 @@ class _WerdHistoryPageState extends State<WerdHistoryPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: backgroundColor,
-                    shape: BoxShape.circle,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: backgroundColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      isCompleted
+                          ? Icons.check_circle_rounded
+                          : Icons.menu_book_rounded,
+                      color: accentColor,
+                      size: 20,
+                    ),
                   ),
-                  child: Icon(
-                    isCompleted
-                        ? Icons.check_circle_rounded
-                        : Icons.menu_book_rounded,
-                    color: accentColor,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        isToday
-                            ? l10n.werdToday
-                            : DateFormat('EEEE', isAr ? 'ar' : 'en').format(date),
-                        style: GoogleFonts.amiri(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        DateFormat('d MMMM', isAr ? 'ar' : 'en').format(date),
-                        style: GoogleFonts.amiri(fontSize: 13, color: context.onSurfaceVariantColor),
-                      ),
-                      if (entry.totalAyahsRead > 0) ...[
-                        const SizedBox(height: 8),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          isAr
-                              ? "من $startSurah ${entry.startAyahNumber.toArabicIndic()} إلى $endSurah ${entry.endAyahNumber.toArabicIndic()}"
-                              : "From $startSurah ${entry.startAyahNumber} to $endSurah ${entry.endAyahNumber}",
+                          isToday
+                              ? l10n.werdToday
+                              : DateFormat(
+                                  'EEEE',
+                                  isAr ? 'ar' : 'en',
+                                ).format(date),
+                          style: GoogleFonts.amiri(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          DateFormat('d MMMM', isAr ? 'ar' : 'en').format(date),
                           style: GoogleFonts.amiri(
                             fontSize: 13,
                             color: context.onSurfaceVariantColor,
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                         ),
+                        if (entry.totalAyahsRead > 0) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            isAr
+                                ? "من $startSurah ${entry.startAyahNumber.toArabicIndic()} إلى $endSurah ${entry.endAyahNumber.toArabicIndic()}"
+                                : "From $startSurah ${entry.startAyahNumber} to $endSurah ${entry.endAyahNumber}",
+                            style: GoogleFonts.amiri(
+                              fontSize: 13,
+                              color: context.onSurfaceVariantColor,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '${_formatDecimal(amount, isAr, decimals)} $unitLabel',
+                        style: GoogleFonts.amiri(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: accentColor,
+                        ),
+                      ),
+                      if (goalValue > 0)
+                        Text(
+                          '${(progressPercent * 100).round().toArabicIndic()}%',
+                          style: GoogleFonts.outfit(
+                            fontSize: 12,
+                            color: accentColor.withValues(alpha: 0.7),
+                          ),
+                        ),
                     ],
                   ),
+                ],
+              ),
+              // Progress bar for goal completion
+              if (goalValue > 0) ...[
+                const SizedBox(height: 12),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: LinearProgressIndicator(
+                    value: progressPercent,
+                    minHeight: 6,
+                    backgroundColor: context.outlineColor.withValues(
+                      alpha: 0.15,
+                    ),
+                    valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+                  ),
                 ),
-                const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+              ],
+              // Additional stats badges - using Wrap to prevent overflow
+              if (entry.totalAyahsRead > 0) ...[
+                const SizedBox(height: 12),
+                Row(
                   children: [
-                    Text(
-                      '${_formatDecimal(amount, isAr, decimals)} $unitLabel',
-                      style: GoogleFonts.amiri(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: accentColor,
+                    Expanded(
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          if (entry.segmentCount > 1)
+                            _buildCompactBadge(
+                              icon: Icons.timeline_rounded,
+                              label: isAr
+                                  ? '${entry.segmentCount.toArabicIndic()} جلسات'
+                                  : '${entry.segmentCount} sessions',
+                              color: accentColor,
+                            ),
+                          if (_displayUnit != WerdUnit.page)
+                            _buildCompactBadge(
+                              icon: Icons.pages_rounded,
+                              label: isAr
+                                  ? "${_formatDecimal(entry.pagesRead, isAr, 1)} صفحات"
+                                  : "${entry.pagesRead.toStringAsFixed(1)} pages",
+                              color: accentColor.withValues(alpha: 0.7),
+                            ),
+                          if (_displayUnit != WerdUnit.juz)
+                            _buildCompactBadge(
+                              icon: Icons.grid_view_rounded,
+                              label: isAr
+                                  ? "${_formatDecimal(entry.juzRead, isAr, 2)} جزء"
+                                  : "${entry.juzRead.toStringAsFixed(2)} juz",
+                              color: accentColor.withValues(alpha: 0.7),
+                            ),
+                          if (_displayUnit != WerdUnit.ayah)
+                            _buildCompactBadge(
+                              icon: Icons.auto_stories_rounded,
+                              label: isAr
+                                  ? "${entry.totalAyahsRead.toArabicIndic()} آية"
+                                  : "${entry.totalAyahsRead} ayahs",
+                              color: accentColor.withValues(alpha: 0.7),
+                            ),
+                        ],
                       ),
                     ),
-                    if (goalValue > 0)
-                      Text(
-                        '${(progressPercent * 100).round().toArabicIndic()}%',
-                        style: GoogleFonts.outfit(fontSize: 12, color: accentColor.withValues(alpha: 0.7)),
+                    // Expansion indicator icon - positioned on the right side near badges
+                    if (canExpand) const SizedBox(width: 4),
+                    if (canExpand)
+                      AnimatedRotation(
+                        turns: isExpanded ? 0.5 : 0,
+                        duration: const Duration(milliseconds: 250),
+                        child: Icon(
+                          Icons.expand_more_rounded,
+                          color: accentColor.withValues(alpha: 0.6),
+                          size: 18,
+                        ),
                       ),
                   ],
                 ),
               ],
-            ),
-            // Progress bar for goal completion
-            if (goalValue > 0) ...[
-              const SizedBox(height: 12),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: LinearProgressIndicator(
-                  value: progressPercent,
-                  minHeight: 6,
-                  backgroundColor: context.outlineColor.withValues(alpha: 0.15),
-                  valueColor: AlwaysStoppedAnimation<Color>(accentColor),
-                ),
-              ),
-            ],
-            // Additional stats badges - using Wrap to prevent overflow
-            if (entry.totalAyahsRead > 0) ...[
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        if (entry.segmentCount > 1)
-                          _buildCompactBadge(
-                            icon: Icons.timeline_rounded,
-                            label: isAr
-                                ? '${entry.segmentCount.toArabicIndic()} جلسات'
-                                : '${entry.segmentCount} sessions',
-                            color: accentColor,
-                          ),
-                        if (_displayUnit != WerdUnit.page)
-                          _buildCompactBadge(
-                            icon: Icons.pages_rounded,
-                            label: isAr
-                                ? "${_formatDecimal(entry.pagesRead, isAr, 1)} صفحات"
-                                : "${entry.pagesRead.toStringAsFixed(1)} pages",
-                            color: accentColor.withValues(alpha: 0.7),
-                          ),
-                        if (_displayUnit != WerdUnit.juz)
-                          _buildCompactBadge(
-                            icon: Icons.grid_view_rounded,
-                            label: isAr
-                                ? "${_formatDecimal(entry.juzRead, isAr, 2)} جزء"
-                                : "${entry.juzRead.toStringAsFixed(2)} juz",
-                            color: accentColor.withValues(alpha: 0.7),
-                          ),
-                        if (_displayUnit != WerdUnit.ayah)
-                          _buildCompactBadge(
-                            icon: Icons.auto_stories_rounded,
-                            label: isAr
-                                ? "${entry.totalAyahsRead.toArabicIndic()} آية"
-                                : "${entry.totalAyahsRead} ayahs",
-                            color: accentColor.withValues(alpha: 0.7),
-                          ),
-                      ],
-                    ),
-                  ),
-                  // Expansion indicator icon - positioned on the right side near badges
-                  if (canExpand) const SizedBox(width: 4),
-                  if (canExpand)
-                    AnimatedRotation(
-                      turns: isExpanded ? 0.5 : 0,
-                      duration: const Duration(milliseconds: 250),
-                      child: Icon(
-                        Icons.expand_more_rounded,
-                        color: accentColor.withValues(alpha: 0.6),
-                        size: 18,
-                      ),
-                    ),
-                ],
-              ),
-            ],
-            // Expandable session details
-            // Expandable session details - wrapped in GestureDetector to absorb taps
-            if (isExpanded && entry.segmentCount > 1)
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {}, // Absorb taps to prevent parent toggle
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(height: 12),
-                    const Divider(height: 1),
-                    const SizedBox(height: 8),
-                    if (entry.sessions != null && entry.sessions!.isNotEmpty) ...[
-                      Text(
-                        l10n.werdSessionDetails,
-                        style: GoogleFonts.amiri(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: context.secondaryColor,
-                        ),
-                      ),
+              // Expandable session details
+              // Expandable session details - wrapped in GestureDetector to absorb taps
+              if (isExpanded && entry.segmentCount > 1)
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {}, // Absorb taps to prevent parent toggle
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 12),
+                      const Divider(height: 1),
                       const SizedBox(height: 8),
-                      ...entry.sessions!.asMap().entries.map((segmentEntry) {
-                        final index = segmentEntry.key;
-                        final segment = segmentEntry.value;
-                        final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(segment.startAyah);
-                        final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(segment.endAyah);
-                        final startName = isAr ? quran.getSurahNameArabic(startPos[0]) : quran.getSurahName(startPos[0]);
-                        final endName = isAr ? quran.getSurahNameArabic(endPos[0]) : quran.getSurahName(endPos[0]);
-                        final isSingleAyah = segment.startAyah == segment.endAyah;
-                        final fromText = isAr ? '$startName، ${startPos[1].toArabicIndic()}' : '$startName ${startPos[1]}';
-                        final toText = isSingleAyah
-                            ? l10n.werdSameAyah
-                            : (isAr ? '$endName، ${endPos[1].toArabicIndic()}' : '$endName ${endPos[1]}');
-
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: accentColor.withValues(alpha: 0.06),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: accentColor.withValues(alpha: 0.2)),
+                      if (entry.sessions != null &&
+                          entry.sessions!.isNotEmpty) ...[
+                        Text(
+                          l10n.werdSessionDetails,
+                          style: GoogleFonts.amiri(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: context.secondaryColor,
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: accentColor.withValues(alpha: 0.12),
-                                      borderRadius: BorderRadius.circular(8),
+                        ),
+                        const SizedBox(height: 8),
+                        ...entry.sessions!.asMap().entries.map((segmentEntry) {
+                          final index = segmentEntry.key;
+                          final segment = segmentEntry.value;
+                          final startPos =
+                              QuranHizbProvider.getSurahAndAyahFromAbsolute(
+                                segment.startAyah,
+                              );
+                          final endPos =
+                              QuranHizbProvider.getSurahAndAyahFromAbsolute(
+                                segment.endAyah,
+                              );
+                          final startName = isAr
+                              ? quran.getSurahNameArabic(startPos[0])
+                              : quran.getSurahName(startPos[0]);
+                          final endName = isAr
+                              ? quran.getSurahNameArabic(endPos[0])
+                              : quran.getSurahName(endPos[0]);
+                          final isSingleAyah =
+                              segment.startAyah == segment.endAyah;
+                          final fromText = isAr
+                              ? '$startName، ${startPos[1].toArabicIndic()}'
+                              : '$startName ${startPos[1]}';
+                          final toText = isSingleAyah
+                              ? l10n.werdSameAyah
+                              : (isAr
+                                    ? '$endName، ${endPos[1].toArabicIndic()}'
+                                    : '$endName ${endPos[1]}');
+
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: accentColor.withValues(alpha: 0.06),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: accentColor.withValues(alpha: 0.2),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: accentColor.withValues(
+                                          alpha: 0.12,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        l10n.werdSessionNumber(index + 1),
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 11,
+                                          color: accentColor,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                                     ),
-                                    child: Text(
-                                      l10n.werdSessionNumber(index + 1),
-                                      style: GoogleFonts.outfit(fontSize: 11, color: accentColor, fontWeight: FontWeight.bold),
+                                    Text(
+                                      isAr
+                                          ? '${(segment.endAyah - segment.startAyah + 1).toString().toArabicIndic()} ${l10n.werdAyahsLabel}'
+                                          : '${segment.endAyah - segment.startAyah + 1} ${l10n.werdAyahsLabel}',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 12,
+                                        color: accentColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  Text(
-                                    isAr 
-                                        ? '${(segment.endAyah - segment.startAyah + 1).toString().toArabicIndic()} ${l10n.werdAyahsLabel}' 
-                                        : '${segment.endAyah - segment.startAyah + 1} ${l10n.werdAyahsLabel}',
-                                    style: GoogleFonts.outfit(fontSize: 12, color: accentColor, fontWeight: FontWeight.bold),
+                                  ],
+                                ),
+                                if (segment.startTime != null) ...[
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.access_time_rounded,
+                                        size: 14,
+                                        color: context.onSurfaceVariantColor
+                                            .withValues(alpha: 0.6),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '${segment.formattedStartTime} - ${segment.formattedEndTime}',
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 11,
+                                          color: context.onSurfaceVariantColor
+                                              .withValues(alpha: 0.6),
+                                        ),
+                                      ),
+                                      if (segment.durationMinutes != null) ...[
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '(${segment.durationMinutes}${l10n.werdMinSuffix})',
+                                          style: GoogleFonts.outfit(
+                                            fontSize: 11,
+                                            color: context.onSurfaceVariantColor
+                                                .withValues(alpha: 0.6),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                 ],
-                              ),
-                              if (segment.startTime != null) ...[
                                 const SizedBox(height: 8),
                                 Row(
                                   children: [
-                                    Icon(Icons.access_time_rounded, size: 14, color: context.onSurfaceVariantColor.withValues(alpha: 0.6)),
-                                    const SizedBox(width: 4),
-                                    Text('${segment.formattedStartTime} - ${segment.formattedEndTime}', style: GoogleFonts.outfit(fontSize: 11, color: context.onSurfaceVariantColor.withValues(alpha: 0.6))),
-                                    if (segment.durationMinutes != null) ...[
-                                      const SizedBox(width: 4),
-                                      Text('(${segment.durationMinutes}${l10n.werdMinSuffix})', style: GoogleFonts.outfit(fontSize: 11, color: context.onSurfaceVariantColor.withValues(alpha: 0.6))),
-                                    ],
-                                  ],
-                                ),
-                              ],
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Icon(Icons.back_hand_rounded, size: 14, color: accentColor),
-                                  const SizedBox(width: 6),
-                                  Expanded(child: Text(fromText, style: GoogleFonts.amiri(fontSize: 12, fontWeight: FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                                ],
-                              ),
-                              if (!isSingleAyah) ...[
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Icon(Icons.arrow_forward_rounded, size: 12, color: accentColor),
+                                    Icon(
+                                      Icons.back_hand_rounded,
+                                      size: 14,
+                                      color: accentColor,
+                                    ),
                                     const SizedBox(width: 6),
-                                    Expanded(child: Text(toText, style: GoogleFonts.amiri(fontSize: 12, fontWeight: FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                                    Expanded(
+                                      child: Text(
+                                        fromText,
+                                        style: GoogleFonts.amiri(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
                                   ],
                                 ),
+                                if (!isSingleAyah) ...[
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.arrow_forward_rounded,
+                                        size: 12,
+                                        color: accentColor,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          toText,
+                                          style: GoogleFonts.amiri(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ],
-                            ],
-                          ),
-                        );
-                      }),
-                    ] else ...[
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: context.outlineVariantColor.withValues(alpha: 0.05),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: context.outlineVariantColor.withValues(alpha: 0.15)),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.history_rounded, size: 16, color: context.outlineVariantColor),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                l10n.werdOlderEntryNote,
-                                style: GoogleFonts.outfit(fontSize: 12, color: context.outlineVariantColor),
+                            ),
+                          );
+                        }),
+                      ] else ...[
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: context.outlineVariantColor.withValues(
+                              alpha: 0.05,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: context.outlineVariantColor.withValues(
+                                alpha: 0.15,
                               ),
                             ),
-                          ],
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.history_rounded,
+                                size: 16,
+                                color: context.outlineVariantColor,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  l10n.werdOlderEntryNote,
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 12,
+                                    color: context.outlineVariantColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-          ],
+            ],
           ),
         ),
       ),

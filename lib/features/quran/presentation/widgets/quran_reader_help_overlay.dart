@@ -20,15 +20,18 @@ class _QuranReaderHelpOverlayState extends State<QuranReaderHelpOverlay> {
     return OverlayPortal(
       controller: _controller,
       overlayChildBuilder: (context) {
-        final RenderBox? buttonBox = _buttonKey.currentContext?.findRenderObject() as RenderBox?;
-        final buttonPosition = buttonBox?.localToGlobal(Offset.zero) ?? Offset.zero;
+        final RenderBox? buttonBox =
+            _buttonKey.currentContext?.findRenderObject() as RenderBox?;
+        final buttonPosition =
+            buttonBox?.localToGlobal(Offset.zero) ?? Offset.zero;
         final buttonSize = buttonBox?.size ?? Size.zero;
 
         final screenWidth = MediaQuery.of(context).size.width;
         const tooltipWidth = 280.0;
         final tooltipLeft = (screenWidth - tooltipWidth) / 2;
-        
-        final arrowCenterX = (buttonPosition.dx + buttonSize.width / 2) - tooltipLeft;
+
+        final arrowCenterX =
+            (buttonPosition.dx + buttonSize.width / 2) - tooltipLeft;
         final topY = buttonPosition.dy + buttonSize.height + 4;
 
         return Stack(
@@ -48,20 +51,25 @@ class _QuranReaderHelpOverlayState extends State<QuranReaderHelpOverlay> {
                 shadowColor: Colors.black54,
                 shape: _TooltipShape(
                   arrowX: arrowCenterX,
-                  borderColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                  borderColor: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.3),
                   arrowWidth: 20,
                   arrowHeight: 12,
                   borderRadius: 16,
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 12.0), // Padding for the arrow height
+                  padding: const EdgeInsets.only(
+                    top: 12.0,
+                  ), // Padding for the arrow height
                   child: SizedBox(
                     width: tooltipWidth,
                     child: FutureBuilder<CategorizedSymbols>(
                       future: widget.repository.getCategorizedSymbols(),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return const SizedBox(
                             height: 150,
                             width: tooltipWidth,
@@ -69,7 +77,13 @@ class _QuranReaderHelpOverlayState extends State<QuranReaderHelpOverlay> {
                           );
                         }
 
-                        final data = snapshot.data ?? CategorizedSymbols(waqfSymbols: [], tajweedSymbols: [], structureSymbols: []);
+                        final data =
+                            snapshot.data ??
+                            CategorizedSymbols(
+                              waqfSymbols: [],
+                              tajweedSymbols: [],
+                              structureSymbols: [],
+                            );
 
                         return Column(
                           mainAxisSize: MainAxisSize.min,
@@ -100,7 +114,9 @@ class _QuranReaderHelpOverlayState extends State<QuranReaderHelpOverlay> {
   Widget _buildHeader(BuildContext context, CategorizedSymbols data) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
-      color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+      color: Theme.of(
+        context,
+      ).colorScheme.primaryContainer.withValues(alpha: 0.3),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -114,7 +130,10 @@ class _QuranReaderHelpOverlayState extends State<QuranReaderHelpOverlay> {
               const SizedBox(width: 8),
               Text(
                 'علامات الوقف (${data.waqfSymbols.length})',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
               ),
             ],
           ),
@@ -131,7 +150,7 @@ class _QuranReaderHelpOverlayState extends State<QuranReaderHelpOverlay> {
 
   Widget _buildBody(BuildContext context, CategorizedSymbols data) {
     final symbols = data.waqfSymbols;
-    
+
     return ConstrainedBox(
       constraints: const BoxConstraints(maxHeight: 340),
       child: GridView.builder(
@@ -168,7 +187,10 @@ class _QuranReaderHelpOverlayState extends State<QuranReaderHelpOverlay> {
                     decoration: BoxDecoration(
                       color: Theme.of(context).cardColor,
                       shape: BoxShape.circle,
-                      border: Border.all(color: color.withValues(alpha: 0.4), width: 2.0),
+                      border: Border.all(
+                        color: color.withValues(alpha: 0.4),
+                        width: 2.0,
+                      ),
                       boxShadow: [
                         BoxShadow(
                           color: color.withValues(alpha: 0.2),
@@ -193,7 +215,10 @@ class _QuranReaderHelpOverlayState extends State<QuranReaderHelpOverlay> {
                       fit: BoxFit.scaleDown,
                       child: Text(
                         s.arabicName,
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                         textAlign: TextAlign.center,
                         maxLines: 1,
                       ),
@@ -220,14 +245,20 @@ class _QuranReaderHelpOverlayState extends State<QuranReaderHelpOverlay> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => SymbolListScreen(repository: widget.repository),
+                builder: (context) =>
+                    SymbolListScreen(repository: widget.repository),
               ),
             );
           },
           icon: const Icon(Icons.menu_book_rounded, size: 18),
-          label: const Text('دليل الرموز الشامل', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+          label: const Text(
+            'دليل الرموز الشامل',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+          ),
           style: OutlinedButton.styleFrom(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             padding: const EdgeInsets.symmetric(vertical: 8),
           ),
         ),
@@ -261,12 +292,18 @@ class _TooltipShape extends ShapeBorder {
 
   @override
   Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
-    final r = Rect.fromLTRB(rect.left, rect.top + arrowHeight, rect.right, rect.bottom);
-    final path = Path()..addRRect(RRect.fromRectAndRadius(r, Radius.circular(borderRadius)));
+    final r = Rect.fromLTRB(
+      rect.left,
+      rect.top + arrowHeight,
+      rect.right,
+      rect.bottom,
+    );
+    final path = Path()
+      ..addRRect(RRect.fromRectAndRadius(r, Radius.circular(borderRadius)));
 
     final double safeArrowX = arrowX.clamp(
-      rect.left + borderRadius + arrowWidth / 2, 
-      rect.right - borderRadius - arrowWidth / 2
+      rect.left + borderRadius + arrowWidth / 2,
+      rect.right - borderRadius - arrowWidth / 2,
     );
 
     final arrowPath = Path()

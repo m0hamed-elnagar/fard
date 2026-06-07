@@ -169,7 +169,12 @@ void main() {
         );
         await repo.saveToday(lastRecord);
 
-        final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
+        final bloc = PrayerTrackerBloc(
+          repo,
+          prefs,
+          prayerTimeService,
+          notificationService,
+        );
 
         await tester.pumpWidget(
           MaterialApp(
@@ -227,70 +232,74 @@ void main() {
       },
     );
 
-    testWidgets(
-      'Clicking "Done" button adds missed days to qada counter',
-      (tester) async {
-        final lastRecord = DailyRecord(
-          id: 'old',
-          date: threeDaysAgo,
-          missedToday: {},
-          completedToday: {for (var s in Salaah.values) s},
-          qada: {for (var s in Salaah.values) s: const MissedCounter(10)},
-        );
-        await repo.saveToday(lastRecord);
+    testWidgets('Clicking "Done" button adds missed days to qada counter', (
+      tester,
+    ) async {
+      final lastRecord = DailyRecord(
+        id: 'old',
+        date: threeDaysAgo,
+        missedToday: {},
+        completedToday: {for (var s in Salaah.values) s},
+        qada: {for (var s in Salaah.values) s: const MissedCounter(10)},
+      );
+      await repo.saveToday(lastRecord);
 
-        final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
+      final bloc = PrayerTrackerBloc(
+        repo,
+        prefs,
+        prayerTimeService,
+        notificationService,
+      );
 
-        await tester.pumpWidget(
-          MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: Scaffold(
-              body: BlocListener<PrayerTrackerBloc, PrayerTrackerState>(
-                bloc: bloc,
-                listener: (context, state) {
-                  state.maybeWhen(
-                    missedDaysPrompt: (dates) {
-                      showDialog(
-                        context: context,
-                        builder: (_) => MissedDaysDialog(
-                          missedDates: dates,
-                          onResponse: (selected) => bloc.add(
-                            PrayerTrackerEvent.acknowledgeMissedDays(
-                              selectedDates: selected,
-                            ),
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: BlocListener<PrayerTrackerBloc, PrayerTrackerState>(
+              bloc: bloc,
+              listener: (context, state) {
+                state.maybeWhen(
+                  missedDaysPrompt: (dates) {
+                    showDialog(
+                      context: context,
+                      builder: (_) => MissedDaysDialog(
+                        missedDates: dates,
+                        onResponse: (selected) => bloc.add(
+                          PrayerTrackerEvent.acknowledgeMissedDays(
+                            selectedDates: selected,
                           ),
                         ),
-                      );
-                    },
-                    orElse: () {},
-                  );
-                },
-                child: const SizedBox(),
-              ),
+                      ),
+                    );
+                  },
+                  orElse: () {},
+                );
+              },
+              child: const SizedBox(),
             ),
           ),
-        );
+        ),
+      );
 
-        bloc.add(const PrayerTrackerEvent.checkMissedDays());
-        await tester.pumpAndSettle();
+      bloc.add(const PrayerTrackerEvent.checkMissedDays());
+      await tester.pumpAndSettle();
 
-        expect(find.text('Done'), findsOneWidget);
-        await tester.tap(find.text('Done'));
-        await tester.pumpAndSettle();
+      expect(find.text('Done'), findsOneWidget);
+      await tester.tap(find.text('Done'));
+      await tester.pumpAndSettle();
 
-        await tester.pump(const Duration(milliseconds: 500));
-        await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
 
-        bloc.state.maybeMap(
-          loaded: (l) {
-            // Base 10 + 2 missed days + 1 today = 13
-            expect(l.qadaStatus[Salaah.fajr]?.value, 13);
-          },
-          orElse: () => fail('Should be loaded'),
-        );
-      },
-    );
+      bloc.state.maybeMap(
+        loaded: (l) {
+          // Base 10 + 2 missed days + 1 today = 13
+          expect(l.qadaStatus[Salaah.fajr]?.value, 13);
+        },
+        orElse: () => fail('Should be loaded'),
+      );
+    });
 
     testWidgets('Can toggle specific days and correctly update Qada', (
       tester,
@@ -307,7 +316,12 @@ void main() {
       );
       await repo.saveToday(lastRecord);
 
-      final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
+      final bloc = PrayerTrackerBloc(
+        repo,
+        prefs,
+        prayerTimeService,
+        notificationService,
+      );
 
       await tester.pumpWidget(
         MaterialApp(
@@ -382,7 +396,12 @@ void main() {
       );
       await repo.saveToday(lastRecord);
 
-      final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
+      final bloc = PrayerTrackerBloc(
+        repo,
+        prefs,
+        prayerTimeService,
+        notificationService,
+      );
 
       await tester.pumpWidget(
         MaterialApp(

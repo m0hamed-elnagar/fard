@@ -78,12 +78,17 @@ class _BookmarkListState extends State<BookmarkList>
                 onPressed: () => Navigator.pop(context, false),
                 child: Text(
                   'إلغاء',
-                  style: GoogleFonts.amiri(color: context.onSurfaceVariantColor),
+                  style: GoogleFonts.amiri(
+                    color: context.onSurfaceVariantColor,
+                  ),
                 ),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: Text('حذف', style: GoogleFonts.amiri(color: context.errorColor)),
+                child: Text(
+                  'حذف',
+                  style: GoogleFonts.amiri(color: context.errorColor),
+                ),
               ),
             ],
           ),
@@ -161,7 +166,10 @@ class _BookmarkListState extends State<BookmarkList>
                 child: Row(
                   children: [
                     IconButton(
-                      icon: Icon(Icons.delete_outline, color: context.errorColor),
+                      icon: Icon(
+                        Icons.delete_outline,
+                        color: context.errorColor,
+                      ),
                       onPressed: () async {
                         if (await _confirmDelete(
                           context,
@@ -309,7 +317,9 @@ class _BookmarkListState extends State<BookmarkList>
                           ? Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: context.secondaryColor.withValues(alpha: 0.1),
+                                color: context.secondaryColor.withValues(
+                                  alpha: 0.1,
+                                ),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(

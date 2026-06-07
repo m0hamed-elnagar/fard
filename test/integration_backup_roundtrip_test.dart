@@ -168,8 +168,11 @@ class FakeSettingsRepository implements SettingsRepository {
   @override
   Future<void> updateLocale(Locale locale) async {}
   @override
-  Future<void> updateLocation(
-      {double? latitude, double? longitude, String? cityName}) async {}
+  Future<void> updateLocation({
+    double? latitude,
+    double? longitude,
+    String? cityName,
+  }) async {}
   @override
   Future<void> updateCalculationMethod(String method) async {}
   @override
@@ -212,7 +215,9 @@ class FakeSettingsRepository implements SettingsRepository {
   Future<void> addCustomTheme(CustomTheme theme) async {}
   @override
   Future<void> updateCustomTheme(
-      String themeId, Map<String, String> colors) async {}
+    String themeId,
+    Map<String, String> colors,
+  ) async {}
   @override
   Future<void> deleteCustomTheme(String themeId) async {}
   @override
@@ -278,14 +283,19 @@ class FakeTasbihRepository implements TasbihRepository {
   Future<int> getItemProgress(String categoryId, String itemId) async => 0;
   @override
   Future<void> saveItemProgress(
-      String categoryId, String itemId, int progress) async {}
+    String categoryId,
+    String itemId,
+    int progress,
+  ) async {}
   @override
   Future<void> incrementHistory(String dhikrId) async {}
   @override
   Future<String?> getPreferredCompletionDuaId(String categoryId) async => null;
   @override
   Future<void> savePreferredCompletionDuaId(
-      String categoryId, String duaId) async {}
+    String categoryId,
+    String duaId,
+  ) async {}
 }
 
 class FakeBookmarkRepository implements BookmarkRepository {
@@ -428,7 +438,10 @@ void main() {
         tasbihProgress: await tasbihRepo.getAllProgress(),
         tasbihPreferredDuas: await tasbihRepo.getAllPreferredDuas(),
         azkarProgress: await azkarRepo.getAllProgress(),
-        bookmarks: (await bookmarkRepo.getBookmarks()).fold((l) => [], (r) => r),
+        bookmarks: (await bookmarkRepo.getBookmarks()).fold(
+          (l) => [],
+          (r) => r,
+        ),
       );
 
       final jsonString = jsonEncode(exportedBackup.toJson());

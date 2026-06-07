@@ -114,7 +114,9 @@ class _WidgetPreviewSectionState extends State<WidgetPreviewSection> {
                 onTap: () {
                   HapticFeedback.selectionClick();
                   setState(() {
-                    _widgetPreviewTheme = WidgetPreviewTheme.fromThemePreset(preset);
+                    _widgetPreviewTheme = WidgetPreviewTheme.fromThemePreset(
+                      preset,
+                    );
                   });
                 },
               );
@@ -126,15 +128,23 @@ class _WidgetPreviewSectionState extends State<WidgetPreviewSection> {
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+            side: BorderSide(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
           ),
           clipBehavior: Clip.antiAlias,
           child: ExpansionTile(
             title: Text(
               l10n.widgetThemeColorCustomization,
-              style: GoogleFonts.amiri(fontSize: 16, fontWeight: FontWeight.bold),
+              style: GoogleFonts.amiri(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            leading: Icon(Icons.color_lens_rounded, color: Theme.of(context).colorScheme.primary),
+            leading: Icon(
+              Icons.color_lens_rounded,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             children: [
               Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -144,35 +154,45 @@ class _WidgetPreviewSectionState extends State<WidgetPreviewSection> {
                       label: l10n.widgetPrimaryColor,
                       currentHex: _widgetPreviewTheme.primaryColorHex,
                       onColorChanged: (hex) => setState(() {
-                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(primaryColorHex: hex);
+                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
+                          primaryColorHex: hex,
+                        );
                       }),
                     ),
                     WidgetColorPicker(
                       label: l10n.widgetAccentColor,
                       currentHex: _widgetPreviewTheme.accentColorHex,
                       onColorChanged: (hex) => setState(() {
-                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(accentColorHex: hex);
+                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
+                          accentColorHex: hex,
+                        );
                       }),
                     ),
                     WidgetColorPicker(
                       label: l10n.widgetBackgroundColor,
                       currentHex: _widgetPreviewTheme.backgroundColorHex,
                       onColorChanged: (hex) => setState(() {
-                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(backgroundColorHex: hex);
+                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
+                          backgroundColorHex: hex,
+                        );
                       }),
                     ),
                     WidgetColorPicker(
                       label: l10n.widgetTextColor,
                       currentHex: _widgetPreviewTheme.textColorHex,
                       onColorChanged: (hex) => setState(() {
-                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(textColorHex: hex);
+                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
+                          textColorHex: hex,
+                        );
                       }),
                     ),
                     WidgetColorPicker(
                       label: l10n.widgetSecondaryTextColor,
                       currentHex: _widgetPreviewTheme.textSecondaryColorHex,
                       onColorChanged: (hex) => setState(() {
-                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(textSecondaryColorHex: hex);
+                        _widgetPreviewTheme = _widgetPreviewTheme.copyWith(
+                          textSecondaryColorHex: hex,
+                        );
                       }),
                     ),
                   ],
@@ -190,12 +210,18 @@ class _WidgetPreviewSectionState extends State<WidgetPreviewSection> {
                 child: OutlinedButton.icon(
                   onPressed: () async {
                     setState(() {
-                      _widgetPreviewTheme = WidgetPreviewTheme.fromColorScheme(Theme.of(context).colorScheme);
+                      _widgetPreviewTheme = WidgetPreviewTheme.fromColorScheme(
+                        Theme.of(context).colorScheme,
+                      );
                     });
                     try {
                       await getIt<WidgetUpdateService>().clearWidgetTheme();
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.widgetThemeAppliedShortly)));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(l10n.widgetThemeAppliedShortly),
+                          ),
+                        );
                       }
                     } catch (e) {
                       debugPrint('Error clearing widget theme: $e');
@@ -217,24 +243,45 @@ class _WidgetPreviewSectionState extends State<WidgetPreviewSection> {
                       : () async {
                           setState(() => _isApplyingWidgetTheme = true);
                           try {
-                            await getIt<WidgetUpdateService>().applyWidgetTheme(_widgetPreviewTheme.toMap());
+                            await getIt<WidgetUpdateService>().applyWidgetTheme(
+                              _widgetPreviewTheme.toMap(),
+                            );
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(l10n.widgetThemeAppliedShortly), backgroundColor: Theme.of(context).colorScheme.primaryContainer),
+                                SnackBar(
+                                  content: Text(l10n.widgetThemeAppliedShortly),
+                                  backgroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.primaryContainer,
+                                ),
                               );
                             }
                           } catch (e) {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(l10n.widgetThemeApplyFailed(e.toString())), backgroundColor: Theme.of(context).colorScheme.errorContainer),
+                                SnackBar(
+                                  content: Text(
+                                    l10n.widgetThemeApplyFailed(e.toString()),
+                                  ),
+                                  backgroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.errorContainer,
+                                ),
                               );
                             }
                           } finally {
-                            if (mounted) setState(() => _isApplyingWidgetTheme = false);
+                            if (mounted)
+                              setState(() => _isApplyingWidgetTheme = false);
                           }
                         },
                   child: _isApplyingWidgetTheme
-                      ? const Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)))
+                      ? const Center(
+                          child: SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        )
                       : Text(
                           l10n.applyToWidget,
                           textAlign: TextAlign.center,
@@ -265,7 +312,10 @@ class _WidgetPreviewSectionState extends State<WidgetPreviewSection> {
       decoration: BoxDecoration(
         color: context.surfaceContainerColor,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: context.outlineColor.withValues(alpha: 0.15), width: 1.0),
+        border: Border.all(
+          color: context.outlineColor.withValues(alpha: 0.15),
+          width: 1.0,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,14 +329,21 @@ class _WidgetPreviewSectionState extends State<WidgetPreviewSection> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: effectiveAccentColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(14)),
+                    decoration: BoxDecoration(
+                      color: effectiveAccentColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                     child: Icon(icon, color: effectiveAccentColor, size: 22),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Text(
                       title,
-                      style: GoogleFonts.amiri(fontSize: 19, fontWeight: FontWeight.bold, color: context.onSurfaceColor),
+                      style: GoogleFonts.amiri(
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                        color: context.onSurfaceColor,
+                      ),
                     ),
                   ),
                   AnimatedRotation(
@@ -305,11 +362,16 @@ class _WidgetPreviewSectionState extends State<WidgetPreviewSection> {
                 const Divider(height: 1),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: children,
+                  ),
                 ),
               ],
             ),
-            crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            crossFadeState: isExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
             duration: const Duration(milliseconds: 250),
           ),
         ],
@@ -340,7 +402,11 @@ class _WidgetPreviewSectionState extends State<WidgetPreviewSection> {
               const Spacer(),
               Text(
                 localeCode == 'ar' ? preset.nameAr : preset.name,
-                style: GoogleFonts.outfit(color: preset.textColor, fontWeight: FontWeight.w600, fontSize: 14),
+                style: GoogleFonts.outfit(
+                  color: preset.textColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
               const SizedBox(height: 4),
               Row(

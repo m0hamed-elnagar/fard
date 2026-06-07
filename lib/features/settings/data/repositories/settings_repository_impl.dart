@@ -80,7 +80,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
       SettingsKeys.salaahSettings,
       (json) => SalaahSettings.fromJson(json),
     );
-    
+
     _salaahSettingsCache = list.isEmpty ? defaults : list;
     return _salaahSettingsCache!;
   }
@@ -114,10 +114,8 @@ class SettingsRepositoryImpl implements SettingsRepository {
   int get hijriAdjustment => _storage.readInt(SettingsKeys.hijriAdjustment);
 
   @override
-  String get themePresetId => _storage.readString(
-    SettingsKeys.themePresetId,
-    defaultValue: 'emerald',
-  )!;
+  String get themePresetId =>
+      _storage.readString(SettingsKeys.themePresetId, defaultValue: 'emerald')!;
 
   @override
   Map<String, String>? get customThemeColors {
@@ -171,14 +169,18 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
-  bool get isAudioPlayerExpanded =>
-      _storage.readBool(SettingsKeys.isAudioPlayerExpanded, defaultValue: false);
+  bool get isAudioPlayerExpanded => _storage.readBool(
+    SettingsKeys.isAudioPlayerExpanded,
+    defaultValue: false,
+  );
 
   // ==================== REMINDERS ====================
 
   @override
-  bool get isSalahReminderEnabled =>
-      _storage.readBool(SettingsKeys.isSalahReminderEnabled, defaultValue: false);
+  bool get isSalahReminderEnabled => _storage.readBool(
+    SettingsKeys.isSalahReminderEnabled,
+    defaultValue: false,
+  );
 
   @override
   int get salahReminderOffsetMinutes => _storage.readInt(
@@ -198,16 +200,19 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Set<Salaah> get enabledSalahReminders {
-    final String? jsonStr =
-        _storage.readString(SettingsKeys.enabledSalahReminders);
+    final String? jsonStr = _storage.readString(
+      SettingsKeys.enabledSalahReminders,
+    );
     if (jsonStr == null) return {};
     try {
       final List<dynamic> decoded = jsonDecode(jsonStr);
       return decoded
-          .map((name) => Salaah.values.firstWhere(
-                (s) => s.name == name,
-                orElse: () => Salaah.fajr,
-              ))
+          .map(
+            (name) => Salaah.values.firstWhere(
+              (s) => s.name == name,
+              orElse: () => Salaah.fajr,
+            ),
+          )
           .toSet();
     } catch (e) {
       return {};
@@ -215,8 +220,10 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
-  bool get isWerdReminderEnabled =>
-      _storage.readBool(SettingsKeys.isWerdReminderEnabled, defaultValue: false);
+  bool get isWerdReminderEnabled => _storage.readBool(
+    SettingsKeys.isWerdReminderEnabled,
+    defaultValue: false,
+  );
 
   @override
   String get werdReminderTime => _storage.readString(
@@ -225,8 +232,10 @@ class SettingsRepositoryImpl implements SettingsRepository {
   )!;
 
   @override
-  bool get isSalawatReminderEnabled =>
-      _storage.readBool(SettingsKeys.isSalawatReminderEnabled, defaultValue: false);
+  bool get isSalawatReminderEnabled => _storage.readBool(
+    SettingsKeys.isSalawatReminderEnabled,
+    defaultValue: false,
+  );
 
   @override
   int get salawatFrequencyHours =>
@@ -239,10 +248,8 @@ class SettingsRepositoryImpl implements SettingsRepository {
   )!;
 
   @override
-  String get salawatEndTime => _storage.readString(
-    SettingsKeys.salawatEndTime,
-    defaultValue: '20:00',
-  )!;
+  String get salawatEndTime =>
+      _storage.readString(SettingsKeys.salawatEndTime, defaultValue: '20:00')!;
 
   // ==================== MIGRATION ====================
 
@@ -251,7 +258,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
     if (_storage.readBool(migrationKey)) return;
 
     try {
-      debugPrint('SettingsRepositoryImpl: performing Azan settings migration...');
+      debugPrint(
+        'SettingsRepositoryImpl: performing Azan settings migration...',
+      );
 
       // 1. Migrate post-prayer reminders if not already set
       if (!_storage.prefs.containsKey(SettingsKeys.isSalahReminderEnabled)) {
@@ -451,10 +460,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
       );
     }
     if (colors.containsKey('text')) {
-      await _storage.writeString(
-        SettingsKeys.customTextColor,
-        colors['text']!,
-      );
+      await _storage.writeString(SettingsKeys.customTextColor, colors['text']!);
     }
     if (colors.containsKey('textSecondary')) {
       await _storage.writeString(
@@ -488,7 +494,10 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
-  Future<void> updateCustomTheme(String themeId, Map<String, String> colors) async {
+  Future<void> updateCustomTheme(
+    String themeId,
+    Map<String, String> colors,
+  ) async {
     final current = savedCustomThemes;
     final index = current.indexWhere((t) => t.id == themeId);
     if (index == -1) return;
@@ -518,10 +527,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Future<void> setActiveCustomTheme(String? themeId) async {
-    await _storage.writeString(
-      SettingsKeys.activeCustomThemeId,
-      themeId ?? '',
-    );
+    await _storage.writeString(SettingsKeys.activeCustomThemeId, themeId ?? '');
   }
 
   @override

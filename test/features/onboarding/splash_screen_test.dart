@@ -47,10 +47,10 @@ class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 class MockNotificationService extends Mock implements NotificationService {
   @override
   Future<Map<String, dynamic>> runDiagnostics() async => {
-        'notifications_enabled': true,
-        'exact_alarm_permission': true,
-        'battery_optimization_ignored': true,
-      };
+    'notifications_enabled': true,
+    'exact_alarm_permission': true,
+    'battery_optimization_ignored': true,
+  };
 }
 
 class MockWidgetUpdateService extends Mock implements WidgetUpdateService {
@@ -64,19 +64,22 @@ class MockQuranBloc extends MockBloc<QuranEvent, QuranState>
 class MockAudioPlayerBloc extends MockBloc<AudioPlayerEvent, AudioPlayerState>
     implements AudioPlayerBloc {}
 
-class MockReciterManagerBloc extends MockBloc<ReciterManagerEvent, ReciterManagerState>
+class MockReciterManagerBloc
+    extends MockBloc<ReciterManagerEvent, ReciterManagerState>
     implements ReciterManagerBloc {}
 
 class MockTasbihBloc extends MockBloc<TasbihEvent, TasbihState>
     implements MockTasbihBlocInstance {}
 
 // Need a non-mock class for implements if it has issues with multiple mocks
-abstract class MockTasbihBlocInstance extends MockBloc<TasbihEvent, TasbihState> implements TasbihBloc {}
+abstract class MockTasbihBlocInstance extends MockBloc<TasbihEvent, TasbihState>
+    implements TasbihBloc {}
 
 class MockReaderBloc extends MockBloc<ReaderEvent, ReaderState>
     implements ReaderBloc {}
 
-class MockConnectivityBloc extends MockBloc<ConnectivityEvent, ConnectivityState>
+class MockConnectivityBloc
+    extends MockBloc<ConnectivityEvent, ConnectivityState>
     implements ConnectivityBloc {}
 
 class MockLocationPrayerCubit extends MockCubit<LocationPrayerState>
@@ -85,11 +88,9 @@ class MockLocationPrayerCubit extends MockCubit<LocationPrayerState>
 class MockDailyRemindersCubit extends MockCubit<DailyRemindersState>
     implements DailyRemindersCubit {}
 
-class MockAdhanCubit extends MockCubit<AdhanState>
-    implements AdhanCubit {}
+class MockAdhanCubit extends MockCubit<AdhanState> implements AdhanCubit {}
 
-class MockThemeCubit extends MockCubit<ThemeState>
-    implements ThemeCubit {}
+class MockThemeCubit extends MockCubit<ThemeState> implements ThemeCubit {}
 
 class MockQuranRepository extends Mock implements QuranRepository {}
 
@@ -143,7 +144,9 @@ void main() {
     getIt.registerSingleton<PrayerTimeService>(mockPrayerTimeService);
     getIt.registerSingleton<NotificationService>(mockNotificationService);
     final mockWidgetUpdateService = MockWidgetUpdateService();
-    when(() => mockWidgetUpdateService.getWidgetTheme()).thenAnswer((_) async => {});
+    when(
+      () => mockWidgetUpdateService.getWidgetTheme(),
+    ).thenAnswer((_) async => {});
     getIt.registerSingleton<WidgetUpdateService>(mockWidgetUpdateService);
     getIt.registerSingleton<GlobalKey<NavigatorState>>(
       GlobalKey<NavigatorState>(),
@@ -153,7 +156,7 @@ void main() {
     getIt.registerSingleton<AdhanCubit>(mockAdhanCubit);
     getIt.registerSingleton<ThemeCubit>(mockThemeCubit);
     getIt.registerSingleton<QuranRepository>(mockQuranRepository);
-    
+
     getIt.registerFactory<QuranBloc>(() => mockQuranBloc);
     getIt.registerFactory<AudioPlayerBloc>(() => mockAudioPlayerBloc);
     getIt.registerFactory<ReciterManagerBloc>(() => mockReciterManagerBloc);
@@ -161,29 +164,59 @@ void main() {
     getIt.registerFactory<ReaderBloc>(() => mockReaderBloc);
     getIt.registerFactory<ConnectivityBloc>(() => mockConnectivityBloc);
 
-    when(() => mockNotificationService.canScheduleExactNotifications()).thenAnswer((_) async => true);
-    when(() => mockPrayerTimeService.isUpcoming(any(), prayerTimes: any(named: 'prayerTimes'), date: any(named: 'date'))).thenReturn(false);
-    when(() => mockPrayerTimeService.isPassed(any(), prayerTimes: any(named: 'prayerTimes'), date: any(named: 'date'))).thenReturn(true);
+    when(
+      () => mockNotificationService.canScheduleExactNotifications(),
+    ).thenAnswer((_) async => true);
+    when(
+      () => mockPrayerTimeService.isUpcoming(
+        any(),
+        prayerTimes: any(named: 'prayerTimes'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(false);
+    when(
+      () => mockPrayerTimeService.isPassed(
+        any(),
+        prayerTimes: any(named: 'prayerTimes'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(true);
     when(() => mockAzkarBloc.state).thenReturn(AzkarState.initial());
     when(
       () => mockPrayerTrackerBloc.state,
     ).thenReturn(const PrayerTrackerState.loading());
     when(() => mockQuranBloc.state).thenReturn(const QuranState());
     when(() => mockAudioPlayerBloc.state).thenReturn(const AudioPlayerState());
-    when(() => mockReciterManagerBloc.state).thenReturn(const ReciterManagerState());
+    when(
+      () => mockReciterManagerBloc.state,
+    ).thenReturn(const ReciterManagerState());
     when(() => mockTasbihBloc.state).thenReturn(TasbihState.initial());
     when(() => mockReaderBloc.state).thenReturn(const ReaderState.initial());
-    when(() => mockConnectivityBloc.state).thenReturn(const ConnectivityStatus(true));
-    when(() => mockLocationPrayerCubit.state).thenReturn(const LocationPrayerState());
-    when(() => mockLocationPrayerCubit.stream).thenAnswer((_) => const Stream.empty());
-    when(() => mockDailyRemindersCubit.state).thenReturn(const DailyRemindersState());
-    when(() => mockDailyRemindersCubit.stream).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockConnectivityBloc.state,
+    ).thenReturn(const ConnectivityStatus(true));
+    when(
+      () => mockLocationPrayerCubit.state,
+    ).thenReturn(const LocationPrayerState());
+    when(
+      () => mockLocationPrayerCubit.stream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockDailyRemindersCubit.state,
+    ).thenReturn(const DailyRemindersState());
+    when(
+      () => mockDailyRemindersCubit.stream,
+    ).thenAnswer((_) => const Stream.empty());
     when(() => mockAdhanCubit.state).thenReturn(const AdhanState());
     when(() => mockAdhanCubit.stream).thenAnswer((_) => const Stream.empty());
-    when(() => mockThemeCubit.state).thenReturn(const ThemeState(locale: Locale('en')));
+    when(
+      () => mockThemeCubit.state,
+    ).thenReturn(const ThemeState(locale: Locale('en')));
     when(() => mockThemeCubit.stream).thenAnswer((_) => const Stream.empty());
     when(() => mockThemeCubit.getAvailablePresets()).thenReturn([]);
-    when(() => mockQuranRepository.getDownloadedTextSurahIds()).thenAnswer((_) async => <int>{});
+    when(
+      () => mockQuranRepository.getDownloadedTextSurahIds(),
+    ).thenAnswer((_) async => <int>{});
   });
 
   tearDown(() {
@@ -256,7 +289,9 @@ void main() {
 
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100)); // Allow for any initial animations
+      await tester.pump(
+        const Duration(milliseconds: 100),
+      ); // Allow for any initial animations
 
       expect(find.byType(MainNavigationScreen), findsOneWidget);
     },

@@ -37,10 +37,10 @@ class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState>
 class MockNotificationService extends Mock implements NotificationService {
   @override
   Future<Map<String, dynamic>> runDiagnostics() async => {
-        'notifications_enabled': true,
-        'exact_alarm_permission': true,
-        'battery_optimization_ignored': true,
-      };
+    'notifications_enabled': true,
+    'exact_alarm_permission': true,
+    'battery_optimization_ignored': true,
+  };
 }
 
 class MockVoiceDownloadService extends Mock implements VoiceDownloadService {}
@@ -87,22 +87,20 @@ void main() {
       () => mockNotificationService.testReminder(any(), any()),
     ).thenAnswer((_) async {});
 
-    when(() => mockLocationPrayerCubit.state).thenReturn(
-      const LocationPrayerState(),
-    );
+    when(
+      () => mockLocationPrayerCubit.state,
+    ).thenReturn(const LocationPrayerState());
 
-    when(() => mockThemeCubit.state).thenReturn(
-      const ThemeState(locale: Locale('en')),
-    );
+    when(
+      () => mockThemeCubit.state,
+    ).thenReturn(const ThemeState(locale: Locale('en')));
     when(() => mockThemeCubit.getAvailablePresets()).thenReturn([]);
 
-    when(() => mockDailyRemindersCubit.state).thenReturn(
-      const DailyRemindersState(),
-    );
+    when(
+      () => mockDailyRemindersCubit.state,
+    ).thenReturn(const DailyRemindersState());
 
-    when(() => mockAdhanCubit.state).thenReturn(
-      const AdhanState(),
-    );
+    when(() => mockAdhanCubit.state).thenReturn(const AdhanState());
 
     when(() => mockAzkarBloc.state).thenReturn(
       const AzkarState(
@@ -130,9 +128,13 @@ void main() {
       return MultiBlocProvider(
         providers: [
           BlocProvider<AzkarBloc>.value(value: mockAzkarBloc),
-          BlocProvider<LocationPrayerCubit>.value(value: mockLocationPrayerCubit),
+          BlocProvider<LocationPrayerCubit>.value(
+            value: mockLocationPrayerCubit,
+          ),
           BlocProvider<ThemeCubit>.value(value: mockThemeCubit),
-          BlocProvider<DailyRemindersCubit>.value(value: mockDailyRemindersCubit),
+          BlocProvider<DailyRemindersCubit>.value(
+            value: mockDailyRemindersCubit,
+          ),
           BlocProvider<AdhanCubit>.value(value: mockAdhanCubit),
         ],
         child: const MaterialApp(
@@ -193,9 +195,13 @@ void main() {
       return MultiBlocProvider(
         providers: [
           BlocProvider<AzkarBloc>.value(value: mockAzkarBloc),
-          BlocProvider<LocationPrayerCubit>.value(value: mockLocationPrayerCubit),
+          BlocProvider<LocationPrayerCubit>.value(
+            value: mockLocationPrayerCubit,
+          ),
           BlocProvider<ThemeCubit>.value(value: mockThemeCubit),
-          BlocProvider<DailyRemindersCubit>.value(value: mockDailyRemindersCubit),
+          BlocProvider<DailyRemindersCubit>.value(
+            value: mockDailyRemindersCubit,
+          ),
           BlocProvider<AdhanCubit>.value(value: mockAdhanCubit),
         ],
         child: const MaterialApp(
@@ -218,7 +224,9 @@ void main() {
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 
-      final l10n = AppLocalizations.of(tester.element(find.byType(SettingsScreen)))!;
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(SettingsScreen)),
+      )!;
 
       // Expand Azkar section
       final azkarSectionFinder = find.text(l10n.azkarSection);

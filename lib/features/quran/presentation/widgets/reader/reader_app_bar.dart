@@ -29,9 +29,7 @@ class QuranReaderAppBar extends StatelessWidget implements PreferredSizeWidget {
         },
       ),
       actions: [
-        QuranReaderHelpOverlay(
-          repository: getIt<QuranSymbolsRepository>(),
-        ),
+        QuranReaderHelpOverlay(repository: getIt<QuranSymbolsRepository>()),
         BlocBuilder<ReaderBloc, ReaderState>(
           builder: (context, state) {
             return IconButton(

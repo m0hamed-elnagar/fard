@@ -74,7 +74,7 @@ void main() {
         await tester.tap(tapButton);
         await tester.pump(const Duration(milliseconds: 50));
       }
-      
+
       // Wait for auto-scroll animation
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
@@ -94,7 +94,7 @@ void main() {
       expect(find.text('سُبْحَانَ ٱللَّٰهِ'), findsOneWidget);
 
       final tapButton = find.byType(TasbihButton);
-      
+
       // Tap 5 times on index 0
       for (int i = 0; i < 5; i++) {
         await tester.tap(tapButton);

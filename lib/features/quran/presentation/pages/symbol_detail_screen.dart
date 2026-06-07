@@ -146,12 +146,17 @@ class _SymbolDetailScreenState extends State<SymbolDetailScreen> {
                   children: [
                     Text(
                       'مصادر ومراجع',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     SizedBox(width: 8),
-                    Icon(Icons.verified_user_rounded,
-                        size: 16, color: Colors.blue),
+                    Icon(
+                      Icons.verified_user_rounded,
+                      size: 16,
+                      color: Colors.blue,
+                    ),
                   ],
                 ),
               ),
@@ -187,8 +192,9 @@ class _SymbolDetailScreenState extends State<SymbolDetailScreen> {
                             ? theme.colorScheme.onPrimary
                             : theme.colorScheme.onSurface,
                         fontSize: 13,
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                       ),
                       backgroundColor: theme.colorScheme.surface,
                       side: BorderSide(
@@ -227,9 +233,9 @@ class _SymbolDetailScreenState extends State<SymbolDetailScreen> {
     final Uri url = Uri.parse(urlString);
     if (!await launchUrl(url)) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not launch $urlString')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not launch $urlString')));
       }
     }
   }
@@ -271,10 +277,9 @@ class _SymbolDetailScreenState extends State<SymbolDetailScreen> {
                 ),
                 style: TextButton.styleFrom(
                   foregroundColor: Theme.of(context).colorScheme.primary,
-                  backgroundColor:
-                      Theme.of(context).colorScheme.primaryContainer.withValues(
-                        alpha: 0.3,
-                      ),
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer.withValues(alpha: 0.3),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 12,

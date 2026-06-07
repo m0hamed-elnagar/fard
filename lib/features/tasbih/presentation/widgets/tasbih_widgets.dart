@@ -31,7 +31,9 @@ class _CounterCircleState extends State<CounterCircle> {
           width: widget.size,
           height: widget.size,
           child: CircularProgressIndicator(
-            value: widget.targetCount > 0 ? widget.count / widget.targetCount : 0,
+            value: widget.targetCount > 0
+                ? widget.count / widget.targetCount
+                : 0,
             strokeWidth: widget.size * 0.05,
             backgroundColor: context.surfaceContainerHighestColor,
             color: color,
@@ -208,7 +210,9 @@ class CycleProgressIndicator extends StatelessWidget {
           decoration: BoxDecoration(
             color: isCompleted
                 ? context.primaryContainerColor
-                : (isActive ? context.secondaryColor : context.surfaceContainerHighestColor),
+                : (isActive
+                      ? context.secondaryColor
+                      : context.surfaceContainerHighestColor),
             borderRadius: BorderRadius.circular(3),
           ),
         );

@@ -97,15 +97,15 @@ void main() {
       ),
     );
 
-    when(() => mockLocationPrayerCubit.state).thenReturn(
-      const LocationPrayerState(),
-    );
-    when(() => mockThemeCubit.state).thenReturn(
-      const ThemeState(locale: Locale('en')),
-    );
-    when(() => mockDailyRemindersCubit.state).thenReturn(
-      const DailyRemindersState(),
-    );
+    when(
+      () => mockLocationPrayerCubit.state,
+    ).thenReturn(const LocationPrayerState());
+    when(
+      () => mockThemeCubit.state,
+    ).thenReturn(const ThemeState(locale: Locale('en')));
+    when(
+      () => mockDailyRemindersCubit.state,
+    ).thenReturn(const DailyRemindersState());
   });
 
   Widget createWidgetUnderTest() {

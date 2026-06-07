@@ -119,10 +119,14 @@ class _CounterCardState extends State<CounterCard>
                   // Add button
                   Container(
                     decoration: BoxDecoration(
-                      color: context.primaryContainerColor.withValues(alpha: 0.15),
+                      color: context.primaryContainerColor.withValues(
+                        alpha: 0.15,
+                      ),
                       borderRadius: BorderRadius.circular(12.0),
                       border: Border.all(
-                        color: context.primaryContainerColor.withValues(alpha: 0.30),
+                        color: context.primaryContainerColor.withValues(
+                          alpha: 0.30,
+                        ),
                       ),
                     ),
                     child: IconButton(

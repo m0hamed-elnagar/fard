@@ -18,12 +18,12 @@ class Bookmark extends Equatable {
   List<Object?> get props => [id, ayahNumber, createdAt, note];
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'surahNumber': ayahNumber.surahNumber,
-        'ayahNumber': ayahNumber.ayahNumberInSurah,
-        'createdAt': createdAt.toIso8601String(),
-        'note': note,
-      };
+    'id': id,
+    'surahNumber': ayahNumber.surahNumber,
+    'ayahNumber': ayahNumber.ayahNumberInSurah,
+    'createdAt': createdAt.toIso8601String(),
+    'note': note,
+  };
 
   factory Bookmark.fromJson(Map<String, dynamic> json) {
     return Bookmark(

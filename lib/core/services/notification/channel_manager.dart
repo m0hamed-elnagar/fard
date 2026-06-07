@@ -14,15 +14,18 @@ class ChannelManager {
 
   String getChannelId(String salaahId, String sound) {
     // We MUST include the sound name/key in the channel ID.
-    // Android notification channels are IMMUTABLE once created. 
+    // Android notification channels are IMMUTABLE once created.
     // If we want to change the sound, we must create a brand new channel ID.
-    
+
     if (sound == 'default') return 'azan_channel_$salaahId';
 
     // Use a clean identifier for the sound
-    String identifier = sound.split(RegExp(r'[/\\]')).last.replaceAll('.mp3', '');
-    
-    // If it's a key with special characters (like Arabic), 
+    String identifier = sound
+        .split(RegExp(r'[/\\]'))
+        .last
+        .replaceAll('.mp3', '');
+
+    // If it's a key with special characters (like Arabic),
     // use a combination of a truncated clean version and its hash to keep it unique but valid for Android
     final String cleanPart = identifier
         .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_')
@@ -30,10 +33,10 @@ class ChannelManager {
         .where((s) => s.isNotEmpty)
         .take(2)
         .join('_');
-        
+
     final String hashPart = sound.hashCode.abs().toString().substring(0, 4);
     final String soundSuffix = '${cleanPart}_$hashPart';
-        
+
     return 'azan_${salaahId}_$soundSuffix';
   }
 

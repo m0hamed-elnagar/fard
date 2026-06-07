@@ -8,10 +8,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockSettingsRepository extends Mock implements SettingsRepository {}
+
 class MockLocationService extends Mock implements LocationService {}
+
 class MockSyncLocationSettings extends Mock implements SyncLocationSettings {}
-class MockSyncNotificationSchedule extends Mock implements SyncNotificationSchedule {}
-class MockUpdateCalculationMethodUseCase extends Mock implements UpdateCalculationMethodUseCase {}
+
+class MockSyncNotificationSchedule extends Mock
+    implements SyncNotificationSchedule {}
+
+class MockUpdateCalculationMethodUseCase extends Mock
+    implements UpdateCalculationMethodUseCase {}
 
 void main() {
   late LocationPrayerCubit cubit;

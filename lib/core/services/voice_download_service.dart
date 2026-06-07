@@ -18,11 +18,11 @@ class VoiceDownloadService {
 
   static const Map<String, String> azanVoices = {
     'Ibrahim Al-Arkani - إبراهيم الأركاني':
-    'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Ibrahim%20Al-Arkani.mp3',
+        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Ibrahim%20Al-Arkani.mp3',
     'Majed Al-Hamathani - ماجد الهمذاني':
-    'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Majed%20Al-hamathani.mp3',
+        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Majed%20Al-hamathani.mp3',
     'Mansoor Az-Zahrani - منصور الزهراني':
-    'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Mansoor%20Az-Zahrani.mp3',
+        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Mansoor%20Az-Zahrani.mp3',
     'Makkah Haram (Beautiful) - مكة المكرمة':
         'https://www.islamcan.com/audio/adhan/azan16.mp3',
     'Ali Ahmed Mala (Madinah) - علي أحمد ملا':
@@ -31,9 +31,9 @@ class VoiceDownloadService {
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Abed%20Albase6.mp3',
     'Mishary Rashid Alafasy - مشاري العفاسي':
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Mishary%20Alafasi.mp3',
-     'Ahmad Al-Nufais - أحمد النفيس':
+    'Ahmad Al-Nufais - أحمد النفيس':
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Ahmad%20Nuyne3.mp3',
-   'Saad Al-Ghamdi - سعد الغامدي':
+    'Saad Al-Ghamdi - سعد الغامدي':
         'https://www.islamcan.com/audio/adhan/azan21.mp3',
     'Nasser Al-Qatami - ناصر القطامي':
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Nasser%20Alqatami.mp3',
@@ -45,15 +45,15 @@ class VoiceDownloadService {
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Mohammad%20Ref3at.mp3',
     'Mansour Al-Salimi - منصور السالمي':
         'https://www.islamcan.com/audio/adhan/azan6.mp3',
-     'Muhammad Al-Luhaidan - محمد اللحيدان':
+    'Muhammad Al-Luhaidan - محمد اللحيدان':
         'https://www.islamcan.com/audio/adhan/azan14.mp3',
     'Wadii Al-Yamani - وديع اليمني':
         'https://www.islamcan.com/audio/adhan/azan12.mp3',
     'Al-Aqsa Mosque (Palestine) - المسجد الأقصى':
         'https://www.islamcan.com/audio/adhan/azan2.mp3',
-       'Turkish Style Adhan - أذان تركي':
+    'Turkish Style Adhan - أذان تركي':
         'https://www.islamcan.com/audio/adhan/azan19.mp3',
-       'Bosnian Style Adhan - أذان البوسنة':
+    'Bosnian Style Adhan - أذان البوسنة':
         'https://www.islamcan.com/audio/adhan/azan5.mp3',
     'Adhan Kuwait - أذان الكويت':
         'https://www.islamcan.com/audio/adhan/azan8.mp3',
@@ -73,7 +73,7 @@ class VoiceDownloadService {
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Suhaib%20Khatba.mp3',
     'Hamad Deghreri - حمد دغريري':
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Hamad%20Deghreri.mp3',
-   };
+  };
 
   String _getFileName(String voiceName) {
     // Extract a stable identifier from the URL to avoid re-downloading when renaming display names
@@ -96,7 +96,9 @@ class VoiceDownloadService {
     _activeClient = null;
 
     if (_activeDownloadTask != null) {
-      debugPrint('VoiceDownloadService: Cancelling previous download to prioritize $voiceName...');
+      debugPrint(
+        'VoiceDownloadService: Cancelling previous download to prioritize $voiceName...',
+      );
       try {
         await _activeDownloadTask;
       } catch (_) {
@@ -128,7 +130,9 @@ class VoiceDownloadService {
 
     // Detect URL changes and reset if necessary
     if (entry != null && entry.url != url) {
-      debugPrint('VoiceDownloadService: URL changed for $voiceName. Resetting.');
+      debugPrint(
+        'VoiceDownloadService: URL changed for $voiceName. Resetting.',
+      );
       final oldPath = await getLocalPath(voiceName);
       final oldFile = File(oldPath);
       if (await oldFile.exists()) await oldFile.delete();
@@ -144,7 +148,10 @@ class VoiceDownloadService {
         return path;
       }
       // Corrupted or missing, reset
-      entry = entry.copyWith(status: DownloadStatus.pending, downloadedBytes: 0);
+      entry = entry.copyWith(
+        status: DownloadStatus.pending,
+        downloadedBytes: 0,
+      );
       await _manifestService.upsertEntry(entry);
     }
 
@@ -153,22 +160,24 @@ class VoiceDownloadService {
     final client = _activeClient!;
 
     try {
-      await _manifestService.upsertEntry(entry.copyWith(
-        status: DownloadStatus.downloading,
-        updatedAt: DateTime.now(),
-      ));
+      await _manifestService.upsertEntry(
+        entry.copyWith(
+          status: DownloadStatus.downloading,
+          updatedAt: DateTime.now(),
+        ),
+      );
 
       final directory = await getApplicationSupportDirectory();
       final fileName = _getFileName(voiceName);
       final finalPath = '${directory.path}/$fileName';
       final file = File(finalPath);
-      
+
       final Map<String, String> headers = {
         'User-Agent': 'FardApp/1.0 (Mobile; AzanDownloader)',
         'Accept': 'audio/mpeg,audio/*;q=0.9,*/*;q=0.8',
         'Connection': 'close',
       };
-      
+
       int startByte = 0;
       if (await file.exists() && entry.downloadedBytes > 0) {
         startByte = await file.length();
@@ -193,7 +202,9 @@ class VoiceDownloadService {
 
           if (retryCount < maxRetries) {
             retryCount++;
-            debugPrint('VoiceDownloadService: Retry $retryCount/3 for $voiceName: $e');
+            debugPrint(
+              'VoiceDownloadService: Retry $retryCount/3 for $voiceName: $e',
+            );
             await Future.delayed(Duration(seconds: 2 * retryCount));
             continue;
           }
@@ -203,7 +214,7 @@ class VoiceDownloadService {
 
       if (response.statusCode == 200 || response.statusCode == 206) {
         final isPartial = response.statusCode == 206;
-        
+
         if (isPartial) {
           await FileDownloadUtils.appendToFile(
             bytes: response.bodyBytes,
@@ -229,16 +240,22 @@ class VoiceDownloadService {
           totalSize = startByte + response.bodyBytes.length;
         }
 
-        final currentSize = isPartial ? (startByte + response.bodyBytes.length) : response.bodyBytes.length;
+        final currentSize = isPartial
+            ? (startByte + response.bodyBytes.length)
+            : response.bodyBytes.length;
         final isDone = response.statusCode == 200 || currentSize >= totalSize;
 
-        await _manifestService.upsertEntry(entry.copyWith(
-          status: isDone ? DownloadStatus.completed : DownloadStatus.downloading,
-          downloadedBytes: currentSize,
-          expectedSize: totalSize,
-          url: url,
-          updatedAt: DateTime.now(),
-        ));
+        await _manifestService.upsertEntry(
+          entry.copyWith(
+            status: isDone
+                ? DownloadStatus.completed
+                : DownloadStatus.downloading,
+            downloadedBytes: currentSize,
+            expectedSize: totalSize,
+            url: url,
+            updatedAt: DateTime.now(),
+          ),
+        );
 
         if (isDone) {
           debugPrint('Successfully downloaded $voiceName to ${file.path}');
@@ -250,15 +267,19 @@ class VoiceDownloadService {
       }
     } catch (e) {
       if (_activeClient != client) {
-        debugPrint('VoiceDownloadService: Download for $voiceName was cancelled.');
+        debugPrint(
+          'VoiceDownloadService: Download for $voiceName was cancelled.',
+        );
         return null;
       }
-      await _manifestService.upsertEntry(entry.copyWith(
-        status: DownloadStatus.failed,
-        errorMessage: e.toString(),
-        updatedAt: DateTime.now(),
-        attemptCount: entry.attemptCount + 1,
-      ));
+      await _manifestService.upsertEntry(
+        entry.copyWith(
+          status: DownloadStatus.failed,
+          errorMessage: e.toString(),
+          updatedAt: DateTime.now(),
+          attemptCount: entry.attemptCount + 1,
+        ),
+      );
       debugPrint('VoiceDownloadService: Failed to download $voiceName: $e');
     } finally {
       if (_activeClient == client) {
@@ -275,11 +296,11 @@ class VoiceDownloadService {
 
     final fileId = 'azan_${voiceName.replaceAll(' ', '_')}';
     final entry = await _manifestService.getEntry(fileId);
-    
+
     if (entry != null && entry.status == DownloadStatus.completed) {
       // Must match current URL and exist on disk
       if (entry.url != url) return false;
-      
+
       final path = await getLocalPath(voiceName);
       final file = File(path);
       return await file.exists() && await file.length() > 1000;
@@ -315,7 +336,9 @@ class VoiceDownloadService {
       relativePath: _getFileName(voiceName),
       contentType: 'azan_voice',
       url: url,
-      expectedSize: size > 0 ? size : 2 * 1024 * 1024, // Estimate 2MB if not exists
+      expectedSize: size > 0
+          ? size
+          : 2 * 1024 * 1024, // Estimate 2MB if not exists
       downloadedBytes: exists ? size : 0,
       status: exists ? DownloadStatus.completed : DownloadStatus.pending,
       updatedAt: DateTime.now(),
@@ -336,20 +359,24 @@ class VoiceDownloadService {
 
     if (Platform.isAndroid) {
       try {
-        final List<Directory>? directories = await getExternalStorageDirectories(
-          type: StorageDirectory.notifications,
-        );
-        final externalDir = directories?.firstOrNull ?? (await getExternalStorageDirectory());
-        
+        final List<Directory>? directories =
+            await getExternalStorageDirectories(
+              type: StorageDirectory.notifications,
+            );
+        final externalDir =
+            directories?.firstOrNull ?? (await getExternalStorageDirectory());
+
         if (externalDir != null) {
           final dir = Directory('${externalDir.path}/azan_sounds');
           if (!(await dir.exists())) await dir.create(recursive: true);
 
           final accessibleFile = File('${dir.path}/$fileName');
-          
-          if (!(await accessibleFile.exists()) || 
+
+          if (!(await accessibleFile.exists()) ||
               (await accessibleFile.length() != await file.length())) {
-            debugPrint('VoiceDownloadService: Copying Azan to system-accessible path: ${accessibleFile.path}');
+            debugPrint(
+              'VoiceDownloadService: Copying Azan to system-accessible path: ${accessibleFile.path}',
+            );
             await file.copy(accessibleFile.path);
           }
           return accessibleFile.path;

@@ -167,7 +167,12 @@ void main() {
   group('PrayerTrackerBloc - Undo Limit Fix', () {
     blocTest<PrayerTrackerBloc, PrayerTrackerState>(
       'Toggle back to missed should consume completedQadaToday budget',
-      build: () => PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService),
+      build: () => PrayerTrackerBloc(
+        repo,
+        prefs,
+        prayerTimeService,
+        notificationService,
+      ),
       act: (bloc) async {
         bloc.add(PrayerTrackerEvent.load(DateTime(2026, 2, 26)));
         await Future.delayed(const Duration(milliseconds: 100));

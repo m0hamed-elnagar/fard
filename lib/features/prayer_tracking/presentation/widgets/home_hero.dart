@@ -91,7 +91,9 @@ class HomeHero extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           shadows: [
                             Shadow(
-                              color: context.backgroundColor.withValues(alpha: 0.3),
+                              color: context.backgroundColor.withValues(
+                                alpha: 0.3,
+                              ),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -303,7 +305,9 @@ class _LocationChip extends StatelessWidget {
             Text(
               cityName ?? l10n.locationNotSet,
               style: TextStyle(
-                color: hasLocation ? context.onSurfaceColor : context.missedColor,
+                color: hasLocation
+                    ? context.onSurfaceColor
+                    : context.missedColor,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
@@ -338,7 +342,9 @@ class _ModernActionButton extends StatelessWidget {
           decoration: BoxDecoration(
             color: context.onSurfaceColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: context.onSurfaceColor.withValues(alpha: 0.2)),
+            border: Border.all(
+              color: context.onSurfaceColor.withValues(alpha: 0.2),
+            ),
             boxShadow: [
               BoxShadow(
                 color: context.outlineColor.withValues(alpha: 0.1),

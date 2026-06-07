@@ -53,10 +53,19 @@ void main() {
     getIt.registerSingleton<PrayerTimeService>(prayerTimeService);
     getIt.registerSingleton<NotificationService>(notificationService);
 
-    when(() => notificationService.cancelPrayerReminder(any(), forTodayOnly: any(named: 'forTodayOnly')))
-        .thenAnswer((_) async {});
+    when(
+      () => notificationService.cancelPrayerReminder(
+        any(),
+        forTodayOnly: any(named: 'forTodayOnly'),
+      ),
+    ).thenAnswer((_) async {});
 
-    bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
+    bloc = PrayerTrackerBloc(
+      repo,
+      prefs,
+      prayerTimeService,
+      notificationService,
+    );
 
     when(() => repo.loadRecord(any())).thenAnswer((_) async => null);
     when(() => repo.loadLastSavedRecord()).thenAnswer((_) async => null);

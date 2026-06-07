@@ -10,7 +10,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockSettingsRepository extends Mock implements SettingsRepository {}
-class MockSyncNotificationSchedule extends Mock implements SyncNotificationSchedule {}
+
+class MockSyncNotificationSchedule extends Mock
+    implements SyncNotificationSchedule {}
+
 class MockNotificationService extends Mock implements NotificationService {}
 
 void main() {
@@ -35,25 +38,30 @@ void main() {
     }
     getIt.registerSingleton<NotificationService>(mockNotifService);
 
-    final initialSalaahSettings = Salaah.values.map((s) => SalaahSettings(salaah: s)).toList();
+    final initialSalaahSettings = Salaah.values
+        .map((s) => SalaahSettings(salaah: s))
+        .toList();
     when(() => mockRepo.salaahSettings).thenReturn(initialSalaahSettings);
     when(() => mockRepo.audioQuality).thenReturn(AudioQuality.low64);
     when(() => mockRepo.isAudioPlayerExpanded).thenReturn(false);
 
     when(() => mockRepo.updateSalaahSettings(any())).thenAnswer((_) async {});
     when(() => mockRepo.updateAudioQuality(any())).thenAnswer((_) async {});
-    when(() => mockRepo.updateAudioPlayerExpanded(any())).thenAnswer((_) async {});
+    when(
+      () => mockRepo.updateAudioPlayerExpanded(any()),
+    ).thenAnswer((_) async {});
     when(() => mockRepo.updateAllAzanEnabled(any())).thenAnswer((_) async {});
     when(() => mockRepo.updateAllAzanSound(any())).thenAnswer((_) async {});
     when(() => mockSyncNotif.execute()).thenAnswer((_) async {});
-    
-    when(() => mockNotifService.areNotificationsEnabled()).thenAnswer((_) async => true);
-    when(() => mockNotifService.canScheduleExactNotifications()).thenAnswer((_) async => true);
 
-    cubit = AdhanCubit(
-      mockRepo,
-      mockSyncNotif,
-    );
+    when(
+      () => mockNotifService.areNotificationsEnabled(),
+    ).thenAnswer((_) async => true);
+    when(
+      () => mockNotifService.canScheduleExactNotifications(),
+    ).thenAnswer((_) async => true);
+
+    cubit = AdhanCubit(mockRepo, mockSyncNotif);
   });
 
   setUpAll(() {
@@ -66,17 +74,20 @@ void main() {
       expect(cubit.state.salaahSettings, isNotEmpty);
     });
 
-    test('updateSalaahSettings updates state, saves to repo and syncs notifications', () async {
-      final target = cubit.state.salaahSettings.first;
-      final updatedItem = target.copyWith(isAzanEnabled: false);
+    test(
+      'updateSalaahSettings updates state, saves to repo and syncs notifications',
+      () async {
+        final target = cubit.state.salaahSettings.first;
+        final updatedItem = target.copyWith(isAzanEnabled: false);
 
-      cubit.updateSalaahSettings(updatedItem);
-      await Future.delayed(const Duration(milliseconds: 100));
+        cubit.updateSalaahSettings(updatedItem);
+        await Future.delayed(const Duration(milliseconds: 100));
 
-      expect(cubit.state.salaahSettings.first.isAzanEnabled, false);
-      verify(() => mockRepo.updateSalaahSettings(any())).called(1);
-      verify(() => mockSyncNotif.execute()).called(1);
-    });
+        expect(cubit.state.salaahSettings.first.isAzanEnabled, false);
+        verify(() => mockRepo.updateSalaahSettings(any())).called(1);
+        verify(() => mockSyncNotif.execute()).called(1);
+      },
+    );
 
     test('updateAudioQuality updates state and repo', () async {
       cubit.updateAudioQuality(AudioQuality.high192);

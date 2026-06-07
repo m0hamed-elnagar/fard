@@ -27,12 +27,21 @@ void main() {
     });
 
     test('hexToColor converts correctly', () {
-      expect(WidgetThemeResolver.hexToColor('#FF0000'), equals(const Color(0xFFFF0000)));
-      expect(WidgetThemeResolver.hexToColor('00FF00'), equals(const Color(0xFF00FF00)));
+      expect(
+        WidgetThemeResolver.hexToColor('#FF0000'),
+        equals(const Color(0xFFFF0000)),
+      );
+      expect(
+        WidgetThemeResolver.hexToColor('00FF00'),
+        equals(const Color(0xFF00FF00)),
+      );
     });
 
     test('colorToHex converts correctly', () {
-      expect(WidgetThemeResolver.colorToHex(const Color(0xFFFF0000)), equals('#FF0000'));
+      expect(
+        WidgetThemeResolver.colorToHex(const Color(0xFFFF0000)),
+        equals('#FF0000'),
+      );
     });
   });
 }

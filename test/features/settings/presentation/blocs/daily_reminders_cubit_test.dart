@@ -9,8 +9,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockSettingsRepository extends Mock implements SettingsRepository {}
-class MockSyncNotificationSchedule extends Mock implements SyncNotificationSchedule {}
-class MockToggleAfterSalahAzkarUseCase extends Mock implements ToggleAfterSalahAzkarUseCase {}
+
+class MockSyncNotificationSchedule extends Mock
+    implements SyncNotificationSchedule {}
+
+class MockToggleAfterSalahAzkarUseCase extends Mock
+    implements ToggleAfterSalahAzkarUseCase {}
 
 void main() {
   late DailyRemindersCubit cubit;
@@ -30,7 +34,9 @@ void main() {
     when(() => mockRepo.isQadaEnabled).thenReturn(true);
     when(() => mockRepo.isSalahReminderEnabled).thenReturn(false);
     when(() => mockRepo.salahReminderOffsetMinutes).thenReturn(0);
-    when(() => mockRepo.prayerReminderType).thenReturn(PrayerReminderType.after);
+    when(
+      () => mockRepo.prayerReminderType,
+    ).thenReturn(PrayerReminderType.after);
     when(() => mockRepo.enabledSalahReminders).thenReturn(<Salaah>{});
     when(() => mockRepo.isWerdReminderEnabled).thenReturn(false);
     when(() => mockRepo.werdReminderTime).thenReturn('04:00');
@@ -41,16 +47,16 @@ void main() {
 
     when(() => mockRepo.updateMorningAzkarTime(any())).thenAnswer((_) async {});
     when(() => mockRepo.updateEveningAzkarTime(any())).thenAnswer((_) async {});
-    when(() => mockRepo.updateSalahReminderEnabled(any())).thenAnswer((_) async {});
-    when(() => mockRepo.updateEnabledSalahReminders(any())).thenAnswer((_) async {});
+    when(
+      () => mockRepo.updateSalahReminderEnabled(any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockRepo.updateEnabledSalahReminders(any()),
+    ).thenAnswer((_) async {});
     when(() => mockRepo.toggleQadaEnabled()).thenAnswer((_) async {});
     when(() => mockSyncNotif.execute()).thenAnswer((_) async {});
 
-    cubit = DailyRemindersCubit(
-      mockRepo,
-      mockSyncNotif,
-      mockToggleAzkar,
-    );
+    cubit = DailyRemindersCubit(mockRepo, mockSyncNotif, mockToggleAzkar);
   });
 
   setUpAll(() {
@@ -73,8 +79,10 @@ void main() {
 
     test('toggleQadaEnabled updates state and repo', () async {
       bool qadaEnabled = true;
-      when(() => mockRepo.isQadaEnabled).thenAnswer((_) => qadaEnabled = !qadaEnabled);
-      
+      when(
+        () => mockRepo.isQadaEnabled,
+      ).thenAnswer((_) => qadaEnabled = !qadaEnabled);
+
       cubit.toggleQadaEnabled();
       await Future.delayed(const Duration(milliseconds: 100));
       expect(cubit.state.isQadaEnabled, false);
@@ -82,17 +90,20 @@ void main() {
     });
 
     group('Smart Master Toggle', () {
-      test('toggleSpecificSalahReminder turns ON master switch if it was OFF when enabling a reminder', () async {
-        expect(cubit.state.isSalahReminderEnabled, false);
+      test(
+        'toggleSpecificSalahReminder turns ON master switch if it was OFF when enabling a reminder',
+        () async {
+          expect(cubit.state.isSalahReminderEnabled, false);
 
-        cubit.toggleSpecificSalahReminder(Salaah.fajr);
-        await Future.delayed(const Duration(milliseconds: 100));
+          cubit.toggleSpecificSalahReminder(Salaah.fajr);
+          await Future.delayed(const Duration(milliseconds: 100));
 
-        expect(cubit.state.isSalahReminderEnabled, true);
-        expect(cubit.state.enabledSalahReminders, contains(Salaah.fajr));
-        verify(() => mockRepo.updateSalahReminderEnabled(true)).called(1);
-        verify(() => mockRepo.updateEnabledSalahReminders(any())).called(1);
-      });
+          expect(cubit.state.isSalahReminderEnabled, true);
+          expect(cubit.state.enabledSalahReminders, contains(Salaah.fajr));
+          verify(() => mockRepo.updateSalahReminderEnabled(true)).called(1);
+          verify(() => mockRepo.updateEnabledSalahReminders(any())).called(1);
+        },
+      );
     });
   });
 }

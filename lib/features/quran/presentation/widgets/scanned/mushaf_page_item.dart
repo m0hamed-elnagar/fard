@@ -103,9 +103,7 @@ class _MushafPageItemState extends State<MushafPageItem> {
                   ),
                   child: Text(
                     l10n.retry,
-                    style: TextStyle(
-                      color: context.onSurfaceColor,
-                    ),
+                    style: TextStyle(color: context.onSurfaceColor),
                   ),
                 ),
               ],
@@ -125,10 +123,26 @@ class _MushafPageItemState extends State<MushafPageItem> {
                       // Inverts Lightness (White -> Black, Black -> White)
                       // while preserving Hue (Green stays Greenish, Gold stays Goldish).
                       colorFilter: const ColorFilter.matrix([
-                        0.333, -0.667, -0.667, 0, 255,
-                        -0.667, 0.333, -0.667, 0, 255,
-                        -0.667, -0.667, 0.333, 0, 255,
-                        0, 0, 0, 1, 0,
+                        0.333,
+                        -0.667,
+                        -0.667,
+                        0,
+                        255,
+                        -0.667,
+                        0.333,
+                        -0.667,
+                        0,
+                        255,
+                        -0.667,
+                        -0.667,
+                        0.333,
+                        0,
+                        255,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
                       ]),
                       child: Image.file(file, fit: BoxFit.contain),
                     )

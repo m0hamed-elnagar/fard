@@ -165,7 +165,9 @@ void main() {
     expect(findDigit(tester, '2'), isTrue);
   });
 
-  testWidgets('AudioPlayerBloc state changes update reader page', (tester) async {
+  testWidgets('AudioPlayerBloc state changes update reader page', (
+    tester,
+  ) async {
     await tester.pumpWidget(createWidgetUnderTest(initialPage: 1));
     await tester.pump(const Duration(seconds: 1));
 

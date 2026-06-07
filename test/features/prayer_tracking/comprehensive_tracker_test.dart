@@ -151,75 +151,90 @@ void main() {
         forTodayOnly: any(named: 'forTodayOnly'),
       ),
     ).thenAnswer((_) async {});
-
   });
 
   group('PrayerTrackerBloc Comprehensive Tests', () {
-    test('Scenario 1: Retroactive toggle ripples forward correctly', () async {
-      final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
+    test(
+      'Scenario 1: Retroactive toggle ripples forward correctly',
+      () async {
+        final bloc = PrayerTrackerBloc(
+          repo,
+          prefs,
+          prayerTimeService,
+          notificationService,
+        );
 
-      await repo.saveToday(
-        DailyRecord(
-          id: 'dby',
-          date: dby,
-          missedToday: {},
-          completedToday: Set.from(Salaah.values),
-          qada: {for (var s in Salaah.values) s: const MissedCounter(0)},
-        ),
-      );
-      await repo.saveToday(
-        DailyRecord(
-          id: 'yesterday',
-          date: yesterday,
-          missedToday: {Salaah.fajr},
-          completedToday: Set.from(
-            Salaah.values.where((s) => s != Salaah.fajr),
+        await repo.saveToday(
+          DailyRecord(
+            id: 'dby',
+            date: dby,
+            missedToday: {},
+            completedToday: Set.from(Salaah.values),
+            qada: {for (var s in Salaah.values) s: const MissedCounter(0)},
           ),
-          qada: {
-            for (var s in Salaah.values)
-              s: s == Salaah.fajr
-                  ? const MissedCounter(1)
-                  : const MissedCounter(0),
-          },
-        ),
-      );
-      await repo.saveToday(
-        DailyRecord(
-          id: 'today',
-          date: today,
-          missedToday: {Salaah.fajr},
-          completedToday: Set.from(
-            Salaah.values.where((s) => s != Salaah.fajr),
+        );
+        await repo.saveToday(
+          DailyRecord(
+            id: 'yesterday',
+            date: yesterday,
+            missedToday: {Salaah.fajr},
+            completedToday: Set.from(
+              Salaah.values.where((s) => s != Salaah.fajr),
+            ),
+            qada: {
+              for (var s in Salaah.values)
+                s: s == Salaah.fajr
+                    ? const MissedCounter(1)
+                    : const MissedCounter(0),
+            },
           ),
-          qada: {
-            for (var s in Salaah.values)
-              s: s == Salaah.fajr
-                  ? const MissedCounter(2)
-                  : const MissedCounter(0),
-          },
-        ),
-      );
+        );
+        await repo.saveToday(
+          DailyRecord(
+            id: 'today',
+            date: today,
+            missedToday: {Salaah.fajr},
+            completedToday: Set.from(
+              Salaah.values.where((s) => s != Salaah.fajr),
+            ),
+            qada: {
+              for (var s in Salaah.values)
+                s: s == Salaah.fajr
+                    ? const MissedCounter(2)
+                    : const MissedCounter(0),
+            },
+          ),
+        );
 
-      bloc.add(PrayerTrackerEvent.load(yesterday));
-      await Future.delayed(const Duration(milliseconds: 500));
-      print('DEBUG TEST: State after load is ${bloc.state}');
+        bloc.add(PrayerTrackerEvent.load(yesterday));
+        await Future.delayed(const Duration(milliseconds: 500));
+        print('DEBUG TEST: State after load is ${bloc.state}');
 
-      print('DEBUG TEST: Toggling Fajr for yesterday');
-      bloc.add(const PrayerTrackerEvent.togglePrayer(Salaah.fajr));
-      await Future.delayed(const Duration(seconds: 2));
+        print('DEBUG TEST: Toggling Fajr for yesterday');
+        bloc.add(const PrayerTrackerEvent.togglePrayer(Salaah.fajr));
+        await Future.delayed(const Duration(seconds: 2));
 
-      print('DEBUG TEST: State after toggle is ${bloc.state}');
-      final todayRecord = await repo.loadRecord(today);
-      print('DEBUG TEST: Today qada is ${todayRecord?.qada[Salaah.fajr]?.value}');
-      expect(
-        todayRecord?.qada[Salaah.fajr]?.value,
-        1,
-        reason: 'Today qada should ripple down to 1',
-      );
-    }, timeout: const Timeout(Duration(seconds: 60)));
+        print('DEBUG TEST: State after toggle is ${bloc.state}');
+        final todayRecord = await repo.loadRecord(today);
+        print(
+          'DEBUG TEST: Today qada is ${todayRecord?.qada[Salaah.fajr]?.value}',
+        );
+        expect(
+          todayRecord?.qada[Salaah.fajr]?.value,
+          1,
+          reason: 'Today qada should ripple down to 1',
+        );
+      },
+      timeout: const Timeout(Duration(seconds: 60)),
+    );
 
     test('Scenario 2: Cascading across multi-day gaps', () async {
-      final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
+      final bloc = PrayerTrackerBloc(
+        repo,
+        prefs,
+        prayerTimeService,
+        notificationService,
+      );
       final d1 = today.subtract(const Duration(days: 10));
       final d5 = today.subtract(const Duration(days: 5));
 
@@ -310,7 +325,12 @@ void main() {
     });
 
     test('Scenario 3: Manual Qada addition ripples forward', () async {
-      final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
+      final bloc = PrayerTrackerBloc(
+        repo,
+        prefs,
+        prayerTimeService,
+        notificationService,
+      );
       await repo.saveToday(
         DailyRecord(
           id: 'yesterday',
@@ -355,7 +375,12 @@ void main() {
     });
 
     test('Scenario 4: Deleting a past record re-bases and ripples', () async {
-      final bloc = PrayerTrackerBloc(repo, prefs, prayerTimeService, notificationService);
+      final bloc = PrayerTrackerBloc(
+        repo,
+        prefs,
+        prayerTimeService,
+        notificationService,
+      );
 
       await repo.saveToday(
         DailyRecord(

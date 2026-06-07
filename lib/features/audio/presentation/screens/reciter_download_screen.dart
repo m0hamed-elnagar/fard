@@ -23,7 +23,9 @@ class ReciterDownloadScreen extends StatelessWidget {
       child: PopScope(
         onPopInvokedWithResult: (didPop, result) {
           if (didPop) {
-            context.read<ReciterManagerBloc>().add(const RefreshReciterStatuses());
+            context.read<ReciterManagerBloc>().add(
+              const RefreshReciterStatuses(),
+            );
           }
         },
         child: Scaffold(
@@ -144,7 +146,9 @@ class ReciterDownloadScreen extends StatelessWidget {
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(context.onSurfaceVariantColor),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        context.onSurfaceVariantColor,
+                      ),
                     ),
                   ),
                   label: Text(l10n.stopping),
@@ -152,7 +156,10 @@ class ReciterDownloadScreen extends StatelessWidget {
               else if (isAnyDownloading)
                 ElevatedButton.icon(
                   onPressed: () {
-                    context.read<AudioDownloadCubit>().cancelDownload(reciter, null);
+                    context.read<AudioDownloadCubit>().cancelDownload(
+                      reciter,
+                      null,
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: context.errorColor.withValues(alpha: 0.05),
@@ -177,20 +184,26 @@ class ReciterDownloadScreen extends StatelessWidget {
                         ),
                         content: Text(
                           l10n.manageRecitersDesc, // Reuse description or use a better one
-                          style: TextStyle(color: context.onSurfaceVariantColor),
+                          style: TextStyle(
+                            color: context.onSurfaceVariantColor,
+                          ),
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(c),
                             child: Text(
                               l10n.cancel,
-                              style: TextStyle(color: context.onSurfaceVariantColor),
+                              style: TextStyle(
+                                color: context.onSurfaceVariantColor,
+                              ),
                             ),
                           ),
                           ElevatedButton(
                             onPressed: () {
                               Navigator.pop(c);
-                              context.read<AudioDownloadCubit>().downloadReciter(reciter);
+                              context
+                                  .read<AudioDownloadCubit>()
+                                  .downloadReciter(reciter);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: context.primaryColor,
@@ -198,7 +211,9 @@ class ReciterDownloadScreen extends StatelessWidget {
                             ),
                             child: Text(
                               l10n.startDownload,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ],
@@ -274,7 +289,9 @@ class ReciterDownloadScreen extends StatelessWidget {
                   value: isStopping ? null : progress,
                   backgroundColor: context.outlineVariantColor,
                   valueColor: isStopping
-                      ? AlwaysStoppedAnimation<Color>(context.onSurfaceVariantColor)
+                      ? AlwaysStoppedAnimation<Color>(
+                          context.onSurfaceVariantColor,
+                        )
                       : null,
                 ),
                 const SizedBox(height: 2),
@@ -293,7 +310,9 @@ class ReciterDownloadScreen extends StatelessWidget {
               height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(context.onSurfaceVariantColor),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  context.onSurfaceVariantColor,
+                ),
               ),
             )
           else if (isDownloading)
@@ -311,7 +330,10 @@ class ReciterDownloadScreen extends StatelessWidget {
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                   onPressed: () {
-                    context.read<AudioDownloadCubit>().cancelDownload(reciter, surahNumber);
+                    context.read<AudioDownloadCubit>().cancelDownload(
+                      reciter,
+                      surahNumber,
+                    );
                   },
                 ),
               ],

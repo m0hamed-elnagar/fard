@@ -1,4 +1,4 @@
-package com.qada.fard.prayer
+package com.khwarizmi.fard.prayer
 
 import com.batoulapps.adhan.*
 import com.batoulapps.adhan.data.DateComponents
@@ -96,3 +96,4 @@ object PrayerTimesCalculator {
         return method
     }
 }
+
