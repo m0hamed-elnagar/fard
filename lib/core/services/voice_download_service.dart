@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -10,49 +11,60 @@ import 'package:fard/core/utils/file_download_utils.dart';
 @singleton
 class VoiceDownloadService {
   final DownloadManifestService _manifestService;
-  final http.Client _client = http.Client();
+  Future<void>? _activeDownloadTask;
+  http.Client? _activeClient;
 
   VoiceDownloadService(this._manifestService);
 
   static const Map<String, String> azanVoices = {
     'Abdul Basit - عبد الباسط':
-        'https://www.ayouby.com/multimedia/Call_of_Prayer/Athan_AB.mp3',
+        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Abed%20Albase6.mp3',
     'Mishary Rashid Alafasy - مشاري العفاسي':
-        'https://media.assabile.com/media/adhan/mishary-rashid-alafasy/mishary-rashid-alafasy-1.mp3',
+        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Mishary%20Alafasi.mp3',
     'Ali Ahmed Mala (Madinah) - علي أحمد ملا':
         'https://www.islamcan.com/audio/adhan/azan20.mp3',
     'Muhammad Siddiq Al-Minshawi - محمد صديق المنشاوي':
-        'https://www.islamcan.com/audio/adhan/azan1.mp3',
+        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Mohammad%20Almenshawy.mp3',
     'Al-Aqsa Mosque (Palestine) - المسجد الأقصى':
         'https://www.islamcan.com/audio/adhan/azan2.mp3',
     'Turkish Style Adhan - أذان تركي':
-        'https://aladhan.com/storage/audio/mustafa_ozcan/1.mp3',
+        'https://www.islamcan.com/audio/adhan/azan19.mp3',
     'Makkah Haram (Beautiful) - مكة المكرمة':
-        'https://www.islamcan.com/audio/adhan/azan10.mp3',
+        'https://www.islamcan.com/audio/adhan/azan16.mp3',
     'Bosnian Style Adhan - أذان البوسنة':
         'https://www.islamcan.com/audio/adhan/azan5.mp3',
     'Nasser Al-Qatami - ناصر القطامي':
-        'https://www.islamcan.com/audio/adhan/azan15.mp3',
+        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Nasser%20Alqatami.mp3',
     'Muhammad Al-Luhaidan - محمد اللحيدان':
         'https://www.islamcan.com/audio/adhan/azan14.mp3',
     'Makkah Haram (Fajr) - أذان الفجر من مكة':
-        'https://www.islamcan.com/audio/adhan/azan16.mp3',
-    'Madinah Haram (Fajr) - أذان الفجر من المدينة':
         'https://www.islamcan.com/audio/adhan/azan17.mp3',
+    'Madinah Haram (Fajr) - أذان الفجر من المدينة':
+        'https://www.islamcan.com/audio/adhan/azan18.mp3',
     'Saad Al-Ghamdi - سعد الغامدي':
         'https://www.islamcan.com/audio/adhan/azan21.mp3',
     'Egyptian Style Adhan - أذان مصري':
         'https://www.islamcan.com/audio/adhan/azan4.mp3',
     'Yusuf Islam - يوسف إسلام':
-        'https://www.islamcan.com/audio/adhan/azan6.mp3',
+        'https://www.islamcan.com/audio/adhan/azan10.mp3',
     'Makkah Haram (Old Style) - الحرم المكي':
-        'https://www.islamcan.com/audio/adhan/azan8.mp3',
+        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Makkah.mp3',
     'Mahmoud Khalil Al-Husary - محمود خليل الحصري':
-        'https://media.assabile.com/media/adhan/mahmoud-khalil-al-hussary/mahmoud-khalil-al-hussary-1.mp3',
+        'https://www.islamcan.com/audio/adhan/azan3.mp3',
     'Mansour Al-Salimi - منصور السالمي':
-        'https://archive.org/download/adhan_202102/Mansour%20Al-Salimi.mp3',
+        'https://www.islamcan.com/audio/adhan/azan6.mp3',
     'Wadii Al-Yamani - وديع اليمني':
-        'https://archive.org/download/adhan_202102/Wadih%20Al-Yamani.mp3',
+        'https://www.islamcan.com/audio/adhan/azan12.mp3',
+    'Yasser Al-Filkawi - ياسر الفيلكاوي':
+        'https://www.islamcan.com/audio/adhan/azan11.mp3',
+    'Muhammad Refaat - محمد رفعت':
+        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Mohammad%20Ref3at.mp3',
+    'Adhan Kuwait - أذان الكويت':
+        'https://www.islamcan.com/audio/adhan/azan8.mp3',
+    'Abdul Majid Al-Surehi - عبدالمجيد السريحي':
+        'https://www.islamcan.com/audio/adhan/azan13.mp3',
+    'Indonesian Style Adhan - أذان إندونيسي':
+        'https://www.islamcan.com/audio/adhan/azan20.mp3',
   };
 
   String _getFileName(String voiceName) {
@@ -60,28 +72,77 @@ class VoiceDownloadService {
     final url = azanVoices[voiceName];
     if (url != null) {
       final uri = Uri.parse(url);
-      final fileName = uri.pathSegments.last;
+      var fileName = uri.pathSegments.last;
+      // Handle encoded spaces and special characters
+      fileName = Uri.decodeComponent(fileName);
+      // Ensure we don't have invalid filesystem characters
+      fileName = fileName.replaceAll(RegExp(r'[^\w\.\-]'), '_');
       return 'voice_$fileName';
     }
     return '${voiceName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_')}_azan.mp3';
   }
 
   Future<String?> downloadAzan(String voiceName) async {
+    // 1. Cancel previous download if it's still running
+    _activeClient?.close();
+    _activeClient = null;
+
+    if (_activeDownloadTask != null) {
+      debugPrint('VoiceDownloadService: Cancelling previous download to prioritize $voiceName...');
+      try {
+        await _activeDownloadTask;
+      } catch (_) {
+        // Ignore errors from cancelled task
+      }
+    }
+
+    final completer = Completer<void>();
+    _activeDownloadTask = completer.future;
+
+    try {
+      final result = await _performDownload(voiceName);
+      return result;
+    } finally {
+      completer.complete();
+      // Only clear if we are still the active task (don't clear a newer task's state)
+      if (_activeDownloadTask == completer.future) {
+        _activeDownloadTask = null;
+      }
+    }
+  }
+
+  Future<String?> _performDownload(String voiceName) async {
     final url = azanVoices[voiceName];
     if (url == null) return null;
 
     final fileId = 'azan_${voiceName.replaceAll(' ', '_')}';
     var entry = await _manifestService.getEntry(fileId);
 
+    // Detect URL changes and reset if necessary
+    if (entry != null && entry.url != url) {
+      debugPrint('VoiceDownloadService: URL changed for $voiceName. Resetting.');
+      final oldPath = await getLocalPath(voiceName);
+      final oldFile = File(oldPath);
+      if (await oldFile.exists()) await oldFile.delete();
+      entry = null;
+    }
+
     entry ??= await _syncManifestForVoice(voiceName);
 
     if (entry.status == DownloadStatus.completed) {
       final path = await getLocalPath(voiceName);
-      if (await File(path).exists()) return path;
-      // If manifest says completed but file is gone, reset entry
+      final file = File(path);
+      if (await file.exists() && await file.length() > 1000) {
+        return path;
+      }
+      // Corrupted or missing, reset
       entry = entry.copyWith(status: DownloadStatus.pending, downloadedBytes: 0);
       await _manifestService.upsertEntry(entry);
     }
+
+    // Assign the client to the instance variable so it can be cancelled
+    _activeClient = http.Client();
+    final client = _activeClient!;
 
     try {
       await _manifestService.upsertEntry(entry.copyWith(
@@ -95,10 +156,9 @@ class VoiceDownloadService {
       final file = File(finalPath);
       
       final Map<String, String> headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        'User-Agent': 'FardApp/1.0 (Mobile; AzanDownloader)',
         'Accept': 'audio/mpeg,audio/*;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Connection': 'keep-alive',
+        'Connection': 'close',
       };
       
       int startByte = 0;
@@ -111,18 +171,21 @@ class VoiceDownloadService {
 
       http.Response response;
       int retryCount = 0;
-      const maxRetries = 2;
+      const maxRetries = 3;
 
       while (true) {
         try {
-          response = await _client
+          response = await client
               .get(Uri.parse(url), headers: headers)
-              .timeout(const Duration(seconds: 45));
+              .timeout(const Duration(seconds: 60));
           break;
         } catch (e) {
-          if (retryCount < maxRetries && (e.toString().contains('Connection closed') || e is http.ClientException)) {
+          // If the client was closed from outside, don't retry, just propagate
+          if (_activeClient != client) throw Exception('Download cancelled');
+
+          if (retryCount < maxRetries) {
             retryCount++;
-            debugPrint('VoiceDownloadService: Retry $retryCount for $voiceName due to connection error: $e');
+            debugPrint('VoiceDownloadService: Retry $retryCount/3 for $voiceName: $e');
             await Future.delayed(Duration(seconds: 2 * retryCount));
             continue;
           }
@@ -146,8 +209,7 @@ class VoiceDownloadService {
           );
         }
 
-        // Get total size from headers
-        int totalSize = entry.expectedSize;
+        int totalSize = response.contentLength ?? response.bodyBytes.length;
         if (isPartial) {
           final contentRange = response.headers['content-range'];
           if (contentRange != null) {
@@ -156,61 +218,75 @@ class VoiceDownloadService {
               totalSize = int.tryParse(parts[1]) ?? totalSize;
             }
           }
-        } else {
-          totalSize = response.contentLength ?? response.bodyBytes.length;
+          totalSize = startByte + response.bodyBytes.length;
         }
 
         final currentSize = isPartial ? (startByte + response.bodyBytes.length) : response.bodyBytes.length;
-        final isDone = currentSize >= totalSize;
+        final isDone = response.statusCode == 200 || currentSize >= totalSize;
 
         await _manifestService.upsertEntry(entry.copyWith(
           status: isDone ? DownloadStatus.completed : DownloadStatus.downloading,
           downloadedBytes: currentSize,
           expectedSize: totalSize,
+          url: url,
           updatedAt: DateTime.now(),
         ));
 
         if (isDone) {
           debugPrint('Successfully downloaded $voiceName to ${file.path}');
           return file.path;
-        } else {
-          debugPrint('Partial download for $voiceName: $currentSize/$totalSize');
-          return null;
         }
+        return null;
       } else {
-        await _manifestService.upsertEntry(entry.copyWith(
-          status: DownloadStatus.failed,
-          errorMessage: 'Status code: ${response.statusCode}',
-          updatedAt: DateTime.now(),
-          attemptCount: entry.attemptCount + 1,
-        ));
-        debugPrint(
-          'Failed to download azan: Server returned status ${response.statusCode} for $url',
-        );
+        throw Exception('Server returned ${response.statusCode}');
       }
     } catch (e) {
+      if (_activeClient != client) {
+        debugPrint('VoiceDownloadService: Download for $voiceName was cancelled.');
+        return null;
+      }
       await _manifestService.upsertEntry(entry.copyWith(
         status: DownloadStatus.failed,
         errorMessage: e.toString(),
         updatedAt: DateTime.now(),
         attemptCount: entry.attemptCount + 1,
       ));
-      debugPrint('Exception during azan download ($voiceName) from $url: $e');
+      debugPrint('VoiceDownloadService: Failed to download $voiceName: $e');
+    } finally {
+      if (_activeClient == client) {
+        client.close();
+        _activeClient = null;
+      }
     }
     return null;
   }
 
   Future<bool> isDownloaded(String voiceName) async {
+    final url = azanVoices[voiceName];
+    if (url == null) return false;
+
     final fileId = 'azan_${voiceName.replaceAll(' ', '_')}';
     final entry = await _manifestService.getEntry(fileId);
     
-    if (entry != null) {
-      return entry.status == DownloadStatus.completed;
+    if (entry != null && entry.status == DownloadStatus.completed) {
+      // Must match current URL and exist on disk
+      if (entry.url != url) return false;
+      
+      final path = await getLocalPath(voiceName);
+      final file = File(path);
+      return await file.exists() && await file.length() > 1000;
     }
 
-    // Lazy sync if manifest missing
-    final synced = await _syncManifestForVoice(voiceName);
-    return synced.status == DownloadStatus.completed;
+    // Check disk anyway in case manifest is out of sync
+    final localPath = await getLocalPath(voiceName);
+    final file = File(localPath);
+    if (await file.exists() && await file.length() > 1000) {
+      // Recover manifest state
+      await _syncManifestForVoice(voiceName);
+      return true;
+    }
+
+    return false;
   }
 
   Future<String> getLocalPath(String voiceName) async {
@@ -252,8 +328,6 @@ class VoiceDownloadService {
 
     if (Platform.isAndroid) {
       try {
-        // On Android, we need the file in a directory that the system notification service can access.
-        // The app's external files directory (with StorageDirectory.notifications) is ideal.
         final List<Directory>? directories = await getExternalStorageDirectories(
           type: StorageDirectory.notifications,
         );
@@ -265,7 +339,6 @@ class VoiceDownloadService {
 
           final accessibleFile = File('${dir.path}/$fileName');
           
-          // Copy if not exists or size mismatch (indicates update)
           if (!(await accessibleFile.exists()) || 
               (await accessibleFile.length() != await file.length())) {
             debugPrint('VoiceDownloadService: Copying Azan to system-accessible path: ${accessibleFile.path}');
@@ -275,7 +348,6 @@ class VoiceDownloadService {
         }
       } catch (e) {
         debugPrint('VoiceDownloadService: Error preparing accessible path: $e');
-        // Fallback to local path if external storage fails
       }
     }
 

@@ -277,125 +277,135 @@ class NotificationService {
   }
 
   Future<void> testAzan(Salaah salaah, String? sound) async {
-    // 1. Check permissions first
-    final bool enabled = await areNotificationsEnabled();
-    final bool canSchedule = await canScheduleExactNotifications();
-    
-    if (!enabled || !canSchedule) {
-      debugPrint('testAzan: Permissions missing. Enabled: $enabled, CanSchedule: $canSchedule');
-      // The UI handles user feedback for missing permissions.
-    }
+    try {
+      // 1. Check permissions first
+      final bool enabled = await areNotificationsEnabled();
+      final bool canSchedule = await canScheduleExactNotifications();
+      
+      if (!enabled || !canSchedule) {
+        debugPrint('testAzan: Permissions missing. Enabled: $enabled, CanSchedule: $canSchedule');
+        // The UI handles user feedback for missing permissions.
+      }
 
-    final String salaahName = _getSalaahName(salaah);
-    final String soundPath = sound ?? 'default';
-    
-    // Delete any old test channels to prevent Android from restoring cached sound configurations
-    final androidPlugin = _notificationsPlugin
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >();
-    if (androidPlugin != null) {
-      final channels = await androidPlugin.getNotificationChannels();
-      for (final channel in channels ?? []) {
-        if (channel.id.startsWith('azan_test_')) {
-          await androidPlugin.deleteNotificationChannel(channelId: channel.id);
+      final String salaahName = _getSalaahName(salaah);
+      final String soundPath = sound ?? 'default';
+      
+      // Delete any old test channels to prevent Android from restoring cached sound configurations
+      final androidPlugin = _notificationsPlugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+      if (androidPlugin != null) {
+        final channels = await androidPlugin.getNotificationChannels();
+        for (final channel in channels ?? []) {
+          if (channel.id.startsWith('azan_test_')) {
+            await androidPlugin.deleteNotificationChannel(channelId: channel.id);
+          }
         }
       }
-    }
 
-    // Use a completely unique channel ID for each test to bypass the Android channel cache bug.
-    // Since we delete old ones above, this won't leak channels.
-    final String channelId = 'azan_test_${DateTime.now().millisecondsSinceEpoch}';
+      // Use a completely unique channel ID for each test to bypass the Android channel cache bug.
+      // Since we delete old ones above, this won't leak channels.
+      final String channelId = 'azan_test_${DateTime.now().millisecondsSinceEpoch}';
 
-    debugPrint('Testing Azan with channel: $channelId, sound: $soundPath');
+      debugPrint('Testing Azan with channel: $channelId, sound: $soundPath');
 
-    await _channelManager.ensureChannelExists(
-      _notificationsPlugin,
-      channelId: channelId,
-      salaahId: salaah.name,
-      sound: soundPath,
-      isTest: true,
-    );
+      await _channelManager.ensureChannelExists(
+        _notificationsPlugin,
+        channelId: channelId,
+        salaahId: salaah.name,
+        sound: soundPath,
+        isTest: true,
+      );
 
-    // Small delay to ensure channel is ready
-    await Future.delayed(const Duration(milliseconds: 600));
-    final String? soundUri = await _soundManager.getSoundUriForChannel(soundPath);
+      // Small delay to ensure channel is ready
+      await Future.delayed(const Duration(milliseconds: 600));
+      final String? soundUri = await _soundManager.getSoundUriForChannel(soundPath);
 
-    String diagnosticInfo = '';
-    if (soundUri != null && soundUri.startsWith('content:')) {
-      diagnosticInfo = '\nتم استخدام FileProvider بنجاح';
-    }
+      String diagnosticInfo = '';
+      if (soundUri != null && soundUri.startsWith('content:')) {
+        diagnosticInfo = '\nتم استخدام FileProvider بنجاح';
+      }
 
-    AndroidNotificationSound? notificationSound;
-    if (soundPath != 'default') {
-      if (soundUri != null) {
-        notificationSound = UriAndroidNotificationSound(soundUri);
-      } else {
-        // Fallback for raw resources
-        if (!soundPath.contains('/') && !soundPath.contains('\\')) {
-          final resourceName = soundPath.split('.').first;
-          notificationSound = RawResourceAndroidNotificationSound(resourceName);
-          diagnosticInfo = '\nمحاولة استخدام مورد داخلي: $resourceName';
+      AndroidNotificationSound? notificationSound;
+      if (soundPath != 'default') {
+        if (soundUri != null) {
+          notificationSound = UriAndroidNotificationSound(soundUri);
+        } else {
+          // Fallback for raw resources
+          if (!soundPath.contains('/') && !soundPath.contains('\\')) {
+            final resourceName = soundPath.split('.').first;
+            notificationSound = RawResourceAndroidNotificationSound(resourceName);
+            diagnosticInfo = '\nمحاولة استخدام مورد داخلي: $resourceName';
+          }
         }
       }
-    }
 
-    AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-          channelId,
-          _applyRtl('Azan Test'),
-          channelDescription: _applyRtl('Temporary channel for Azan testing'),
-          importance: Importance.max,
-          priority: Priority.high,
-          category: AndroidNotificationCategory.alarm,
-          audioAttributesUsage: AudioAttributesUsage.alarm,
-          playSound: true,
-          sound: notificationSound,
-          groupKey: groupKey,
-          fullScreenIntent: false,
-        );
+      AndroidNotificationDetails androidPlatformChannelSpecifics =
+          AndroidNotificationDetails(
+            channelId,
+            _applyRtl('Azan Test'),
+            channelDescription: _applyRtl('Temporary channel for Azan testing'),
+            importance: Importance.max,
+            priority: Priority.high,
+            category: AndroidNotificationCategory.alarm,
+            audioAttributesUsage: AudioAttributesUsage.alarm,
+            playSound: true,
+            sound: notificationSound,
+            groupKey: groupKey,
+            fullScreenIntent: false,
+          );
 
-    await _notificationsPlugin.show(
-      id: 999,
-      title: _applyRtl('تجربة الأذان: $salaahName'),
-      body: _applyRtl('تجربة صوت الأذان$diagnosticInfo'),
-      notificationDetails: NotificationDetails(
-        android: androidPlatformChannelSpecifics,
-        iOS: DarwinNotificationDetails(
-          sound: sound,
-          presentAlert: true,
-          presentSound: true,
+      await _notificationsPlugin.show(
+        id: 999,
+        title: _applyRtl('تجربة الأذان: $salaahName'),
+        body: _applyRtl('تجربة صوت الأذان$diagnosticInfo'),
+        notificationDetails: NotificationDetails(
+          android: androidPlatformChannelSpecifics,
+          iOS: DarwinNotificationDetails(
+            sound: sound,
+            presentAlert: true,
+            presentSound: true,
+          ),
+          windows: const WindowsNotificationDetails(),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      debugPrint('NotificationService: Error in testAzan: $e');
+    }
   }
 
   Future<void> testReminder(Salaah salaah, int minutesBefore) async {
-    final String salaahName = _getSalaahName(salaah);
+    try {
+      final String salaahName = _getSalaahName(salaah);
 
-    await _notificationsPlugin.show(
-      id: 998,
-      title: _applyRtl('تجربة التذكير: $salaahName'),
-      body: _applyRtl('تجربة تذكير: باقي $minutesBefore دقيقة على الأذان'),
-      notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(
-          ChannelManager.reminderChannelId,
-          _applyRtl('Prayer Reminders'),
-          channelDescription: _applyRtl('Notifications before prayer time'),
-          importance: Importance.max,
-          priority: Priority.high,
-          category: AndroidNotificationCategory.alarm,
-          audioAttributesUsage: AudioAttributesUsage.alarm,
-          visibility: NotificationVisibility.public,
-          groupKey: groupKey,
+      await _notificationsPlugin.show(
+        id: 998,
+        title: _applyRtl('تجربة التذكير: $salaahName'),
+        body: _applyRtl('تجربة تذكير: باقي $minutesBefore دقيقة على الأذان'),
+        notificationDetails: NotificationDetails(
+          android: AndroidNotificationDetails(
+            ChannelManager.reminderChannelId,
+            _applyRtl('Prayer Reminders'),
+            channelDescription: _applyRtl('Notifications before prayer time'),
+            importance: Importance.max,
+            priority: Priority.high,
+            category: AndroidNotificationCategory.alarm,
+            audioAttributesUsage: AudioAttributesUsage.alarm,
+            visibility: NotificationVisibility.public,
+            groupKey: groupKey,
+          ),
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+          windows: const WindowsNotificationDetails(),
         ),
-        iOS: DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        ),
-      ),
-    );
+      );
+    } catch (e) {
+      debugPrint('NotificationService: Error in testReminder: $e');
+    }
   }
 
   String _getSalaahName(Salaah salaah) {

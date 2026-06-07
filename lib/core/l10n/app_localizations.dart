@@ -1313,7 +1313,7 @@ abstract class AppLocalizations {
   /// No description provided for @defaultVal.
   ///
   /// In en, this message translates to:
-  /// **'Phone Notification'**
+  /// **'Phone Notification Tone'**
   String get defaultVal;
 
   /// No description provided for @pagesDownloadedSuccess.

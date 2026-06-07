@@ -654,7 +654,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get highBitrate => 'High (192k)';
 
   @override
-  String get defaultVal => 'Phone Notification';
+  String get defaultVal => 'Phone Notification Tone';
 
   @override
   String get pagesDownloadedSuccess => 'All pages downloaded successfully';

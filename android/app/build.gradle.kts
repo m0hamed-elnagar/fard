@@ -63,10 +63,10 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("release")
-            manifestPlaceholders["appLabel"] = "fard"
+            manifestPlaceholders["appLabel"] = "Fard"
         }
         debug {
-            manifestPlaceholders["appLabel"] = "fard (Debug)"
+            manifestPlaceholders["appLabel"] = "Fard (Debug)"
         }
         // Build type for generating baseline profiles
         create("benchmark") {
@@ -79,7 +79,7 @@ android {
             )
             signingConfig = signingConfigs.getByName("release")
             matchingFallbacks += listOf("release")
-            manifestPlaceholders["appLabel"] = "fard (Benchmark)"
+            manifestPlaceholders["appLabel"] = "Fard (Benchmark)"
         }
     }
 }

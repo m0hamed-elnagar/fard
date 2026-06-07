@@ -652,7 +652,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get highBitrate => 'جودة عالية (192k)';
 
   @override
-  String get defaultVal => 'أذان الهاتف';
+  String get defaultVal => 'نغمة الهاتف';
 
   @override
   String get pagesDownloadedSuccess => 'تم تحميل جميع الصفحات بنجاح';

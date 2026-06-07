@@ -223,8 +223,11 @@ flutter test
 # Analyze
 flutter analyze
 
-# Build APK
-flutter build apk --debug
+# Build Play Store App Bundle
+flutter build appbundle
+
+# Build Release APK
+flutter build apk --release
 ```
 
 ### Testing

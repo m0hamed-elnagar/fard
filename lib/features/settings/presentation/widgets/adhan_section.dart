@@ -124,7 +124,7 @@ class _AdhanSectionState extends State<AdhanSection> with NotificationPermission
                             return;
                           }
 
-                          getIt<NotificationService>().testAzan(
+                          await getIt<NotificationService>().testAzan(
                             Salaah.fajr,
                             commonVoice,
                           );
