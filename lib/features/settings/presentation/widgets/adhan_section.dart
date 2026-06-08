@@ -114,6 +114,7 @@ class _AdhanSectionState extends State<AdhanSection>
                 }
                 cubit.updateAllAzanEnabled(val);
               },
+              context: context,
             ),
             if (allAzanEnabled) ...[
               const SizedBox(height: 16),
@@ -163,9 +164,10 @@ class _AdhanSectionState extends State<AdhanSection>
               const Divider(height: 24),
               Text(
                 l10n.individualSettings,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
+                  color: context.onSurfaceColor,
                 ),
               ),
               const SizedBox(height: 8),
@@ -187,7 +189,10 @@ class _AdhanSectionState extends State<AdhanSection>
     final cubit = context.read<AdhanCubit>();
     return FardListTile(
       contentPadding: EdgeInsets.zero,
-      title: Text(_getLocalizedSalaahName(s.salaah, l10n)),
+      title: Text(
+        _getLocalizedSalaahName(s.salaah, l10n),
+        style: TextStyle(color: context.onSurfaceColor),
+      ),
       trailing: CustomToggle(
         value: s.isAzanEnabled,
         onChanged: (val) {
@@ -207,7 +212,10 @@ class _AdhanSectionState extends State<AdhanSection>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(_getLocalizedSalaahName(s.salaah, l10n)),
+        title: Text(
+          _getLocalizedSalaahName(s.salaah, l10n),
+          style: TextStyle(color: context.onSurfaceColor),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -288,11 +296,18 @@ class _AdhanSectionState extends State<AdhanSection>
     required String title,
     required bool value,
     required ValueChanged<bool> onChanged,
+    BuildContext? context,
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
+        Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: context?.onSurfaceColor,
+          ),
+        ),
         CustomToggle(value: value, onChanged: onChanged),
       ],
     );
@@ -311,7 +326,8 @@ class _AdhanSectionState extends State<AdhanSection>
     ValueChanged<String?> onChanged,
   ) {
     return DropdownButtonFormField<String?>(
-      value: _resolveVoiceKey(currentVoice),
+      key: ValueKey(_resolveVoiceKey(currentVoice)),
+      initialValue: _resolveVoiceKey(currentVoice),
       decoration: InputDecoration(
         labelText: l10n.azanVoice,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

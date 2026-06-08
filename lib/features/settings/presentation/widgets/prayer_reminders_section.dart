@@ -4,6 +4,7 @@ import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_toggle.dart';
 import '../../../../core/mixins/notification_permission_mixin.dart';
+import '../../../../core/extensions/salaah_extension.dart';
 import '../../../prayer_tracking/domain/salaah.dart';
 import '../../domain/prayer_reminder_type.dart';
 import '../blocs/daily_reminders_cubit.dart';
@@ -37,6 +38,7 @@ class PrayerRemindersSection extends StatelessWidget
                 }
                 cubit.toggleSalahReminder(val);
               },
+              context: context,
             ),
             if (state.isSalahReminderEnabled) ...[
               const SizedBox(height: 16),
@@ -77,7 +79,7 @@ class PrayerRemindersSection extends StatelessWidget
                 onChanged: (val) => cubit.setSalahReminderOffset(val.toInt()),
               ),
               const Divider(height: 24),
-              Wrap(
+                Wrap(
                 spacing: 8,
                 children: Salaah.values.map((s) {
                   final isEnabled = state.enabledSalahReminders.contains(s);
@@ -85,10 +87,17 @@ class PrayerRemindersSection extends StatelessWidget
                     label: Text(_getLocalizedSalaahName(s, l10n)),
                     selected: isEnabled,
                     onSelected: (_) => cubit.toggleSpecificSalahReminder(s),
-                    selectedColor: context.primaryContainerColor.withValues(
+                    selectedColor: context.primaryColor.withValues(
                       alpha: 0.2,
                     ),
                     checkmarkColor: context.primaryColor,
+                    labelStyle: TextStyle(
+                      fontSize: 12,
+                      color: isEnabled
+                          ? context.primaryColor
+                          : context.onSurfaceColor,
+                      fontWeight: isEnabled ? FontWeight.bold : FontWeight.normal,
+                    ),
                   );
                 }).toList(),
               ),
@@ -135,9 +144,10 @@ class PrayerRemindersSection extends StatelessWidget
                 const SizedBox(width: 16),
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 19,
                     fontWeight: FontWeight.bold,
+                    color: context.onSurfaceColor,
                   ),
                 ),
               ],
@@ -160,28 +170,24 @@ class PrayerRemindersSection extends StatelessWidget
     required String title,
     required bool value,
     required ValueChanged<bool> onChanged,
+    BuildContext? context,
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
+        Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: context?.onSurfaceColor,
+          ),
+        ),
         CustomToggle(value: value, onChanged: onChanged),
       ],
     );
   }
 
   String _getLocalizedSalaahName(Salaah salaah, AppLocalizations l10n) {
-    switch (salaah) {
-      case Salaah.fajr:
-        return l10n.fajr;
-      case Salaah.dhuhr:
-        return l10n.dhuhr;
-      case Salaah.asr:
-        return l10n.asr;
-      case Salaah.maghrib:
-        return l10n.maghrib;
-      case Salaah.isha:
-        return l10n.isha;
-    }
+    return salaah.localizedName(l10n);
   }
 }

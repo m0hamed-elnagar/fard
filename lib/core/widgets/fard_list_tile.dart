@@ -110,7 +110,7 @@ class FardSwitchListTile extends StatelessWidget {
         value: value,
         onChanged: onChanged,
         contentPadding: contentPadding,
-        activeColor: activeColor,
+        activeThumbColor: activeColor,
         activeTrackColor: activeTrackColor,
         inactiveThumbColor: inactiveThumbColor,
         inactiveTrackColor: inactiveTrackColor,

@@ -115,7 +115,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   String get themePresetId =>
-      _storage.readString(SettingsKeys.themePresetId, defaultValue: 'emerald')!;
+      _storage.readString(SettingsKeys.themePresetId, defaultValue: 'antique')!;
 
   @override
   Map<String, String>? get customThemeColors {

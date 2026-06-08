@@ -49,7 +49,7 @@ Keep your tongue moist with the remembrance of Allah.
 
 ### 🎨 Premium Visual Experience
 A sophisticated design system that adapts to your preference.
-- **Theme Presets**: Choose from professionally crafted themes like **Emerald** (Deep Green), **Parchment** (Classic Manuscript), **Rose**, and **Twilight**.
+- **Theme Presets**: Choose from professionally crafted themes like **Emerald** (Deep Green), **Antique** (Classic Manuscript), **Rose**, and **Twilight**.
 - **Dynamic Color Engine**: Manually create your own theme by picking primary and accent colors; the app intelligently auto-derives a harmonious Material 3 palette for the entire UI.
 - **Islamic Aesthetics**: Custom design tokens and theme extensions ensure a consistent, premium feel across all components.
 

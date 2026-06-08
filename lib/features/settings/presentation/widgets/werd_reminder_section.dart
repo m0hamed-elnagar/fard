@@ -36,11 +36,15 @@ class WerdReminderSection extends StatelessWidget
                 }
                 cubit.toggleWerdReminder(val);
               },
+              context: context,
             ),
             if (state.isWerdReminderEnabled)
               FardListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text(l10n.time),
+                title: Text(
+                  l10n.time,
+                  style: TextStyle(color: context.onSurfaceColor),
+                ),
                 trailing: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -109,9 +113,10 @@ class WerdReminderSection extends StatelessWidget
                 const SizedBox(width: 16),
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 19,
                     fontWeight: FontWeight.bold,
+                    color: context.onSurfaceColor,
                   ),
                 ),
               ],
@@ -134,11 +139,18 @@ class WerdReminderSection extends StatelessWidget
     required String title,
     required bool value,
     required ValueChanged<bool> onChanged,
+    BuildContext? context,
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
+        Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: context?.onSurfaceColor,
+          ),
+        ),
         CustomToggle(value: value, onChanged: onChanged),
       ],
     );

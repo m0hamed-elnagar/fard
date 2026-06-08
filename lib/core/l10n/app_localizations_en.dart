@@ -1335,13 +1335,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emeraldTheme => 'Emerald';
 
   @override
-  String get parchmentTheme => 'Parchment';
+  String get antiqueTheme => 'Antique';
 
   @override
   String get roseTheme => 'Rose';
 
   @override
-  String get midnightTheme => 'Midnight';
+  String get twilightTheme => 'Twilight';
 
   @override
   String get customTheme => 'Custom';

@@ -8,7 +8,7 @@ import 'app_theme.dart';
 /// Contains all predefined theme presets and theme building logic.
 ///
 /// This class provides:
-/// - 4 preset themes: Emerald, Parchment, Rose, Midnight
+/// - 4 preset themes: Emerald, Antique, Rose, Twilight
 /// - Theme builder that generates ThemeData from ThemePreset
 /// - Custom theme builder with Material 3 auto-derivation
 abstract final class ThemePresets {
@@ -30,10 +30,10 @@ abstract final class ThemePresets {
     isDark: true,
   );
 
-  static final parchment = ThemePreset(
-    id: 'parchment',
-    name: 'Parchment',
-    nameAr: 'الرق',
+  static final antique = ThemePreset(
+    id: 'antique',
+    name: 'Antique',
+    nameAr: 'عتيق',
     primaryColor: const Color(0xFF8B6914),
     accentColor: const Color(0xFF6B4F1D),
     backgroundColor: const Color(0xFFFFFAF0),
@@ -81,11 +81,11 @@ abstract final class ThemePresets {
   );
 
   /// All available presets
-  static final List<ThemePreset> all = [emerald, parchment, rose, twilight];
+  static final List<ThemePreset> all = [antique, emerald, rose, twilight];
 
   /// Get preset by ID
   static ThemePreset getById(String id) {
-    return all.firstWhere((p) => p.id == id, orElse: () => emerald);
+    return all.firstWhere((p) => p.id == id, orElse: () => antique);
   }
 
   // ==================== THEME BUILDERS ====================

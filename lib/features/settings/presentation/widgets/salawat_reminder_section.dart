@@ -36,6 +36,7 @@ class SalawatReminderSection extends StatelessWidget
                 }
                 cubit.toggleSalawatReminder(val);
               },
+              context: context,
             ),
             if (state.isSalawatReminderEnabled) ...[
               const SizedBox(height: 12),
@@ -59,7 +60,10 @@ class SalawatReminderSection extends StatelessWidget
               const Divider(height: 24),
               Text(
                 l10n.activeWindow,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: context.onSurfaceColor,
+                ),
               ),
               Text(
                 l10n.activeWindowDesc,
@@ -76,7 +80,10 @@ class SalawatReminderSection extends StatelessWidget
                       contentPadding: EdgeInsets.zero,
                       title: Text(
                         l10n.startTime,
-                        style: const TextStyle(fontSize: 13),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: context.onSurfaceColor,
+                        ),
                       ),
                       subtitle: Text(
                         state.salawatStartTime,
@@ -99,7 +106,10 @@ class SalawatReminderSection extends StatelessWidget
                       contentPadding: EdgeInsets.zero,
                       title: Text(
                         l10n.endTime,
-                        style: const TextStyle(fontSize: 13),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: context.onSurfaceColor,
+                        ),
                       ),
                       subtitle: Text(
                         state.salawatEndTime,
@@ -162,9 +172,10 @@ class SalawatReminderSection extends StatelessWidget
                 const SizedBox(width: 16),
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 19,
                     fontWeight: FontWeight.bold,
+                    color: context.onSurfaceColor,
                   ),
                 ),
               ],
@@ -187,11 +198,18 @@ class SalawatReminderSection extends StatelessWidget
     required String title,
     required bool value,
     required ValueChanged<bool> onChanged,
+    BuildContext? context,
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
+        Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: context?.onSurfaceColor,
+          ),
+        ),
         CustomToggle(value: value, onChanged: onChanged),
       ],
     );

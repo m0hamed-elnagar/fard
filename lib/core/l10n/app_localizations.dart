@@ -2515,11 +2515,11 @@ abstract class AppLocalizations {
   /// **'Emerald'**
   String get emeraldTheme;
 
-  /// No description provided for @parchmentTheme.
+  /// No description provided for @antiqueTheme.
   ///
   /// In en, this message translates to:
-  /// **'Parchment'**
-  String get parchmentTheme;
+  /// **'Antique'**
+  String get antiqueTheme;
 
   /// No description provided for @roseTheme.
   ///
@@ -2527,11 +2527,11 @@ abstract class AppLocalizations {
   /// **'Rose'**
   String get roseTheme;
 
-  /// No description provided for @midnightTheme.
+  /// No description provided for @twilightTheme.
   ///
   /// In en, this message translates to:
-  /// **'Midnight'**
-  String get midnightTheme;
+  /// **'Twilight'**
+  String get twilightTheme;
 
   /// No description provided for @customTheme.
   ///

@@ -189,14 +189,17 @@ class RemindersSettingsDialog extends StatelessWidget {
                                                 : 'Reminder for ${s.localizedName(l10n)} disabled'),
                                     );
                                   },
-                                  selectedColor: context.secondaryColor
+                                  selectedColor: context.primaryColor
                                       .withValues(alpha: 0.2),
-                                  checkmarkColor: context.secondaryColor,
+                                  checkmarkColor: context.primaryColor,
                                   labelStyle: TextStyle(
                                     fontSize: 12,
                                     color: isEnabled
-                                        ? context.secondaryColor
+                                        ? context.primaryColor
                                         : context.onSurfaceColor,
+                                    fontWeight: isEnabled
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
                                   ),
                                 );
                               }).toList(),

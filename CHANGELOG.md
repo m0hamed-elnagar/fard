@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - **Quran Symbols Guide**: New feature to explore and understand Quranic reading symbols with detailed explanations and a detection service.
 - **Tasbih Navigation**: Added navigation arrows to the Tasbih page for easier switching between different remembrances.
-- **Home Widget Theme Sync**: The home widget now perfectly synchronizes its colors with the app's theme presets (Emerald, Parchment, etc.), resolving the "shady green" issue.
+- **Home Widget Theme Sync**: The home widget now perfectly synchronizes its colors with the app's theme presets (Emerald, Antique, etc.), resolving the "shady green" issue.
 - **SymbolDetectorService**: Added a service to identify specific Quran symbols from text.
 
 ### Changed

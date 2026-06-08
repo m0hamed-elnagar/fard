@@ -1328,13 +1328,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get emeraldTheme => 'الزمرد';
 
   @override
-  String get parchmentTheme => 'الرق';
+  String get antiqueTheme => 'عتيق';
 
   @override
   String get roseTheme => 'الوردة';
 
   @override
-  String get midnightTheme => 'منتصف الليل';
+  String get twilightTheme => 'الغسق';
 
   @override
   String get customTheme => 'مخصص';
