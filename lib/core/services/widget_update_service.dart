@@ -7,6 +7,7 @@ import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/core/utils/widget_prayer_calculator.dart';
 import 'package:fard/core/utils/widget_theme_resolver.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
+import 'package:fard/core/utils/app_identifiers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hijri/hijri_calendar.dart';
@@ -17,7 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 @singleton
 class WidgetUpdateService {
-  static const platform = MethodChannel(CalculationContract.channelName);
+  final MethodChannel platform;
   final PrayerTimeService _prayerTimeService;
   final SharedPreferences _prefs;
   final SettingsRepository _settingsProvider;
@@ -28,7 +29,7 @@ class WidgetUpdateService {
     this._prayerTimeService,
     this._prefs,
     this._settingsProvider,
-  );
+  ) : platform = MethodChannel(AppIdentifiers.instantUpdatesChannelName);
 
   Future<void> updateWidget() async {
     final now = DateTime.now();
@@ -222,7 +223,7 @@ class WidgetUpdateService {
   // Native theme management methods retained as they are orchestration, not logic
   Future<Map<String, String>?> getWidgetTheme() async {
     try {
-      const channel = MethodChannel('com.khwarizmi.fard/widget_theme');
+      final channel = MethodChannel(AppIdentifiers.widgetThemeChannelName);
       return await channel.invokeMapMethod<String, String>('getWidgetTheme');
     } catch (e) {
       debugPrint('WidgetUpdateService: Error getting widget theme: $e');
@@ -232,7 +233,7 @@ class WidgetUpdateService {
 
   Future<void> applyWidgetTheme(Map<String, String> themeMap) async {
     try {
-      const channel = MethodChannel('com.khwarizmi.fard/widget_theme');
+      final channel = MethodChannel(AppIdentifiers.widgetThemeChannelName);
       await channel.invokeMethod('applyWidgetTheme', themeMap);
     } catch (e) {
       debugPrint('WidgetUpdateService: Error applying widget theme: $e');
@@ -242,7 +243,7 @@ class WidgetUpdateService {
 
   Future<void> clearWidgetTheme({bool triggerUpdate = true}) async {
     try {
-      const channel = MethodChannel('com.khwarizmi.fard/widget_theme');
+      final channel = MethodChannel(AppIdentifiers.widgetThemeChannelName);
       await channel.invokeMethod('clearWidgetTheme', {
         'trigger_update': triggerUpdate,
       });

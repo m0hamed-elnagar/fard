@@ -69,7 +69,7 @@ class WidgetUpdateWorker(
 
             // For the CountdownWidget, send a broadcast to the receiver
             val intent = Intent(applicationContext, NextPrayerCountdownWidgetReceiver::class.java).apply {
-                action = NextPrayerCountdownWidgetReceiver.ACTION_FORCE_UPDATE
+                action = NextPrayerCountdownWidgetReceiver.getActionForceUpdate(applicationContext)
             }
             applicationContext.sendBroadcast(intent)
 

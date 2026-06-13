@@ -30,9 +30,11 @@ class NextPrayerCountdownWidgetReceiver : GlanceAppWidgetReceiver() {
 
         Log.d("CountdownWidgetRec", "onReceive: ${intent.action}")
 
+        val actionForceUpdate = getActionForceUpdate(context)
+        val actionMinuteUpdate = getActionMinuteUpdate(context)
         when (intent.action) {
-            ACTION_FORCE_UPDATE,
-            ACTION_MINUTE_UPDATE,
+            actionForceUpdate,
+            actionMinuteUpdate,
             Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_MY_PACKAGE_REPLACED,
             Intent.ACTION_USER_PRESENT,
@@ -81,7 +83,7 @@ class NextPrayerCountdownWidgetReceiver : GlanceAppWidgetReceiver() {
     internal fun scheduleNextMinuteUpdate(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, NextPrayerCountdownWidgetReceiver::class.java).apply {
-            action = ACTION_MINUTE_UPDATE
+            action = getActionMinuteUpdate(context)
         }
         
         val pendingIntent = PendingIntent.getBroadcast(
@@ -122,7 +124,7 @@ class NextPrayerCountdownWidgetReceiver : GlanceAppWidgetReceiver() {
     private fun cancelMinuteUpdate(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, NextPrayerCountdownWidgetReceiver::class.java).apply {
-            action = ACTION_MINUTE_UPDATE
+            action = getActionMinuteUpdate(context)
         }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
@@ -137,8 +139,8 @@ class NextPrayerCountdownWidgetReceiver : GlanceAppWidgetReceiver() {
     }
 
     companion object {
-        const val ACTION_FORCE_UPDATE = "com.khwarizmi.fard.ACTION_FORCE_UPDATE"
-        const val ACTION_MINUTE_UPDATE = "com.khwarizmi.fard.ACTION_MINUTE_UPDATE"
+        fun getActionForceUpdate(context: Context): String = "${context.packageName}.ACTION_FORCE_UPDATE"
+        fun getActionMinuteUpdate(context: Context): String = "${context.packageName}.ACTION_MINUTE_UPDATE"
         private const val MINUTE_UPDATE_REQUEST_CODE = 2001
     }
 }

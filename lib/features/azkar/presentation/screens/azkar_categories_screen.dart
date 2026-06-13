@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fard/core/utils/time_utils.dart';
 import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
 import 'package:fard/features/settings/domain/azkar_reminder.dart';
@@ -359,7 +360,7 @@ void _showAddReminderDialog(BuildContext context, String category) {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          selectedTime,
+                          TimeUtils.formatTo12Hour(selectedTime),
                           style: TextStyle(
                             color: context.secondaryColor,
                             fontWeight: FontWeight.bold,

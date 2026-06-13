@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_toggle.dart';
 import '../../../../core/widgets/fard_list_tile.dart';
 import '../../../../core/mixins/notification_permission_mixin.dart';
+import '../../../../core/utils/time_utils.dart';
 import '../blocs/daily_reminders_cubit.dart';
 import '../blocs/daily_reminders_state.dart';
 
@@ -86,7 +87,7 @@ class SalawatReminderSection extends StatelessWidget
                         ),
                       ),
                       subtitle: Text(
-                        state.salawatStartTime,
+                        TimeUtils.formatTo12Hour(state.salawatStartTime),
                         style: TextStyle(
                           color: context.secondaryColor,
                           fontWeight: FontWeight.bold,
@@ -112,7 +113,7 @@ class SalawatReminderSection extends StatelessWidget
                         ),
                       ),
                       subtitle: Text(
-                        state.salawatEndTime,
+                        TimeUtils.formatTo12Hour(state.salawatEndTime),
                         style: TextStyle(
                           color: context.secondaryColor,
                           fontWeight: FontWeight.bold,

@@ -270,6 +270,17 @@ class NotificationService {
     return true;
   }
 
+  Future<bool> requestExactAlarmsPermission() async {
+    if (Platform.isAndroid) {
+      final androidPlugin = _notificationsPlugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+      return await androidPlugin?.requestExactAlarmsPermission() ?? false;
+    }
+    return true;
+  }
+
   Future<bool> isBatteryOptimizationIgnored() async {
     if (Platform.isAndroid) {
       return await Permission.ignoreBatteryOptimizations.isGranted;

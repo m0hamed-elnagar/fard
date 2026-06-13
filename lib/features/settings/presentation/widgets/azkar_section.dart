@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_toggle.dart';
 import '../../../../core/widgets/fard_list_tile.dart';
 import '../../../../core/mixins/notification_permission_mixin.dart';
+import '../../../../core/utils/time_utils.dart';
 import '../../domain/azkar_reminder.dart';
 import '../blocs/daily_reminders_cubit.dart';
 import '../blocs/daily_reminders_state.dart';
@@ -214,7 +215,7 @@ class _AzkarSectionState extends State<AzkarSection>
         ),
       ),
       subtitle: Text(
-        reminder.time,
+        TimeUtils.formatTo12Hour(reminder.time),
         style: TextStyle(
           color: context.secondaryColor,
           fontWeight: FontWeight.bold,
@@ -472,7 +473,7 @@ class _AzkarSectionState extends State<AzkarSection>
             borderRadius: BorderRadius.circular(10),
           ),
           child: Text(
-            time,
+            TimeUtils.formatTo12Hour(time),
             style: TextStyle(
               color: context.secondaryColor,
               fontWeight: FontWeight.bold,

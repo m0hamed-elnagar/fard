@@ -31,10 +31,8 @@ class AppIdentifiers {
   static bool get isReleaseBuild => _isReleaseBuild ?? false;
 
   /// Base identifier for notifications.
-  /// Release builds use original identifiers for backward compatibility.
-  /// Debug/benchmark builds use package-specific identifiers.
-  static String get _notificationBase =>
-      isReleaseBuild ? 'com.nagar.fard' : packageName;
+  /// Release, debug, and benchmark builds use their respective package names.
+  static String get _notificationBase => packageName;
 
   /// Notification group key for Android (package-specific).
   static String get notificationGroupKey => '$_notificationBase.NOTIFICATIONS';
@@ -53,6 +51,9 @@ class AppIdentifiers {
   static String get instantUpdatesChannelName =>
       '$_notificationBase/instant_updates';
 
+  /// MethodChannel name for widget theme persistence (package-specific).
+  static String get widgetThemeChannelName => '$packageName/widget_theme';
+
   /// WorkManager task names (package-specific).
   static String get prayerSchedulerTaskName =>
       '$_notificationBase.prayer_scheduler_task';
@@ -67,5 +68,6 @@ class AppIdentifiers {
   static String get azkarChannelId => '$_notificationBase.azkar_reminders';
 
   static const String privacyPolicyUrl =
-      'https://github.com/m-nagar/fard/blob/main/PRIVACY_POLICY.md';
+      'https://github.com/m0hamed-elnagar/fard/blob/main/PRIVACY_POLICY.md';
 }
+

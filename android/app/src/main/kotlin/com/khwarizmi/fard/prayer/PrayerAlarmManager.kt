@@ -37,7 +37,7 @@ object PrayerAlarmManager {
     private fun scheduleExactAlarm(context: Context, timeMillis: Long) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, PrayerWidgetReceiver::class.java).apply {
-            action = "com.khwarizmi.fard.UPDATE_WIDGET"
+            action = "${context.packageName}.UPDATE_WIDGET"
         }
         
         val pendingIntent = PendingIntent.getBroadcast(

@@ -1,8 +1,9 @@
+import 'package:fard/core/extensions/salaah_extension.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_colors.dart';
+import 'package:fard/core/utils/time_utils.dart';
 import 'package:fard/core/widgets/fard_list_tile.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
-import 'package:fard/core/extensions/salaah_extension.dart';
 import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
 import 'package:flutter/material.dart';
@@ -227,8 +228,8 @@ class RemindersSettingsDialog extends StatelessWidget {
                               val,
                               customMessage: val
                                   ? (isAr
-                                        ? 'سنذكرك بوردك اليومي في الساعة ${state.werdReminderTime}'
-                                        : 'Daily Werd reminder set for ${state.werdReminderTime}')
+                                        ? 'سنذكرك بوردك اليومي في الساعة ${TimeUtils.formatTo12Hour(state.werdReminderTime)}'
+                                        : 'Daily Werd reminder set for ${TimeUtils.formatTo12Hour(state.werdReminderTime)}')
                                   : (isAr
                                         ? 'تم إيقاف تذكير الورد اليومي'
                                         : 'Daily Werd reminder disabled'),
@@ -239,7 +240,9 @@ class RemindersSettingsDialog extends StatelessWidget {
                         if (state.isWerdReminderEnabled)
                           FardListTile(
                             title: Text(isAr ? 'وقت التذكير' : 'Reminder Time'),
-                            subtitle: Text(state.werdReminderTime),
+                            subtitle: Text(
+                              TimeUtils.formatTo12Hour(state.werdReminderTime),
+                            ),
                             trailing: const Icon(Icons.access_time_rounded),
                             onTap: () async {
                               final time = await _selectTime(
@@ -255,8 +258,8 @@ class RemindersSettingsDialog extends StatelessWidget {
                                   isAr ? 'وقت الورد' : 'Werd Time',
                                   true,
                                   customMessage: isAr
-                                      ? 'تم تحديث وقت تذكير الورد إلى $time'
-                                      : 'Werd reminder time updated to $time',
+                                      ? 'تم تحديث وقت تذكير الورد إلى ${TimeUtils.formatTo12Hour(time)}'
+                                      : 'Werd reminder time updated to ${TimeUtils.formatTo12Hour(time)}',
                                 );
                               }
                             },
@@ -321,7 +324,9 @@ class RemindersSettingsDialog extends StatelessWidget {
                           ),
                           FardListTile(
                             title: Text(isAr ? 'من وقت' : 'Start Time'),
-                            subtitle: Text(state.salawatStartTime),
+                            subtitle: Text(
+                              TimeUtils.formatTo12Hour(state.salawatStartTime),
+                            ),
                             trailing: const Icon(Icons.access_time_rounded),
                             onTap: () async {
                               final time = await _selectTime(
@@ -337,7 +342,9 @@ class RemindersSettingsDialog extends StatelessWidget {
                           ),
                           FardListTile(
                             title: Text(isAr ? 'إلى وقت' : 'End Time'),
-                            subtitle: Text(state.salawatEndTime),
+                            subtitle: Text(
+                              TimeUtils.formatTo12Hour(state.salawatEndTime),
+                            ),
                             trailing: const Icon(Icons.access_time_rounded),
                             onTap: () async {
                               final time = await _selectTime(

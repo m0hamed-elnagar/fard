@@ -66,6 +66,7 @@ android {
             manifestPlaceholders["appLabel"] = "Fard"
         }
         debug {
+            applicationIdSuffix = ".debug"
             manifestPlaceholders["appLabel"] = "Fard (Debug)"
         }
         // Build type for generating baseline profiles
@@ -81,6 +82,10 @@ android {
             matchingFallbacks += listOf("release")
             manifestPlaceholders["appLabel"] = "Fard (Benchmark)"
         }
+    }
+
+    lint {
+        disable.add("PropertyEscape")
     }
 }
 

@@ -289,7 +289,7 @@ class _BookmarkListState extends State<BookmarkList>
                             ),
                             Text(
                               DateFormat(
-                                'yyyy/MM/dd HH:mm',
+                                'yyyy/MM/dd h:mm a',
                               ).format(bookmark.createdAt),
                               style: TextStyle(
                                 fontSize: 10,

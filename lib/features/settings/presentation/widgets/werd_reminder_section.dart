@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_toggle.dart';
 import '../../../../core/widgets/fard_list_tile.dart';
 import '../../../../core/mixins/notification_permission_mixin.dart';
+import '../../../../core/utils/time_utils.dart';
 import '../blocs/daily_reminders_cubit.dart';
 import '../blocs/daily_reminders_state.dart';
 
@@ -55,7 +56,7 @@ class WerdReminderSection extends StatelessWidget
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    state.werdReminderTime,
+                    TimeUtils.formatTo12Hour(state.werdReminderTime),
                     style: TextStyle(
                       color: context.secondaryColor,
                       fontWeight: FontWeight.bold,

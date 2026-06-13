@@ -144,8 +144,10 @@ class _SettingsScreenState extends State<SettingsScreen>
                 l10n.exactAlarmWarningDesc,
                 Icons.warning_amber_rounded,
                 actionLabel: l10n.openSettings,
-                onAction: () =>
-                    getIt<NotificationService>().openNotificationSettings(),
+                onAction: () async {
+                  await getIt<NotificationService>().requestExactAlarmsPermission();
+                  await _checkPermissions();
+                },
               ),
 
             // Section 1: Appearance

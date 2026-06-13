@@ -25,43 +25,20 @@ import java.io.File
 class MainActivity : AudioServiceActivity() {
     private val TAG = "MainActivity"
     
-    // MethodChannel for widget theme persistence
-    private val WIDGET_THEME_CHANNEL = "com.khwarizmi.fard/widget_theme"
+    // MethodChannel for widget theme persistence (constructed dynamically based on package name)
+    private val widgetThemeChannelName: String
+        get() = "$packageName/widget_theme"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Request exact alarm permission on Android 13+ if needed
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            checkAndRequestExactAlarmPermission()
-        }
-    }
-
-    /**
-     * Check and request exact alarm permission on Android 13+.
-     * This is required for precise countdown widget updates.
-     */
-    private fun checkAndRequestExactAlarmPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
-            if (!alarmManager.canScheduleExactAlarms()) {
-                Log.w(TAG, "Exact alarm permission not granted - opening settings")
-                // Open the exact alarm permission settings page
-                try {
-                    val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                    startActivity(intent)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to open exact alarm settings", e)
-                }
-            }
-        }
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
-        // Original settings channel
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CalculationContract.CHANNEL_NAME).setMethodCallHandler { call, result ->
+        // Original settings channel (dynamic using packageName)
+        val settingsChannelName = "$packageName/instant_updates"
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, settingsChannelName).setMethodCallHandler { call, result ->
             if (call.method == "settingsChanged") {
                 val settings = call.arguments as? Map<String, Any>
                 Log.d(TAG, "=== SETTINGS CHANGED VIA METHOD CHANNEL ===")
@@ -77,7 +54,7 @@ class MainActivity : AudioServiceActivity() {
         // Widget theme persistence channel
         val widgetThemeChannel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
-            WIDGET_THEME_CHANNEL
+            widgetThemeChannelName
         )
         widgetThemeChannel.setMethodCallHandler { call, result ->
             when (call.method) {
@@ -335,12 +312,12 @@ class MainActivity : AudioServiceActivity() {
 
                     // Robust update via Receivers (handles alarms, etc)
                     val prayerIntent = Intent(this@MainActivity, PrayerWidgetReceiver::class.java).apply {
-                        action = "com.khwarizmi.fard.UPDATE_WIDGET"
+                        action = "${packageName}.UPDATE_WIDGET"
                     }
                     sendBroadcast(prayerIntent)
 
                     val countdownIntent = Intent(this@MainActivity, NextPrayerCountdownWidgetReceiver::class.java).apply {
-                        action = "com.khwarizmi.fard.ACTION_FORCE_UPDATE"
+                        action = "${packageName}.ACTION_FORCE_UPDATE"
                     }
                     sendBroadcast(countdownIntent)
 

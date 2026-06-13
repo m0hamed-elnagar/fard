@@ -32,7 +32,7 @@ class PrayerWidgetReceiver : GlanceAppWidgetReceiver() {
             Intent.ACTION_TIMEZONE_CHANGED,
             Intent.ACTION_LOCALE_CHANGED,
             Intent.ACTION_BOOT_COMPLETED,
-            "com.khwarizmi.fard.UPDATE_WIDGET" -> {
+            "${context.packageName}.UPDATE_WIDGET" -> {
                 receiverScope.launch {
                     updateAll(context)
                 }

@@ -273,11 +273,19 @@ class PrayerNotificationScheduler {
         DateTime.now(),
       );
       await _scheduleWerdReminder(notificationsPlugin, scheduledDate: werdTime);
+    } else {
+      await notificationsPlugin.cancel(id: werdReminderId);
     }
 
     // 6. Salawat Reminders
     if (_settingsProvider.isSalawatReminderEnabled) {
       await scheduleSalawatReminders(notificationsPlugin);
+    } else {
+      await _cancelNotificationRanges(
+        notificationsPlugin,
+        [salawatReminderIdStart],
+        maxSalawatReminders,
+      );
     }
   }
 
