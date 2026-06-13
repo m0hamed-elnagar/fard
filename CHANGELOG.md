@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0+7] - 2026-06-13
+
+### Added
+- **Firebase Analytics** with typed in-app event tracking:
+  - `prayer_marked` — fired when a Fard prayer is toggled to completed
+  - `qada_completed` — fired when a Qada prayer is decremented
+  - `quran_opened` — fired when the Quran reader successfully loads
+  - `theme_changed` — fired when the user selects a new theme preset
+- **Firebase Crashlytics** for automatic crash reporting:
+  - Flutter framework errors reported as non-fatal
+  - Unhandled async/platform errors reported as fatal
+  - Crashlytics + Analytics collection **disabled in debug builds** to keep the Firebase Console clean
+  - ProGuard/R8 mapping file upload enabled for human-readable release stack traces
+- **`AnalyticsService`** — injectable service wrapping `FirebaseAnalytics`; all methods are silent no-ops if Firebase fails to initialize, fully decoupling feature code from Firebase
+
+### Changed
+- `FlutterError.onError` handler upgraded to `recordFlutterError` (non-fatal) — prevents minor Flutter framework warnings from appearing as fatal crashes in the Crashlytics dashboard
+
+### Removed
+- `USE_FULL_SCREEN_INTENT` Android permission — was declared but never used; all notifications explicitly set `fullScreenIntent: false`
+- `requestLegacyExternalStorage="true"` from the Android manifest — no-op on Android 11+ and flagged by Play Store policy review tools
+
+### Security
+- `android/app/google-services.json` is now gitignored; it must be manually placed on fresh clones (see README — Firebase Setup)
+
+---
+
 ## [1.4.0+6] - 2026-04-23
 
 ### Added

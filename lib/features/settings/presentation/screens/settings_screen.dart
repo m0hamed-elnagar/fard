@@ -5,6 +5,7 @@ import 'package:fard/core/services/location_service.dart';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/core/theme/app_colors.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:fard/core/theme/theme_presets.dart';
 import 'package:fard/core/widgets/fard_list_tile.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
@@ -269,6 +270,73 @@ class _SettingsScreenState extends State<SettingsScreen>
                     icon: const Icon(Icons.refresh, size: 18),
                     label: const Text('Refresh'),
                   ),
+                ),
+                const Divider(),
+                const SizedBox(height: 8),
+                Text(
+                  'Firebase Crashlytics Testing',
+                  style: GoogleFonts.amiri(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: context.onSurfaceColor,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Trigger a crash report. In debug mode, collection is enabled by default for testing. Note: Fatal crashes will close the app.',
+                  style: TextStyle(
+                    color: context.onSurfaceVariantColor,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          HapticFeedback.mediumImpact();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Reporting non-fatal test error...'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                          await FirebaseCrashlytics.instance.log(
+                              "User triggered non-fatal test error from settings UI");
+                          await FirebaseCrashlytics.instance.recordError(
+                            Exception("Fard Test Non-Fatal Error"),
+                            StackTrace.current,
+                            reason: "Manual Crashlytics test button",
+                          );
+                        },
+                        icon: const Icon(Icons.bug_report_outlined, size: 18),
+                        label: const Text('Non-Fatal'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: context.errorColor,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: () async {
+                          HapticFeedback.heavyImpact();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Crashing app in 1 second...'),
+                              duration: Duration(seconds: 1),
+                            ),
+                          );
+                          await Future.delayed(const Duration(seconds: 1));
+                          FirebaseCrashlytics.instance.crash();
+                        },
+                        icon: const Icon(Icons.flash_on, size: 18),
+                        label: const Text('Fatal Crash'),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -204,6 +204,13 @@ class AudioDownloadCubit extends Cubit<AudioDownloadState> {
   }
 
   @override
+  void emit(AudioDownloadState state) {
+    if (!isClosed) {
+      super.emit(state);
+    }
+  }
+
+  @override
   Future<void> close() {
     _progressSubscription?.cancel();
     return super.close();

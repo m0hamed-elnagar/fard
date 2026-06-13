@@ -9,6 +9,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "96.0.0"
+  _flutterfire_internals:
+    dependency: transitive
+    description:
+      name: _flutterfire_internals
+      sha256: ff0a84a2734d9e1089f8aedd5c0af0061b82fb94e95260d943404e0ef2134b11
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.3.59"
   adhan:
     dependency: "direct main"
     description:
@@ -261,10 +269,10 @@ packages:
     dependency: transitive
     description:
       name: coverage
-      sha256: "5da775aa218eaf2151c721b16c01c7676fbfdd99cebba2bf64e8b807a28ff94d"
+      sha256: "956a3de0725ca232ad353565a8290d3357592bf4250f6f298a185e2d949c5d3d"
       url: "https://pub.dev"
     source: hosted
-    version: "1.15.0"
+    version: "1.15.1"
   cross_file:
     dependency: transitive
     description:
@@ -369,6 +377,94 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "11.0.2"
+  firebase_analytics:
+    dependency: "direct main"
+    description:
+      name: firebase_analytics
+      sha256: "4f85b161772e1d54a66893ef131c0a44bd9e552efa78b33d5f4f60d2caa5c8a3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "11.6.0"
+  firebase_analytics_platform_interface:
+    dependency: transitive
+    description:
+      name: firebase_analytics_platform_interface
+      sha256: a44b6d1155ed5cae7641e3de7163111cfd9f6f6c954ca916dc6a3bdfa86bf845
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.4.3"
+  firebase_analytics_web:
+    dependency: transitive
+    description:
+      name: firebase_analytics_web
+      sha256: c7d1ed1f86ae64215757518af5576ff88341c8ce5741988c05cc3b2e07b0b273
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.10+16"
+  firebase_core:
+    dependency: "direct main"
+    description:
+      name: firebase_core
+      sha256: "7be63a3f841fc9663342f7f3a011a42aef6a61066943c90b1c434d79d5c995c5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.15.2"
+  firebase_core_platform_interface:
+    dependency: transitive
+    description:
+      name: firebase_core_platform_interface
+      sha256: "0ecda14c1bfc9ed8cac303dd0f8d04a320811b479362a9a4efb14fd331a473ce"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.3"
+  firebase_core_web:
+    dependency: transitive
+    description:
+      name: firebase_core_web
+      sha256: "0ed0dc292e8f9ac50992e2394e9d336a0275b6ae400d64163fdf0a8a8b556c37"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.24.1"
+  firebase_crashlytics:
+    dependency: "direct main"
+    description:
+      name: firebase_crashlytics
+      sha256: "662ae6443da91bca1fb0be8aeeac026fa2975e8b7ddfca36e4d90ebafa35dde1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.3.10"
+  firebase_crashlytics_platform_interface:
+    dependency: transitive
+    description:
+      name: firebase_crashlytics_platform_interface
+      sha256: "7222a8a40077c79f6b8b3f3439241c9f2b34e9ddfde8381ffc512f7b2e61f7eb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.8.10"
+  firebase_performance:
+    dependency: "direct main"
+    description:
+      name: firebase_performance
+      sha256: b6948a02cb06d5da36e9f91f4a96b39745ab7565942a8134b7692ea6fc4ac595
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.10.1+10"
+  firebase_performance_platform_interface:
+    dependency: transitive
+    description:
+      name: firebase_performance_platform_interface
+      sha256: "836b219dc99c59ee5b854ba4f6432781f40ae75b31ea112f3b8b2ffce8a01cd4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.5+10"
+  firebase_performance_web:
+    dependency: transitive
+    description:
+      name: firebase_performance_web
+      sha256: "7b8cdc99f8c7ceafd6c3f51a3a661aef96bc9c5948af78d35bc9660941ed5b2f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.7+16"
   fixnum:
     dependency: transitive
     description:
@@ -603,18 +699,18 @@ packages:
     dependency: transitive
     description:
       name: geolocator_android
-      sha256: "179c3cb66dfa674fc9ccbf2be872a02658724d1c067634e2c427cf6df7df901a"
+      sha256: "86ea1654e4f61ff51466848e91c116b422d6010ea269fda0fbe1af7e9e742ce1"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.2"
+    version: "5.0.3"
   geolocator_apple:
     dependency: transitive
     description:
       name: geolocator_apple
-      sha256: dbdd8789d5aaf14cf69f74d4925ad1336b4433a6efdf2fce91e8955dc921bf22
+      sha256: "853803d6bb1713c094e935b4a5ae5f19c0308acf81da13fa9ff84fb4c70c0b73"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.13"
+    version: "2.3.14"
   geolocator_linux:
     dependency: transitive
     description:
@@ -627,18 +723,18 @@ packages:
     dependency: transitive
     description:
       name: geolocator_platform_interface
-      sha256: "30cb64f0b9adcc0fb36f628b4ebf4f731a2961a0ebd849f4b56200205056fe67"
+      sha256: cdb082e4f048b69da244117b7914cc60d2a8897546ffaa4f2529c786ded7aee2
       url: "https://pub.dev"
     source: hosted
-    version: "4.2.6"
+    version: "4.2.8"
   geolocator_web:
     dependency: transitive
     description:
       name: geolocator_web
-      sha256: b1ae9bdfd90f861fde8fd4f209c37b953d65e92823cb73c7dee1fa021b06f172
+      sha256: "19e485a0f8d6a88abcf9c53cba3a4105e14b7435ed8ac1c108c067b938fe8429"
       url: "https://pub.dev"
     source: hosted
-    version: "4.1.3"
+    version: "4.1.4"
   geolocator_windows:
     dependency: transitive
     description:
@@ -1128,10 +1224,10 @@ packages:
     dependency: transitive
     description:
       name: permission_handler_apple
-      sha256: e20daf680eef1ca62ffe8c8c526b778cc386d50137c77ac71c8ec9c88c13fb9d
+      sha256: "79dfa1df734798aa3cfdad166d3a3698c206d8813de13516ea1071b5d7e2f420"
       url: "https://pub.dev"
     source: hosted
-    version: "9.4.9"
+    version: "9.4.10"
   permission_handler_html:
     dependency: transitive
     description:
@@ -1288,10 +1384,10 @@ packages:
     dependency: transitive
     description:
       name: shared_preferences_android
-      sha256: a2c49fc1fed7140cadd892d765bd47edbe4ac0b9c7e7e3c493dcb58126f99cf0
+      sha256: "93ae5884a9df5d3bb696825bceb3a17590754548b5d740eba51500afc8d088f5"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.25"
+    version: "2.4.26"
   shared_preferences_foundation:
     dependency: transitive
     description:
@@ -1437,10 +1533,10 @@ packages:
     dependency: transitive
     description:
       name: sqflite_common
-      sha256: cce558075afe2a83f3fd7fc123acd6b090683e4f23910d44fbb31ecd7800b014
+      sha256: "5bf6a55c166e73bf651ba7ec3ed486e577620e3dc8f3a9c6a258a8031b624590"
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.9"
+    version: "2.5.11"
   sqflite_darwin:
     dependency: transitive
     description:
@@ -1669,10 +1765,10 @@ packages:
     dependency: "direct main"
     description:
       name: vibration
-      sha256: "9bb06614c69260f8bd11c80fe01ed7988905cf00e3417d656c2647e41f261d87"
+      sha256: c6c25eb7acadfd231925a60004736443cbf63f1eb5740d6dd83a1bc09cf00f6d
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.8"
+    version: "3.2.0"
   vibration_platform_interface:
     dependency: transitive
     description:

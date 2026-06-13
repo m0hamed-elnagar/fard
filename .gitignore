@@ -58,6 +58,9 @@ app.*.map.json
 /android/app/*.keystore
 /android/app/*.p12
 
+# Firebase config (contains API key — place manually or via CI secrets on fresh clones)
+/android/app/google-services.json
+
 # Android Studio will place build artifacts here
 /android/app/debug
 /android/app/profile

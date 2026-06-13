@@ -10,18 +10,26 @@ import '../../../azkar/data/azkar_source.dart';
 /// 1. Fetching all azkar from the repository
 /// 2. Scheduling azkar reminders
 /// 3. Scheduling prayer time notifications
-@injectable
+@singleton
 class SyncNotificationSchedule {
   final NotificationService _notificationService;
   final IAzkarSource _azkarRepository;
   bool _isSyncing = false;
+  bool _needsSync = false;
 
   SyncNotificationSchedule(this._notificationService, this._azkarRepository);
 
   /// Schedules both prayer notifications and azkar reminders.
+  /// Handles concurrent calls by queueing a subsequent sync if one is already running.
   Future<void> execute() async {
-    if (_isSyncing) return;
+    if (_isSyncing) {
+      _needsSync = true;
+      return;
+    }
+
     _isSyncing = true;
+    _needsSync = false;
+
     try {
       await _notificationService.ensureInitialized();
       final azkar = await _azkarRepository.getAllAzkar();
@@ -29,6 +37,11 @@ class SyncNotificationSchedule {
       await _notificationService.schedulePrayerNotifications();
     } finally {
       _isSyncing = false;
+      // If another sync was requested while we were busy, run it now.
+      if (_needsSync) {
+        _needsSync = false;
+        Future.microtask(() => execute());
+      }
     }
   }
 

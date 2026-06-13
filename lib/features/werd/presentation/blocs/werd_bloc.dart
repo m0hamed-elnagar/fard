@@ -35,7 +35,9 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
                   debugPrint(
                     '📡 [WerdBloc] WatchProgress emitted progress update',
                   );
-                  add(WerdEvent.progressUpdated(progress));
+                  if (!isClosed) {
+                    add(WerdEvent.progressUpdated(progress));
+                  }
                 });
               });
 

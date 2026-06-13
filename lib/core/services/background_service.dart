@@ -276,6 +276,7 @@ void callbackDispatcher() {
 
         // 3. Load Settings
         final prefs = await SharedPreferences.getInstance();
+        await prefs.reload(); // 🛡️ CRITICAL: Ensure we have latest values from UI thread
         final settings = SettingsLoader.loadSettings(prefs);
 
         if (settings.latitude == null || settings.longitude == null) {

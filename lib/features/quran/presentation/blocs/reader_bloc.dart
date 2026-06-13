@@ -96,7 +96,9 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
 
                     // FIX: Only auto-select if NOTHING is highlighted yet
                     if (s.lastReadAyah == null && s.highlightedAyah == null) {
-                      add(ReaderEvent.selectAyah(ayah));
+                      if (!isClosed) {
+                        add(ReaderEvent.selectAyah(ayah));
+                      }
                     }
                   }
                 },
@@ -110,7 +112,11 @@ class ReaderBloc extends Bloc<ReaderEvent, ReaderState> {
           ) {
             result.fold(
               (_) => null,
-              (bookmarks) => add(ReaderEvent.bookmarksUpdated(bookmarks)),
+              (bookmarks) {
+                if (!isClosed) {
+                  add(ReaderEvent.bookmarksUpdated(bookmarks));
+                }
+              },
             );
           });
         });

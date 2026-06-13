@@ -10,6 +10,7 @@ import 'package:injectable/injectable.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+import 'package:fard/core/services/analytics_service.dart';
 import 'configure_dependencies.config.dart';
 
 final getIt = GetIt.instance;
@@ -63,6 +64,10 @@ Future<void> configureDependencies({String? hivePath}) async {
   // Register Services
   // getIt.registerLazySingleton(() => ConnectivityService());
   // getIt.registerLazySingleton(() => ConnectivityBloc(connectivityService: getIt<ConnectivityService>()));
+
+  // Register AnalyticsService manually (not code-generated: depends on Firebase SDK
+  // which is outside the injectable graph).
+  getIt.registerLazySingleton<AnalyticsService>(() => AnalyticsService());
 
   // Initialize GetIt
   await getIt.init();

@@ -9,7 +9,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <!-- Required for receiving time change broadcasts -->
 
@@ -21,8 +20,7 @@
         android:usesCleartextTraffic="false"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
-        android:requestLegacyExternalStorage="true">
+        android:fullBackupContent="@xml/backup_rules">
         
         <meta-data
             android:name="io.flutter.embedding.android.EnableImpeller"

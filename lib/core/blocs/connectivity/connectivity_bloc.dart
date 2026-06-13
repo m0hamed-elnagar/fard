@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -38,6 +39,7 @@ class ConnectivityStatus extends ConnectivityState {
 @injectable
 class ConnectivityBloc extends Bloc<ConnectivityEvent, ConnectivityState> {
   final ConnectivityService _connectivityService;
+  StreamSubscription<List<ConnectivityResult>>? _subscription;
 
   ConnectivityBloc({required this._connectivityService})
     : super(ConnectivityInitial()) {
@@ -45,13 +47,23 @@ class ConnectivityBloc extends Bloc<ConnectivityEvent, ConnectivityState> {
 
     // Initial check
     _connectivityService.checkConnectivity().then((results) {
-      add(ConnectivityChanged(results));
+      if (!isClosed) {
+        add(ConnectivityChanged(results));
+      }
     });
 
     // Listen to stream
-    _connectivityService.onConnectivityChanged.listen((results) {
-      add(ConnectivityChanged(results));
+    _subscription = _connectivityService.onConnectivityChanged.listen((results) {
+      if (!isClosed) {
+        add(ConnectivityChanged(results));
+      }
     });
+  }
+
+  @override
+  Future<void> close() {
+    _subscription?.cancel();
+    return super.close();
   }
 
   void _onConnectivityChanged(
@@ -59,6 +71,8 @@ class ConnectivityBloc extends Bloc<ConnectivityEvent, ConnectivityState> {
     Emitter<ConnectivityState> emit,
   ) async {
     final isConnected = await _connectivityService.hasNetwork();
-    emit(ConnectivityStatus(isConnected));
+    if (!isClosed) {
+      emit(ConnectivityStatus(isConnected));
+    }
   }
 }

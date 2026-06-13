@@ -8,6 +8,9 @@ import 'package:fard/features/quran/domain/entities/bookmark.dart';
 import 'package:fard/features/quran/domain/value_objects/ayah_number.dart';
 import 'package:injectable/injectable.dart';
 
+import 'package:fard/core/di/injection.dart';
+import 'package:fard/core/services/analytics_service.dart';
+
 import 'package:fard/features/quran/domain/usecases/watch_last_read.dart';
 import 'dart:async';
 
@@ -82,7 +85,12 @@ class QuranBloc extends Bloc<QuranEvent, QuranState> {
       result.fold(
         (failure) =>
             emit(state.copyWith(isLoading: false, error: failure.message)),
-        (surahs) => emit(state.copyWith(isLoading: false, surahs: surahs)),
+        (surahs) {
+          emit(state.copyWith(isLoading: false, surahs: surahs));
+          if (getIt.isRegistered<AnalyticsService>()) {
+            getIt<AnalyticsService>().logQuranOpened();
+          }
+        },
       );
     });
 

@@ -241,3 +241,26 @@
 -dontwarn javax.**
 -dontwarn org.xmlpull.v1.**
 -dontwarn com.google.android.**
+
+# ===========================
+# FIREBASE (Analytics + Crashlytics)
+# ===========================
+
+# Keep Firebase core classes
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.firebase.**
+-dontwarn com.google.android.gms.**
+
+# Crashlytics: keep exception classes for readable crash reports
+-keep public class * extends java.lang.Exception
+
+# Crashlytics NDK & stack trace symbolication
+# NOTE: -keepattributes SourceFile,LineNumberTable is already declared above (line 10)
+# and is the most critical rule for human-readable Crashlytics stack traces.
+-keep class com.google.firebase.crashlytics.** { *; }
+-dontwarn com.google.firebase.crashlytics.**
+
+# Firebase Analytics
+-keep class com.google.firebase.analytics.** { *; }
+-dontwarn com.google.firebase.analytics.**

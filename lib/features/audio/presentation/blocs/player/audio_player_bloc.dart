@@ -58,25 +58,25 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
     on<UpdateCurrentPosition>(_onUpdateCurrentPosition);
 
     _statusSubscription = playerService.watchStatus().listen((status) {
-      add(StatusChanged(status));
+      if (!isClosed) add(StatusChanged(status));
     });
 
     _errorSubscription = playerService.watchError().listen((error) {
-      add(LastErrorChanged(error));
+      if (!isClosed) add(LastErrorChanged(error));
     });
 
     _positionSubscription = playerService.watchPosition().listen((position) {
-      add(PositionChanged(position));
+      if (!isClosed) add(PositionChanged(position));
     });
 
     _durationSubscription = playerService.watchDuration().listen((duration) {
-      if (duration != null) {
+      if (duration != null && !isClosed) {
         add(DurationChanged(duration));
       }
     });
 
     _indexSubscription = playerService.watchCurrentIndex().listen((index) {
-      add(IndexChanged(index));
+      if (!isClosed) add(IndexChanged(index));
     });
 
     // Initialize with current state

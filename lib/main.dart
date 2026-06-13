@@ -1,6 +1,12 @@
 import 'dart:io';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
+import 'firebase_options.dart';
+
 import 'package:fard/core/di/injection.dart';
+import 'package:fard/core/services/analytics_service.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/navigation/theme_update_observer.dart';
 import 'package:fard/core/services/background_service.dart';
@@ -47,12 +53,41 @@ void main() async {
     '[STARTUP] App identifiers initialized: ${AppIdentifiers.packageName} (${startupTimer.elapsedMilliseconds}ms)',
   );
 
+  // Initialize Firebase (Analytics & Crashlytics)
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    // Set to true if you are actively testing Crashlytics in development.
+    // Remember to set back to false (or use !kDebugMode) before shipping to production.
+    const bool testCrashlyticsInDebug = true;
+    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
+      !kDebugMode || testCrashlyticsInDebug,
+    );
+    // Pass Flutter framework errors to Crashlytics as NON-fatal.
+    // Fatal is reserved for truly unrecoverable errors (PlatformDispatcher).
+    FlutterError.onError = (errorDetails) {
+      FirebaseCrashlytics.instance.recordFlutterError(errorDetails);
+    };
+    // Pass all uncaught async errors (outside Flutter framework) as fatal.
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+    debugPrint('[STARTUP] Firebase initialized');
+  } catch (e) {
+    debugPrint('[STARTUP] Firebase initialization warning: $e');
+  }
+
   // 1. CRITICAL: Configure Dependencies (Hive, GetIt, SharedPreferences)
   // This must finish before runApp because widgets depend on getIt.
   await configureDependencies();
   debugPrint(
     '[STARTUP] Dependencies configured (${startupTimer.elapsedMilliseconds}ms)',
   );
+
+  // Initialize Analytics after DI is ready (AnalyticsService is injectable).
+  await getIt<AnalyticsService>().initialize();
 
   // 1.5 Initialize Widget Sync Coordinator
   getIt<WidgetSyncCoordinator>().init();

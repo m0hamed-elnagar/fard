@@ -22,9 +22,11 @@ plugins {
     id("com.android.application") version "8.13.2" apply false
     id("com.android.library") version "8.13.2" apply false
     id("com.android.test") version "8.13.2" apply false
-    id("org.jetbrains.kotlin.android") version "2.2.21" apply false
     id("org.jetbrains.kotlin.plugin.compose") version "2.2.21" apply false
     id("androidx.baselineprofile") version "1.3.3" apply false
+    id("com.google.gms.google-services") version "4.4.2" apply false
+    id("com.google.firebase.crashlytics") version "3.0.2" apply false
+    id("com.google.firebase.firebase-perf") version "1.4.2" apply false
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.10.0"
 }
 

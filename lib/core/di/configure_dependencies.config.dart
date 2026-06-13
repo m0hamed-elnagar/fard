@@ -389,7 +389,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i188.DownloadManifestService>(),
       ),
     );
-    gh.factory<_i760.SyncNotificationSchedule>(
+    gh.singleton<_i760.SyncNotificationSchedule>(
       () => _i760.SyncNotificationSchedule(
         gh<_i941.NotificationService>(),
         gh<_i1027.IAzkarSource>(),

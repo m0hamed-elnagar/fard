@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 
 import 'package:adhan/adhan.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:fard/core/services/analytics_service.dart';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
@@ -13,6 +14,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:fard/core/di/injection.dart';
 
 part 'prayer_tracker_bloc.freezed.dart';
 part 'prayer_tracker_event.dart';
@@ -422,6 +424,15 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
         await _repo.saveToday(recordToSave);
         await _cascadeUpdateFrom(recordToSave, oldBaseQada: oldQadaMap);
 
+        // Log analytics: prayer toggled to completed counts as "marked"
+        if (completed.contains(e.prayer) &&
+            getIt.isRegistered<AnalyticsService>()) {
+          getIt<AnalyticsService>().logPrayerMarked(
+            prayerName: e.prayer.name,
+            isQada: false,
+          );
+        }
+
         em(newState);
 
         final month = await _repo.loadMonth(
@@ -545,6 +556,11 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
       );
       await _repo.saveToday(recordToSave);
       await _cascadeUpdateFrom(recordToSave, oldBaseQada: oldQadaMap);
+
+      // Log analytics: a Qada prayer was removed (completed)
+      if (!isDayRecovery && getIt.isRegistered<AnalyticsService>()) {
+        getIt<AnalyticsService>().logQadaCompleted(prayerName: e.prayer.name);
+      }
 
       final month = await _repo.loadMonth(
         s.selectedDate.year,

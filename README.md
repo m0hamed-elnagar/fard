@@ -126,5 +126,21 @@ Fard integrates deeply with the Android ecosystem to provide a premium feel:
 
 ---
 
+---
+
+## 🔥 Firebase Setup
+
+Firebase Analytics and Crashlytics are integrated for production builds.  
+The `android/app/google-services.json` file is **gitignored** for security.
+
+**On a fresh clone or in CI:**
+1. Go to [Firebase Console](https://console.firebase.google.com/) → `fard` project → ⚙️ Project Settings → **Your apps**
+2. Download `google-services.json`
+3. Place it at `android/app/google-services.json`
+
+> **Note**: The file contains both `com.khwarizmi.fard` (release) and `com.khwarizmi.fard.debug` (debug) app entries. Both IDs must be present in the same file.
+
+---
+
 ## 📄 License
 Private - All rights reserved. Built with ❤️ for the Ummah.

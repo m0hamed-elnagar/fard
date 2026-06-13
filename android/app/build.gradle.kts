@@ -3,11 +3,13 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
-    id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
     id("org.jetbrains.kotlin.plugin.compose")
     id("androidx.baselineprofile")
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
+    id("com.google.firebase.firebase-perf")
 }
 
 
@@ -86,6 +88,14 @@ android {
 
     lint {
         disable.add("PropertyEscape")
+    }
+
+    firebaseCrashlytics {
+        // Automatically upload ProGuard/R8 mapping files so that release crash
+        // stack traces are human-readable in the Firebase Console.
+        mappingFileUploadEnabled = true
+        // No NDK code in this project.
+        nativeSymbolUploadEnabled = false
     }
 }
 

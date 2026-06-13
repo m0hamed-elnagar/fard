@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/di/injection.dart';
+import '../../../../core/services/analytics_service.dart';
+
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/theme_presets.dart';
 import '../../domain/entities/custom_theme.dart';
@@ -75,8 +78,10 @@ class ThemeCubit extends Cubit<ThemeState> {
   Future<void> selectThemePreset(String presetId) async {
     try {
       await _applyTheme.execute(presetId);
-
       emit(state.copyWith(themePresetId: presetId, customThemeColors: null));
+      if (getIt.isRegistered<AnalyticsService>()) {
+        getIt<AnalyticsService>().logThemeChanged(themeId: presetId);
+      }
     } catch (e) {
       debugPrint('ThemeCubit: Error selecting theme preset: $e');
     }

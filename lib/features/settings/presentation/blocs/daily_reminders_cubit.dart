@@ -237,6 +237,7 @@ class DailyRemindersCubit extends Cubit<DailyRemindersState> {
   Future<void> _toggleQadaEnabledAsync() async {
     await _repo.toggleQadaEnabled();
     emit(state.copyWith(isQadaEnabled: _repo.isQadaEnabled));
+    _sync();
   }
 
   void updateAllReminderEnabled(bool v) {

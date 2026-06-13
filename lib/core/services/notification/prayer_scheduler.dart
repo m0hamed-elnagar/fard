@@ -61,12 +61,8 @@ class PrayerNotificationScheduler {
       settings: _settingsProvider,
     );
 
-    if (_settingsProvider.latitude == null ||
-        _settingsProvider.longitude == null) {
-      return;
-    }
-
     // Cancel previous prayer notifications in known ranges
+    // This happens BEFORE the latitude check so we clear everything even if location is lost.
     await _cancelNotificationRanges(notificationsPlugin, [
       azanIdStart,
       prayerReminderIdStart,
@@ -74,6 +70,40 @@ class PrayerNotificationScheduler {
       postPrayerReminderIdStart,
       salawatReminderIdStart,
     ], maxPrayerNotificationIds);
+
+    // 🛡️ Explicitly cancel Werd if disabled (single ID, not a range)
+    if (!_settingsProvider.isWerdReminderEnabled) {
+      await notificationsPlugin.cancel(id: werdReminderId);
+    }
+
+    // 🛡️ Process location-independent reminders first
+    // 5. Werd Reminder
+    if (_settingsProvider.isWerdReminderEnabled) {
+      final werdTime = _parseTime(
+        _settingsProvider.werdReminderTime,
+        DateTime.now(),
+      );
+      await _scheduleWerdReminder(notificationsPlugin, scheduledDate: werdTime);
+    }
+
+    // 6. Salawat Reminders
+    if (_settingsProvider.isSalawatReminderEnabled) {
+      await scheduleSalawatReminders(notificationsPlugin);
+    } else {
+      await _cancelNotificationRanges(
+        notificationsPlugin,
+        [salawatReminderIdStart],
+        maxSalawatReminders,
+      );
+    }
+
+    if (_settingsProvider.latitude == null ||
+        _settingsProvider.longitude == null) {
+      debugPrint(
+        'PrayerNotificationScheduler: Location not set, skipping prayer-time dependent notifications.',
+      );
+      return;
+    }
 
     final now = tz.TZDateTime.now(tz.local);
     final allAzkar = await _azkarSource.getAllAzkar();
@@ -264,28 +294,6 @@ class PrayerNotificationScheduler {
       }
 
       await events[i].schedule(timeout);
-    }
-
-    // 5. Werd Reminder
-    if (_settingsProvider.isWerdReminderEnabled) {
-      final werdTime = _parseTime(
-        _settingsProvider.werdReminderTime,
-        DateTime.now(),
-      );
-      await _scheduleWerdReminder(notificationsPlugin, scheduledDate: werdTime);
-    } else {
-      await notificationsPlugin.cancel(id: werdReminderId);
-    }
-
-    // 6. Salawat Reminders
-    if (_settingsProvider.isSalawatReminderEnabled) {
-      await scheduleSalawatReminders(notificationsPlugin);
-    } else {
-      await _cancelNotificationRanges(
-        notificationsPlugin,
-        [salawatReminderIdStart],
-        maxSalawatReminders,
-      );
     }
   }
 
@@ -646,6 +654,7 @@ class PrayerNotificationScheduler {
           ticker: _applyRtl(title),
           subText: _applyRtl(title),
           timeoutAfter: timeoutAfter,
+          fullScreenIntent: false,
         ),
         iOS: DarwinNotificationDetails(
           presentAlert: true,
