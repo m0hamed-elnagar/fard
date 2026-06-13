@@ -60,7 +60,7 @@ void main() async {
     );
     // Set to true if you are actively testing Crashlytics in development.
     // Remember to set back to false (or use !kDebugMode) before shipping to production.
-    const bool testCrashlyticsInDebug = true;
+    const bool testCrashlyticsInDebug = false;
     await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
       !kDebugMode || testCrashlyticsInDebug,
     );
