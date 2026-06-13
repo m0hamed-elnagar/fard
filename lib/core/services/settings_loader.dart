@@ -44,7 +44,7 @@ class SettingsLoader {
           prefs.getBool(SettingsKeys.afterSalahAzkarEnabled) ?? false,
       isQadaEnabled: prefs.getBool(SettingsKeys.qadaEnabled) ?? true,
       hijriAdjustment: prefs.getInt(SettingsKeys.hijriAdjustment) ?? 0,
-      themePresetId: prefs.getString(SettingsKeys.themePresetId) ?? 'emerald',
+      themePresetId: prefs.getString(SettingsKeys.themePresetId) ?? 'antique',
       customThemeColors: _loadCustomThemeColors(prefs),
       reminders: _loadReminders(
         prefs,

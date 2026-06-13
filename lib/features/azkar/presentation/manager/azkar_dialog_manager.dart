@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/azkar/presentation/screens/azkar_list_screen.dart';
 import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
@@ -96,12 +95,16 @@ class _AzkarDialogManagerState extends State<AzkarDialogManager> {
 
   void _showAzkarDialog(String category, String title) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            const Icon(Icons.notifications_active, color: AppTheme.accent),
+            Icon(Icons.notifications_active, color: colorScheme.secondary),
             const SizedBox(width: 12),
             Text(l10n.timeFor, style: GoogleFonts.amiri(fontSize: 18)),
           ],
@@ -115,7 +118,10 @@ class _AzkarDialogManagerState extends State<AzkarDialogManager> {
             onPressed: () => Navigator.pop(context),
             child: Text(
               l10n.cancel,
-              style: const TextStyle(color: AppTheme.textSecondary),
+              style: TextStyle(
+                color: textTheme.bodyMedium?.color ??
+                    colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
             ),
           ),
           ElevatedButton(

@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/core/theme/app_theme.dart';
 
 class HomeScreen extends StatelessWidget {
   final bool showAddQadaOnStart;
@@ -107,6 +106,9 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return BlocConsumer<PrayerTrackerBloc, PrayerTrackerState>(
       listener: (context, state) {
         state.whenOrNull(
@@ -114,7 +116,7 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(message),
-                backgroundColor: AppTheme.missed,
+                backgroundColor: colorScheme.error,
               ),
             );
           },
@@ -138,10 +140,10 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
       },
       builder: (context, state) {
         return state.when(
-          loading: () => const Scaffold(
+          loading: () => Scaffold(
             body: Center(
               child: CircularProgressIndicator(
-                color: AppTheme.primaryLight,
+                color: colorScheme.primary,
                 strokeWidth: 4.0,
               ),
             ),
@@ -151,16 +153,16 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.error_outline_rounded,
-                    color: AppTheme.missed,
+                    color: colorScheme.error,
                     size: 48.0,
                   ),
                   const SizedBox(height: 16.0),
                   Text(
                     AppLocalizations.of(context)!.errorOccurred,
                     style: GoogleFonts.amiri(
-                      color: AppTheme.textPrimary,
+                      color: colorScheme.onSurface,
                       fontSize: 20.0,
                     ),
                   ),
@@ -175,10 +177,10 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
               ),
             ),
           ),
-          missedDaysPrompt: (_) => const Scaffold(
+          missedDaysPrompt: (_) => Scaffold(
             body: Center(
               child: CircularProgressIndicator(
-                color: AppTheme.accent,
+                color: colorScheme.secondary,
                 strokeWidth: 4.0,
               ),
             ),

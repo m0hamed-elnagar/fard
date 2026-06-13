@@ -1,4 +1,3 @@
-import 'package:fard/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -80,6 +79,18 @@ class _CustomToggleState extends State<CustomToggle>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
+    final inactiveBg = colorScheme.surfaceContainerHighest;
+    final activeBg = colorScheme.secondary;
+    final inactiveBorder = colorScheme.outline;
+    final activeBorder = colorScheme.secondary;
+    final thumbColor = theme.brightness == Brightness.dark
+        ? const Color(0xFFF0F6FC)
+        : Colors.white;
+
     return RepaintBoundary(
       child: GestureDetector(
         onTap: _handleTap,
@@ -89,13 +100,13 @@ class _CustomToggleState extends State<CustomToggle>
             animation: _controller,
             builder: (context, child) {
               final color = Color.lerp(
-                AppTheme.surfaceLight,
-                AppTheme.accent,
+                inactiveBg,
+                activeBg,
                 _toggleAnimation.value,
               );
               final borderColor = Color.lerp(
-                AppTheme.cardBorder,
-                AppTheme.accent,
+                inactiveBorder,
+                activeBorder,
                 _toggleAnimation.value,
               );
 
@@ -108,7 +119,7 @@ class _CustomToggleState extends State<CustomToggle>
                   border: Border.all(color: borderColor!, width: 1.5),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.accent.withValues(
+                      color: activeBg.withValues(
                         alpha: 0.3 * _toggleAnimation.value,
                       ),
                       blurRadius: 8 * _toggleAnimation.value,
@@ -127,10 +138,10 @@ class _CustomToggleState extends State<CustomToggle>
                         margin: const EdgeInsets.symmetric(horizontal: 3),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: AppTheme.textPrimary,
+                          color: thumbColor,
                           boxShadow: [
                             BoxShadow(
-                              color: AppTheme.cardBorder.withValues(alpha: 0.1),
+                              color: inactiveBorder.withValues(alpha: 0.1),
                               blurRadius: 2,
                               offset: const Offset(0, 1),
                             ),
@@ -148,8 +159,11 @@ class _CustomToggleState extends State<CustomToggle>
                                     fontSize: 8,
                                     fontWeight: FontWeight.bold,
                                     color: Color.lerp(
-                                      AppTheme.textSecondary,
-                                      AppTheme.accent,
+                                      textTheme.bodyMedium?.color ??
+                                          colorScheme.onSurface.withValues(
+                                            alpha: 0.7,
+                                          ),
+                                      activeBg,
                                       _toggleAnimation.value,
                                     ),
                                   ),

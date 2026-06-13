@@ -8,7 +8,7 @@ part 'theme_state.freezed.dart';
 sealed class ThemeState with _$ThemeState {
   const factory ThemeState({
     required Locale locale,
-    @Default('emerald') String themePresetId,
+    @Default('antique') String themePresetId,
     Map<String, String>? customThemeColors,
     @Default([]) List<CustomTheme> savedCustomThemes,
     String? activeCustomThemeId,

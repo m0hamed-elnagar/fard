@@ -9,7 +9,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/core/widgets/custom_toggle.dart';
 import 'package:fard/features/azkar/presentation/screens/main_navigation_screen.dart';
 import 'package:fard/core/services/voice_download_service.dart';
@@ -62,6 +61,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final bottomPadding = MediaQuery.of(context).padding.bottom + 120;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
 
     return Scaffold(
       body: SafeArea(
@@ -129,8 +131,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         width: _currentPage == index ? 24.0 : 8.0,
                         decoration: BoxDecoration(
                           color: _currentPage == index
-                              ? AppTheme.accent
-                              : AppTheme.textSecondary.withValues(alpha: 0.3),
+                              ? colorScheme.secondary
+                              : (textTheme.bodyMedium?.color ?? colorScheme.onSurface).withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(4.0),
                         ),
                       ),
@@ -150,19 +152,19 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                     curve: Curves.easeInOut,
                                   )),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryLight,
-                        foregroundColor: AppTheme.onPrimary,
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16.0),
                         ),
                       ),
                       child: _isDownloading
-                          ? const SizedBox(
+                          ? SizedBox(
                               height: 24,
                               width: 24,
                               child: CircularProgressIndicator(
-                                color: AppTheme.textPrimary,
+                                color: colorScheme.onPrimary,
                                 strokeWidth: 2,
                               ),
                             )
@@ -197,6 +199,9 @@ class _LocationPrayerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<LocationPrayerCubit>();
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
 
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(24.0, 40.0, 24.0, bottomPadding),
@@ -205,13 +210,13 @@ class _LocationPrayerPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(32.0),
             decoration: BoxDecoration(
-              color: AppTheme.primaryLight.withValues(alpha: 0.1),
+              color: colorScheme.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.location_on_rounded,
               size: 64.0,
-              color: AppTheme.primaryLight,
+              color: colorScheme.primary,
             ),
           ),
           const SizedBox(height: 32.0),
@@ -219,7 +224,7 @@ class _LocationPrayerPage extends StatelessWidget {
             l10n.prayerSettings,
             textAlign: TextAlign.center,
             style: GoogleFonts.amiri(
-              color: AppTheme.textPrimary,
+              color: colorScheme.onSurface,
               fontSize: 28.0,
               fontWeight: FontWeight.w700,
             ),
@@ -229,7 +234,7 @@ class _LocationPrayerPage extends StatelessWidget {
             l10n.locationDesc,
             textAlign: TextAlign.center,
             style: GoogleFonts.outfit(
-              color: AppTheme.textSecondary,
+              color: textTheme.bodyMedium?.color ?? colorScheme.onSurface.withValues(alpha: 0.7),
               fontSize: 16.0,
             ),
           ),
@@ -289,6 +294,9 @@ class _AzanSelectionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<AdhanCubit>();
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final isAzanEnabled = state.salaahSettings.any((s) => s.isAzanEnabled);
     final currentSound = state.salaahSettings.isNotEmpty
         ? state.salaahSettings.first.azanSound
@@ -301,13 +309,13 @@ class _AzanSelectionPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(32.0),
             decoration: BoxDecoration(
-              color: AppTheme.primaryLight.withValues(alpha: 0.1),
+              color: colorScheme.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.notifications_active_rounded,
               size: 64.0,
-              color: AppTheme.primaryLight,
+              color: colorScheme.primary,
             ),
           ),
           const SizedBox(height: 32.0),
@@ -315,7 +323,7 @@ class _AzanSelectionPage extends StatelessWidget {
             l10n.azanSettings,
             textAlign: TextAlign.center,
             style: GoogleFonts.amiri(
-              color: AppTheme.textPrimary,
+              color: colorScheme.onSurface,
               fontSize: 28.0,
               fontWeight: FontWeight.w700,
             ),
@@ -324,9 +332,9 @@ class _AzanSelectionPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: AppTheme.surfaceLight,
+              color: theme.cardTheme.color ?? colorScheme.surface,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.cardBorder),
+              border: Border.all(color: colorScheme.outline),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -336,8 +344,8 @@ class _AzanSelectionPage extends StatelessWidget {
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.w600,
                     color: isAzanEnabled
-                        ? AppTheme.accent
-                        : AppTheme.textSecondary,
+                        ? colorScheme.secondary
+                        : (textTheme.bodyMedium?.color ?? colorScheme.onSurface.withValues(alpha: 0.7)),
                   ),
                 ),
                 CustomToggle(
@@ -426,7 +434,7 @@ class _AzanSelectionPage extends StatelessWidget {
                     },
               icon: const Icon(Icons.play_circle_filled_rounded),
               label: Text(l10n.testAzan),
-              style: TextButton.styleFrom(foregroundColor: AppTheme.accent),
+              style: TextButton.styleFrom(foregroundColor: colorScheme.secondary),
             ),
           ],
         ],
@@ -470,19 +478,23 @@ class _SettingsDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: AppTheme.surfaceLight,
+          color: theme.cardTheme.color ?? colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.cardBorder),
+          border: Border.all(color: colorScheme.outline),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: AppTheme.accent),
+            Icon(icon, size: 20, color: colorScheme.secondary),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -492,7 +504,7 @@ class _SettingsDropdown extends StatelessWidget {
                     label,
                     style: GoogleFonts.outfit(
                       fontSize: 12,
-                      color: AppTheme.textSecondary,
+                      color: textTheme.bodyMedium?.color ?? colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                   ),
                   Text(
@@ -500,7 +512,7 @@ class _SettingsDropdown extends StatelessWidget {
                     style: GoogleFonts.outfit(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: AppTheme.textPrimary,
+                      color: colorScheme.onSurface,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -508,10 +520,10 @@ class _SettingsDropdown extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.refresh_rounded,
               size: 20,
-              color: AppTheme.textSecondary,
+              color: textTheme.bodyMedium?.color ?? colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ],
         ),
@@ -535,12 +547,16 @@ class _SettingsDropdownSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceLight,
+        color: theme.cardTheme.color ?? colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.cardBorder),
+        border: Border.all(color: colorScheme.outline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -551,7 +567,7 @@ class _SettingsDropdownSelector extends StatelessWidget {
               label,
               style: GoogleFonts.outfit(
                 fontSize: 12,
-                color: AppTheme.textSecondary,
+                color: textTheme.bodyMedium?.color ?? colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
           ),
@@ -559,9 +575,9 @@ class _SettingsDropdownSelector extends StatelessWidget {
             child: DropdownButton<String>(
               value: options.containsKey(value) ? value : options.keys.first,
               isExpanded: true,
-              icon: const Icon(
+              icon: Icon(
                 Icons.keyboard_arrow_down_rounded,
-                color: AppTheme.accent,
+                color: colorScheme.secondary,
               ),
               items: options.entries.map((e) {
                 return DropdownMenuItem(
@@ -598,6 +614,10 @@ class _QadaSelectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(24.0, 40.0, 24.0, bottomPadding),
       child: Column(
@@ -605,13 +625,13 @@ class _QadaSelectionPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(32.0),
             decoration: BoxDecoration(
-              color: AppTheme.primaryLight.withValues(alpha: 0.1),
+              color: colorScheme.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.check_circle_outline_rounded,
               size: 64.0,
-              color: AppTheme.primaryLight,
+              color: colorScheme.primary,
             ),
           ),
           const SizedBox(height: 32.0),
@@ -619,7 +639,7 @@ class _QadaSelectionPage extends StatelessWidget {
             l10n.qadaOnboardingTitle,
             textAlign: TextAlign.center,
             style: GoogleFonts.amiri(
-              color: AppTheme.textPrimary,
+              color: colorScheme.onSurface,
               fontSize: 28.0,
               fontWeight: FontWeight.w700,
             ),
@@ -629,7 +649,7 @@ class _QadaSelectionPage extends StatelessWidget {
             l10n.qadaOnboardingDesc,
             textAlign: TextAlign.center,
             style: GoogleFonts.outfit(
-              color: AppTheme.textSecondary,
+              color: textTheme.bodyMedium?.color ?? colorScheme.onSurface.withValues(alpha: 0.7),
               fontSize: 16.0,
               height: 1.5,
             ),
@@ -638,9 +658,9 @@ class _QadaSelectionPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: AppTheme.surfaceLight,
+              color: theme.cardTheme.color ?? colorScheme.surface,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.cardBorder),
+              border: Border.all(color: colorScheme.outline),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -649,7 +669,9 @@ class _QadaSelectionPage extends StatelessWidget {
                   isEnabled ? l10n.enableQada : l10n.disableQada,
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.w600,
-                    color: isEnabled ? AppTheme.accent : AppTheme.textSecondary,
+                    color: isEnabled
+                        ? colorScheme.secondary
+                        : (textTheme.bodyMedium?.color ?? colorScheme.onSurface.withValues(alpha: 0.7)),
                   ),
                 ),
                 CustomToggle(value: isEnabled, onChanged: onChanged),
@@ -677,6 +699,10 @@ class _OnboardingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(24.0, 40.0, 24.0, bottomPadding),
       child: Column(
@@ -684,17 +710,17 @@ class _OnboardingPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(32.0),
             decoration: BoxDecoration(
-              color: AppTheme.primaryLight.withValues(alpha: 0.1),
+              color: colorScheme.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 64.0, color: AppTheme.primaryLight),
+            child: Icon(icon, size: 64.0, color: colorScheme.primary),
           ),
           const SizedBox(height: 32.0),
           Text(
             title,
             textAlign: TextAlign.center,
             style: GoogleFonts.amiri(
-              color: AppTheme.textPrimary,
+              color: colorScheme.onSurface,
               fontSize: 28.0,
               fontWeight: FontWeight.w700,
             ),
@@ -704,7 +730,7 @@ class _OnboardingPage extends StatelessWidget {
             description,
             textAlign: TextAlign.center,
             style: GoogleFonts.outfit(
-              color: AppTheme.textSecondary,
+              color: textTheme.bodyMedium?.color ?? colorScheme.onSurface.withValues(alpha: 0.7),
               fontSize: 16.0,
               height: 1.5,
             ),

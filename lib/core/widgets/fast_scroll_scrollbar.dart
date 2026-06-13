@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fard/core/theme/app_theme.dart';
 
 class FastScrollScrollbar extends StatefulWidget {
   final ScrollController scrollController;
@@ -96,15 +95,16 @@ class _FastScrollScrollbarState extends State<FastScrollScrollbar> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final isLight = theme.brightness == Brightness.light;
 
     // Use more vibrant colors for better visibility
     final trackColor = isLight
-        ? AppTheme.textSecondary.withValues(alpha: 0.3)
-        : AppTheme.textSecondary.withValues(alpha: 0.2);
+        ? colorScheme.outline.withValues(alpha: 0.3)
+        : colorScheme.outline.withValues(alpha: 0.2);
     final thumbColor = _isDragging
-        ? theme.primaryColor
-        : theme.primaryColor.withValues(alpha: 0.85);
+        ? colorScheme.primary
+        : colorScheme.primary.withValues(alpha: 0.85);
     final thumbWidth = _isDragging ? 10.0 : 8.0;
 
     return Positioned(
@@ -147,12 +147,12 @@ class _FastScrollScrollbarState extends State<FastScrollScrollbar> {
                       color: thumbColor,
                       borderRadius: BorderRadius.circular(5),
                       border: Border.all(
-                        color: AppTheme.textPrimary.withValues(alpha: 0.3),
+                        color: colorScheme.onPrimary.withValues(alpha: 0.3),
                         width: 1.5,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: theme.primaryColor.withValues(
+                          color: colorScheme.primary.withValues(
                             alpha: _isDragging ? 0.5 : 0.3,
                           ),
                           blurRadius: _isDragging ? 12 : 8,
@@ -185,7 +185,7 @@ class _FastScrollScrollbarState extends State<FastScrollScrollbar> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: theme.primaryColor.withValues(alpha: 0.3),
+                          color: colorScheme.primary.withValues(alpha: 0.3),
                           width: 1.5,
                         ),
                       ),

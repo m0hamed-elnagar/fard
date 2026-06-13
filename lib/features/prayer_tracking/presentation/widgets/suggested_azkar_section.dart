@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/core/theme/app_theme.dart';
 import 'package:fard/core/theme/app_colors.dart';
 
 import '../../../settings/domain/azkar_reminder.dart';
@@ -220,15 +219,15 @@ class SuggestedAzkarSection extends StatelessWidget {
                                           SnackBar(
                                             content: Text(l10n.resetSuccessful),
                                             backgroundColor:
-                                                AppTheme.primaryLight,
+                                                Theme.of(context).colorScheme.primary,
                                             behavior: SnackBarBehavior.floating,
                                           ),
                                         );
                                       },
                                       child: Text(
                                         l10n.yes,
-                                        style: const TextStyle(
-                                          color: AppTheme.missed,
+                                        style: TextStyle(
+                                          color: Theme.of(context).colorScheme.error,
                                         ),
                                       ),
                                     ),

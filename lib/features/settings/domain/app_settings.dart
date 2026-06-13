@@ -55,7 +55,7 @@ class AppSettings {
     this.salaahSettings = const [],
     this.isQadaEnabled = true,
     this.hijriAdjustment = 0,
-    this.themePresetId = 'emerald',
+    this.themePresetId = 'antique',
     this.customThemeColors,
     this.audioQuality = AudioQuality.low64,
     this.isAudioPlayerExpanded = false,

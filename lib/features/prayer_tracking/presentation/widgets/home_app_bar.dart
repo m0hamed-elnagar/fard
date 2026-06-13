@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
-import 'package:fard/core/theme/app_theme.dart';
 
 class HomeAppBar extends StatelessWidget {
   final DateTime selectedDate;
@@ -35,7 +34,7 @@ class HomeAppBar extends StatelessWidget {
                   child: Text(
                     l10n.appName,
                     style: GoogleFonts.amiri(
-                      color: AppTheme.textPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 22.0,
                       fontWeight: FontWeight.w700,
                     ),
@@ -45,16 +44,16 @@ class HomeAppBar extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.location_on_rounded,
                         size: 14,
-                        color: AppTheme.accent,
+                        color: Theme.of(context).colorScheme.secondary,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         cityName!,
-                        style: const TextStyle(
-                          color: AppTheme.textSecondary,
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyMedium?.color ?? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                           fontSize: 12.0,
                           fontWeight: FontWeight.w500,
                         ),
@@ -67,7 +66,7 @@ class HomeAppBar extends StatelessWidget {
             Text(
               DateFormat.yMMMMEEEEd(locale).format(selectedDate),
               style: GoogleFonts.outfit(
-                color: AppTheme.textSecondary,
+                color: Theme.of(context).textTheme.bodyMedium?.color ?? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                 fontSize: 14.0,
                 fontWeight: FontWeight.w400,
               ),
@@ -75,7 +74,7 @@ class HomeAppBar extends StatelessWidget {
             Text(
               hijriDate,
               style: GoogleFonts.amiri(
-                color: AppTheme.accent,
+                color: Theme.of(context).colorScheme.secondary,
                 fontSize: 18.0,
                 fontWeight: FontWeight.w500,
               ),
@@ -94,16 +93,16 @@ class HomeAppBar extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 4.0),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.location_off_rounded,
                         size: 14,
-                        color: AppTheme.missed,
+                        color: Theme.of(context).colorScheme.error,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         l10n.locationNotSet,
-                        style: const TextStyle(
-                          color: AppTheme.missed,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
                           fontSize: 12.0,
                           fontWeight: FontWeight.w500,
                           decoration: TextDecoration.underline,

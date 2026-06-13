@@ -114,6 +114,7 @@ abstract final class ThemePresets {
         onError: AppTheme.textPrimary,
         outline: preset.cardBorderColor,
         surfaceContainer: preset.surfaceColor,
+        surfaceContainerHighest: preset.surfaceLightColor,
       ),
       textTheme: GoogleFonts.outfitTextTheme(
         TextTheme(

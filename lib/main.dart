@@ -219,7 +219,7 @@ class _MaterialAppWithReactiveTheme extends StatefulWidget {
 class _MaterialAppWithReactiveThemeState
     extends State<_MaterialAppWithReactiveTheme> {
   final _themeObserver = ThemeUpdateObserver();
-  ThemeData _theme = ThemePresets.buildThemeData(ThemePresets.emerald);
+  ThemeData _theme = ThemePresets.buildThemeData(ThemePresets.antique);
   Locale _locale = const Locale('ar');
   ThemeState? _pendingThemeState;
 
