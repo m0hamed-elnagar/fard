@@ -98,6 +98,10 @@ void main() {
           >(),
     ).thenReturn(mockAndroidPlugin);
     
+    when(
+      () => mockAndroidPlugin.canScheduleExactNotifications(),
+    ).thenAnswer((_) async => true);
+    
     when(() => mockChannelManager.createNotificationChannels(any(), settings: any(named: 'settings')))
         .thenAnswer((_) async {});
         

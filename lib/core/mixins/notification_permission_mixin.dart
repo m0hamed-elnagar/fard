@@ -12,10 +12,8 @@ mixin NotificationPermissionMixin {
     final notificationService = getIt<NotificationService>();
 
     final isEnabled = await notificationService.areNotificationsEnabled();
-    final canSchedule = await notificationService
-        .canScheduleExactNotifications();
 
-    if (isEnabled && canSchedule) {
+    if (isEnabled) {
       return true;
     }
 

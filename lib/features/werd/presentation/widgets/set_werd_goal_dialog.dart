@@ -519,8 +519,6 @@ class _SetWerdGoalDialogState extends State<SetWerdGoalDialog> {
   }
 
   Widget _buildStepButton(IconData icon, VoidCallback onPressed, {Key? key}) {
-    // ignore: avoid_print
-    print('DEBUG: Building button with key: $key');
     return Material(
       key: key,
       color: context.secondaryColor.withValues(alpha: 0.1),

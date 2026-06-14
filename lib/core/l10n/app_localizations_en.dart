@@ -979,6 +979,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get alarmAdded => 'Alarm added';
 
   @override
+  String get alarmUpdated => 'Alarm updated';
+
+  @override
+  String get alarmRemoved => 'Alarm removed';
+
+  @override
+  String get activeReminders => 'Active Reminders';
+
+  @override
   String get readyToPlay => 'Ready to play';
 
   @override

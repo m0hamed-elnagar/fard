@@ -471,6 +471,9 @@ class _TasbihPageItem extends StatelessWidget {
                                       ? state.currentCategory.countsPerCycle
                                       : (currentDhikr?.targetCount ?? 33)),
                               size: counterSize,
+                              onTap: () => context
+                                  .read<TasbihBloc>()
+                                  .add(const TasbihEvent.increment()),
                             ),
                             if (!state.showCompletionDua)
                               Positioned(

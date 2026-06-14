@@ -115,6 +115,9 @@ void main() {
           >(),
     ).thenReturn(mockAndroidPlugin);
     when(
+      () => mockAndroidPlugin.canScheduleExactNotifications(),
+    ).thenAnswer((_) async => true);
+    when(
       () => mockChannelManager.createNotificationChannels(
         any(),
         settings: any(named: 'settings'),
@@ -271,6 +274,53 @@ void main() {
         matchDateTimeComponents: any(named: 'matchDateTimeComponents'),
       ),
     ).called(2);
+  });
+
+  test('schedulePrayerNotifications uses inexactAllowWhileIdle when exact alarms are not permitted', () async {
+    when(() => mockAndroidPlugin.canScheduleExactNotifications()).thenAnswer((_) async => false);
+    when(() => mockSettingsRepository.latitude).thenReturn(30.0);
+    when(() => mockSettingsRepository.longitude).thenReturn(31.0);
+    when(() => mockSettingsRepository.calculationMethod).thenReturn('muslim_league');
+    when(() => mockSettingsRepository.madhab).thenReturn('shafi');
+    when(() => mockSettingsRepository.salaahSettings).thenReturn(
+      Salaah.values
+          .map(
+            (s) => SalaahSettings(
+              salaah: s,
+              isAzanEnabled: true,
+              isReminderEnabled: false,
+            ),
+          )
+          .toList(),
+    );
+
+    final now = DateTime.now().toUtc();
+    when(
+      () => mockPrayerTimeService.getPrayerTimes(
+        latitude: any(named: 'latitude'),
+        longitude: any(named: 'longitude'),
+        method: any(named: 'method'),
+        madhab: any(named: 'madhab'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(MockPrayerTimes());
+
+    when(
+      () => mockPrayerTimeService.getTimeForSalaah(any(), any()),
+    ).thenReturn(now.add(const Duration(hours: 1)));
+
+    await scheduler.schedulePrayerNotifications(mockNotificationsPlugin);
+
+    verify(
+      () => mockNotificationsPlugin.zonedSchedule(
+        id: any(named: 'id', that: greaterThanOrEqualTo(200)),
+        title: any(named: 'title'),
+        body: any(named: 'body'),
+        scheduledDate: any(named: 'scheduledDate'),
+        notificationDetails: any(named: 'notificationDetails'),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      ),
+    ).called(15);
   });
 }
 

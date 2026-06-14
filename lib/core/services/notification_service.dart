@@ -195,9 +195,7 @@ class NotificationService {
         'Permissions result: Notifications=$notificationGranted, Alarms=$alarmGranted',
       );
 
-      final granted = notificationGranted && alarmGranted;
-
-      if (granted) {
+      if (notificationGranted) {
         // Re-create channels to ensure they are properly registered now that we have permission
         await ensureInitialized();
         await _channelManager.createNotificationChannels(
@@ -206,7 +204,7 @@ class NotificationService {
         );
       }
 
-      return granted;
+      return notificationGranted;
     } else {
       // iOS / Other platforms
       final notificationStatus = await Permission.notification.request();

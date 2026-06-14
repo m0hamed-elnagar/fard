@@ -614,13 +614,21 @@ class PrayerNotificationScheduler {
       ),
     );
 
+    final androidPlugin = notificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+    final bool canScheduleExact =
+        await androidPlugin?.canScheduleExactNotifications() ?? false;
+
     await notificationsPlugin.zonedSchedule(
       id: id,
       title: _applyRtl(title),
       body: _applyRtl('أقم الصلاة يرحمك الله'),
       scheduledDate: scheduledDate,
       notificationDetails: platformChannelSpecifics,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: canScheduleExact
+          ? AndroidScheduleMode.exactAllowWhileIdle
+          : AndroidScheduleMode.inexactAllowWhileIdle,
     );
   }
 

@@ -254,7 +254,16 @@ class _AzkarSectionState extends State<AzkarSection>
               size: 20,
               color: context.errorColor,
             ),
-            onPressed: () => cubit.removeReminder(index),
+            onPressed: () {
+              cubit.removeReminder(index);
+              final l10n = AppLocalizations.of(context)!;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(l10n.alarmRemoved),
+                  backgroundColor: context.errorColor,
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -362,8 +371,20 @@ class _AzkarSectionState extends State<AzkarSection>
                         );
                         if (index == null) {
                           cubit.addReminder(newReminder);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(l10n.alarmAdded),
+                              backgroundColor: context.secondaryColor,
+                            ),
+                          );
                         } else {
                           cubit.updateReminder(index, newReminder);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(l10n.alarmUpdated),
+                              backgroundColor: context.secondaryColor,
+                            ),
+                          );
                         }
                         Navigator.pop(context);
                       },

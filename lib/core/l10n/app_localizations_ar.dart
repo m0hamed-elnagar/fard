@@ -976,6 +976,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get alarmAdded => 'تمت إضافة التنبيه';
 
   @override
+  String get alarmUpdated => 'تم تحديث التنبيه';
+
+  @override
+  String get alarmRemoved => 'تم حذف التنبيه';
+
+  @override
+  String get activeReminders => 'التذكيرات النشطة';
+
+  @override
   String get readyToPlay => 'جاهز للتشغيل';
 
   @override

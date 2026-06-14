@@ -259,11 +259,17 @@ class _AzkarListScreenState extends State<AzkarListScreen> {
                                 Stack(
                                   alignment: Alignment.center,
                                   children: [
-                                    _buildAzkarCounterCircle(
-                                      count: item.currentCount,
-                                      target: item.count,
-                                      isCompleted: isCompleted,
-                                      size: counterSize,
+                                    GestureDetector(
+                                      onTap: isCompleted
+                                          ? null
+                                          : () => _incrementCounter(context, item),
+                                      behavior: HitTestBehavior.opaque,
+                                      child: _buildAzkarCounterCircle(
+                                        count: item.currentCount,
+                                        target: item.count,
+                                        isCompleted: isCompleted,
+                                        size: counterSize,
+                                      ),
                                     ),
                                   ],
                                 ),

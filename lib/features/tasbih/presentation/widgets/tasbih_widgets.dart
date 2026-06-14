@@ -7,6 +7,7 @@ class CounterCircle extends StatefulWidget {
   final int targetCount;
   final Color? color;
   final double size;
+  final VoidCallback? onTap;
 
   const CounterCircle({
     super.key,
@@ -14,6 +15,7 @@ class CounterCircle extends StatefulWidget {
     required this.targetCount,
     this.color,
     this.size = 240,
+    this.onTap,
   });
 
   @override
@@ -24,7 +26,7 @@ class _CounterCircleState extends State<CounterCircle> {
   @override
   Widget build(BuildContext context) {
     final color = widget.color ?? context.primaryContainerColor;
-    return Stack(
+    final child = Stack(
       alignment: Alignment.center,
       children: [
         SizedBox(
@@ -63,6 +65,15 @@ class _CounterCircleState extends State<CounterCircle> {
         ),
       ],
     );
+
+    if (widget.onTap != null) {
+      return GestureDetector(
+        onTap: widget.onTap,
+        behavior: HitTestBehavior.opaque,
+        child: child,
+      );
+    }
+    return child;
   }
 }
 

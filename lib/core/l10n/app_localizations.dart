@@ -1898,6 +1898,24 @@ abstract class AppLocalizations {
   /// **'Alarm added'**
   String get alarmAdded;
 
+  /// No description provided for @alarmUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Alarm updated'**
+  String get alarmUpdated;
+
+  /// No description provided for @alarmRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Alarm removed'**
+  String get alarmRemoved;
+
+  /// No description provided for @activeReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Reminders'**
+  String get activeReminders;
+
   /// No description provided for @readyToPlay.
   ///
   /// In en, this message translates to:

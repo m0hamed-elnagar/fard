@@ -77,6 +77,8 @@ void main() {
     registerFallbackValue(MockSettingsRepository());
   });
 
+  int mockPermissionStatus = 1;
+
   setUp(() async {
     mockNotificationsPlugin = MockFlutterLocalNotificationsPlugin();
     mockAndroidPlugin = MockAndroidFlutterLocalNotificationsPlugin();
@@ -86,6 +88,7 @@ void main() {
     mockWidgetUpdateService = MockWidgetUpdateService();
     mockSettingsRepository = MockSettingsRepository();
     mockSharedPreferences = MockSharedPreferences();
+    mockPermissionStatus = 1;
 
     // Mock SharedPreferences
     when(() => mockSharedPreferences.getString(any())).thenReturn(null);
@@ -155,6 +158,22 @@ void main() {
       return null;
     });
 
+    // Mock permission_handler MethodChannel
+    const MethodChannel permissionChannel =
+        MethodChannel('flutter.baseflow.com/permissions/methods');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(permissionChannel, (MethodCall methodCall) async {
+      if (methodCall.method == 'requestPermissions') {
+        final List<dynamic> permissions = methodCall.arguments;
+        final map = <int, int>{};
+        for (final p in permissions) {
+          map[p as int] = mockPermissionStatus;
+        }
+        return map;
+      }
+      return null;
+    });
+
     await notificationService.init();
   });
 
@@ -189,5 +208,25 @@ void main() {
         ).called(1);
       },
     );
+
+    test('requestPermissions returns notificationGranted status even if exact alarms fail', () async {
+      when(() => mockAndroidPlugin.requestNotificationsPermission()).thenAnswer((_) async => true);
+      when(() => mockAndroidPlugin.requestExactAlarmsPermission()).thenAnswer((_) async => false);
+      mockPermissionStatus = 1;
+
+      final result = await notificationService.requestPermissions();
+
+      expect(result, isTrue);
+    });
+
+    test('requestPermissions returns false if notification permission is denied', () async {
+      when(() => mockAndroidPlugin.requestNotificationsPermission()).thenAnswer((_) async => false);
+      when(() => mockAndroidPlugin.requestExactAlarmsPermission()).thenAnswer((_) async => true);
+      mockPermissionStatus = 0;
+
+      final result = await notificationService.requestPermissions();
+
+      expect(result, isFalse);
+    });
   });
 }

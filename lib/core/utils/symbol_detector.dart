@@ -24,24 +24,12 @@ class SymbolDetectorService {
     await _ensureInitialized();
     final Set<String> detectedIds = {};
 
-    // Log mapping size for debugging
-    print(
-      'SymbolDetector: Scanning text length ${ayahText.length}. Map size: ${_symbolMap!.length}',
-    );
-
     for (final rune in ayahText.runes) {
       final character = String.fromCharCode(rune);
       if (_symbolMap!.containsKey(character)) {
         final symbolId = _symbolMap![character]!;
         detectedIds.add(symbolId);
-        print(
-          'SymbolDetector: Match found! Character: $character (U+${rune.toRadixString(16).padLeft(4, '0')}) -> ID: $symbolId',
-        );
       }
-    }
-
-    if (detectedIds.isEmpty) {
-      print('SymbolDetector: No symbols detected in text: "$ayahText"');
     }
 
     return detectedIds.toList();

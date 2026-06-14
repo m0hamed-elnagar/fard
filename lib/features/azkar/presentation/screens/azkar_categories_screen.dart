@@ -9,6 +9,8 @@ import 'package:fard/core/theme/app_colors.dart';
 import '../blocs/azkar_bloc.dart';
 import 'azkar_list_screen.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/core/widgets/custom_toggle.dart';
+import 'package:fard/core/mixins/notification_permission_mixin.dart';
 
 class AzkarCategoriesScreen extends StatefulWidget {
   const AzkarCategoriesScreen({super.key});
@@ -17,7 +19,7 @@ class AzkarCategoriesScreen extends StatefulWidget {
   State<AzkarCategoriesScreen> createState() => _AzkarCategoriesScreenState();
 }
 
-class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
+class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> with NotificationPermissionMixin {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   bool _isSearching = false;
@@ -82,6 +84,28 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
               ),
         centerTitle: false,
         actions: [
+          BlocBuilder<DailyRemindersCubit, DailyRemindersState>(
+            builder: (context, settingsState) {
+              final hasActive = settingsState.reminders.isNotEmpty;
+              return Badge(
+                isLabelVisible: hasActive,
+                backgroundColor: context.secondaryColor,
+                smallSize: 10,
+                alignment: const Alignment(0.5, -0.5),
+                child: IconButton(
+                  key: const Key('azkar_reminders_badge_button'),
+                  icon: Icon(
+                    hasActive
+                        ? Icons.notifications_active_rounded
+                        : Icons.notifications_none_rounded,
+                    color: hasActive ? context.secondaryColor : null,
+                  ),
+                  tooltip: l10n.activeReminders,
+                  onPressed: () => _showAllRemindersBottomSheet(context, settingsState),
+                ),
+              );
+            },
+          ),
           IconButton(
             key: const Key('azkar_search_button'),
             icon: Icon(_isSearching ? Icons.close : Icons.search),
@@ -237,12 +261,10 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                 morningTime = _parseTime(settingsState.morningAzkarTime, now);
                 eveningTime = _parseTime(settingsState.eveningAzkarTime, now);
 
-                return ListView.builder(
+                return ListView(
                   key: const Key('azkar_categories_list'),
                   padding: const EdgeInsets.all(16),
-                  itemCount: filteredCategories.length,
-                  itemBuilder: (context, index) {
-                    final category = filteredCategories[index];
+                  children: filteredCategories.map((category) {
                     final isRecommended = _checkIsRecommended(
                       category,
                       now,
@@ -254,14 +276,185 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
                       key: Key('category_$category'),
                       category: category,
                       isRecommended: isRecommended,
+                      allReminders: settingsState.reminders,
                     );
-                  },
+                  }).toList(),
                 );
               },
             ),
           );
         },
       ),
+    );
+  }
+
+  void _showAllRemindersBottomSheet(
+    BuildContext context,
+    DailyRemindersState settingsState,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final cubit = context.read<DailyRemindersCubit>();
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      backgroundColor: context.surfaceContainerColor,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.only(
+            top: 8,
+            left: 16,
+            right: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+          ),
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: BlocBuilder<DailyRemindersCubit, DailyRemindersState>(
+            builder: (context, state) {
+              return Column(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: context.outlineColor.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.notifications_active_rounded,
+                        color: context.secondaryColor,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        l10n.activeReminders,
+                        style: GoogleFonts.amiri(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Divider(),
+                  Expanded(
+                    child: state.reminders.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.notifications_none_rounded,
+                                  size: 64,
+                                  color: context.onSurfaceVariantColor.withValues(alpha: 0.4),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  l10n.localeName == 'ar'
+                                      ? 'لا توجد تذكيرات نشطة'
+                                      : 'No active reminders',
+                                  style: TextStyle(
+                                    color: context.onSurfaceVariantColor,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            itemCount: state.reminders.length,
+                            itemBuilder: (context, index) {
+                              final reminder = state.reminders[index];
+                              return Column(
+                                children: [
+                                  ListTile(
+                                    contentPadding: EdgeInsets.zero,
+                                    title: Text(
+                                      reminder.title.isNotEmpty ? reminder.title : reminder.category,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        color: reminder.isEnabled
+                                            ? context.onSurfaceColor
+                                            : context.onSurfaceVariantColor,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      TimeUtils.formatTo12Hour(reminder.time),
+                                      style: TextStyle(
+                                        color: context.secondaryColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        CustomToggle(
+                                          value: reminder.isEnabled,
+                                          onChanged: (val) async {
+                                            if (val) {
+                                              final granted = await checkAndRequestNotificationPermissions(
+                                                context,
+                                              );
+                                              if (!granted) return;
+                                            }
+                                            cubit.toggleReminder(index);
+                                          },
+                                        ),
+                                        const SizedBox(width: 8),
+                                        IconButton(
+                                          icon: Icon(
+                                            Icons.edit_outlined,
+                                            size: 20,
+                                            color: context.onSurfaceVariantColor,
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                            _showAddReminderDialog(
+                                              context,
+                                              reminder.category,
+                                              index: index,
+                                              reminder: reminder,
+                                            );
+                                          },
+                                        ),
+                                        IconButton(
+                                          icon: Icon(
+                                            Icons.delete_outline,
+                                            size: 20,
+                                            color: context.errorColor,
+                                          ),
+                                          onPressed: () {
+                                            cubit.removeReminder(index);
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text(l10n.alarmRemoved),
+                                                backgroundColor: context.errorColor,
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (index < state.reminders.length - 1)
+                                    const Divider(),
+                                ],
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -298,12 +491,17 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> {
   }
 }
 
-void _showAddReminderDialog(BuildContext context, String category) {
+void _showAddReminderDialog(
+  BuildContext context,
+  String category, {
+  int? index,
+  AzkarReminder? reminder,
+}) {
   final cubit = context.read<DailyRemindersCubit>();
   final l10n = AppLocalizations.of(context)!;
 
-  String selectedTime = '05:00';
-  String customTitle = category;
+  String selectedTime = reminder?.time ?? '05:00';
+  String customTitle = reminder?.title ?? category;
 
   showDialog(
     context: context,
@@ -311,7 +509,10 @@ void _showAddReminderDialog(BuildContext context, String category) {
       return StatefulBuilder(
         builder: (context, setDialogState) {
           return AlertDialog(
-            title: Text(l10n.addAlarm, style: GoogleFonts.amiri()),
+            title: Text(
+              index == null ? l10n.addAlarm : l10n.editReminder,
+              style: GoogleFonts.amiri(),
+            ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -373,6 +574,23 @@ void _showAddReminderDialog(BuildContext context, String category) {
               ],
             ),
             actions: [
+              if (index != null)
+                TextButton(
+                  onPressed: () {
+                    cubit.removeReminder(index);
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(l10n.alarmRemoved),
+                        backgroundColor: context.errorColor,
+                      ),
+                    );
+                  },
+                  child: Text(
+                    l10n.delete,
+                    style: TextStyle(color: context.errorColor),
+                  ),
+                ),
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text(
@@ -382,21 +600,30 @@ void _showAddReminderDialog(BuildContext context, String category) {
               ),
               ElevatedButton(
                 onPressed: () {
-                  cubit.addReminder(
-                    AzkarReminder(
-                      category: category,
-                      time: selectedTime,
-                      title: customTitle,
-                      isEnabled: true,
-                    ),
+                  final newReminder = AzkarReminder(
+                    category: category,
+                    time: selectedTime,
+                    title: customTitle,
+                    isEnabled: reminder?.isEnabled ?? true,
                   );
+                  if (index == null) {
+                    cubit.addReminder(newReminder);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(l10n.alarmAdded),
+                        backgroundColor: context.secondaryColor,
+                      ),
+                    );
+                  } else {
+                    cubit.updateReminder(index, newReminder);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(l10n.alarmUpdated),
+                        backgroundColor: context.secondaryColor,
+                      ),
+                    );
+                  }
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(l10n.alarmAdded),
-                      backgroundColor: context.secondaryColor,
-                    ),
-                  );
                 },
                 child: Text(l10n.yes),
               ),
@@ -431,39 +658,134 @@ Future<String?> _selectTime(BuildContext context, String currentTime) async {
 class _CategoryCard extends StatelessWidget {
   final String category;
   final bool isRecommended;
+  final List<AzkarReminder> allReminders;
 
   const _CategoryCard({
     super.key,
     required this.category,
     this.isRecommended = false,
+    required this.allReminders,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final categoryReminders = allReminders
+        .where((r) => r.category == category)
+        .toList();
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: isRecommended ? 4 : 1,
+      elevation: 0.0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: isRecommended
-            ? BorderSide(color: context.secondaryColor, width: 2)
-            : const BorderSide(color: Colors.transparent),
+        borderRadius: BorderRadius.circular(24),
+        side: BorderSide(
+          color: isRecommended ? context.secondaryColor : context.outlineColor,
+          width: isRecommended ? 1.5 : 1.0,
+        ),
       ),
       color: isRecommended
           ? context.secondaryColor.withValues(alpha: 0.05)
           : null,
-      child: Stack(
-        children: [
-          Material(
-            color: Colors.transparent,
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
-              title: Text(
+      child: Material(
+        color: Colors.transparent,
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 4,
+          ),
+          leading: categoryReminders.isEmpty
+              ? IconButton(
+                  icon: Icon(
+                    Icons.notifications_none_rounded,
+                    color: context.onSurfaceVariantColor.withValues(alpha: 0.5),
+                  ),
+                  onPressed: () => _showAddReminderDialog(context, category),
+                  tooltip: l10n.addAlarm,
+                )
+              : Builder(
+                  builder: (context) {
+                    final primaryReminder = categoryReminders.first;
+                    final extraCount = categoryReminders.length - 1;
+                    final timeStr = TimeUtils.formatTo12Hour(primaryReminder.time);
+                    final displayStr = extraCount > 0 ? '$timeStr (+$extraCount)' : timeStr;
+                    final globalIndex = allReminders.indexWhere((r) =>
+                        r.category == primaryReminder.category &&
+                        r.time == primaryReminder.time &&
+                        r.title == primaryReminder.title);
+
+                    return InkWell(
+                      onTap: () {
+                        _showAddReminderDialog(
+                          context,
+                          category,
+                          index: globalIndex,
+                          reminder: primaryReminder,
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: primaryReminder.isEnabled
+                              ? context.secondaryColor.withValues(alpha: 0.12)
+                              : context.surfaceContainerHighestColor,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: primaryReminder.isEnabled
+                                ? context.secondaryColor.withValues(alpha: 0.3)
+                                : context.outlineColor.withValues(alpha: 0.15),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              primaryReminder.isEnabled
+                                  ? Icons.notifications_active_rounded
+                                  : Icons.notifications_off_rounded,
+                              size: 14,
+                              color: primaryReminder.isEnabled
+                                  ? context.secondaryColor
+                                  : context.onSurfaceVariantColor,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              displayStr,
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: primaryReminder.isEnabled
+                                      ? context.secondaryColor
+                                      : context.onSurfaceVariantColor,
+                                ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isRecommended) ...[
+                Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: context.secondaryColor.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.star_rounded,
+                    color: context.secondaryColor,
+                    size: 14,
+                  ),
+                ),
+              ],
+              Text(
                 category,
                 style: GoogleFonts.amiri(
                   fontSize: 18,
@@ -472,81 +794,22 @@ class _CategoryCard extends StatelessWidget {
                 ),
                 textAlign: TextAlign.right,
               ),
-              subtitle: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton.icon(
-                    onPressed: () => _showAddReminderDialog(context, category),
-                    icon: Icon(
-                      Icons.alarm_add_rounded,
-                      size: 16,
-                      color: context.secondaryColor,
-                    ),
-                    label: Text(
-                      l10n.addAlarm,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: context.secondaryColor,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              trailing: Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: isRecommended ? context.secondaryColor : null,
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AzkarListScreen(category: category),
-                  ),
-                );
-              },
-            ),
+            ],
           ),
-          if (isRecommended)
-            Positioned(
-              left: 12,
-              top: 0,
-              bottom: 0,
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: context.secondaryColor,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '★',
-                        style: TextStyle(
-                          color: context.theme.colorScheme.onSecondary,
-                          fontSize: 10,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        AppLocalizations.of(context)!.recommended,
-                        style: TextStyle(
-                          color: context.theme.colorScheme.onSecondary,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+          trailing: Icon(
+            Icons.arrow_forward_ios,
+            size: 16,
+            color: isRecommended ? context.secondaryColor : context.onSurfaceVariantColor.withValues(alpha: 0.5),
+          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AzkarListScreen(category: category),
               ),
-            ),
-        ],
+            );
+          },
+        ),
       ),
     );
   }

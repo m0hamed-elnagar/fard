@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
 import 'package:fard/features/quran/domain/models/quran_symbol.dart';
@@ -29,7 +30,7 @@ class QuranSymbolsRepositoryImpl implements QuranSymbolsRepository {
             .toList(),
       );
     } catch (e, stack) {
-      print('Error in getCategorizedSymbols: $e\n$stack');
+      debugPrint('Error in getCategorizedSymbols: $e\n$stack');
       return CategorizedSymbols(
         waqfSymbols: [],
         tajweedSymbols: [],
@@ -44,7 +45,7 @@ class QuranSymbolsRepositoryImpl implements QuranSymbolsRepository {
       final symbols = await _loadAll();
       return symbols.where((s) => ids.contains(s.id)).toList();
     } catch (e) {
-      print('Error in getSymbolsByIds: $e');
+      debugPrint('Error in getSymbolsByIds: $e');
       return [];
     }
   }
@@ -77,12 +78,12 @@ class QuranSymbolsRepositoryImpl implements QuranSymbolsRepository {
       }
 
       _cachedSymbols = all;
-      print(
+      debugPrint(
         'QuranSymbolsRepository: Loaded ${all.length} symbols successfully',
       );
       return all;
     } catch (e, stack) {
-      print('QuranSymbolsRepository: Failed to load JSON: $e\n$stack');
+      debugPrint('QuranSymbolsRepository: Failed to load JSON: $e\n$stack');
       rethrow;
     }
   }
