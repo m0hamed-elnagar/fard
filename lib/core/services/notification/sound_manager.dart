@@ -9,9 +9,7 @@ import 'package:path_provider/path_provider.dart';
 
 @singleton
 class SoundManager {
-  static const MethodChannel _channel = MethodChannel(
-    'com.khwarizmi.fard/widget_theme',
-  );
+  MethodChannel get _channel => MethodChannel(AppIdentifiers.widgetThemeChannelName);
 
   /// Resolves a sound string (key or path) into a platform-appropriate URI.
   Future<String?> getSoundUriForChannel(String sound) async {
@@ -92,6 +90,18 @@ class SoundManager {
         final String fallbackUri =
             'content://$authority/external_azan/$fileName';
         debugPrint('SoundManager: FALLBACK Android Content URI: $fallbackUri');
+
+        // Grant permissions via the native channel for the fallback URI
+        try {
+          await _channel.invokeMethod<void>(
+            'grantUriPermission',
+            {'uri': fallbackUri},
+          );
+          debugPrint('SoundManager: Granted URI permission for fallback URI: $fallbackUri');
+        } catch (e) {
+          debugPrint('SoundManager: Error granting URI permission for fallback URI: $e');
+        }
+
         return fallbackUri;
       }
     } catch (e) {

@@ -31,7 +31,7 @@ class _AdhanSectionState extends State<AdhanSection>
     return BlocBuilder<AdhanCubit, AdhanState>(
       builder: (context, state) {
         final cubit = context.read<AdhanCubit>();
-        final bool allAzanEnabled = state.salaahSettings.every(
+        final bool anyAzanEnabled = state.salaahSettings.any(
           (s) => s.isAzanEnabled,
         );
         final String? commonVoice = _getCommonVoice(state.salaahSettings);
@@ -102,7 +102,7 @@ class _AdhanSectionState extends State<AdhanSection>
               ),
             _buildToggleItem(
               title: l10n.enableAzan,
-              value: allAzanEnabled,
+              value: anyAzanEnabled,
               onChanged: (val) async {
                 if (val && notificationsDisabled) {
                   if (!context.mounted) return;
@@ -116,7 +116,7 @@ class _AdhanSectionState extends State<AdhanSection>
               },
               context: context,
             ),
-            if (allAzanEnabled) ...[
+            if (anyAzanEnabled) ...[
               const SizedBox(height: 16),
               _buildVoiceDropdown(context, commonVoice, l10n, (val) {
                 cubit.updateAllAzanSound(val);

@@ -253,8 +253,10 @@ class NotificationService {
             AndroidFlutterLocalNotificationsPlugin
           >();
       return await androidPlugin?.areNotificationsEnabled() ?? false;
+    } else if (Platform.isIOS) {
+      return await Permission.notification.isGranted;
     }
-    return true; // iOS handles this differently or via request
+    return true;
   }
 
   Future<bool> canScheduleExactNotifications() async {
