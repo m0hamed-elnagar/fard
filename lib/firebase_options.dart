@@ -38,7 +38,7 @@ class DefaultFirebaseOptions {
         : '1:892116958938:android:a07b337d341a813e38efe3'; // Fard Release (+ Benchmark)
 
     return FirebaseOptions(
-      apiKey: 'AIzaSyBD2Wly4VlTh73f6b8Vgzd_K6pEIuv5fO0',
+      apiKey: const String.fromEnvironment('FIREBASE_API_KEY'),
       appId: appId,
       messagingSenderId: '892116958938',
       projectId: 'fard-6b8a0',

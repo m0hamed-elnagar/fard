@@ -422,11 +422,14 @@ class SettingsRepositoryImpl implements SettingsRepository {
     salaahSettings.map((s) => s.copyWith(afterSalaahAzkarMinutes: v)).toList(),
   );
 
-  Future<void> _saveSalaah(List<SalaahSettings> list) => _storage.writeJsonList(
-    SettingsKeys.salaahSettings,
-    list,
-    (s) => s.toJson(),
-  );
+  Future<void> _saveSalaah(List<SalaahSettings> list) async {
+    _salaahSettingsCache = list;
+    await _storage.writeJsonList(
+      SettingsKeys.salaahSettings,
+      list,
+      (s) => s.toJson(),
+    );
+  }
 
   @override
   Future<void> updateThemePreset(String presetId) async {
