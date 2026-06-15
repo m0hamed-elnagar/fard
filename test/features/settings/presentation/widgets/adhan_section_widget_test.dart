@@ -1,15 +1,13 @@
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/voice_download_service.dart';
-import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/core/widgets/custom_toggle.dart';
 import 'package:fard/core/widgets/fard_list_tile.dart';
+import 'package:fard/features/prayer_tracking/domain/salaah.dart';
+import 'package:fard/features/settings/domain/salaah_settings.dart';
 import 'package:fard/features/settings/presentation/blocs/adhan_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/adhan_state.dart';
 import 'package:fard/features/settings/presentation/widgets/adhan_section.dart';
-import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
-import 'package:fard/features/settings/domain/salaah_settings.dart';
-import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
