@@ -82,17 +82,6 @@ void main() {
     expect(find.text('Fajr'), findsOneWidget);
     expect(find.text('Dhuhr'), findsOneWidget);
 
-    // 2. Simulate toggling off Fajr
-    // Dhuhr, Asr, Maghrib, Isha are still true.
-    final updatedSettings = initialSettings.map((s) {
-      if (s.salaah == Salaah.fajr) {
-        return s.copyWith(isAzanEnabled: false);
-      }
-      return s;
-    }).toList();
-
-    final updatedState = state.copyWith(salaahSettings: updatedSettings);
-
     // When toggled, AdhanCubit should call updateSalaahSettings
     when(() => mockAdhanCubit.updateSalaahSettings(any())).thenAnswer((_) async {});
 

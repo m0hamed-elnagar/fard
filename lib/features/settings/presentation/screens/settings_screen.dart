@@ -183,11 +183,11 @@ class _SettingsScreenState extends State<SettingsScreen>
             // Section 4: Azkar
             const AzkarSection(),
 
-            // Section 5: General
-            const GeneralSection(),
-
-            // Section 6: Data & Location
+            // Section 5: Data & Location
             const DataAndLocationSection(),
+
+            // Section 6: General (App Global Settings)
+            const GeneralSection(),
 
             // Debug: Widget Refresh Section (only in debug mode)
             if (!kReleaseMode) ...[_buildDebugWidgetSection(context, l10n)],

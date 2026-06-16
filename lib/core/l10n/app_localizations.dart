@@ -1220,6 +1220,66 @@ abstract class AppLocalizations {
   /// **'General App Settings'**
   String get generalSettings;
 
+  /// No description provided for @aboutApp.
+  ///
+  /// In en, this message translates to:
+  /// **'About Fard'**
+  String get aboutApp;
+
+  /// No description provided for @aboutAppDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn more about Fard and its developer'**
+  String get aboutAppDesc;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @privacyPolicyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Read our privacy commitments'**
+  String get privacyPolicyDesc;
+
+  /// No description provided for @aboutAppTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About Fard'**
+  String get aboutAppTitle;
+
+  /// No description provided for @aboutAppMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Fard is an Islamic utility app designed for tracking missed prayers (Qada), reading Quran, Azkar, and Tasbih, focusing on privacy and premium user experience.'**
+  String get aboutAppMessage;
+
+  /// No description provided for @developedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Developed by Mohamed Elnagar'**
+  String get developedBy;
+
+  /// No description provided for @contactUs.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Us'**
+  String get contactUs;
+
+  /// No description provided for @contactDevHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact the developer for feedback or support:'**
+  String get contactDevHint;
+
+  /// No description provided for @whatsapp.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp'**
+  String get whatsapp;
+
   /// No description provided for @exactAlarmWarningTitle.
   ///
   /// In en, this message translates to:
@@ -1657,6 +1717,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rotate phone until the arrow points up'**
   String get rotatePhoneForQibla;
+
+  /// No description provided for @qiblaCalibrationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compass Calibration'**
+  String get qiblaCalibrationTitle;
+
+  /// No description provided for @qiblaCalibrationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'For accurate Qibla direction, please calibrate your compass by moving your phone in a figure-8 (infinity ♾️) pattern several times.'**
+  String get qiblaCalibrationDesc;
+
+  /// No description provided for @qiblaCalibrationTipTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips for better accuracy:'**
+  String get qiblaCalibrationTipTitle;
+
+  /// No description provided for @qiblaCalibrationTip1.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep away from electronic devices, magnets, or metallic surfaces.'**
+  String get qiblaCalibrationTip1;
+
+  /// No description provided for @qiblaCalibrationTip2.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold your phone flat and horizontal parallel to the ground.'**
+  String get qiblaCalibrationTip2;
 
   /// No description provided for @previousSurah.
   ///

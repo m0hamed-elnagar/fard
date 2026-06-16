@@ -607,6 +607,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generalSettings => 'General App Settings';
 
   @override
+  String get aboutApp => 'About Fard';
+
+  @override
+  String get aboutAppDesc => 'Learn more about Fard and its developer';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get privacyPolicyDesc => 'Read our privacy commitments';
+
+  @override
+  String get aboutAppTitle => 'About Fard';
+
+  @override
+  String get aboutAppMessage =>
+      'Fard is an Islamic utility app designed for tracking missed prayers (Qada), reading Quran, Azkar, and Tasbih, focusing on privacy and premium user experience.';
+
+  @override
+  String get developedBy => 'Developed by Mohamed Elnagar';
+
+  @override
+  String get contactUs => 'Contact Us';
+
+  @override
+  String get contactDevHint => 'Contact the developer for feedback or support:';
+
+  @override
+  String get whatsapp => 'WhatsApp';
+
+  @override
   String get exactAlarmWarningTitle => 'Warning: Azan may not work accurately';
 
   @override
@@ -848,6 +879,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rotatePhoneForQibla => 'Rotate phone until the arrow points up';
+
+  @override
+  String get qiblaCalibrationTitle => 'Compass Calibration';
+
+  @override
+  String get qiblaCalibrationDesc =>
+      'For accurate Qibla direction, please calibrate your compass by moving your phone in a figure-8 (infinity ♾️) pattern several times.';
+
+  @override
+  String get qiblaCalibrationTipTitle => 'Tips for better accuracy:';
+
+  @override
+  String get qiblaCalibrationTip1 =>
+      'Keep away from electronic devices, magnets, or metallic surfaces.';
+
+  @override
+  String get qiblaCalibrationTip2 =>
+      'Hold your phone flat and horizontal parallel to the ground.';
 
   @override
   String get previousSurah => 'Previous Surah';

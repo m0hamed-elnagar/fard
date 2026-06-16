@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fard/core/di/injection.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class QiblaScreen extends StatefulWidget {
   const QiblaScreen({super.key});
@@ -18,6 +20,27 @@ class QiblaScreen extends StatefulWidget {
 }
 
 class _QiblaScreenState extends State<QiblaScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkCalibrationOnboarding();
+    });
+  }
+
+  void _checkCalibrationOnboarding() {
+    if (Platform.isWindows) return;
+
+    final prefs = getIt<SharedPreferences>();
+    final hasSeen = prefs.getBool('has_seen_qibla_calibration_onboarding') ?? false;
+
+    if (!hasSeen) {
+      final l10n = AppLocalizations.of(context)!;
+      _showCalibrationDialog(context, l10n);
+      prefs.setBool('has_seen_qibla_calibration_onboarding', true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -63,6 +86,13 @@ class _QiblaScreenState extends State<QiblaScreen> {
           style: GoogleFonts.amiri(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.help_outline_rounded),
+            tooltip: l10n.qiblaCalibrationTitle,
+            onPressed: () => _showCalibrationDialog(context, l10n),
+          ),
+        ],
       ),
       body: BlocBuilder<LocationPrayerCubit, LocationPrayerState>(
         builder: (context, state) {
@@ -200,9 +230,23 @@ class _QiblaScreenState extends State<QiblaScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      l10n.rotatePhoneForQibla,
-                      style: TextStyle(color: context.onSurfaceVariantColor),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          l10n.rotatePhoneForQibla,
+                          style: TextStyle(color: context.onSurfaceVariantColor),
+                        ),
+                        const SizedBox(width: 6),
+                        GestureDetector(
+                          onTap: () => _showCalibrationDialog(context, l10n),
+                          child: Icon(
+                            Icons.help_outline_rounded,
+                            size: 18,
+                            color: context.primaryColor,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -210,6 +254,105 @@ class _QiblaScreenState extends State<QiblaScreen> {
             },
           );
         },
+      ),
+    );
+  }
+
+  void _showCalibrationDialog(BuildContext context, AppLocalizations l10n) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.compass_calibration_rounded,
+                color: Theme.of(context).colorScheme.primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Text(
+              l10n.qiblaCalibrationTitle,
+              style: GoogleFonts.amiri(
+                fontWeight: FontWeight.bold,
+                fontSize: 22,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.qiblaCalibrationDesc,
+              style: const TextStyle(fontSize: 14, height: 1.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.qiblaCalibrationTipTitle,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.sensors_off_rounded,
+                  size: 18,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.qiblaCalibrationTip1,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.screen_rotation_rounded,
+                  size: 18,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.qiblaCalibrationTip2,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              MaterialLocalizations.of(context).closeButtonLabel,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'package:fard/core/widgets/custom_toggle.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/voice_download_service.dart';
@@ -154,5 +155,63 @@ void main() {
     await tester.tap(dataLocationFinder);
     await tester.pumpAndSettle();
     expect(find.text('London'), findsOneWidget);
+  });
+
+  testWidgets('toggles Qada tracker in general settings section', (
+    WidgetTester tester,
+  ) async {
+    when(() => mockDailyRemindersCubit.toggleQadaEnabled()).thenAnswer((_) => {});
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    // 1. Scroll to the General section card
+    final generalSettingsFinder = find.text('General App Settings');
+    await tester.scrollUntilVisible(
+      generalSettingsFinder,
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(generalSettingsFinder);
+    await tester.pumpAndSettle();
+
+    // 2. Find Qada Tracker toggle and tap it
+    final qadaTrackerTextFinder = find.text('Missed Prayers Tracker');
+    expect(qadaTrackerTextFinder, findsOneWidget);
+    
+    // Tap the CustomToggle widget (which contains GestureDetector)
+    final toggleFinder = find.byType(CustomToggle);
+    expect(toggleFinder, findsOneWidget);
+    await tester.tap(toggleFinder);
+    await tester.pumpAndSettle();
+
+    verify(() => mockDailyRemindersCubit.toggleQadaEnabled()).called(1);
+  });
+
+  testWidgets('shows About Fard dialog and contact hint', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    // 1. Scroll to the General section card
+    final generalSettingsFinder = find.text('General App Settings');
+    await tester.scrollUntilVisible(
+      generalSettingsFinder,
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(generalSettingsFinder);
+    await tester.pumpAndSettle();
+
+    // 2. Find and tap About Fard tile
+    final aboutFardFinder = find.text('About Fard');
+    expect(aboutFardFinder, findsWidgets);
+    await tester.tap(aboutFardFinder.last);
+    await tester.pumpAndSettle();
+
+    // 3. Verify dialog is shown with contact developer hint
+    expect(find.text('Contact the developer for feedback or support:'), findsOneWidget);
+    expect(find.byTooltip('WhatsApp'), findsOneWidget);
   });
 }

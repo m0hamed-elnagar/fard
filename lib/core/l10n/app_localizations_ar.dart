@@ -605,6 +605,37 @@ class AppLocalizationsAr extends AppLocalizations {
   String get generalSettings => 'إعدادات التطبيق العامة';
 
   @override
+  String get aboutApp => 'عن فرض';
+
+  @override
+  String get aboutAppDesc => 'تعرف على المزيد حول تطبيق فرض والمطور';
+
+  @override
+  String get privacyPolicy => 'سياسة الخصوصية';
+
+  @override
+  String get privacyPolicyDesc => 'اقرأ التزاماتنا المتعلقة بالخصوصية';
+
+  @override
+  String get aboutAppTitle => 'عن فرض';
+
+  @override
+  String get aboutAppMessage =>
+      'فرض هو تطبيق إسلامي مصمم لتتبع الصلوات الفائتة (القضاء)، وقراءة القرآن، والأذكار، والتسبيح، مع التركيز على الخصوصية وتجربة مستخدم متميزة.';
+
+  @override
+  String get developedBy => 'تطوير محمد النجار';
+
+  @override
+  String get contactUs => 'تواصل معنا';
+
+  @override
+  String get contactDevHint => 'تواصل مع المطور للملاحظات أو الدعم:';
+
+  @override
+  String get whatsapp => 'واتساب';
+
+  @override
   String get exactAlarmWarningTitle => 'تحذير: الأذان قد لا يعمل بدقة';
 
   @override
@@ -846,6 +877,24 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get rotatePhoneForQibla => 'قم بتدوير الهاتف حتى يشير السهم للأعلى';
+
+  @override
+  String get qiblaCalibrationTitle => 'معايرة البوصلة';
+
+  @override
+  String get qiblaCalibrationDesc =>
+      'للحصول على اتجاه دقيق للقبلة، يرجى معايرة البوصلة عن طريق تحريك هاتفك في الهواء على شكل رقم 8 (علامة المالانهاية ♾️) عدة مرات.';
+
+  @override
+  String get qiblaCalibrationTipTitle => 'نصائح لدقة أفضل:';
+
+  @override
+  String get qiblaCalibrationTip1 =>
+      'ابتعد عن الأجهزة الإلكترونية، أو المغناطيس، أو الأسطح المعدنية.';
+
+  @override
+  String get qiblaCalibrationTip2 =>
+      'احرص على إبقاء هاتفك مستوياً وأفقياً موازياً للأرض.';
 
   @override
   String get previousSurah => 'السورة السابقة';
