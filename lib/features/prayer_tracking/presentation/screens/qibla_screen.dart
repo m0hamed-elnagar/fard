@@ -297,6 +297,10 @@ class _QiblaScreenState extends State<QiblaScreen> {
               style: const TextStyle(fontSize: 14, height: 1.5),
             ),
             const SizedBox(height: 16),
+            const Center(
+              child: AnimatedInfinity(),
+            ),
+            const SizedBox(height: 16),
             Text(
               l10n.qiblaCalibrationTipTitle,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
@@ -370,5 +374,152 @@ class _QiblaScreenState extends State<QiblaScreen> {
       default:
         return '';
     }
+  }
+}
+
+class AnimatedInfinity extends StatefulWidget {
+  const AnimatedInfinity({super.key});
+
+  @override
+  State<AnimatedInfinity> createState() => _AnimatedInfinityState();
+}
+
+class _AnimatedInfinityState extends State<AnimatedInfinity>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return CustomPaint(
+          size: const Size(200, 100),
+          painter: InfinityPainter(
+            progress: _controller.value,
+            pathColor: primaryColor,
+            dotColor: primaryColor,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class InfinityPainter extends CustomPainter {
+  final double progress;
+  final Color pathColor;
+  final Color dotColor;
+
+  InfinityPainter({
+    required this.progress,
+    required this.pathColor,
+    required this.dotColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = pathColor.withValues(alpha: 0.2)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+
+    final path = Path();
+    final width = size.width;
+    final height = size.height;
+    final cx = width / 2;
+    final cy = height / 2;
+    final double scale = width * 0.45;
+
+    bool first = true;
+    for (double t = 0; t <= 2 * pi + 0.05; t += 0.05) {
+      final double denom = 1 + sin(t) * sin(t);
+      final double x = cx + (scale * cos(t)) / denom;
+      final double y = cy + (scale * sin(t) * cos(t)) / denom;
+      if (first) {
+        path.moveTo(x, y);
+        first = false;
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+    canvas.drawPath(path, paint);
+
+    final double t = progress * 2 * pi;
+    final double denom = 1 + sin(t) * sin(t);
+    final double dotX = cx + (scale * cos(t)) / denom;
+    final double dotY = cy + (scale * sin(t) * cos(t)) / denom;
+
+    final dotPaint = Paint()
+      ..color = dotColor
+      ..style = PaintingStyle.fill;
+
+    final shadowPaint = Paint()
+      ..color = dotColor.withValues(alpha: 0.4)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+
+    const rectWidth = 24.0;
+    const rectHeight = 14.0;
+
+    canvas.save();
+    canvas.translate(dotX, dotY);
+
+    final double nextT = t + 0.05;
+    final double nextDenom = 1 + sin(nextT) * sin(nextT);
+    final double nextX = cx + (scale * cos(nextT)) / nextDenom;
+    final double nextY = cy + (scale * sin(nextT) * cos(nextT)) / nextDenom;
+    final double angle = atan2(nextY - dotY, nextX - dotX);
+    canvas.rotate(angle);
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: Offset.zero, width: rectWidth, height: rectHeight),
+        const Radius.circular(3),
+      ),
+      shadowPaint,
+    );
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: Offset.zero, width: rectWidth, height: rectHeight),
+        const Radius.circular(3),
+      ),
+      dotPaint,
+    );
+
+    final innerPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.8)
+      ..style = PaintingStyle.fill;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: Offset.zero, width: rectWidth - 6, height: rectHeight - 4),
+        const Radius.circular(1.5),
+      ),
+      innerPaint,
+    );
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant InfinityPainter oldDelegate) {
+    return oldDelegate.progress != progress;
   }
 }
