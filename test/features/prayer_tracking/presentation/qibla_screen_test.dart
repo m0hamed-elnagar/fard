@@ -38,24 +38,27 @@ void main() {
     when(() => mockPrefs.setBool(any(), any())).thenAnswer((_) async => true);
   });
 
-  Widget createWidgetUnderTest() {
+  Widget createWidgetUnderTest({bool isActive = false}) {
     return BlocProvider<LocationPrayerCubit>.value(
       value: mockLocationPrayerCubit,
       child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('en'),
-        home: const QiblaScreen(),
+        home: QiblaScreen(isActive: isActive),
       ),
     );
   }
 
   testWidgets('renders Qibla screen on Windows', (WidgetTester tester) async {
-    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpWidget(createWidgetUnderTest(isActive: true));
     await tester.pumpAndSettle();
 
     expect(find.text('Qibla'), findsOneWidget);
     expect(find.text('Compass is not supported on this platform'), findsOneWidget);
     expect(find.text('Please use the mobile app for Qibla direction'), findsOneWidget);
+    
+    // On Windows, the onboarding calibration should be skipped immediately
+    verifyNever(() => mockPrefs.getBool('has_seen_qibla_calibration_onboarding'));
   });
 }

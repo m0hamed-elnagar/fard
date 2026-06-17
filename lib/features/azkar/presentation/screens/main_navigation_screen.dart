@@ -21,9 +21,7 @@ class MainNavigationScreen extends StatefulWidget {
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  List<Widget>? _screens;
   int _selectedIndex = 0;
-  Locale? _lastLocale;
 
   @override
   void initState() {
@@ -34,27 +32,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     });
   }
 
-  void _initScreens() {
-    _screens = [
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    final screens = [
       HomeScreen(showAddQadaOnStart: widget.showAddQadaOnStart),
       const QuranPage(),
       const AzkarCategoriesScreen(),
       const TasbihPage(),
-      const QiblaScreen(),
+      QiblaScreen(isActive: _selectedIndex == 4),
       const SettingsScreen(),
     ];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final currentLocale = Localizations.localeOf(context);
-
-    // Re-initialize screens if locale changed to ensure they pick up new translations
-    if (_screens == null || _lastLocale != currentLocale) {
-      _initScreens();
-      _lastLocale = currentLocale;
-    }
 
     return BlocListener<PrayerTrackerBloc, PrayerTrackerState>(
       listenWhen: (previous, current) =>
@@ -67,7 +56,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         body: Column(
           children: [
             Expanded(
-              child: IndexedStack(index: _selectedIndex, children: _screens!),
+              child: IndexedStack(index: _selectedIndex, children: screens),
             ),
             const AudioPlayerBar(),
           ],

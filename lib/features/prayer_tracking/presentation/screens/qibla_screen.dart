@@ -13,7 +13,12 @@ import 'package:fard/core/di/injection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class QiblaScreen extends StatefulWidget {
-  const QiblaScreen({super.key});
+  final bool isActive;
+
+  const QiblaScreen({
+    super.key,
+    this.isActive = false,
+  });
 
   @override
   State<QiblaScreen> createState() => _QiblaScreenState();
@@ -23,9 +28,21 @@ class _QiblaScreenState extends State<QiblaScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkCalibrationOnboarding();
-    });
+    if (widget.isActive) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _checkCalibrationOnboarding();
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant QiblaScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive && !oldWidget.isActive) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _checkCalibrationOnboarding();
+      });
+    }
   }
 
   void _checkCalibrationOnboarding() {
