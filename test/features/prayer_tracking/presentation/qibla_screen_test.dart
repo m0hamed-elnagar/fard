@@ -34,7 +34,7 @@ void main() {
     );
     when(() => mockLocationPrayerCubit.stream).thenAnswer((_) => const Stream.empty());
     
-    when(() => mockPrefs.getBool('has_seen_qibla_calibration_onboarding')).thenReturn(true);
+    when(() => mockPrefs.getBool('has_seen_qibla_calibration_v2')).thenReturn(true);
     when(() => mockPrefs.setBool(any(), any())).thenAnswer((_) async => true);
   });
 
@@ -59,6 +59,6 @@ void main() {
     expect(find.text('Please use the mobile app for Qibla direction'), findsOneWidget);
     
     // On Windows, the onboarding calibration should be skipped immediately
-    verifyNever(() => mockPrefs.getBool('has_seen_qibla_calibration_onboarding'));
+    verifyNever(() => mockPrefs.getBool('has_seen_qibla_calibration_v2'));
   });
 }

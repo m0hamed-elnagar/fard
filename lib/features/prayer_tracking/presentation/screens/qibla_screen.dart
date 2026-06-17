@@ -49,12 +49,12 @@ class _QiblaScreenState extends State<QiblaScreen> {
     if (Platform.isWindows) return;
 
     final prefs = getIt<SharedPreferences>();
-    final hasSeen = prefs.getBool('has_seen_qibla_calibration_onboarding') ?? false;
+    final hasSeen = prefs.getBool('has_seen_qibla_calibration_v2') ?? false;
 
     if (!hasSeen) {
       final l10n = AppLocalizations.of(context)!;
       _showCalibrationDialog(context, l10n);
-      prefs.setBool('has_seen_qibla_calibration_onboarding', true);
+      prefs.setBool('has_seen_qibla_calibration_v2', true);
     }
   }
 
