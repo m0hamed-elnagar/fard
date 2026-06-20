@@ -7,8 +7,12 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/extensions/number_extension.dart';
 import 'package:fard/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
+import 'package:fard/core/services/location_service.dart';
 
 class PrayerTimesCard extends StatefulWidget {
   final PrayerTimes? prayerTimes;
@@ -30,11 +34,45 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
   Timer? _timer;
   String _countdown = '';
   Salaah? _nextSalaah;
+  bool _isRefreshing = false;
 
   @override
   void initState() {
     super.initState();
     _startTimer();
+  }
+
+  Future<void> _refreshLocation() async {
+    if (_isRefreshing) return;
+    HapticFeedback.mediumImpact();
+    setState(() {
+      _isRefreshing = true;
+    });
+    try {
+      final cubit = context.read<LocationPrayerCubit>();
+      await cubit.refreshLocation();
+      if (mounted) {
+        final state = cubit.state;
+        if (state.lastLocationStatus == LocationStatus.success && state.cityName != null) {
+          final l10n = AppLocalizations.of(context)!;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.locationUpdatedSuccess(state.cityName!)),
+              backgroundColor: context.secondaryColor,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error refreshing location: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRefreshing = false;
+        });
+      }
+    }
   }
 
   @override
@@ -206,41 +244,72 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                               ],
                             ),
                           ),
-                          if (widget.cityName != null)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: context.outlineColor.withValues(
-                                  alpha: 0.5,
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: _refreshLocation,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
                                 ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.location_on,
-                                    size: 12,
-                                    color: context.secondaryColor,
+                                decoration: BoxDecoration(
+                                  color: context.outlineColor.withValues(
+                                    alpha: 0.5,
                                   ),
-                                  const SizedBox(width: 4),
-                                  Flexible(
-                                    child: Text(
-                                      widget.cityName!,
-                                      style: TextStyle(
-                                        color: context.onSurfaceColor,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: context.outlineColor.withValues(
+                                      alpha: 0.3,
                                     ),
+                                    width: 1,
                                   ),
-                                ],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _isRefreshing
+                                        ? SizedBox(
+                                            width: 12,
+                                            height: 12,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 1.5,
+                                              valueColor: AlwaysStoppedAnimation<Color>(
+                                                context.secondaryColor,
+                                              ),
+                                            ),
+                                          )
+                                        : Icon(
+                                            Icons.refresh,
+                                            size: 11,
+                                            color: context.onSurfaceVariantColor.withValues(alpha: 0.6),
+                                          ),
+                                    const SizedBox(width: 6),
+                                    Flexible(
+                                      child: Text(
+                                        widget.cityName ?? l10n.locationNotSet,
+                                        style: TextStyle(
+                                          color: context.onSurfaceColor,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Icon(
+                                      widget.cityName != null
+                                          ? Icons.location_on
+                                          : Icons.location_off,
+                                      size: 12,
+                                      color: context.secondaryColor,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
+                          ),
                         ],
                       ),
                       const Spacer(flex: 2),

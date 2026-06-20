@@ -684,5 +684,13 @@
   "reminderType": "نوع التذكير",
   "beforeAzan": "قبل الأذان",
   "afterAzan": "بعد الأذان",
-  "offset": "المدة"
+  "offset": "المدة",
+  "locationUpdatedSuccess": "تم تحديث الموقع إلى {city}",
+  "@locationUpdatedSuccess": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  }
 }

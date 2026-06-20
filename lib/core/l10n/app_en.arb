@@ -684,5 +684,13 @@
   "reminderType": "Reminder Type",
   "beforeAzan": "Before Azan",
   "afterAzan": "After Azan",
-  "offset": "Offset"
+  "offset": "Offset",
+  "locationUpdatedSuccess": "Location updated to {city}",
+  "@locationUpdatedSuccess": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  }
 }
