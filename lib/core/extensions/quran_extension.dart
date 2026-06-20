@@ -35,7 +35,7 @@ class QuranHizbProvider {
     [16, 90],
     [17, 50],
     [18, 32],
-    [19, 22],
+    [19, 1],
     [20, 55],
     [21, 29],
     [22, 19],
@@ -170,7 +170,7 @@ class QuranHizbProvider {
     [13, 35],
     [14, 1],
     [14, 28],
-    [14, 53],
+    [15, 1],
     [15, 49],
     [16, 1],
     [16, 30],
@@ -188,6 +188,7 @@ class QuranHizbProvider {
     [18, 51],
     [18, 75],
     [18, 99],
+    [19, 1],
     [19, 22],
     [19, 59],
     [20, 1],
@@ -308,6 +309,8 @@ class QuranHizbProvider {
     [88, 1],
     [94, 1],
   ];
+
+  static int get rubStartsLength => _rubStarts.length;
 
   static final Map<int, int> _pageVerseCountMap = {};
   static final Map<int, int> _juzVerseCountMap = {};
