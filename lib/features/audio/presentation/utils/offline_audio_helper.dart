@@ -92,7 +92,7 @@ class OfflineAudioHelper {
         final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.manageRecitersDesc),
+            content: Text('${l10n.noInternetConnection}. ${l10n.manageRecitersDesc}'),
             action: SnackBarAction(
               label: l10n.downloadCenterBtn,
               onPressed: () {
