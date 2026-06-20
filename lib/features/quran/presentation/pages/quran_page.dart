@@ -265,24 +265,6 @@ class _QuranPageState extends State<QuranPage> {
 
             return Column(
               children: [
-                if (!isConnected)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 8,
-                      horizontal: 16,
-                    ),
-                    color: Colors.amber.shade700,
-                    child: Text(
-                      l10n.offlineModeBanner,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-
                 Expanded(
                   child: MultiBlocListener(
                     listeners: [
