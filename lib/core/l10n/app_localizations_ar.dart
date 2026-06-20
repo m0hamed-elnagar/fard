@@ -1665,4 +1665,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get offset => 'المدة';
+
+  @override
+  String locationUpdatedSuccess(String city) {
+    return 'تم تحديث الموقع إلى $city';
+  }
 }

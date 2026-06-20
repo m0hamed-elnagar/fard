@@ -1674,4 +1674,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get offset => 'Offset';
+
+  @override
+  String locationUpdatedSuccess(String city) {
+    return 'Location updated to $city';
+  }
 }

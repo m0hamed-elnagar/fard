@@ -9,6 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
+import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
+import 'package:fard/core/utils/location_dialog_helper.dart';
 
 class HomeScreen extends StatelessWidget {
   final bool showAddQadaOnStart;
@@ -109,102 +112,109 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return BlocConsumer<PrayerTrackerBloc, PrayerTrackerState>(
-      listener: (context, state) {
-        state.whenOrNull(
-          error: (message) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(message),
-                backgroundColor: colorScheme.error,
-              ),
-            );
-          },
-          missedDaysPrompt: (missedDates) {
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (_) => MissedDaysDialog(
-                missedDates: missedDates,
-                onResponse: (selectedDates) {
-                  context.read<PrayerTrackerBloc>().add(
-                    PrayerTrackerEvent.acknowledgeMissedDays(
-                      selectedDates: selectedDates,
-                    ),
-                  );
-                },
-              ),
-            );
-          },
-        );
-      },
-      builder: (context, state) {
-        return state.when(
-          loading: () => Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(
-                color: colorScheme.primary,
-                strokeWidth: 4.0,
-              ),
-            ),
-          ),
-          error: (message) => Scaffold(
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline_rounded,
-                    color: colorScheme.error,
-                    size: 48.0,
-                  ),
-                  const SizedBox(height: 16.0),
-                  Text(
-                    AppLocalizations.of(context)!.errorOccurred,
-                    style: GoogleFonts.amiri(
-                      color: colorScheme.onSurface,
-                      fontSize: 20.0,
-                    ),
-                  ),
-                  const SizedBox(height: 8.0),
-                  ElevatedButton(
-                    onPressed: () => context.read<PrayerTrackerBloc>().add(
-                      PrayerTrackerEvent.load(DateTime.now()),
-                    ),
-                    child: Text(AppLocalizations.of(context)!.retry),
-                  ),
-                ],
+    return BlocListener<LocationPrayerCubit, LocationPrayerState>(
+      listenWhen: (prev, curr) =>
+          curr.lastLocationStatus != null &&
+          curr.lastLocationStatus != prev.lastLocationStatus,
+      listener: (context, state) =>
+          LocationDialogHelper.showLocationStatusDialog(context, state.lastLocationStatus!),
+      child: BlocConsumer<PrayerTrackerBloc, PrayerTrackerState>(
+        listener: (context, state) {
+          state.whenOrNull(
+            error: (message) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(message),
+                  backgroundColor: colorScheme.error,
+                ),
+              );
+            },
+            missedDaysPrompt: (missedDates) {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) => MissedDaysDialog(
+                  missedDates: missedDates,
+                  onResponse: (selectedDates) {
+                    context.read<PrayerTrackerBloc>().add(
+                      PrayerTrackerEvent.acknowledgeMissedDays(
+                        selectedDates: selectedDates,
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        },
+        builder: (context, state) {
+          return state.when(
+            loading: () => Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(
+                  color: colorScheme.primary,
+                  strokeWidth: 4.0,
+                ),
               ),
             ),
-          ),
-          missedDaysPrompt: (_) => Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(
-                color: colorScheme.secondary,
-                strokeWidth: 4.0,
+            error: (message) => Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline_rounded,
+                      color: colorScheme.error,
+                      size: 48.0,
+                    ),
+                    const SizedBox(height: 16.0),
+                    Text(
+                      AppLocalizations.of(context)!.errorOccurred,
+                      style: GoogleFonts.amiri(
+                        color: colorScheme.onSurface,
+                        fontSize: 20.0,
+                      ),
+                    ),
+                    const SizedBox(height: 8.0),
+                    ElevatedButton(
+                      onPressed: () => context.read<PrayerTrackerBloc>().add(
+                        PrayerTrackerEvent.load(DateTime.now()),
+                      ),
+                      child: Text(AppLocalizations.of(context)!.retry),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          loaded:
-              (
-                selectedDate,
-                missedToday,
-                completedToday,
-                qadaStatus,
-                completedQadaToday,
-                monthRecords,
-                history,
-              ) => HomeContent(
-                selectedDate: selectedDate,
-                missedToday: missedToday,
-                completedToday: completedToday,
-                qadaStatus: qadaStatus,
-                completedQadaToday: completedQadaToday,
-                monthRecords: monthRecords,
-                history: history,
+            missedDaysPrompt: (_) => Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(
+                  color: colorScheme.secondary,
+                  strokeWidth: 4.0,
+                ),
               ),
-        );
-      },
+            ),
+            loaded:
+                (
+                  selectedDate,
+                  missedToday,
+                  completedToday,
+                  qadaStatus,
+                  completedQadaToday,
+                  monthRecords,
+                  history,
+                ) => HomeContent(
+                  selectedDate: selectedDate,
+                  missedToday: missedToday,
+                  completedToday: completedToday,
+                  qadaStatus: qadaStatus,
+                  completedQadaToday: completedQadaToday,
+                  monthRecords: monthRecords,
+                  history: history,
+                ),
+          );
+        },
+      ),
     );
   }
 }

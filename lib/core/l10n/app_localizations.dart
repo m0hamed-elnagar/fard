@@ -3139,6 +3139,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Offset'**
   String get offset;
+
+  /// No description provided for @locationUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Location updated to {city}'**
+  String locationUpdatedSuccess(String city);
 }
 
 class _AppLocalizationsDelegate
