@@ -67,7 +67,38 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   bool get isAfterSalahAzkarEnabled =>
-      _storage.readBool(SettingsKeys.afterSalahAzkarEnabled);
+      _storage.readBool(SettingsKeys.afterSalahAzkarEnabled, defaultValue: true);
+
+  @override
+  bool get isBeforeSalahReminderEnabled {
+    final hasBefore =
+        _storage.prefs.containsKey(SettingsKeys.isBeforeSalahReminderEnabled);
+    if (hasBefore) {
+      return _storage.readBool(
+        SettingsKeys.isBeforeSalahReminderEnabled,
+        defaultValue: false,
+      );
+    }
+    final oldType = _storage.readString(SettingsKeys.salahReminderType);
+    return oldType == 'before';
+  }
+
+  @override
+  bool get isAfterSalahReminderEnabled {
+    final hasAfter =
+        _storage.prefs.containsKey(SettingsKeys.isAfterSalahReminderEnabled);
+    if (hasAfter) {
+      return _storage.readBool(
+        SettingsKeys.isAfterSalahReminderEnabled,
+        defaultValue: true,
+      );
+    }
+    final oldType = _storage.readString(SettingsKeys.salahReminderType);
+    if (oldType == 'after' || oldType == null) {
+      return true;
+    }
+    return false;
+  }
 
   @override
   List<SalaahSettings> get salaahSettings {
@@ -228,7 +259,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   String get werdReminderTime => _storage.readString(
     SettingsKeys.werdReminderTime,
-    defaultValue: '20:00',
+    defaultValue: '08:00',
   )!;
 
   @override
@@ -556,6 +587,16 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<void> updatePrayerReminderType(PrayerReminderType type) async {
     await _storage.writeString(SettingsKeys.salahReminderType, type.name);
+  }
+
+  @override
+  Future<void> updateBeforeSalahReminderEnabled(bool enabled) async {
+    await _storage.writeBool(SettingsKeys.isBeforeSalahReminderEnabled, enabled);
+  }
+
+  @override
+  Future<void> updateAfterSalahReminderEnabled(bool enabled) async {
+    await _storage.writeBool(SettingsKeys.isAfterSalahReminderEnabled, enabled);
   }
 
   @override

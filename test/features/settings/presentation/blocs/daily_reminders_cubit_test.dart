@@ -37,6 +37,8 @@ void main() {
     when(
       () => mockRepo.prayerReminderType,
     ).thenReturn(PrayerReminderType.after);
+    when(() => mockRepo.isBeforeSalahReminderEnabled).thenReturn(false);
+    when(() => mockRepo.isAfterSalahReminderEnabled).thenReturn(true);
     when(() => mockRepo.enabledSalahReminders).thenReturn(<Salaah>{});
     when(() => mockRepo.isWerdReminderEnabled).thenReturn(false);
     when(() => mockRepo.werdReminderTime).thenReturn('04:00');
@@ -49,6 +51,12 @@ void main() {
     when(() => mockRepo.updateEveningAzkarTime(any())).thenAnswer((_) async {});
     when(
       () => mockRepo.updateSalahReminderEnabled(any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockRepo.updateBeforeSalahReminderEnabled(any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockRepo.updateAfterSalahReminderEnabled(any()),
     ).thenAnswer((_) async {});
     when(
       () => mockRepo.updateEnabledSalahReminders(any()),
@@ -102,6 +110,72 @@ void main() {
           expect(cubit.state.enabledSalahReminders, contains(Salaah.fajr));
           verify(() => mockRepo.updateSalahReminderEnabled(true)).called(1);
           verify(() => mockRepo.updateEnabledSalahReminders(any())).called(1);
+        },
+      );
+
+      test(
+        'toggleBeforeSalahReminder turns ON master switch if it is enabled',
+        () async {
+          expect(cubit.state.isSalahReminderEnabled, false);
+
+          cubit.toggleBeforeSalahReminder(true);
+          await Future.delayed(const Duration(milliseconds: 100));
+
+          expect(cubit.state.isBeforeSalahReminderEnabled, true);
+          expect(cubit.state.isSalahReminderEnabled, true);
+          verify(() => mockRepo.updateBeforeSalahReminderEnabled(true)).called(1);
+          verify(() => mockRepo.updateSalahReminderEnabled(true)).called(1);
+        },
+      );
+
+      test(
+        'toggleAfterSalahReminder turns ON master switch if it is enabled',
+        () async {
+          expect(cubit.state.isSalahReminderEnabled, false);
+
+          cubit.toggleAfterSalahReminder(true);
+          await Future.delayed(const Duration(milliseconds: 100));
+
+          expect(cubit.state.isAfterSalahReminderEnabled, true);
+          expect(cubit.state.isSalahReminderEnabled, true);
+          verify(() => mockRepo.updateAfterSalahReminderEnabled(true)).called(1);
+          verify(() => mockRepo.updateSalahReminderEnabled(true)).called(1);
+        },
+      );
+
+      test(
+        'disabling both before and after salah reminders turns OFF the master switch',
+        () async {
+          // Setup state where after salah is true (from repository setup, isAfterSalahReminderEnabled is true)
+          // Initially repository has isAfterSalahReminderEnabled = true but isSalahReminderEnabled = false
+          // So let's enable it fully first
+          cubit.toggleAfterSalahReminder(true);
+          await Future.delayed(const Duration(milliseconds: 100));
+          expect(cubit.state.isSalahReminderEnabled, true);
+
+          // Now disable after salah reminder
+          cubit.toggleAfterSalahReminder(false);
+          await Future.delayed(const Duration(milliseconds: 100));
+
+          expect(cubit.state.isBeforeSalahReminderEnabled, false);
+          expect(cubit.state.isAfterSalahReminderEnabled, false);
+          expect(cubit.state.isSalahReminderEnabled, false);
+          verify(() => mockRepo.updateSalahReminderEnabled(false)).called(1);
+        },
+      );
+
+      test(
+        'toggleAfterSalahAzkar turns ON master switch if it is enabled',
+        () async {
+          expect(cubit.state.isSalahReminderEnabled, false);
+
+          when(() => mockToggleAzkar.execute()).thenAnswer((_) async => true);
+          cubit.toggleAfterSalahAzkar();
+          await Future.delayed(const Duration(milliseconds: 100));
+
+          expect(cubit.state.isAfterSalahAzkarEnabled, true);
+          expect(cubit.state.isSalahReminderEnabled, true);
+          verify(() => mockRepo.updateSalahReminderEnabled(true)).called(1);
         },
       );
     });

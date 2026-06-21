@@ -143,6 +143,8 @@ void main() {
     );
     when(() => mockSettingsRepository.enabledSalahReminders).thenReturn({});
     when(() => mockSettingsRepository.isSalahReminderEnabled).thenReturn(false);
+    when(() => mockSettingsRepository.isBeforeSalahReminderEnabled).thenReturn(false);
+    when(() => mockSettingsRepository.isAfterSalahReminderEnabled).thenReturn(true);
     when(() => mockSettingsRepository.salahReminderOffsetMinutes).thenReturn(15);
 
     when(() => mockAzkarRepository.getAllAzkar()).thenAnswer((_) async => []);
@@ -225,15 +227,22 @@ void main() {
       ));
     });
 
-    test('Scenario: Post-Prayer Reminder Enabled for Maghrib Only', () async {
+    test('Scenario: After-Salah Azkar Enabled for Maghrib Only', () async {
       when(() => mockSettingsRepository.isSalahReminderEnabled).thenReturn(true);
+      when(() => mockSettingsRepository.isAfterSalahAzkarEnabled).thenReturn(true);
       when(() => mockSettingsRepository.enabledSalahReminders).thenReturn({Salaah.maghrib});
+      when(() => mockSettingsRepository.salaahSettings).thenReturn(
+        Salaah.values.map((s) => SalaahSettings(
+          salaah: s,
+          isAfterSalahAzkarEnabled: s == Salaah.maghrib,
+        )).toList()
+      );
 
       await scheduler.schedulePrayerNotifications(mockNotificationsPlugin);
 
-      // Maghrib is index 3. ID = 503.
+      // Maghrib is index 3. ID = 403.
       verify(() => mockNotificationsPlugin.zonedSchedule(
-        id: 503,
+        id: 403,
         title: any(named: 'title'),
         body: any(named: 'body'),
         scheduledDate: any(named: 'scheduledDate'),
@@ -245,6 +254,9 @@ void main() {
     });
 
     test('Scenario: Pre-Prayer Reminder Enabled for Dhuhr', () async {
+      when(() => mockSettingsRepository.isSalahReminderEnabled).thenReturn(true);
+      when(() => mockSettingsRepository.isBeforeSalahReminderEnabled).thenReturn(true);
+      when(() => mockSettingsRepository.enabledSalahReminders).thenReturn({Salaah.dhuhr});
       when(() => mockSettingsRepository.salaahSettings).thenReturn(
         Salaah.values.map((s) => SalaahSettings(
           salaah: s, 
@@ -269,7 +281,9 @@ void main() {
     });
 
     test('Scenario: After-Salah Azkar Enabled globally but disabled for Asr', () async {
+      when(() => mockSettingsRepository.isSalahReminderEnabled).thenReturn(true);
       when(() => mockSettingsRepository.isAfterSalahAzkarEnabled).thenReturn(true);
+      when(() => mockSettingsRepository.enabledSalahReminders).thenReturn(Salaah.values.toSet());
       when(() => mockSettingsRepository.salaahSettings).thenReturn(
         Salaah.values.map((s) => SalaahSettings(
           salaah: s, 

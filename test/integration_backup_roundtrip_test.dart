@@ -151,6 +151,10 @@ class FakeSettingsRepository implements SettingsRepository {
   @override
   PrayerReminderType get prayerReminderType => PrayerReminderType.after;
   @override
+  bool get isBeforeSalahReminderEnabled => false;
+  @override
+  bool get isAfterSalahReminderEnabled => true;
+  @override
   Set<Salaah> get enabledSalahReminders => {};
   @override
   bool get isWerdReminderEnabled => false;
@@ -232,6 +236,10 @@ class FakeSettingsRepository implements SettingsRepository {
   Future<void> updateSalahReminderOffset(int minutes) async {}
   @override
   Future<void> updatePrayerReminderType(PrayerReminderType type) async {}
+  @override
+  Future<void> updateBeforeSalahReminderEnabled(bool enabled) async {}
+  @override
+  Future<void> updateAfterSalahReminderEnabled(bool enabled) async {}
   @override
   Future<void> updateEnabledSalahReminders(Set<Salaah> enabledSalahs) async {}
   @override

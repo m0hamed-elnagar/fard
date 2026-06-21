@@ -141,7 +141,7 @@
   "enableReminder": "تفعيل التذكير",
   "qibla": "القبلة",
   "afterSalahAzkar": "الأذكار بعد الصلاة",
-  "afterSalahAzkarDesc": "تذكير لقراءة الأذكار بعد 15 دقيقة من الأذان",
+  "afterSalahAzkarDesc": "تنبيهك لقراءة أذكار ما بعد الصلاة بعد انقضاء الصلاة",
   "quran": "القرآن الكريم",
   "loadingQuran": "جاري تحميل القرآن...",
   "errorLoadingQuran": "خطأ في تحميل القرآن",

@@ -33,6 +33,8 @@ class AppSettings {
   final bool isSalahReminderEnabled;
   final int salahReminderOffsetMinutes;
   final PrayerReminderType prayerReminderType;
+  final bool isBeforeSalahReminderEnabled;
+  final bool isAfterSalahReminderEnabled;
   final Set<Salaah> enabledSalahReminders;
   final bool isWerdReminderEnabled;
   final String werdReminderTime;
@@ -50,7 +52,7 @@ class AppSettings {
     this.madhab = 'shafi',
     this.morningAzkarTime = '05:00',
     this.eveningAzkarTime = '18:00',
-    this.isAfterSalahAzkarEnabled = false,
+    this.isAfterSalahAzkarEnabled = true,
     this.reminders = const [],
     this.salaahSettings = const [],
     this.isQadaEnabled = true,
@@ -62,9 +64,11 @@ class AppSettings {
     this.isSalahReminderEnabled = false,
     this.salahReminderOffsetMinutes = 15,
     this.prayerReminderType = PrayerReminderType.after,
+    this.isBeforeSalahReminderEnabled = false,
+    this.isAfterSalahReminderEnabled = true,
     this.enabledSalahReminders = const {},
     this.isWerdReminderEnabled = false,
-    this.werdReminderTime = '20:00',
+    this.werdReminderTime = '08:00',
     this.isSalawatReminderEnabled = false,
     this.salawatFrequencyHours = 3,
     this.salawatStartTime = '10:00',

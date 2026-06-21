@@ -171,7 +171,10 @@ class PrayerNotificationScheduler {
         }
 
         // 2. Reminder Event
-        if (salaahSetting.isReminderEnabled &&
+        if (_settingsProvider.isSalahReminderEnabled &&
+            _settingsProvider.isBeforeSalahReminderEnabled &&
+            _settingsProvider.enabledSalahReminders.contains(salaahSetting.salaah) &&
+            salaahSetting.isReminderEnabled &&
             salaahSetting.reminderMinutesBefore > 0) {
           final reminderTime = tzSalaahTime.subtract(
             Duration(minutes: salaahSetting.reminderMinutesBefore),
@@ -204,36 +207,8 @@ class PrayerNotificationScheduler {
         }
 
         // 3. After Salah Azkar Event
-        if (_settingsProvider.isAfterSalahAzkarEnabled &&
-            salaahSetting.isAfterSalahAzkarEnabled) {
-          final azkarTime = tzSalaahTime.add(
-            Duration(minutes: salaahSetting.afterSalaahAzkarMinutes),
-          );
-          if (azkarTime.isAfter(now)) {
-            events.add((
-              time: azkarTime,
-              isAzan: false,
-              schedule: (int? timeout) async {
-                try {
-                  await _scheduleAfterSalahAzkar(
-                    notificationsPlugin,
-                    id: afterSalahAzkarIdStart + dayOffset,
-                    scheduledDate: azkarTime,
-                    allAzkar: allAzkar,
-                    timeoutAfter: timeout,
-                  );
-                } catch (e) {
-                  debugPrint(
-                    'PrayerNotificationScheduler: Error scheduling After-Salah Azkar: $e',
-                  );
-                }
-              },
-            ));
-          }
-        }
-
-        // 4. Post-Prayer Reminder (Did you pray?)
         if (_settingsProvider.isSalahReminderEnabled &&
+            _settingsProvider.isAfterSalahAzkarEnabled &&
             _settingsProvider.enabledSalahReminders.contains(
               salaahSetting.salaah,
             )) {
@@ -246,16 +221,18 @@ class PrayerNotificationScheduler {
               isAzan: false,
               schedule: (int? timeout) async {
                 try {
-                  await _schedulePostPrayerReminder(
-                    notificationsPlugin,
-                    id: postPrayerReminderIdStart + dayOffset,
-                    salaah: salaahSetting.salaah,
-                    scheduledDate: reminderTime,
-                    timeoutAfter: timeout,
-                  );
+                  if (salaahSetting.isAfterSalahAzkarEnabled) {
+                    await _scheduleAfterSalahAzkar(
+                      notificationsPlugin,
+                      id: afterSalahAzkarIdStart + dayOffset,
+                      scheduledDate: reminderTime,
+                      allAzkar: allAzkar,
+                      timeoutAfter: timeout,
+                    );
+                  }
                 } catch (e) {
                   debugPrint(
-                    'PrayerNotificationScheduler: Error scheduling post-prayer reminder: $e',
+                    'PrayerNotificationScheduler: Error scheduling After-Salah Azkar: $e',
                   );
                 }
               },
@@ -388,40 +365,7 @@ class PrayerNotificationScheduler {
     );
   }
 
-  Future<void> _schedulePostPrayerReminder(
-    FlutterLocalNotificationsPlugin notificationsPlugin, {
-    required int id,
-    required Salaah salaah,
-    required tz.TZDateTime scheduledDate,
-    int? timeoutAfter,
-  }) async {
-    final String salaahName = _getSalaahName(salaah);
-    final String title = 'هل صليت $salaahName؟';
 
-    await notificationsPlugin.zonedSchedule(
-      id: id,
-      title: _applyRtl(title),
-      body: _applyRtl('اضغط لتسجيل صلاتك في متتبع القضاء'),
-      scheduledDate: scheduledDate,
-      notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(
-          ChannelManager.reminderChannelId,
-          _applyRtl('Reminders'),
-          channelDescription: _applyRtl('Post-prayer reminders'),
-          importance: Importance.max,
-          priority: Priority.high,
-          groupKey: groupKey,
-          timeoutAfter: timeoutAfter,
-        ),
-        iOS: const DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-    );
-  }
 
   Future<void> _scheduleWerdReminder(
     FlutterLocalNotificationsPlugin notificationsPlugin, {
@@ -646,7 +590,7 @@ class PrayerNotificationScheduler {
     await notificationsPlugin.zonedSchedule(
       id: id,
       title: _applyRtl(title),
-      body: _applyRtl('باقي $minutesBefore دقيقة على الأذان'),
+      body: _applyRtl('اقتربت صلاة $salaahName'),
       scheduledDate: scheduledDate,
       notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(

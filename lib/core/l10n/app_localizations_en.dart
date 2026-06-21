@@ -365,11 +365,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get qibla => 'Qibla';
 
   @override
-  String get afterSalahAzkar => 'Azkar after Salah';
+  String get afterSalahAzkar => 'After Salah Azkar';
 
   @override
   String get afterSalahAzkarDesc =>
-      'Reminder to read azkar 15 minutes after azan';
+      'Get notified to read Azkar after the prayer time';
 
   @override
   String get quran => 'Quran';

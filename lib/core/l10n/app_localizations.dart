@@ -773,13 +773,13 @@ abstract class AppLocalizations {
   /// No description provided for @afterSalahAzkar.
   ///
   /// In en, this message translates to:
-  /// **'Azkar after Salah'**
+  /// **'After Salah Azkar'**
   String get afterSalahAzkar;
 
   /// No description provided for @afterSalahAzkarDesc.
   ///
   /// In en, this message translates to:
-  /// **'Reminder to read azkar 15 minutes after azan'**
+  /// **'Get notified to read Azkar after the prayer time'**
   String get afterSalahAzkarDesc;
 
   /// No description provided for @quran.

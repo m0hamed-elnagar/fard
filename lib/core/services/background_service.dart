@@ -98,6 +98,12 @@ class _BackgroundSettingsProvider implements SettingsRepository {
   PrayerReminderType get prayerReminderType => _settings.prayerReminderType;
 
   @override
+  bool get isBeforeSalahReminderEnabled => _settings.isBeforeSalahReminderEnabled;
+
+  @override
+  bool get isAfterSalahReminderEnabled => _settings.isAfterSalahReminderEnabled;
+
+  @override
   Set<Salaah> get enabledSalahReminders => _settings.enabledSalahReminders;
 
   @override
@@ -215,6 +221,14 @@ class _BackgroundSettingsProvider implements SettingsRepository {
 
   @override
   Future<void> updatePrayerReminderType(PrayerReminderType type) =>
+      Future.value();
+
+  @override
+  Future<void> updateBeforeSalahReminderEnabled(bool enabled) =>
+      Future.value();
+
+  @override
+  Future<void> updateAfterSalahReminderEnabled(bool enabled) =>
       Future.value();
 
   @override

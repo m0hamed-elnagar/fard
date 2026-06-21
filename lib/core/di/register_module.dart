@@ -9,6 +9,7 @@ import 'package:fard/features/quran/data/datasources/local/entities/bookmark_ent
 import 'package:fard/features/quran/data/datasources/local/quran_local_source.dart';
 import 'package:fard/features/quran/data/repositories/bookmark_repository_impl.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 @module
 abstract class RegisterModule {
@@ -57,4 +58,7 @@ abstract class RegisterModule {
   @lazySingleton
   FlutterLocalNotificationsPlugin get flutterLocalNotificationsPlugin =>
       FlutterLocalNotificationsPlugin();
+
+  @lazySingleton
+  Connectivity get connectivity => Connectivity();
 }

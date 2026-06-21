@@ -178,6 +178,8 @@ void main() {
     when(
       () => mockSettingsRepository.prayerReminderType,
     ).thenReturn(PrayerReminderType.after);
+    when(() => mockSettingsRepository.isBeforeSalahReminderEnabled).thenReturn(false);
+    when(() => mockSettingsRepository.isAfterSalahReminderEnabled).thenReturn(true);
     when(() => mockSettingsRepository.enabledSalahReminders).thenReturn({});
   });
 

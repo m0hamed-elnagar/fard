@@ -3,6 +3,7 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/core/utils/time_utils.dart';
 import 'package:fard/core/widgets/fard_list_tile.dart';
+import 'package:fard/core/widgets/custom_toggle.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
@@ -106,63 +107,177 @@ class RemindersSettingsDialog extends StatelessWidget {
                           isAr ? 'تذكيرات الصلاة' : 'Salah Reminders',
                           context,
                         ),
-                        _buildSwitchTile(
-                          isAr
-                              ? 'تفعيل التذكير بعد الصلاة'
-                              : 'Post-Prayer Reminders',
-                          isAr
-                              ? 'تذكير لتسجيل الصلاة في المتتبع'
-                              : 'Reminder to log prayer in tracker',
-                          state.isSalahReminderEnabled,
-                          (val) {
-                            context
-                                .read<DailyRemindersCubit>()
-                                .toggleSalahReminder(val);
-                            _showReminderSnackBar(
-                              context,
-                              isAr ? 'تذكيرات الصلاة' : 'Salah Reminders',
-                              val,
-                              customMessage: val
-                                  ? (isAr
-                                        ? 'سنذكرك بتسجيل صلواتك بعد الأذان بـ ${state.salahReminderOffsetMinutes} دقيقة'
-                                        : 'We will remind you to log prayers ${state.salahReminderOffsetMinutes}m after Azan')
-                                  : (isAr
-                                        ? 'تم إيقاف تذكيرات تسجيل الصلاة'
-                                        : 'Post-prayer logging reminders disabled'),
-                            );
-                          },
-                          context,
-                        ),
-                        if (state.isSalahReminderEnabled) ...[
-                          const SizedBox(height: 8),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  isAr
-                                      ? 'التذكير بعد ${state.salahReminderOffsetMinutes} دقيقة'
-                                      : 'Remind after ${state.salahReminderOffsetMinutes} minutes',
-                                  style: TextStyle(
-                                    color: context.onSurfaceVariantColor,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                Slider(
-                                  value: state.salahReminderOffsetMinutes
-                                      .toDouble(),
-                                  min: 5,
-                                  max: 60,
-                                  divisions: 11,
-                                  activeColor: context.secondaryColor,
-                                  onChanged: (val) => context
-                                      .read<DailyRemindersCubit>()
-                                      .setSalahReminderOffset(val.round()),
-                                ),
-                              ],
+                        // Before Azan Reminder Card
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: state.isBeforeSalahReminderEnabled
+                                ? context.primaryColor.withValues(alpha: 0.04)
+                                : context.surfaceContainerHighestColor.withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: state.isBeforeSalahReminderEnabled
+                                  ? context.primaryColor.withValues(alpha: 0.15)
+                                  : context.outlineColor.withValues(alpha: 0.1),
                             ),
                           ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      isAr ? 'تذكير قبل الأذان' : 'Before Azan Reminder',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                        color: context.onSurfaceColor,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      isAr
+                                          ? 'تنبيه قبل دخول وقت الصلاة'
+                                          : 'Notification before prayer time',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: context.onSurfaceVariantColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              CustomToggle(
+                                value: state.isBeforeSalahReminderEnabled,
+                                onChanged: (val) {
+                                  context
+                                      .read<DailyRemindersCubit>()
+                                      .toggleBeforeSalahReminder(val);
+                                  _showReminderSnackBar(
+                                    context,
+                                    isAr ? 'تذكير قبل الأذان' : 'Before Azan Reminder',
+                                    val,
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        
+                        // After Salah Azkar Card
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: state.isAfterSalahAzkarEnabled
+                                ? context.primaryColor.withValues(alpha: 0.04)
+                                : context.surfaceContainerHighestColor.withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: state.isAfterSalahAzkarEnabled
+                                  ? context.primaryColor.withValues(alpha: 0.15)
+                                  : context.outlineColor.withValues(alpha: 0.1),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          l10n.afterSalahAzkar,
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                            color: context.onSurfaceColor,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          l10n.afterSalahAzkarDesc,
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: context.onSurfaceVariantColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  CustomToggle(
+                                    value: state.isAfterSalahAzkarEnabled,
+                                    onChanged: (val) {
+                                      context
+                                          .read<DailyRemindersCubit>()
+                                          .toggleAfterSalahAzkar();
+                                      _showReminderSnackBar(
+                                        context,
+                                        l10n.afterSalahAzkar,
+                                        val,
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                              if (state.isAfterSalahAzkarEnabled) ...[
+                                const SizedBox(height: 16),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.hourglass_top_rounded,
+                                      size: 14,
+                                      color: context.onSurfaceVariantColor,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      isAr
+                                          ? 'التذكير بعد ${state.salahReminderOffsetMinutes} دقيقة'
+                                          : 'Remind after ${state.salahReminderOffsetMinutes} minutes',
+                                      style: TextStyle(
+                                        color: context.onSurfaceColor.withValues(alpha: 0.85),
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                SliderTheme(
+                                  data: SliderTheme.of(context).copyWith(
+                                    trackHeight: 3.0,
+                                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6.0),
+                                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 12.0),
+                                  ),
+                                  child: Slider(
+                                    value: state.salahReminderOffsetMinutes.toDouble(),
+                                    min: 5,
+                                    max: 60,
+                                    divisions: 11,
+                                    activeColor: context.secondaryColor,
+                                    inactiveColor: context.outlineColor.withValues(alpha: 0.2),
+                                    onChanged: (val) => context
+                                        .read<DailyRemindersCubit>()
+                                        .setSalahReminderOffset(val.round()),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        if (state.isBeforeSalahReminderEnabled ||
+                            state.isAfterSalahAzkarEnabled) ...[
+                          const SizedBox(height: 8),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Wrap(
@@ -183,10 +298,10 @@ class RemindersSettingsDialog extends StatelessWidget {
                                       val,
                                       customMessage: val
                                           ? (isAr
-                                                ? 'سنذكرك بتسجيل ${s.localizedName(l10n)} بعد الأذان'
-                                                : 'We will remind you to log ${s.localizedName(l10n)} after Azan')
+                                                ? 'سنذكرك بصلاة ${s.localizedName(l10n)}'
+                                                : 'We will remind you for ${s.localizedName(l10n)}')
                                           : (isAr
-                                                ? 'تم إيقاف تذكير ${s.localizedName(l10n)}'
+                                                ? 'تم إيقاف تذكير صلاة ${s.localizedName(l10n)}'
                                                 : 'Reminder for ${s.localizedName(l10n)} disabled'),
                                     );
                                   },
@@ -404,6 +519,7 @@ class RemindersSettingsDialog extends StatelessWidget {
       activeColor: context.secondaryColor,
     );
   }
+
 
   Future<String?> _selectTime(BuildContext context, String current) async {
     final parts = current.split(':');

@@ -22,6 +22,34 @@ class SettingsLoader {
       orElse: () => AudioQuality.low64,
     );
 
+    final hasBefore = prefs.containsKey(SettingsKeys.isBeforeSalahReminderEnabled);
+    final hasAfter = prefs.containsKey(SettingsKeys.isAfterSalahReminderEnabled);
+
+    bool beforeEnabled = false;
+    bool afterEnabled = true;
+
+    if (hasBefore) {
+      beforeEnabled =
+          prefs.getBool(SettingsKeys.isBeforeSalahReminderEnabled) ?? false;
+    } else {
+      final oldType = prefs.getString(SettingsKeys.salahReminderType);
+      if (oldType == 'before') {
+        beforeEnabled = true;
+      }
+    }
+
+    if (hasAfter) {
+      afterEnabled =
+          prefs.getBool(SettingsKeys.isAfterSalahReminderEnabled) ?? true;
+    } else {
+      final oldType = prefs.getString(SettingsKeys.salahReminderType);
+      if (oldType == 'after' || oldType == null) {
+        afterEnabled = true;
+      } else if (oldType == 'before') {
+        afterEnabled = false;
+      }
+    }
+
     final reminderTypeStr = prefs.getString(SettingsKeys.salahReminderType);
     final reminderType = PrayerReminderType.values.firstWhere(
       (e) => e.name == reminderTypeStr,
@@ -41,7 +69,7 @@ class SettingsLoader {
       eveningAzkarTime:
           prefs.getString(SettingsKeys.eveningAzkarTime) ?? '18:00',
       isAfterSalahAzkarEnabled:
-          prefs.getBool(SettingsKeys.afterSalahAzkarEnabled) ?? false,
+          prefs.getBool(SettingsKeys.afterSalahAzkarEnabled) ?? true,
       isQadaEnabled: prefs.getBool(SettingsKeys.qadaEnabled) ?? true,
       hijriAdjustment: prefs.getInt(SettingsKeys.hijriAdjustment) ?? 0,
       themePresetId: prefs.getString(SettingsKeys.themePresetId) ?? 'antique',
@@ -60,11 +88,13 @@ class SettingsLoader {
       salahReminderOffsetMinutes:
           prefs.getInt(SettingsKeys.salahReminderOffsetMinutes) ?? 15,
       prayerReminderType: reminderType,
+      isBeforeSalahReminderEnabled: beforeEnabled,
+      isAfterSalahReminderEnabled: afterEnabled,
       enabledSalahReminders: _loadEnabledSalahReminders(prefs),
       isWerdReminderEnabled:
           prefs.getBool(SettingsKeys.isWerdReminderEnabled) ?? false,
       werdReminderTime:
-          prefs.getString(SettingsKeys.werdReminderTime) ?? '20:00',
+          prefs.getString(SettingsKeys.werdReminderTime) ?? '08:00',
       isSalawatReminderEnabled:
           prefs.getBool(SettingsKeys.isSalawatReminderEnabled) ?? false,
       salawatFrequencyHours:

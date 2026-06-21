@@ -41,6 +41,8 @@ void main() {
     when(
       () => mockRepo.prayerReminderType,
     ).thenReturn(PrayerReminderType.after);
+    when(() => mockRepo.isBeforeSalahReminderEnabled).thenReturn(false);
+    when(() => mockRepo.isAfterSalahReminderEnabled).thenReturn(true);
     when(() => mockRepo.enabledSalahReminders).thenReturn({});
     when(() => mockRepo.isWerdReminderEnabled).thenReturn(false);
     when(() => mockRepo.werdReminderTime).thenReturn('20:00');
@@ -48,7 +50,7 @@ void main() {
     when(() => mockRepo.salawatFrequencyHours).thenReturn(3);
     when(() => mockRepo.salawatStartTime).thenReturn('10:00');
     when(() => mockRepo.salawatEndTime).thenReturn('20:00');
-
+    when(() => mockRepo.updateSalahReminderEnabled(any())).thenAnswer((_) async {});
     when(() => mockSyncNotif.execute()).thenAnswer((_) async {});
   }
 

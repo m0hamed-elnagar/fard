@@ -28,6 +28,8 @@ class DailyRemindersCubit extends Cubit<DailyRemindersState> {
           isSalahReminderEnabled: _repo.isSalahReminderEnabled,
           salahReminderOffsetMinutes: _repo.salahReminderOffsetMinutes,
           prayerReminderType: _repo.prayerReminderType,
+          isBeforeSalahReminderEnabled: _repo.isBeforeSalahReminderEnabled,
+          isAfterSalahReminderEnabled: _repo.isAfterSalahReminderEnabled,
           enabledSalahReminders: _repo.enabledSalahReminders,
           isWerdReminderEnabled: _repo.isWerdReminderEnabled,
           werdReminderTime: _repo.werdReminderTime,
@@ -65,6 +67,36 @@ class DailyRemindersCubit extends Cubit<DailyRemindersState> {
   Future<void> _setPrayerReminderTypeAsync(PrayerReminderType type) async {
     emit(state.copyWith(prayerReminderType: type));
     await _repo.updatePrayerReminderType(type);
+    _sync();
+  }
+
+  void toggleBeforeSalahReminder(bool enabled) {
+    _toggleBeforeSalahReminderAsync(enabled);
+  }
+
+  Future<void> _toggleBeforeSalahReminderAsync(bool enabled) async {
+    final bool newMasterEnabled = enabled || state.isAfterSalahAzkarEnabled;
+    emit(state.copyWith(
+      isBeforeSalahReminderEnabled: enabled,
+      isSalahReminderEnabled: newMasterEnabled,
+    ));
+    await _repo.updateBeforeSalahReminderEnabled(enabled);
+    await _repo.updateSalahReminderEnabled(newMasterEnabled);
+    _sync();
+  }
+
+  void toggleAfterSalahReminder(bool enabled) {
+    _toggleAfterSalahReminderAsync(enabled);
+  }
+
+  Future<void> _toggleAfterSalahReminderAsync(bool enabled) async {
+    final bool newMasterEnabled = state.isBeforeSalahReminderEnabled || enabled;
+    emit(state.copyWith(
+      isAfterSalahReminderEnabled: enabled,
+      isSalahReminderEnabled: newMasterEnabled,
+    ));
+    await _repo.updateAfterSalahReminderEnabled(enabled);
+    await _repo.updateSalahReminderEnabled(newMasterEnabled);
     _sync();
   }
 
@@ -226,7 +258,12 @@ class DailyRemindersCubit extends Cubit<DailyRemindersState> {
 
   Future<void> _toggleAfterSalahAzkarAsync() async {
     final v = await _toggleAzkar.execute();
-    emit(state.copyWith(isAfterSalahAzkarEnabled: v));
+    final bool newMasterEnabled = state.isBeforeSalahReminderEnabled || v;
+    emit(state.copyWith(
+      isAfterSalahAzkarEnabled: v,
+      isSalahReminderEnabled: newMasterEnabled,
+    ));
+    await _repo.updateSalahReminderEnabled(newMasterEnabled);
     _sync();
   }
 
@@ -288,6 +325,8 @@ class DailyRemindersCubit extends Cubit<DailyRemindersState> {
         isSalahReminderEnabled: _repo.isSalahReminderEnabled,
         salahReminderOffsetMinutes: _repo.salahReminderOffsetMinutes,
         prayerReminderType: _repo.prayerReminderType,
+        isBeforeSalahReminderEnabled: _repo.isBeforeSalahReminderEnabled,
+        isAfterSalahReminderEnabled: _repo.isAfterSalahReminderEnabled,
         enabledSalahReminders: _repo.enabledSalahReminders,
         isWerdReminderEnabled: _repo.isWerdReminderEnabled,
         werdReminderTime: _repo.werdReminderTime,

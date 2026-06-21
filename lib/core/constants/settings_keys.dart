@@ -35,6 +35,10 @@ abstract final class SettingsKeys {
   static const String salahReminderOffsetMinutes =
       'salah_reminder_offset_minutes';
   static const String salahReminderType = 'salah_reminder_type';
+  static const String isBeforeSalahReminderEnabled =
+      'is_before_salah_reminder_enabled';
+  static const String isAfterSalahReminderEnabled =
+      'is_after_salah_reminder_enabled';
   static const String enabledSalahReminders = 'enabled_salah_reminders';
   static const String isWerdReminderEnabled = 'is_werd_reminder_enabled';
   static const String werdReminderTime = 'werd_reminder_time';

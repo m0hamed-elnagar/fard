@@ -368,7 +368,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get afterSalahAzkarDesc =>
-      'تذكير لقراءة الأذكار بعد 15 دقيقة من الأذان';
+      'تنبيهك لقراءة أذكار ما بعد الصلاة بعد انقضاء الصلاة';
 
   @override
   String get quran => 'القرآن الكريم';

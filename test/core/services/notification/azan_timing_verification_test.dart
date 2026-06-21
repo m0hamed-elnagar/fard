@@ -119,6 +119,8 @@ void main() {
     when(
       () => mockSettingsProvider.prayerReminderType,
     ).thenReturn(PrayerReminderType.after);
+    when(() => mockSettingsProvider.isBeforeSalahReminderEnabled).thenReturn(false);
+    when(() => mockSettingsProvider.isAfterSalahReminderEnabled).thenReturn(true);
     when(() => mockSettingsProvider.enabledSalahReminders).thenReturn({});
     when(() => mockSettingsProvider.isAfterSalahAzkarEnabled).thenReturn(false);
     when(() => mockSettingsProvider.isWerdReminderEnabled).thenReturn(false);
@@ -317,6 +319,9 @@ void main() {
       when(
         () => mockSettingsProvider.isAfterSalahAzkarEnabled,
       ).thenReturn(true);
+      when(() => mockSettingsProvider.isSalahReminderEnabled).thenReturn(true);
+      when(() => mockSettingsProvider.salahReminderOffsetMinutes).thenReturn(minutesAfter);
+      when(() => mockSettingsProvider.enabledSalahReminders).thenReturn({Salaah.isha});
       when(() => mockSettingsProvider.salaahSettings).thenReturn([
         SalaahSettings(
           salaah: Salaah.isha,

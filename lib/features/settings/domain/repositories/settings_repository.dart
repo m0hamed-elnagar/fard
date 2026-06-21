@@ -86,6 +86,12 @@ abstract interface class SettingsRepository {
   /// Type of prayer reminder (before/after)
   PrayerReminderType get prayerReminderType;
 
+  /// Whether before-salah reminder is enabled
+  bool get isBeforeSalahReminderEnabled;
+
+  /// Whether after-salah reminder is enabled
+  bool get isAfterSalahReminderEnabled;
+
   /// Set of prayers that have reminders enabled
   Set<Salaah> get enabledSalahReminders;
 
@@ -202,6 +208,12 @@ abstract interface class SettingsRepository {
 
   /// Update prayer reminder type
   Future<void> updatePrayerReminderType(PrayerReminderType type);
+
+  /// Update before-salah reminder enabled state
+  Future<void> updateBeforeSalahReminderEnabled(bool enabled);
+
+  /// Update after-salah reminder enabled state
+  Future<void> updateAfterSalahReminderEnabled(bool enabled);
 
   /// Update the list of enabled post-prayer reminders
   Future<void> updateEnabledSalahReminders(Set<Salaah> enabledSalahs);

@@ -9,6 +9,7 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:connectivity_plus/connectivity_plus.dart' as _i895;
 import 'package:flutter/material.dart' as _i409;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
     as _i163;
@@ -139,7 +140,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => registerModule.prefs,
       preResolve: true,
     );
-    gh.factory<_i47.ConnectivityService>(() => _i47.ConnectivityService());
     gh.factory<_i494.GetAvailableThemePresets>(
       () => _i494.GetAvailableThemePresets(),
     );
@@ -152,6 +152,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i519.Client>(() => registerModule.httpClient);
     gh.lazySingleton<_i163.FlutterLocalNotificationsPlugin>(
       () => registerModule.flutterLocalNotificationsPlugin,
+    );
+    gh.lazySingleton<_i895.Connectivity>(() => registerModule.connectivity);
+    gh.factory<_i47.ConnectivityService>(
+      () => _i47.ConnectivityService(connectivity: gh<_i895.Connectivity>()),
     );
     await gh.factoryAsync<_i1055.Box<_i453.DailyRecordEntity>>(
       () => registerModule.dailyRecordsBox,

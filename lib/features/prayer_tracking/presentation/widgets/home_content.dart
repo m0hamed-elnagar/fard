@@ -567,6 +567,8 @@ class _DailyPrayersSectionState extends State<_DailyPrayersSection> {
                             isQadaEnabled: widget.remindersState.isQadaEnabled,
                             isReminderEnabled:
                                 widget.remindersState.isSalahReminderEnabled &&
+                                (widget.remindersState.isBeforeSalahReminderEnabled ||
+                                    widget.remindersState.isAfterSalahReminderEnabled) &&
                                 widget.remindersState.enabledSalahReminders
                                     .contains(Salaah.values[index]),
                             onAdd: () => context.read<PrayerTrackerBloc>().add(

@@ -581,9 +581,12 @@ ${(results['channels'] as List).map((c) => '    • ${c['id']} (${c['importance'
       id: PrayerNotificationScheduler.prayerReminderIdStart + dayOffset,
     );
 
-    // Cancel post-prayer reminder
+    // Cancel post-prayer reminder (both legacy logging and new Azkar)
     await _notificationsPlugin.cancel(
       id: PrayerNotificationScheduler.postPrayerReminderIdStart + dayOffset,
+    );
+    await _notificationsPlugin.cancel(
+      id: PrayerNotificationScheduler.afterSalahAzkarIdStart + dayOffset,
     );
   }
 

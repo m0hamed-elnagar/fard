@@ -6,7 +6,6 @@ import '../../../../core/widgets/custom_toggle.dart';
 import '../../../../core/mixins/notification_permission_mixin.dart';
 import '../../../../core/extensions/salaah_extension.dart';
 import '../../../prayer_tracking/domain/salaah.dart';
-import '../../domain/prayer_reminder_type.dart';
 import '../blocs/daily_reminders_cubit.dart';
 import '../blocs/daily_reminders_state.dart';
 
@@ -17,6 +16,7 @@ class PrayerRemindersSection extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
     return BlocBuilder<DailyRemindersCubit, DailyRemindersState>(
       builder: (context, state) {
         final cubit = context.read<DailyRemindersCubit>();
@@ -26,60 +26,114 @@ class PrayerRemindersSection extends StatelessWidget
           icon: Icons.notification_important_rounded,
           accentColor: context.secondaryColor,
           children: [
-            _buildToggleItem(
-              title: l10n.enableReminder,
-              value: state.isSalahReminderEnabled,
-              onChanged: (val) async {
-                if (val) {
-                  final granted = await checkAndRequestNotificationPermissions(
-                    context,
-                  );
-                  if (!granted) return;
-                }
-                cubit.toggleSalahReminder(val);
-              },
-              context: context,
+            // Before Azan Reminder Card
+            Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: state.isBeforeSalahReminderEnabled
+                    ? context.primaryColor.withValues(alpha: 0.04)
+                    : context.surfaceContainerHighestColor.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: state.isBeforeSalahReminderEnabled
+                      ? context.primaryColor.withValues(alpha: 0.15)
+                      : context.outlineColor.withValues(alpha: 0.1),
+                ),
+              ),
+              child: _buildToggleItem(
+                title: isAr ? 'تذكير قبل الأذان' : 'Before Azan Reminder',
+                subtitle: isAr
+                    ? 'تنبيهك قبل دخول وقت الصلاة'
+                    : 'Get notified before the prayer time starts',
+                value: state.isBeforeSalahReminderEnabled,
+                onChanged: (val) async {
+                  if (val) {
+                    final granted = await checkAndRequestNotificationPermissions(context);
+                    if (!granted) return;
+                  }
+                  cubit.toggleBeforeSalahReminder(val);
+                },
+                context: context,
+              ),
             ),
-            if (state.isSalahReminderEnabled) ...[
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            
+            // Grouped After Salah Azkar Container Card
+            Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: state.isAfterSalahAzkarEnabled
+                    ? context.primaryColor.withValues(alpha: 0.04)
+                    : context.surfaceContainerHighestColor.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: state.isAfterSalahAzkarEnabled
+                      ? context.primaryColor.withValues(alpha: 0.15)
+                      : context.outlineColor.withValues(alpha: 0.1),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    l10n.reminderType,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  _buildToggleItem(
+                    title: l10n.afterSalahAzkar,
+                    subtitle: l10n.afterSalahAzkarDesc,
+                    value: state.isAfterSalahAzkarEnabled,
+                    onChanged: (val) async {
+                      if (val) {
+                        final granted = await checkAndRequestNotificationPermissions(context);
+                        if (!granted) return;
+                      }
+                      cubit.toggleAfterSalahAzkar();
+                    },
+                    context: context,
                   ),
-                  SegmentedButton<PrayerReminderType>(
-                    segments: [
-                      ButtonSegment(
-                        value: PrayerReminderType.before,
-                        label: Text(l10n.beforeAzan),
+                  if (state.isAfterSalahAzkarEnabled) ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.hourglass_top_rounded,
+                          size: 14,
+                          color: context.onSurfaceVariantColor,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          "${l10n.offset}: ${state.salahReminderOffsetMinutes} ${l10n.werdMinSuffix}",
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w500,
+                            color: context.onSurfaceColor.withValues(alpha: 0.85),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        trackHeight: 3.0,
+                        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6.0),
+                        overlayShape: const RoundSliderOverlayShape(overlayRadius: 12.0),
                       ),
-                      ButtonSegment(
-                        value: PrayerReminderType.after,
-                        label: Text(l10n.afterAzan),
+                      child: Slider(
+                        value: state.salahReminderOffsetMinutes.toDouble(),
+                        min: 5,
+                        max: 60,
+                        divisions: 11,
+                        activeColor: context.secondaryColor,
+                        inactiveColor: context.outlineColor.withValues(alpha: 0.2),
+                        label: state.salahReminderOffsetMinutes.toString(),
+                        onChanged: (val) => cubit.setSalahReminderOffset(val.round()),
                       ),
-                    ],
-                    selected: {state.prayerReminderType},
-                    onSelectionChanged: (set) =>
-                        cubit.setPrayerReminderType(set.first),
-                  ),
+                    ),
+                  ],
                 ],
               ),
-              const SizedBox(height: 16),
-              Text(
-                "${l10n.offset}: ${state.salahReminderOffsetMinutes} ${l10n.werdMinSuffix}",
-              ),
-              Slider(
-                value: state.salahReminderOffsetMinutes.toDouble(),
-                min: 0,
-                max: 60,
-                divisions: 12,
-                label: state.salahReminderOffsetMinutes.toString(),
-                onChanged: (val) => cubit.setSalahReminderOffset(val.toInt()),
-              ),
+            ),
+            if (state.isBeforeSalahReminderEnabled || state.isAfterSalahAzkarEnabled) ...[
               const Divider(height: 24),
-                Wrap(
+              Wrap(
                 spacing: 8,
                 children: Salaah.values.map((s) {
                   final isEnabled = state.enabledSalahReminders.contains(s);
@@ -168,20 +222,41 @@ class PrayerRemindersSection extends StatelessWidget
 
   Widget _buildToggleItem({
     required String title,
+    String? subtitle,
     required bool value,
     required ValueChanged<bool> onChanged,
-    BuildContext? context,
+    required BuildContext context,
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            color: context?.onSurfaceColor,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: context.onSurfaceColor,
+                ),
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: context.onSurfaceVariantColor,
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
+        const SizedBox(width: 16),
         CustomToggle(value: value, onChanged: onChanged),
       ],
     );
