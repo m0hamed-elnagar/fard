@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.7+15] - 2026-06-21
+
+### Added
+- **After-Salah Azkar Card**: Redesigned the "After Salah" options to present Azkar directly as a top-level settings card with an integrated offset minutes slider.
+- **Unified Prayer Selection**: Added smart master sync that dynamically registers toggles under a unified checklist.
+
+### Changed
+- **Pre-Prayer Reminders**: Removed hardcoded minute counts (`باقي X دقيقة`) from pre-prayer reminder notifications to avoid accuracy deviations, changing the notification body to `'اقتربت صلاة...'`.
+- **Werd Reminder Default**: Updated the default time for Werd (Quran reading tracker) notifications from 8:00 PM to 8:00 AM (`08:00`).
+
+### Removed
+- **"Did you pray?" Logging Notification**: Completely deprecated/removed the legacy logging reminder to simplify user notifications and prevent overlapping alerts.
+
+---
+
 ## [1.5.0+7] - 2026-06-13
 
 ### Added
