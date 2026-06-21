@@ -32,6 +32,9 @@ import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get_it/get_it.dart';
 import 'package:bloc_test/bloc_test.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:fard/core/services/voice_download_service.dart';
+import 'package:fard/core/services/connectivity_service.dart';
 
 class MockSharedPreferences extends Mock implements SharedPreferences {}
 
@@ -94,6 +97,10 @@ class MockThemeCubit extends MockCubit<ThemeState> implements ThemeCubit {}
 
 class MockQuranRepository extends Mock implements QuranRepository {}
 
+class MockVoiceDownloadService extends Mock implements VoiceDownloadService {}
+
+class MockConnectivityService extends Mock implements ConnectivityService {}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(PrayerTrackerEvent.load(DateTime.now()));
@@ -117,6 +124,8 @@ void main() {
   late MockAdhanCubit mockAdhanCubit;
   late MockThemeCubit mockThemeCubit;
   late MockQuranRepository mockQuranRepository;
+  late MockVoiceDownloadService mockVoiceDownloadService;
+  late MockConnectivityService mockConnectivityService;
 
   setUp(() {
     mockPrefs = MockSharedPreferences();
@@ -133,6 +142,8 @@ void main() {
     mockLocationPrayerCubit = MockLocationPrayerCubit();
     mockDailyRemindersCubit = MockDailyRemindersCubit();
     mockAdhanCubit = MockAdhanCubit();
+    mockVoiceDownloadService = MockVoiceDownloadService();
+    mockConnectivityService = MockConnectivityService();
     mockThemeCubit = MockThemeCubit();
     mockQuranRepository = MockQuranRepository();
 
@@ -156,6 +167,8 @@ void main() {
     getIt.registerSingleton<AdhanCubit>(mockAdhanCubit);
     getIt.registerSingleton<ThemeCubit>(mockThemeCubit);
     getIt.registerSingleton<QuranRepository>(mockQuranRepository);
+    getIt.registerSingleton<VoiceDownloadService>(mockVoiceDownloadService);
+    getIt.registerSingleton<ConnectivityService>(mockConnectivityService);
 
     getIt.registerFactory<QuranBloc>(() => mockQuranBloc);
     getIt.registerFactory<AudioPlayerBloc>(() => mockAudioPlayerBloc);
@@ -163,6 +176,10 @@ void main() {
     getIt.registerFactory<TasbihBloc>(() => mockTasbihBloc);
     getIt.registerFactory<ReaderBloc>(() => mockReaderBloc);
     getIt.registerFactory<ConnectivityBloc>(() => mockConnectivityBloc);
+
+    when(() => mockVoiceDownloadService.isDownloaded(any())).thenAnswer((_) async => false);
+    when(() => mockConnectivityService.onConnectivityChanged).thenAnswer((_) => Stream.value([ConnectivityResult.wifi]));
+    when(() => mockConnectivityService.hasNetwork()).thenAnswer((_) async => true);
 
     when(
       () => mockNotificationService.canScheduleExactNotifications(),

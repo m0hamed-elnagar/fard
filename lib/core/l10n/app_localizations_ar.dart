@@ -653,6 +653,9 @@ class AppLocalizationsAr extends AppLocalizations {
       'فشل تحميل صوت الأذان. تأكد من أن الموقع متاح أو حاول اختيار صوت آخر.';
 
   @override
+  String get downloadingVoice => 'جاري تحميل الصوت...';
+
+  @override
   String get testAzan => 'تجربة الصوت';
 
   @override
@@ -876,6 +879,9 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get qiblaCalibrationHint => 'حرك الهاتف بشكل ♾️ لضبط دقة القبلة';
+
+  @override
   String get rotatePhoneForQibla => 'قم بتدوير الهاتف حتى يشير السهم للأعلى';
 
   @override
@@ -938,6 +944,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noInternetConnection => 'لا يوجد اتصال بالإنترنت';
+
+  @override
+  String get offlineVoiceSelectionHint =>
+      'أنت غير متصل بالإنترنت. يرجى اختيار أحد أصوات الأذان المحملة مسبقاً (المميزة بأيقونة السحابة).';
 
   @override
   String get offlineModeBanner =>

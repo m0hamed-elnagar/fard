@@ -255,8 +255,7 @@ class QuranRepositoryImpl implements QuranRepository {
       // Step 1: Ensure we have the basic list of surahs
       final surahsResult = await getSurahs();
       if (!surahsResult.isSuccess) {
-        yield 0.0;
-        return;
+        throw Exception(surahsResult.failure?.message ?? 'Failed to load Surahs list');
       }
 
       final surahs = surahsResult.data!;
@@ -294,12 +293,17 @@ class QuranRepositoryImpl implements QuranRepository {
         if (result.isSuccess) {
           downloaded++;
           yield downloaded / totalSurahs;
+        } else {
+          throw Exception(result.failure?.message ?? 'Failed to download Surah $i');
         }
       }
 
+      if (downloaded < totalSurahs) {
+        throw Exception('Download incomplete');
+      }
       yield 1.0;
-    } catch (_) {
-      yield 0.0;
+    } catch (e) {
+      rethrow;
     }
   }
 

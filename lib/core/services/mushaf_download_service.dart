@@ -272,6 +272,11 @@ class MushafDownloadService {
       }
       yield downloadedCount / totalPages;
 
+      if (downloadedCount == totalPages) {
+        yield 1.0;
+        return;
+      }
+
       // Download in chunks to be faster but not overwhelm the system
       const int chunkSize = 5;
       for (int i = 1; i <= totalPages; i += chunkSize) {
@@ -287,7 +292,12 @@ class MushafDownloadService {
         }
 
         if (chunkFutures.isNotEmpty) {
-          await Future.wait(chunkFutures);
+          final results = await Future.wait(chunkFutures);
+
+          // If every download attempt in this chunk failed (returned null), fail early
+          if (results.every((r) => r == null)) {
+            throw Exception('Connection failed or server unreachable');
+          }
 
           // Recalculate downloaded count
           int currentCount = 0;
@@ -297,6 +307,14 @@ class MushafDownloadService {
           downloadedCount = currentCount;
           yield downloadedCount / totalPages;
         }
+      }
+
+      int finalCount = 0;
+      for (int k = 1; k <= totalPages; k++) {
+        if (await isPageDownloaded(k)) finalCount++;
+      }
+      if (finalCount < totalPages) {
+        throw Exception('Some pages failed to download');
       }
 
       yield 1.0;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/mushaf_download_service.dart';
+import 'package:fard/core/services/connectivity_service.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/features/quran/domain/repositories/quran_repository.dart';
@@ -125,23 +126,61 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
     );
   }
 
-  void _startMushafDownload() {
+  void _showInlineError(String message) {
+    setState(() {
+      _errorMessage = message;
+    });
+    Future.delayed(const Duration(seconds: 5), () {
+      if (mounted && _errorMessage == message) {
+        setState(() {
+          _errorMessage = null;
+        });
+      }
+    });
+  }
+
+  void _startMushafDownload() async {
+    final hasNet = await getIt<ConnectivityService>().hasNetwork();
+    if (!hasNet) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        _showInlineError(l10n.noInternetConnection);
+      }
+      return;
+    }
+
     setState(() {
       _isMushafDownloading = true;
     });
-    _mushafService.downloadAllPages().listen((progress) {
-      if (mounted) {
-        setState(() {
-          _mushafProgress = progress;
-        });
-        if (progress >= 1.0 ||
-            _mushafProgress == progress && !_isMushafDownloading) {
+    _mushafService.downloadAllPages().listen(
+      (progress) {
+        if (mounted) {
+          setState(() {
+            _mushafProgress = progress;
+          });
+          if (progress >= 1.0) {
+            setState(() {
+              _isMushafDownloading = false;
+            });
+          }
+        }
+      },
+      onError: (error) async {
+        if (mounted) {
           setState(() {
             _isMushafDownloading = false;
           });
+          final hasNetworkNow = await getIt<ConnectivityService>().hasNetwork();
+          if (mounted) {
+            final l10n = AppLocalizations.of(context)!;
+            final message = hasNetworkNow
+                ? '${l10n.errorOccurred}: ${error.toString().replaceAll('Exception: ', '')}'
+                : l10n.noInternetConnection;
+            _showInlineError(message);
+          }
         }
-      }
-    });
+      },
+    );
   }
 
   void _cancelMushafDownload() {
@@ -151,22 +190,48 @@ class _DownloadCenterSheetState extends State<DownloadCenterSheet> {
     });
   }
 
-  void _startTextDownload() {
+  void _startTextDownload() async {
+    final hasNet = await getIt<ConnectivityService>().hasNetwork();
+    if (!hasNet) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        _showInlineError(l10n.noInternetConnection);
+      }
+      return;
+    }
+
     setState(() {
       _isTextDownloading = true;
     });
-    _quranRepository.downloadAllSurahs().listen((progress) {
-      if (mounted) {
-        setState(() {
-          _textProgress = progress;
-        });
-        if (progress >= 1.0) {
+    _quranRepository.downloadAllSurahs().listen(
+      (progress) {
+        if (mounted) {
+          setState(() {
+            _textProgress = progress;
+          });
+          if (progress >= 1.0) {
+            setState(() {
+              _isTextDownloading = false;
+            });
+          }
+        }
+      },
+      onError: (error) async {
+        if (mounted) {
           setState(() {
             _isTextDownloading = false;
           });
+          final hasNetworkNow = await getIt<ConnectivityService>().hasNetwork();
+          if (mounted) {
+            final l10n = AppLocalizations.of(context)!;
+            final message = hasNetworkNow
+                ? '${l10n.errorOccurred}: ${error.toString().replaceAll('Exception: ', '')}'
+                : l10n.noInternetConnection;
+            _showInlineError(message);
+          }
         }
-      }
-    });
+      },
+    );
   }
 
   void _cancelTextDownload() {

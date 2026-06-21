@@ -27,33 +27,38 @@ class ConnectivityService {
   /// with a robust raw socket lookup fallback if connectivity_plus reports none.
   Future<bool> hasNetwork() async {
     final result = await checkConnectivity();
-    if (!result.contains(ConnectivityResult.none)) {
+    if (result.any((r) => r != ConnectivityResult.none)) {
       return true;
+    }
+    // On mobile devices (Android/iOS), if connectivity_plus reports none,
+    // we are definitely offline, so we return false immediately without blocking.
+    if (Platform.isAndroid || Platform.isIOS) {
+      return false;
     }
     // Fallback if connectivity_plus reports none (e.g. false negative on Windows/VPN)
     return hasInternet();
   }
 
   /// Checks if the internet is actually reachable.
-  /// Uses a raw socket connection to bypass DNS lookup entirely.
+  /// Uses raw socket connections and DNS lookup in parallel to speed up checking.
   Future<bool> hasInternet() async {
     try {
-      // Try raw socket connection to Google Public DNS (8.8.8.8) on port 53 (DNS)
-      final success = await verifySocketConnection('8.8.8.8', 53);
-      if (success) return true;
-      
-      // Backup: Try Cloudflare DNS (1.1.1.1) on port 53
-      final backupSuccess = await verifySocketConnection('1.1.1.1', 53);
-      if (backupSuccess) return true;
+      final results = await Future.wait([
+        verifySocketConnection('8.8.8.8', 53),
+        verifySocketConnection('1.1.1.1', 53),
+        _verifyDnsLookup('google.com'),
+      ]);
+      return results.any((r) => r == true);
+    } catch (_) {
+      return false;
+    }
+  }
 
-      // Final fallback: Standard DNS lookup (e.g. if raw IP connections are blocked)
-      try {
-        final result = await InternetAddress.lookup('google.com')
-            .timeout(const Duration(milliseconds: 1000));
-        return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-      } catch (_) {
-        return false;
-      }
+  Future<bool> _verifyDnsLookup(String host) async {
+    try {
+      final result = await InternetAddress.lookup(host)
+          .timeout(const Duration(milliseconds: 1000));
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
     } catch (_) {
       return false;
     }

@@ -655,6 +655,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Failed to download Azan voice. Ensure the site is accessible or try another voice.';
 
   @override
+  String get downloadingVoice => 'Downloading voice...';
+
+  @override
   String get testAzan => 'Test Sound';
 
   @override
@@ -878,6 +881,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get qiblaCalibrationHint =>
+      'Move phone in a ♾️ pattern to adjust Qibla accuracy';
+
+  @override
   String get rotatePhoneForQibla => 'Rotate phone until the arrow points up';
 
   @override
@@ -941,6 +948,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noInternetConnection => 'No internet connection';
+
+  @override
+  String get offlineVoiceSelectionHint =>
+      'You are offline. Please choose one of the downloaded voices (marked with a cloud icon).';
 
   @override
   String get offlineModeBanner =>

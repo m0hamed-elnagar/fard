@@ -7,6 +7,8 @@ import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/settings/domain/salaah_settings.dart';
 import 'package:fard/features/settings/presentation/blocs/adhan_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/adhan_state.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:fard/core/services/connectivity_service.dart';
 import 'package:fard/features/settings/presentation/widgets/adhan_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,11 +19,13 @@ import 'package:mocktail/mocktail.dart';
 class MockAdhanCubit extends Mock implements AdhanCubit {}
 class MockNotificationService extends Mock implements NotificationService {}
 class MockVoiceDownloadService extends Mock implements VoiceDownloadService {}
+class MockConnectivityService extends Mock implements ConnectivityService {}
 
 void main() {
   late MockAdhanCubit mockAdhanCubit;
   late MockNotificationService mockNotificationService;
   late MockVoiceDownloadService mockVoiceDownloadService;
+  late MockConnectivityService mockConnectivityService;
 
   setUpAll(() {
     registerFallbackValue(const SalaahSettings(salaah: Salaah.fajr));
@@ -31,14 +35,19 @@ void main() {
     mockAdhanCubit = MockAdhanCubit();
     mockNotificationService = MockNotificationService();
     mockVoiceDownloadService = MockVoiceDownloadService();
+    mockConnectivityService = MockConnectivityService();
 
     final getIt = GetIt.instance;
     getIt.reset();
     getIt.registerSingleton<NotificationService>(mockNotificationService);
     getIt.registerSingleton<VoiceDownloadService>(mockVoiceDownloadService);
+    getIt.registerSingleton<ConnectivityService>(mockConnectivityService);
 
     when(() => mockNotificationService.areNotificationsEnabled()).thenAnswer((_) async => true);
     when(() => mockNotificationService.canScheduleExactNotifications()).thenAnswer((_) async => true);
+    when(() => mockVoiceDownloadService.isDownloaded(any())).thenAnswer((_) async => false);
+    when(() => mockConnectivityService.onConnectivityChanged).thenAnswer((_) => Stream.value([ConnectivityResult.wifi]));
+    when(() => mockConnectivityService.hasNetwork()).thenAnswer((_) async => true);
   });
 
   Widget createWidgetUnderTest() {
@@ -106,5 +115,39 @@ void main() {
     verify(() => mockAdhanCubit.updateSalaahSettings(
       any(that: predicate<SalaahSettings>((s) => s.salaah == Salaah.fajr && s.isAzanEnabled == false)),
     )).called(1);
+  });
+
+  testWidgets('Test Azan button is disabled and warning hint is shown when offline and selected voice is not downloaded', (WidgetTester tester) async {
+    // 1. Set offline status
+    when(() => mockConnectivityService.hasNetwork()).thenAnswer((_) async => false);
+    when(() => mockConnectivityService.onConnectivityChanged).thenAnswer((_) => Stream.value([ConnectivityResult.none]));
+
+    // 2. Set sound to a specific non-downloaded voice name
+    final voiceName = 'Saad Al-Ghamdi - سعد الغامدي';
+    final settings = Salaah.values
+        .map((s) => SalaahSettings(salaah: s, isAzanEnabled: true, azanSound: voiceName))
+        .toList();
+
+    var state = AdhanState(
+      salaahSettings: settings,
+      notificationsEnabled: true,
+      exactAlarmsEnabled: true,
+    );
+
+    when(() => mockAdhanCubit.state).thenReturn(state);
+    when(() => mockAdhanCubit.stream).thenAnswer((_) => Stream.value(state));
+    when(() => mockVoiceDownloadService.isDownloaded(voiceName)).thenAnswer((_) async => false);
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    // Verify warning hint is displayed
+    expect(find.text('You are offline. Please choose one of the downloaded voices (marked with a cloud icon).'), findsOneWidget);
+
+    // Verify Test Sound button is disabled
+    final testButtonFinder = find.widgetWithText(TextButton, 'Test Sound');
+    expect(testButtonFinder, findsOneWidget);
+    final TextButton button = tester.widget<TextButton>(testButtonFinder);
+    expect(button.onPressed, isNull);
   });
 }

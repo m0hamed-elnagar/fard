@@ -140,5 +140,40 @@ void main() {
       // Should NOT have been called because it's passed as null in the widget when count is 0
       expect(removeCalled, isFalse);
     });
+
+    testWidgets('displays prayer time on the right when Qada is disabled', (
+      WidgetTester tester,
+    ) async {
+      final testTime = DateTime(2026, 2, 14, 13, 45); // 1:45 PM
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: Scaffold(
+            body: SalaahTile(
+              salaah: Salaah.dhuhr,
+              qadaCount: 0,
+              isMissedToday: false,
+              isCompletedToday: false,
+              time: testTime,
+              onAdd: () {},
+              onRemove: () {},
+              onToggleMissed: () {},
+              onToggleReminder: () {},
+              completedQadaCount: 0,
+              isQadaEnabled: false,
+              isReminderEnabled: false,
+              isUpcoming: false,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('1:45'), findsOneWidget);
+      expect(find.byIcon(Icons.access_time_rounded), findsOneWidget);
+    });
   });
 }

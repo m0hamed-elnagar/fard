@@ -246,6 +246,15 @@ class _QiblaScreenState extends State<QiblaScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    Text(
+                      l10n.qiblaCalibrationHint,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: context.onSurfaceVariantColor.withValues(alpha: 0.8),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,

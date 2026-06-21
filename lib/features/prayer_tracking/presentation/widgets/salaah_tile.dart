@@ -134,311 +134,409 @@ class _SalaahTileState extends State<SalaahTile> {
                     },
               child: Opacity(
                 opacity: widget.isUpcoming ? 0.6 : 1.0,
-                child: Padding(
-                  padding: EdgeInsets.all(isNarrow ? 10.0 : 14.0),
+                child: IntrinsicHeight(
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Today Missed Status
-                      _StatusIndicator(
-                        icon: _getSalaahIcon(widget.salaah),
-                        isMissed:
-                            !widget.isUpcoming && !widget.isCompletedToday,
-                        isCompleted: widget.isCompletedToday,
-                        isUpcoming: widget.isUpcoming,
-                        size: isNarrow ? 40.0 : 48.0,
-                        onTap: widget.isUpcoming
-                            ? () {}
-                            : () {
-                                HapticFeedback.mediumImpact();
-                                if (widget.isCompletedToday &&
-                                    _removedInSession > 0) {
-                                  setState(() {
-                                    _removedInSession--;
-                                  });
-                                }
-                                widget.onToggleMissed();
-                              },
-                      ),
-                      SizedBox(width: isNarrow ? 10.0 : 16.0),
-
-                      // Stacked Counter Buttons
-                      if (widget.isQadaEnabled && !isVeryNarrow)
-                        Container(
-                          decoration: BoxDecoration(
-                            color: context.surfaceLightColor,
-                            borderRadius: BorderRadius.circular(14.0),
-                            border: Border.all(
-                              color: context.outlineColor.withValues(
-                                alpha: 0.5,
-                              ),
-                            ),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _CounterButton(
-                                icon: Icons.add_rounded,
-                                size: isNarrow ? 20 : 24,
-                                padding: isNarrow ? 6 : 10,
-                                onPressed: widget.isUpcoming
-                                    ? null
-                                    : () {
-                                        HapticFeedback.lightImpact();
-                                        if (_removedInSession > 0 ||
-                                            widget.completedQadaCount > 0) {
-                                          widget.onAdd();
-                                          if (_removedInSession > 0) {
-                                            setState(() {
-                                              _removedInSession--;
-                                            });
-                                          }
-                                        } else {
-                                          widget.onLimitExceeded?.call();
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).clearSnackBars();
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Row(
-                                                children: [
-                                                  const Icon(
-                                                    Icons.arrow_upward_rounded,
-                                                    color: Colors.white,
-                                                    size: 20,
-                                                  ),
-                                                  const SizedBox(width: 12),
-                                                  Expanded(
-                                                    child: Text(
-                                                      l10n.useAddQadaToNewPrayers,
-                                                      style: GoogleFonts.outfit(
-                                                        color: context
-                                                            .onSurfaceColor,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              backgroundColor:
-                                                  context.secondaryColor,
-                                              behavior:
-                                                  SnackBarBehavior.floating,
-                                              margin: const EdgeInsets.all(16),
-                                              elevation: 4,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                              ),
-                                              duration: const Duration(
-                                                seconds: 3,
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                      },
-                                color:
-                                    (_removedInSession > 0 &&
-                                        !widget.isUpcoming)
-                                    ? context.primaryLight
-                                    : context.neutralColor.withValues(
-                                        alpha: 0.5,
-                                      ),
-                              ),
-                              Container(
-                                width: 16,
-                                height: 1,
-                                color: context.outlineColor.withValues(
-                                  alpha: 0.5,
-                                ),
-                              ),
-                              _CounterButton(
-                                icon: Icons.remove_rounded,
-                                size: isNarrow ? 20 : 24,
-                                padding: isNarrow ? 6 : 10,
-                                onPressed:
-                                    (widget.qadaCount > 0 && !widget.isUpcoming)
-                                    ? () {
-                                        HapticFeedback.lightImpact();
-                                        widget.onRemove();
-                                        setState(() {
-                                          _removedInSession++;
-                                        });
-                                      }
-                                    : null,
-                                color: context.missedColor,
-                              ),
-                            ],
+                      // Today Missed Status (Done status indicator on the far left)
+                      Padding(
+                        padding: EdgeInsetsDirectional.only(
+                          start: isNarrow ? 10.0 : 14.0,
+                          top: isNarrow ? 10.0 : 14.0,
+                          bottom: isNarrow ? 10.0 : 14.0,
+                        ),
+                        child: Center(
+                          child: _StatusIndicator(
+                            icon: _getSalaahIcon(widget.salaah),
+                            isMissed:
+                                !widget.isUpcoming && !widget.isCompletedToday,
+                            isCompleted: widget.isCompletedToday,
+                            isUpcoming: widget.isUpcoming,
+                            size: isNarrow ? 40.0 : 48.0,
+                            onTap: widget.isUpcoming
+                                ? () {}
+                                : () {
+                                    HapticFeedback.mediumImpact();
+                                    if (widget.isCompletedToday &&
+                                        _removedInSession > 0) {
+                                      setState(() {
+                                        _removedInSession--;
+                                      });
+                                    }
+                                    widget.onToggleMissed();
+                                  },
                           ),
                         ),
+                      ),
 
-                      if (widget.isQadaEnabled && !isVeryNarrow)
-                        SizedBox(width: isNarrow ? 10.0 : 16.0),
-
-                      // Salaah Info
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  widget.salaah.localizedName(l10n),
-                                  style: GoogleFonts.amiri(
-                                    color: context.onSurfaceColor,
-                                    fontSize: isNarrow ? 18.0 : 22.0,
-                                    fontWeight: FontWeight.w700,
-                                    height: 1.2,
+                      // Stacked Counter Buttons (Now in the middle, taking full height)
+                      if (widget.isQadaEnabled && !isVeryNarrow) ...[
+                        SizedBox(width: isNarrow ? 10.0 : 14.0),
+                        Material(
+                          color: context.surfaceLightColor,
+                          clipBehavior: Clip.antiAlias,
+                          child: Container(
+                            width: isNarrow ? 46.0 : 56.0,
+                            decoration: BoxDecoration(
+                              border: BorderDirectional(
+                                start: BorderSide(
+                                  color: context.outlineColor.withValues(
+                                    alpha: 0.5,
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                IconButton(
-                                  onPressed: widget.onToggleReminder,
-                                  visualDensity: VisualDensity.compact,
-                                  iconSize: 18,
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                  icon: Icon(
-                                    widget.isReminderEnabled
-                                        ? Icons.notifications_active_rounded
-                                        : Icons.notifications_none_rounded,
-                                    color: widget.isReminderEnabled
-                                        ? context.secondaryColor
+                                end: BorderSide(
+                                  color: context.outlineColor.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Expanded(
+                                  child: _CounterButton(
+                                    icon: Icons.add_rounded,
+                                    size: isNarrow ? 20 : 24,
+                                    borderRadius: BorderRadius.zero,
+                                    onPressed: widget.isUpcoming
+                                        ? null
+                                        : () {
+                                            HapticFeedback.lightImpact();
+                                            if (_removedInSession > 0 ||
+                                                widget.completedQadaCount > 0) {
+                                              widget.onAdd();
+                                              if (_removedInSession > 0) {
+                                                setState(() {
+                                                  _removedInSession--;
+                                                });
+                                              }
+                                            } else {
+                                              widget.onLimitExceeded?.call();
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).clearSnackBars();
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Row(
+                                                    children: [
+                                                      const Icon(
+                                                        Icons.arrow_upward_rounded,
+                                                        color: Colors.white,
+                                                        size: 20,
+                                                      ),
+                                                      const SizedBox(width: 12),
+                                                      Expanded(
+                                                        child: Text(
+                                                          l10n.useAddQadaToNewPrayers,
+                                                          style: GoogleFonts
+                                                              .outfit(
+                                                            color: context
+                                                                .onSurfaceColor,
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  backgroundColor:
+                                                      context.secondaryColor,
+                                                  behavior:
+                                                      SnackBarBehavior.floating,
+                                                  margin:
+                                                      const EdgeInsets.all(16),
+                                                  elevation: 4,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          12,
+                                                        ),
+                                                  ),
+                                                  duration: const Duration(
+                                                    seconds: 3,
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          },
+                                    color:
+                                        (_removedInSession > 0 &&
+                                            !widget.isUpcoming)
+                                        ? context.primaryLight
                                         : context.neutralColor.withValues(
                                             alpha: 0.5,
                                           ),
                                   ),
                                 ),
+                                Container(
+                                  height: 1,
+                                  color: context.outlineColor.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: _CounterButton(
+                                    icon: Icons.remove_rounded,
+                                    size: isNarrow ? 20 : 24,
+                                    borderRadius: BorderRadius.zero,
+                                    onPressed:
+                                        (widget.qadaCount > 0 &&
+                                                !widget.isUpcoming)
+                                            ? () {
+                                                HapticFeedback.lightImpact();
+                                                widget.onRemove();
+                                                setState(() {
+                                                  _removedInSession++;
+                                                });
+                                              }
+                                            : null,
+                                    color: context.missedColor,
+                                  ),
+                                ),
                               ],
                             ),
-                            if (widget.time != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 2),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.access_time_rounded,
-                                      size: isNarrow ? 12 : 14,
-                                      color: context.secondaryColor,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      timeFormat.format(widget.time!),
-                                      style: GoogleFonts.outfit(
-                                        color: context.secondaryColor,
-                                        fontSize: isNarrow ? 11.0 : 13.0,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                          ],
+                          ),
                         ),
-                      ),
+                      ] else
+                        SizedBox(width: isNarrow ? 10.0 : 16.0),
 
-                      // Qada Count Display
-                      if (widget.isQadaEnabled)
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (widget.completedQadaCount > 0 && !isVeryNarrow)
-                              Container(
-                                margin: const EdgeInsets.only(right: 6.0),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8.0,
-                                  vertical: 4.0,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: context.primaryLight.withValues(
-                                    alpha: 0.1,
-                                  ),
-                                  borderRadius: BorderRadius.circular(14.0),
-                                  border: Border.all(
-                                    color: context.primaryLight.withValues(
-                                      alpha: 0.3,
-                                    ),
-                                  ),
-                                ),
+                      // Rest of the tile contents
+                      Expanded(
+                        child: Padding(
+                          padding: EdgeInsetsDirectional.only(
+                            start: (widget.isQadaEnabled && !isVeryNarrow)
+                                ? (isNarrow ? 10.0 : 14.0)
+                                : 0.0,
+                            top: isNarrow ? 10.0 : 14.0,
+                            bottom: isNarrow ? 10.0 : 14.0,
+                            end: isNarrow ? 10.0 : 14.0,
+                          ),
+                          child: Row(
+                            children: [
+                              // Salaah Info
+                              Expanded(
                                 child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
-                                      '${widget.completedQadaCount}',
-                                      style: GoogleFonts.outfit(
-                                        color: context.primaryLight,
-                                        fontSize: isNarrow ? 14.0 : 18.0,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                    Text(
-                                      l10n.done,
-                                      style: GoogleFonts.outfit(
-                                        color: context.primaryLight.withValues(
-                                          alpha: 0.7,
+                                    Row(
+                                      children: [
+                                        Text(
+                                          widget.salaah.localizedName(l10n),
+                                          style: GoogleFonts.amiri(
+                                            color: context.onSurfaceColor,
+                                            fontSize: isNarrow ? 18.0 : 22.0,
+                                            fontWeight: FontWeight.w700,
+                                            height: 1.2,
+                                          ),
                                         ),
-                                        fontSize: isNarrow ? 7.0 : 9.0,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                        const SizedBox(width: 8),
+                                        IconButton(
+                                          onPressed: widget.onToggleReminder,
+                                          visualDensity: VisualDensity.compact,
+                                          iconSize: 18,
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
+                                          icon: Icon(
+                                            widget.isReminderEnabled
+                                                ? Icons
+                                                    .notifications_active_rounded
+                                                : Icons
+                                                    .notifications_none_rounded,
+                                            color: widget.isReminderEnabled
+                                                ? context.secondaryColor
+                                                : context.neutralColor
+                                                    .withValues(
+                                                      alpha: 0.5,
+                                                    ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
+                                    if (widget.isQadaEnabled &&
+                                        widget.time != null)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 2),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.access_time_rounded,
+                                              size: isNarrow ? 12 : 14,
+                                              color: context.secondaryColor,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              timeFormat.format(widget.time!),
+                                              style: GoogleFonts.outfit(
+                                                color: context.secondaryColor,
+                                                fontSize:
+                                                    isNarrow ? 11.0 : 13.0,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                   ],
                                 ),
                               ),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: isNarrow ? 10.0 : 16.0,
-                                vertical: isNarrow ? 6.0 : 8.0,
-                              ),
-                              decoration: BoxDecoration(
-                                color: widget.qadaCount > 0
-                                    ? context.secondaryColor.withValues(
-                                        alpha: 0.1,
-                                      )
-                                    : context.surfaceContainerColor,
-                                borderRadius: BorderRadius.circular(14.0),
-                                border: Border.all(
-                                  color: widget.qadaCount > 0
-                                      ? context.secondaryColor.withValues(
-                                          alpha: 0.3,
-                                        )
-                                      : context.outlineColor.withValues(
-                                          alpha: 0.5,
+
+                              // Qada Count Display or Prayer Time Display
+                              if (widget.isQadaEnabled)
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (widget.completedQadaCount > 0 &&
+                                        !isVeryNarrow)
+                                      Container(
+                                        margin: const EdgeInsets.only(
+                                          right: 6.0,
                                         ),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8.0,
+                                          vertical: 4.0,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color:
+                                              context.primaryLight.withValues(
+                                                alpha: 0.1,
+                                              ),
+                                          borderRadius: BorderRadius.circular(
+                                            14.0,
+                                          ),
+                                          border: Border.all(
+                                            color:
+                                                context.primaryLight.withValues(
+                                                  alpha: 0.3,
+                                                ),
+                                          ),
+                                        ),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              '${widget.completedQadaCount}',
+                                              style: GoogleFonts.outfit(
+                                                color: context.primaryLight,
+                                                fontSize:
+                                                    isNarrow ? 14.0 : 18.0,
+                                                fontWeight: FontWeight.w800,
+                                              ),
+                                            ),
+                                            Text(
+                                              l10n.done,
+                                              style: GoogleFonts.outfit(
+                                                color: context.primaryLight
+                                                    .withValues(
+                                                      alpha: 0.7,
+                                                    ),
+                                                fontSize: isNarrow ? 7.0 : 9.0,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: isNarrow ? 10.0 : 16.0,
+                                        vertical: isNarrow ? 6.0 : 8.0,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: widget.qadaCount > 0
+                                            ? context.secondaryColor.withValues(
+                                                alpha: 0.1,
+                                              )
+                                            : context.surfaceContainerColor,
+                                        borderRadius: BorderRadius.circular(
+                                          14.0,
+                                        ),
+                                        border: Border.all(
+                                          color: widget.qadaCount > 0
+                                              ? context.secondaryColor
+                                                  .withValues(
+                                                    alpha: 0.3,
+                                                  )
+                                              : context.outlineColor.withValues(
+                                                  alpha: 0.5,
+                                                ),
+                                        ),
+                                      ),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            '${widget.qadaCount}',
+                                            style: GoogleFonts.outfit(
+                                              color: widget.qadaCount > 0
+                                                  ? context.secondaryColor
+                                                  : context
+                                                      .onSurfaceVariantColor,
+                                              fontSize: isNarrow ? 18.0 : 24.0,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
+                                          Text(
+                                            isNarrow
+                                                ? 'rem.'
+                                                : l10n.remaining.toLowerCase(),
+                                            style: GoogleFonts.outfit(
+                                              color: widget.qadaCount > 0
+                                                  ? context.secondaryColor
+                                                  : context.neutralColor,
+                                              fontSize: isNarrow ? 7.0 : 10.0,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              else if (widget.time != null)
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: isNarrow ? 10.0 : 14.0,
+                                    vertical: isNarrow ? 6.0 : 8.0,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: context.secondaryColor.withValues(
+                                      alpha: 0.08,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12.0),
+                                    border: Border.all(
+                                      color: context.secondaryColor.withValues(
+                                        alpha: 0.2,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.access_time_rounded,
+                                        size: isNarrow ? 14 : 16,
+                                        color: context.secondaryColor,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        timeFormat.format(widget.time!),
+                                        style: GoogleFonts.outfit(
+                                          color: context.secondaryColor,
+                                          fontSize: isNarrow ? 12.0 : 14.0,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    '${widget.qadaCount}',
-                                    style: GoogleFonts.outfit(
-                                      color: widget.qadaCount > 0
-                                          ? context.secondaryColor
-                                          : context.onSurfaceVariantColor,
-                                      fontSize: isNarrow ? 18.0 : 24.0,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                  Text(
-                                    isNarrow
-                                        ? 'rem.'
-                                        : l10n.remaining.toLowerCase(),
-                                    style: GoogleFonts.outfit(
-                                      color: widget.qadaCount > 0
-                                          ? context.secondaryColor
-                                          : context.neutralColor,
-                                      fontSize: isNarrow ? 7.0 : 10.0,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
+                      ),
                     ],
                   ),
                 ),
@@ -526,32 +624,32 @@ class _CounterButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final Color color;
   final double size;
-  final double padding;
+  final BorderRadiusGeometry borderRadius;
 
   const _CounterButton({
     required this.icon,
     this.onPressed,
     required this.color,
     this.size = 24.0,
-    this.padding = 10.0,
+    required this.borderRadius,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(12.0),
-      onTap: onPressed,
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: padding + 2,
-          vertical: padding,
-        ),
-        child: Icon(
-          icon,
-          color: onPressed != null
-              ? color
-              : context.neutralColor.withValues(alpha: 0.5),
-          size: size,
+    final textDirection = Directionality.of(context);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: borderRadius.resolve(textDirection),
+        onTap: onPressed,
+        child: Center(
+          child: Icon(
+            icon,
+            color: onPressed != null
+                ? color
+                : context.neutralColor.withValues(alpha: 0.5),
+            size: size,
+          ),
         ),
       ),
     );

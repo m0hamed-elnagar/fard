@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:fard/features/settings/presentation/blocs/adhan_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/adhan_state.dart';
@@ -8,11 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/widgets/custom_toggle.dart';
 import 'package:fard/features/azkar/presentation/screens/main_navigation_screen.dart';
 import 'package:fard/core/services/voice_download_service.dart';
 import 'package:fard/core/services/notification_service.dart';
+import 'package:fard/core/services/connectivity_service.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 
@@ -32,6 +35,57 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   bool _isQadaEnabled = true;
   bool _isDownloading = false;
   final int _totalPages = 5;
+  Set<String> _downloadedVoices = {};
+  bool _isOffline = false;
+  StreamSubscription? _connectivitySubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDownloadedVoices();
+    _checkConnectivity();
+    _connectivitySubscription = getIt<ConnectivityService>()
+        .onConnectivityChanged
+        .listen((results) {
+      final isOffline = results.every((r) => r == ConnectivityResult.none);
+      if (mounted) {
+        setState(() {
+          _isOffline = isOffline;
+        });
+      }
+    });
+  }
+
+  Future<void> _checkConnectivity() async {
+    final hasNet = await getIt<ConnectivityService>().hasNetwork();
+    if (mounted) {
+      setState(() {
+        _isOffline = !hasNet;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadDownloadedVoices() async {
+    if (!getIt.isRegistered<VoiceDownloadService>()) return;
+    final downloader = getIt<VoiceDownloadService>();
+    final List<String> downloaded = [];
+    for (var voice in VoiceDownloadService.azanVoices.keys) {
+      if (await downloader.isDownloaded(voice)) {
+        downloaded.add(voice);
+      }
+    }
+    if (mounted) {
+      setState(() {
+        _downloadedVoices = downloaded.toSet();
+      });
+    }
+  }
 
   Future<void> _completeOnboarding() async {
     // If Azan is enabled, make one last check for permissions
@@ -99,6 +153,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           isDownloading: _isDownloading,
                           onDownloadingChanged: (val) =>
                               setState(() => _isDownloading = val),
+                          downloadedVoices: _downloadedVoices,
+                          onVoiceDownloaded: (val) {
+                            setState(() {
+                              _downloadedVoices.add(val);
+                            });
+                          },
+                          isOffline: _isOffline,
                           bottomPadding: bottomPadding,
                         ),
                         _QadaSelectionPage(
@@ -281,12 +342,18 @@ class _AzanSelectionPage extends StatelessWidget {
   final AdhanState state;
   final bool isDownloading;
   final ValueChanged<bool> onDownloadingChanged;
+  final Set<String> downloadedVoices;
+  final ValueChanged<String> onVoiceDownloaded;
+  final bool isOffline;
   final double bottomPadding;
 
   const _AzanSelectionPage({
     required this.state,
     required this.isDownloading,
     required this.onDownloadingChanged,
+    required this.downloadedVoices,
+    required this.onVoiceDownloaded,
+    required this.isOffline,
     required this.bottomPadding,
   });
 
@@ -301,6 +368,8 @@ class _AzanSelectionPage extends StatelessWidget {
     final currentSound = state.salaahSettings.isNotEmpty
         ? state.salaahSettings.first.azanSound
         : null;
+    final String? resolvedKey = _getDisplayName(currentSound);
+    final bool isVoiceDownloaded = resolvedKey == null || downloadedVoices.contains(resolvedKey);
 
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(24.0, 40.0, 24.0, bottomPadding),
@@ -372,6 +441,8 @@ class _AzanSelectionPage extends StatelessWidget {
             _SettingsDropdownSelector(
               label: l10n.azanVoice,
               value: _getDisplayName(currentSound) ?? l10n.defaultVal,
+              downloadedKeys: downloadedVoices,
+              isDownloading: isDownloading,
               options: {
                 l10n.defaultVal: l10n.defaultVal,
                 ...VoiceDownloadService.azanVoices.map(
@@ -384,12 +455,35 @@ class _AzanSelectionPage extends StatelessWidget {
                   return;
                 }
 
+                // Already downloaded — select immediately
+                if (downloadedVoices.contains(val)) {
+                  cubit.updateAllAzanSound(val);
+                  return;
+                }
+
+                // Not downloaded — start download flow immediately
+                // to disable the UI during async operations
+                onDownloadingChanged(true);
+
                 try {
-                  onDownloadingChanged(true);
+                  final hasNet = await getIt<ConnectivityService>().hasNetwork();
+                  if (!hasNet) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(l10n.noInternetConnection),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                    return;
+                  }
+
                   final downloader = getIt<VoiceDownloadService>();
                   final path = await downloader.downloadAzan(val);
 
                   if (path != null) {
+                    onVoiceDownloaded(val);
                     cubit.updateAllAzanSound(val);
                   } else {
                     if (context.mounted) {
@@ -416,9 +510,34 @@ class _AzanSelectionPage extends StatelessWidget {
                 }
               },
             ),
+            if (isOffline && !isVoiceDownloaded) ...[
+              const SizedBox(height: 8.0),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.info_outline_rounded,
+                      color: Colors.orange,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        l10n.offlineVoiceSelectionHint,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.orange,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 16.0),
             TextButton.icon(
-              onPressed: isDownloading
+              onPressed: (isDownloading || !isVoiceDownloaded)
                   ? null
                   : () async {
                       final ns = getIt<NotificationService>();
@@ -537,12 +656,16 @@ class _SettingsDropdownSelector extends StatelessWidget {
   final String value;
   final Map<String, String> options;
   final ValueChanged<String?> onChanged;
+  final Set<String> downloadedKeys;
+  final bool isDownloading;
 
   const _SettingsDropdownSelector({
     required this.label,
     required this.value,
     required this.options,
     required this.onChanged,
+    this.downloadedKeys = const {},
+    this.isDownloading = false,
   });
 
   @override
@@ -575,25 +698,60 @@ class _SettingsDropdownSelector extends StatelessWidget {
             child: DropdownButton<String>(
               value: options.containsKey(value) ? value : options.keys.first,
               isExpanded: true,
-              icon: Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: colorScheme.secondary,
-              ),
+              icon: isDownloading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: colorScheme.secondary,
+                    ),
               items: options.entries.map((e) {
+                final isDownloaded = downloadedKeys.contains(e.key);
                 return DropdownMenuItem(
                   value: e.key,
-                  child: Text(
-                    e.value,
-                    style: GoogleFonts.outfit(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          e.value,
+                          style: GoogleFonts.outfit(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (isDownloaded)
+                        Icon(
+                          Icons.cloud_done_rounded,
+                          size: 18,
+                          color: colorScheme.primary,
+                        ),
+                    ],
                   ),
                 );
               }).toList(),
-              onChanged: onChanged,
+              onChanged: isDownloading ? null : onChanged,
             ),
           ),
+          if (isDownloading) ...[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Text(
+                AppLocalizations.of(context)!.downloadingVoice,
+                style: GoogleFonts.outfit(
+                  fontSize: 12,
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

@@ -1,11 +1,14 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/services/voice_download_service.dart';
+import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/widgets/custom_toggle.dart';
 import '../../../../core/widgets/fard_list_tile.dart';
 import '../../../../core/mixins/notification_permission_mixin.dart';
@@ -24,6 +27,64 @@ class AdhanSection extends StatefulWidget {
 class _AdhanSectionState extends State<AdhanSection>
     with NotificationPermissionMixin {
   bool _isDownloading = false;
+  Set<String> _downloadedVoices = {};
+  bool _isOffline = false;
+  StreamSubscription? _connectivitySubscription;
+  String? _dropdownValue;
+  /// True when the user selected a non-downloaded voice while offline.
+  /// Prevents the build method from overwriting _dropdownValue with cubit state.
+  bool _hasUserOverride = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDownloadedVoices();
+    _checkConnectivity();
+    _connectivitySubscription = getIt<ConnectivityService>()
+        .onConnectivityChanged
+        .listen((results) {
+      final isOffline = results.every((r) => r == ConnectivityResult.none);
+      if (mounted) {
+        setState(() {
+          _isOffline = isOffline;
+          // When back online, clear the override so the dropdown
+          // syncs back to the cubit state.
+          if (!isOffline) _hasUserOverride = false;
+        });
+      }
+    });
+  }
+
+  Future<void> _checkConnectivity() async {
+    final hasNet = await getIt<ConnectivityService>().hasNetwork();
+    if (mounted) {
+      setState(() {
+        _isOffline = !hasNet;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadDownloadedVoices() async {
+    if (!getIt.isRegistered<VoiceDownloadService>()) return;
+    final downloader = getIt<VoiceDownloadService>();
+    final List<String> downloaded = [];
+    for (var voice in VoiceDownloadService.azanVoices.keys) {
+      if (await downloader.isDownloaded(voice)) {
+        downloaded.add(voice);
+      }
+    }
+    if (mounted) {
+      setState(() {
+        _downloadedVoices = downloaded.toSet();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +96,12 @@ class _AdhanSectionState extends State<AdhanSection>
           (s) => s.isAzanEnabled,
         );
         final String? commonVoice = _getCommonVoice(state.salaahSettings);
+        if (!_isDownloading && !_hasUserOverride) {
+          _dropdownValue = _resolveVoiceKey(commonVoice);
+        }
         final bool notificationsDisabled =
             !state.notificationsEnabled || !state.exactAlarmsEnabled;
+        final bool isVoiceDownloaded = _dropdownValue == null || _downloadedVoices.contains(_dropdownValue);
 
         return _buildSection(
           context,
@@ -121,10 +186,35 @@ class _AdhanSectionState extends State<AdhanSection>
               _buildVoiceDropdown(context, commonVoice, l10n, (val) {
                 cubit.updateAllAzanSound(val);
               }),
+              if (_isOffline && !isVoiceDownloaded) ...[
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.info_outline_rounded,
+                        color: Colors.orange,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          l10n.offlineVoiceSelectionHint,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.orange,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 8),
               Center(
                 child: TextButton.icon(
-                  onPressed: _isDownloading
+                  onPressed: (_isDownloading || !isVoiceDownloaded)
                       ? null
                       : () async {
                           final granted =
@@ -151,7 +241,7 @@ class _AdhanSectionState extends State<AdhanSection>
 
                           await getIt<NotificationService>().testAzan(
                             Salaah.fajr,
-                            commonVoice,
+                            _dropdownValue,
                           );
                         },
                   icon: const Icon(Icons.play_arrow_rounded),
@@ -326,54 +416,137 @@ class _AdhanSectionState extends State<AdhanSection>
     ValueChanged<String?> onChanged,
   ) {
     return DropdownButtonFormField<String?>(
-      key: ValueKey(_resolveVoiceKey(currentVoice)),
-      initialValue: _resolveVoiceKey(currentVoice),
+      key: ValueKey(_dropdownValue),
+      initialValue: _dropdownValue,
+      isExpanded: true,
+      icon: _isDownloading
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+              ),
+            )
+          : null,
       decoration: InputDecoration(
         labelText: l10n.azanVoice,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         filled: true,
         fillColor: context.surfaceContainerHighestColor,
+        helperText: _isDownloading ? l10n.downloadingVoice : null,
+        helperStyle: TextStyle(color: context.primaryColor),
       ),
       items: [
         DropdownMenuItem(value: null, child: Text(l10n.defaultVal)),
         ...VoiceDownloadService.azanVoices.keys.map((v) {
           final parts = v.split(' - ');
-          final displayName = l10n.localeName == 'ar'
+          final baseName = l10n.localeName == 'ar'
               ? (parts.length > 1 ? parts[1] : parts[0])
               : parts[0];
-          return DropdownMenuItem(value: v, child: Text(displayName));
+          
+          final isDownloaded = _downloadedVoices.contains(v);
+          
+          return DropdownMenuItem(
+            value: v,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    baseName,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (isDownloaded)
+                  Icon(
+                    Icons.cloud_done_rounded,
+                    size: 18,
+                    color: context.primaryColor,
+                  ),
+              ],
+            ),
+          );
         }),
       ],
-      onChanged: (val) async {
+      onChanged: _isDownloading
+          ? null
+          : (val) async {
         if (val == null) {
+          setState(() {
+            _dropdownValue = null;
+            _hasUserOverride = false;
+          });
           onChanged(null);
           return;
         }
 
-        try {
-          final downloader = getIt<VoiceDownloadService>();
-          if (!(await downloader.isDownloaded(val))) {
-            if (!mounted) return;
-            setState(() => _isDownloading = true);
-            final path = await downloader.downloadAzan(val);
+        // Already downloaded — select immediately, no download needed
+        if (_downloadedVoices.contains(val)) {
+          setState(() {
+            _dropdownValue = val;
+            _hasUserOverride = false;
+          });
+          onChanged(val);
+          return;
+        }
 
-            if (path != null) {
-              onChanged(val);
-            } else {
-              if (mounted && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(l10n.azanDownloadError),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              }
+        // Not downloaded — sync dropdown state and start download flow.
+        // Setting _isDownloading = true prevents the build method from
+        // overwriting _dropdownValue during async operations.
+        setState(() {
+          _dropdownValue = val;
+          _isDownloading = true;
+        });
+
+        try {
+          final hasNet = await getIt<ConnectivityService>().hasNetwork();
+          if (!hasNet) {
+            // Keep _dropdownValue as the user's selection so the
+            // offline hint shows and the Test Sound button stays disabled.
+            if (mounted) {
+              setState(() {
+                _hasUserOverride = true;
+              });
             }
-          } else {
+            return;
+          }
+
+          if (!mounted) return;
+          final downloader = getIt<VoiceDownloadService>();
+          final path = await downloader.downloadAzan(val);
+
+          if (path != null) {
+            if (mounted) {
+              setState(() {
+                _downloadedVoices.add(val);
+                _dropdownValue = val;
+                _hasUserOverride = false;
+              });
+            }
             onChanged(val);
+          } else {
+            if (mounted) {
+              setState(() {
+                _dropdownValue = _resolveVoiceKey(currentVoice);
+                _hasUserOverride = false;
+              });
+            }
+            if (mounted && context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(l10n.azanDownloadError),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
           }
         } catch (e) {
           debugPrint('AdhanSection: Error selecting azan: $e');
+          if (mounted) {
+            setState(() {
+              _dropdownValue = _resolveVoiceKey(currentVoice);
+              _hasUserOverride = false;
+            });
+          }
           if (mounted && context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(

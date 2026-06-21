@@ -1310,6 +1310,12 @@ abstract class AppLocalizations {
   /// **'Failed to download Azan voice. Ensure the site is accessible or try another voice.'**
   String get azanDownloadError;
 
+  /// No description provided for @downloadingVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading voice...'**
+  String get downloadingVoice;
+
   /// No description provided for @testAzan.
   ///
   /// In en, this message translates to:
@@ -1712,6 +1718,12 @@ abstract class AppLocalizations {
   /// **'Qibla Direction: {direction}°'**
   String qiblaDirectionWithVal(Object direction);
 
+  /// No description provided for @qiblaCalibrationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Move phone in a ♾️ pattern to adjust Qibla accuracy'**
+  String get qiblaCalibrationHint;
+
   /// No description provided for @rotatePhoneForQibla.
   ///
   /// In en, this message translates to:
@@ -1831,6 +1843,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No internet connection'**
   String get noInternetConnection;
+
+  /// No description provided for @offlineVoiceSelectionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You are offline. Please choose one of the downloaded voices (marked with a cloud icon).'**
+  String get offlineVoiceSelectionHint;
 
   /// No description provided for @offlineModeBanner.
   ///
