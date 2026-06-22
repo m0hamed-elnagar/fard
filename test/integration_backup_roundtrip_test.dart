@@ -157,6 +157,8 @@ class FakeSettingsRepository implements SettingsRepository {
   @override
   Set<Salaah> get enabledSalahReminders => {};
   @override
+  Set<Salaah> get enabledBeforeSalahReminders => {};
+  @override
   bool get isWerdReminderEnabled => false;
   @override
   String get werdReminderTime => '20:00';
@@ -242,6 +244,8 @@ class FakeSettingsRepository implements SettingsRepository {
   Future<void> updateAfterSalahReminderEnabled(bool enabled) async {}
   @override
   Future<void> updateEnabledSalahReminders(Set<Salaah> enabledSalahs) async {}
+  @override
+  Future<void> updateEnabledBeforeSalahReminders(Set<Salaah> enabledSalahs) async {}
   @override
   Future<void> updateWerdReminderEnabled(bool enabled) async {}
   @override

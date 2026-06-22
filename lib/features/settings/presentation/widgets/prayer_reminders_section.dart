@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_toggle.dart';
+import '../../../../core/widgets/expandable_section_card.dart';
 import '../../../../core/mixins/notification_permission_mixin.dart';
 import '../../../../core/extensions/salaah_extension.dart';
 import '../../../prayer_tracking/domain/salaah.dart';
@@ -20,8 +21,7 @@ class PrayerRemindersSection extends StatelessWidget
     return BlocBuilder<DailyRemindersCubit, DailyRemindersState>(
       builder: (context, state) {
         final cubit = context.read<DailyRemindersCubit>();
-        return _buildSection(
-          context,
+        return ExpandableSectionCard(
           title: l10n.reminder,
           icon: Icons.notification_important_rounded,
           accentColor: context.secondaryColor,
@@ -41,20 +41,62 @@ class PrayerRemindersSection extends StatelessWidget
                       : context.outlineColor.withValues(alpha: 0.1),
                 ),
               ),
-              child: _buildToggleItem(
-                title: isAr ? 'تذكير قبل الأذان' : 'Before Azan Reminder',
-                subtitle: isAr
-                    ? 'تنبيهك قبل دخول وقت الصلاة'
-                    : 'Get notified before the prayer time starts',
-                value: state.isBeforeSalahReminderEnabled,
-                onChanged: (val) async {
-                  if (val) {
-                    final granted = await checkAndRequestNotificationPermissions(context);
-                    if (!granted) return;
-                  }
-                  cubit.toggleBeforeSalahReminder(val);
-                },
-                context: context,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildToggleItem(
+                    title: isAr ? 'تذكير قبل الأذان' : 'Before Azan Reminder',
+                    subtitle: isAr
+                        ? 'تنبيهك قبل دخول وقت الصلاة'
+                        : 'Get notified before the prayer time starts',
+                    value: state.isBeforeSalahReminderEnabled,
+                    onChanged: (val) async {
+                      if (val) {
+                        final granted = await checkAndRequestNotificationPermissions(context);
+                        if (!granted) return;
+                      }
+                      cubit.toggleBeforeSalahReminder(val);
+                    },
+                    context: context,
+                  ),
+                  if (state.isBeforeSalahReminderEnabled) ...[
+                    const SizedBox(height: 12),
+                    const Divider(),
+                    const SizedBox(height: 8),
+                    Text(
+                      isAr ? 'تذكير لصلوات:' : 'Remind me for:',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: context.onSurfaceColor.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: Salaah.values.map((s) {
+                        final isEnabled = state.enabledBeforeSalahReminders.contains(s);
+                        return FilterChip(
+                          label: Text(_getLocalizedSalaahName(s, l10n)),
+                          selected: isEnabled,
+                          onSelected: (_) => cubit.toggleSpecificBeforeSalahReminder(s),
+                          selectedColor: context.primaryColor.withValues(
+                            alpha: 0.2,
+                          ),
+                          checkmarkColor: context.primaryColor,
+                          labelStyle: TextStyle(
+                            fontSize: 12,
+                            color: isEnabled
+                                ? context.primaryColor
+                                : context.onSurfaceColor,
+                            fontWeight: isEnabled ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ],
               ),
             ),
             
@@ -127,98 +169,52 @@ class PrayerRemindersSection extends StatelessWidget
                         onChanged: (val) => cubit.setSalahReminderOffset(val.round()),
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    const Divider(),
+                    const SizedBox(height: 8),
+                    Text(
+                      isAr ? 'تذكير لصلوات:' : 'Remind me for:',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: context.onSurfaceColor.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: Salaah.values.map((s) {
+                        final isEnabled = state.enabledSalahReminders.contains(s);
+                        return FilterChip(
+                          label: Text(_getLocalizedSalaahName(s, l10n)),
+                          selected: isEnabled,
+                          onSelected: (_) => cubit.toggleSpecificSalahReminder(s),
+                          selectedColor: context.primaryColor.withValues(
+                            alpha: 0.2,
+                          ),
+                          checkmarkColor: context.primaryColor,
+                          labelStyle: TextStyle(
+                            fontSize: 12,
+                            color: isEnabled
+                                ? context.primaryColor
+                                : context.onSurfaceColor,
+                            fontWeight: isEnabled ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        );
+                      }).toList(),
+                    ),
                   ],
                 ],
               ),
             ),
-            if (state.isBeforeSalahReminderEnabled || state.isAfterSalahAzkarEnabled) ...[
-              const Divider(height: 24),
-              Wrap(
-                spacing: 8,
-                children: Salaah.values.map((s) {
-                  final isEnabled = state.enabledSalahReminders.contains(s);
-                  return FilterChip(
-                    label: Text(_getLocalizedSalaahName(s, l10n)),
-                    selected: isEnabled,
-                    onSelected: (_) => cubit.toggleSpecificSalahReminder(s),
-                    selectedColor: context.primaryColor.withValues(
-                      alpha: 0.2,
-                    ),
-                    checkmarkColor: context.primaryColor,
-                    labelStyle: TextStyle(
-                      fontSize: 12,
-                      color: isEnabled
-                          ? context.primaryColor
-                          : context.onSurfaceColor,
-                      fontWeight: isEnabled ? FontWeight.bold : FontWeight.normal,
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
           ],
         );
       },
     );
   }
 
-  Widget _buildSection(
-    BuildContext context, {
-    required String title,
-    required IconData icon,
-    required List<Widget> children,
-    Color? accentColor,
-  }) {
-    final effectiveAccentColor = accentColor ?? context.primaryColor;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: context.surfaceContainerColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: context.outlineColor.withValues(alpha: 0.15),
-          width: 1.0,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: effectiveAccentColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(icon, color: effectiveAccentColor, size: 22),
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.bold,
-                    color: context.onSurfaceColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: children,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildToggleItem({
     required String title,

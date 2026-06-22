@@ -142,6 +142,7 @@ void main() {
       )).toList()
     );
     when(() => mockSettingsRepository.enabledSalahReminders).thenReturn({});
+    when(() => mockSettingsRepository.enabledBeforeSalahReminders).thenReturn({});
     when(() => mockSettingsRepository.isSalahReminderEnabled).thenReturn(false);
     when(() => mockSettingsRepository.isBeforeSalahReminderEnabled).thenReturn(false);
     when(() => mockSettingsRepository.isAfterSalahReminderEnabled).thenReturn(true);
@@ -257,6 +258,7 @@ void main() {
       when(() => mockSettingsRepository.isSalahReminderEnabled).thenReturn(true);
       when(() => mockSettingsRepository.isBeforeSalahReminderEnabled).thenReturn(true);
       when(() => mockSettingsRepository.enabledSalahReminders).thenReturn({Salaah.dhuhr});
+      when(() => mockSettingsRepository.enabledBeforeSalahReminders).thenReturn({Salaah.dhuhr});
       when(() => mockSettingsRepository.salaahSettings).thenReturn(
         Salaah.values.map((s) => SalaahSettings(
           salaah: s, 

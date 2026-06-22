@@ -251,6 +251,27 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
+  Set<Salaah> get enabledBeforeSalahReminders {
+    final String? jsonStr = _storage.readString(
+      SettingsKeys.enabledBeforeSalahReminders,
+    );
+    if (jsonStr == null) return {};
+    try {
+      final List<dynamic> decoded = jsonDecode(jsonStr);
+      return decoded
+          .map(
+            (name) => Salaah.values.firstWhere(
+              (s) => s.name == name,
+              orElse: () => Salaah.fajr,
+            ),
+          )
+          .toSet();
+    } catch (e) {
+      return {};
+    }
+  }
+
+  @override
   bool get isWerdReminderEnabled => _storage.readBool(
     SettingsKeys.isWerdReminderEnabled,
     defaultValue: false,
@@ -603,6 +624,14 @@ class SettingsRepositoryImpl implements SettingsRepository {
   Future<void> updateEnabledSalahReminders(Set<Salaah> enabledSalahs) async {
     await _storage.writeString(
       SettingsKeys.enabledSalahReminders,
+      jsonEncode(enabledSalahs.map((s) => s.name).toList()),
+    );
+  }
+
+  @override
+  Future<void> updateEnabledBeforeSalahReminders(Set<Salaah> enabledSalahs) async {
+    await _storage.writeString(
+      SettingsKeys.enabledBeforeSalahReminders,
       jsonEncode(enabledSalahs.map((s) => s.name).toList()),
     );
   }

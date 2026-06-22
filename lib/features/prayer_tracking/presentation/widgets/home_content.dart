@@ -17,10 +17,11 @@ import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.
 import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
-import 'package:fard/features/settings/presentation/widgets/reminders_settings_dialog.dart';
+import 'package:fard/features/settings/presentation/screens/azan_settings_screen.dart';
 import 'package:fard/features/werd/presentation/blocs/werd_bloc.dart';
 import 'package:fard/features/werd/presentation/widgets/set_werd_goal_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -106,7 +107,15 @@ class _HomeContentState extends State<HomeContent> {
         ),
         actions: [
           IconButton(
-            onPressed: () => RemindersSettingsDialog.show(context),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AzanSettingsScreen(),
+                ),
+              );
+            },
             icon: const Icon(Icons.notifications_active_rounded),
             color: context.secondaryColor,
           ),
@@ -567,9 +576,8 @@ class _DailyPrayersSectionState extends State<_DailyPrayersSection> {
                             isQadaEnabled: widget.remindersState.isQadaEnabled,
                             isReminderEnabled:
                                 widget.remindersState.isSalahReminderEnabled &&
-                                (widget.remindersState.isBeforeSalahReminderEnabled ||
-                                    widget.remindersState.isAfterSalahReminderEnabled) &&
-                                widget.remindersState.enabledSalahReminders
+                                widget.remindersState.isBeforeSalahReminderEnabled &&
+                                widget.remindersState.enabledBeforeSalahReminders
                                     .contains(Salaah.values[index]),
                             onAdd: () => context.read<PrayerTrackerBloc>().add(
                               PrayerTrackerEvent.addQada(Salaah.values[index]),
@@ -590,18 +598,18 @@ class _DailyPrayersSectionState extends State<_DailyPrayersSection> {
                               final salaah = Salaah.values[index];
                               final isEnabled = widget
                                   .remindersState
-                                  .enabledSalahReminders
+                                  .enabledBeforeSalahReminders
                                   .contains(salaah);
                               context
                                   .read<DailyRemindersCubit>()
-                                  .toggleSpecificSalahReminder(salaah);
+                                  .toggleSpecificBeforeSalahReminder(salaah);
                               _showReminderSnackBar(
                                 salaah.localizedName(l10n),
                                 !isEnabled,
                                 customMessage: !isEnabled
                                     ? (isAr
-                                          ? 'سنذكرك بتسجيل ${salaah.localizedName(l10n)} بعد الأذان'
-                                          : 'We will remind you to log ${salaah.localizedName(l10n)} after Azan')
+                                          ? 'سنذكرك قبل صلاة ${salaah.localizedName(l10n)}'
+                                          : 'We will remind you before ${salaah.localizedName(l10n)}')
                                     : (isAr
                                           ? 'تم إيقاف تذكير ${salaah.localizedName(l10n)}'
                                           : 'Reminder for ${salaah.localizedName(l10n)} disabled'),

@@ -4,6 +4,7 @@ import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_toggle.dart';
 import '../../../../core/widgets/fard_list_tile.dart';
+import '../../../../core/widgets/expandable_section_card.dart';
 import '../../../../core/mixins/notification_permission_mixin.dart';
 import '../../../../core/utils/time_utils.dart';
 import '../blocs/daily_reminders_cubit.dart';
@@ -19,8 +20,7 @@ class WerdReminderSection extends StatelessWidget
     return BlocBuilder<DailyRemindersCubit, DailyRemindersState>(
       builder: (context, state) {
         final cubit = context.read<DailyRemindersCubit>();
-        return _buildSection(
-          context,
+        return ExpandableSectionCard(
           title: l10n.werdReminder,
           icon: Icons.menu_book_rounded,
           accentColor: Colors.deepPurpleAccent,
@@ -78,63 +78,7 @@ class WerdReminderSection extends StatelessWidget
     );
   }
 
-  Widget _buildSection(
-    BuildContext context, {
-    required String title,
-    required IconData icon,
-    required List<Widget> children,
-    Color? accentColor,
-  }) {
-    final effectiveAccentColor = accentColor ?? context.primaryColor;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: context.surfaceContainerColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: context.outlineColor.withValues(alpha: 0.15),
-          width: 1.0,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: effectiveAccentColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(icon, color: effectiveAccentColor, size: 22),
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.bold,
-                    color: context.onSurfaceColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: children,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildToggleItem({
     required String title,

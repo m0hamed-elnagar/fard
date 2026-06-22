@@ -44,6 +44,7 @@ void main() {
     when(() => mockRepo.isBeforeSalahReminderEnabled).thenReturn(false);
     when(() => mockRepo.isAfterSalahReminderEnabled).thenReturn(true);
     when(() => mockRepo.enabledSalahReminders).thenReturn({});
+    when(() => mockRepo.enabledBeforeSalahReminders).thenReturn({});
     when(() => mockRepo.isWerdReminderEnabled).thenReturn(false);
     when(() => mockRepo.werdReminderTime).thenReturn('20:00');
     when(() => mockRepo.isSalawatReminderEnabled).thenReturn(false);

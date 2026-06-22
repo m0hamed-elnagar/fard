@@ -36,6 +36,7 @@ class AppSettings {
   final bool isBeforeSalahReminderEnabled;
   final bool isAfterSalahReminderEnabled;
   final Set<Salaah> enabledSalahReminders;
+  final Set<Salaah> enabledBeforeSalahReminders;
   final bool isWerdReminderEnabled;
   final String werdReminderTime;
   final bool isSalawatReminderEnabled;
@@ -67,6 +68,7 @@ class AppSettings {
     this.isBeforeSalahReminderEnabled = false,
     this.isAfterSalahReminderEnabled = true,
     this.enabledSalahReminders = const {},
+    this.enabledBeforeSalahReminders = const {},
     this.isWerdReminderEnabled = false,
     this.werdReminderTime = '08:00',
     this.isSalawatReminderEnabled = false,

@@ -173,7 +173,7 @@ class PrayerNotificationScheduler {
         // 2. Reminder Event
         if (_settingsProvider.isSalahReminderEnabled &&
             _settingsProvider.isBeforeSalahReminderEnabled &&
-            _settingsProvider.enabledSalahReminders.contains(salaahSetting.salaah) &&
+            _settingsProvider.enabledBeforeSalahReminders.contains(salaahSetting.salaah) &&
             salaahSetting.isReminderEnabled &&
             salaahSetting.reminderMinutesBefore > 0) {
           final reminderTime = tzSalaahTime.subtract(

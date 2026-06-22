@@ -11,6 +11,7 @@ import '../../../../core/services/voice_download_service.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/widgets/custom_toggle.dart';
 import '../../../../core/widgets/fard_list_tile.dart';
+import '../../../../core/widgets/expandable_section_card.dart';
 import '../../../../core/mixins/notification_permission_mixin.dart';
 import '../../../prayer_tracking/domain/salaah.dart';
 import '../../domain/salaah_settings.dart';
@@ -103,11 +104,11 @@ class _AdhanSectionState extends State<AdhanSection>
             !state.notificationsEnabled || !state.exactAlarmsEnabled;
         final bool isVoiceDownloaded = _dropdownValue == null || _downloadedVoices.contains(_dropdownValue);
 
-        return _buildSection(
-          context,
+        return ExpandableSectionCard(
           title: l10n.azan,
           icon: Icons.volume_up_rounded,
           accentColor: context.primaryColor,
+          initiallyExpanded: true,
           children: [
             if (notificationsDisabled)
               Container(
@@ -289,98 +290,66 @@ class _AdhanSectionState extends State<AdhanSection>
           cubit.updateSalaahSettings(s.copyWith(isAzanEnabled: val));
         },
       ),
-      onTap: () => _showIndividualAzanDialog(context, s, l10n),
+      onTap: () => _showIndividualAzanBottomSheet(context, s, l10n),
     );
   }
 
-  void _showIndividualAzanDialog(
+  void _showIndividualAzanBottomSheet(
     BuildContext context,
     SalaahSettings s,
     AppLocalizations l10n,
   ) {
     final cubit = context.read<AdhanCubit>();
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          _getLocalizedSalaahName(s.salaah, l10n),
-          style: TextStyle(color: context.onSurfaceColor),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: context.surfaceColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        content: Column(
+        padding: EdgeInsets.only(
+          top: 16,
+          left: 20,
+          right: 20,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        ),
+        child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: context.outlineColor.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '${l10n.localeName == 'ar' ? 'صوت الأذان لـ' : 'Adhan voice for '}${_getLocalizedSalaahName(s.salaah, l10n)}',
+              style: GoogleFonts.amiri(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: context.onSurfaceColor,
+              ),
+            ),
+            const SizedBox(height: 16),
             _buildVoiceDropdown(context, s.azanSound, l10n, (val) {
               cubit.updateSalaahSettings(s.copyWith(azanSound: val));
             }),
+            const SizedBox(height: 12),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.close),
-          ),
-        ],
       ),
     );
   }
 
-  Widget _buildSection(
-    BuildContext context, {
-    required String title,
-    required IconData icon,
-    required List<Widget> children,
-    Color? accentColor,
-  }) {
-    final effectiveAccentColor = accentColor ?? context.primaryColor;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: context.surfaceContainerColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: context.outlineColor.withValues(alpha: 0.15),
-          width: 1.0,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: effectiveAccentColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(icon, color: effectiveAccentColor, size: 22),
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  title,
-                  style: GoogleFonts.amiri(
-                    fontSize: 19,
-                    fontWeight: FontWeight.bold,
-                    color: context.onSurfaceColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: children,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildToggleItem({
     required String title,

@@ -1,3 +1,5 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:fard/core/services/connectivity_service.dart';
 import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/voice_download_service.dart';
 import 'package:fard/core/services/widget_update_service.dart';
@@ -12,7 +14,7 @@ import 'package:fard/features/settings/presentation/blocs/daily_reminders_cubit.
 import 'package:fard/features/settings/presentation/blocs/daily_reminders_state.dart';
 import 'package:fard/features/settings/presentation/blocs/adhan_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/adhan_state.dart';
-import 'package:fard/features/settings/presentation/screens/settings_screen.dart';
+import 'package:fard/features/settings/presentation/screens/azan_settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -45,6 +47,8 @@ class MockNotificationService extends Mock implements NotificationService {
 
 class MockVoiceDownloadService extends Mock implements VoiceDownloadService {}
 
+class MockConnectivityService extends Mock implements ConnectivityService {}
+
 class MockWidgetUpdateService extends Mock implements WidgetUpdateService {
   @override
   Future<Map<String, String>?> getWidgetTheme() async => {};
@@ -64,6 +68,7 @@ void main() {
   late MockAzkarBloc mockAzkarBloc;
   late MockNotificationService mockNotificationService;
   late MockVoiceDownloadService mockVoiceDownloadService;
+  late MockConnectivityService mockConnectivityService;
 
   setUp(() {
     mockLocationPrayerCubit = MockLocationPrayerCubit();
@@ -73,12 +78,14 @@ void main() {
     mockAzkarBloc = MockAzkarBloc();
     mockNotificationService = MockNotificationService();
     mockVoiceDownloadService = MockVoiceDownloadService();
+    mockConnectivityService = MockConnectivityService();
 
     final getIt = GetIt.instance;
     getIt.reset();
     getIt.registerSingleton<NotificationService>(mockNotificationService);
     getIt.registerSingleton<VoiceDownloadService>(mockVoiceDownloadService);
     getIt.registerSingleton<WidgetUpdateService>(MockWidgetUpdateService());
+    getIt.registerSingleton<ConnectivityService>(mockConnectivityService);
 
     when(
       () => mockNotificationService.canScheduleExactNotifications(),
@@ -86,6 +93,16 @@ void main() {
     when(
       () => mockNotificationService.testReminder(any(), any()),
     ).thenAnswer((_) async {});
+
+    when(() => mockConnectivityService.onConnectivityChanged).thenAnswer(
+      (_) => Stream.value([ConnectivityResult.wifi]),
+    );
+    when(() => mockConnectivityService.hasNetwork()).thenAnswer(
+      (_) async => true,
+    );
+    when(() => mockVoiceDownloadService.isDownloaded(any())).thenAnswer(
+      (_) async => false,
+    );
 
     when(
       () => mockLocationPrayerCubit.state,
@@ -192,6 +209,9 @@ void main() {
       if (!getIt.isRegistered<VoiceDownloadService>()) {
         getIt.registerSingleton<VoiceDownloadService>(mockVoiceDownloadService);
       }
+      if (!getIt.isRegistered<ConnectivityService>()) {
+        getIt.registerSingleton<ConnectivityService>(mockConnectivityService);
+      }
       return MultiBlocProvider(
         providers: [
           BlocProvider<AzkarBloc>.value(value: mockAzkarBloc),
@@ -208,7 +228,7 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: Locale('en'),
-          home: Scaffold(body: SettingsScreen()),
+          home: AzanSettingsScreen(),
         ),
       );
     }
@@ -225,7 +245,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final l10n = AppLocalizations.of(
-        tester.element(find.byType(SettingsScreen)),
+        tester.element(find.byType(AzanSettingsScreen)),
       )!;
 
       // Expand Azkar section

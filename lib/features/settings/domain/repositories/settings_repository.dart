@@ -95,6 +95,9 @@ abstract interface class SettingsRepository {
   /// Set of prayers that have reminders enabled
   Set<Salaah> get enabledSalahReminders;
 
+  /// Set of prayers that have before-salah reminders enabled
+  Set<Salaah> get enabledBeforeSalahReminders;
+
   /// Whether daily Werd reminder is enabled
   bool get isWerdReminderEnabled;
 
@@ -217,6 +220,9 @@ abstract interface class SettingsRepository {
 
   /// Update the list of enabled post-prayer reminders
   Future<void> updateEnabledSalahReminders(Set<Salaah> enabledSalahs);
+
+  /// Update the list of enabled before-prayer reminders
+  Future<void> updateEnabledBeforeSalahReminders(Set<Salaah> enabledSalahs);
 
   /// Update Werd reminder enabled state
   Future<void> updateWerdReminderEnabled(bool enabled);

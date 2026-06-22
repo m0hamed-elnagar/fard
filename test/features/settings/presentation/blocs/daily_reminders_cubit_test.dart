@@ -40,6 +40,7 @@ void main() {
     when(() => mockRepo.isBeforeSalahReminderEnabled).thenReturn(false);
     when(() => mockRepo.isAfterSalahReminderEnabled).thenReturn(true);
     when(() => mockRepo.enabledSalahReminders).thenReturn(<Salaah>{});
+    when(() => mockRepo.enabledBeforeSalahReminders).thenReturn(<Salaah>{});
     when(() => mockRepo.isWerdReminderEnabled).thenReturn(false);
     when(() => mockRepo.werdReminderTime).thenReturn('04:00');
     when(() => mockRepo.isSalawatReminderEnabled).thenReturn(false);
@@ -60,6 +61,9 @@ void main() {
     ).thenAnswer((_) async {});
     when(
       () => mockRepo.updateEnabledSalahReminders(any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockRepo.updateEnabledBeforeSalahReminders(any()),
     ).thenAnswer((_) async {});
     when(() => mockRepo.toggleQadaEnabled()).thenAnswer((_) async {});
     when(() => mockSyncNotif.execute()).thenAnswer((_) async {});

@@ -2,6 +2,7 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/features/settings/presentation/widgets/adhan_section.dart';
 import 'package:fard/features/settings/presentation/widgets/prayer_reminders_section.dart';
+import 'package:fard/features/settings/presentation/widgets/azkar_section.dart';
 import 'package:fard/features/settings/presentation/widgets/werd_reminder_section.dart';
 import 'package:fard/features/settings/presentation/widgets/salawat_reminder_section.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,7 @@ class AzanSettingsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          l10n.azanSettings,
+          l10n.azanNotifications,
           style: GoogleFonts.amiri(fontWeight: FontWeight.bold, fontSize: 24),
         ),
         backgroundColor: Colors.transparent,
@@ -31,6 +32,7 @@ class AzanSettingsScreen extends StatelessWidget {
         children: const [
           AdhanSection(),
           PrayerRemindersSection(),
+          AzkarSection(),
           WerdReminderSection(),
           SalawatReminderSection(),
         ],

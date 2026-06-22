@@ -181,6 +181,7 @@ void main() {
     when(() => mockSettingsRepository.isBeforeSalahReminderEnabled).thenReturn(false);
     when(() => mockSettingsRepository.isAfterSalahReminderEnabled).thenReturn(true);
     when(() => mockSettingsRepository.enabledSalahReminders).thenReturn({});
+    when(() => mockSettingsRepository.enabledBeforeSalahReminders).thenReturn({});
   });
 
   test('schedulePrayerNotifications schedules all 5 prayers', () async {

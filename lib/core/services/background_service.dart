@@ -107,6 +107,9 @@ class _BackgroundSettingsProvider implements SettingsRepository {
   Set<Salaah> get enabledSalahReminders => _settings.enabledSalahReminders;
 
   @override
+  Set<Salaah> get enabledBeforeSalahReminders => _settings.enabledBeforeSalahReminders;
+
+  @override
   bool get isWerdReminderEnabled => _settings.isWerdReminderEnabled;
 
   @override
@@ -233,6 +236,10 @@ class _BackgroundSettingsProvider implements SettingsRepository {
 
   @override
   Future<void> updateEnabledSalahReminders(Set<Salaah> enabledSalahs) =>
+      Future.value();
+
+  @override
+  Future<void> updateEnabledBeforeSalahReminders(Set<Salaah> enabledSalahs) =>
       Future.value();
 
   @override

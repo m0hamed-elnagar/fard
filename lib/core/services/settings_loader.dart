@@ -91,6 +91,7 @@ class SettingsLoader {
       isBeforeSalahReminderEnabled: beforeEnabled,
       isAfterSalahReminderEnabled: afterEnabled,
       enabledSalahReminders: _loadEnabledSalahReminders(prefs),
+      enabledBeforeSalahReminders: _loadEnabledBeforeSalahReminders(prefs),
       isWerdReminderEnabled:
           prefs.getBool(SettingsKeys.isWerdReminderEnabled) ?? false,
       werdReminderTime:
@@ -107,6 +108,19 @@ class SettingsLoader {
 
   static Set<Salaah> _loadEnabledSalahReminders(SharedPreferences prefs) {
     final String? jsonStr = prefs.getString(SettingsKeys.enabledSalahReminders);
+    if (jsonStr == null) return {};
+    try {
+      final List<dynamic> decoded = jsonDecode(jsonStr);
+      return decoded
+          .map((e) => Salaah.values.firstWhere((s) => s.name == e))
+          .toSet();
+    } catch (_) {
+      return {};
+    }
+  }
+
+  static Set<Salaah> _loadEnabledBeforeSalahReminders(SharedPreferences prefs) {
+    final String? jsonStr = prefs.getString(SettingsKeys.enabledBeforeSalahReminders);
     if (jsonStr == null) return {};
     try {
       final List<dynamic> decoded = jsonDecode(jsonStr);

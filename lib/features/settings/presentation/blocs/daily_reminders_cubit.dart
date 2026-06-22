@@ -31,6 +31,7 @@ class DailyRemindersCubit extends Cubit<DailyRemindersState> {
           isBeforeSalahReminderEnabled: _repo.isBeforeSalahReminderEnabled,
           isAfterSalahReminderEnabled: _repo.isAfterSalahReminderEnabled,
           enabledSalahReminders: _repo.enabledSalahReminders,
+          enabledBeforeSalahReminders: _repo.enabledBeforeSalahReminders,
           isWerdReminderEnabled: _repo.isWerdReminderEnabled,
           werdReminderTime: _repo.werdReminderTime,
           isSalawatReminderEnabled: _repo.isSalawatReminderEnabled,
@@ -129,6 +130,38 @@ class DailyRemindersCubit extends Cubit<DailyRemindersState> {
       await _repo.updateSalahReminderEnabled(masterEnabled);
     }
     await _repo.updateEnabledSalahReminders(set);
+    _sync();
+  }
+
+  void toggleSpecificBeforeSalahReminder(Salaah salaah) {
+    _toggleSpecificBeforeSalahReminderAsync(salaah);
+  }
+
+  Future<void> _toggleSpecificBeforeSalahReminderAsync(Salaah salaah) async {
+    final set = Set<Salaah>.from(state.enabledBeforeSalahReminders);
+    final bool oldMasterEnabled = state.isSalahReminderEnabled;
+    bool masterEnabled = oldMasterEnabled;
+
+    if (set.contains(salaah)) {
+      set.remove(salaah);
+    } else {
+      set.add(salaah);
+      if (!masterEnabled) {
+        masterEnabled = true;
+      }
+    }
+
+    emit(
+      state.copyWith(
+        enabledBeforeSalahReminders: set,
+        isSalahReminderEnabled: masterEnabled,
+      ),
+    );
+
+    if (masterEnabled != oldMasterEnabled) {
+      await _repo.updateSalahReminderEnabled(masterEnabled);
+    }
+    await _repo.updateEnabledBeforeSalahReminders(set);
     _sync();
   }
 
@@ -328,6 +361,7 @@ class DailyRemindersCubit extends Cubit<DailyRemindersState> {
         isBeforeSalahReminderEnabled: _repo.isBeforeSalahReminderEnabled,
         isAfterSalahReminderEnabled: _repo.isAfterSalahReminderEnabled,
         enabledSalahReminders: _repo.enabledSalahReminders,
+        enabledBeforeSalahReminders: _repo.enabledBeforeSalahReminders,
         isWerdReminderEnabled: _repo.isWerdReminderEnabled,
         werdReminderTime: _repo.werdReminderTime,
         isSalawatReminderEnabled: _repo.isSalawatReminderEnabled,

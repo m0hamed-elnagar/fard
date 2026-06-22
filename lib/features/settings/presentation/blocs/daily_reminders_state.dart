@@ -19,6 +19,7 @@ sealed class DailyRemindersState with _$DailyRemindersState {
     @Default(false) bool isBeforeSalahReminderEnabled,
     @Default(true) bool isAfterSalahReminderEnabled,
     @Default({}) Set<Salaah> enabledSalahReminders,
+    @Default({}) Set<Salaah> enabledBeforeSalahReminders,
     @Default(false) bool isWerdReminderEnabled,
     @Default('08:00') String werdReminderTime,
     @Default(false) bool isSalawatReminderEnabled,

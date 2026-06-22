@@ -13,7 +13,6 @@ import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.
 import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
 import 'package:fard/features/settings/presentation/screens/azan_settings_screen.dart';
 import 'package:fard/features/settings/presentation/widgets/appearance_section.dart';
-import 'package:fard/features/settings/presentation/widgets/azkar_section.dart';
 import 'package:fard/features/settings/presentation/widgets/general_section.dart';
 import 'package:fard/features/settings/presentation/widgets/location_section.dart';
 import 'package:fard/features/settings/presentation/widgets/widget_preview_section.dart';
@@ -119,9 +118,6 @@ class _SettingsScreenState extends State<SettingsScreen>
                 );
               },
             ),
-
-            // Section 4: Azkar
-            const AzkarSection(),
 
             // Section 5: Data & Location
             const DataAndLocationSection(),

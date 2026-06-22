@@ -40,6 +40,7 @@ abstract final class SettingsKeys {
   static const String isAfterSalahReminderEnabled =
       'is_after_salah_reminder_enabled';
   static const String enabledSalahReminders = 'enabled_salah_reminders';
+  static const String enabledBeforeSalahReminders = 'enabled_before_salah_reminders';
   static const String isWerdReminderEnabled = 'is_werd_reminder_enabled';
   static const String werdReminderTime = 'werd_reminder_time';
   static const String isSalawatReminderEnabled = 'is_salawat_reminder_enabled';
