@@ -327,7 +327,7 @@ void callbackDispatcher() {
 
         final notificationsPlugin = FlutterLocalNotificationsPlugin();
         const AndroidInitializationSettings initializationSettingsAndroid =
-            AndroidInitializationSettings('@mipmap/ic_launcher');
+            AndroidInitializationSettings('ic_launcher');
         const InitializationSettings initializationSettings =
             InitializationSettings(
               android: initializationSettingsAndroid,

@@ -260,6 +260,9 @@ void main() {
       when(() => mockSettingsProvider.longitude).thenReturn(lon);
       when(() => mockSettingsProvider.calculationMethod).thenReturn('egyptian');
       when(() => mockSettingsProvider.madhab).thenReturn('shafi');
+      when(() => mockSettingsProvider.isSalahReminderEnabled).thenReturn(true);
+      when(() => mockSettingsProvider.isBeforeSalahReminderEnabled).thenReturn(true);
+      when(() => mockSettingsProvider.enabledBeforeSalahReminders).thenReturn({Salaah.dhuhr});
       when(() => mockSettingsProvider.salaahSettings).thenReturn([
         SalaahSettings(
           salaah: Salaah.dhuhr,
@@ -293,7 +296,7 @@ void main() {
           () => mockNotificationsPlugin.zonedSchedule(
             id: 301, // Dhuhr Reminder ID
             title: any(named: 'title', that: contains('تذكير')),
-            body: any(named: 'body', that: contains('$minutesBefore')),
+            body: any(named: 'body', that: contains('اقتربت')),
             scheduledDate: any(named: 'scheduledDate'),
             notificationDetails: any(named: 'notificationDetails'),
             androidScheduleMode: any(named: 'androidScheduleMode'),

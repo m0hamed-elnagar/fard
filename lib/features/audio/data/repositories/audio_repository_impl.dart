@@ -70,8 +70,13 @@ class AudioRepositoryImpl implements AudioRepository {
         final Map<String, dynamic> data = json.decode(response.body);
         final List<dynamic> editions = data['data'];
 
-        // Include all reciters from Al Quran Cloud as we have a CDN fallback for all
+        // Include all reciters from Al Quran Cloud as we have a CDN fallback for all,
+        // filtering out duplicate/alternate entries (e.g. identifiers ending with -2)
         final reciters = editions
+            .where((e) {
+              final id = e['identifier'] as String;
+              return !id.endsWith('-2');
+            })
             .map(
               (e) => Reciter(
                 identifier: e['identifier'],
@@ -501,6 +506,7 @@ class AudioRepositoryImpl implements AudioRepository {
                 style: e['style'],
               ),
             )
+            .where((r) => !r.identifier.endsWith('-2'))
             .toList();
       }
 

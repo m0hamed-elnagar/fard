@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.8+16] - 2026-06-27
+
+### Added
+- **Local Fallback Fonts**: Added a local fallback directory (`assets/fonts/`) to the Flutter configuration.
+
+### Fixed
+- **Glance Widget**: Resolved crash on Android when clicking/opening the widget by providing an explicit intent flag instead of generic class action start activity.
+- **Local Notifications**: Fixed local notification initialization crash on Android by using `ic_launcher` directly.
+- **Reciters List**: Filtered out duplicate/alternate entries for reciters (identifiers ending with `-2`) from Al Quran Cloud to prevent duplicates in selection, and added comprehensive repository tests.
+- **Google Fonts Loading**: Suppressed non-fatal Google Fonts network loading errors from polluting Crashlytics.
+
 ## [1.5.7+15] - 2026-06-21
 
 ### Added

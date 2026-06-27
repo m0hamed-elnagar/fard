@@ -112,7 +112,7 @@ class NotificationService {
       debugPrint('Local timezone set to: $timeZoneName');
 
       const AndroidInitializationSettings initializationSettingsAndroid =
-          AndroidInitializationSettings('@mipmap/ic_launcher');
+          AndroidInitializationSettings('ic_launcher');
 
       const DarwinInitializationSettings initializationSettingsDarwin =
           DarwinInitializationSettings(

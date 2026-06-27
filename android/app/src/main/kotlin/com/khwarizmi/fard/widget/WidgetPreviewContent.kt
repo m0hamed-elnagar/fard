@@ -5,9 +5,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.content.Intent
+import androidx.glance.LocalContext
 import androidx.glance.GlanceModifier
 import androidx.glance.LocalSize
-import androidx.glance.action.actionStartActivity
+import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
@@ -74,12 +76,17 @@ fun PrayerScheduleContent(
     val hPad = if (isCompact) 6.dp else 16.dp
     val vPad = if (isCompact) 4.dp else 14.dp
 
+    val context = LocalContext.current
+    val intent = Intent(context, MainActivity::class.java).apply {
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
             .background(colors.background)
             .cornerRadius(16.dp)
-            .clickable(actionStartActivity<MainActivity>())
+            .clickable(actionStartActivity(intent))
             .padding(horizontal = hPad, vertical = vPad),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -349,12 +356,17 @@ fun CountdownContent(
         else -> 18.dp
     }
 
+    val context = LocalContext.current
+    val intent = Intent(context, MainActivity::class.java).apply {
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
             .background(colors.background)
             .cornerRadius(16.dp)
-            .clickable(actionStartActivity<MainActivity>())
+            .clickable(actionStartActivity(intent))
             .padding(padding),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalAlignment = Alignment.CenterVertically

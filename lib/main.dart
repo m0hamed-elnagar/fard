@@ -67,10 +67,35 @@ void main() async {
     // Pass Flutter framework errors to Crashlytics as NON-fatal.
     // Fatal is reserved for truly unrecoverable errors (PlatformDispatcher).
     FlutterError.onError = (errorDetails) {
+      final exceptionStr = errorDetails.exception.toString().toLowerCase();
+      final stackStr = errorDetails.stack?.toString().toLowerCase() ?? '';
+
+      // Ignore Google Fonts network loading errors as they are non-fatal,
+      // handled gracefully by falling back to system fonts, and shouldn't pollute Crashlytics.
+      if (exceptionStr.contains('google_fonts') ||
+          exceptionStr.contains('fonts.gstatic.com') ||
+          stackStr.contains('google_fonts') ||
+          stackStr.contains('_httpfetchfontandsavetodevice')) {
+        debugPrint('[Crashlytics] Suppressed Google Fonts loading error');
+        return;
+      }
+
       FirebaseCrashlytics.instance.recordFlutterError(errorDetails);
     };
     // Pass all uncaught async errors (outside Flutter framework) as fatal.
     PlatformDispatcher.instance.onError = (error, stack) {
+      final errorStr = error.toString().toLowerCase();
+      final stackStr = stack.toString().toLowerCase();
+
+      // Ignore Google Fonts network loading errors as they are non-fatal.
+      if (errorStr.contains('google_fonts') ||
+          errorStr.contains('fonts.gstatic.com') ||
+          stackStr.contains('google_fonts') ||
+          stackStr.contains('_httpfetchfontandsavetodevice')) {
+        debugPrint('[Crashlytics] Suppressed Google Fonts async loading error');
+        return true;
+      }
+
       FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
       return true;
     };
