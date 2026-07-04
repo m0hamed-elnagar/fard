@@ -62,8 +62,26 @@ class LocationService {
       );
       if (placemarks.isNotEmpty) {
         final place = placemarks[0];
+        
+        // Find the best non-empty name representing the city/region
+        String? city = place.locality;
+        if (city == null || city.trim().isEmpty) {
+          city = place.subAdministrativeArea;
+        }
+        if (city == null || city.trim().isEmpty) {
+          city = place.administrativeArea;
+        }
+        if (city == null || city.trim().isEmpty) {
+          city = place.subLocality;
+        }
+        if (city == null || city.trim().isEmpty) {
+          city = place.name;
+        }
+
+        final trimmedCity = cleanCityName(city);
+
         return {
-          'city': place.locality ?? place.subAdministrativeArea,
+          'city': trimmedCity,
           'countryCode': place.isoCountryCode,
         };
       }
@@ -71,5 +89,18 @@ class LocationService {
       return null;
     }
     return null;
+  }
+
+  static String? cleanCityName(String? name) {
+    if (name == null) return null;
+    final cleaned = name
+        .replaceAll(
+          RegExp(r'(?<=^|\s)(m[ae]dina[ht]?|m[ae]dinet)(?=$|\s)', caseSensitive: false),
+          '',
+        )
+        .replaceAll(RegExp(r'(?<=^|\s)(مدينة|مدينه)(?=$|\s)'), '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    return cleaned.isNotEmpty ? cleaned : null;
   }
 }

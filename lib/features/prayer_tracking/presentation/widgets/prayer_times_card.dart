@@ -162,7 +162,7 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
   /// This is conservative - ensures prayer time has definitely started
   String _formatPrayerTime(DateTime time, String locale) {
     // Truncate seconds (always round down): 12:30:59 → 12:30
-    final timeFormat = DateFormat('h:mm a');
+    final timeFormat = DateFormat('h:mm');
     final timeStr = timeFormat.format(time);
 
     if (locale == 'ar') {
@@ -323,7 +323,7 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                                 isAr ? _countdown.toArabicIndic() : _countdown,
                                 style: GoogleFonts.outfit(
                                   color: context.onSurfaceColor,
-                                  fontSize: isShort ? 36 : 42,
+                                  fontSize: isShort ? 32 : 38,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 1,
                                   height: 1.0,
@@ -431,7 +431,7 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                                           color: isNext
                                               ? context.secondaryColor
                                               : context.onSurfaceVariantColor,
-                                          fontSize: isVeryNarrow ? 10 : 12,
+                                          fontSize: isVeryNarrow ? 12 : 16,
                                           fontWeight: isNext
                                               ? FontWeight.bold
                                               : FontWeight.w600,
@@ -452,7 +452,7 @@ class _PrayerTimesCardState extends State<PrayerTimesCard> {
                                               ? context.onSurfaceColor
                                               : context.onSurfaceColor
                                                     .withValues(alpha: 0.9),
-                                          fontSize: isVeryNarrow ? 11 : 13,
+                                          fontSize: isVeryNarrow ? 14 : 20,
                                           fontWeight: isNext
                                               ? FontWeight.bold
                                               : FontWeight.w600,

@@ -70,22 +70,27 @@ class SyncLocationSettings {
     String? cityName;
     String? countryCode;
     String method = _settingsRepo.calculationMethod;
+    int hijriAdjustment = _settingsRepo.hijriAdjustment;
 
     if (locationData != null) {
       cityName = locationData['city'];
       countryCode = locationData['countryCode'];
-      if (cityName != null) {
+      if (cityName != null && cityName.trim().isNotEmpty) {
         await _settingsRepo.updateLocation(cityName: cityName);
       }
 
       if (countryCode != null) {
         method = _mapCountryToMethod(countryCode);
         await _settingsRepo.updateCalculationMethod(method);
+
+        hijriAdjustment = _computeHijriAdjustment(countryCode);
+        await _settingsRepo.updateHijriAdjustment(hijriAdjustment);
       }
     }
 
-    final hijriAdjustment = _computeHijriAdjustment(countryCode);
-    await _settingsRepo.updateHijriAdjustment(hijriAdjustment);
+    if (cityName == null || cityName.trim().isEmpty) {
+      cityName = _settingsRepo.cityName;
+    }
 
     return LocationSyncResult(
       latitude: position.latitude,
