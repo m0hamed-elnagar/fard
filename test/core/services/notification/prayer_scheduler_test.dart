@@ -1,6 +1,10 @@
 import 'package:adhan/adhan.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fard/core/services/notification/channel_manager.dart';
 import 'package:fard/core/services/notification/prayer_scheduler.dart';
+import 'package:fard/core/services/voice_download_service.dart';
+import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/notification/sound_manager.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/features/azkar/data/azkar_repository.dart';
@@ -75,6 +79,7 @@ void main() {
   });
 
   setUp(() {
+    SharedPreferences.setMockInitialValues({});
     mockNotificationsPlugin = MockFlutterLocalNotificationsPlugin();
     mockPrayerTimeService = MockPrayerTimeService();
     mockAzkarRepository = MockAzkarRepository();
@@ -325,6 +330,89 @@ void main() {
       ),
     ).called(15);
   });
+
+  test('schedulePrayerNotifications writes adhan schedule to SharedPreferences and invokes MethodChannel on Android', () async {
+    final mockVoiceDownloadService = MockVoiceDownloadService();
+    when(() => mockVoiceDownloadService.getAccessiblePath(any()))
+        .thenAnswer((_) async => '/mock/path/to/sound.mp3');
+    getIt.registerSingleton<VoiceDownloadService>(mockVoiceDownloadService);
+
+    const adhanChannel = MethodChannel('com.khwarizmi.fard/adhan');
+    final List<MethodCall> methodCalls = [];
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(adhanChannel, (MethodCall call) async {
+      methodCalls.add(call);
+      return true;
+    });
+
+    when(() => mockAndroidPlugin.canScheduleExactNotifications()).thenAnswer((_) async => true);
+    when(() => mockSettingsRepository.latitude).thenReturn(30.0);
+    when(() => mockSettingsRepository.longitude).thenReturn(31.0);
+    when(() => mockSettingsRepository.calculationMethod).thenReturn('muslim_league');
+    when(() => mockSettingsRepository.madhab).thenReturn('shafi');
+    
+    when(() => mockSettingsRepository.salaahSettings).thenReturn([
+      const SalaahSettings(
+        salaah: Salaah.fajr,
+        isAzanEnabled: true,
+        isReminderEnabled: false,
+        azanSound: 'Ali Ahmed Mala',
+      ),
+      const SalaahSettings(
+        salaah: Salaah.dhuhr,
+        isAzanEnabled: true,
+        isReminderEnabled: false,
+        azanSound: 'default',
+      ),
+    ]);
+
+    final now = DateTime.now().toUtc();
+    when(
+      () => mockPrayerTimeService.getPrayerTimes(
+        latitude: any(named: 'latitude'),
+        longitude: any(named: 'longitude'),
+        method: any(named: 'method'),
+        madhab: any(named: 'madhab'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(MockPrayerTimes());
+
+    when(
+      () => mockPrayerTimeService.getTimeForSalaah(any(), any()),
+    ).thenReturn(now.add(const Duration(hours: 1)));
+
+    try {
+      await scheduler.schedulePrayerNotifications(mockNotificationsPlugin);
+
+      expect(methodCalls.map((c) => c.method), contains('rescheduleAdhanAlarms'));
+
+      final prefs = await SharedPreferences.getInstance();
+      final jsonStr = prefs.getString('fard.adhan_schedule');
+      expect(jsonStr, isNotNull);
+
+      final List<dynamic> schedule = jsonDecode(jsonStr!);
+      expect(schedule.length, equals(4));
+      
+      final fajrItem = schedule.firstWhere(
+        (item) =>
+            item['prayerName'] == 'fajr' ||
+            item['prayerName'] == 'الفجر' ||
+            item['prayerName'].toString().toLowerCase().contains('fajr'),
+      );
+      expect(fajrItem['enabled'], isTrue);
+
+      final dhuhrItem = schedule.firstWhere(
+        (item) =>
+            item['prayerName'] == 'dhuhr' ||
+            item['prayerName'] == 'الظهر' ||
+            item['prayerName'].toString().toLowerCase().contains('dhuhr'),
+      );
+      expect(dhuhrItem['enabled'], isFalse);
+    } finally {
+      await getIt.unregister<VoiceDownloadService>();
+    }
+  });
 }
 
 class MockPrayerTimes extends Mock implements PrayerTimes {}
+class MockVoiceDownloadService extends Mock implements VoiceDownloadService {}

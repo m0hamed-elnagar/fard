@@ -54,6 +54,9 @@ class AppIdentifiers {
   /// MethodChannel name for widget theme persistence (package-specific).
   static String get widgetThemeChannelName => '$packageName/widget_theme';
 
+  /// MethodChannel name for Adhan alarms scheduling (package-specific).
+  static String get adhanChannelName => '$packageName/adhan';
+
   /// WorkManager task names (package-specific).
   static String get prayerSchedulerTaskName =>
       '$_notificationBase.prayer_scheduler_task';

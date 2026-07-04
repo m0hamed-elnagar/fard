@@ -123,6 +123,7 @@ class ChannelManager {
       }
     }
 
+    final bool isDefault = sound == 'default';
     final androidChannel = AndroidNotificationChannel(
       channelId,
       isTest ? 'Azan Test' : 'Azan ${salaahId.toUpperCase()}',
@@ -131,7 +132,8 @@ class ChannelManager {
           : 'Azan notifications for ${salaahId.toUpperCase()}',
       importance: Importance.max,
       playSound: true,
-      audioAttributesUsage: AudioAttributesUsage.alarm,
+      audioAttributesUsage:
+          isDefault ? AudioAttributesUsage.notification : AudioAttributesUsage.alarm,
       sound: notificationSound,
     );
 

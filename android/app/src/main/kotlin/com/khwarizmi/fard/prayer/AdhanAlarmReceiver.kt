@@ -1,0 +1,76 @@
+package com.khwarizmi.fard.prayer
+
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.os.PowerManager
+import android.util.Log
+import androidx.core.content.ContextCompat
+
+class AdhanAlarmReceiver : BroadcastReceiver() {
+    companion object {
+        private const val TAG = "AdhanAlarmReceiver"
+        private const val WAKELOCK_TAG = "fard:adhan_wakelock"
+        private const val WAKELOCK_TIMEOUT_MS = 10 * 60 * 1000L // 10 minutes
+
+        @Volatile
+        var wakeLock: PowerManager.WakeLock? = null
+
+        fun releaseWakeLock() {
+            try {
+                synchronized(this) {
+                    wakeLock?.let {
+                        if (it.isHeld) {
+                            it.release()
+                            Log.d(TAG, "WakeLock released successfully")
+                        }
+                    }
+                    wakeLock = null
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error releasing WakeLock", e)
+            }
+        }
+    }
+
+    override fun onReceive(context: Context, intent: Intent) {
+        Log.d(TAG, "onReceive: Adhan Alarm Triggered")
+
+        // Acquire WakeLock immediately to ensure the device stays awake
+        try {
+            val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+            synchronized(AdhanAlarmReceiver::class.java) {
+                if (wakeLock == null) {
+                    wakeLock = powerManager.newWakeLock(
+                        PowerManager.PARTIAL_WAKE_LOCK,
+                        WAKELOCK_TAG
+                    ).apply {
+                        acquire(WAKELOCK_TIMEOUT_MS)
+                    }
+                    Log.d(TAG, "WakeLock acquired with 10 mins timeout")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error acquiring WakeLock", e)
+        }
+
+        val prayerName = intent.getStringExtra("prayerName") ?: ""
+        val audioFilePath = intent.getStringExtra("audioFilePath") ?: ""
+
+        Log.d(TAG, "onReceive: prayerName=$prayerName, audioFilePath=$audioFilePath")
+
+        // Start AdhanService as a Foreground Service
+        val serviceIntent = Intent(context, AdhanService::class.java).apply {
+            putExtra("prayerName", prayerName)
+            putExtra("audioFilePath", audioFilePath)
+        }
+
+        try {
+            ContextCompat.startForegroundService(context, serviceIntent)
+            Log.d(TAG, "AdhanService started successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to start AdhanService, releasing WakeLock", e)
+            releaseWakeLock()
+        }
+    }
+}

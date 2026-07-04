@@ -13,6 +13,7 @@ import com.khwarizmi.fard.prayer.PrayerAlarmManager
 import com.khwarizmi.fard.prayer.PrayerTimesCalculator
 import com.khwarizmi.fard.prayer.SettingsRepository
 import com.khwarizmi.fard.prayer.PrayerParity
+import com.khwarizmi.fard.prayer.AdhanService
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -35,6 +36,61 @@ class MainActivity : AudioServiceActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        // Adhan alarms reschedule channel
+        val adhanChannelName = "$packageName/adhan"
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, adhanChannelName).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "rescheduleAdhanAlarms" -> {
+                    Log.d(TAG, "MethodChannel rescheduleAdhanAlarms called")
+                    try {
+                        PrayerAlarmManager.scheduleAdhanAlarms(this)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error in rescheduleAdhanAlarms channel call", e)
+                        result.error("SCHEDULING_FAILED", e.message, null)
+                    }
+                }
+                "startAdhanService" -> {
+                    val prayerName = call.argument<String>("prayerName") ?: "تجربة"
+                    val audioFilePath = call.argument<String>("audioFilePath") ?: ""
+                    val isTest = call.argument<Boolean>("isTest") ?: false
+                    Log.d(TAG, "MethodChannel startAdhanService called: prayerName=$prayerName, audioFilePath=$audioFilePath, isTest=$isTest")
+                    try {
+                        val intent = Intent(this, AdhanService::class.java).apply {
+                            putExtra("prayerName", prayerName)
+                            putExtra("audioFilePath", audioFilePath)
+                            putExtra("isTest", isTest)
+                        }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            startForegroundService(intent)
+                        } else {
+                            startService(intent)
+                        }
+                        result.success(true)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error in startAdhanService channel call", e)
+                        result.error("PLAYBACK_FAILED", e.message, null)
+                    }
+                }
+                "stopAdhanService" -> {
+                    Log.d(TAG, "MethodChannel stopAdhanService called")
+                    try {
+                        val intent = Intent(this, AdhanService::class.java).apply {
+                            action = "$packageName.action.STOP_ADHAN"
+                        }
+                        startService(intent)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error in stopAdhanService channel call", e)
+                        result.error("STOP_FAILED", e.message, null)
+                    }
+                }
+                else -> {
+                    result.notImplemented()
+                }
+            }
+        }
 
         // Original settings channel (dynamic using packageName)
         val settingsChannelName = "$packageName/instant_updates"

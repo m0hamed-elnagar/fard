@@ -89,6 +89,17 @@
           </intent-filter>
         </receiver>
 
+        <!-- Adhan Playback Foreground Service -->
+        <service
+            android:name=".prayer.AdhanService"
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="false" />
+
+        <!-- Adhan Alarm Broadcast Receiver -->
+        <receiver
+            android:name=".prayer.AdhanAlarmReceiver"
+            android:exported="false" />
+
         <receiver android:name="com.khwarizmi.fard.PrayerWidgetReceiver"
             android:label="Prayer Schedule"
             android:exported="true">

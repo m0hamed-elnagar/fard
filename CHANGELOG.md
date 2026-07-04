@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.9+17] - 2026-07-04
+
+### Fixed
+- **Local Notifications**: Corrected Android scheduled notification receiver NullPointerException by properly referencing the launcher icon resource as `@mipmap/ic_launcher` instead of `ic_launcher`.
+
 ## [1.5.8+16] - 2026-06-27
 
 ### Added

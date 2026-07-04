@@ -43,6 +43,10 @@ void main() {
         equals('com.khwarizmi.fard/widget_theme'),
       );
       expect(
+        AppIdentifiers.adhanChannelName,
+        equals('com.khwarizmi.fard/adhan'),
+      );
+      expect(
         AppIdentifiers.prayerSchedulerTaskName,
         equals('com.khwarizmi.fard.prayer_scheduler_task'),
       );
@@ -87,6 +91,10 @@ void main() {
       expect(
         AppIdentifiers.widgetThemeChannelName,
         equals('com.khwarizmi.fard.debug/widget_theme'),
+      );
+      expect(
+        AppIdentifiers.adhanChannelName,
+        equals('com.khwarizmi.fard.debug/adhan'),
       );
       expect(
         AppIdentifiers.prayerSchedulerTaskName,

@@ -1,4 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fard/core/di/injection.dart';
+import 'package:fard/core/services/voice_download_service.dart';
 import 'package:fard/features/azkar/data/azkar_source.dart';
 import 'package:fard/core/utils/salawat_schedule_helper.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
@@ -36,6 +42,21 @@ class PrayerNotificationScheduler {
 
   String _applyRtl(String text) {
     return RtlTextUtil.applyRtlFromSettings(text, _settingsProvider);
+  }
+
+  Future<String> _getAbsoluteSoundPath(String? sound) async {
+    if (sound == null || sound == 'default') return '';
+    if (!sound.contains('/') && !sound.contains('\\')) {
+      try {
+        final downloader = getIt<VoiceDownloadService>();
+        final path = await downloader.getAccessiblePath(sound);
+        return path ?? '';
+      } catch (e) {
+        debugPrint('Error getting accessible path for $sound: $e');
+        return '';
+      }
+    }
+    return sound;
   }
 
   // Max counts for cancellation
@@ -122,6 +143,8 @@ class PrayerNotificationScheduler {
     >
     events = [];
 
+    final List<Map<String, dynamic>> adhanSchedule = [];
+
     for (int day = 0; day < maxScheduledDays; day++) {
       final date = DateTime.now().add(Duration(days: day));
       final prayerTimes = _prayerTimeService.getPrayerTimes(
@@ -141,6 +164,21 @@ class PrayerNotificationScheduler {
 
         final tzSalaahTime = tz.TZDateTime.from(salaahTime, tz.local);
         final dayOffset = day * prayersPerDay + salaahSetting.salaah.index;
+
+        if (day < 2) {
+          final absolutePath = await _getAbsoluteSoundPath(salaahSetting.azanSound);
+          // Only enable native alarm if custom downloaded Adhan sound is selected
+          final isNativeEnabled = salaahSetting.isAzanEnabled &&
+              salaahSetting.azanSound != null &&
+              salaahSetting.azanSound != 'default';
+
+          adhanSchedule.add({
+            'prayerName': _getSalaahName(salaahSetting.salaah),
+            'timeEpochMs': tzSalaahTime.millisecondsSinceEpoch,
+            'audioFilePath': absolutePath,
+            'enabled': isNativeEnabled,
+          });
+        }
 
         // 1. Azan Event
         if (salaahSetting.isAzanEnabled) {
@@ -271,6 +309,23 @@ class PrayerNotificationScheduler {
       }
 
       await events[i].schedule(timeout);
+    }
+
+    // Save to SharedPreferences and trigger native scheduling if on Android or in testing
+    final bool isAndroidTarget = Platform.isAndroid || Platform.environment.containsKey('FLUTTER_TEST');
+    if (!kIsWeb && isAndroidTarget) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final jsonStr = jsonEncode(adhanSchedule);
+        await prefs.setString('fard.adhan_schedule', jsonStr);
+        debugPrint('Saved fard.adhan_schedule to SharedPreferences: $jsonStr');
+
+        final adhanChannel = MethodChannel(AppIdentifiers.adhanChannelName);
+        await adhanChannel.invokeMethod('rescheduleAdhanAlarms');
+        debugPrint('Invoked rescheduleAdhanAlarms MethodChannel');
+      } catch (e) {
+        debugPrint('Error saving Adhan schedule or invoking MethodChannel: $e');
+      }
     }
   }
 
@@ -525,6 +580,8 @@ class PrayerNotificationScheduler {
     }
 
     final String title = 'حان وقت صلاة $salaahName';
+    final bool isAndroid = !kIsWeb && Platform.isAndroid;
+    final bool useNativeAdhan = isAndroid && soundPath != 'default';
     AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
           channelId,
@@ -532,12 +589,13 @@ class PrayerNotificationScheduler {
           channelDescription: _applyRtl(
             'Azan notifications for ${salaah.name.toUpperCase()}',
           ),
-          importance: Importance.max,
-          priority: Priority.high,
-          category: AndroidNotificationCategory.alarm,
-          audioAttributesUsage: AudioAttributesUsage.alarm,
-          playSound: true,
-          sound: notificationSound,
+          importance: useNativeAdhan ? Importance.low : Importance.max,
+          priority: useNativeAdhan ? Priority.low : Priority.high,
+          category: soundPath == 'default' ? null : AndroidNotificationCategory.alarm,
+          audioAttributesUsage: soundPath == 'default' ? AudioAttributesUsage.notification : AudioAttributesUsage.alarm,
+          playSound: !useNativeAdhan,
+          enableVibration: !useNativeAdhan,
+          sound: useNativeAdhan ? null : notificationSound,
           visibility: NotificationVisibility.public,
           autoCancel: true,
           groupKey: groupKey,
@@ -564,16 +622,18 @@ class PrayerNotificationScheduler {
     final bool canScheduleExact =
         await androidPlugin?.canScheduleExactNotifications() ?? false;
 
-    await notificationsPlugin.zonedSchedule(
-      id: id,
-      title: _applyRtl(title),
-      body: _applyRtl('أقم الصلاة يرحمك الله'),
-      scheduledDate: scheduledDate,
-      notificationDetails: platformChannelSpecifics,
-      androidScheduleMode: canScheduleExact
-          ? AndroidScheduleMode.exactAllowWhileIdle
-          : AndroidScheduleMode.inexactAllowWhileIdle,
-    );
+    if (!useNativeAdhan) {
+      await notificationsPlugin.zonedSchedule(
+        id: id,
+        title: _applyRtl(title),
+        body: _applyRtl('أقم الصلاة يرحمك الله'),
+        scheduledDate: scheduledDate,
+        notificationDetails: platformChannelSpecifics,
+        androidScheduleMode: canScheduleExact
+            ? AndroidScheduleMode.exactAllowWhileIdle
+            : AndroidScheduleMode.inexactAllowWhileIdle,
+      );
+    }
   }
 
   Future<void> _schedulePrayerReminder(

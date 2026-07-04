@@ -141,7 +141,7 @@ class SettingsRepository(private val context: Context) {
             val secondary = themeData["textSecondaryColorHex"] as? String
             putString("flutter.widget_theme_text_secondary", if (cu.isValidHex(secondary)) secondary else "#8B949E")
             
-            putLong("flutter/widget_theme_timestamp", System.currentTimeMillis())
+            putLong("flutter.widget_theme_timestamp", System.currentTimeMillis())
             putBoolean("flutter.widget_theme_is_manual", true)
             commit()
         }

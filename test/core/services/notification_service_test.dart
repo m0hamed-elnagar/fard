@@ -67,7 +67,7 @@ void main() {
     registerFallbackValue(const AndroidNotificationChannel('id', 'name'));
     registerFallbackValue(
       const InitializationSettings(
-        android: AndroidInitializationSettings('ic_launcher'),
+        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
       ),
     );
     registerFallbackValue(Salaah.fajr);

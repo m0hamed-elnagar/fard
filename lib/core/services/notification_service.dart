@@ -17,6 +17,9 @@ import 'package:injectable/injectable.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:fard/core/services/voice_download_service.dart';
 import 'notification/sound_manager.dart';
 import 'widget_update_service.dart';
 
@@ -112,7 +115,7 @@ class NotificationService {
       debugPrint('Local timezone set to: $timeZoneName');
 
       const AndroidInitializationSettings initializationSettingsAndroid =
-          AndroidInitializationSettings('ic_launcher');
+          AndroidInitializationSettings('@mipmap/ic_launcher');
 
       const DarwinInitializationSettings initializationSettingsDarwin =
           DarwinInitializationSettings(
@@ -323,6 +326,34 @@ class NotificationService {
       final String salaahName = _getSalaahName(salaah);
       final String soundPath = sound ?? 'default';
 
+      final bool isAndroid = !kIsWeb && Platform.isAndroid;
+      final bool useNativeAdhan = isAndroid && soundPath != 'default';
+
+      if (useNativeAdhan) {
+        String rawPath = soundPath;
+        if (!soundPath.contains('/') && !soundPath.contains('\\')) {
+          try {
+            final downloader = getIt<VoiceDownloadService>();
+            final path = await downloader.getAccessiblePath(soundPath);
+            rawPath = path ?? '';
+          } catch (e) {
+            debugPrint('testAzan: Error resolving voice key: $e');
+          }
+        }
+        
+        try {
+          final adhanChannel = MethodChannel(AppIdentifiers.adhanChannelName);
+          await adhanChannel.invokeMethod('startAdhanService', {
+            'prayerName': _getSalaahName(salaah),
+            'audioFilePath': rawPath,
+            'isTest': true,
+          });
+        } catch (e) {
+          debugPrint('testAzan: Error starting native Adhan service: $e');
+        }
+        return;
+      }
+
       // Delete any old test channels to prevent Android from restoring cached sound configurations
       final androidPlugin = _notificationsPlugin
           .resolvePlatformSpecificImplementation<
@@ -381,6 +412,7 @@ class NotificationService {
         }
       }
 
+      final bool isDefault = soundPath == 'default';
       AndroidNotificationDetails androidPlatformChannelSpecifics =
           AndroidNotificationDetails(
             channelId,
@@ -388,8 +420,8 @@ class NotificationService {
             channelDescription: _applyRtl('Temporary channel for Azan testing'),
             importance: Importance.max,
             priority: Priority.high,
-            category: AndroidNotificationCategory.alarm,
-            audioAttributesUsage: AudioAttributesUsage.alarm,
+            category: isDefault ? null : AndroidNotificationCategory.alarm,
+            audioAttributesUsage: isDefault ? AudioAttributesUsage.notification : AudioAttributesUsage.alarm,
             playSound: true,
             sound: notificationSound,
             groupKey: groupKey,
