@@ -1,6 +1,8 @@
 import 'package:fard/core/widgets/custom_toggle.dart';
+import 'package:fard/core/widgets/fard_list_tile.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/services/notification_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fard/core/services/voice_download_service.dart';
 import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/core/theme/theme_presets.dart';
@@ -56,6 +58,7 @@ void main() {
     mockAzkarBloc = MockAzkarBloc();
     mockWidgetUpdateService = MockWidgetUpdateService();
 
+    SharedPreferences.setMockInitialValues({});
     final getIt = GetIt.instance;
     getIt.reset();
     getIt.registerSingleton<NotificationService>(mockNotificationService);
@@ -72,6 +75,7 @@ void main() {
         'notifications_enabled': true,
         'exact_alarm_permission': true,
         'battery_optimization_ignored': true,
+        'device_manufacturer': 'google',
       },
     );
     when(
@@ -179,8 +183,14 @@ void main() {
     final qadaTrackerTextFinder = find.text('Missed Prayers Tracker');
     expect(qadaTrackerTextFinder, findsOneWidget);
     
-    // Tap the CustomToggle widget (which contains GestureDetector)
-    final toggleFinder = find.byType(CustomToggle);
+    // Tap the CustomToggle widget descendant of the specific tracker list tile
+    final toggleFinder = find.descendant(
+      of: find.ancestor(
+        of: qadaTrackerTextFinder,
+        matching: find.byType(FardListTile),
+      ),
+      matching: find.byType(CustomToggle),
+    );
     expect(toggleFinder, findsOneWidget);
     await tester.tap(toggleFinder);
     await tester.pumpAndSettle();
@@ -213,5 +223,65 @@ void main() {
     // 3. Verify dialog is shown with contact developer hint
     expect(find.text('Contact the developer for feedback or support:'), findsOneWidget);
     expect(find.byTooltip('WhatsApp'), findsOneWidget);
+  });
+
+  testWidgets('shows battery optimization warning when not ignored', (
+    WidgetTester tester,
+  ) async {
+    when(() => mockNotificationService.runDiagnostics()).thenAnswer(
+      (_) async => {
+        'notifications_enabled': true,
+        'exact_alarm_permission': true,
+        'battery_optimization_ignored': false,
+        'device_manufacturer': 'google',
+      },
+    );
+    when(
+      () => mockNotificationService.requestIgnoreBatteryOptimizations(),
+    ).thenAnswer((_) async => {});
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Battery Optimization'), findsOneWidget);
+    // Tap the warning card action button
+    await tester.tap(find.text('Disable Restrictions'));
+    await tester.pumpAndSettle();
+
+    // Tap the dialog confirm button (which also has the same text, we find the last/active one)
+    await tester.tap(find.text('Disable Restrictions').last);
+    await tester.pumpAndSettle();
+
+    verify(() => mockNotificationService.requestIgnoreBatteryOptimizations()).called(1);
+  });
+
+  testWidgets('shows autostart warning on Xiaomi device', (
+    WidgetTester tester,
+  ) async {
+    when(() => mockNotificationService.runDiagnostics()).thenAnswer(
+      (_) async => {
+        'notifications_enabled': true,
+        'exact_alarm_permission': true,
+        'battery_optimization_ignored': true,
+        'device_manufacturer': 'xiaomi',
+      },
+    );
+    when(
+      () => mockNotificationService.openAutostartSettings(),
+    ).thenAnswer((_) async => {});
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Enable Autostart'), findsOneWidget);
+    // Tap the warning card action button
+    await tester.tap(find.text('Enable'));
+    await tester.pumpAndSettle();
+
+    // Tap the dialog confirm button
+    await tester.tap(find.text('Open Settings'));
+    await tester.pumpAndSettle();
+
+    verify(() => mockNotificationService.openAutostartSettings()).called(1);
   });
 }

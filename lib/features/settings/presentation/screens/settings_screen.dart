@@ -8,10 +8,12 @@ import 'package:fard/core/theme/app_colors.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:fard/core/theme/theme_presets.dart';
 import 'package:fard/core/widgets/fard_list_tile.dart';
+import 'package:fard/core/widgets/custom_toggle.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
 import 'package:fard/features/settings/presentation/screens/azan_settings_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fard/features/settings/presentation/widgets/appearance_section.dart';
 import 'package:fard/features/settings/presentation/widgets/general_section.dart';
 import 'package:fard/features/settings/presentation/widgets/location_section.dart';
@@ -30,24 +32,58 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen>
-    with NotificationPermissionMixin {
+    with NotificationPermissionMixin, WidgetsBindingObserver {
   bool _canScheduleExactAlarms = true;
+  bool _isBatteryOptimizationIgnored = true;
+  bool _isOemDeviceForAutostart = false;
+  bool _autostartDismissed = false;
+  bool _isManufacturerSpoofed = false;
+  bool _batteryDismissed = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     context.read<AzkarBloc>().add(const AzkarEvent.loadCategories());
     _checkPermissions();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkPermissions();
+    }
   }
 
   Future<void> _checkPermissions() async {
     final notificationService = getIt<NotificationService>();
     final diagnosticResults = await notificationService.runDiagnostics();
 
+    final prefs = await SharedPreferences.getInstance();
+    final autostartDismissed = prefs.getBool('autostart_warning_dismissed') ?? false;
+    final batteryDismissed = prefs.getBool('battery_warning_dismissed') ?? false;
+    final isSpoofed = prefs.getBool('spoof_manufacturer') ?? false;
+
+    final String manufacturer = isSpoofed ? 'xiaomi' : (diagnosticResults['device_manufacturer'] ?? 'none');
+    final oemList = ['xiaomi', 'redmi', 'poco', 'huawei', 'honor', 'oppo', 'realme', 'vivo', 'oneplus'];
+    final isOem = oemList.any((oem) => manufacturer.contains(oem));
+
     if (mounted) {
       setState(() {
         _canScheduleExactAlarms =
             diagnosticResults['exact_alarm_permission'] ?? true;
+        _isBatteryOptimizationIgnored =
+            diagnosticResults['battery_optimization_ignored'] ?? true;
+        _isOemDeviceForAutostart = isOem;
+        _autostartDismissed = autostartDismissed;
+        _batteryDismissed = batteryDismissed;
+        _isManufacturerSpoofed = isSpoofed;
       });
     }
   }
@@ -90,6 +126,63 @@ class _SettingsScreenState extends State<SettingsScreen>
                 },
               ),
 
+            if (!_isBatteryOptimizationIgnored && !_batteryDismissed)
+              _buildWarningCard(
+                l10n.batteryOptimization,
+                l10n.batteryOptimizationDesc,
+                Icons.battery_alert_rounded,
+                actionLabel: l10n.disableRestrictions,
+                onAction: () {
+                  _showInstructionDialog(
+                    title: l10n.batteryInstructionTitle,
+                    message: l10n.batteryInstructionDesc,
+                    confirmLabel: l10n.disableRestrictions,
+                    onConfirm: () async {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('battery_warning_dismissed', true);
+                      if (mounted) {
+                        setState(() {
+                          _batteryDismissed = true;
+                        });
+                      }
+                      await getIt<NotificationService>().requestIgnoreBatteryOptimizations();
+                    },
+                  );
+                },
+                onDismiss: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('battery_warning_dismissed', true);
+                  setState(() {
+                    _batteryDismissed = true;
+                  });
+                },
+              ),
+
+            if (_isOemDeviceForAutostart && !_autostartDismissed)
+              _buildWarningCard(
+                l10n.autostartWarningTitle,
+                l10n.autostartWarningDesc,
+                Icons.power_settings_new_rounded,
+                actionLabel: l10n.enable,
+                onAction: () {
+                  _showInstructionDialog(
+                    title: l10n.autostartInstructionTitle,
+                    message: l10n.autostartInstructionDesc,
+                    confirmLabel: l10n.openSettings,
+                    onConfirm: () async {
+                      await getIt<NotificationService>().openAutostartSettings();
+                    },
+                  );
+                },
+                onDismiss: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('autostart_warning_dismissed', true);
+                  setState(() {
+                    _autostartDismissed = true;
+                  });
+                },
+              ),
+
             // Section 1: Appearance
             const AppearanceSection(),
 
@@ -123,7 +216,10 @@ class _SettingsScreenState extends State<SettingsScreen>
             const DataAndLocationSection(),
 
             // Section 6: General (App Global Settings)
-            const GeneralSection(),
+            GeneralSection(
+              isBatteryOptimizationIgnored: _isBatteryOptimizationIgnored,
+              isOemDevice: _isOemDeviceForAutostart,
+            ),
 
             // Debug: Widget Refresh Section (only in debug mode)
             if (!kReleaseMode) ...[_buildDebugWidgetSection(context, l10n)],
@@ -210,6 +306,43 @@ class _SettingsScreenState extends State<SettingsScreen>
                 const Divider(),
                 const SizedBox(height: 8),
                 Text(
+                  'OEM Spoofing for Autostart Testing',
+                  style: GoogleFonts.amiri(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: context.onSurfaceColor,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Forces the device manufacturer to be detected as "xiaomi" to test Autostart warning cards and tiles on any device or emulator.',
+                  style: TextStyle(
+                    color: context.onSurfaceVariantColor,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                FardListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Spoof Manufacturer (Xiaomi)'),
+                  trailing: CustomToggle(
+                    value: _isManufacturerSpoofed,
+                    onChanged: (val) async {
+                      HapticFeedback.lightImpact();
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('spoof_manufacturer', val);
+                      if (!val) {
+                        // Reset warning card dismiss state when disabling spoof
+                        await prefs.remove('autostart_warning_dismissed');
+                        await prefs.remove('battery_warning_dismissed');
+                      }
+                      await _checkPermissions();
+                    },
+                  ),
+                ),
+                const Divider(),
+                const SizedBox(height: 8),
+                Text(
                   'Firebase Crashlytics Testing',
                   style: GoogleFonts.amiri(
                     fontWeight: FontWeight.bold,
@@ -289,6 +422,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     bool isSmall = false,
     String? actionLabel,
     VoidCallback? onAction,
+    VoidCallback? onDismiss,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -323,6 +457,13 @@ class _SettingsScreenState extends State<SettingsScreen>
                   ],
                 ),
               ),
+              if (onDismiss != null)
+                IconButton(
+                  icon: Icon(Icons.close_rounded, color: context.errorColor, size: 18),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: onDismiss,
+                ),
             ],
           ),
           if (actionLabel != null && onAction != null) ...[
@@ -334,6 +475,58 @@ class _SettingsScreenState extends State<SettingsScreen>
           ],
         ],
       ),
+    );
+  }
+
+  Future<void> _showInstructionDialog({
+    required String title,
+    required String message,
+    required String confirmLabel,
+    required VoidCallback onConfirm,
+  }) async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: Text(
+            title,
+            style: GoogleFonts.amiri(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(fontSize: 14, height: 1.5),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                AppLocalizations.of(context)!.cancel,
+                style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                onConfirm();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              ),
+              child: Text(
+                confirmLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

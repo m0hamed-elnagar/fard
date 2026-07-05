@@ -12,11 +12,22 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:fard/features/audio/presentation/screens/offline_audio_screen.dart';
 import '../blocs/daily_reminders_cubit.dart';
 import '../blocs/daily_reminders_state.dart';
+import 'dart:io';
+import '../../../../core/di/injection.dart';
+import '../../../../core/services/notification_service.dart';
 import '../screens/privacy_policy_screen.dart';
 
 class GeneralSection extends StatefulWidget {
   final bool initiallyExpanded;
-  const GeneralSection({super.key, this.initiallyExpanded = false});
+  final bool isBatteryOptimizationIgnored;
+  final bool isOemDevice;
+
+  const GeneralSection({
+    super.key,
+    this.initiallyExpanded = false,
+    required this.isBatteryOptimizationIgnored,
+    required this.isOemDevice,
+  });
 
   @override
   State<GeneralSection> createState() => _GeneralSectionState();
@@ -53,6 +64,60 @@ class _GeneralSectionState extends State<GeneralSection> {
       isExpanded: _isExpanded,
       onToggle: () => setState(() => _isExpanded = !_isExpanded),
       children: [
+        if (Platform.isAndroid) ...[
+          _buildActionTile(
+            context,
+            title: l10n.batteryOptimization,
+            subtitle: widget.isBatteryOptimizationIgnored
+                ? l10n.batteryUnrestricted
+                : l10n.batteryOptimizationDesc,
+            icon: Icons.battery_charging_full_rounded,
+            trailing: widget.isBatteryOptimizationIgnored
+                ? const Icon(Icons.check_circle_outline, color: Colors.green)
+                : const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+            onTap: () async {
+              HapticFeedback.lightImpact();
+              if (widget.isBatteryOptimizationIgnored) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(l10n.batteryAlreadyUnrestricted),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              } else {
+                _showInstructionDialog(
+                  title: l10n.batteryInstructionTitle,
+                  message: l10n.batteryInstructionDesc,
+                  confirmLabel: l10n.disableRestrictions,
+                  onConfirm: () async {
+                    await getIt<NotificationService>().requestIgnoreBatteryOptimizations();
+                  },
+                );
+              }
+            },
+          ),
+          if (widget.isOemDevice) ...[
+            const Divider(height: 1),
+            _buildActionTile(
+              context,
+              title: l10n.autostartWarningTitle,
+              subtitle: l10n.autostartSettingsDesc,
+              icon: Icons.power_settings_new_rounded,
+              onTap: () async {
+                HapticFeedback.lightImpact();
+                _showInstructionDialog(
+                  title: l10n.autostartInstructionTitle,
+                  message: l10n.autostartInstructionDesc,
+                  confirmLabel: l10n.openSettings,
+                  onConfirm: () async {
+                    await getIt<NotificationService>().openAutostartSettings();
+                  },
+                );
+              },
+            ),
+          ],
+          const Divider(height: 1),
+        ],
         BlocBuilder<DailyRemindersCubit, DailyRemindersState>(
           builder: (context, state) {
             return FardListTile(
@@ -350,6 +415,7 @@ class _GeneralSectionState extends State<GeneralSection> {
     required String subtitle,
     required IconData icon,
     required VoidCallback onTap,
+    Widget? trailing,
   }) {
     return FardListTile(
       contentPadding: EdgeInsets.zero,
@@ -363,6 +429,7 @@ class _GeneralSectionState extends State<GeneralSection> {
       ),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
       subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+      trailing: trailing,
       onTap: onTap,
     );
   }
@@ -374,5 +441,57 @@ class _GeneralSectionState extends State<GeneralSection> {
     } catch (e) {
       debugPrint('Could not launch $url: $e');
     }
+  }
+
+  Future<void> _showInstructionDialog({
+    required String title,
+    required String message,
+    required String confirmLabel,
+    required VoidCallback onConfirm,
+  }) async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: Text(
+            title,
+            style: GoogleFonts.amiri(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(fontSize: 14, height: 1.5),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                AppLocalizations.of(context)!.cancel,
+                style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                onConfirm();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              ),
+              child: Text(
+                confirmLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

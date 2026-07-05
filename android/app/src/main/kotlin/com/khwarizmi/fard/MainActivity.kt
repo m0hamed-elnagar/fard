@@ -1,9 +1,13 @@
 package com.khwarizmi.fard
 
+import android.content.ComponentName
+import java.util.Locale
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
 import androidx.glance.appwidget.updateAll
@@ -32,6 +36,30 @@ class MainActivity : AudioServiceActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        handleIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        intent?.let {
+            Log.d(TAG, "handleIntent: checking if STOP_ADHAN_ON_OPEN is set")
+            if (it.getBooleanExtra("STOP_ADHAN_ON_OPEN", false)) {
+                Log.d(TAG, "handleIntent: STOP_ADHAN_ON_OPEN is true, stopping AdhanService")
+                try {
+                    val stopIntent = Intent(this, AdhanService::class.java).apply {
+                        action = "$packageName.action.STOP_ADHAN"
+                    }
+                    startService(stopIntent)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error stopping AdhanService via handleIntent", e)
+                }
+            }
+        }
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -84,6 +112,29 @@ class MainActivity : AudioServiceActivity() {
                     } catch (e: Exception) {
                         Log.e(TAG, "Error in stopAdhanService channel call", e)
                         result.error("STOP_FAILED", e.message, null)
+                    }
+                }
+                "getDeviceManufacturer" -> {
+                    result.success(Build.MANUFACTURER.lowercase(Locale.getDefault()))
+                }
+                "openAutostartSettings" -> {
+                    openAutostartSettings()
+                    result.success(true)
+                }
+                "isBatteryOptimizationIgnored" -> {
+                    val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+                    result.success(powerManager.isIgnoringBatteryOptimizations(packageName))
+                }
+                "requestIgnoreBatteryOptimizations" -> {
+                    try {
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", packageName, null)
+                        }
+                        startActivity(intent)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error in requestIgnoreBatteryOptimizations", e)
+                        result.error("INTENT_FAILED", e.message, null)
                     }
                 }
                 else -> {
@@ -392,6 +443,144 @@ class MainActivity : AudioServiceActivity() {
                 Log.d(TAG, "Widgets updated (double-refresh), broadcasts sent, and WorkManager task enqueued")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to handle settings update", e)
+            }
+        }
+    }
+
+    private fun openAutostartSettings() {
+        val manufacturer = Build.MANUFACTURER.lowercase(Locale.getDefault())
+        val intents = mutableListOf<Intent>()
+
+        when {
+            manufacturer.contains("xiaomi") || manufacturer.contains("redmi") || manufacturer.contains("poco") -> {
+                intents.add(Intent().apply {
+                    component = ComponentName(
+                        "com.miui.securitycenter",
+                        "com.miui.permcenter.autostart.AutoStartManagementActivity"
+                    )
+                })
+                intents.add(Intent().apply {
+                    component = ComponentName(
+                        "com.miui.securitycenter",
+                        "com.miui.securitycenter.permission.AutoStartManagementActivity"
+                    )
+                })
+                intents.add(Intent("miui.intent.action.OP_AUTO_START").apply {
+                    addCategory(Intent.CATEGORY_DEFAULT)
+                })
+            }
+            manufacturer.contains("huawei") || manufacturer.contains("honor") -> {
+                intents.add(Intent().apply {
+                    component = ComponentName(
+                        "com.huawei.systemmanager",
+                        "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"
+                    )
+                })
+                intents.add(Intent().apply {
+                    component = ComponentName(
+                        "com.huawei.systemmanager",
+                        "com.huawei.systemmanager.appcontrol.activity.StartupAppControlActivity"
+                    )
+                })
+                intents.add(Intent().apply {
+                    component = ComponentName(
+                        "com.huawei.systemmanager",
+                        "com.huawei.systemmanager.optimize.process.ProtectActivity"
+                    )
+                })
+            }
+            manufacturer.contains("oppo") || manufacturer.contains("realme") -> {
+                intents.add(Intent().apply {
+                    component = ComponentName(
+                        "com.coloros.safecenter",
+                        "com.coloros.safecenter.permission.startup.StartupAppListActivity"
+                    )
+                })
+                intents.add(Intent().apply {
+                    component = ComponentName(
+                        "com.coloros.safecenter",
+                        "com.coloros.safecenter.startupapp.StartupAppListActivity"
+                    )
+                })
+                intents.add(Intent().apply {
+                    component = ComponentName(
+                        "com.oppo.safe",
+                        "com.oppo.safe.permission.startup.StartupAppListActivity"
+                    )
+                })
+                intents.add(Intent().apply {
+                    component = ComponentName(
+                        "com.coloros.safecenter",
+                        "com.coloros.safecenter.permission.startupapp.StartupAppListActivity"
+                    )
+                })
+            }
+            manufacturer.contains("vivo") -> {
+                intents.add(Intent().apply {
+                    component = ComponentName(
+                        "com.vivo.permissionmanager",
+                        "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"
+                    )
+                })
+                intents.add(Intent().apply {
+                    component = ComponentName(
+                        "com.iqoo.secure",
+                        "com.iqoo.secure.ui.phoneoptimize.BgStartUpManager"
+                    )
+                })
+                intents.add(Intent().apply {
+                    component = ComponentName(
+                        "com.iqoo.secure",
+                        "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity"
+                    )
+                })
+            }
+            manufacturer.contains("oneplus") -> {
+                intents.add(Intent().apply {
+                    component = ComponentName(
+                        "com.oneplus.security",
+                        "com.oneplus.security.chainlaunch.AppBootLaunchActivity"
+                    )
+                })
+                // OnePlus fallback to Oppo/ColorOS paths (common in Android 12+)
+                intents.add(Intent().apply {
+                    component = ComponentName(
+                        "com.coloros.safecenter",
+                        "com.coloros.safecenter.permission.startup.StartupAppListActivity"
+                    )
+                })
+                intents.add(Intent().apply {
+                    component = ComponentName(
+                        "com.coloros.safecenter",
+                        "com.coloros.safecenter.startupapp.StartupAppListActivity"
+                    )
+                })
+            }
+        }
+
+        var success = false
+        for (intent in intents) {
+            try {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+                success = true
+                Log.d(TAG, "Successfully started autostart activity: ${intent.component ?: intent.action}")
+                break
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to start autostart activity variant, trying next: ${intent.component ?: intent.action}", e)
+            }
+        }
+
+        if (!success) {
+            Log.i(TAG, "No specific autostart activity succeeded. Falling back to App settings.")
+            try {
+                val fallbackIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = android.net.Uri.fromParts("package", packageName, null)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(fallbackIntent)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to start fallback app settings details", e)
             }
         }
     }

@@ -120,6 +120,7 @@ dependencies {
     implementation("com.batoulapps.adhan:adhan:1.2.1")
     implementation("androidx.work:work-runtime-ktx:2.11.2")
     implementation("androidx.preference:preference-ktx:1.2.1")
+    implementation("androidx.media:media:1.7.0")
     // Baseline profile dependency
     "baselineProfile"(project(":baselineprofile"))
 }
