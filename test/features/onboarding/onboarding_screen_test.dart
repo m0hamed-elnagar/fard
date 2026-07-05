@@ -1,9 +1,7 @@
 import 'mock_audio_download_service.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/audio/domain/services/audio_download_service.dart';
-import 'package:fard/features/onboarding/presentation/screens/splash_screen.dart';
 import 'package:fard/features/onboarding/presentation/screens/onboarding_screen.dart';
-import 'package:fard/features/azkar/presentation/screens/main_navigation_screen.dart';
 import 'package:fard/features/azkar/presentation/blocs/azkar_bloc.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/audio/presentation/blocs/player/audio_player_bloc.dart';
@@ -38,11 +36,9 @@ import 'package:fard/core/services/connectivity_service.dart';
 
 class MockSharedPreferences extends Mock implements SharedPreferences {}
 
-class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState>
-    implements AzkarBloc {}
+class MockAzkarBloc extends MockBloc<AzkarEvent, AzkarState> implements AzkarBloc {}
 
-class MockPrayerTrackerBloc
-    extends MockBloc<PrayerTrackerEvent, PrayerTrackerState>
+class MockPrayerTrackerBloc extends MockBloc<PrayerTrackerEvent, PrayerTrackerState>
     implements PrayerTrackerBloc {}
 
 class MockPrayerTimeService extends Mock implements PrayerTimeService {}
@@ -50,10 +46,10 @@ class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 class MockNotificationService extends Mock implements NotificationService {
   @override
   Future<Map<String, dynamic>> runDiagnostics() async => {
-    'notifications_enabled': true,
-    'exact_alarm_permission': true,
-    'battery_optimization_ignored': true,
-  };
+        'notifications_enabled': true,
+        'exact_alarm_permission': true,
+        'battery_optimization_ignored': true,
+      };
 }
 
 class MockWidgetUpdateService extends Mock implements WidgetUpdateService {
@@ -61,28 +57,23 @@ class MockWidgetUpdateService extends Mock implements WidgetUpdateService {
   Future<void> updateWidget() async {}
 }
 
-class MockQuranBloc extends MockBloc<QuranEvent, QuranState>
-    implements QuranBloc {}
+class MockQuranBloc extends MockBloc<QuranEvent, QuranState> implements QuranBloc {}
 
 class MockAudioPlayerBloc extends MockBloc<AudioPlayerEvent, AudioPlayerState>
     implements AudioPlayerBloc {}
 
-class MockReciterManagerBloc
-    extends MockBloc<ReciterManagerEvent, ReciterManagerState>
+class MockReciterManagerBloc extends MockBloc<ReciterManagerEvent, ReciterManagerState>
     implements ReciterManagerBloc {}
 
 class MockTasbihBloc extends MockBloc<TasbihEvent, TasbihState>
     implements MockTasbihBlocInstance {}
 
-// Need a non-mock class for implements if it has issues with multiple mocks
 abstract class MockTasbihBlocInstance extends MockBloc<TasbihEvent, TasbihState>
     implements TasbihBloc {}
 
-class MockReaderBloc extends MockBloc<ReaderEvent, ReaderState>
-    implements ReaderBloc {}
+class MockReaderBloc extends MockBloc<ReaderEvent, ReaderState> implements ReaderBloc {}
 
-class MockConnectivityBloc
-    extends MockBloc<ConnectivityEvent, ConnectivityState>
+class MockConnectivityBloc extends MockBloc<ConnectivityEvent, ConnectivityState>
     implements ConnectivityBloc {}
 
 class MockLocationPrayerCubit extends MockCubit<LocationPrayerState>
@@ -155,13 +146,9 @@ void main() {
     getIt.registerSingleton<PrayerTimeService>(mockPrayerTimeService);
     getIt.registerSingleton<NotificationService>(mockNotificationService);
     final mockWidgetUpdateService = MockWidgetUpdateService();
-    when(
-      () => mockWidgetUpdateService.getWidgetTheme(),
-    ).thenAnswer((_) async => {});
+    when(() => mockWidgetUpdateService.getWidgetTheme()).thenAnswer((_) async => {});
     getIt.registerSingleton<WidgetUpdateService>(mockWidgetUpdateService);
-    getIt.registerSingleton<GlobalKey<NavigatorState>>(
-      GlobalKey<NavigatorState>(),
-    );
+    getIt.registerSingleton<GlobalKey<NavigatorState>>(GlobalKey<NavigatorState>());
     getIt.registerSingleton<LocationPrayerCubit>(mockLocationPrayerCubit);
     getIt.registerSingleton<DailyRemindersCubit>(mockDailyRemindersCubit);
     getIt.registerSingleton<AdhanCubit>(mockAdhanCubit);
@@ -177,70 +164,40 @@ void main() {
     getIt.registerFactory<ReaderBloc>(() => mockReaderBloc);
     getIt.registerFactory<ConnectivityBloc>(() => mockConnectivityBloc);
 
-    when(() => mockVoiceDownloadService.isDownloaded(any())).thenAnswer((_) async => false);
-    when(() => mockConnectivityService.onConnectivityChanged).thenAnswer((_) => Stream.value([ConnectivityResult.wifi]));
+    when(() => mockVoiceDownloadService.isDownloaded(any<String>())).thenAnswer((_) async => false);
+    when(() => mockConnectivityService.onConnectivityChanged)
+        .thenAnswer((_) => Stream.value([ConnectivityResult.wifi]));
     when(() => mockConnectivityService.hasNetwork()).thenAnswer((_) async => true);
 
-    when(
-      () => mockNotificationService.canScheduleExactNotifications(),
-    ).thenAnswer((_) async => true);
-    when(
-      () => mockNotificationService.checkSoundStatus(),
-    ).thenAnswer((_) async => {
-      'silentMode': false,
-      'dndMode': false,
-      'isMuted': false,
-    });
-    when(
-      () => mockPrayerTimeService.isUpcoming(
-        any(),
-        prayerTimes: any(named: 'prayerTimes'),
-        date: any(named: 'date'),
-      ),
-    ).thenReturn(false);
-    when(
-      () => mockPrayerTimeService.isPassed(
-        any(),
-        prayerTimes: any(named: 'prayerTimes'),
-        date: any(named: 'date'),
-      ),
-    ).thenReturn(true);
+    when(() => mockNotificationService.canScheduleExactNotifications()).thenAnswer((_) async => true);
+    when(() => mockNotificationService.areNotificationsEnabled()).thenAnswer((_) async => true);
+    when(() => mockNotificationService.checkSoundStatus()).thenAnswer((_) async => {
+          'silentMode': false,
+          'dndMode': false,
+          'isMuted': false,
+        });
+    when(() => mockPrayerTimeService.isUpcoming(any(),
+        prayerTimes: any(named: 'prayerTimes'), date: any(named: 'date'))).thenReturn(false);
+    when(() => mockPrayerTimeService.isPassed(any(),
+        prayerTimes: any(named: 'prayerTimes'), date: any(named: 'date'))).thenReturn(true);
     when(() => mockAzkarBloc.state).thenReturn(AzkarState.initial());
-    when(
-      () => mockPrayerTrackerBloc.state,
-    ).thenReturn(const PrayerTrackerState.loading());
+    when(() => mockPrayerTrackerBloc.state).thenReturn(const PrayerTrackerState.loading());
     when(() => mockQuranBloc.state).thenReturn(const QuranState());
     when(() => mockAudioPlayerBloc.state).thenReturn(const AudioPlayerState());
-    when(
-      () => mockReciterManagerBloc.state,
-    ).thenReturn(const ReciterManagerState());
+    when(() => mockReciterManagerBloc.state).thenReturn(const ReciterManagerState());
     when(() => mockTasbihBloc.state).thenReturn(TasbihState.initial());
     when(() => mockReaderBloc.state).thenReturn(const ReaderState.initial());
-    when(
-      () => mockConnectivityBloc.state,
-    ).thenReturn(const ConnectivityStatus(true));
-    when(
-      () => mockLocationPrayerCubit.state,
-    ).thenReturn(const LocationPrayerState());
-    when(
-      () => mockLocationPrayerCubit.stream,
-    ).thenAnswer((_) => const Stream.empty());
-    when(
-      () => mockDailyRemindersCubit.state,
-    ).thenReturn(const DailyRemindersState());
-    when(
-      () => mockDailyRemindersCubit.stream,
-    ).thenAnswer((_) => const Stream.empty());
+    when(() => mockConnectivityBloc.state).thenReturn(const ConnectivityStatus(true));
+    when(() => mockLocationPrayerCubit.state).thenReturn(const LocationPrayerState());
+    when(() => mockLocationPrayerCubit.stream).thenAnswer((_) => const Stream.empty());
+    when(() => mockDailyRemindersCubit.state).thenReturn(const DailyRemindersState());
+    when(() => mockDailyRemindersCubit.stream).thenAnswer((_) => const Stream.empty());
     when(() => mockAdhanCubit.state).thenReturn(const AdhanState());
     when(() => mockAdhanCubit.stream).thenAnswer((_) => const Stream.empty());
-    when(
-      () => mockThemeCubit.state,
-    ).thenReturn(const ThemeState(locale: Locale('en')));
+    when(() => mockThemeCubit.state).thenReturn(const ThemeState(locale: Locale('en')));
     when(() => mockThemeCubit.stream).thenAnswer((_) => const Stream.empty());
     when(() => mockThemeCubit.getAvailablePresets()).thenReturn([]);
-    when(
-      () => mockQuranRepository.getDownloadedTextSurahIds(),
-    ).thenAnswer((_) async => <int>{});
+    when(() => mockQuranRepository.getDownloadedTextSurahIds()).thenAnswer((_) async => <int>{});
   });
 
   tearDown(() {
@@ -268,56 +225,41 @@ void main() {
         supportedLocales: AppLocalizations.supportedLocales,
         locale: Locale('en'),
         home: Scaffold(
-          body: SizedBox(width: 1080, height: 1920, child: RootScreen()),
+          body: SizedBox(width: 1080, height: 1920, child: OnboardingScreen()),
         ),
       ),
     );
   }
 
-  testWidgets('RootScreen shows OnboardingScreen when first time', (
-    tester,
-  ) async {
+  testWidgets('OnboardingScreen displays Skip button and reacts to next/back navigation',
+      (tester) async {
     // Set fixed size
     tester.view.physicalSize = const Size(1080, 1920);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    when(() => mockPrefs.getBool('onboarding_complete')).thenReturn(false);
-
     await tester.pumpWidget(createWidgetUnderTest());
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    expect(find.byType(OnboardingScreen), findsOneWidget);
+    // Verify Skip button is present
+    expect(find.text('Skip'), findsOneWidget);
+
+    // Verify Back button is NOT present on the first page
+    expect(find.byIcon(Icons.arrow_back_ios_new_rounded), findsNothing);
+
+    // Tap "Next" button
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+
+    // Now on page 2: Back button should be present
+    expect(find.byIcon(Icons.arrow_back_ios_new_rounded), findsOneWidget);
+
+    // Tap Back button
+    await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded));
+    await tester.pumpAndSettle();
+
+    // Back to page 1: Back button should be gone again
+    expect(find.byIcon(Icons.arrow_back_ios_new_rounded), findsNothing);
   });
-
-  testWidgets(
-    'RootScreen shows MainNavigationScreen when onboarding complete',
-    (tester) async {
-      // Set fixed size
-      tester.view.physicalSize = const Size(1080, 1920);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-
-      when(() => mockPrefs.getBool('onboarding_complete')).thenReturn(true);
-      when(() => mockPrayerTrackerBloc.state).thenReturn(
-        PrayerTrackerState.loaded(
-          selectedDate: DateTime.now(),
-          missedToday: {},
-          qadaStatus: {},
-          monthRecords: {},
-          history: [],
-        ),
-      );
-
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pump();
-      await tester.pump(
-        const Duration(milliseconds: 100),
-      ); // Allow for any initial animations
-
-      expect(find.byType(MainNavigationScreen), findsOneWidget);
-    },
-  );
 }

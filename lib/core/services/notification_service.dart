@@ -662,4 +662,32 @@ ${(results['channels'] as List).map((c) => '    • ${c['id']} (${c['importance'
       debugPrint('Error opening autostart settings: $e');
     }
   }
+
+  Future<Map<String, bool>> checkSoundStatus() async {
+    if (!Platform.isAndroid) {
+      return {
+        'silentMode': false,
+        'dndMode': false,
+        'isMuted': false,
+      };
+    }
+    try {
+      final adhanChannel = MethodChannel(AppIdentifiers.adhanChannelName);
+      final result = await adhanChannel.invokeMapMethod<String, bool>('checkSoundStatus');
+      if (result != null) {
+        return {
+          'silentMode': result['silentMode'] ?? false,
+          'dndMode': result['dndMode'] ?? false,
+          'isMuted': result['isMuted'] ?? false,
+        };
+      }
+    } catch (e) {
+      debugPrint('Error checking sound status: $e');
+    }
+    return {
+      'silentMode': false,
+      'dndMode': false,
+      'isMuted': false,
+    };
+  }
 }

@@ -9,9 +9,11 @@ import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import android.app.NotificationManager
+import android.media.AudioManager
 import android.util.Log
-import androidx.glance.appwidget.updateAll
 import androidx.core.content.FileProvider
+import androidx.glance.appwidget.updateAll
 import com.khwarizmi.fard.prayer.CalculationContract
 import com.khwarizmi.fard.prayer.PrayerAlarmManager
 import com.khwarizmi.fard.prayer.PrayerTimesCalculator
@@ -135,6 +137,32 @@ class MainActivity : AudioServiceActivity() {
                     } catch (e: Exception) {
                         Log.e(TAG, "Error in requestIgnoreBatteryOptimizations", e)
                         result.error("INTENT_FAILED", e.message, null)
+                    }
+                }
+                "checkSoundStatus" -> {
+                    try {
+                        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                        
+                        val ringerMode = audioManager.ringerMode
+                        val isSilentOrVibrate = ringerMode == AudioManager.RINGER_MODE_SILENT || ringerMode == AudioManager.RINGER_MODE_VIBRATE
+                        
+                        val isDNDActive = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            val filter = notificationManager.currentInterruptionFilter
+                            filter != NotificationManager.INTERRUPTION_FILTER_ALL
+                        } else {
+                            false
+                        }
+                        
+                        val response = mapOf(
+                            "silentMode" to isSilentOrVibrate,
+                            "dndMode" to isDNDActive,
+                            "isMuted" to (isSilentOrVibrate || isDNDActive)
+                        )
+                        result.success(response)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error in checkSoundStatus", e)
+                        result.error("SOUND_STATUS_ERROR", e.message, null)
                     }
                 }
                 else -> {

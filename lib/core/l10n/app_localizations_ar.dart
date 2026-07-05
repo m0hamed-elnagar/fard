@@ -40,6 +40,9 @@ class AppLocalizationsAr extends AppLocalizations {
       'تتبع وأكمل صلواتك الفائتة بسهولة مع مرور الوقت.';
 
   @override
+  String get skipOnboarding => 'تخطي';
+
+  @override
   String get getStarted => 'ابدأ الآن';
 
   @override
@@ -1711,4 +1714,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String locationUpdatedSuccess(String city) {
     return 'تم تحديث الموقع إلى $city';
   }
+
+  @override
+  String get phoneMutedTitleSilent => 'الهاتف في الوضع الصامت';
+
+  @override
+  String get phoneMutedTitleDnd => 'وضع عدم الإزعاج مفعل';
+
+  @override
+  String get phoneMutedTitleBoth => 'الهاتف صامت ووضع عدم الإزعاج مفعل';
+
+  @override
+  String get phoneMutedDesc =>
+      'لن تصدر التنبيهات أي صوت إلا إذا تم إلغاء كتم الهاتف أو السماح لتطبيق فرض بالعمل في وضع عدم الإزعاج.';
 }

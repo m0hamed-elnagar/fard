@@ -240,7 +240,24 @@ class _AdhanSectionState extends State<AdhanSection>
                             return;
                           }
 
-                          await getIt<NotificationService>().testAzan(
+                           final ns = getIt<NotificationService>();
+                          final soundStatus = await ns.checkSoundStatus();
+                          if (soundStatus['isMuted'] == true && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  soundStatus['dndMode'] == true && soundStatus['silentMode'] == true
+                                      ? l10n.phoneMutedTitleBoth
+                                      : soundStatus['dndMode'] == true
+                                          ? l10n.phoneMutedTitleDnd
+                                          : l10n.phoneMutedTitleSilent,
+                                ),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+
+                          await ns.testAzan(
                             Salaah.fajr,
                             _dropdownValue,
                           );

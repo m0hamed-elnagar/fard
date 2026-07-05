@@ -158,6 +158,12 @@ abstract class AppLocalizations {
   /// **'Easily track and complete your missed prayers over time.'**
   String get onboardingDesc2;
 
+  /// No description provided for @skipOnboarding.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skipOnboarding;
+
   /// No description provided for @getStarted.
   ///
   /// In en, this message translates to:
@@ -3217,6 +3223,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Location updated to {city}'**
   String locationUpdatedSuccess(String city);
+
+  /// No description provided for @phoneMutedTitleSilent.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone is on silent'**
+  String get phoneMutedTitleSilent;
+
+  /// No description provided for @phoneMutedTitleDnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Do Not Disturb is active'**
+  String get phoneMutedTitleDnd;
+
+  /// No description provided for @phoneMutedTitleBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone is silent and Do Not Disturb is active'**
+  String get phoneMutedTitleBoth;
+
+  /// No description provided for @phoneMutedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications will have no sound unless silent mode is disabled or Fard is allowed to bypass Do Not Disturb.'**
+  String get phoneMutedDesc;
 }
 
 class _AppLocalizationsDelegate

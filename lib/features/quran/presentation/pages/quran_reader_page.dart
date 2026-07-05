@@ -157,13 +157,11 @@ class _QuranReaderPageState extends State<QuranReaderPage>
                               // Generate keys for all ayahs if not already done
                               _scrollController.generateKeys(s.surah.ayahs);
 
-                              if (s.highlightedAyah != null) {
-                                // Scroll to highlighted ayah (initial or changed)
+                              if (s.highlightedAyah != null && _isInitialScroll) {
+                                // Scroll to highlighted ayah only on initial load
                                 _scrollController.scrollToAyah(
                                   s.highlightedAyah!.number.ayahNumberInSurah,
-                                  duration: _isInitialScroll
-                                      ? Duration.zero
-                                      : const Duration(milliseconds: 600),
+                                  duration: Duration.zero,
                                 );
                                 _isInitialScroll = false;
                               }

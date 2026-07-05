@@ -10,6 +10,7 @@
   "onboardingDesc1": "Keep a record of your daily prayers and never miss a beat.",
   "onboardingTitle2": "Manage Qada",
   "onboardingDesc2": "Easily track and complete your missed prayers over time.",
+  "skipOnboarding": "Skip",
   "getStarted": "Get Started",
   "helloWorld": "Hello World!",
   "calendar": "Calendar",
@@ -704,5 +705,9 @@
         "type": "String"
       }
     }
-  }
+  },
+  "phoneMutedTitleSilent": "Phone is on silent",
+  "phoneMutedTitleDnd": "Do Not Disturb is active",
+  "phoneMutedTitleBoth": "Phone is silent and Do Not Disturb is active",
+  "phoneMutedDesc": "Notifications will have no sound unless silent mode is disabled or Fard is allowed to bypass Do Not Disturb."
 }

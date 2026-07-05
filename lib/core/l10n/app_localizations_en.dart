@@ -41,6 +41,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Easily track and complete your missed prayers over time.';
 
   @override
+  String get skipOnboarding => 'Skip';
+
+  @override
   String get getStarted => 'Get Started';
 
   @override
@@ -1722,4 +1725,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String locationUpdatedSuccess(String city) {
     return 'Location updated to $city';
   }
+
+  @override
+  String get phoneMutedTitleSilent => 'Phone is on silent';
+
+  @override
+  String get phoneMutedTitleDnd => 'Do Not Disturb is active';
+
+  @override
+  String get phoneMutedTitleBoth =>
+      'Phone is silent and Do Not Disturb is active';
+
+  @override
+  String get phoneMutedDesc =>
+      'Notifications will have no sound unless silent mode is disabled or Fard is allowed to bypass Do Not Disturb.';
 }

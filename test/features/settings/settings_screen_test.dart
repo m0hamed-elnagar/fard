@@ -221,7 +221,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // 3. Verify dialog is shown with contact developer hint
-    expect(find.text('Contact the developer for feedback or support:'), findsOneWidget);
+    expect(find.text('MOHAMED ELNAGAR'), findsOneWidget);
     expect(find.byTooltip('WhatsApp'), findsOneWidget);
   });
 

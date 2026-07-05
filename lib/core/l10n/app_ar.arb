@@ -10,6 +10,7 @@
   "onboardingDesc1": "احتفظ بسجل لصلواتك اليومية ولا تفوت أي صلاة.",
   "onboardingTitle2": "إدارة القضاء",
   "onboardingDesc2": "تتبع وأكمل صلواتك الفائتة بسهولة مع مرور الوقت.",
+  "skipOnboarding": "تخطي",
   "getStarted": "ابدأ الآن",
   "helloWorld": "أهلاً بالعالم!",
   "calendar": "التقويم",
@@ -704,5 +705,9 @@
         "type": "String"
       }
     }
-  }
+  },
+  "phoneMutedTitleSilent": "الهاتف في الوضع الصامت",
+  "phoneMutedTitleDnd": "وضع عدم الإزعاج مفعل",
+  "phoneMutedTitleBoth": "الهاتف صامت ووضع عدم الإزعاج مفعل",
+  "phoneMutedDesc": "لن تصدر التنبيهات أي صوت إلا إذا تم إلغاء كتم الهاتف أو السماح لتطبيق فرض بالعمل في وضع عدم الإزعاج."
 }

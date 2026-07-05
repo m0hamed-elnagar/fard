@@ -20,6 +20,7 @@ import 'package:fard/core/di/injection.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 
 import 'package:fard/core/mixins/notification_permission_mixin.dart';
+import 'package:fard/core/utils/location_dialog_helper.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -87,6 +88,22 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     }
   }
 
+  bool _isSoundMuted = false;
+  bool _isDndActive = false;
+  bool _isSilentMode = false;
+
+  Future<void> _checkPhoneSoundStatus() async {
+    final ns = getIt<NotificationService>();
+    final status = await ns.checkSoundStatus();
+    if (mounted) {
+      setState(() {
+        _isSoundMuted = status['isMuted'] ?? false;
+        _isDndActive = status['dndMode'] ?? false;
+        _isSilentMode = status['silentMode'] ?? false;
+      });
+    }
+  }
+
   Future<void> _completeOnboarding() async {
     // If Azan is enabled, make one last check for permissions
     final adhanState = context.read<AdhanCubit>().state;
@@ -119,131 +136,214 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            BlocBuilder<LocationPrayerCubit, LocationPrayerState>(
-              builder: (context, locationState) {
-                return BlocBuilder<AdhanCubit, AdhanState>(
-                  builder: (context, adhanState) {
-                    return PageView(
-                      controller: _pageController,
-                      onPageChanged: (index) =>
-                          setState(() => _currentPage = index),
-                      children: [
-                        _OnboardingPage(
-                          title: l10n.onboardingTitle1,
-                          description: l10n.onboardingDesc1,
-                          icon: Icons.auto_graph_rounded,
-                          bottomPadding: bottomPadding,
-                        ),
-                        _OnboardingPage(
-                          title: l10n.onboardingTitle2,
-                          description: l10n.onboardingDesc2,
-                          icon: Icons.history_rounded,
-                          bottomPadding: bottomPadding,
-                        ),
-                        _LocationPrayerPage(
-                          state: locationState,
-                          bottomPadding: bottomPadding,
-                        ),
-                        _AzanSelectionPage(
-                          state: adhanState,
-                          isDownloading: _isDownloading,
-                          onDownloadingChanged: (val) =>
-                              setState(() => _isDownloading = val),
-                          downloadedVoices: _downloadedVoices,
-                          onVoiceDownloaded: (val) {
-                            setState(() {
-                              _downloadedVoices.add(val);
-                            });
+    return PopScope(
+      canPop: _currentPage == 0,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (_currentPage > 0) {
+          _pageController.previousPage(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: BlocListener<LocationPrayerCubit, LocationPrayerState>(
+            listenWhen: (prev, curr) =>
+                curr.lastLocationStatus != null &&
+                curr.lastLocationStatus != prev.lastLocationStatus,
+            listener: (context, state) {
+              LocationDialogHelper.showLocationStatusDialog(
+                context,
+                state.lastLocationStatus!,
+              );
+            },
+            child: Stack(
+              children: [
+                BlocBuilder<LocationPrayerCubit, LocationPrayerState>(
+                  builder: (context, locationState) {
+                    return BlocBuilder<AdhanCubit, AdhanState>(
+                      builder: (context, adhanState) {
+                        return PageView(
+                          controller: _pageController,
+                          onPageChanged: (index) {
+                            setState(() => _currentPage = index);
+                            if (index == 2) {
+                              final state = context.read<LocationPrayerCubit>().state;
+                              if (state.latitude == null && state.longitude == null) {
+                                context.read<LocationPrayerCubit>().refreshLocation();
+                              }
+                            } else if (index == 3) {
+                              _checkPhoneSoundStatus();
+                            }
                           },
-                          isOffline: _isOffline,
-                          bottomPadding: bottomPadding,
-                        ),
-                        _QadaSelectionPage(
-                          isEnabled: _isQadaEnabled,
-                          onChanged: (val) =>
-                              setState(() => _isQadaEnabled = val),
-                          bottomPadding: bottomPadding,
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-            ),
-            Positioned(
-              bottom: 24.0,
-              left: 24.0,
-              right: 24.0,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      _totalPages,
-                      (index) => AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                        height: 8.0,
-                        width: _currentPage == index ? 24.0 : 8.0,
-                        decoration: BoxDecoration(
-                          color: _currentPage == index
-                              ? colorScheme.secondary
-                              : (textTheme.bodyMedium?.color ?? colorScheme.onSurface).withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(4.0),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24.0),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56.0,
-                    child: ElevatedButton(
-                      onPressed: _isDownloading
-                          ? null
-                          : (_currentPage == _totalPages - 1
-                                ? _completeOnboarding
-                                : () => _pageController.nextPage(
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeInOut,
-                                  )),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colorScheme.primary,
-                        foregroundColor: colorScheme.onPrimary,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0),
-                        ),
-                      ),
-                      child: _isDownloading
-                          ? SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                color: colorScheme.onPrimary,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Text(
-                              _currentPage == _totalPages - 1
-                                  ? l10n.getStarted
-                                  : l10n.next,
-                              style: GoogleFonts.outfit(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.w600,
+                          children: [
+                            _AnimatedPageTransition(
+                              child: _OnboardingPage(
+                                title: l10n.onboardingTitle1,
+                                description: l10n.onboardingDesc1,
+                                icon: Icons.auto_graph_rounded,
+                                bottomPadding: bottomPadding,
                               ),
                             ),
-                    ),
+                            _AnimatedPageTransition(
+                              child: _OnboardingPage(
+                                title: l10n.onboardingTitle2,
+                                description: l10n.onboardingDesc2,
+                                icon: Icons.history_rounded,
+                                bottomPadding: bottomPadding,
+                              ),
+                            ),
+                            _AnimatedPageTransition(
+                              child: _LocationPrayerPage(
+                                state: locationState,
+                                bottomPadding: bottomPadding,
+                              ),
+                            ),
+                            _AnimatedPageTransition(
+                              child: _AzanSelectionPage(
+                                state: adhanState,
+                                isDownloading: _isDownloading,
+                                onDownloadingChanged: (val) =>
+                                    setState(() => _isDownloading = val),
+                                downloadedVoices: _downloadedVoices,
+                                onVoiceDownloaded: (val) {
+                                  setState(() {
+                                    _downloadedVoices.add(val);
+                                  });
+                                },
+                                isOffline: _isOffline,
+                                isSoundMuted: _isSoundMuted,
+                                isDndActive: _isDndActive,
+                                isSilentMode: _isSilentMode,
+                                onRefreshSoundStatus: _checkPhoneSoundStatus,
+                                bottomPadding: bottomPadding,
+                              ),
+                            ),
+                            _AnimatedPageTransition(
+                              child: _QadaSelectionPage(
+                                isEnabled: _isQadaEnabled,
+                                onChanged: (val) =>
+                                    setState(() => _isQadaEnabled = val),
+                                bottomPadding: bottomPadding,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+                Positioned(
+                  bottom: 24.0,
+                  left: 24.0,
+                  right: 24.0,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          _totalPages,
+                          (index) => AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                            height: 8.0,
+                            width: _currentPage == index ? 24.0 : 8.0,
+                            decoration: BoxDecoration(
+                              color: _currentPage == index
+                                  ? colorScheme.secondary
+                                  : (textTheme.bodyMedium?.color ?? colorScheme.onSurface).withValues(alpha: 0.3),
+                              borderRadius: BorderRadius.circular(4.0),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24.0),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56.0,
+                        child: ElevatedButton(
+                          onPressed: _isDownloading
+                              ? null
+                              : (_currentPage == _totalPages - 1
+                                    ? _completeOnboarding
+                                    : () => _pageController.nextPage(
+                                        duration: const Duration(milliseconds: 300),
+                                        curve: Curves.easeInOut,
+                                      )),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colorScheme.primary,
+                            foregroundColor: colorScheme.onPrimary,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16.0),
+                            ),
+                          ),
+                          child: _isDownloading
+                              ? SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    color: colorScheme.onPrimary,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  _currentPage == _totalPages - 1
+                                      ? l10n.getStarted
+                                      : l10n.next,
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                Positioned(
+                  top: 16.0,
+                  left: 16.0,
+                  right: 16.0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _currentPage > 0
+                          ? IconButton(
+                              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                              color: colorScheme.onSurface,
+                              onPressed: _isDownloading
+                                  ? null
+                                  : () {
+                                      _pageController.previousPage(
+                                        duration: const Duration(milliseconds: 300),
+                                        curve: Curves.easeInOut,
+                                      );
+                                    },
+                            )
+                          : const SizedBox.shrink(),
+                      _currentPage < _totalPages - 1
+                          ? TextButton(
+                              onPressed: _isDownloading ? null : _completeOnboarding,
+                              child: Text(
+                                l10n.skipOnboarding,
+                                style: GoogleFonts.outfit(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: colorScheme.secondary,
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -345,6 +445,10 @@ class _AzanSelectionPage extends StatelessWidget {
   final Set<String> downloadedVoices;
   final ValueChanged<String> onVoiceDownloaded;
   final bool isOffline;
+  final bool isSoundMuted;
+  final bool isDndActive;
+  final bool isSilentMode;
+  final VoidCallback onRefreshSoundStatus;
   final double bottomPadding;
 
   const _AzanSelectionPage({
@@ -354,6 +458,10 @@ class _AzanSelectionPage extends StatelessWidget {
     required this.downloadedVoices,
     required this.onVoiceDownloaded,
     required this.isOffline,
+    required this.isSoundMuted,
+    required this.isDndActive,
+    required this.isSilentMode,
+    required this.onRefreshSoundStatus,
     required this.bottomPadding,
   });
 
@@ -436,6 +544,64 @@ class _AzanSelectionPage extends StatelessWidget {
               ],
             ),
           ),
+          if (isAzanEnabled && isSoundMuted) ...[
+            const SizedBox(height: 16.0),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.4)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.volume_off_rounded,
+                    color: Colors.orange,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isDndActive && isSilentMode
+                              ? l10n.phoneMutedTitleBoth
+                              : isDndActive
+                                  ? l10n.phoneMutedTitleDnd
+                                  : l10n.phoneMutedTitleSilent,
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Colors.orange.shade800,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          l10n.phoneMutedDesc,
+                          style: GoogleFonts.outfit(
+                            fontSize: 12,
+                            color: Colors.orange.shade900,
+                            height: 1.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.refresh_rounded,
+                      color: Colors.orange,
+                      size: 20,
+                    ),
+                    onPressed: onRefreshSoundStatus,
+                  ),
+                ],
+              ),
+            ),
+          ],
           if (isAzanEnabled) ...[
             const SizedBox(height: 16.0),
             _SettingsDropdownSelector(
@@ -499,8 +665,8 @@ class _AzanSelectionPage extends StatelessWidget {
                   debugPrint('Onboarding: Error selecting azan: $e');
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('حدث خطأ أثناء تحميل الأذان'),
+                      SnackBar(
+                        content: Text(l10n.azanDownloadError),
                         behavior: SnackBarBehavior.floating,
                       ),
                     );
@@ -548,6 +714,21 @@ class _AzanSelectionPage extends StatelessWidget {
                           );
                         }
                         return;
+                      }
+                      final soundStatus = await ns.checkSoundStatus();
+                      if (soundStatus['isMuted'] == true && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              soundStatus['dndMode'] == true && soundStatus['silentMode'] == true
+                                  ? l10n.phoneMutedTitleBoth
+                                  : soundStatus['dndMode'] == true
+                                      ? l10n.phoneMutedTitleDnd
+                                      : l10n.phoneMutedTitleSilent,
+                            ),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
                       }
                       await ns.testAzan(Salaah.fajr, currentSound);
                     },
@@ -894,6 +1075,59 @@ class _OnboardingPage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AnimatedPageTransition extends StatefulWidget {
+  final Widget child;
+  const _AnimatedPageTransition({required this.child});
+
+  @override
+  State<_AnimatedPageTransition> createState() => _AnimatedPageTransitionState();
+}
+
+class _AnimatedPageTransitionState extends State<_AnimatedPageTransition>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeIn,
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0.0, 0.05),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    ));
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: widget.child,
       ),
     );
   }
