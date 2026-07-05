@@ -47,7 +47,7 @@ class _GeneralSectionState extends State<GeneralSection> {
     final info = await PackageInfo.fromPlatform();
     if (mounted) {
       setState(() {
-        _version = '${info.version}+${info.buildNumber}';
+        _version = info.version;
       });
     }
   }
