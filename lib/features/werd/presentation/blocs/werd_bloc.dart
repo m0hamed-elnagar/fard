@@ -78,7 +78,7 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
           emit(state.copyWith(isLoading: true));
           await _repository.setGoal(e.goal);
 
-          // Get current progress before resetting
+          // Get current progress
           final currentProgressRes = await _repository.getProgress(
             goalId: e.goal.id,
           );
@@ -92,108 +92,17 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
             (p) => p,
           );
 
-          // FIX #4: Save today's sessions to history BEFORE resetting
-          // This prevents data loss when changing goals
-          var progressToSave = currentProgress;
-
-          debugPrint('🔍 [Goal Change] Before saving to history:');
-          debugPrint(
-            '   totalAmountReadToday: ${currentProgress.totalAmountReadToday}',
-          );
-          debugPrint(
-            '   segmentsToday: ${currentProgress.segmentsToday.length}',
-          );
-          debugPrint('   history entries: ${currentProgress.history.length}');
-
-          if (currentProgress.totalAmountReadToday > 0 ||
-              currentProgress.segmentsToday.isNotEmpty) {
-            final dateKey = DateTime.now().toIso8601String().split('T')[0];
-
-            debugPrint('💾 [Goal Change] Saving to history with key: $dateKey');
-
-            // Calculate history entry from current segments
-            final startAbs =
-                currentProgress.sessionStartAbsolute ??
-                (currentProgress.segmentsToday.isNotEmpty
-                    ? currentProgress.segmentsToday.first.startAyah
-                    : 1);
-            final endAbs =
-                currentProgress.lastReadAbsolute ??
-                (currentProgress.segmentsToday.isNotEmpty
-                    ? currentProgress.segmentsToday.last.endAyah
-                    : startAbs);
-
-            final pagesRead =
-                QuranHizbProvider.calculateFractionalProgressFromSegments(
-                  currentProgress.segmentsToday,
-                  WerdUnit.page,
-                );
-            final juzRead =
-                QuranHizbProvider.calculateFractionalProgressFromSegments(
-                  currentProgress.segmentsToday,
-                  WerdUnit.juz,
-                );
-
-            final startPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(
-              startAbs,
-            );
-            final endPos = QuranHizbProvider.getSurahAndAyahFromAbsolute(
-              endAbs,
-            );
-            final startSurahName = quran.getSurahName(startPos[0]);
-            final endSurahName = quran.getSurahName(endPos[0]);
-
-            final summary =
-                "Read ${currentProgress.totalAmountReadToday} ayahs (${pagesRead.toStringAsFixed(1)} pages) from $startSurahName ${startPos[1]} to $endSurahName ${endPos[1]}";
-
-            final historyEntry = WerdHistoryEntry(
-              totalAyahsRead: currentProgress.totalAmountReadToday,
-              startAbsolute: startAbs,
-              endAbsolute: endAbs,
-              pagesRead: pagesRead,
-              juzRead: juzRead,
-              segmentCount: currentProgress.segmentsToday.length,
-              startSurahName: startSurahName,
-              startAyahNumber: startPos[1],
-              endSurahName: endSurahName,
-              endAyahNumber: endPos[1],
-              summary: summary,
-              sessions: currentProgress.segmentsToday.isNotEmpty
-                  ? currentProgress.segmentsToday
-                  : null,
-            );
-
-            // Add to history
-            final newHistory = Map<String, WerdHistoryEntry>.from(
-              currentProgress.history,
-            );
-            newHistory[dateKey] = historyEntry;
-
-            debugPrint(
-              '💾 [Goal Change] Saved today\'s sessions to history: $dateKey - ${currentProgress.totalAmountReadToday} ayahs',
-            );
-            debugPrint('   History entries now: ${newHistory.length}');
-
-            progressToSave = currentProgress.copyWith(history: newHistory);
-          } else {
-            debugPrint(
-              '⚠️ [Goal Change] No sessions to save (totalAmountReadToday=0, segmentsToday=0)',
-            );
-          }
-
-          // NOW reset progress for the new goal
-          final updatedProgress = progressToSave.copyWith(
+          // Preserve today's reading progress (totalAmountReadToday, segmentsToday, readItemsToday, history, etc.)
+          // Only update the position parameters based on the new goal's start point
+          final updatedProgress = currentProgress.copyWith(
             lastReadAbsolute: e.goal.startAbsolute != null
                 ? e.goal.startAbsolute! - 1
-                : null,
-            sessionStartAbsolute: e.goal.startAbsolute,
-            totalAmountReadToday: 0,
-            segmentsToday: const [], // ✅ Reset segments
-            readItemsToday: const {}, // ✅ Reset read items
+                : currentProgress.lastReadAbsolute,
+            sessionStartAbsolute: e.goal.startAbsolute ?? currentProgress.sessionStartAbsolute,
             lastUpdated: DateTime.now(),
           );
 
-          debugPrint('📊 [Goal Change] After reset:');
+          debugPrint('📊 [Goal Change] Progress updated:');
           debugPrint(
             '   totalAmountReadToday: ${updatedProgress.totalAmountReadToday}',
           );
@@ -201,9 +110,10 @@ class WerdBloc extends Bloc<WerdEvent, WerdState> {
             '   segmentsToday: ${updatedProgress.segmentsToday.length}',
           );
           debugPrint('   history entries: ${updatedProgress.history.length}');
+          debugPrint('   lastReadAbsolute: ${updatedProgress.lastReadAbsolute}');
 
           await _repository.updateProgress(updatedProgress);
-          debugPrint('✅ [Goal Change] Progress reset for new goal');
+          debugPrint('✅ [Goal Change] Progress updated for goal');
 
           if (state.goal?.id != e.goal.id) {
             debugPrint(

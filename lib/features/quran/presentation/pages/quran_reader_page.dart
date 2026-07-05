@@ -59,6 +59,7 @@ class _QuranReaderPageState extends State<QuranReaderPage>
   late final ReaderScrollController _scrollController;
   bool _hasHandledPlayOnLoad = false;
   bool _hasShownCycleCompletionDialog = false;
+  bool _isInitialScroll = true;
 
   // Save WerdBloc reference early to use in dispose()
   late final WerdBloc _werdBloc;
@@ -75,9 +76,10 @@ class _QuranReaderPageState extends State<QuranReaderPage>
   @override
   void didUpdateWidget(QuranReaderPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Reset the flag when navigating to a different surah
+    // Reset the flags when navigating to a different surah
     if (oldWidget.surahNumber != widget.surahNumber) {
       _hasShownCycleCompletionDialog = false;
+      _isInitialScroll = true;
     }
   }
 
@@ -159,7 +161,11 @@ class _QuranReaderPageState extends State<QuranReaderPage>
                                 // Scroll to highlighted ayah (initial or changed)
                                 _scrollController.scrollToAyah(
                                   s.highlightedAyah!.number.ayahNumberInSurah,
+                                  duration: _isInitialScroll
+                                      ? Duration.zero
+                                      : const Duration(milliseconds: 600),
                                 );
+                                _isInitialScroll = false;
                               }
 
                               // Play on load logic

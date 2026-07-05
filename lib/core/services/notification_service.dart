@@ -286,18 +286,26 @@ class NotificationService {
 
   Future<bool> isBatteryOptimizationIgnored() async {
     if (Platform.isAndroid) {
-      return await Permission.ignoreBatteryOptimizations.isGranted;
+      try {
+        final adhanChannel = MethodChannel(AppIdentifiers.adhanChannelName);
+        return await adhanChannel.invokeMethod<bool>('isBatteryOptimizationIgnored') ?? false;
+      } catch (e) {
+        debugPrint('Failed to check battery optimization status natively: $e');
+        return true;
+      }
     }
     return true;
   }
 
   Future<void> requestIgnoreBatteryOptimizations() async {
     if (Platform.isAndroid) {
-      if (await Permission.ignoreBatteryOptimizations.request().isGranted) {
-        return;
+      try {
+        final adhanChannel = MethodChannel(AppIdentifiers.adhanChannelName);
+        await adhanChannel.invokeMethod('requestIgnoreBatteryOptimizations');
+      } catch (e) {
+        debugPrint('Failed to request ignore battery optimization natively: $e');
+        await openAppSettings();
       }
-      // If direct request fails or isn't enough, open settings
-      await openAppSettings();
     }
   }
 
@@ -550,6 +558,7 @@ class NotificationService {
     results['exact_alarm_permission'] = await canScheduleExactNotifications();
     results['battery_optimization_ignored'] =
         await isBatteryOptimizationIgnored();
+    results['device_manufacturer'] = await getDeviceManufacturer();
 
     final channels = await androidPlugin?.getNotificationChannels() ?? [];
     results['channels_count'] = channels.length;
@@ -630,5 +639,27 @@ ${(results['channels'] as List).map((c) => '    • ${c['id']} (${c['importance'
     await _notificationsPlugin.cancel(
       id: PrayerNotificationScheduler.werdReminderId,
     );
+  }
+
+  Future<String> getDeviceManufacturer() async {
+    if (!Platform.isAndroid) return 'none';
+    try {
+      final adhanChannel = MethodChannel(AppIdentifiers.adhanChannelName);
+      final String? manufacturer = await adhanChannel.invokeMethod<String>('getDeviceManufacturer');
+      return manufacturer ?? 'none';
+    } catch (e) {
+      debugPrint('Error getting device manufacturer: $e');
+      return 'none';
+    }
+  }
+
+  Future<void> openAutostartSettings() async {
+    if (!Platform.isAndroid) return;
+    try {
+      final adhanChannel = MethodChannel(AppIdentifiers.adhanChannelName);
+      await adhanChannel.invokeMethod('openAutostartSettings');
+    } catch (e) {
+      debugPrint('Error opening autostart settings: $e');
+    }
   }
 }

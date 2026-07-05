@@ -18,6 +18,7 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.media.app.NotificationCompat.MediaStyle
 import android.media.RingtoneManager
 import com.khwarizmi.fard.MainActivity
 import com.khwarizmi.fard.R
@@ -206,6 +207,7 @@ class AdhanService : Service() {
         val contentIntent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("OPEN_PRAYER_TIMES", true)
+            putExtra("STOP_ADHAN_ON_OPEN", true)
         }
         val pendingContentIntent = PendingIntent.getActivity(
             this,
@@ -226,7 +228,7 @@ class AdhanService : Service() {
         )
 
         val title = "حان وقت صلاة $prayerName"
-        val body = "اضغط لإيقاف الأذان"
+        val body = "أقم الصلاة يرحمك الله"
 
         val notification = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.mipmap.ic_launcher)
@@ -236,7 +238,10 @@ class AdhanService : Service() {
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setOngoing(true)
             .setContentIntent(pendingContentIntent)
-            .addAction(R.mipmap.ic_launcher, "إيقاف", pendingStopIntent)
+            .setStyle(MediaStyle()
+                .setShowActionsInCompactView(0)
+            )
+            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "إيقاف", pendingStopIntent)
             .build()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

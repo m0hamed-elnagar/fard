@@ -1578,10 +1578,9 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
   ) {
     // Calculate "Current Position" (next ayah to read):
     // 1. If finished Quran (completedCycles > 0 and last session ended at 6236) → go to ayah 1
-    // 2. If sessions exist today → last session's endAyah + 1
-    // 3. If sessionStartAbsolute set (clicked Continue but no reading yet) → use it
-    // 4. If no session today, continue from where stopped previously (+1)
-    // 5. First time → go to ayah 1
+    // 2. If lastReadAbsolute is set (stopped reading somewhere or manual jump/edit) → continue from where stopped (+1)
+    // 3. If sessionStartAbsolute set (clicked Continue or explicit start set) → use it
+    // 4. First time / no progress → go to ayah 1
     int targetAbs;
 
     final completedCycles = progress?.completedCycles ?? 0;
@@ -1593,17 +1592,13 @@ class _WerdProgressCardState extends State<WerdProgressCard> {
         sessions.last.endAyah == 6236) {
       // Just finished Quran, start new cycle
       targetAbs = 1;
-    } else if (sessions.isNotEmpty) {
-      // Has sessions today → show next ayah after last session's end
-      final lastEndAyah = sessions.last.endAyah;
-      targetAbs = (lastEndAyah + 1 > 6236) ? 1 : lastEndAyah + 1;
+    } else if (progress?.lastReadAbsolute != null) {
+      // Continue from where stopped previously (+1)
+      final lastAbs = progress!.lastReadAbsolute!;
+      targetAbs = (lastAbs + 1 > 6236) ? 1 : lastAbs + 1;
     } else if (sessionStart != null) {
       // Explicit starting point was set or Continue clicked but no reading yet
       targetAbs = sessionStart;
-    } else if (progress?.lastReadAbsolute != null) {
-      // FIX: If no session today, continue from where stopped previously (+1)
-      final lastAbs = progress!.lastReadAbsolute!;
-      targetAbs = (lastAbs + 1 > 6236) ? 1 : lastAbs + 1;
     } else {
       // First time user or no progress
       targetAbs = 1;

@@ -66,19 +66,27 @@ class ReaderScrollController {
     }
   }
 
-  void scrollToAyah(int ayahNumber, {int retryCount = 0}) {
+  void scrollToAyah(
+    int ayahNumber, {
+    Duration duration = const Duration(milliseconds: 600),
+    int retryCount = 0,
+  }) {
     Future.delayed(Duration(milliseconds: retryCount == 0 ? 300 : 200), () {
       if (_isDisposed) return;
       final key = _ayahKeys[ayahNumber];
       if (key != null && key.currentContext != null) {
         Scrollable.ensureVisible(
           key.currentContext!,
-          duration: const Duration(milliseconds: 600),
+          duration: duration,
           curve: Curves.easeInOut,
           alignment: 0.1, // Show near top of screen
         );
       } else if (retryCount < 5) {
-        scrollToAyah(ayahNumber, retryCount: retryCount + 1);
+        scrollToAyah(
+          ayahNumber,
+          duration: duration,
+          retryCount: retryCount + 1,
+        );
       }
     });
   }

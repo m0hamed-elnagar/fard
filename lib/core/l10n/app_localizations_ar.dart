@@ -264,6 +264,37 @@ class AppLocalizationsAr extends AppLocalizations {
   String get disableRestrictions => 'إلغاء القيود';
 
   @override
+  String get autostartWarningTitle => 'تفعيل التشغيل التلقائي';
+
+  @override
+  String get autostartWarningDesc =>
+      'بالنسبة لأجهزة مثل شاومي وهواوي وأوبو وفيفو وون بلس، يرجى تمكين التشغيل التلقائي للحفاظ على عمل تنبيهات الأذان بعد إعادة التشغيل.';
+
+  @override
+  String get autostartSettingsDesc =>
+      'تهيئة إعدادات التشغيل التلقائي للحفاظ على عمل التطبيق بعد إعادة تشغيل الهاتف.';
+
+  @override
+  String get batteryUnrestricted => 'معطلة (غير مقيدة)';
+
+  @override
+  String get batteryAlreadyUnrestricted => 'تحسين البطارية معطل بالفعل.';
+
+  @override
+  String get batteryInstructionTitle => 'إعدادات البطارية';
+
+  @override
+  String get batteryInstructionDesc =>
+      'لضمان سماع الأذان في الوقت المحدد، يحتاج التطبيق إلى إذن للعمل دون قيود على البطارية.\n\nفي الشاشة التالية:\n1. اضغط على (البطارية / Battery).\n2. اختر (غير مقيد / Unrestricted).\n3. ارجع للتطبيق.';
+
+  @override
+  String get autostartInstructionTitle => 'إعدادات التشغيل التلقائي';
+
+  @override
+  String get autostartInstructionDesc =>
+      'للحفاظ على عمل تنبيهات الأذان والأدوات بشكل صحيح، يرجى تفعيل التشغيل التلقائي لتطبيق فرض.\n\nفي الشاشة التالية:\n1. ابحث عن تطبيق (فرض) في القائمة.\n2. قم بتشغيل الزر بجانبه (ليصبح مفعلاً).\n3. اضغط على زر الرجوع للعودة للتطبيق.';
+
+  @override
   String get tryAgain => 'إعادة المحاولة';
 
   @override

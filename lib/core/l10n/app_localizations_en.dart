@@ -265,6 +265,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get disableRestrictions => 'Disable Restrictions';
 
   @override
+  String get autostartWarningTitle => 'Enable Autostart';
+
+  @override
+  String get autostartWarningDesc =>
+      'For devices like Xiaomi, Huawei, OPPO, Vivo, and OnePlus, please enable Autostart to keep Adhan notifications working after restarting your phone.';
+
+  @override
+  String get autostartSettingsDesc =>
+      'Configure autostart settings to keep the app active on phone startup.';
+
+  @override
+  String get batteryUnrestricted => 'Disabled (Unrestricted)';
+
+  @override
+  String get batteryAlreadyUnrestricted =>
+      'Battery optimization is already disabled.';
+
+  @override
+  String get batteryInstructionTitle => 'Battery Settings Setup';
+
+  @override
+  String get batteryInstructionDesc =>
+      'To ensure you hear the Adhan (Call to Prayer) on time, the app needs permission to run in the background without battery restrictions.\n\nOn the next screen:\n1. Tap Battery.\n2. Select Unrestricted.\n3. Return to the app.';
+
+  @override
+  String get autostartInstructionTitle => 'Autostart Settings Setup';
+
+  @override
+  String get autostartInstructionDesc =>
+      'To keep Adhan notifications and widgets working properly, please enable Autostart for Fard.\n\nOn the next screen:\n1. Find Fard in the list.\n2. Turn the switch next to it ON.\n3. Return to the app.';
+
+  @override
   String get tryAgain => 'Try Again';
 
   @override

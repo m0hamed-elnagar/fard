@@ -578,6 +578,60 @@ abstract class AppLocalizations {
   /// **'Disable Restrictions'**
   String get disableRestrictions;
 
+  /// No description provided for @autostartWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Autostart'**
+  String get autostartWarningTitle;
+
+  /// No description provided for @autostartWarningDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'For devices like Xiaomi, Huawei, OPPO, Vivo, and OnePlus, please enable Autostart to keep Adhan notifications working after restarting your phone.'**
+  String get autostartWarningDesc;
+
+  /// No description provided for @autostartSettingsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure autostart settings to keep the app active on phone startup.'**
+  String get autostartSettingsDesc;
+
+  /// No description provided for @batteryUnrestricted.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled (Unrestricted)'**
+  String get batteryUnrestricted;
+
+  /// No description provided for @batteryAlreadyUnrestricted.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery optimization is already disabled.'**
+  String get batteryAlreadyUnrestricted;
+
+  /// No description provided for @batteryInstructionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery Settings Setup'**
+  String get batteryInstructionTitle;
+
+  /// No description provided for @batteryInstructionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'To ensure you hear the Adhan (Call to Prayer) on time, the app needs permission to run in the background without battery restrictions.\n\nOn the next screen:\n1. Tap Battery.\n2. Select Unrestricted.\n3. Return to the app.'**
+  String get batteryInstructionDesc;
+
+  /// No description provided for @autostartInstructionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Autostart Settings Setup'**
+  String get autostartInstructionTitle;
+
+  /// No description provided for @autostartInstructionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'To keep Adhan notifications and widgets working properly, please enable Autostart for Fard.\n\nOn the next screen:\n1. Find Fard in the list.\n2. Turn the switch next to it ON.\n3. Return to the app.'**
+  String get autostartInstructionDesc;
+
   /// No description provided for @tryAgain.
   ///
   /// In en, this message translates to:

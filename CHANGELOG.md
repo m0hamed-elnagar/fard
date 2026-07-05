@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.2+19] - 2026-07-05
+
+### Added
+- **Battery Optimization Settings**: Added warning cards and settings tiles to guide Android users to set battery usage to "Unrestricted". Includes step-by-step guidance dialogs optimized for senior citizens.
+- **Autostart Settings**: Added warning banners and settings entries targeting custom OEMs (Xiaomi, Huawei, OPPO, Vivo, OnePlus) to keep the app active in the background.
+- **Dismissible warning cards**: Warning banners can be closed/dismissed permanently (persisting the state in SharedPreferences).
+- **Developer OEM Spoof Toggle**: Added a debug-only option to spoof manufacturer settings, enabling easy testing of OEM warning cards on standard emulators or other brands.
+
+### Fixed
+- **Google Play Policy Compliance**: Removed `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` from the manifest. Querying and launching battery optimization bypass is now handled natively via MethodChannel and App Info redirects, completely avoiding policy review risks.
+
+## [1.6.1+18] - 2026-07-04
+
+### Fixed
+- **Werd (Quran reading tracker)**: Fixed the issue where changing/editing the goal of the day would reset today's reading progress back to 0. It now correctly preserves today's progress counters, segments, and read items.
+- **Werd Card position sync**: Updated the Werd progress card's next ayah calculation to prioritize `lastReadAbsolute` as the primary source of truth, ensuring that manual jumps or goal position shifts are properly respected by the "Continue" button.
+- **Premature History Writes**: Removed premature writing of today's progress to the history map when editing goals, which previously caused data loss by overwriting earlier progress when the daily rollover happened.
+
 ## [1.5.9+17] - 2026-07-04
 
 ### Fixed
