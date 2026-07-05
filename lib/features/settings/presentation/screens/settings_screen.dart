@@ -16,6 +16,8 @@ import 'package:fard/features/settings/presentation/screens/azan_settings_screen
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fard/features/settings/presentation/widgets/appearance_section.dart';
 import 'package:fard/features/settings/presentation/widgets/general_section.dart';
+import 'package:fard/features/settings/presentation/widgets/about_dialog.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:fard/features/settings/presentation/widgets/location_section.dart';
 import 'package:fard/features/settings/presentation/widgets/widget_preview_section.dart';
 import 'package:flutter/foundation.dart';
@@ -39,6 +41,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   bool _autostartDismissed = false;
   bool _isManufacturerSpoofed = false;
   bool _batteryDismissed = false;
+  String _version = '1.0.0';
 
   @override
   void initState() {
@@ -46,6 +49,16 @@ class _SettingsScreenState extends State<SettingsScreen>
     WidgetsBinding.instance.addObserver(this);
     context.read<AzkarBloc>().add(const AzkarEvent.loadCategories());
     _checkPermissions();
+    _loadPackageInfo();
+  }
+
+  Future<void> _loadPackageInfo() async {
+    final info = await PackageInfo.fromPlatform();
+    if (mounted) {
+      setState(() {
+        _version = '${info.version}+${info.buildNumber}';
+      });
+    }
   }
 
   @override
@@ -223,6 +236,126 @@ class _SettingsScreenState extends State<SettingsScreen>
 
             // Debug: Widget Refresh Section (only in debug mode)
             if (!kReleaseMode) ...[_buildDebugWidgetSection(context, l10n)],
+
+            const SizedBox(height: 24),
+            // Subtly separate footer from settings tiles
+            Center(
+              child: Container(
+                width: 60,
+                height: 1,
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.15),
+              ),
+            ),
+            const SizedBox(height: 20),
+            
+            // Footer Content Area
+            Center(
+              child: InkWell(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  showAboutAppDialog(context, _version);
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Mosque Icon (Centered at the top of footer)
+                      Icon(
+                        Icons.mosque_rounded,
+                        size: 13,
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+                      ),
+                      const SizedBox(height: 8),
+                      
+                      // Developed By Label
+                      Text(
+                        Localizations.localeOf(context).languageCode == 'ar' ? 'تطوير' : 'DEVELOPED BY',
+                        style: GoogleFonts.outfit(
+                          fontSize: 8,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.5,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      
+                      // Signature Name with Elegant Side Line Accents
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 12,
+                            height: 1,
+                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
+                          ),
+                          const SizedBox(width: 8),
+                          Localizations.localeOf(context).languageCode == 'ar'
+                              ? Text(
+                                  'محمد النجار',
+                                  style: GoogleFonts.amiri(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
+                                  ),
+                                )
+                              : Padding(
+                                  padding: const EdgeInsets.only(bottom: 2), // Align Cinzel baseline
+                                  child: Text(
+                                    'MOHAMED ELNAGAR',
+                                    style: GoogleFonts.cinzel(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1.5,
+                                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
+                                    ),
+                                  ),
+                                ),
+                          const SizedBox(width: 8),
+                          Container(
+                            width: 12,
+                            height: 1,
+                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      
+                      // Spiritual Touch
+                      Localizations.localeOf(context).languageCode == 'ar'
+                          ? Text(
+                              '✨ لا تنسونا من صالح دعائكم ✨',
+                              style: GoogleFonts.amiri(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
+                              ),
+                            )
+                          : Text(
+                              '✨ Please remember us in your prayers ✨',
+                              style: GoogleFonts.dancingScript(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.75),
+                              ),
+                            ),
+                      const SizedBox(height: 8),
+                      
+                      // Version Tag (At the absolute bottom)
+                      Text(
+                        'v$_version',
+                        style: GoogleFonts.outfit(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
