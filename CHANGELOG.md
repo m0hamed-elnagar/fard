@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.3+20] - 2026-07-06
+
+### Added
+- **Onboarding / Sound Status Checks**: Added native checks on Android (silent, vibration, do not disturb) with warning banners and localizations during onboarding to warn the user if notifications could be silenced.
+
+### Changed
+- **Settings Screen**: Redesigned the developer signature and settings footer with a new "About" dialog.
+- **Settings Screen**: Cleaned up the settings display to show only the version name without the build number.
+
 ## [1.6.2+19] - 2026-07-05
 
 ### Added
