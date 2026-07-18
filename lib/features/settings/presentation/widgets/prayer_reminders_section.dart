@@ -51,11 +51,15 @@ class PrayerRemindersSection extends StatelessWidget
                         : 'Get notified before the prayer time starts',
                     value: state.isBeforeSalahReminderEnabled,
                     onChanged: (val) async {
+                      cubit.toggleBeforeSalahReminder(val);
                       if (val) {
                         final granted = await checkAndRequestNotificationPermissions(context);
-                        if (!granted) return;
+                        if (!granted) {
+                          if (context.mounted) {
+                            cubit.toggleBeforeSalahReminder(false);
+                          }
+                        }
                       }
-                      cubit.toggleBeforeSalahReminder(val);
                     },
                     context: context,
                   ),
@@ -123,11 +127,15 @@ class PrayerRemindersSection extends StatelessWidget
                     subtitle: l10n.afterSalahAzkarDesc,
                     value: state.isAfterSalahAzkarEnabled,
                     onChanged: (val) async {
+                      cubit.toggleAfterSalahAzkar();
                       if (val) {
                         final granted = await checkAndRequestNotificationPermissions(context);
-                        if (!granted) return;
+                        if (!granted) {
+                          if (context.mounted) {
+                            cubit.toggleAfterSalahAzkar();
+                          }
+                        }
                       }
-                      cubit.toggleAfterSalahAzkar();
                     },
                     context: context,
                   ),

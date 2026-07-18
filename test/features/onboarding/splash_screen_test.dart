@@ -35,6 +35,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fard/core/services/voice_download_service.dart';
 import 'package:fard/core/services/connectivity_service.dart';
+import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 
 class MockSharedPreferences extends Mock implements SharedPreferences {}
 
@@ -101,6 +102,8 @@ class MockVoiceDownloadService extends Mock implements VoiceDownloadService {}
 
 class MockConnectivityService extends Mock implements ConnectivityService {}
 
+class MockSettingsRepository extends Mock implements SettingsRepository {}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(PrayerTrackerEvent.load(DateTime.now()));
@@ -126,6 +129,7 @@ void main() {
   late MockQuranRepository mockQuranRepository;
   late MockVoiceDownloadService mockVoiceDownloadService;
   late MockConnectivityService mockConnectivityService;
+  late MockSettingsRepository mockSettingsRepository;
 
   setUp(() {
     mockPrefs = MockSharedPreferences();
@@ -146,6 +150,7 @@ void main() {
     mockConnectivityService = MockConnectivityService();
     mockThemeCubit = MockThemeCubit();
     mockQuranRepository = MockQuranRepository();
+    mockSettingsRepository = MockSettingsRepository();
 
     final getIt = GetIt.instance;
     getIt.reset();
@@ -169,6 +174,9 @@ void main() {
     getIt.registerSingleton<QuranRepository>(mockQuranRepository);
     getIt.registerSingleton<VoiceDownloadService>(mockVoiceDownloadService);
     getIt.registerSingleton<ConnectivityService>(mockConnectivityService);
+    
+    when(() => mockSettingsRepository.shouldShowRemovedVoiceNotice).thenReturn(false);
+    getIt.registerSingleton<SettingsRepository>(mockSettingsRepository);
 
     getIt.registerFactory<QuranBloc>(() => mockQuranBloc);
     getIt.registerFactory<AudioPlayerBloc>(() => mockAudioPlayerBloc);

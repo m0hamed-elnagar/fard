@@ -1412,6 +1412,84 @@ abstract class AppLocalizations {
   /// **'Failed to download Azan voice. Ensure the site is accessible or try another voice.'**
   String get azanDownloadError;
 
+  /// No description provided for @respectSilentDndModeBannerText.
+  ///
+  /// In en, this message translates to:
+  /// **'When your phone is Silent, Vibrate, or in Do Not Disturb, the Adhan will show as a notification instead of playing audibly.'**
+  String get respectSilentDndModeBannerText;
+
+  /// No description provided for @ringerExplanationNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Adhan will play normally.'**
+  String get ringerExplanationNormal;
+
+  /// No description provided for @ringerExplanationSilentToggleOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone is silent, but Adhan will still play.'**
+  String get ringerExplanationSilentToggleOff;
+
+  /// No description provided for @ringerExplanationSilentToggleOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone is silent — Adhan will only show a notification.'**
+  String get ringerExplanationSilentToggleOn;
+
+  /// No description provided for @ringerExplanationDndToggleOff.
+  ///
+  /// In en, this message translates to:
+  /// **'DND is active, but Adhan will still play.'**
+  String get ringerExplanationDndToggleOff;
+
+  /// No description provided for @ringerExplanationDndToggleOn.
+  ///
+  /// In en, this message translates to:
+  /// **'DND is active — Adhan will only show a notification.'**
+  String get ringerExplanationDndToggleOn;
+
+  /// No description provided for @ringerExplanationBothToggleOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone is silent and DND is active, but Adhan will still play.'**
+  String get ringerExplanationBothToggleOff;
+
+  /// No description provided for @ringerExplanationBothToggleOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone is silent and DND is active — Adhan will only show a notification.'**
+  String get ringerExplanationBothToggleOn;
+
+  /// No description provided for @general.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get general;
+
+  /// No description provided for @alarmPrecision.
+  ///
+  /// In en, this message translates to:
+  /// **'Alarm Precision'**
+  String get alarmPrecision;
+
+  /// No description provided for @quietHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet Hours'**
+  String get quietHours;
+
+  /// No description provided for @loadingVoices.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading available voices...'**
+  String get loadingVoices;
+
+  /// No description provided for @salahCountdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Salah Countdown'**
+  String get salahCountdown;
+
   /// No description provided for @downloadingVoice.
   ///
   /// In en, this message translates to:

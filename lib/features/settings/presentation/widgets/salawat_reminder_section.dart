@@ -29,13 +29,17 @@ class SalawatReminderSection extends StatelessWidget
               title: l10n.enable,
               value: state.isSalawatReminderEnabled,
               onChanged: (val) async {
+                cubit.toggleSalawatReminder(val);
                 if (val) {
                   final granted = await checkAndRequestNotificationPermissions(
                     context,
                   );
-                  if (!granted) return;
+                  if (!granted) {
+                    if (context.mounted) {
+                      cubit.toggleSalawatReminder(false);
+                    }
+                  }
                 }
-                cubit.toggleSalawatReminder(val);
               },
               context: context,
             ),

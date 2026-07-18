@@ -715,6 +715,52 @@ class AppLocalizationsEn extends AppLocalizations {
       'Failed to download Azan voice. Ensure the site is accessible or try another voice.';
 
   @override
+  String get respectSilentDndModeBannerText =>
+      'When your phone is Silent, Vibrate, or in Do Not Disturb, the Adhan will show as a notification instead of playing audibly.';
+
+  @override
+  String get ringerExplanationNormal => 'Adhan will play normally.';
+
+  @override
+  String get ringerExplanationSilentToggleOff =>
+      'Phone is silent, but Adhan will still play.';
+
+  @override
+  String get ringerExplanationSilentToggleOn =>
+      'Phone is silent — Adhan will only show a notification.';
+
+  @override
+  String get ringerExplanationDndToggleOff =>
+      'DND is active, but Adhan will still play.';
+
+  @override
+  String get ringerExplanationDndToggleOn =>
+      'DND is active — Adhan will only show a notification.';
+
+  @override
+  String get ringerExplanationBothToggleOff =>
+      'Phone is silent and DND is active, but Adhan will still play.';
+
+  @override
+  String get ringerExplanationBothToggleOn =>
+      'Phone is silent and DND is active — Adhan will only show a notification.';
+
+  @override
+  String get general => 'General';
+
+  @override
+  String get alarmPrecision => 'Alarm Precision';
+
+  @override
+  String get quietHours => 'Quiet Hours';
+
+  @override
+  String get loadingVoices => 'Loading available voices...';
+
+  @override
+  String get salahCountdown => 'Salah Countdown';
+
+  @override
   String get downloadingVoice => 'Downloading voice...';
 
   @override

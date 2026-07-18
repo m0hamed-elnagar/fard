@@ -342,7 +342,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i724.WerdRepository>(),
       ),
     );
-    gh.factory<_i984.ThemeCubit>(
+    gh.lazySingleton<_i984.ThemeCubit>(
       () => _i984.ThemeCubit(
         gh<_i674.SettingsRepository>(),
         gh<_i808.ApplyThemePreset>(),
@@ -422,7 +422,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i33.BookmarkRepository>(),
       ),
     );
-    gh.factory<_i185.LocationPrayerCubit>(
+    gh.lazySingleton<_i185.LocationPrayerCubit>(
       () => _i185.LocationPrayerCubit(
         gh<_i674.SettingsRepository>(),
         gh<_i669.LocationService>(),
@@ -431,7 +431,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i6.UpdateCalculationMethodUseCase>(),
       ),
     );
-    gh.factory<_i126.DailyRemindersCubit>(
+    gh.lazySingleton<_i126.DailyRemindersCubit>(
       () => _i126.DailyRemindersCubit(
         gh<_i674.SettingsRepository>(),
         gh<_i760.SyncNotificationSchedule>(),
@@ -449,7 +449,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i941.NotificationService>(),
       ),
     );
-    gh.factory<_i310.AdhanCubit>(
+    gh.lazySingleton<_i310.AdhanCubit>(
       () => _i310.AdhanCubit(
         gh<_i674.SettingsRepository>(),
         gh<_i760.SyncNotificationSchedule>(),

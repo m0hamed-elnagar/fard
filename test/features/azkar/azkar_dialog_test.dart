@@ -16,6 +16,7 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
+import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/core/services/widget_update_service.dart';
@@ -44,12 +45,15 @@ class MockWidgetUpdateService extends Mock implements WidgetUpdateService {
   Future<void> updateWidget() async {}
 }
 
+class MockSettingsRepository extends Mock implements SettingsRepository {}
+
 void main() {
   late MockLocationPrayerCubit mockLocationPrayerCubit;
   late MockThemeCubit mockThemeCubit;
   late MockDailyRemindersCubit mockDailyRemindersCubit;
   late MockAzkarBloc mockAzkarBloc;
   late MockPrayerTrackerBloc mockPrayerTrackerBloc;
+  late MockSettingsRepository mockSettingsRepository;
 
   setUpAll(() {
     registerFallbackValue(PrayerTrackerEvent.load(DateTime.now()));
@@ -62,6 +66,7 @@ void main() {
     mockDailyRemindersCubit = MockDailyRemindersCubit();
     mockAzkarBloc = MockAzkarBloc();
     mockPrayerTrackerBloc = MockPrayerTrackerBloc();
+    mockSettingsRepository = MockSettingsRepository();
 
     final getIt = GetIt.instance;
     getIt.reset();
@@ -70,6 +75,9 @@ void main() {
     final mockPrayerTimeService = MockPrayerTimeService();
     getIt.registerSingleton<PrayerTimeService>(mockPrayerTimeService);
     getIt.registerSingleton<WidgetUpdateService>(MockWidgetUpdateService());
+    
+    when(() => mockSettingsRepository.shouldShowRemovedVoiceNotice).thenReturn(false);
+    getIt.registerSingleton<SettingsRepository>(mockSettingsRepository);
 
     // Default mocks for PrayerTimeService
     when(

@@ -11,7 +11,7 @@ import '../../domain/usecases/sync_notification_schedule.dart';
 import '../../domain/usecases/toggle_after_salah_azkar_usecase.dart';
 import 'daily_reminders_state.dart';
 
-@injectable
+@lazySingleton
 class DailyRemindersCubit extends Cubit<DailyRemindersState> {
   final SettingsRepository _repo;
   final SyncNotificationSchedule _syncNotif;

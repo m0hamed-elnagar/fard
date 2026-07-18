@@ -397,13 +397,17 @@ class _AzkarCategoriesScreenState extends State<AzkarCategoriesScreen> with Noti
                                         CustomToggle(
                                           value: reminder.isEnabled,
                                           onChanged: (val) async {
+                                            cubit.toggleReminder(index);
                                             if (val) {
                                               final granted = await checkAndRequestNotificationPermissions(
                                                 context,
                                               );
-                                              if (!granted) return;
+                                              if (!granted) {
+                                                if (context.mounted) {
+                                                  cubit.toggleReminder(index);
+                                                }
+                                              }
                                             }
-                                            cubit.toggleReminder(index);
                                           },
                                         ),
                                         const SizedBox(width: 8),

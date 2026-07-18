@@ -712,6 +712,52 @@ class AppLocalizationsAr extends AppLocalizations {
       'فشل تحميل صوت الأذان. تأكد من أن الموقع متاح أو حاول اختيار صوت آخر.';
 
   @override
+  String get respectSilentDndModeBannerText =>
+      'عندما يكون هاتفك في الوضع الصامت أو الاهتزاز أو وضع عدم الإزعاج، سيظهر الأذان كإشعار بدلاً من تشغيله بصوت مسموع.';
+
+  @override
+  String get ringerExplanationNormal => 'سيتم تشغيل الأذان بشكل طبيعي.';
+
+  @override
+  String get ringerExplanationSilentToggleOff =>
+      'الهاتف صامت، ولكن سيتم تشغيل الأذان.';
+
+  @override
+  String get ringerExplanationSilentToggleOn =>
+      'الهاتف صامت — سيظهر الأذان كإشعار فقط.';
+
+  @override
+  String get ringerExplanationDndToggleOff =>
+      'وضع عدم الإزعاج نشط، ولكن سيتم تشغيل الأذان.';
+
+  @override
+  String get ringerExplanationDndToggleOn =>
+      'وضع عدم الإزعاج نشط — سيظهر الأذان كإشعار فقط.';
+
+  @override
+  String get ringerExplanationBothToggleOff =>
+      'الهاتف صامت وعدم الإزعاج نشط، ولكن سيتم تشغيل الأذان.';
+
+  @override
+  String get ringerExplanationBothToggleOn =>
+      'الهاتف صامت وعدم الإزعاج نشط — سيظهر الأذان كإشعار فقط.';
+
+  @override
+  String get general => 'عام';
+
+  @override
+  String get alarmPrecision => 'دقة التنبيه';
+
+  @override
+  String get quietHours => 'ساعات الهدوء';
+
+  @override
+  String get loadingVoices => 'جاري تحميل الأصوات المتاحة...';
+
+  @override
+  String get salahCountdown => 'عد تنازلي للصلاة';
+
+  @override
   String get downloadingVoice => 'جاري تحميل الصوت...';
 
   @override

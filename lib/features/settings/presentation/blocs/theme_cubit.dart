@@ -15,7 +15,7 @@ import '../../domain/usecases/get_available_theme_presets.dart';
 import '../../domain/usecases/save_custom_theme.dart';
 import 'theme_state.dart';
 
-@injectable
+@lazySingleton
 class ThemeCubit extends Cubit<ThemeState> {
   final SettingsRepository _repo;
   final ApplyThemePreset _applyTheme;

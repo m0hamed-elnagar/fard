@@ -11,7 +11,7 @@ import '../../domain/usecases/sync_notification_schedule.dart';
 import '../../domain/usecases/update_calculation_method_usecase.dart';
 import 'location_prayer_state.dart';
 
-@injectable
+@lazySingleton
 class LocationPrayerCubit extends Cubit<LocationPrayerState> {
   final SettingsRepository _repo;
   final LocationService _location;

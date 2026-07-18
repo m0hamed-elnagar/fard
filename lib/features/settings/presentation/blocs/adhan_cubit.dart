@@ -10,7 +10,7 @@ import '../../domain/salaah_settings.dart';
 import '../../domain/usecases/sync_notification_schedule.dart';
 import 'adhan_state.dart';
 
-@injectable
+@lazySingleton
 class AdhanCubit extends Cubit<AdhanState> with WidgetsBindingObserver {
   final SettingsRepository _repo;
   final SyncNotificationSchedule _syncNotif;

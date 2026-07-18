@@ -1,6 +1,7 @@
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/core/theme/app_colors.dart';
 import 'package:fard/features/settings/presentation/widgets/adhan_section.dart';
+import 'package:fard/features/settings/presentation/widgets/salah_countdown_section.dart';
 import 'package:fard/features/settings/presentation/widgets/prayer_reminders_section.dart';
 import 'package:fard/features/settings/presentation/widgets/azkar_section.dart';
 import 'package:fard/features/settings/presentation/widgets/werd_reminder_section.dart';
@@ -31,6 +32,7 @@ class AzanSettingsScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 40.0),
         children: const [
           AdhanSection(),
+          SalahCountdownSection(),
           PrayerRemindersSection(),
           AzkarSection(),
           WerdReminderSection(),

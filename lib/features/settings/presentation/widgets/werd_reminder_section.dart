@@ -29,13 +29,17 @@ class WerdReminderSection extends StatelessWidget
               title: l10n.enable,
               value: state.isWerdReminderEnabled,
               onChanged: (val) async {
+                cubit.toggleWerdReminder(val);
                 if (val) {
                   final granted = await checkAndRequestNotificationPermissions(
                     context,
                   );
-                  if (!granted) return;
+                  if (!granted) {
+                    if (context.mounted) {
+                      cubit.toggleWerdReminder(false);
+                    }
+                  }
                 }
-                cubit.toggleWerdReminder(val);
               },
               context: context,
             ),

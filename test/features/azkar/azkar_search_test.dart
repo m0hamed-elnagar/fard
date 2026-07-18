@@ -18,6 +18,9 @@ import 'package:fard/features/settings/presentation/screens/azan_settings_screen
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
+import 'package:fard/features/audio/domain/repositories/audio_repository.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
@@ -56,6 +59,10 @@ class MockWidgetUpdateService extends Mock implements WidgetUpdateService {
   Future<void> updateWidget() async {}
 }
 
+class MockSharedPreferences extends Mock implements SharedPreferences {}
+
+class MockSettingsRepository extends Mock implements SettingsRepository {}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(Salaah.fajr);
@@ -69,6 +76,8 @@ void main() {
   late MockNotificationService mockNotificationService;
   late MockVoiceDownloadService mockVoiceDownloadService;
   late MockConnectivityService mockConnectivityService;
+  late MockSharedPreferences mockPrefs;
+  late MockSettingsRepository mockSettingsRepository;
 
   setUp(() {
     mockLocationPrayerCubit = MockLocationPrayerCubit();
@@ -79,6 +88,8 @@ void main() {
     mockNotificationService = MockNotificationService();
     mockVoiceDownloadService = MockVoiceDownloadService();
     mockConnectivityService = MockConnectivityService();
+    mockPrefs = MockSharedPreferences();
+    mockSettingsRepository = MockSettingsRepository();
 
     final getIt = GetIt.instance;
     getIt.reset();
@@ -86,6 +97,20 @@ void main() {
     getIt.registerSingleton<VoiceDownloadService>(mockVoiceDownloadService);
     getIt.registerSingleton<WidgetUpdateService>(MockWidgetUpdateService());
     getIt.registerSingleton<ConnectivityService>(mockConnectivityService);
+    getIt.registerSingleton<SharedPreferences>(mockPrefs);
+    getIt.registerSingleton<SettingsRepository>(mockSettingsRepository);
+
+    when(() => mockPrefs.getBool(any())).thenReturn(false);
+    when(() => mockSettingsRepository.shouldShowRemovedVoiceNotice).thenReturn(false);
+    when(() => mockSettingsRepository.respectSilentDndMode).thenReturn(false);
+    when(() => mockSettingsRepository.useExactAlarmClock).thenReturn(false);
+    when(() => mockSettingsRepository.showSalahCountdownNotification).thenReturn(false);
+    when(() => mockSettingsRepository.audioQuality).thenReturn(AudioQuality.high192);
+    when(() => mockSettingsRepository.isAudioPlayerExpanded).thenReturn(false);
+    when(() => mockSettingsRepository.salaahSettings).thenReturn([]);
+    when(() => mockSettingsRepository.locale).thenReturn(const Locale('en'));
+    when(() => mockSettingsRepository.themePresetId).thenReturn('antique');
+    when(() => mockSettingsRepository.customThemeColors).thenReturn({});
 
     when(
       () => mockNotificationService.canScheduleExactNotifications(),
@@ -93,6 +118,12 @@ void main() {
     when(
       () => mockNotificationService.testReminder(any(), any()),
     ).thenAnswer((_) async {});
+    when(
+      () => mockNotificationService.checkSoundStatus(),
+    ).thenAnswer((_) async => {
+      'silentMode': false,
+      'dndMode': false,
+    });
 
     when(() => mockConnectivityService.onConnectivityChanged).thenAnswer(
       (_) => Stream.value([ConnectivityResult.wifi]),
