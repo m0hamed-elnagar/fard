@@ -127,6 +127,73 @@ class AdhanService : Service() {
         // 2. Focus notification channel and start foreground immediately
         showForegroundNotification(prayerName)
 
+        // Check if device is in Silent / Vibrate mode or Do Not Disturb (DND) mode
+        val prefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+        val respectSilentDndMode = prefs.getBoolean("flutter.respect_silent_dnd_mode", false)
+
+        val ringerMode = audioManager.ringerMode
+        val isSilentOrVibrate = ringerMode == AudioManager.RINGER_MODE_SILENT || ringerMode == AudioManager.RINGER_MODE_VIBRATE
+        
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val isDNDActive = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val filter = notificationManager.currentInterruptionFilter
+            filter != NotificationManager.INTERRUPTION_FILTER_ALL
+        } else {
+            false
+        }
+
+        val shouldMute = respectSilentDndMode && (isSilentOrVibrate || isDNDActive) && !isTest
+
+        if (shouldMute) {
+            val reason = if (isSilentOrVibrate) "Ringer Mode ($ringerMode)" else "DND Mode"
+            Log.d(TAG, "Device is in Silent/Vibrate/DND (respectSilentDndMode=true, reason=$reason) and this is a real alarm. Suppressing sound/vibration.")
+            
+            // Post a clean, clearable notification
+            val channelId = "adhan_playback_channel"
+            val contentIntent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra("OPEN_PRAYER_TIMES", true)
+            }
+            val pendingContentIntent = PendingIntent.getActivity(
+                this,
+                2001,
+                contentIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+            )
+
+            val title = "حان وقت صلاة $prayerName"
+            val body = "أقم الصلاة يرحمك الله"
+
+            val vibratePattern = if (ringerMode == AudioManager.RINGER_MODE_VIBRATE && !isDNDActive) {
+                longArrayOf(0, 500, 250, 500)
+            } else {
+                null
+            }
+
+            val cleanNotification = NotificationCompat.Builder(this, channelId)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(title)
+                .setContentText(body)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setContentIntent(pendingContentIntent)
+                .setAutoCancel(true)
+                .setSound(null)
+                .setVibrate(vibratePattern)
+                .build()
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+            } else {
+                @Suppress("DEPRECATION")
+                stopForeground(true)
+            }
+
+            notificationManager.notify(NOTIFICATION_ID, cleanNotification)
+            stopSelf()
+            return
+        }
+
         // 3. Request audio focus
         if (!requestFocus(isTest)) {
             Log.w(TAG, "Failed to obtain audio focus. Continuing playback anyway.")

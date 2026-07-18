@@ -9,6 +9,7 @@ import android.util.Log
 import com.batoulapps.adhan.Prayer
 import com.batoulapps.adhan.PrayerTimes
 import com.khwarizmi.fard.PrayerWidgetReceiver
+import com.khwarizmi.fard.MainActivity
 import org.json.JSONArray
 import java.util.*
 
@@ -122,50 +123,75 @@ object PrayerAlarmManager {
             val now = System.currentTimeMillis()
 
             for (i in 0 until jsonArray.length()) {
-                val item = jsonArray.getJSONObject(i)
-                val prayerName = item.optString("prayerName", "")
-                val timeEpochMs = item.optLong("timeEpochMs", 0L)
-                val audioFilePath = item.optString("audioFilePath", "")
-                val enabled = item.optBoolean("enabled", false)
-
-                val prayerIndex = getPrayerIndex(prayerName)
-                if (prayerIndex == -1 || timeEpochMs == 0L) {
-                    continue
-                }
-
-                val requestCode = BASE_ADHAN_REQUEST_CODE + i
-
-                // Create intent targeting AdhanAlarmReceiver
-                val intent = Intent(context, AdhanAlarmReceiver::class.java).apply {
-                    putExtra("prayerName", prayerName)
-                    putExtra("audioFilePath", audioFilePath)
-                }
-
-                val pendingIntent = PendingIntent.getBroadcast(
-                    context,
-                    requestCode,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
-                )
-
-                if (enabled && timeEpochMs > now) {
-                    Log.d(TAG, "Scheduling Adhan for $prayerName at ${Date(timeEpochMs)} (RequestCode: $requestCode)")
+                try {
+                    val item = jsonArray.getJSONObject(i)
+                    val prayerName = item.optString("prayerName", "")
+                    val timeEpochMs = item.optLong("timeEpochMs", 0L)
+                    val audioFilePath = item.optString("audioFilePath", "")
+                    val enabled = item.optBoolean("enabled", false)
                     
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        alarmManager.setExactAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP,
-                            timeEpochMs,
-                            pendingIntent
-                        )
-                    } else {
-                        alarmManager.setExact(
-                            AlarmManager.RTC_WAKEUP,
-                            timeEpochMs,
-                            pendingIntent
-                        )
+                    // Retrieve useExactAlarmClock preference (checking item json first, then fallback to prefs)
+                    val useExactAlarmClockJson = item.optBoolean("useExactAlarmClock", true)
+                    val useExactAlarmClockPrefs = prefs.getBoolean("flutter.use_exact_alarm_clock", true)
+                    val useExactSetting = useExactAlarmClockJson && useExactAlarmClockPrefs
+
+                    val prayerIndex = getPrayerIndex(prayerName)
+                    if (prayerIndex == -1 || timeEpochMs == 0L) {
+                        continue
                     }
-                } else {
-                    Log.d(TAG, "Adhan for $prayerName at ${Date(timeEpochMs)} is disabled or in the past.")
+
+                    val requestCode = BASE_ADHAN_REQUEST_CODE + i
+
+                    // Create intent targeting AdhanAlarmReceiver
+                    val intent = Intent(context, AdhanAlarmReceiver::class.java).apply {
+                        putExtra("prayerName", prayerName)
+                        putExtra("audioFilePath", audioFilePath)
+                        putExtra("scheduledTime", timeEpochMs) // Pass expected scheduled time for trigger delay analysis
+                    }
+
+                    val pendingIntent = PendingIntent.getBroadcast(
+                        context,
+                        requestCode,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+                    )
+
+                    if (enabled && timeEpochMs > now) {
+                        val hasExactPermission = canScheduleExactAlarms(context)
+                        val useExact = useExactSetting && hasExactPermission
+
+                        if (useExact) {
+                            Log.d(TAG, "Scheduling Adhan for $prayerName at ${Date(timeEpochMs)} using setAlarmClock (RequestCode: $requestCode)")
+                            val showIntent = Intent(context, MainActivity::class.java)
+                            val showPendingIntent = PendingIntent.getActivity(
+                                context,
+                                0,
+                                showIntent,
+                                PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+                            )
+                            val alarmClockInfo = AlarmManager.AlarmClockInfo(timeEpochMs, showPendingIntent)
+                            alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
+                        } else {
+                            Log.d(TAG, "Scheduling Adhan for $prayerName at ${Date(timeEpochMs)} using fallback setAndAllowWhileIdle (RequestCode: $requestCode)")
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                alarmManager.setAndAllowWhileIdle(
+                                    AlarmManager.RTC_WAKEUP,
+                                    timeEpochMs,
+                                    pendingIntent
+                                )
+                            } else {
+                                alarmManager.set(
+                                    AlarmManager.RTC_WAKEUP,
+                                    timeEpochMs,
+                                    pendingIntent
+                                )
+                            }
+                        }
+                    } else {
+                        Log.d(TAG, "Adhan for $prayerName at ${Date(timeEpochMs)} is disabled or in the past.")
+                    }
+                } catch (slotEx: Exception) {
+                    Log.e(TAG, "Error scheduling individual Adhan alarm slot $i", slotEx)
                 }
             }
         } catch (e: Exception) {

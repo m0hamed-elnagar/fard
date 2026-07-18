@@ -224,6 +224,13 @@
   "globalSettings": "Global Notification Settings",
   "globalSettingsDesc": "Apply these settings to all five prayers at once.",
   "azanNotifications": "Azan & Notifications",
+  "useExactAlarmClock": "Precise Adhan Alarms",
+  "useExactAlarmClockDesc": "Guarantees hearing the Adhan exactly on time even when the device is idle (shows an alarm icon in status bar)",
+  "showSalahCountdownNotification": "Next Salah Countdown Notification",
+  "showSalahCountdownNotificationDesc": "Displays a persistent notification with a live countdown to the next prayer (efficient countdown, no battery drain)",
+  "exactAlarmPermissionRequired": "Exact Alarm Permission Required",
+  "exactAlarmPermissionRequiredDesc": "Precise Adhan Alarms were auto-disabled because the exact alarm permission is missing. Without this permission, the Adhan may be delayed or fail during deep sleep.",
+  "grantPermission": "Grant Permission",
   "azanSettingsDesc": "Manage azan voices, reminders, and after-salah azkar for all prayers.",
   "individualSettings": "Individual Prayer Settings",
   "createNewTheme": "Create New Theme",
@@ -709,5 +716,11 @@
   "phoneMutedTitleSilent": "Phone is on silent",
   "phoneMutedTitleDnd": "Do Not Disturb is active",
   "phoneMutedTitleBoth": "Phone is silent and Do Not Disturb is active",
-  "phoneMutedDesc": "Notifications will have no sound unless silent mode is disabled or Fard is allowed to bypass Do Not Disturb."
+  "phoneMutedDesc": "Notifications will have no sound unless silent mode is disabled or Fard is allowed to bypass Do Not Disturb.",
+  "respectSilentDndModeTitle": "Respect Silent/DND Mode",
+  "respectSilentDndModeDesc": "When enabled, Adhan will stay silent if your phone is on silent, vibrate, or Do Not Disturb.",
+  "voiceRemovedTitle": "Selected Voice Unavailable",
+  "voiceRemovedDesc": "Your previously selected Adhan voice is no longer available and has been reset to the default voice.",
+  "changeVoice": "Choose Voice",
+  "ok": "OK"
 }

@@ -13,5 +13,8 @@ sealed class AdhanState with _$AdhanState {
     @Default(false) bool isAzanVoiceDownloading,
     @Default(true) bool notificationsEnabled,
     @Default(true) bool exactAlarmsEnabled,
+    @Default(true) bool useExactAlarmClock,
+    @Default(false) bool showSalahCountdownNotification,
+    @Default(false) bool respectSilentDndMode,
   }) = _AdhanState;
 }

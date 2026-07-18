@@ -75,6 +75,18 @@ abstract interface class SettingsRepository {
   /// Whether the audio player is expanded
   bool get isAudioPlayerExpanded;
 
+  /// Whether to use exact Alarm Clock for Adhan notifications
+  bool get useExactAlarmClock;
+
+  /// Whether to show the countdown to the next salah in a persistent notification
+  bool get showSalahCountdownNotification;
+
+  /// Whether to respect silent and Do Not Disturb (DND) modes
+  bool get respectSilentDndMode;
+
+  /// Whether we should show a one-time notice that a removed voice was reset
+  bool get shouldShowRemovedVoiceNotice;
+
   // ==================== REMINDERS ====================
 
   /// Whether post-prayer reminders are globally enabled
@@ -202,6 +214,18 @@ abstract interface class SettingsRepository {
 
   /// Update whether the audio player is expanded
   Future<void> updateAudioPlayerExpanded(bool expanded);
+
+  /// Update whether to use exact Alarm Clock for Adhan notifications
+  Future<void> updateUseExactAlarmClock(bool value);
+
+  /// Update whether to show the countdown to the next salah in a persistent notification
+  Future<void> updateShowSalahCountdownNotification(bool value);
+
+  /// Update respectSilentDndMode setting
+  Future<void> updateRespectSilentDndMode(bool value);
+
+  /// Clear the show_removed_voice_notice flag
+  Future<void> clearRemovedVoiceNotice();
 
   /// Update post-prayer reminders enabled state
   Future<void> updateSalahReminderEnabled(bool enabled);

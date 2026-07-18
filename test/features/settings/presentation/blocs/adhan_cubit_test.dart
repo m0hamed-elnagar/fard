@@ -44,6 +44,9 @@ void main() {
     when(() => mockRepo.salaahSettings).thenReturn(initialSalaahSettings);
     when(() => mockRepo.audioQuality).thenReturn(AudioQuality.low64);
     when(() => mockRepo.isAudioPlayerExpanded).thenReturn(false);
+    when(() => mockRepo.useExactAlarmClock).thenReturn(false);
+    when(() => mockRepo.showSalahCountdownNotification).thenReturn(false);
+    when(() => mockRepo.respectSilentDndMode).thenReturn(false);
 
     when(() => mockRepo.updateSalaahSettings(any())).thenAnswer((_) async {});
     when(() => mockRepo.updateAudioQuality(any())).thenAnswer((_) async {});
@@ -52,6 +55,7 @@ void main() {
     ).thenAnswer((_) async {});
     when(() => mockRepo.updateAllAzanEnabled(any())).thenAnswer((_) async {});
     when(() => mockRepo.updateAllAzanSound(any())).thenAnswer((_) async {});
+    when(() => mockRepo.updateRespectSilentDndMode(any())).thenAnswer((_) async {});
     when(() => mockSyncNotif.execute()).thenAnswer((_) async {});
 
     when(
@@ -107,6 +111,15 @@ void main() {
 
       expect(cubit.state.salaahSettings.every((s) => !s.isAzanEnabled), true);
       verify(() => mockRepo.updateAllAzanEnabled(false)).called(1);
+    });
+
+    test('toggleRespectSilentDndMode updates state, repo and syncs notifications', () async {
+      cubit.toggleRespectSilentDndMode(true);
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      expect(cubit.state.respectSilentDndMode, true);
+      verify(() => mockRepo.updateRespectSilentDndMode(true)).called(1);
+      verify(() => mockSyncNotif.execute()).called(1);
     });
   });
 }

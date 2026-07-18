@@ -39,6 +39,7 @@ class PrayerNotificationScheduler {
   static const int postPrayerReminderIdStart = 500;
   static const int werdReminderId = 600;
   static const int salawatReminderIdStart = 700;
+  static const int salahCountdownNotificationId = 900;
 
   String _applyRtl(String text) {
     return RtlTextUtil.applyRtlFromSettings(text, _settingsProvider);
@@ -145,6 +146,8 @@ class PrayerNotificationScheduler {
 
     final List<Map<String, dynamic>> adhanSchedule = [];
 
+    final List<({tz.TZDateTime time, Salaah salaah})> futurePrayers = [];
+
     for (int day = 0; day < maxScheduledDays; day++) {
       final date = DateTime.now().add(Duration(days: day));
       final prayerTimes = _prayerTimeService.getPrayerTimes(
@@ -163,6 +166,7 @@ class PrayerNotificationScheduler {
         if (salaahTime == null) continue;
 
         final tzSalaahTime = tz.TZDateTime.from(salaahTime, tz.local);
+        futurePrayers.add((time: tzSalaahTime, salaah: salaahSetting.salaah));
         final dayOffset = day * prayersPerDay + salaahSetting.salaah.index;
 
         if (day < 2) {
@@ -177,6 +181,7 @@ class PrayerNotificationScheduler {
             'timeEpochMs': tzSalaahTime.millisecondsSinceEpoch,
             'audioFilePath': absolutePath,
             'enabled': isNativeEnabled,
+            'useExactAlarmClock': _settingsProvider.useExactAlarmClock,
           });
         }
 
@@ -327,6 +332,37 @@ class PrayerNotificationScheduler {
         debugPrint('Error saving Adhan schedule or invoking MethodChannel: $e');
       }
     }
+
+    // --- Countdown Notification Logic ---
+    if (!_settingsProvider.showSalahCountdownNotification) {
+      await notificationsPlugin.cancel(id: salahCountdownNotificationId);
+    } else if (futurePrayers.isNotEmpty) {
+      futurePrayers.sort((a, b) => a.time.compareTo(b.time));
+      final nextPrayerIndex = futurePrayers.indexWhere((p) => p.time.isAfter(now));
+      if (nextPrayerIndex != -1) {
+        // 1. Immediately update/show the countdown notification for the first upcoming prayer
+        final nextPrayer = futurePrayers[nextPrayerIndex];
+        await _showCountdownNotification(
+          notificationsPlugin,
+          targetTime: nextPrayer.time,
+          salaah: nextPrayer.salaah,
+        );
+
+        // 2. Schedule future countdown updates at each prayer boundary
+        // We only schedule a reasonable number (e.g. next 10 boundaries)
+        final maxFutureCountdowns = min(futurePrayers.length, nextPrayerIndex + 10);
+        for (int i = nextPrayerIndex + 1; i < maxFutureCountdowns; i++) {
+          final triggerTime = futurePrayers[i - 1].time; // Previous prayer start
+          final targetPrayer = futurePrayers[i]; // Next prayer target
+          await _scheduleFutureCountdownNotification(
+            notificationsPlugin,
+            triggerTime: triggerTime,
+            targetTime: targetPrayer.time,
+            salaah: targetPrayer.salaah,
+          );
+        }
+      }
+    }
   }
 
   Future<void> scheduleAzkarReminders(
@@ -411,6 +447,7 @@ class PrayerNotificationScheduler {
         android: AndroidNotificationDetails(
           'salawat_reminders',
           _applyRtl('Salawat Reminders'),
+          icon: '@mipmap/ic_launcher',
           importance: Importance.max,
           priority: Priority.high,
           groupKey: groupKey,
@@ -472,6 +509,7 @@ class PrayerNotificationScheduler {
         android: AndroidNotificationDetails(
           'azkar_reminders',
           _applyRtl('Azkar Reminders'),
+          icon: '@mipmap/ic_launcher',
           importance: Importance.max,
           priority: Priority.high,
           groupKey: groupKey,
@@ -507,6 +545,7 @@ class PrayerNotificationScheduler {
         android: AndroidNotificationDetails(
           'azkar_reminders',
           _applyRtl('Azkar Reminders'),
+          icon: '@mipmap/ic_launcher',
           importance: Importance.max,
           priority: Priority.high,
           groupKey: groupKey,
@@ -589,6 +628,7 @@ class PrayerNotificationScheduler {
           channelDescription: _applyRtl(
             'Azan notifications for ${salaah.name.toUpperCase()}',
           ),
+          icon: '@mipmap/ic_launcher',
           importance: useNativeAdhan ? Importance.low : Importance.max,
           priority: useNativeAdhan ? Priority.low : Priority.high,
           category: soundPath == 'default' ? null : AndroidNotificationCategory.alarm,
@@ -619,8 +659,9 @@ class PrayerNotificationScheduler {
     final androidPlugin = notificationsPlugin
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
-    final bool canScheduleExact =
+    final bool canScheduleExactAlarm =
         await androidPlugin?.canScheduleExactNotifications() ?? false;
+    final bool useExact = canScheduleExactAlarm && _settingsProvider.useExactAlarmClock;
 
     if (!useNativeAdhan) {
       await notificationsPlugin.zonedSchedule(
@@ -629,7 +670,7 @@ class PrayerNotificationScheduler {
         body: _applyRtl('أقم الصلاة يرحمك الله'),
         scheduledDate: scheduledDate,
         notificationDetails: platformChannelSpecifics,
-        androidScheduleMode: canScheduleExact
+        androidScheduleMode: useExact
             ? AndroidScheduleMode.exactAllowWhileIdle
             : AndroidScheduleMode.inexactAllowWhileIdle,
       );
@@ -657,6 +698,7 @@ class PrayerNotificationScheduler {
           ChannelManager.reminderChannelId,
           _applyRtl('Prayer Reminders'),
           channelDescription: _applyRtl('Notifications before prayer time'),
+          icon: '@mipmap/ic_launcher',
           importance: Importance.max,
           priority: Priority.high,
           category: AndroidNotificationCategory.alarm,
@@ -704,5 +746,72 @@ class PrayerNotificationScheduler {
     return item.zekr.length > 100
         ? '${item.zekr.substring(0, 100)}...'
         : item.zekr;
+  }
+
+  Future<void> _showCountdownNotification(
+    FlutterLocalNotificationsPlugin notificationsPlugin, {
+    required tz.TZDateTime targetTime,
+    required Salaah salaah,
+  }) async {
+    final title = _applyRtl('الصلاة التالية: ${_getSalaahName(salaah)}');
+    final body = _applyRtl('المتبقي على الصلاة');
+    
+    await notificationsPlugin.show(
+      id: salahCountdownNotificationId,
+      title: title,
+      body: body,
+      notificationDetails: NotificationDetails(
+        android: AndroidNotificationDetails(
+          'salah_countdown_channel',
+          _applyRtl('Salah Countdown'),
+          channelDescription: _applyRtl('Persistent countdown to the next Salah'),
+          importance: Importance.low,
+          priority: Priority.low,
+          icon: '@mipmap/ic_launcher',
+          usesChronometer: true,
+          chronometerCountDown: true,
+          when: targetTime.millisecondsSinceEpoch,
+          ongoing: true,
+          onlyAlertOnce: true,
+          showWhen: true,
+          groupKey: groupKey,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _scheduleFutureCountdownNotification(
+    FlutterLocalNotificationsPlugin notificationsPlugin, {
+    required tz.TZDateTime triggerTime,
+    required tz.TZDateTime targetTime,
+    required Salaah salaah,
+  }) async {
+    final title = _applyRtl('الصلاة التالية: ${_getSalaahName(salaah)}');
+    final body = _applyRtl('المتبقي على الصلاة');
+
+    await notificationsPlugin.zonedSchedule(
+      id: salahCountdownNotificationId,
+      title: title,
+      body: body,
+      scheduledDate: triggerTime,
+      notificationDetails: NotificationDetails(
+        android: AndroidNotificationDetails(
+          'salah_countdown_channel',
+          _applyRtl('Salah Countdown'),
+          channelDescription: _applyRtl('Persistent countdown to the next Salah'),
+          importance: Importance.low,
+          priority: Priority.low,
+          icon: '@mipmap/ic_launcher',
+          usesChronometer: true,
+          chronometerCountDown: true,
+          when: targetTime.millisecondsSinceEpoch,
+          ongoing: true,
+          onlyAlertOnce: true,
+          showWhen: true,
+          groupKey: groupKey,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    );
   }
 }

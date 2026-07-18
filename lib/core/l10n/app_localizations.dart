@@ -1190,6 +1190,48 @@ abstract class AppLocalizations {
   /// **'Azan & Notifications'**
   String get azanNotifications;
 
+  /// No description provided for @useExactAlarmClock.
+  ///
+  /// In en, this message translates to:
+  /// **'Precise Adhan Alarms'**
+  String get useExactAlarmClock;
+
+  /// No description provided for @useExactAlarmClockDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Guarantees hearing the Adhan exactly on time even when the device is idle (shows an alarm icon in status bar)'**
+  String get useExactAlarmClockDesc;
+
+  /// No description provided for @showSalahCountdownNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Salah Countdown Notification'**
+  String get showSalahCountdownNotification;
+
+  /// No description provided for @showSalahCountdownNotificationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Displays a persistent notification with a live countdown to the next prayer (efficient countdown, no battery drain)'**
+  String get showSalahCountdownNotificationDesc;
+
+  /// No description provided for @exactAlarmPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Exact Alarm Permission Required'**
+  String get exactAlarmPermissionRequired;
+
+  /// No description provided for @exactAlarmPermissionRequiredDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Precise Adhan Alarms were auto-disabled because the exact alarm permission is missing. Without this permission, the Adhan may be delayed or fail during deep sleep.'**
+  String get exactAlarmPermissionRequiredDesc;
+
+  /// No description provided for @grantPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant Permission'**
+  String get grantPermission;
+
   /// No description provided for @azanSettingsDesc.
   ///
   /// In en, this message translates to:
@@ -3247,6 +3289,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Notifications will have no sound unless silent mode is disabled or Fard is allowed to bypass Do Not Disturb.'**
   String get phoneMutedDesc;
+
+  /// No description provided for @respectSilentDndModeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Respect Silent/DND Mode'**
+  String get respectSilentDndModeTitle;
+
+  /// No description provided for @respectSilentDndModeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'When enabled, Adhan will stay silent if your phone is on silent, vibrate, or Do Not Disturb.'**
+  String get respectSilentDndModeDesc;
+
+  /// No description provided for @voiceRemovedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected Voice Unavailable'**
+  String get voiceRemovedTitle;
+
+  /// No description provided for @voiceRemovedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your previously selected Adhan voice is no longer available and has been reset to the default voice.'**
+  String get voiceRemovedDesc;
+
+  /// No description provided for @changeVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Voice'**
+  String get changeVoice;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
 }
 
 class _AppLocalizationsDelegate

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -100,8 +101,8 @@ class _AdhanSectionState extends State<AdhanSection>
         if (!_isDownloading && !_hasUserOverride) {
           _dropdownValue = _resolveVoiceKey(commonVoice);
         }
-        final bool notificationsDisabled =
-            !state.notificationsEnabled || !state.exactAlarmsEnabled;
+        final bool notificationsDisabled = !state.notificationsEnabled;
+        final bool exactAlarmsDisabled = !state.exactAlarmsEnabled;
         final bool isVoiceDownloaded = _dropdownValue == null || _downloadedVoices.contains(_dropdownValue);
 
         return ExpandableSectionCard(
@@ -166,23 +167,125 @@ class _AdhanSectionState extends State<AdhanSection>
                   ],
                 ),
               ),
+            if (!notificationsDisabled && exactAlarmsDisabled && anyAzanEnabled)
+              Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.orange.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.warning_amber_rounded,
+                          color: Colors.orange,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            l10n.exactAlarmPermissionRequiredDesc,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () async {
+                          await getIt<NotificationService>().requestExactAlarmsPermission();
+                          final currentlyGranted = await getIt<NotificationService>().canScheduleExactNotifications();
+                          if (currentlyGranted) {
+                            cubit.toggleUseExactAlarmClock(true);
+                          }
+                          cubit.refreshPermissions();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.orange,
+                          side: const BorderSide(color: Colors.orange),
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                        ),
+                        child: Text(l10n.grantPermission),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             _buildToggleItem(
               title: l10n.enableAzan,
               value: anyAzanEnabled,
               onChanged: (val) async {
-                if (val && notificationsDisabled) {
+                if (val && (notificationsDisabled || exactAlarmsDisabled)) {
                   if (!context.mounted) return;
-                  final granted = await checkAndRequestNotificationPermissions(
-                    context,
-                  );
-                  if (!granted) return;
-                  cubit.refreshPermissions();
+                  if (notificationsDisabled) {
+                    final granted = await checkAndRequestNotificationPermissions(
+                      context,
+                    );
+                    if (!granted) return;
+                    cubit.refreshPermissions();
+                  }
+                  if (exactAlarmsDisabled) {
+                    await getIt<NotificationService>().requestExactAlarmsPermission();
+                    final currentlyGranted = await getIt<NotificationService>().canScheduleExactNotifications();
+                    if (!currentlyGranted) return;
+                    cubit.toggleUseExactAlarmClock(true);
+                    cubit.refreshPermissions();
+                  }
                 }
                 cubit.updateAllAzanEnabled(val);
               },
               context: context,
             ),
+            const SizedBox(height: 12),
+            _buildToggleItem(
+              title: l10n.showSalahCountdownNotification,
+              subtitle: l10n.showSalahCountdownNotificationDesc,
+              value: state.showSalahCountdownNotification,
+              onChanged: (val) {
+                cubit.toggleShowSalahCountdownNotification(val);
+              },
+              context: context,
+            ),
             if (anyAzanEnabled) ...[
+              const Divider(height: 24),
+              _buildToggleItem(
+                title: l10n.useExactAlarmClock,
+                subtitle: l10n.useExactAlarmClockDesc,
+                value: state.useExactAlarmClock,
+                onChanged: (val) async {
+                  if (val) {
+                    final exactAlarms = await getIt<NotificationService>().canScheduleExactNotifications();
+                    if (!exactAlarms) {
+                      final granted = await getIt<NotificationService>().requestExactAlarmsPermission();
+                      if (!granted) return;
+                      cubit.refreshPermissions();
+                    }
+                  }
+                  cubit.toggleUseExactAlarmClock(val);
+                },
+                context: context,
+              ),
+              const SizedBox(height: 12),
+              _buildToggleItem(
+                title: l10n.respectSilentDndModeTitle,
+                subtitle: l10n.respectSilentDndModeDesc,
+                value: state.respectSilentDndMode,
+                onChanged: (val) {
+                  cubit.toggleRespectSilentDndMode(val);
+                },
+                context: context,
+              ),
               const SizedBox(height: 16),
               _buildVoiceDropdown(context, commonVoice, l10n, (val) {
                 cubit.updateAllAzanSound(val);
@@ -214,59 +317,106 @@ class _AdhanSectionState extends State<AdhanSection>
               ],
               const SizedBox(height: 8),
               Center(
-                child: TextButton.icon(
-                  onPressed: (_isDownloading || !isVoiceDownloaded)
-                      ? null
-                      : () async {
-                          final granted =
-                              await checkAndRequestNotificationPermissions(
-                                context,
-                              );
-                          if (!granted) {
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(l10n.notificationsRequiredDesc),
-                                  behavior: SnackBarBehavior.floating,
-                                  action: SnackBarAction(
-                                    label: l10n.enable,
-                                    onPressed: () =>
-                                        getIt<NotificationService>()
-                                            .openNotificationSettings(),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton.icon(
+                      onPressed: (_isDownloading || !isVoiceDownloaded)
+                          ? null
+                          : () async {
+                              final granted =
+                                  await checkAndRequestNotificationPermissions(
+                                    context,
+                                  );
+                              if (!granted) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(l10n.notificationsRequiredDesc),
+                                      behavior: SnackBarBehavior.floating,
+                                      action: SnackBarAction(
+                                        label: l10n.enable,
+                                        onPressed: () =>
+                                            getIt<NotificationService>()
+                                                .openNotificationSettings(),
+                                      ),
+                                    ),
+                                  );
+                                }
+                                return;
+                              }
+
+                              final ns = getIt<NotificationService>();
+                              final soundStatus = await ns.checkSoundStatus();
+                              if (soundStatus['isMuted'] == true && context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      soundStatus['dndMode'] == true && soundStatus['silentMode'] == true
+                                          ? l10n.phoneMutedTitleBoth
+                                          : soundStatus['dndMode'] == true
+                                              ? l10n.phoneMutedTitleDnd
+                                              : l10n.phoneMutedTitleSilent,
+                                    ),
+                                    behavior: SnackBarBehavior.floating,
                                   ),
-                                ),
+                                );
+                              }
+
+                              await ns.testAzan(
+                                Salaah.fajr,
+                                _dropdownValue,
                               );
-                            }
-                            return;
-                          }
+                            },
+                      icon: const Icon(Icons.play_arrow_rounded),
+                      label: Text(l10n.testAzan),
+                      style: TextButton.styleFrom(
+                        foregroundColor: context.secondaryColor,
+                      ),
+                    ),
+                    if (kDebugMode) ...[
+                      const SizedBox(width: 8),
+                      TextButton.icon(
+                        onPressed: (_isDownloading || !isVoiceDownloaded)
+                            ? null
+                            : () async {
+                                final granted =
+                                    await checkAndRequestNotificationPermissions(
+                                      context,
+                                    );
+                                if (!granted) return;
 
-                           final ns = getIt<NotificationService>();
-                          final soundStatus = await ns.checkSoundStatus();
-                          if (soundStatus['isMuted'] == true && context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  soundStatus['dndMode'] == true && soundStatus['silentMode'] == true
-                                      ? l10n.phoneMutedTitleBoth
-                                      : soundStatus['dndMode'] == true
-                                          ? l10n.phoneMutedTitleDnd
-                                          : l10n.phoneMutedTitleSilent,
-                                ),
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                          }
+                                final ns = getIt<NotificationService>();
+                                final soundStatus = await ns.checkSoundStatus();
+                                if (soundStatus['isMuted'] == true && context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        soundStatus['dndMode'] == true && soundStatus['silentMode'] == true
+                                            ? l10n.phoneMutedTitleBoth
+                                            : soundStatus['dndMode'] == true
+                                                ? l10n.phoneMutedTitleDnd
+                                                : l10n.phoneMutedTitleSilent,
+                                      ),
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                }
 
-                          await ns.testAzan(
-                            Salaah.fajr,
-                            _dropdownValue,
-                          );
-                        },
-                  icon: const Icon(Icons.play_arrow_rounded),
-                  label: Text(l10n.testAzan),
-                  style: TextButton.styleFrom(
-                    foregroundColor: context.secondaryColor,
-                  ),
+                                await ns.testAzan(
+                                  Salaah.fajr,
+                                  _dropdownValue,
+                                  isTest: false,
+                                );
+                              },
+                        icon: const Icon(Icons.bug_report_rounded),
+                        label: const Text('Test Muting (Debug)'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.redAccent,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
               const Divider(height: 24),
@@ -370,6 +520,7 @@ class _AdhanSectionState extends State<AdhanSection>
 
   Widget _buildToggleItem({
     required String title,
+    String? subtitle,
     required bool value,
     required ValueChanged<bool> onChanged,
     BuildContext? context,
@@ -377,13 +528,31 @@ class _AdhanSectionState extends State<AdhanSection>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            color: context?.onSurfaceColor,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: context?.onSurfaceColor,
+                ),
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: (context?.onSurfaceColor ?? Colors.grey).withValues(alpha: 0.7),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
+        const SizedBox(width: 16),
         CustomToggle(value: value, onChanged: onChanged),
       ],
     );

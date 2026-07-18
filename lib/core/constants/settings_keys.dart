@@ -29,6 +29,9 @@ abstract final class SettingsKeys {
   static const String activeCustomThemeId = 'active_custom_theme_id';
   static const String audioQuality = 'audio_quality';
   static const String isAudioPlayerExpanded = 'is_audio_player_expanded';
+  static const String useExactAlarmClock = 'use_exact_alarm_clock';
+  static const String showSalahCountdownNotification = 'show_salah_countdown_notification';
+  static const String respectSilentDndMode = 'respect_silent_dnd_mode';
 
   // Reminders
   static const String isSalahReminderEnabled = 'is_salah_reminder_enabled';

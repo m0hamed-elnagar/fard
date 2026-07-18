@@ -17,26 +17,16 @@ class VoiceDownloadService {
   VoiceDownloadService(this._manifestService);
 
   static const Map<String, String> azanVoices = {
-    'Ibrahim Al-Arkani - إبراهيم الأركاني':
-        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Ibrahim%20Al-Arkani.mp3',
-    'Majed Al-Hamathani - ماجد الهمذاني':
-        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Majed%20Al-hamathani.mp3',
-    'Mansoor Az-Zahrani - منصور الزهراني':
-        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Mansoor%20Az-Zahrani.mp3',
     'Makkah Haram (Beautiful) - مكة المكرمة':
         'https://www.islamcan.com/audio/adhan/azan16.mp3',
     'Ali Ahmed Mala (Madinah) - علي أحمد ملا':
         'https://www.islamcan.com/audio/adhan/azan20.mp3',
     'Abdul Basit - عبد الباسط':
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Abed%20Albase6.mp3',
-    'Mishary Rashid Alafasy - مشاري العفاسي':
-        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Mishary%20Alafasi.mp3',
     'Ahmad Al-Nufais - أحمد النفيس':
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Ahmad%20Nuyne3.mp3',
     'Saad Al-Ghamdi - سعد الغامدي':
         'https://www.islamcan.com/audio/adhan/azan21.mp3',
-    'Nasser Al-Qatami - ناصر القطامي':
-        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Nasser%20Alqatami.mp3',
     'Muhammad Siddiq Al-Minshawi - محمد صديق المنشاوي':
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Mohammad%20Almenshawy.mp3',
     'Mahmoud Khalil Al-Husary - محمود خليل الحصري':
@@ -71,8 +61,6 @@ class VoiceDownloadService {
         'https://www.islamcan.com/audio/adhan/azan10.mp3',
     'Suhaib Khatba - صهيب خطبة':
         'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Suhaib%20Khatba.mp3',
-    'Hamad Deghreri - حمد دغريري':
-        'https://raw.githubusercontent.com/abodehq/Athan-MP3/master/Sounds/Athan%20Hamad%20Deghreri.mp3',
   };
 
   String _getFileName(String voiceName) {

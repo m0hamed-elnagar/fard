@@ -89,6 +89,18 @@ class _BackgroundSettingsProvider implements SettingsRepository {
   bool get isAudioPlayerExpanded => _settings.isAudioPlayerExpanded;
 
   @override
+  bool get useExactAlarmClock => _settings.useExactAlarmClock;
+
+  @override
+  bool get showSalahCountdownNotification => _settings.showSalahCountdownNotification;
+
+  @override
+  bool get respectSilentDndMode => _settings.respectSilentDndMode;
+
+  @override
+  bool get shouldShowRemovedVoiceNotice => false;
+
+  @override
   bool get isSalahReminderEnabled => _settings.isSalahReminderEnabled;
 
   @override
@@ -215,6 +227,18 @@ class _BackgroundSettingsProvider implements SettingsRepository {
 
   @override
   Future<void> updateAudioPlayerExpanded(bool expanded) => Future.value();
+
+  @override
+  Future<void> updateUseExactAlarmClock(bool value) => Future.value();
+
+  @override
+  Future<void> updateShowSalahCountdownNotification(bool value) => Future.value();
+
+  @override
+  Future<void> updateRespectSilentDndMode(bool value) => Future.value();
+
+  @override
+  Future<void> clearRemovedVoiceNotice() => Future.value();
 
   @override
   Future<void> updateSalahReminderEnabled(bool enabled) => Future.value();

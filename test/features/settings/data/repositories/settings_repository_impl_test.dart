@@ -50,6 +50,9 @@ void main() {
     when(
       () => mockStorage.writeJsonList<SalaahSettings>(any(), any(), any()),
     ).thenAnswer((_) async => true);
+    when(
+      () => mockStorage.readJsonList<SalaahSettings>(any(), any()),
+    ).thenReturn([]);
   });
 
   group('SettingsRepositoryImpl Migration', () {
@@ -152,5 +155,91 @@ void main() {
         ).called(1);
       },
     );
+  });
+
+  group('SettingsRepositoryImpl Voice Fallback', () {
+    test('resets voice to null and sets notice flag if settings contain a removed voice', () async {
+      final oldSalaahSettings = [
+        SalaahSettings(
+          salaah: Salaah.fajr,
+          isAzanEnabled: true,
+          azanSound: 'Mishary Rashid Alafasy - مشاري العفاسي',
+        ),
+        SalaahSettings(
+          salaah: Salaah.dhuhr,
+          isAzanEnabled: true,
+          azanSound: 'custom_voice.mp3',
+        ),
+      ];
+
+      when(
+        () => mockStorage.readJsonList<SalaahSettings>(
+          SettingsKeys.salaahSettings,
+          any(),
+        ),
+      ).thenReturn(oldSalaahSettings);
+
+      when(
+        () => mockStorage.readBool('azan_settings_migration_v1_done'),
+      ).thenReturn(true);
+
+      SettingsRepositoryImpl(mockStorage);
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      // Verify it called updateSalaahSettings with Fajr voice set to null
+      verify(
+        () => mockStorage.writeJsonList<SalaahSettings>(
+          SettingsKeys.salaahSettings,
+          any(that: predicate((list) {
+            final listCast = list as List<SalaahSettings>;
+            final fajrSetting = listCast.firstWhere((s) => s.salaah == Salaah.fajr);
+            final dhuhrSetting = listCast.firstWhere((s) => s.salaah == Salaah.dhuhr);
+            return fajrSetting.azanSound == null && dhuhrSetting.azanSound == 'custom_voice.mp3';
+          })),
+          any(),
+        ),
+      ).called(1);
+
+      // Verify it set show_removed_voice_notice to true
+      verify(
+        () => mockStorage.writeBool('show_removed_voice_notice', true),
+      ).called(1);
+    });
+
+    test('does not reset voice or set notice flag if settings do not contain a removed voice', () async {
+      final oldSalaahSettings = [
+        SalaahSettings(
+          salaah: Salaah.fajr,
+          isAzanEnabled: true,
+          azanSound: 'custom_voice.mp3',
+        ),
+      ];
+
+      when(
+        () => mockStorage.readJsonList<SalaahSettings>(
+          SettingsKeys.salaahSettings,
+          any(),
+        ),
+      ).thenReturn(oldSalaahSettings);
+
+      when(
+        () => mockStorage.readBool('azan_settings_migration_v1_done'),
+      ).thenReturn(true);
+
+      SettingsRepositoryImpl(mockStorage);
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      verifyNever(
+        () => mockStorage.writeJsonList<SalaahSettings>(
+          SettingsKeys.salaahSettings,
+          any(),
+          any(),
+        ),
+      );
+
+      verifyNever(
+        () => mockStorage.writeBool('show_removed_voice_notice', any()),
+      );
+    });
   });
 }

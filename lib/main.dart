@@ -27,6 +27,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fard/features/settings/domain/usecases/sync_notification_schedule.dart';
 
 import 'core/blocs/connectivity/connectivity_bloc.dart';
 import 'features/audio/presentation/blocs/manager/reciter_manager_bloc.dart';
@@ -143,8 +145,24 @@ Future<void> _initializeBackgroundServices(Stopwatch timer) async {
       _cleanupTempFiles(),
 
       // Notification Service
-      getIt<NotificationService>().init().then((_) {
+      getIt<NotificationService>().init().then((_) async {
         getIt<NotificationService>().handleInitialNotification();
+
+        // Force reschedule on version upgrade to apply small icon fix
+        final prefs = getIt<SharedPreferences>();
+        const String migrationIconFixKey = 'notification_icon_fix_reschedule_done_v2';
+        if (!(prefs.getBool(migrationIconFixKey) ?? false)) {
+          debugPrint('[STARTUP] Migration: Forcing notification reschedule to apply icon fix...');
+          try {
+            final syncNotif = getIt<SyncNotificationSchedule>();
+            await syncNotif.execute();
+            await getIt<NotificationService>().scheduleSalawatReminders();
+            await prefs.setBool(migrationIconFixKey, true);
+            debugPrint('[STARTUP] Migration: Notification reschedule completed successfully.');
+          } catch (e) {
+            debugPrint('[STARTUP] Migration: Failed to reschedule notifications: $e');
+          }
+        }
       }),
 
       // JustAudio & Workmanager

@@ -104,6 +104,8 @@ void main() {
       () => mockSettingsRepository.calculationMethod,
     ).thenReturn('muslim_league');
     when(() => mockSettingsRepository.madhab).thenReturn('shafi');
+    when(() => mockSettingsRepository.useExactAlarmClock).thenReturn(true);
+    when(() => mockSettingsRepository.showSalahCountdownNotification).thenReturn(false);
 
     scheduler = PrayerNotificationScheduler(
       mockPrayerTimeService,
@@ -237,6 +239,48 @@ void main() {
         androidScheduleMode: any(named: 'androidScheduleMode'),
       ),
     ).called(15);
+  });
+
+  test('schedulePrayerNotifications configures the android icon as @mipmap/ic_launcher', () async {
+    when(() => mockSettingsRepository.latitude).thenReturn(30.0);
+    when(() => mockSettingsRepository.longitude).thenReturn(31.0);
+    when(() => mockSettingsRepository.calculationMethod).thenReturn('muslim_league');
+    when(() => mockSettingsRepository.madhab).thenReturn('shafi');
+    when(() => mockSettingsRepository.salaahSettings).thenReturn([
+      SalaahSettings(salaah: Salaah.fajr, isAzanEnabled: true),
+    ]);
+
+    final now = DateTime.now().toUtc();
+    when(
+      () => mockPrayerTimeService.getPrayerTimes(
+        latitude: any(named: 'latitude'),
+        longitude: any(named: 'longitude'),
+        method: any(named: 'method'),
+        madhab: any(named: 'madhab'),
+        date: any(named: 'date'),
+      ),
+    ).thenReturn(MockPrayerTimes());
+
+    when(
+      () => mockPrayerTimeService.getTimeForSalaah(any(), any()),
+    ).thenReturn(now.add(const Duration(hours: 1)));
+
+    await scheduler.schedulePrayerNotifications(mockNotificationsPlugin);
+
+    final captured = verify(
+      () => mockNotificationsPlugin.zonedSchedule(
+        id: any(named: 'id'),
+        title: any(named: 'title'),
+        body: any(named: 'body'),
+        scheduledDate: any(named: 'scheduledDate'),
+        notificationDetails: captureAny(named: 'notificationDetails'),
+        androidScheduleMode: any(named: 'androidScheduleMode'),
+      ),
+    ).captured;
+
+    expect(captured.isNotEmpty, true);
+    final details = captured.first as NotificationDetails;
+    expect(details.android?.icon, '@mipmap/ic_launcher');
   });
 
   test('scheduleAzkarReminders schedules reminders from settings', () async {

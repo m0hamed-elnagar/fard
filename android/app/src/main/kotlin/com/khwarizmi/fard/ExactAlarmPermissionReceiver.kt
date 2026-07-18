@@ -16,7 +16,20 @@ class ExactAlarmPermissionReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED) return
         
-        Log.i("ExactAlarmReceiver", "Exact alarm permission changed - rescheduling alarms")
+        Log.i("ExactAlarmReceiver", "Exact alarm permission changed")
+
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val hasExactPermission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            alarmManager.canScheduleExactAlarms()
+        } else {
+            true
+        }
+
+        if (!hasExactPermission) {
+            Log.w("ExactAlarmReceiver", "Exact alarm permission was revoked! Auto-disabling use_exact_alarm_clock setting.")
+            val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+            prefs.edit().putBoolean("flutter.use_exact_alarm_clock", false).commit()
+        }
 
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {

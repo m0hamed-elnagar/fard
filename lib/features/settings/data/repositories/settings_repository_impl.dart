@@ -21,9 +21,44 @@ import 'settings_storage.dart';
 class SettingsRepositoryImpl implements SettingsRepository {
   final SettingsStorage _storage;
   List<SalaahSettings>? _salaahSettingsCache;
+  List<AzkarReminder>? _remindersCache;
 
   SettingsRepositoryImpl(this._storage) {
-    _performMigration();
+    _init();
+  }
+
+  Future<void> _init() async {
+    await _performMigration();
+    await _checkAndFallbackRemovedVoices();
+  }
+
+  bool _isRemovedVoice(String? sound) {
+    if (sound == null) return false;
+    final lowercaseSound = sound.toLowerCase();
+    return lowercaseSound.contains('deghreri') ||
+        lowercaseSound.contains('arkani') ||
+        lowercaseSound.contains('hamathani') ||
+        lowercaseSound.contains('alafasy') ||
+        lowercaseSound.contains('zahrani') ||
+        lowercaseSound.contains('qatami');
+  }
+
+  Future<void> _checkAndFallbackRemovedVoices() async {
+    final currentSettings = salaahSettings;
+    bool modified = false;
+    final newSettings = currentSettings.map((s) {
+      if (_isRemovedVoice(s.azanSound)) {
+        modified = true;
+        return s.copyWith(azanSound: null);
+      }
+      return s;
+    }).toList();
+
+    if (modified) {
+      debugPrint('SettingsRepositoryImpl: Found removed voice in settings. Resetting to default.');
+      await updateSalaahSettings(newSettings);
+      await _storage.writeBool('show_removed_voice_notice', true);
+    }
   }
 
   // ==================== READ OPERATIONS ====================
@@ -118,6 +153,10 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   List<AzkarReminder> get reminders {
+    if (_remindersCache != null) {
+      return _remindersCache!;
+    }
+
     final defaults = [
       AzkarReminder(
         category: 'أذكار الصباح',
@@ -130,11 +169,19 @@ class SettingsRepositoryImpl implements SettingsRepository {
         title: 'أذكار المساء',
       ),
     ];
+
+    final hasReminders = _storage.readString(SettingsKeys.azkarReminders) != null;
+    if (!hasReminders) {
+      _remindersCache = defaults;
+      return defaults;
+    }
+
     final list = _storage.readJsonList<AzkarReminder>(
       SettingsKeys.azkarReminders,
       (json) => AzkarReminder.fromJson(json),
     );
-    return list.isEmpty ? defaults : list;
+    _remindersCache = list;
+    return list;
   }
 
   @override
@@ -204,6 +251,28 @@ class SettingsRepositoryImpl implements SettingsRepository {
     SettingsKeys.isAudioPlayerExpanded,
     defaultValue: false,
   );
+
+  @override
+  bool get useExactAlarmClock => _storage.readBool(
+    SettingsKeys.useExactAlarmClock,
+    defaultValue: true,
+  );
+
+  @override
+  bool get showSalahCountdownNotification => _storage.readBool(
+    SettingsKeys.showSalahCountdownNotification,
+    defaultValue: false,
+  );
+
+  @override
+  bool get respectSilentDndMode => _storage.readBool(
+    SettingsKeys.respectSilentDndMode,
+    defaultValue: false,
+  );
+
+  @override
+  bool get shouldShowRemovedVoiceNotice =>
+      _storage.readBool('show_removed_voice_notice', defaultValue: false);
 
   // ==================== REMINDERS ====================
 
@@ -432,6 +501,12 @@ class SettingsRepositoryImpl implements SettingsRepository {
     if (index >= 0 && index < newList.length) {
       newList[index] = reminder;
       await _saveReminders(newList);
+
+      if (reminder.category == 'أذكار الصباح' || reminder.category == 'Morning Azkar') {
+        await updateMorningAzkarTime(reminder.time);
+      } else if (reminder.category == 'أذكار المساء' || reminder.category == 'Evening Azkar') {
+        await updateEveningAzkarTime(reminder.time);
+      }
     }
   }
 
@@ -447,6 +522,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   Future<void> _saveReminders(List<AzkarReminder> reminderList) async {
+    _remindersCache = reminderList;
     await _storage.writeJsonList<AzkarReminder>(
       SettingsKeys.azkarReminders,
       reminderList,
@@ -593,6 +669,26 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<void> updateAudioPlayerExpanded(bool expanded) async {
     await _storage.writeBool(SettingsKeys.isAudioPlayerExpanded, expanded);
+  }
+
+  @override
+  Future<void> updateUseExactAlarmClock(bool value) async {
+    await _storage.writeBool(SettingsKeys.useExactAlarmClock, value);
+  }
+
+  @override
+  Future<void> updateShowSalahCountdownNotification(bool value) async {
+    await _storage.writeBool(SettingsKeys.showSalahCountdownNotification, value);
+  }
+
+  @override
+  Future<void> updateRespectSilentDndMode(bool value) async {
+    await _storage.writeBool(SettingsKeys.respectSilentDndMode, value);
+  }
+
+  @override
+  Future<void> clearRemovedVoiceNotice() async {
+    await _storage.writeBool('show_removed_voice_notice', false);
   }
 
   @override

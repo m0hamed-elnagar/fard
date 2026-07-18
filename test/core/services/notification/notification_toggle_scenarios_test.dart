@@ -147,6 +147,8 @@ void main() {
     when(() => mockSettingsRepository.isBeforeSalahReminderEnabled).thenReturn(false);
     when(() => mockSettingsRepository.isAfterSalahReminderEnabled).thenReturn(true);
     when(() => mockSettingsRepository.salahReminderOffsetMinutes).thenReturn(15);
+    when(() => mockSettingsRepository.useExactAlarmClock).thenReturn(true);
+    when(() => mockSettingsRepository.showSalahCountdownNotification).thenReturn(false);
 
     when(() => mockAzkarRepository.getAllAzkar()).thenAnswer((_) async => []);
     when(() => mockPrayerTimeService.getPrayerTimes(

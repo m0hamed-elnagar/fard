@@ -106,10 +106,10 @@ void main() {
         settings: mockSettings,
       );
 
-      // 1 for Fajr, 1 for Reminder, 1 for Azkar = 3
+      // 1 for Fajr, 1 for Reminder, 1 for Azkar, 1 for Countdown = 4
       verify(
         () => mockAndroidPlugin.createNotificationChannel(any()),
-      ).called(3);
+      ).called(4);
     });
   });
 }

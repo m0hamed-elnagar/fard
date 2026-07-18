@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.6.3+20] - 2026-07-06
+## [1.6.3+20] - 2026-07-18
 
 ### Added
 - **Onboarding / Sound Status Checks**: Added native checks on Android (silent, vibration, do not disturb) with warning banners and localizations during onboarding to warn the user if notifications could be silenced.
@@ -10,6 +10,13 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - **Settings Screen**: Redesigned the developer signature and settings footer with a new "About" dialog.
 - **Settings Screen**: Cleaned up the settings display to show only the version name without the build number.
+
+### Removed
+- **Adhan Voices**: Removed 6 Adhan/Azan voices containing unwanted advertisement or website attribution outros (Hamad Deghreri, Ibrahim Al-Arkani, Majed Al-Hamathani, Mishary Rashid Alafasy, Mansoor Az-Zahrani, and Nasser Al-Qatami).
+
+### Fixed
+- **Adhan Cubit Test Mocking**: Fixed settings repository mock setup for `AdhanCubit` in tests to resolve Null casting errors.
+- **Silent & Do Not Disturb Muting**: Integrated ringer mode and Do Not Disturb (DND) status checks in Android's native foreground playback service. Real alarms will now skip playing the Adhan audio when silent or DND is active, replacing the ongoing service notification with a clean, clearable alert.
 
 ## [1.6.2+19] - 2026-07-05
 

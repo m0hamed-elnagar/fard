@@ -12,6 +12,8 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
 import 'package:fard/core/utils/location_dialog_helper.dart';
+import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
+import 'package:fard/features/settings/presentation/screens/azan_settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final bool showAddQadaOnStart;
@@ -43,6 +45,52 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
         _showInitialAddQadaDialog();
       });
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkRemovedVoiceNotice();
+    });
+  }
+
+  void _checkRemovedVoiceNotice() {
+    final settingsRepo = getIt<SettingsRepository>();
+    if (settingsRepo.shouldShowRemovedVoiceNotice) {
+      settingsRepo.clearRemovedVoiceNotice();
+      _showRemovedVoiceNoticeDialog();
+    }
+  }
+
+  void _showRemovedVoiceNoticeDialog() {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text(
+          l10n.voiceRemovedTitle,
+          style: GoogleFonts.amiri(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          l10n.voiceRemovedDesc,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.ok),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AzanSettingsScreen(),
+                ),
+              );
+            },
+            child: Text(l10n.changeVoice),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showInitialAddQadaDialog() {

@@ -86,6 +86,17 @@ class ChannelManager {
     );
 
     await androidPlugin.createNotificationChannel(azkarChannel);
+
+    const countdownChannel = AndroidNotificationChannel(
+      'salah_countdown_channel',
+      'Salah Countdown',
+      description: 'Persistent countdown to the next Salah',
+      importance: Importance.low,
+      playSound: false,
+      showBadge: false,
+    );
+
+    await androidPlugin.createNotificationChannel(countdownChannel);
   }
 
   Future<void> ensureChannelExists(

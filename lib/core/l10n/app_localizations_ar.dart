@@ -591,6 +591,31 @@ class AppLocalizationsAr extends AppLocalizations {
   String get azanNotifications => 'الأذان والإشعارات';
 
   @override
+  String get useExactAlarmClock => 'منبه دقيق للأذان';
+
+  @override
+  String get useExactAlarmClockDesc =>
+      'يضمن سماع الأذان في الوقت المحدد بالضبط حتى أثناء سكون الهاتف (قد يظهر رمز منبه في شريط الحالة)';
+
+  @override
+  String get showSalahCountdownNotification =>
+      'مؤقت الصلاة التالية في الإشعارات';
+
+  @override
+  String get showSalahCountdownNotificationDesc =>
+      'يعرض إشعاراً دائماً يحتوي على عد تنازلي مباشر للصلاة التالية (مؤقت ذكي لا يستهلك البطارية)';
+
+  @override
+  String get exactAlarmPermissionRequired => 'إذن المنبهات الدقيقة مطلوب';
+
+  @override
+  String get exactAlarmPermissionRequiredDesc =>
+      'تم إيقاف ميزة المنبه الدقيق للأذان تلقائياً لأن إذن جدولة المنبهات الدقيقة غير مفعل في النظام. بدون هذا الإذن قد يتأخر الأذان أو لا يعمل في وضع السكون.';
+
+  @override
+  String get grantPermission => 'منح الإذن';
+
+  @override
   String get azanSettingsDesc =>
       'إدارة أصوات الأذان، التذكيرات، وأذكار ما بعد الصلاة لجميع الصلوات.';
 
@@ -1727,4 +1752,25 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get phoneMutedDesc =>
       'لن تصدر التنبيهات أي صوت إلا إذا تم إلغاء كتم الهاتف أو السماح لتطبيق فرض بالعمل في وضع عدم الإزعاج.';
+
+  @override
+  String get respectSilentDndModeTitle =>
+      'احترام الوضع الصامت ووضع عدم الإزعاج';
+
+  @override
+  String get respectSilentDndModeDesc =>
+      'عند التفعيل، لن يعمل صوت الأذن إذا كان هاتفك في الوضع الصامت، الاهتزاز، أو وضع عدم الإزعاج.';
+
+  @override
+  String get voiceRemovedTitle => 'صوت الأذان غير متوفر';
+
+  @override
+  String get voiceRemovedDesc =>
+      'صوت الأذان الذي اخترته سابقاً لم يعد متوفراً، وتمت إعادة تعيينه إلى الصوت الافتراضي.';
+
+  @override
+  String get changeVoice => 'اختيار صوت';
+
+  @override
+  String get ok => 'حسناً';
 }

@@ -145,6 +145,14 @@ class FakeSettingsRepository implements SettingsRepository {
   @override
   bool get isAudioPlayerExpanded => false;
   @override
+  bool get useExactAlarmClock => true;
+  @override
+  bool get showSalahCountdownNotification => false;
+  @override
+  bool get respectSilentDndMode => false;
+  @override
+  bool get shouldShowRemovedVoiceNotice => false;
+  @override
   bool get isSalahReminderEnabled => false;
   @override
   int get salahReminderOffsetMinutes => 15;
@@ -232,6 +240,14 @@ class FakeSettingsRepository implements SettingsRepository {
   Future<void> updateAudioQuality(AudioQuality quality) async {}
   @override
   Future<void> updateAudioPlayerExpanded(bool expanded) async {}
+  @override
+  Future<void> updateUseExactAlarmClock(bool value) async {}
+  @override
+  Future<void> updateShowSalahCountdownNotification(bool value) async {}
+  @override
+  Future<void> updateRespectSilentDndMode(bool value) async {}
+  @override
+  Future<void> clearRemovedVoiceNotice() async {}
   @override
   Future<void> updateSalahReminderEnabled(bool enabled) async {}
   @override

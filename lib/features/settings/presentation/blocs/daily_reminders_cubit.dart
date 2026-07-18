@@ -226,62 +226,75 @@ class DailyRemindersCubit extends Cubit<DailyRemindersState> {
   }
 
   void addReminder(AzkarReminder r) {
+    final newList = List<AzkarReminder>.from(state.reminders)..add(r);
+    emit(state.copyWith(reminders: newList));
     _addReminderAsync(r);
   }
 
   Future<void> _addReminderAsync(AzkarReminder r) async {
     await _repo.addReminder(r);
-    emit(state.copyWith(reminders: _repo.reminders));
     _sync();
   }
 
   void removeReminder(int i) {
+    final newList = List<AzkarReminder>.from(state.reminders);
+    if (i >= 0 && i < newList.length) {
+      newList.removeAt(i);
+      emit(state.copyWith(reminders: newList));
+    }
     _removeReminderAsync(i);
   }
 
   Future<void> _removeReminderAsync(int i) async {
     await _repo.removeReminder(i);
-    emit(state.copyWith(reminders: _repo.reminders));
     _sync();
   }
 
   void updateReminder(int i, AzkarReminder r) {
+    final newList = List<AzkarReminder>.from(state.reminders);
+    if (i >= 0 && i < newList.length) {
+      newList[i] = r;
+      emit(state.copyWith(reminders: newList));
+    }
     _updateReminderAsync(i, r);
   }
 
   Future<void> _updateReminderAsync(int i, AzkarReminder r) async {
     await _repo.updateReminder(i, r);
-    emit(state.copyWith(reminders: _repo.reminders));
     _sync();
   }
 
   void toggleReminder(int i) {
+    final newList = List<AzkarReminder>.from(state.reminders);
+    if (i >= 0 && i < newList.length) {
+      newList[i] = newList[i].copyWith(isEnabled: !newList[i].isEnabled);
+      emit(state.copyWith(reminders: newList));
+    }
     _toggleReminderAsync(i);
   }
 
   Future<void> _toggleReminderAsync(int i) async {
     await _repo.toggleReminder(i);
-    emit(state.copyWith(reminders: _repo.reminders));
     _sync();
   }
 
   void updateMorningAzkarTime(String v) {
+    emit(state.copyWith(morningAzkarTime: v));
     _updateMorningAzkarTimeAsync(v);
   }
 
   Future<void> _updateMorningAzkarTimeAsync(String v) async {
     await _repo.updateMorningAzkarTime(v);
-    emit(state.copyWith(morningAzkarTime: v));
     _sync();
   }
 
   void updateEveningAzkarTime(String v) {
+    emit(state.copyWith(eveningAzkarTime: v));
     _updateEveningAzkarTimeAsync(v);
   }
 
   Future<void> _updateEveningAzkarTimeAsync(String v) async {
     await _repo.updateEveningAzkarTime(v);
-    emit(state.copyWith(eveningAzkarTime: v));
     _sync();
   }
 

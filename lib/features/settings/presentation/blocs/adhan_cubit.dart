@@ -21,6 +21,9 @@ class AdhanCubit extends Cubit<AdhanState> with WidgetsBindingObserver {
           salaahSettings: _repo.salaahSettings,
           audioQuality: _repo.audioQuality,
           isAudioPlayerExpanded: _repo.isAudioPlayerExpanded,
+          useExactAlarmClock: _repo.useExactAlarmClock,
+          showSalahCountdownNotification: _repo.showSalahCountdownNotification,
+          respectSilentDndMode: _repo.respectSilentDndMode,
         ),
       ) {
     WidgetsBinding.instance.addObserver(this);
@@ -38,12 +41,25 @@ class AdhanCubit extends Cubit<AdhanState> with WidgetsBindingObserver {
     final ns = getIt<NotificationService>();
     final notifications = await ns.areNotificationsEnabled();
     final exactAlarms = await ns.canScheduleExactNotifications();
-    emit(
-      state.copyWith(
-        notificationsEnabled: notifications,
-        exactAlarmsEnabled: exactAlarms,
-      ),
-    );
+    
+    if (!exactAlarms && state.useExactAlarmClock) {
+      await _repo.updateUseExactAlarmClock(false);
+      emit(
+        state.copyWith(
+          notificationsEnabled: notifications,
+          exactAlarmsEnabled: exactAlarms,
+          useExactAlarmClock: false,
+        ),
+      );
+      _sync();
+    } else {
+      emit(
+        state.copyWith(
+          notificationsEnabled: notifications,
+          exactAlarmsEnabled: exactAlarms,
+        ),
+      );
+    }
   }
 
   @override
@@ -113,6 +129,36 @@ class AdhanCubit extends Cubit<AdhanState> with WidgetsBindingObserver {
     _sync();
   }
 
+  void toggleUseExactAlarmClock(bool v) {
+    _toggleUseExactAlarmClockAsync(v);
+  }
+
+  Future<void> _toggleUseExactAlarmClockAsync(bool v) async {
+    await _repo.updateUseExactAlarmClock(v);
+    emit(state.copyWith(useExactAlarmClock: v));
+    _sync();
+  }
+
+  void toggleShowSalahCountdownNotification(bool v) {
+    _toggleShowSalahCountdownNotificationAsync(v);
+  }
+
+  Future<void> _toggleShowSalahCountdownNotificationAsync(bool v) async {
+    await _repo.updateShowSalahCountdownNotification(v);
+    emit(state.copyWith(showSalahCountdownNotification: v));
+    _sync();
+  }
+
+  void toggleRespectSilentDndMode(bool v) {
+    _toggleRespectSilentDndModeAsync(v);
+  }
+
+  Future<void> _toggleRespectSilentDndModeAsync(bool v) async {
+    await _repo.updateRespectSilentDndMode(v);
+    emit(state.copyWith(respectSilentDndMode: v));
+    _sync();
+  }
+
   void _sync() => Future.microtask(() async {
     try {
       await _syncNotif.execute();
@@ -127,6 +173,9 @@ class AdhanCubit extends Cubit<AdhanState> with WidgetsBindingObserver {
         salaahSettings: _repo.salaahSettings,
         audioQuality: _repo.audioQuality,
         isAudioPlayerExpanded: _repo.isAudioPlayerExpanded,
+        useExactAlarmClock: _repo.useExactAlarmClock,
+        showSalahCountdownNotification: _repo.showSalahCountdownNotification,
+        respectSilentDndMode: _repo.respectSilentDndMode,
       ),
     );
     _sync();

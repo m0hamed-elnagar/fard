@@ -34,7 +34,14 @@ class AdhanAlarmReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d(TAG, "onReceive: Adhan Alarm Triggered")
+        val now = System.currentTimeMillis()
+        val scheduledTime = intent.getLongExtra("scheduledTime", 0L)
+        if (scheduledTime != 0L) {
+            val delayMs = now - scheduledTime
+            Log.i(TAG, "onReceive: Adhan Alarm Triggered. Scheduled at ${java.util.Date(scheduledTime)}, Fired at ${java.util.Date(now)}, Delay = ${delayMs}ms")
+        } else {
+            Log.i(TAG, "onReceive: Adhan Alarm Triggered. Fired at ${java.util.Date(now)} (No scheduledTime extra found)")
+        }
 
         // Acquire WakeLock immediately to ensure the device stays awake
         try {

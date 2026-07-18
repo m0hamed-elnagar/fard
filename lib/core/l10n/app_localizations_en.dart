@@ -594,6 +594,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get azanNotifications => 'Azan & Notifications';
 
   @override
+  String get useExactAlarmClock => 'Precise Adhan Alarms';
+
+  @override
+  String get useExactAlarmClockDesc =>
+      'Guarantees hearing the Adhan exactly on time even when the device is idle (shows an alarm icon in status bar)';
+
+  @override
+  String get showSalahCountdownNotification =>
+      'Next Salah Countdown Notification';
+
+  @override
+  String get showSalahCountdownNotificationDesc =>
+      'Displays a persistent notification with a live countdown to the next prayer (efficient countdown, no battery drain)';
+
+  @override
+  String get exactAlarmPermissionRequired => 'Exact Alarm Permission Required';
+
+  @override
+  String get exactAlarmPermissionRequiredDesc =>
+      'Precise Adhan Alarms were auto-disabled because the exact alarm permission is missing. Without this permission, the Adhan may be delayed or fail during deep sleep.';
+
+  @override
+  String get grantPermission => 'Grant Permission';
+
+  @override
   String get azanSettingsDesc =>
       'Manage azan voices, reminders, and after-salah azkar for all prayers.';
 
@@ -1739,4 +1764,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get phoneMutedDesc =>
       'Notifications will have no sound unless silent mode is disabled or Fard is allowed to bypass Do Not Disturb.';
+
+  @override
+  String get respectSilentDndModeTitle => 'Respect Silent/DND Mode';
+
+  @override
+  String get respectSilentDndModeDesc =>
+      'When enabled, Adhan will stay silent if your phone is on silent, vibrate, or Do Not Disturb.';
+
+  @override
+  String get voiceRemovedTitle => 'Selected Voice Unavailable';
+
+  @override
+  String get voiceRemovedDesc =>
+      'Your previously selected Adhan voice is no longer available and has been reset to the default voice.';
+
+  @override
+  String get changeVoice => 'Choose Voice';
+
+  @override
+  String get ok => 'OK';
 }

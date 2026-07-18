@@ -126,6 +126,8 @@ void main() {
     when(() => mockSettingsProvider.isAfterSalahAzkarEnabled).thenReturn(false);
     when(() => mockSettingsProvider.isWerdReminderEnabled).thenReturn(false);
     when(() => mockSettingsProvider.isSalawatReminderEnabled).thenReturn(false);
+    when(() => mockSettingsProvider.useExactAlarmClock).thenReturn(true);
+    when(() => mockSettingsProvider.showSalahCountdownNotification).thenReturn(false);
 
     // Mock AzkarRepository
     when(() => mockAzkarRepository.getAllAzkar()).thenAnswer((_) async => []);

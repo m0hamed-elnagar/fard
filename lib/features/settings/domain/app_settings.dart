@@ -28,6 +28,9 @@ class AppSettings {
   final Map<String, String>? customThemeColors;
   final AudioQuality audioQuality;
   final bool isAudioPlayerExpanded;
+  final bool useExactAlarmClock;
+  final bool showSalahCountdownNotification;
+  final bool respectSilentDndMode;
 
   // Reminders
   final bool isSalahReminderEnabled;
@@ -62,6 +65,9 @@ class AppSettings {
     this.customThemeColors,
     this.audioQuality = AudioQuality.low64,
     this.isAudioPlayerExpanded = false,
+    this.useExactAlarmClock = true,
+    this.showSalahCountdownNotification = false,
+    this.respectSilentDndMode = false,
     this.isSalahReminderEnabled = false,
     this.salahReminderOffsetMinutes = 15,
     this.prayerReminderType = PrayerReminderType.after,

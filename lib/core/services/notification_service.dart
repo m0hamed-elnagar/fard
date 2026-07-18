@@ -317,7 +317,7 @@ class NotificationService {
     await _prayerScheduler.schedulePrayerNotifications(_notificationsPlugin);
   }
 
-  Future<void> testAzan(Salaah salaah, String? sound) async {
+  Future<void> testAzan(Salaah salaah, String? sound, {bool isTest = true}) async {
     await ensureInitialized();
     try {
       // 1. Check permissions first
@@ -354,7 +354,7 @@ class NotificationService {
           await adhanChannel.invokeMethod('startAdhanService', {
             'prayerName': _getSalaahName(salaah),
             'audioFilePath': rawPath,
-            'isTest': true,
+            'isTest': isTest,
           });
         } catch (e) {
           debugPrint('testAzan: Error starting native Adhan service: $e');
@@ -426,6 +426,7 @@ class NotificationService {
             channelId,
             _applyRtl('Azan Test'),
             channelDescription: _applyRtl('Temporary channel for Azan testing'),
+            icon: '@mipmap/ic_launcher',
             importance: Importance.max,
             priority: Priority.high,
             category: isDefault ? null : AndroidNotificationCategory.alarm,
@@ -469,6 +470,7 @@ class NotificationService {
             ChannelManager.reminderChannelId,
             _applyRtl('Prayer Reminders'),
             channelDescription: _applyRtl('Notifications before prayer time'),
+            icon: '@mipmap/ic_launcher',
             importance: Importance.max,
             priority: Priority.high,
             category: AndroidNotificationCategory.alarm,
@@ -520,6 +522,7 @@ class NotificationService {
           downloadChannelId,
           _applyRtl(l10n.downloadsChannelName),
           channelDescription: _applyRtl(l10n.downloadsChannelDesc),
+          icon: '@mipmap/ic_launcher',
           importance: Importance.low,
           priority: Priority.low,
           onlyAlertOnce: true,
