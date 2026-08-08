@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:fard/core/services/background_azkar_source.dart';
+import 'package:fard/core/services/background_prayer_sync_service.dart';
 import 'package:fard/core/services/notification/channel_manager.dart';
 import 'package:fard/core/services/notification/prayer_scheduler.dart';
 import 'package:fard/core/services/notification/sound_manager.dart';
@@ -26,10 +27,10 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 
 /// Minimal SettingsRepository implementation for background isolates.
 /// Wraps the [AppSettings] loaded from SharedPreferences.
-class _BackgroundSettingsProvider implements SettingsRepository {
+class BackgroundSettingsProvider implements SettingsRepository {
   final AppSettings _settings;
 
-  _BackgroundSettingsProvider(this._settings);
+  BackgroundSettingsProvider(this._settings);
 
   @override
   Locale get locale => _settings.locale;
@@ -322,6 +323,10 @@ void callbackDispatcher() {
         // 3. Load Settings
         final prefs = await SharedPreferences.getInstance();
         await prefs.reload(); // 🛡️ CRITICAL: Ensure we have latest values from UI thread
+        
+        // Drain any natively queued "Done Praying" actions before updating/refreshing
+        await BackgroundPrayerSyncService.drainQueue(prefs);
+        
         final settings = SettingsLoader.loadSettings(prefs);
 
         if (settings.latitude == null || settings.longitude == null) {
@@ -330,7 +335,7 @@ void callbackDispatcher() {
         }
 
         final prayerTimeService = PrayerTimeService();
-        final settingsProvider = _BackgroundSettingsProvider(settings);
+        final settingsProvider = BackgroundSettingsProvider(settings);
         final widgetUpdateService = WidgetUpdateService(
           prayerTimeService,
           prefs,

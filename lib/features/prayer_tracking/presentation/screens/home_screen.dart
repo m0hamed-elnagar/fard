@@ -1,5 +1,10 @@
+import 'dart:async';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/widget_update_service.dart';
+import 'package:fard/core/services/notification_service.dart';
+import 'package:fard/core/services/background_prayer_sync_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 import 'package:fard/features/azkar/presentation/manager/azkar_dialog_manager.dart';
 import 'package:fard/features/prayer_tracking/presentation/blocs/prayer_tracker_bloc.dart';
 import 'package:fard/features/prayer_tracking/presentation/widgets/add_qada_dialog.dart';
@@ -12,6 +17,9 @@ import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_state.dart';
 import 'package:fard/core/utils/location_dialog_helper.dart';
+import 'package:fard/core/services/in_app_update_service.dart';
+import 'package:fard/core/services/in_app_review_service.dart';
+import 'package:fard/features/prayer_tracking/domain/daily_record.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/features/settings/presentation/screens/azan_settings_screen.dart';
 
@@ -36,6 +44,9 @@ class _HomeBody extends StatefulWidget {
 }
 
 class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
+  StreamSubscription<Salaah>? _markPrayedSubscription;
+  bool _isNotificationBlocked = false;
+
   @override
   void initState() {
     super.initState();
@@ -47,7 +58,32 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkRemovedVoiceNotice();
+      _checkNotificationStatus();
+      getIt<InAppUpdateService>().checkForUpdateSilently(context);
     });
+    if (getIt.isRegistered<NotificationService>()) {
+      _markPrayedSubscription = getIt<NotificationService>().onMarkPrayed.listen((salaah) {
+        if (mounted) {
+          debugPrint('HomeScreen: received mark prayed stream event for $salaah');
+          context.read<PrayerTrackerBloc>().add(PrayerTrackerEvent.togglePrayer(salaah));
+        }
+      });
+    }
+  }
+
+  Future<void> _checkNotificationStatus() async {
+    if (getIt.isRegistered<NotificationService>()) {
+      try {
+        final isBlocked = await getIt<NotificationService>().isCountdownChannelBlocked();
+        if (mounted && isBlocked != _isNotificationBlocked) {
+          setState(() {
+            _isNotificationBlocked = isBlocked;
+          });
+        }
+      } catch (e) {
+        debugPrint('HomeScreen: Error checking notification status: $e');
+      }
+    }
   }
 
   void _checkRemovedVoiceNotice() {
@@ -106,6 +142,7 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _markPrayedSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -116,13 +153,24 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
     switch (state) {
       case AppLifecycleState.resumed:
         debugPrint('HomeScreen: App resumed - triggering widget update');
-        // Refresh prayer data
-        final bloc = context.read<PrayerTrackerBloc>();
-        bloc.state.mapOrNull(
-          loaded: (s) {
-            bloc.add(PrayerTrackerEvent.load(s.selectedDate));
-          },
-        );
+        
+        // Drain any pending completed prayers from SharedPreferences first
+        final prefs = getIt<SharedPreferences>();
+        BackgroundPrayerSyncService.drainQueue(prefs).then((_) {
+          if (mounted) {
+            // Refresh prayer data
+            final bloc = context.read<PrayerTrackerBloc>();
+            bloc.state.mapOrNull(
+              loaded: (s) {
+                bloc.add(PrayerTrackerEvent.load(s.selectedDate));
+              },
+            );
+          }
+        });
+
+        // Check if notification settings changed while app was in background
+        _checkNotificationStatus();
+        getIt<InAppUpdateService>().onResumeCheck(context);
 
         // Refresh widget with latest data (includes locale, location, prayer times)
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -153,6 +201,80 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
       // Silently fail - widget update is not critical
       debugPrint('Failed to update widget on pause: $e');
     }
+  }
+
+  Widget _buildBlockedNotificationBanner(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final text = isAr 
+        ? "إشعارات مؤقت الصلاة معطلة في النظام. اضغط هنا لتفعيلها."
+        : "Countdown notifications are blocked. Tap here to enable in settings.";
+
+    return Material(
+      color: colorScheme.errorContainer,
+      child: InkWell(
+        onTap: () {
+          getIt<NotificationService>().openNotificationSettings();
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          child: Row(
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                color: colorScheme.onErrorContainer,
+              ),
+              const SizedBox(width: 12.0),
+              Expanded(
+                child: Text(
+                  text,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onErrorContainer,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14.0,
+                color: colorScheme.onErrorContainer,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  int _calculateStreak(List<DailyRecord> history) {
+    if (history.isEmpty) return 0;
+    final sorted = List<DailyRecord>.from(history)
+      ..sort((a, b) => b.date.compareTo(a.date));
+
+    int streak = 0;
+    DateTime? currentCheck = DateTime.now();
+
+    for (final record in sorted) {
+      final recordDate = DateTime(record.date.year, record.date.month, record.date.day);
+      final checkDate = DateTime(currentCheck!.year, currentCheck.month, currentCheck.day);
+      final diff = checkDate.difference(recordDate).inDays;
+
+      if (diff > 1 && streak > 0) {
+        break;
+      }
+
+      final hasActivity = record.completedToday.isNotEmpty ||
+          record.completedQada.values.any((v) => v > 0);
+
+      if (hasActivity) {
+        streak++;
+        currentCheck = recordDate;
+      } else if (diff > 0) {
+        break;
+      }
+    }
+    return streak;
   }
 
   @override
@@ -251,15 +373,37 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
                   completedQadaToday,
                   monthRecords,
                   history,
-                ) => HomeContent(
-                  selectedDate: selectedDate,
-                  missedToday: missedToday,
-                  completedToday: completedToday,
-                  qadaStatus: qadaStatus,
-                  completedQadaToday: completedQadaToday,
-                  monthRecords: monthRecords,
-                  history: history,
-                ),
+                ) {
+                  final streak = _calculateStreak(history);
+                  getIt<InAppReviewService>().checkAndPromptReviewIfEligible(currentStreak: streak);
+
+                  bool showCountdown = false;
+                  try {
+                    showCountdown = getIt<SettingsRepository>().showSalahCountdownNotification;
+                  } catch (_) {
+                    showCountdown = false;
+                  }
+                  final showBanner = _isNotificationBlocked && showCountdown;
+                  
+                  final homeContent = HomeContent(
+                    selectedDate: selectedDate,
+                    missedToday: missedToday,
+                    completedToday: completedToday,
+                    qadaStatus: qadaStatus,
+                    completedQadaToday: completedQadaToday,
+                    monthRecords: monthRecords,
+                    history: history,
+                  );
+                  
+                  if (!showBanner) return homeContent;
+                  
+                  return Column(
+                    children: [
+                      _buildBlockedNotificationBanner(context),
+                      Expanded(child: homeContent),
+                    ],
+                  );
+                },
           );
         },
       ),

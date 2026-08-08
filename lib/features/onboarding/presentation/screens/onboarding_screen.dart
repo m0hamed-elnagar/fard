@@ -544,6 +544,62 @@ class _AzanSelectionPage extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(height: 16.0),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: theme.cardTheme.color ?? colorScheme.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: colorScheme.outline),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.showSalahCountdownNotification,
+                        style: GoogleFonts.outfit(
+                          fontWeight: FontWeight.w600,
+                          color: state.showSalahCountdownNotification
+                              ? colorScheme.secondary
+                              : (textTheme.bodyMedium?.color ??
+                                  colorScheme.onSurface.withValues(alpha: 0.7)),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.showSalahCountdownNotificationDesc,
+                        style: GoogleFonts.outfit(
+                          fontSize: 11,
+                          color: colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                CustomToggle(
+                  value: state.showSalahCountdownNotification,
+                  onChanged: (val) async {
+                    if (val) {
+                      final granted =
+                          await (context
+                                      .findAncestorStateOfType<
+                                        _OnboardingScreenState
+                                      >()
+                                  as _OnboardingScreenState)
+                              .checkAndRequestNotificationPermissions(context);
+                      if (!granted) return;
+                    }
+                    cubit.toggleShowSalahCountdownNotification(val);
+                  },
+                ),
+              ],
+            ),
+          ),
           if (isAzanEnabled && isSoundMuted) ...[
             const SizedBox(height: 16.0),
             Container(

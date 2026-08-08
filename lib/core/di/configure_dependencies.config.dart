@@ -116,6 +116,8 @@ import '../blocs/connectivity/connectivity_bloc.dart' as _i256;
 import '../services/connectivity_service.dart' as _i47;
 import '../services/download/download_manifest_service.dart' as _i188;
 import '../services/export_import_service.dart' as _i1068;
+import '../services/in_app_review_service.dart' as _i286;
+import '../services/in_app_update_service.dart' as _i366;
 import '../services/location_service.dart' as _i669;
 import '../services/mushaf_download_service.dart' as _i700;
 import '../services/notification/channel_manager.dart' as _i680;
@@ -154,6 +156,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => registerModule.flutterLocalNotificationsPlugin,
     );
     gh.lazySingleton<_i895.Connectivity>(() => registerModule.connectivity);
+    gh.lazySingleton<_i366.InAppUpdateService>(
+      () => _i366.InAppUpdateService(),
+    );
     gh.factory<_i47.ConnectivityService>(
       () => _i47.ConnectivityService(connectivity: gh<_i895.Connectivity>()),
     );
@@ -210,6 +215,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => registerModule.bookmarkBox,
       instanceName: 'bookmarkBox',
       preResolve: true,
+    );
+    gh.lazySingleton<_i286.InAppReviewService>(
+      () => _i286.InAppReviewService(gh<_i460.SharedPreferences>()),
     );
     gh.lazySingleton<_i307.SettingsStorage>(
       () => _i307.SettingsStorage(gh<_i460.SharedPreferences>()),

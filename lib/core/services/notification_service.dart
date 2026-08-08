@@ -20,6 +20,13 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:fard/core/services/voice_download_service.dart';
+import 'package:fard/core/services/background_service.dart';
+import 'package:fard/core/services/background_azkar_source.dart';
+import 'package:fard/core/services/settings_loader.dart';
+import 'package:fard/core/services/prayer_time_service.dart';
+import 'package:timezone/data/latest.dart' as tz_data;
+import 'package:fard/core/services/background_prayer_sync_service.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'notification/sound_manager.dart';
 import 'widget_update_service.dart';
 
@@ -35,6 +42,8 @@ class NotificationService {
   final GlobalKey<NavigatorState> _navigatorKey;
 
   final Completer<void> _initCompleter = Completer<void>();
+  final _markPrayedController = StreamController<Salaah>.broadcast();
+  Stream<Salaah> get onMarkPrayed => _markPrayedController.stream;
 
   NotificationService(
     this._soundManager,
@@ -153,11 +162,30 @@ class NotificationService {
             }
           }
         },
+        onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
       );
 
       // Create notification channels for Android initially
       if (Platform.isAndroid) {
         await _channelManager.createNotificationChannels(_notificationsPlugin);
+        
+        final adhanChannel = MethodChannel(AppIdentifiers.adhanChannelName);
+        adhanChannel.setMethodCallHandler((call) async {
+          if (call.method == 'onMarkPrayedFromNotification') {
+            final String prayerName = call.arguments as String;
+            debugPrint('NotificationService: received onMarkPrayedFromNotification: $prayerName');
+            _handleMarkPrayed(prayerName);
+          }
+        });
+
+        final pending = _prefs.getString('pending_mark_prayed');
+        if (pending != null) {
+          debugPrint('NotificationService: found pending mark prayed in prefs: $pending');
+          await _prefs.remove('pending_mark_prayed');
+          Future.delayed(const Duration(milliseconds: 500), () {
+            _handleMarkPrayed(pending);
+          });
+        }
       }
     } catch (e) {
       debugPrint('NotificationService initialization error: $e');
@@ -273,6 +301,27 @@ class NotificationService {
     return true;
   }
 
+  Future<bool> isCountdownChannelBlocked() async {
+    if (!Platform.isAndroid) return false;
+    
+    // First check overall notification permissions
+    final enabled = await areNotificationsEnabled();
+    if (!enabled) return true;
+
+    // Then query our custom native MethodChannel to check if the specific channel is blocked
+    try {
+      final adhanChannel = MethodChannel(AppIdentifiers.adhanChannelName);
+      final bool isBlocked = await adhanChannel.invokeMethod<bool>(
+        'checkChannelBlocked',
+        {'channelId': 'salah_countdown_channel'},
+      ) ?? false;
+      return isBlocked;
+    } catch (e) {
+      debugPrint('Failed to check channel block status natively: $e');
+      return false;
+    }
+  }
+
   Future<bool> requestExactAlarmsPermission() async {
     if (Platform.isAndroid) {
       final androidPlugin = _notificationsPlugin
@@ -315,6 +364,14 @@ class NotificationService {
     await _widgetUpdateService.updateWidget();
 
     await _prayerScheduler.schedulePrayerNotifications(_notificationsPlugin);
+    if (Platform.isAndroid) {
+      try {
+        final adhanChannel = MethodChannel(AppIdentifiers.adhanChannelName);
+        await adhanChannel.invokeMethod('updateCountdownNotification');
+      } catch (e) {
+        debugPrint('Failed to trigger updateCountdownNotification: $e');
+      }
+    }
   }
 
   Future<void> testAzan(Salaah salaah, String? sound, {bool isTest = true}) async {
@@ -692,5 +749,102 @@ ${(results['channels'] as List).map((c) => '    • ${c['id']} (${c['importance'
       'dndMode': false,
       'isMuted': false,
     };
+  }
+
+  void _handleMarkPrayed(String arabicName) {
+    Salaah? salaah;
+    if (arabicName == 'الفجر') {
+      salaah = Salaah.fajr;
+    } else if (arabicName == 'الظهر') {
+      salaah = Salaah.dhuhr;
+    } else if (arabicName == 'العصر') {
+      salaah = Salaah.asr;
+    } else if (arabicName == 'المغرب') {
+      salaah = Salaah.maghrib;
+    } else if (arabicName == 'العشاء') {
+      salaah = Salaah.isha;
+    }
+    if (salaah != null) {
+      debugPrint('NotificationService: triggering onMarkPrayed for $salaah');
+      _markPrayedController.add(salaah);
+    } else {
+      debugPrint('NotificationService: unknown prayer name: $arabicName');
+    }
+  }
+}
+
+@pragma('vm:entry-point')
+Future<void> notificationTapBackground(NotificationResponse details) async {
+  WidgetsFlutterBinding.ensureInitialized();
+  debugPrint('BackgroundIsolate: notificationTapBackground called. actionId=${details.actionId}, payload=${details.payload}');
+  
+  if (details.actionId == 'action_mark_previous_prayed' && details.payload != null) {
+    final parts = details.payload!.split(':');
+    if (parts.length == 3 && parts[0] == 'mark_prayed') {
+      final prayerKey = parts[1];
+      final dateStr = parts[2];
+      debugPrint('BackgroundIsolate: marking $prayerKey as completed on $dateStr');
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.reload();
+
+      try {
+        await Hive.initFlutter();
+      } catch (e) {
+        debugPrint('BackgroundIsolate: Hive already initialized or failed: $e');
+      }
+
+      final prayer = Salaah.values.firstWhere(
+        (s) => s.name.toLowerCase() == prayerKey.toLowerCase(),
+        orElse: () => Salaah.fajr,
+      );
+      final date = DateTime.parse(dateStr);
+
+      await BackgroundPrayerSyncService.markPrayerAsPrayed(date, prayer, prefs);
+
+      // Cancel/hide the post-Salah notification that was clicked
+      if (details.id != null) {
+        final notificationsPlugin = FlutterLocalNotificationsPlugin();
+        await notificationsPlugin.cancel(id: details.id!);
+        debugPrint('BackgroundIsolate: cancelled notification ${details.id}');
+      }
+
+      try {
+        await AppIdentifiers.initialize();
+      } catch (e) {
+        debugPrint('BackgroundIsolate: Failed to initialize AppIdentifiers: $e');
+      }
+
+      tz_data.initializeTimeZones();
+      try {
+        final timeZoneName = await FlutterTimezone.getLocalTimezone();
+        tz.setLocalLocation(tz.getLocation(timeZoneName.toString()));
+      } catch (_) {}
+
+      final settings = SettingsLoader.loadSettings(prefs);
+      final settingsProvider = BackgroundSettingsProvider(settings);
+      final prayerTimeService = PrayerTimeService();
+      
+      final widgetUpdateService = WidgetUpdateService(
+        prayerTimeService,
+        prefs,
+        settingsProvider,
+      );
+      await widgetUpdateService.updateWidget();
+
+      final soundManager = SoundManager();
+      final channelManager = ChannelManager(soundManager);
+      final scheduler = PrayerNotificationScheduler(
+        prayerTimeService,
+        BackgroundAzkarSource(),
+        channelManager,
+        soundManager,
+        settingsProvider,
+      );
+
+      final notificationsPlugin = FlutterLocalNotificationsPlugin();
+      await scheduler.schedulePrayerNotifications(notificationsPlugin);
+      debugPrint('BackgroundIsolate: finished scheduling notifications');
+    }
   }
 }

@@ -23,7 +23,7 @@
 - Tasbih counter for dhikr
 
 ### Version Information
-- **Current Version**: 1.3.1+5
+- **Current Version**: 1.6.4+21
 - **Min Android**: API 21 (Android 5.0)
 - **Min iOS**: 12.0
 

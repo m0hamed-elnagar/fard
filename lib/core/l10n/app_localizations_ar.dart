@@ -758,6 +758,24 @@ class AppLocalizationsAr extends AppLocalizations {
   String get salahCountdown => 'عد تنازلي للصلاة';
 
   @override
+  String get customIndividual => 'أصوات مخصصة لكل صلاة';
+
+  @override
+  String get customIndividualHelper =>
+      'تمت تهيئة الصلوات بأصوات مختلفة. اختر صوتاً هنا لتوحيد الأذان لجميع الصلوات.';
+
+  @override
+  String get azanDisabledSubtitle => 'معطل لجميع الصلوات';
+
+  @override
+  String get azanEnabledAllSubtitle => 'مفعل لجميع الصلوات';
+
+  @override
+  String azanEnabledPartialSubtitle(int enabled, int total) {
+    return 'مفعل لـ $enabled من $total صلوات';
+  }
+
+  @override
   String get downloadingVoice => 'جاري تحميل الصوت...';
 
   @override
@@ -1819,4 +1837,26 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ok => 'حسناً';
+
+  @override
+  String get rateApp => 'تقييم التطبيق';
+
+  @override
+  String get rateAppDesc => 'ادعم تطبيق فرض بتقييمك على متجر جوجل بلاي';
+
+  @override
+  String get checkForUpdates => 'التحقق من التحديثات';
+
+  @override
+  String get checkForUpdatesDesc => 'تأكد من حصولك على أحدث الميزات والإصلاحات';
+
+  @override
+  String get updateDownloaded =>
+      'تم تحميل التحديث. هل تريد إعادة التشغيل للتثبيت؟';
+
+  @override
+  String get restartAndInstall => 'إعادة التشغيل والتثبيت';
+
+  @override
+  String get noUpdatesAvailable => 'أنت تستخدم أحدث إصدار من فرض.';
 }

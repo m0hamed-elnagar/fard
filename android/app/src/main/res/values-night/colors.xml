@@ -3,4 +3,10 @@
     <!-- Dark theme background color -->
     <color name="splash_background">#F5EDD8</color>
     <color name="ic_launcher_background">#F5EDD8</color>
+
+    <!-- Fard Notification Theme (Dark Mode - Pure White & High Contrast) -->
+    <color name="notification_text_primary">#FFFFFF</color>
+    <color name="notification_text_secondary">#E2E8F0</color>
+    <color name="notification_accent">#4ADE80</color>
+    <color name="notification_progress_bg">#334155</color>
 </resources>

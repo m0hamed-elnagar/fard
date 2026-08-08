@@ -42,13 +42,14 @@ class AdhanCubit extends Cubit<AdhanState> with WidgetsBindingObserver {
     final notifications = await ns.areNotificationsEnabled();
     final exactAlarms = await ns.canScheduleExactNotifications();
     
-    if (!exactAlarms && state.useExactAlarmClock) {
-      await _repo.updateUseExactAlarmClock(false);
+    final bool targetUseExact = exactAlarms;
+    if (state.useExactAlarmClock != targetUseExact) {
+      await _repo.updateUseExactAlarmClock(targetUseExact);
       emit(
         state.copyWith(
           notificationsEnabled: notifications,
           exactAlarmsEnabled: exactAlarms,
-          useExactAlarmClock: false,
+          useExactAlarmClock: targetUseExact,
         ),
       );
       _sync();

@@ -10,6 +10,7 @@ import android.util.Log
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.updateAll
+import com.khwarizmi.fard.prayer.CountdownNotificationManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -51,6 +52,17 @@ class NextPrayerCountdownWidgetReceiver : GlanceAppWidgetReceiver() {
                         pendingResult.finish()
                     }
                 }
+                
+                // Update persistent countdown notification ONLY on non-minute-heartbeat actions
+                // (native Chronometer ticks continuously in SystemUI without needing minute-by-minute notify calls)
+                if (intent.action != actionMinuteUpdate) {
+                    try {
+                        CountdownNotificationManager.updateCountdownNotification(context)
+                    } catch (e: Exception) {
+                        Log.e("CountdownWidgetRec", "Failed to update countdown notification", e)
+                    }
+                }
+
                 // 🛡️ Move schedule logic outside the coroutine/try-finally 
                 // to ensure the loop doesn't break even if the UI update fails
                 scheduleNextMinuteUpdate(context)

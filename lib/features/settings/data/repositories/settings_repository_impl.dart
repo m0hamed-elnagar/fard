@@ -1,8 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/constants/settings_keys.dart';
+import '../../../../core/utils/app_identifiers.dart';
 import '../../../prayer_tracking/domain/salaah.dart';
 import '../../domain/azkar_reminder.dart';
 import '../../domain/entities/custom_theme.dart';
@@ -261,7 +265,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   bool get showSalahCountdownNotification => _storage.readBool(
     SettingsKeys.showSalahCountdownNotification,
-    defaultValue: false,
+    defaultValue: true,
   );
 
   @override
@@ -432,6 +436,14 @@ class SettingsRepositoryImpl implements SettingsRepository {
     }
     if (cityName != null) {
       await _storage.writeString(SettingsKeys.cityName, cityName);
+    }
+    if (Platform.isAndroid) {
+      try {
+        final adhanChannel = MethodChannel(AppIdentifiers.adhanChannelName);
+        await adhanChannel.invokeMethod('updateCountdownNotification');
+      } catch (e) {
+        debugPrint('Error triggering updateCountdownNotification in updateLocation: $e');
+      }
     }
   }
 
@@ -679,6 +691,19 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<void> updateShowSalahCountdownNotification(bool value) async {
     await _storage.writeBool(SettingsKeys.showSalahCountdownNotification, value);
+    if (value) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('flutter.dismissed_prayer_target');
+      await prefs.remove('dismissed_prayer_target');
+    }
+    if (Platform.isAndroid) {
+      try {
+        final adhanChannel = MethodChannel(AppIdentifiers.adhanChannelName);
+        await adhanChannel.invokeMethod('updateCountdownNotification');
+      } catch (e) {
+        debugPrint('Error triggering updateCountdownNotification: $e');
+      }
+    }
   }
 
   @override

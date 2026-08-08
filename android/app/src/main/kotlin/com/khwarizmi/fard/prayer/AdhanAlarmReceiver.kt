@@ -66,6 +66,20 @@ class AdhanAlarmReceiver : BroadcastReceiver() {
 
         Log.d(TAG, "onReceive: prayerName=$prayerName, audioFilePath=$audioFilePath")
 
+        // Reschedule Adhan alarms to ensure next alarm is set (chain-of-custody)
+        try {
+            PrayerAlarmManager.scheduleAdhanAlarms(context)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to reschedule Adhan alarms on receive", e)
+        }
+
+        // Update persistent countdown notification immediately at prayer boundary zero-crossing
+        try {
+            CountdownNotificationManager.updateCountdownNotification(context)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to update countdown notification on adhan alarm", e)
+        }
+
         // Start AdhanService as a Foreground Service
         val serviceIntent = Intent(context, AdhanService::class.java).apply {
             putExtra("prayerName", prayerName)

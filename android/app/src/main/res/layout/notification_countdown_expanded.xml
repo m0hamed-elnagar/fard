@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/notification_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layoutDirection="locale"
+    android:orientation="vertical"
+    android:background="@android:color/transparent"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp">
+
+    <!-- Top Header Row: Prayer Title (Start/Right in RTL) & Location (End/Left in RTL) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="6dp">
+
+        <TextView
+            android:id="@+id/tv_prayer_title_expanded"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/notification_text_primary"
+            android:gravity="start|center_vertical"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tv_location_expanded"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/notification_text_secondary"
+            android:gravity="end|center_vertical"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- Center Hero Ticking Countdown Clock Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:layout_marginBottom="6dp">
+
+        <TextView
+            android:id="@+id/tv_countdown_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/notification_text_secondary"
+            android:gravity="center" />
+
+        <Chronometer
+            android:id="@+id/chronometer_countdown_expanded"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textSize="34sp"
+            android:textStyle="bold"
+            android:textColor="@color/notification_accent"
+            android:gravity="center" />
+    </LinearLayout>
+
+    <!-- Timeline & Progress Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="6dp">
+
+        <ProgressBar
+            android:id="@+id/pb_prayer_progress_expanded"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:max="100"
+            android:progressDrawable="@drawable/notification_progress_track" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="4dp">
+
+            <!-- Previous Prayer + Start Time (Right in RTL, Left in LTR) -->
+            <TextView
+                android:id="@+id/tv_prev_prayer_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="11sp"
+                android:textColor="@color/notification_text_secondary"
+                android:gravity="start|center_vertical"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <!-- Next Prayer + Target Time (Left in RTL, Right in LTR) -->
+            <TextView
+                android:id="@+id/tv_next_prayer_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="@color/notification_text_primary"
+                android:gravity="end|center_vertical"
+                android:maxLines="1"
+                android:ellipsize="end" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Bottom Status Line for Previous Prayer -->
+    <TextView
+        android:id="@+id/tv_previous_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:textColor="@color/notification_text_secondary"
+        android:gravity="start|center_vertical"
+        android:layout_marginTop="2dp"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+</LinearLayout>

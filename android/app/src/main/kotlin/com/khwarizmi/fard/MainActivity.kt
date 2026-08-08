@@ -20,6 +20,7 @@ import com.khwarizmi.fard.prayer.PrayerTimesCalculator
 import com.khwarizmi.fard.prayer.SettingsRepository
 import com.khwarizmi.fard.prayer.PrayerParity
 import com.khwarizmi.fard.prayer.AdhanService
+import com.khwarizmi.fard.prayer.CountdownNotificationManager
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -31,6 +32,7 @@ import java.io.File
 
 class MainActivity : AudioServiceActivity() {
     private val TAG = "MainActivity"
+    private var adhanChannel: MethodChannel? = null
     
     // MethodChannel for widget theme persistence (constructed dynamically based on package name)
     private val widgetThemeChannelName: String
@@ -61,6 +63,16 @@ class MainActivity : AudioServiceActivity() {
                     Log.e(TAG, "Error stopping AdhanService via handleIntent", e)
                 }
             }
+            val markPrayed = it.getStringExtra("MARK_PRAYED")
+            if (markPrayed != null) {
+                Log.d(TAG, "handleIntent: MARK_PRAYED extra found: $markPrayed")
+                // Save it to shared preferences so Flutter can read it on startup/resume
+                val prefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+                prefs.edit().putString("flutter.pending_mark_prayed", markPrayed).apply()
+                
+                // Also invoke on the channel immediately if it is initialized
+                adhanChannel?.invokeMethod("onMarkPrayedFromNotification", markPrayed)
+            }
         }
     }
 
@@ -69,8 +81,30 @@ class MainActivity : AudioServiceActivity() {
 
         // Adhan alarms reschedule channel
         val adhanChannelName = "$packageName/adhan"
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, adhanChannelName).setMethodCallHandler { call, result ->
+        val channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, adhanChannelName)
+        adhanChannel = channel
+        channel.setMethodCallHandler { call, result ->
             when (call.method) {
+                "checkChannelBlocked" -> {
+                    val channelId = call.argument<String>("channelId") ?: ""
+                    Log.d(TAG, "MethodChannel checkChannelBlocked called: channelId=$channelId")
+                    try {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                            val notificationChannel = manager.getNotificationChannel(channelId)
+                            if (notificationChannel != null) {
+                                result.success(notificationChannel.importance == NotificationManager.IMPORTANCE_NONE)
+                            } else {
+                                result.success(false)
+                            }
+                        } else {
+                            result.success(false)
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error in checkChannelBlocked", e)
+                        result.success(false)
+                    }
+                }
                 "rescheduleAdhanAlarms" -> {
                     Log.d(TAG, "MethodChannel rescheduleAdhanAlarms called")
                     try {
@@ -79,6 +113,16 @@ class MainActivity : AudioServiceActivity() {
                     } catch (e: Exception) {
                         Log.e(TAG, "Error in rescheduleAdhanAlarms channel call", e)
                         result.error("SCHEDULING_FAILED", e.message, null)
+                    }
+                }
+                "updateCountdownNotification" -> {
+                    Log.d(TAG, "MethodChannel updateCountdownNotification called")
+                    try {
+                        CountdownNotificationManager.updateCountdownNotification(this)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error in updateCountdownNotification channel call", e)
+                        result.error("UPDATE_FAILED", e.message, null)
                     }
                 }
                 "startAdhanService" -> {
@@ -455,6 +499,13 @@ class MainActivity : AudioServiceActivity() {
                         action = "${packageName}.ACTION_FORCE_UPDATE"
                     }
                     sendBroadcast(countdownIntent)
+                    
+                    // Update persistent countdown notification
+                    try {
+                        CountdownNotificationManager.updateCountdownNotification(this@MainActivity)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to update countdown notification natively", e)
+                    }
 
                     // 9. Absolute safety net: Enqueue OneTimeWorkRequest to refresh widgets from background
                     try {

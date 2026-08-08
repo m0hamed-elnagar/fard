@@ -275,6 +275,21 @@
   "quietHours": "Quiet Hours",
   "loadingVoices": "Loading available voices...",
   "salahCountdown": "Salah Countdown",
+  "customIndividual": "Customized per prayer",
+  "customIndividualHelper": "Prayers are configured with different voices. Select a voice here to unify them all.",
+  "azanDisabledSubtitle": "Disabled for all prayers",
+  "azanEnabledAllSubtitle": "Enabled for all prayers",
+  "azanEnabledPartialSubtitle": "Enabled for {enabled} of {total} prayers",
+  "@azanEnabledPartialSubtitle": {
+    "placeholders": {
+      "enabled": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "downloadingVoice": "Downloading voice...",
   "testAzan": "Test Sound",
   "testReminder": "Test Reminder",
@@ -735,5 +750,12 @@
   "voiceRemovedTitle": "Selected Voice Unavailable",
   "voiceRemovedDesc": "Your previously selected Adhan voice is no longer available and has been reset to the default voice.",
   "changeVoice": "Choose Voice",
-  "ok": "OK"
+  "ok": "OK",
+  "rateApp": "Rate the App",
+  "rateAppDesc": "Support Fard by leaving a rating on Google Play",
+  "checkForUpdates": "Check for Updates",
+  "checkForUpdatesDesc": "Ensure you have the latest features and fixes",
+  "updateDownloaded": "An update has been downloaded. Restart to install?",
+  "restartAndInstall": "Restart & Install",
+  "noUpdatesAvailable": "You are using the latest version of Fard."
 }

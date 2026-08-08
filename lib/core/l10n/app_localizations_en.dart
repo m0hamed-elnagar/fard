@@ -761,6 +761,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get salahCountdown => 'Salah Countdown';
 
   @override
+  String get customIndividual => 'Customized per prayer';
+
+  @override
+  String get customIndividualHelper =>
+      'Prayers are configured with different voices. Select a voice here to unify them all.';
+
+  @override
+  String get azanDisabledSubtitle => 'Disabled for all prayers';
+
+  @override
+  String get azanEnabledAllSubtitle => 'Enabled for all prayers';
+
+  @override
+  String azanEnabledPartialSubtitle(int enabled, int total) {
+    return 'Enabled for $enabled of $total prayers';
+  }
+
+  @override
   String get downloadingVoice => 'Downloading voice...';
 
   @override
@@ -1830,4 +1848,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ok => 'OK';
+
+  @override
+  String get rateApp => 'Rate the App';
+
+  @override
+  String get rateAppDesc => 'Support Fard by leaving a rating on Google Play';
+
+  @override
+  String get checkForUpdates => 'Check for Updates';
+
+  @override
+  String get checkForUpdatesDesc =>
+      'Ensure you have the latest features and fixes';
+
+  @override
+  String get updateDownloaded =>
+      'An update has been downloaded. Restart to install?';
+
+  @override
+  String get restartAndInstall => 'Restart & Install';
+
+  @override
+  String get noUpdatesAvailable => 'You are using the latest version of Fard.';
 }

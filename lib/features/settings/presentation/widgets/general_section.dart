@@ -13,6 +13,8 @@ import '../blocs/daily_reminders_state.dart';
 import 'dart:io';
 import '../../../../core/di/injection.dart';
 import '../../../../core/services/notification_service.dart';
+import '../../../../core/services/in_app_update_service.dart';
+import '../../../../core/services/in_app_review_service.dart';
 import '../screens/privacy_policy_screen.dart';
 import 'about_dialog.dart';
 
@@ -162,6 +164,28 @@ class _GeneralSectionState extends State<GeneralSection> {
               context,
               MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
             );
+          },
+        ),
+        const Divider(height: 1),
+        _buildActionTile(
+          context,
+          title: l10n.rateApp,
+          subtitle: l10n.rateAppDesc,
+          icon: Icons.star_rate_rounded,
+          onTap: () {
+            HapticFeedback.lightImpact();
+            getIt<InAppReviewService>().openStoreListingManually();
+          },
+        ),
+        const Divider(height: 1),
+        _buildActionTile(
+          context,
+          title: l10n.checkForUpdates,
+          subtitle: l10n.checkForUpdatesDesc,
+          icon: Icons.system_update_rounded,
+          onTap: () {
+            HapticFeedback.lightImpact();
+            getIt<InAppUpdateService>().checkForUpdateManually(context);
           },
         ),
         const Divider(height: 1),

@@ -44,7 +44,7 @@ void main() {
     when(() => mockRepo.salaahSettings).thenReturn(initialSalaahSettings);
     when(() => mockRepo.audioQuality).thenReturn(AudioQuality.low64);
     when(() => mockRepo.isAudioPlayerExpanded).thenReturn(false);
-    when(() => mockRepo.useExactAlarmClock).thenReturn(false);
+    when(() => mockRepo.useExactAlarmClock).thenReturn(true);
     when(() => mockRepo.showSalahCountdownNotification).thenReturn(false);
     when(() => mockRepo.respectSilentDndMode).thenReturn(false);
 
@@ -56,6 +56,7 @@ void main() {
     when(() => mockRepo.updateAllAzanEnabled(any())).thenAnswer((_) async {});
     when(() => mockRepo.updateAllAzanSound(any())).thenAnswer((_) async {});
     when(() => mockRepo.updateRespectSilentDndMode(any())).thenAnswer((_) async {});
+    when(() => mockRepo.updateUseExactAlarmClock(any())).thenAnswer((_) async {});
     when(() => mockSyncNotif.execute()).thenAnswer((_) async {});
 
     when(

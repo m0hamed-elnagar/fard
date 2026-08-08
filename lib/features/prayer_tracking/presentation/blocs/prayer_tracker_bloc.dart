@@ -13,8 +13,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:fard/core/di/injection.dart';
+import 'package:fard/core/utils/app_identifiers.dart';
 
 part 'prayer_tracker_bloc.freezed.dart';
 part 'prayer_tracker_event.dart';
@@ -330,6 +332,49 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
         }
       }
 
+      if (isToday) {
+        try {
+          final pendingMarked = _prefs.getString('pending_completed_prayers') ?? '';
+          if (pendingMarked.isNotEmpty) {
+            final prayerKeys = pendingMarked.split(',').where((s) => s.isNotEmpty).toList();
+            await _prefs.remove('pending_completed_prayers');
+            
+            bool modified = false;
+            for (final key in prayerKeys) {
+              final salaah = Salaah.values.firstWhere((s) => s.name == key, orElse: () => Salaah.fajr);
+              if (!completedToday.contains(salaah)) {
+                completedToday.add(salaah);
+                if (missedToday.contains(salaah)) {
+                  missedToday.remove(salaah);
+                  qada[salaah] = (qada[salaah] ?? const MissedCounter(0)).removeMissed();
+                }
+                modified = true;
+              }
+            }
+            
+            if (modified) {
+              final updatedRecord = DailyRecord(
+                id: record?.id ?? '${normalizedDate.year}-${normalizedDate.month.toString().padLeft(2, '0')}-${normalizedDate.day.toString().padLeft(2, '0')}',
+                date: normalizedDate,
+                missedToday: missedToday,
+                completedToday: completedToday,
+                qada: qada,
+                completedQada: record?.completedQada ?? {},
+              );
+              await _repo.saveToday(updatedRecord);
+            }
+          }
+        } catch (e) {
+          developer.log('PrayerTrackerBloc: SharedPreferences error in onLoad: $e');
+        }
+        
+        try {
+          await _prefs.setString('completed_today', completedToday.map((s) => s.name).join(','));
+        } catch (e) {
+          developer.log('PrayerTrackerBloc: SharedPreferences error saving completed_today in onLoad: $e');
+        }
+      }
+
       // Final state construction logic
       final currentState = state;
       final loadedState = PrayerTrackerState.loaded(
@@ -423,6 +468,32 @@ class PrayerTrackerBloc extends Bloc<PrayerTrackerEvent, PrayerTrackerState> {
 
         await _repo.saveToday(recordToSave);
         await _cascadeUpdateFrom(recordToSave, oldBaseQada: oldQadaMap);
+
+        final now = DateTime.now();
+        final isToday =
+            normalizedDate.year == now.year &&
+            normalizedDate.month == now.month &&
+            normalizedDate.day == now.day;
+        if (isToday) {
+          try {
+            await _prefs.setString('completed_today', completed.map((s) => s.name).join(','));
+            
+            // Sync the native done-state flag so the countdown notification updates
+            final dateStr = '${normalizedDate.year}-${normalizedDate.month.toString().padLeft(2, '0')}-${normalizedDate.day.toString().padLeft(2, '0')}';
+            final doneKey = 'prayer_done_${e.prayer.name.toLowerCase()}_$dateStr';
+            await _prefs.setBool(doneKey, completed.contains(e.prayer));
+            
+            // Trigger native notification refresh via MethodChannel
+            try {
+              final adhanChannel = MethodChannel(AppIdentifiers.adhanChannelName);
+              await adhanChannel.invokeMethod('updateCountdownNotification');
+            } catch (channelErr) {
+              developer.log('PrayerTrackerBloc: MethodChannel updateCountdownNotification error: $channelErr');
+            }
+          } catch (e) {
+            developer.log('PrayerTrackerBloc: SharedPreferences error saving completed_today in onTogglePrayer: $e');
+          }
+        }
 
         // Log analytics: prayer toggled to completed counts as "marked"
         if (completed.contains(e.prayer) &&

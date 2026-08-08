@@ -31,8 +31,8 @@ class AzanSettingsScreen extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 40.0),
         children: const [
-          AdhanSection(),
           SalahCountdownSection(),
+          AdhanSection(),
           PrayerRemindersSection(),
           AzkarSection(),
           WerdReminderSection(),

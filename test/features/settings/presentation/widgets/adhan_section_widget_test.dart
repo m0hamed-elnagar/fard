@@ -11,6 +11,7 @@ import 'package:fard/features/settings/presentation/blocs/adhan_state.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fard/core/services/connectivity_service.dart';
 import 'package:fard/features/settings/presentation/widgets/adhan_section.dart';
+import 'package:fard/features/settings/presentation/widgets/salah_countdown_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -73,7 +74,12 @@ void main() {
         locale: const Locale('en'),
         home: const Scaffold(
           body: SingleChildScrollView(
-            child: AdhanSection(),
+            child: Column(
+              children: [
+                SalahCountdownSection(),
+                AdhanSection(),
+              ],
+            ),
           ),
         ),
       ),
@@ -99,9 +105,18 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify master toggle is ON (value is true)
-    // Individual settings section is visible, containing 5 tiles
     expect(find.text('Enable Azan'), findsOneWidget);
     expect(find.text('Individual Prayer Settings'), findsOneWidget);
+
+    // Tap individual settings header to expand the collapsible list
+    final headerFinder = find.text('Individual Prayer Settings');
+    await tester.ensureVisible(headerFinder);
+    await tester.pumpAndSettle();
+    
+    await tester.tap(headerFinder);
+    await tester.pumpAndSettle();
+
+    // Verify individual settings section content is visible, containing 5 tiles
     expect(find.text('Fajr'), findsOneWidget);
     expect(find.text('Dhuhr'), findsOneWidget);
 
@@ -173,7 +188,7 @@ void main() {
     expect(button.onPressed, isNull);
   });
 
-  testWidgets('When Enable Azan is false, General group is visible but Alarm Precision/Quiet Hours groups are hidden', (WidgetTester tester) async {
+  testWidgets('When Enable Azan is false, Salah Countdown is visible but Alarm Precision/Quiet Hours groups are hidden', (WidgetTester tester) async {
     // Initial state: all prayers have Azan disabled
     final initialSettings = Salaah.values
         .map((s) => SalaahSettings(salaah: s, isAzanEnabled: false))
@@ -195,8 +210,8 @@ void main() {
     // Verify master toggle is OFF
     expect(find.text('Enable Azan'), findsOneWidget);
 
-    // Verify General group (Show Salah Countdown) is visible
-    expect(find.text('General'), findsOneWidget);
+    // Verify Salah Countdown group is visible
+    expect(find.text('Salah Countdown'), findsOneWidget);
     expect(find.text('Next Salah Countdown Notification'), findsOneWidget);
 
     // Verify Alarm Precision and Quiet Hours groups are hidden
@@ -243,5 +258,74 @@ void main() {
     expect(find.text('Phone is silent — Adhan will only show a notification.'), findsOneWidget);
 
     await controller.close();
+  });
+
+  testWidgets('Tapping a prayer tile opens the individual voice picker bottom sheet', (WidgetTester tester) async {
+    final settings = Salaah.values
+        .map((s) => SalaahSettings(salaah: s, isAzanEnabled: true))
+        .toList();
+
+    var state = AdhanState(
+      salaahSettings: settings,
+      notificationsEnabled: true,
+      exactAlarmsEnabled: true,
+    );
+
+    when(() => mockAdhanCubit.state).thenReturn(state);
+    when(() => mockAdhanCubit.stream).thenAnswer((_) => Stream.value(state));
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    // 1. Expand individual settings list
+    final headerFinder = find.text('Individual Prayer Settings');
+    await tester.ensureVisible(headerFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(headerFinder);
+    await tester.pumpAndSettle();
+
+    // 2. Find the Fajr tile and tap it to open bottom sheet
+    final fajrTileFinder = find.ancestor(
+      of: find.text('Fajr'),
+      matching: find.byType(FardListTile),
+    );
+    expect(fajrTileFinder, findsOneWidget);
+    await tester.ensureVisible(fajrTileFinder);
+    await tester.pumpAndSettle();
+    
+    // Tap the tile anywhere except the toggle
+    await tester.tap(find.text('Fajr'));
+    await tester.pumpAndSettle();
+
+    // 3. Verify the bottom sheet opens with correct title
+    expect(find.text('Adhan voice for Fajr'), findsOneWidget);
+  });
+
+  testWidgets('Global voice dropdown displays Custom (Individual) when individual voices differ', (WidgetTester tester) async {
+    final settings = Salaah.values
+        .map((s) => SalaahSettings(salaah: s, isAzanEnabled: true))
+        .toList();
+    // Make Fajr and Dhuhr voices different
+    settings[0] = settings[0].copyWith(azanSound: 'Saad Al-Ghamdi - سعد الغامدي');
+    settings[1] = settings[1].copyWith(azanSound: 'Mishary Al-Afasy - مشاري العفاسي');
+
+    var state = AdhanState(
+      salaahSettings: settings,
+      notificationsEnabled: true,
+      exactAlarmsEnabled: true,
+    );
+
+    when(() => mockAdhanCubit.state).thenReturn(state);
+    when(() => mockAdhanCubit.stream).thenAnswer((_) => Stream.value(state));
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    // Verify global dropdown is showing "Customized per prayer" and its helper text
+    expect(find.text('Customized per prayer'), findsOneWidget);
+    expect(
+      find.text('Prayers are configured with different voices. Select a voice here to unify them all.'),
+      findsOneWidget,
+    );
   });
 }

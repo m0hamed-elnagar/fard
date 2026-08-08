@@ -20,6 +20,9 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.media.app.NotificationCompat.MediaStyle
 import android.media.RingtoneManager
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
+import androidx.work.Data
 import com.khwarizmi.fard.MainActivity
 import com.khwarizmi.fard.R
 import java.io.File
@@ -92,6 +95,57 @@ class AdhanService : Service() {
         if (action == "$packageName.action.STOP_ADHAN") {
             Log.d(TAG, "onStartCommand: STOP action received")
             stopAdhan()
+            return START_NOT_STICKY
+        }
+
+        if (action == "$packageName.action.MARK_PRAYED_AND_STOP") {
+            Log.d(TAG, "onStartCommand: MARK_PRAYED_AND_STOP action received")
+            val prayerName = intent.getStringExtra("prayerName") ?: ""
+            stopAdhan()
+            
+            // 1. Convert Arabic name to English lower key
+            val prayerKey = when (prayerName) {
+                "الفجر" -> "fajr"
+                "الظهر" -> "dhuhr"
+                "العصر" -> "asr"
+                "المغرب" -> "maghrib"
+                "العشاء" -> "isha"
+                else -> prayerName.lowercase()
+            }
+            
+            // 2. Save it to SharedPreferences
+            val prefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+            val pending = prefs.getString("flutter.pending_completed_prayers", "") ?: ""
+            val newPending = if (pending.isEmpty()) prayerKey else "$pending,$prayerKey"
+            prefs.edit().putString("flutter.pending_completed_prayers", newPending).apply()
+
+            val completed = prefs.getString("flutter.completed_today", "") ?: ""
+            val newCompleted = if (completed.isEmpty()) prayerKey else "$completed,$prayerKey"
+            prefs.edit().putString("flutter.completed_today", newCompleted).apply()
+
+            // Show native Toast feedback
+            val isAr = prefs.getString("flutter.locale", "ar") == "ar"
+            val message = if (isAr) "تم تسجيل صلاة $prayerName بنجاح" else "$prayerName marked as prayed successfully"
+            android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_SHORT).show()
+
+            // 3. Trigger Flutter background task via WorkManager (using reflection to avoid compile dependency issues)
+            try {
+                @Suppress("UNCHECKED_CAST")
+                val workerClass = Class.forName("be.tramckrijte.workmanager.BackgroundWorker") as Class<out androidx.work.ListenableWorker>
+                val workRequest = OneTimeWorkRequest.Builder(workerClass)
+                    .setInputData(
+                        Data.Builder()
+                            .putString("be.tramckrijte.workmanager.BACKGROUND_ISOLATE_TASK_NAME", "widget_refresh_task")
+                            .build()
+                    )
+                    .build()
+                WorkManager.getInstance(this).enqueue(workRequest)
+                Log.d(TAG, "WorkManager task enqueued successfully from AdhanService")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to enqueue WorkManager task from AdhanService", e)
+            }
+
+            stopSelf()
             return START_NOT_STICKY
         }
 
@@ -294,6 +348,18 @@ class AdhanService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
         )
 
+        // Action mark prayed intent
+        val markIntent = Intent(this, AdhanService::class.java).apply {
+            action = "$packageName.action.MARK_PRAYED_AND_STOP"
+            putExtra("prayerName", prayerName)
+        }
+        val pendingMarkIntent = PendingIntent.getService(
+            this,
+            2003,
+            markIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+        )
+
         val title = "حان وقت صلاة $prayerName"
         val body = "أقم الصلاة يرحمك الله"
 
@@ -305,10 +371,8 @@ class AdhanService : Service() {
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setOngoing(true)
             .setContentIntent(pendingContentIntent)
-            .setStyle(MediaStyle()
-                .setShowActionsInCompactView(0)
-            )
-            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "إيقاف", pendingStopIntent)
+            .addAction(R.drawable.ic_notification_stop, "إيقاف", pendingStopIntent)
+            .addAction(R.drawable.ic_notification_check, "تمت الصلاة", pendingMarkIntent)
             .build()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

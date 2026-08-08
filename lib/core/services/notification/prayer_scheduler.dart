@@ -270,6 +270,7 @@ class PrayerNotificationScheduler {
                       id: afterSalahAzkarIdStart + dayOffset,
                       scheduledDate: reminderTime,
                       allAzkar: allAzkar,
+                      salaah: salaahSetting.salaah,
                       timeoutAfter: timeout,
                     );
                   }
@@ -325,42 +326,50 @@ class PrayerNotificationScheduler {
         await prefs.setString('fard.adhan_schedule', jsonStr);
         debugPrint('Saved fard.adhan_schedule to SharedPreferences: $jsonStr');
 
+        // Find the next upcoming prayer to write to SharedPreferences as target
+        if (futurePrayers.isNotEmpty) {
+          futurePrayers.sort((a, b) => a.time.compareTo(b.time));
+          final nextPrayerIdx = futurePrayers.indexWhere((p) => p.time.isAfter(now));
+          if (nextPrayerIdx != -1) {
+            final next = futurePrayers[nextPrayerIdx];
+            final String dateStr = "${next.time.year}-${next.time.month.toString().padLeft(2, '0')}-${next.time.day.toString().padLeft(2, '0')}";
+            await prefs.setString('flutter.next_prayer_id', next.salaah.name);
+            await prefs.setInt('flutter.next_prayer_time', next.time.millisecondsSinceEpoch);
+            await prefs.setString('flutter.next_prayer_date', dateStr);
+            debugPrint('Saved next_prayer target to SharedPreferences: ${next.salaah.name} on $dateStr');
+
+            int prevTimeMs = 0;
+            if (nextPrayerIdx > 0) {
+              prevTimeMs = futurePrayers[nextPrayerIdx - 1].time.millisecondsSinceEpoch;
+            } else {
+              // Next is the first upcoming prayer in futurePrayers (Fajr today)
+              // Explicitly compute yesterday's Isha time
+              final yesterday = DateTime.now().subtract(const Duration(days: 1));
+              final pTimes = _prayerTimeService.getPrayerTimes(
+                latitude: _settingsProvider.latitude!,
+                longitude: _settingsProvider.longitude!,
+                method: _settingsProvider.calculationMethod,
+                madhab: _settingsProvider.madhab,
+                date: yesterday,
+              );
+              final ishaTime = _prayerTimeService.getTimeForSalaah(pTimes, Salaah.isha);
+              if (ishaTime != null) {
+                prevTimeMs = tz.TZDateTime.from(ishaTime, tz.local).millisecondsSinceEpoch;
+              }
+            }
+            if (prevTimeMs > 0) {
+              await prefs.setInt('prev_prayer_time', prevTimeMs);
+              await prefs.setInt('flutter.prev_prayer_time', prevTimeMs);
+              debugPrint('Saved prev_prayer_time to SharedPreferences: $prevTimeMs');
+            }
+          }
+        }
+
         final adhanChannel = MethodChannel(AppIdentifiers.adhanChannelName);
         await adhanChannel.invokeMethod('rescheduleAdhanAlarms');
         debugPrint('Invoked rescheduleAdhanAlarms MethodChannel');
       } catch (e) {
         debugPrint('Error saving Adhan schedule or invoking MethodChannel: $e');
-      }
-    }
-
-    // --- Countdown Notification Logic ---
-    if (!_settingsProvider.showSalahCountdownNotification) {
-      await notificationsPlugin.cancel(id: salahCountdownNotificationId);
-    } else if (futurePrayers.isNotEmpty) {
-      futurePrayers.sort((a, b) => a.time.compareTo(b.time));
-      final nextPrayerIndex = futurePrayers.indexWhere((p) => p.time.isAfter(now));
-      if (nextPrayerIndex != -1) {
-        // 1. Immediately update/show the countdown notification for the first upcoming prayer
-        final nextPrayer = futurePrayers[nextPrayerIndex];
-        await _showCountdownNotification(
-          notificationsPlugin,
-          targetTime: nextPrayer.time,
-          salaah: nextPrayer.salaah,
-        );
-
-        // 2. Schedule future countdown updates at each prayer boundary
-        // We only schedule a reasonable number (e.g. next 10 boundaries)
-        final maxFutureCountdowns = min(futurePrayers.length, nextPrayerIndex + 10);
-        for (int i = nextPrayerIndex + 1; i < maxFutureCountdowns; i++) {
-          final triggerTime = futurePrayers[i - 1].time; // Previous prayer start
-          final targetPrayer = futurePrayers[i]; // Next prayer target
-          await _scheduleFutureCountdownNotification(
-            notificationsPlugin,
-            triggerTime: triggerTime,
-            targetTime: targetPrayer.time,
-            salaah: targetPrayer.salaah,
-          );
-        }
       }
     }
   }
@@ -530,11 +539,17 @@ class PrayerNotificationScheduler {
     required int id,
     required tz.TZDateTime scheduledDate,
     required List<AzkarItem> allAzkar,
+    required Salaah salaah,
     int? timeoutAfter,
   }) async {
     const String category = 'الأذكار بعد السلام من الصلاة';
     final String zekrBody = _getRandomZekr(allAzkar, category);
     final String title = 'أذكار بعد الصلاة';
+
+    final String dateStr = "${scheduledDate.year}-${scheduledDate.month.toString().padLeft(2, '0')}-${scheduledDate.day.toString().padLeft(2, '0')}";
+    final String actionText = _settingsProvider.locale.languageCode == 'ar'
+        ? '✅ صليت ${_getSalaahName(salaah)}'
+        : '✅ Prayed ${_getSalaahNameEn(salaah)}';
 
     await notificationsPlugin.zonedSchedule(
       id: id,
@@ -552,12 +567,35 @@ class PrayerNotificationScheduler {
           ticker: _applyRtl(title),
           subText: _applyRtl(title),
           timeoutAfter: timeoutAfter,
+          actions: <AndroidNotificationAction>[
+            AndroidNotificationAction(
+              'action_mark_previous_prayed',
+              actionText,
+              showsUserInterface: false,
+              cancelNotification: false,
+            ),
+          ],
         ),
       ),
       // 🛡️ Standard alarm (allowWhileIdle) for non-essential notifications
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      payload: 'category:$category',
+      payload: 'mark_prayed:${salaah.name}:$dateStr',
     );
+  }
+
+  String _getSalaahNameEn(Salaah salaah) {
+    switch (salaah) {
+      case Salaah.fajr:
+        return 'Fajr';
+      case Salaah.dhuhr:
+        return 'Dhuhr';
+      case Salaah.asr:
+        return 'Asr';
+      case Salaah.maghrib:
+        return 'Maghrib';
+      case Salaah.isha:
+        return 'Isha';
+    }
   }
 
   DateTime _parseTime(String timeStr, DateTime now) {
@@ -748,70 +786,4 @@ class PrayerNotificationScheduler {
         : item.zekr;
   }
 
-  Future<void> _showCountdownNotification(
-    FlutterLocalNotificationsPlugin notificationsPlugin, {
-    required tz.TZDateTime targetTime,
-    required Salaah salaah,
-  }) async {
-    final title = _applyRtl('الصلاة التالية: ${_getSalaahName(salaah)}');
-    final body = _applyRtl('المتبقي على الصلاة');
-    
-    await notificationsPlugin.show(
-      id: salahCountdownNotificationId,
-      title: title,
-      body: body,
-      notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(
-          'salah_countdown_channel',
-          _applyRtl('Salah Countdown'),
-          channelDescription: _applyRtl('Persistent countdown to the next Salah'),
-          importance: Importance.low,
-          priority: Priority.low,
-          icon: '@mipmap/ic_launcher',
-          usesChronometer: true,
-          chronometerCountDown: true,
-          when: targetTime.millisecondsSinceEpoch,
-          ongoing: true,
-          onlyAlertOnce: true,
-          showWhen: true,
-          groupKey: groupKey,
-        ),
-      ),
-    );
-  }
-
-  Future<void> _scheduleFutureCountdownNotification(
-    FlutterLocalNotificationsPlugin notificationsPlugin, {
-    required tz.TZDateTime triggerTime,
-    required tz.TZDateTime targetTime,
-    required Salaah salaah,
-  }) async {
-    final title = _applyRtl('الصلاة التالية: ${_getSalaahName(salaah)}');
-    final body = _applyRtl('المتبقي على الصلاة');
-
-    await notificationsPlugin.zonedSchedule(
-      id: salahCountdownNotificationId,
-      title: title,
-      body: body,
-      scheduledDate: triggerTime,
-      notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(
-          'salah_countdown_channel',
-          _applyRtl('Salah Countdown'),
-          channelDescription: _applyRtl('Persistent countdown to the next Salah'),
-          importance: Importance.low,
-          priority: Priority.low,
-          icon: '@mipmap/ic_launcher',
-          usesChronometer: true,
-          chronometerCountDown: true,
-          when: targetTime.millisecondsSinceEpoch,
-          ongoing: true,
-          onlyAlertOnce: true,
-          showWhen: true,
-          groupKey: groupKey,
-        ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    );
-  }
 }

@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.4+21] - 2026-08-08
+
+### Added
+- **Location Display in Notifications**: Integrated localized location indicator (`📍 Cairo` / `📍 القاهرة`) into the Next Salah Countdown Notification header.
+- **Arabic City Name Translation**: Built bidirectional city name translator (`getLocalizedCityName`) mapping regional and international city names to Arabic when the app locale is Arabic.
+- **Onboarding Countdown Control**: Added a dedicated switch card for enabling/disabling the Next Salah Countdown Notification directly in the Onboarding Azan setup step.
+- **Background Actions**: Added background action buttons ("Mark as Prayed") to the Azan notification and the Salah countdown notification.
+- **Port Communication Bridge**: Added `IsolateNameServer` port bridge (`notification_tap_port`) to send real-time notification action taps to the main isolate when the app is in the foreground.
+
+### Changed
+- **Instant Switch Responsiveness**: Updated `AdhanCubit` with optimistic UI state updates (0ms latency, instant 60fps switch animation) and asynchronous background MethodChannel calls.
+- **High-Contrast Text Visibility**: Upgraded dark theme notification text to pure crisp white (`#FFFFFF`) for primary titles and bright off-white (`#E2E8F0`) for secondary labels.
+- **Single Target Time Display**: Positioned target prayer time strictly once under the progress bar on the timeline, eliminating duplicate target time displays in the header.
+- **Minimal Collapsed Notification**: Streamlined collapsed notification to a clean 2-line layout without location clutter, increasing progress bar height to 5dp for clear tracking.
+- **Explicit RTL Layout Direction**: Applied `LAYOUT_DIRECTION_RTL` to native Android RemoteViews, aligning prayer titles to the right and location/times to the left in Arabic mode.
+
+### Fixed
+- **Past Prayer Time Synchronization**: Fixed native Kotlin background rollover to persist `flutter.prev_prayer_time` in `SharedPreferences` when prayer targets roll over in the background.
+- **Safe SharedPreferences Reading**: Resolved `ClassCastException` in Kotlin when reading `prev_prayer_time` across `Long` and `Int` types.
+- **Test Suite Stability**: Resolved mock SharedPreferences and mock NotificationService issues in unit and integration tests.
+
 ## [1.6.3+20] - 2026-07-18
 
 ### Added

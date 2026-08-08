@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.glance.appwidget.updateAll
+import com.khwarizmi.fard.prayer.CountdownNotificationManager
 import com.khwarizmi.fard.prayer.PrayerAlarmManager
 import com.khwarizmi.fard.prayer.PrayerTimesCalculator
 import com.khwarizmi.fard.prayer.SettingsRepository
@@ -57,6 +58,13 @@ class TimeChangedReceiver : BroadcastReceiver() {
         // Update UIs
         PrayerWidget().updateAll(context)
         NextPrayerCountdownWidget().updateAll(context)
+
+        // Update countdown notification
+        try {
+            CountdownNotificationManager.updateCountdownNotification(context)
+        } catch (e: Exception) {
+            Log.e("TimeChangedReceiver", "Failed to update countdown notification", e)
+        }
     }
 }
 

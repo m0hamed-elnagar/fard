@@ -66,7 +66,7 @@ class AppSettings {
     this.audioQuality = AudioQuality.low64,
     this.isAudioPlayerExpanded = false,
     this.useExactAlarmClock = true,
-    this.showSalahCountdownNotification = false,
+    this.showSalahCountdownNotification = true,
     this.respectSilentDndMode = false,
     this.isSalahReminderEnabled = false,
     this.salahReminderOffsetMinutes = 15,

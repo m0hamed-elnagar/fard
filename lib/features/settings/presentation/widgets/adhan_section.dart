@@ -155,6 +155,14 @@ class _AdhanSectionState extends State<AdhanSection>
         final bool anyAzanEnabled = state.salaahSettings.any(
           (s) => s.isAzanEnabled,
         );
+        final int enabledCount = state.salaahSettings.where((s) => s.isAzanEnabled).length;
+        final int totalCount = state.salaahSettings.length;
+        final String masterSubtitle = enabledCount == 0
+            ? l10n.azanDisabledSubtitle
+            : (enabledCount == totalCount
+                ? l10n.azanEnabledAllSubtitle
+                : l10n.azanEnabledPartialSubtitle(enabledCount, totalCount));
+
         final String? commonVoice = _getCommonVoice(state.salaahSettings);
         final String? displayedVoiceKey = _pendingVoiceUpdate
             ? _optimisticVoiceKey
@@ -283,6 +291,7 @@ class _AdhanSectionState extends State<AdhanSection>
             // Standalone master switch
             _buildToggleItem(
               title: l10n.enableAzan,
+              subtitle: masterSubtitle,
               value: anyAzanEnabled,
               onChanged: (val) async {
                 if (val && (notificationsDisabled || exactAlarmsDisabled)) {
@@ -307,31 +316,6 @@ class _AdhanSectionState extends State<AdhanSection>
               context: context,
             ),
             if (anyAzanEnabled) ...[
-              const SizedBox(height: 12),
-              // Alarm Precision Group
-              _buildToggleGroup(
-                context,
-                l10n.alarmPrecision,
-                [
-                  _buildToggleItem(
-                    title: l10n.useExactAlarmClock,
-                    subtitle: l10n.useExactAlarmClockDesc,
-                    value: state.useExactAlarmClock,
-                    onChanged: (val) async {
-                      if (val) {
-                        final exactAlarms = await getIt<NotificationService>().canScheduleExactNotifications();
-                        if (!exactAlarms) {
-                          final granted = await getIt<NotificationService>().requestExactAlarmsPermission();
-                          if (!granted) return;
-                          cubit.refreshPermissions();
-                        }
-                      }
-                      cubit.toggleUseExactAlarmClock(val);
-                    },
-                    context: context,
-                  ),
-                ],
-              ),
               const SizedBox(height: 12),
               // Quiet Hours Group
               _buildToggleGroup(
@@ -363,9 +347,15 @@ class _AdhanSectionState extends State<AdhanSection>
                 ],
               ),
               const SizedBox(height: 16),
-              _buildVoiceDropdown(context, commonVoice, l10n, (val) {
-                cubit.updateAllAzanSound(val);
-              }),
+              _buildVoiceDropdown(
+                context,
+                commonVoice,
+                l10n,
+                (val) {
+                  cubit.updateAllAzanSound(val);
+                },
+                isGlobal: true,
+              ),
               if (_isOffline && !isVoiceDownloaded) ...[
                 const SizedBox(height: 8),
                 Padding(
@@ -765,8 +755,9 @@ class _AdhanSectionState extends State<AdhanSection>
     BuildContext context,
     String? currentVoice,
     AppLocalizations l10n,
-    ValueChanged<String?> onChanged,
-  ) {
+    ValueChanged<String?> onChanged, {
+    bool isGlobal = false,
+  }) {
     if (_isLoadingVoices) {
       return Container(
         height: 56,
@@ -800,147 +791,212 @@ class _AdhanSectionState extends State<AdhanSection>
       );
     }
 
-    final String? displayedVoiceKey = _pendingVoiceUpdate
-        ? _optimisticVoiceKey
-        : _resolveVoiceKey(currentVoice);
+    final settings = context.read<AdhanCubit>().state.salaahSettings;
+    final firstVoice = settings.isNotEmpty ? settings.first.azanSound : null;
+    final bool isMixed = isGlobal && !settings.every((s) => s.azanSound == firstVoice);
 
-    return DropdownButtonFormField<String?>(
-      key: ValueKey(displayedVoiceKey),
-      initialValue: displayedVoiceKey,
-      isExpanded: true,
-      icon: _isDownloading
-          ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-              ),
-            )
-          : null,
-      decoration: InputDecoration(
-        labelText: l10n.azanVoice,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        filled: true,
-        fillColor: context.surfaceContainerHighestColor,
-        helperText: _isDownloading ? l10n.downloadingVoice : null,
-        helperStyle: TextStyle(color: context.primaryColor),
-      ),
-      items: [
-        DropdownMenuItem(value: null, child: Text(l10n.defaultVal)),
-        ...VoiceDownloadService.azanVoices.keys.map((v) {
-          final baseName = _getVoiceBaseName(v, l10n);
-          final isDownloaded = _downloadedVoices.contains(v);
-          
-          return DropdownMenuItem(
-            value: v,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    baseName,
-                    overflow: TextOverflow.ellipsis,
+    final String? displayedVoiceKey = isMixed
+        ? (_pendingVoiceUpdate ? _optimisticVoiceKey : 'mixed')
+        : (_pendingVoiceUpdate ? _optimisticVoiceKey : _resolveVoiceKey(currentVoice));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        DropdownButtonFormField<String?>(
+          key: ValueKey(displayedVoiceKey),
+          initialValue: displayedVoiceKey,
+          isExpanded: true,
+          icon: _isDownloading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
                   ),
+                )
+              : null,
+          decoration: InputDecoration(
+            labelText: l10n.azanVoice,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            filled: true,
+            fillColor: context.surfaceContainerHighestColor,
+            helperText: _isDownloading ? l10n.downloadingVoice : null,
+            helperStyle: TextStyle(color: context.primaryColor),
+          ),
+          selectedItemBuilder: (BuildContext context) {
+            return [
+              if (isMixed)
+                Text(
+                  l10n.customIndividual,
+                  style: TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: context.onSurfaceColor.withValues(alpha: 0.38),
+                  ),
+                  maxLines: null,
+                  softWrap: true,
                 ),
-                if (isDownloaded)
-                  Icon(
-                    Icons.cloud_done_rounded,
-                    size: 18,
-                    color: context.primaryColor,
+              Text(
+                l10n.defaultVal,
+                style: TextStyle(color: context.onSurfaceColor),
+              ),
+              ...VoiceDownloadService.azanVoices.keys.map((v) {
+                final baseName = _getVoiceBaseName(v, l10n);
+                return Text(
+                  baseName,
+                  style: TextStyle(color: context.onSurfaceColor),
+                  overflow: TextOverflow.ellipsis,
+                );
+              }),
+            ];
+          },
+          items: [
+            if (isMixed)
+              DropdownMenuItem(
+                value: 'mixed',
+                child: Text(
+                  l10n.customIndividual,
+                  style: TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: context.onSurfaceColor.withValues(alpha: 0.8),
                   ),
-              ],
-            ),
-          );
-        }),
-      ],
-      onChanged: _isDownloading
-          ? null
-          : (val) async {
-              if (val == null) {
-                setState(() {
-                  _pendingVoiceUpdate = false;
-                  _optimisticVoiceKey = null;
-                });
-                onChanged(null);
-                return;
-              }
-
-              if (_downloadedVoices.contains(val)) {
-                setState(() {
-                  _pendingVoiceUpdate = false;
-                  _optimisticVoiceKey = null;
-                });
-                onChanged(val);
-                return;
-              }
-
-              setState(() {
-                _pendingVoiceUpdate = true;
-                _optimisticVoiceKey = val;
-                _isDownloading = true;
-              });
-
-              try {
-                final hasNet = await getIt<ConnectivityService>().hasNetwork();
-                if (!hasNet) {
-                  if (mounted) {
-                    setState(() {
-                      _isDownloading = false;
-                    });
-                  }
-                  return;
-                }
-
-                if (!mounted) return;
-                final downloader = getIt<VoiceDownloadService>();
-                final path = await downloader.downloadAzan(val);
-
-                if (path != null) {
-                  if (mounted) {
-                    setState(() {
-                      _downloadedVoices.add(val);
-                      _pendingVoiceUpdate = false;
-                      _optimisticVoiceKey = null;
-                    });
-                  }
-                  onChanged(val);
-                } else {
-                  if (mounted) {
-                    setState(() {
-                      _pendingVoiceUpdate = false;
-                      _optimisticVoiceKey = null;
-                    });
-                  }
-                  if (mounted && context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(l10n.azanDownloadError),
-                        behavior: SnackBarBehavior.floating,
+                  maxLines: null,
+                  softWrap: true,
+                ),
+              ),
+            DropdownMenuItem(value: null, child: Text(l10n.defaultVal)),
+            ...VoiceDownloadService.azanVoices.keys.map((v) {
+              final baseName = _getVoiceBaseName(v, l10n);
+              final isDownloaded = _downloadedVoices.contains(v);
+              
+              return DropdownMenuItem(
+                value: v,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        baseName,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    );
-                  }
-                }
-              } catch (e) {
-                debugPrint('AdhanSection: Error selecting azan: $e');
-                if (mounted) {
-                  setState(() {
-                    _pendingVoiceUpdate = false;
-                    _optimisticVoiceKey = null;
-                  });
-                }
-                if (mounted && context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(l10n.azanDownloadError),
-                      behavior: SnackBarBehavior.floating,
                     ),
-                  );
-                }
-              } finally {
-                if (mounted) {
-                  setState(() => _isDownloading = false);
-                }
-              }
-            },
+                    if (isDownloaded)
+                      Icon(
+                        Icons.cloud_done_rounded,
+                        size: 18,
+                        color: context.primaryColor,
+                      ),
+                  ],
+                ),
+              );
+            }),
+          ],
+          onChanged: _isDownloading
+              ? null
+              : (val) async {
+                  if (val == 'mixed') return;
+                  if (val == null) {
+                    setState(() {
+                      _pendingVoiceUpdate = false;
+                      _optimisticVoiceKey = null;
+                    });
+                    onChanged(null);
+                    return;
+                  }
+
+                  if (_downloadedVoices.contains(val)) {
+                    setState(() {
+                      _pendingVoiceUpdate = false;
+                      _optimisticVoiceKey = null;
+                    });
+                    onChanged(val);
+                    return;
+                  }
+
+                  setState(() {
+                    _pendingVoiceUpdate = true;
+                    _optimisticVoiceKey = val;
+                    _isDownloading = true;
+                  });
+
+                  try {
+                    final hasNet = await getIt<ConnectivityService>().hasNetwork();
+                    if (!hasNet) {
+                      if (mounted) {
+                        setState(() {
+                          _isDownloading = false;
+                        });
+                      }
+                      return;
+                    }
+
+                    if (!mounted) return;
+                    final downloader = getIt<VoiceDownloadService>();
+                    final path = await downloader.downloadAzan(val);
+
+                    if (path != null) {
+                      if (mounted) {
+                        setState(() {
+                          _downloadedVoices.add(val);
+                          _pendingVoiceUpdate = false;
+                          _optimisticVoiceKey = null;
+                        });
+                      }
+                      onChanged(val);
+                    } else {
+                      if (mounted) {
+                        setState(() {
+                          _pendingVoiceUpdate = false;
+                          _optimisticVoiceKey = null;
+                        });
+                      }
+                      if (mounted && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(l10n.azanDownloadError),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+                    }
+                  } catch (e) {
+                    debugPrint('AdhanSection: Error selecting azan: $e');
+                    if (mounted) {
+                      setState(() {
+                        _pendingVoiceUpdate = false;
+                        _optimisticVoiceKey = null;
+                      });
+                    }
+                    if (mounted && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(l10n.azanDownloadError),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  } finally {
+                    if (mounted) {
+                      setState(() => _isDownloading = false);
+                    }
+                  }
+                },
+        ),
+        if (isMixed) ...[
+          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: Text(
+              l10n.customIndividualHelper,
+              style: TextStyle(
+                fontSize: 12,
+                color: context.primaryColor,
+                fontWeight: FontWeight.w400,
+              ),
+              softWrap: true,
+            ),
+          ),
+        ],
+      ],
     );
   }
 

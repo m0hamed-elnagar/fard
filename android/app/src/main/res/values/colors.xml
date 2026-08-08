@@ -3,4 +3,10 @@
     <!-- Light theme background color -->
     <color name="splash_background">#F5EDD8</color>
     <color name="ic_launcher_background">#F5EDD8</color>
+
+    <!-- Fard Notification Theme (Light Mode) -->
+    <color name="notification_text_primary">#0F172A</color>
+    <color name="notification_text_secondary">#334155</color>
+    <color name="notification_accent">#15803D</color>
+    <color name="notification_progress_bg">#E2E8F0</color>
 </resources>

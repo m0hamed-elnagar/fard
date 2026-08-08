@@ -55,6 +55,9 @@ class MockNotificationService extends Mock implements NotificationService {
     'exact_alarm_permission': true,
     'battery_optimization_ignored': true,
   };
+
+  @override
+  Stream<Salaah> get onMarkPrayed => const Stream.empty();
 }
 
 class MockWidgetUpdateService extends Mock implements WidgetUpdateService {

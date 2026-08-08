@@ -60,6 +60,7 @@ class SyncLocationSettings {
     final locationData = await _locationService.getLocationDataFromCoordinates(
       position.latitude,
       position.longitude,
+      localeIdentifier: _settingsRepo.locale.languageCode,
     );
 
     await _settingsRepo.updateLocation(

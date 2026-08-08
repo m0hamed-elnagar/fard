@@ -275,6 +275,21 @@
   "quietHours": "ساعات الهدوء",
   "loadingVoices": "جاري تحميل الأصوات المتاحة...",
   "salahCountdown": "عد تنازلي للصلاة",
+  "customIndividual": "أصوات مخصصة لكل صلاة",
+  "customIndividualHelper": "تمت تهيئة الصلوات بأصوات مختلفة. اختر صوتاً هنا لتوحيد الأذان لجميع الصلوات.",
+  "azanDisabledSubtitle": "معطل لجميع الصلوات",
+  "azanEnabledAllSubtitle": "مفعل لجميع الصلوات",
+  "azanEnabledPartialSubtitle": "مفعل لـ {enabled} من {total} صلوات",
+  "@azanEnabledPartialSubtitle": {
+    "placeholders": {
+      "enabled": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "downloadingVoice": "جاري تحميل الصوت...",
   "testAzan": "تجربة الصوت",
   "testReminder": "تجربة التذكير",
@@ -735,5 +750,12 @@
   "voiceRemovedTitle": "صوت الأذان غير متوفر",
   "voiceRemovedDesc": "صوت الأذان الذي اخترته سابقاً لم يعد متوفراً، وتمت إعادة تعيينه إلى الصوت الافتراضي.",
   "changeVoice": "اختيار صوت",
-  "ok": "حسناً"
+  "ok": "حسناً",
+  "rateApp": "تقييم التطبيق",
+  "rateAppDesc": "ادعم تطبيق فرض بتقييمك على متجر جوجل بلاي",
+  "checkForUpdates": "التحقق من التحديثات",
+  "checkForUpdatesDesc": "تأكد من حصولك على أحدث الميزات والإصلاحات",
+  "updateDownloaded": "تم تحميل التحديث. هل تريد إعادة التشغيل للتثبيت؟",
+  "restartAndInstall": "إعادة التشغيل والتثبيت",
+  "noUpdatesAvailable": "أنت تستخدم أحدث إصدار من فرض."
 }

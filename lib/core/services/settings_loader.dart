@@ -104,7 +104,7 @@ class SettingsLoader {
           prefs.getString(SettingsKeys.salawatStartTime) ?? '10:00',
       salawatEndTime: prefs.getString(SettingsKeys.salawatEndTime) ?? '20:00',
       useExactAlarmClock: prefs.getBool(SettingsKeys.useExactAlarmClock) ?? true,
-      showSalahCountdownNotification: prefs.getBool(SettingsKeys.showSalahCountdownNotification) ?? false,
+      showSalahCountdownNotification: prefs.getBool(SettingsKeys.showSalahCountdownNotification) ?? true,
       respectSilentDndMode: prefs.getBool(SettingsKeys.respectSilentDndMode) ?? false,
     );
   }

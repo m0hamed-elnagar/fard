@@ -1490,6 +1490,36 @@ abstract class AppLocalizations {
   /// **'Salah Countdown'**
   String get salahCountdown;
 
+  /// No description provided for @customIndividual.
+  ///
+  /// In en, this message translates to:
+  /// **'Customized per prayer'**
+  String get customIndividual;
+
+  /// No description provided for @customIndividualHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Prayers are configured with different voices. Select a voice here to unify them all.'**
+  String get customIndividualHelper;
+
+  /// No description provided for @azanDisabledSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled for all prayers'**
+  String get azanDisabledSubtitle;
+
+  /// No description provided for @azanEnabledAllSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled for all prayers'**
+  String get azanEnabledAllSubtitle;
+
+  /// No description provided for @azanEnabledPartialSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled for {enabled} of {total} prayers'**
+  String azanEnabledPartialSubtitle(int enabled, int total);
+
   /// No description provided for @downloadingVoice.
   ///
   /// In en, this message translates to:
@@ -3403,6 +3433,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OK'**
   String get ok;
+
+  /// No description provided for @rateApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate the App'**
+  String get rateApp;
+
+  /// No description provided for @rateAppDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Support Fard by leaving a rating on Google Play'**
+  String get rateAppDesc;
+
+  /// No description provided for @checkForUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for Updates'**
+  String get checkForUpdates;
+
+  /// No description provided for @checkForUpdatesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ensure you have the latest features and fixes'**
+  String get checkForUpdatesDesc;
+
+  /// No description provided for @updateDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'An update has been downloaded. Restart to install?'**
+  String get updateDownloaded;
+
+  /// No description provided for @restartAndInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart & Install'**
+  String get restartAndInstall;
+
+  /// No description provided for @noUpdatesAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'You are using the latest version of Fard.'**
+  String get noUpdatesAvailable;
 }
 
 class _AppLocalizationsDelegate

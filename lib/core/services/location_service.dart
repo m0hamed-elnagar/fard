@@ -49,13 +49,17 @@ class LocationService {
 
   Future<Map<String, String?>?> getLocationDataFromCoordinates(
     double latitude,
-    double longitude,
-  ) async {
+    double longitude, {
+    String? localeIdentifier,
+  }) async {
     if (Platform.isWindows) {
       return null; // Geocoding not supported on Windows
     }
 
     try {
+      if (localeIdentifier != null && localeIdentifier.isNotEmpty) {
+        await setLocaleIdentifier(localeIdentifier);
+      }
       List<Placemark> placemarks = await placemarkFromCoordinates(
         latitude,
         longitude,

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.glance.appwidget.updateAll
+import com.khwarizmi.fard.prayer.CountdownNotificationManager
 import com.khwarizmi.fard.prayer.PrayerAlarmManager
 import com.khwarizmi.fard.prayer.PrayerTimesCalculator
 import com.khwarizmi.fard.prayer.SettingsRepository
@@ -14,9 +15,11 @@ import kotlinx.coroutines.launch
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action != Intent.ACTION_BOOT_COMPLETED) return
+        if (intent.action != Intent.ACTION_BOOT_COMPLETED && 
+            intent.action != Intent.ACTION_LOCKED_BOOT_COMPLETED &&
+            intent.action != Intent.ACTION_MY_PACKAGE_REPLACED) return
         
-        Log.i("BootReceiver", "BOOT_COMPLETED received - refreshing widgets and alarms")
+        Log.i("BootReceiver", "BOOT_COMPLETED / LOCKED_BOOT_COMPLETED / MY_PACKAGE_REPLACED received - refreshing widgets and alarms")
 
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
@@ -40,6 +43,13 @@ class BootReceiver : BroadcastReceiver() {
         // Refresh UIs
         PrayerWidget().updateAll(context)
         NextPrayerCountdownWidget().updateAll(context)
+        
+        // Update countdown notification
+        try {
+            CountdownNotificationManager.updateCountdownNotification(context)
+        } catch (e: Exception) {
+            Log.e("BootReceiver", "Failed to update countdown notification", e)
+        }
         
         // IMPORTANT: Restart the countdown widget's minute-by-minute update loop
         // This was missing after reboot, causing the countdown to stop updating
