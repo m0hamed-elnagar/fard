@@ -1,11 +1,13 @@
 package com.khwarizmi.fard.widget
 
+import androidx.annotation.Keep
 import androidx.compose.ui.graphics.Color
 
 /**
  * Widget theme data class used by both preview and real widgets.
  * Contains 6 color fields for complete widget theming.
  */
+@Keep
 data class WidgetTheme(
     val primaryColorHex: String = "#2E7D32",
     val accentColorHex: String = "#FFD54F",
@@ -27,6 +29,7 @@ data class WidgetTheme(
 /**
  * Resolved Color objects from hex strings.
  */
+@Keep
 data class WidgetColors(
     val primary: Color,
     val accent: Color,
@@ -39,6 +42,7 @@ data class WidgetColors(
 /**
  * Prayer data for widget display.
  */
+@Keep
 data class PrayerData(
     val name: String,
     val time: String
@@ -47,6 +51,7 @@ data class PrayerData(
 /**
  * Complete data for Prayer Schedule widget.
  */
+@Keep
 data class PrayerScheduleData(
     val gregorianDate: String,
     val hijriDate: String,
@@ -61,6 +66,7 @@ data class PrayerScheduleData(
 /**
  * Data for Next Prayer Countdown widget.
  */
+@Keep
 data class CountdownData(
     val nextPrayerName: String,
     val nextPrayerTime: Long = 0,

@@ -59,7 +59,9 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkRemovedVoiceNotice();
       _checkNotificationStatus();
-      getIt<InAppUpdateService>().checkForUpdateSilently(context);
+      if (getIt.isRegistered<InAppUpdateService>()) {
+        getIt<InAppUpdateService>().checkForUpdateSilently(context);
+      }
     });
     if (getIt.isRegistered<NotificationService>()) {
       _markPrayedSubscription = getIt<NotificationService>().onMarkPrayed.listen((salaah) {
@@ -170,7 +172,9 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
 
         // Check if notification settings changed while app was in background
         _checkNotificationStatus();
-        getIt<InAppUpdateService>().onResumeCheck(context);
+        if (getIt.isRegistered<InAppUpdateService>()) {
+          getIt<InAppUpdateService>().onResumeCheck(context);
+        }
 
         // Refresh widget with latest data (includes locale, location, prayer times)
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -375,7 +379,9 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
                   history,
                 ) {
                   final streak = _calculateStreak(history);
-                  getIt<InAppReviewService>().checkAndPromptReviewIfEligible(currentStreak: streak);
+                  if (getIt.isRegistered<InAppReviewService>()) {
+                    getIt<InAppReviewService>().checkAndPromptReviewIfEligible(currentStreak: streak);
+                  }
 
                   bool showCountdown = false;
                   try {

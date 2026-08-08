@@ -174,7 +174,9 @@ class _GeneralSectionState extends State<GeneralSection> {
           icon: Icons.star_rate_rounded,
           onTap: () {
             HapticFeedback.lightImpact();
-            getIt<InAppReviewService>().openStoreListingManually();
+            if (getIt.isRegistered<InAppReviewService>()) {
+              getIt<InAppReviewService>().openStoreListingManually();
+            }
           },
         ),
         const Divider(height: 1),
@@ -185,7 +187,9 @@ class _GeneralSectionState extends State<GeneralSection> {
           icon: Icons.system_update_rounded,
           onTap: () {
             HapticFeedback.lightImpact();
-            getIt<InAppUpdateService>().checkForUpdateManually(context);
+            if (getIt.isRegistered<InAppUpdateService>()) {
+              getIt<InAppUpdateService>().checkForUpdateManually(context);
+            }
           },
         ),
         const Divider(height: 1),

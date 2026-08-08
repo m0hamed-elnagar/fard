@@ -1,5 +1,7 @@
 package com.khwarizmi.fard.prayer
+import androidx.annotation.Keep
 
+@Keep
 data class CalculationSettings(
     val latitude: Double,
     val longitude: Double,
