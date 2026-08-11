@@ -15,6 +15,7 @@ sealed class AdhanState with _$AdhanState {
     @Default(true) bool exactAlarmsEnabled,
     @Default(true) bool useExactAlarmClock,
     @Default(true) bool showSalahCountdownNotification,
+    @Default(false) bool isCountdownHiddenForCurrentPrayer,
     @Default(false) bool respectSilentDndMode,
   }) = _AdhanState;
 }

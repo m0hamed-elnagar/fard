@@ -36,7 +36,7 @@ object PrayerAlarmManager {
             prayerTimes.asr.after(now) -> Prayer.ASR
             prayerTimes.maghrib.after(now) -> Prayer.MAGHRIB
             prayerTimes.isha.after(now) -> Prayer.ISHA
-            else -> null // Next day handled by daily refresh
+            else -> Prayer.FAJR // Next day Fajr fallback
         }
     }
 
@@ -88,6 +88,12 @@ object PrayerAlarmManager {
         }
     }
 
+    /**
+     * CRITICAL: We must ALWAYS schedule boundary alarms for ALL upcoming prayers (timeEpochMs > now),
+     * regardless of whether custom Adhan audio is enabled (`enabled`).
+     * If alarms are skipped when enabled is false, CountdownNotificationManager will not be updated
+     * at prayer zero-crossing, causing Android SystemUI Chronometer to count past 00:00 into negative numbers.
+     */
     fun scheduleAdhanAlarms(context: Context) {
         Log.d(TAG, "scheduleAdhanAlarms started")
         val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
@@ -146,6 +152,7 @@ object PrayerAlarmManager {
                     val intent = Intent(context, AdhanAlarmReceiver::class.java).apply {
                         putExtra("prayerName", prayerName)
                         putExtra("audioFilePath", audioFilePath)
+                        putExtra("isAdhanAudioEnabled", enabled)
                         putExtra("scheduledTime", timeEpochMs) // Pass expected scheduled time for trigger delay analysis
                     }
 
@@ -156,12 +163,12 @@ object PrayerAlarmManager {
                         PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
                     )
 
-                    if (enabled && timeEpochMs > now) {
+                    if (timeEpochMs > now) {
                         val hasExactPermission = canScheduleExactAlarms(context)
                         val useExact = useExactSetting && hasExactPermission
 
                         if (useExact) {
-                            Log.d(TAG, "Scheduling Adhan for $prayerName at ${Date(timeEpochMs)} using setAlarmClock (RequestCode: $requestCode)")
+                            Log.d(TAG, "Scheduling boundary/Adhan alarm for $prayerName at ${Date(timeEpochMs)} using setAlarmClock (RequestCode: $requestCode, audioEnabled: $enabled)")
                             val showIntent = Intent(context, MainActivity::class.java)
                             val showPendingIntent = PendingIntent.getActivity(
                                 context,
@@ -172,7 +179,7 @@ object PrayerAlarmManager {
                             val alarmClockInfo = AlarmManager.AlarmClockInfo(timeEpochMs, showPendingIntent)
                             alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
                         } else {
-                            Log.d(TAG, "Scheduling Adhan for $prayerName at ${Date(timeEpochMs)} using fallback setAndAllowWhileIdle (RequestCode: $requestCode)")
+                            Log.d(TAG, "Scheduling boundary/Adhan alarm for $prayerName at ${Date(timeEpochMs)} using fallback setAndAllowWhileIdle (RequestCode: $requestCode, audioEnabled: $enabled)")
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                 alarmManager.setAndAllowWhileIdle(
                                     AlarmManager.RTC_WAKEUP,
@@ -188,7 +195,7 @@ object PrayerAlarmManager {
                             }
                         }
                     } else {
-                        Log.d(TAG, "Adhan for $prayerName at ${Date(timeEpochMs)} is disabled or in the past.")
+                        Log.d(TAG, "Boundary/Adhan alarm for $prayerName at ${Date(timeEpochMs)} is in the past.")
                     }
                 } catch (slotEx: Exception) {
                     Log.e(TAG, "Error scheduling individual Adhan alarm slot $i", slotEx)

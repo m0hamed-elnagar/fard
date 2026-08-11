@@ -56,4 +56,9 @@ abstract final class SettingsKeys {
   static const String quranReaderSeparator = 'reader_separator_choice';
   static const String quranTextScale = 'reader_text_scale';
   static const String quranFontFamily = 'reader_font_family';
+
+  // Native notification tracking
+  static const String nextPrayerId = 'next_prayer_id';
+  static const String nextPrayerDate = 'next_prayer_date';
+  static const String dismissedPrayerTarget = 'dismissed_prayer_target';
 }

@@ -96,6 +96,9 @@ class BackgroundSettingsProvider implements SettingsRepository {
   bool get showSalahCountdownNotification => _settings.showSalahCountdownNotification;
 
   @override
+  bool get isCountdownHiddenForCurrentPrayer => false;
+
+  @override
   bool get respectSilentDndMode => _settings.respectSilentDndMode;
 
   @override

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:injectable/injectable.dart';
@@ -57,10 +58,14 @@ class LocationService {
     }
 
     try {
+      ui.Locale? parsedLocale;
       if (localeIdentifier != null && localeIdentifier.isNotEmpty) {
-        await setLocaleIdentifier(localeIdentifier);
+        final parts = localeIdentifier.split('_');
+        parsedLocale = parts.length > 1 ? ui.Locale(parts[0], parts[1]) : ui.Locale(parts[0]);
       }
-      List<Placemark> placemarks = await placemarkFromCoordinates(
+      
+      final geocoding = Geocoding(locale: parsedLocale);
+      List<Placemark> placemarks = await geocoding.placemarkFromCoordinates(
         latitude,
         longitude,
       );

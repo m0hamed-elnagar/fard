@@ -55,6 +55,11 @@ class PrayerWidgetReceiver : GlanceAppWidgetReceiver() {
 
             // Update the actual UI
             glanceAppWidget.updateAll(context)
+            try {
+                com.khwarizmi.fard.prayer.CountdownNotificationManager.updateCountdownNotification(context)
+            } catch (e: Exception) {
+                Log.e("PrayerWidgetReceiver", "Error updating countdown notification", e)
+            }
             Log.d("PrayerWidgetReceiver", "Widget updated successfully")
         } catch (e: Exception) {
             Log.e("PrayerWidgetReceiver", "Error updating widget", e)

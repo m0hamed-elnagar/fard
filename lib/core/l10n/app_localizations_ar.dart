@@ -606,6 +606,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'يعرض إشعاراً دائماً يحتوي على عد تنازلي مباشر للصلاة التالية (مؤقت ذكي لا يستهلك البطارية)';
 
   @override
+  String get countdownHiddenForCurrentPrayer =>
+      'تم إخفاء المؤقت للصلاة القادمة';
+
+  @override
   String get exactAlarmPermissionRequired => 'إذن المنبهات الدقيقة مطلوب';
 
   @override

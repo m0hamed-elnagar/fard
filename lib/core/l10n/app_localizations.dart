@@ -1214,6 +1214,12 @@ abstract class AppLocalizations {
   /// **'Displays a persistent notification with a live countdown to the next prayer (efficient countdown, no battery drain)'**
   String get showSalahCountdownNotificationDesc;
 
+  /// No description provided for @countdownHiddenForCurrentPrayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Countdown hidden for the upcoming prayer'**
+  String get countdownHiddenForCurrentPrayer;
+
   /// No description provided for @exactAlarmPermissionRequired.
   ///
   /// In en, this message translates to:

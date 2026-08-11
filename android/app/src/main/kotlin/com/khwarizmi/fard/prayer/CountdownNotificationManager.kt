@@ -42,9 +42,23 @@ object CountdownNotificationManager {
 
         val now = System.currentTimeMillis()
 
-        // 2. Perform native rollover check if current target has passed
-        if (nextPrayerTime == 0L || now >= nextPrayerTime) {
-            Log.d("CountdownNotification", "Target has passed or uninitialized, performing native rollover")
+        // Read storedPrevTime safely supporting both Long and Int types to detect backward time shifts
+        val storedPrevTime = try {
+            val longVal = prefs.getLong("flutter.prev_prayer_time", 0L)
+            if (longVal != 0L) longVal else prefs.getLong("prev_prayer_time", 0L)
+        } catch (e: Exception) {
+            try {
+                val intVal = prefs.getInt("flutter.prev_prayer_time", 0)
+                if (intVal != 0) intVal.toLong() else prefs.getInt("prev_prayer_time", 0).toLong()
+            } catch (e2: Exception) {
+                0L
+            }
+        }
+
+        // 2. Perform native target resolution if current target has passed or current time is before previous prayer (time moved backwards)
+        val isTargetInvalid = nextPrayerTime == 0L || now >= nextPrayerTime || (storedPrevTime > 0L && now < storedPrevTime)
+        if (isTargetInvalid) {
+            Log.d("CountdownNotification", "Target invalid (passed, uninitialized, or time changed backwards: now=$now, target=$nextPrayerTime, prev=$storedPrevTime), performing native target resolution")
             val scheduleJson = prefs.getString("flutter.fard.adhan_schedule", null)
                 ?: prefs.getString("fard.adhan_schedule", null)
 
@@ -71,7 +85,7 @@ object CountdownNotificationManager {
                             val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
                             nextPrayerDate = sdf.format(Date(timeEpochMs))
 
-                            // Persist resolved rollover and updated prev_prayer_time back to SharedPreferences
+                            // Persist resolved target and updated prev_prayer_time back to SharedPreferences
                             prefs.edit().apply {
                                 putString("flutter.next_prayer_id", nextPrayerId)
                                 putLong("flutter.next_prayer_time", nextPrayerTime)
@@ -83,12 +97,12 @@ object CountdownNotificationManager {
                             }.apply()
 
                             rolledOver = true
-                            Log.d("CountdownNotification", "Native rollover succeeded to $nextPrayerId at $nextPrayerDate ($nextPrayerTime), prev prayer time: $prevItemTime")
+                            Log.d("CountdownNotification", "Native target resolution succeeded to $nextPrayerId at $nextPrayerDate ($nextPrayerTime), prev prayer time: $prevItemTime")
                             break
                         }
                     }
                 } catch (e: Exception) {
-                    Log.e("CountdownNotification", "Error parsing adhan schedule for rollover", e)
+                    Log.e("CountdownNotification", "Error parsing adhan schedule for target resolution", e)
                 }
             }
 
@@ -146,19 +160,6 @@ object CountdownNotificationManager {
         val currentElapsedMs = SystemClock.elapsedRealtime()
         val currentTimeMs = System.currentTimeMillis()
         val targetElapsedRealtime = currentElapsedMs + (nextPrayerTime - currentTimeMs)
-
-        // Read storedPrevTime safely supporting both Long and Int types
-        val storedPrevTime = try {
-            val longVal = prefs.getLong("flutter.prev_prayer_time", 0L)
-            if (longVal != 0L) longVal else prefs.getLong("prev_prayer_time", 0L)
-        } catch (e: Exception) {
-            try {
-                val intVal = prefs.getInt("flutter.prev_prayer_time", 0)
-                if (intVal != 0) intVal.toLong() else prefs.getInt("prev_prayer_time", 0).toLong()
-            } catch (e2: Exception) {
-                0L
-            }
-        }
 
         val isFajr = nextPrayerId.equals("fajr", ignoreCase = true)
         val maxAllowedIntervalMs = 14 * 3600 * 1000L
@@ -308,7 +309,7 @@ object CountdownNotificationManager {
             .setPublicVersion(publicBuilder.build())
 
         // PendingIntent for explicit "Hide" / "إخفاء" action
-        val hideActionText = if (isAr) "إخفاء" else "Hide"
+        val hideActionText = if (isAr) "إخفاء لهذه الصلاة" else "Hide for this prayer"
         val hideIntent = Intent(context, NotificationDismissReceiver::class.java).apply {
             putExtra("targetStr", currentTargetStr)
         }

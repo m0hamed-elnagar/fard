@@ -228,6 +228,7 @@
   "useExactAlarmClockDesc": "يضمن سماع الأذان في الوقت المحدد بالضبط حتى أثناء سكون الهاتف (قد يظهر رمز منبه في شريط الحالة)",
   "showSalahCountdownNotification": "مؤقت الصلاة التالية في الإشعارات",
   "showSalahCountdownNotificationDesc": "يعرض إشعاراً دائماً يحتوي على عد تنازلي مباشر للصلاة التالية (مؤقت ذكي لا يستهلك البطارية)",
+  "countdownHiddenForCurrentPrayer": "تم إخفاء المؤقت للصلاة القادمة",
   "exactAlarmPermissionRequired": "إذن المنبهات الدقيقة مطلوب",
   "exactAlarmPermissionRequiredDesc": "تم إيقاف ميزة المنبه الدقيق للأذان تلقائياً لأن إذن جدولة المنبهات الدقيقة غير مفعل في النظام. بدون هذا الإذن قد يتأخر الأذان أو لا يعمل في وضع السكون.",
   "grantPermission": "منح الإذن",

@@ -41,6 +41,7 @@ migrate_working_dir/
 /android/app/build/
 /android/local.properties
 /android/generated/
+/android/app/src/release/generated/
 /android/.gradle/
 /android/.kotlin/
 /android/app/build.gradle.kts.old

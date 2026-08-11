@@ -33,6 +33,7 @@ class HomeContent extends StatefulWidget {
   final Map<Salaah, int> completedQadaToday;
   final Map<DateTime, DailyRecord> monthRecords;
   final List<DailyRecord> history;
+  final Widget? topBanner;
 
   const HomeContent({
     super.key,
@@ -43,6 +44,7 @@ class HomeContent extends StatefulWidget {
     required this.completedQadaToday,
     required this.monthRecords,
     required this.history,
+    this.topBanner,
   });
 
   @override
@@ -122,12 +124,16 @@ class _HomeContentState extends State<HomeContent> {
         ],
       ),
       body: SafeArea(
-        child: CustomScrollView(
-          controller: _scrollController,
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            // Sliver 1: Dashboard Carousel (Optimized Rebuilds)
-            BlocBuilder<LocationPrayerCubit, LocationPrayerState>(
+        child: Column(
+          children: [
+            if (widget.topBanner != null) widget.topBanner!,
+            Expanded(
+              child: CustomScrollView(
+                controller: _scrollController,
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  // Sliver 1: Dashboard Carousel (Optimized Rebuilds)
+                  BlocBuilder<LocationPrayerCubit, LocationPrayerState>(
               buildWhen: (prev, curr) =>
                   prev.latitude != curr.latitude ||
                   prev.longitude != curr.longitude ||
@@ -291,11 +297,14 @@ class _HomeContentState extends State<HomeContent> {
                 ),
               ),
             ),
-          ],
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
+    }
 }
 
 class _LocationWarning extends StatelessWidget {

@@ -435,7 +435,7 @@ void main() {
       expect(jsonStr, isNotNull);
 
       final List<dynamic> schedule = jsonDecode(jsonStr!);
-      expect(schedule.length, equals(4));
+      expect(schedule.length, equals(6));
       
       final fajrItem = schedule.firstWhere(
         (item) =>

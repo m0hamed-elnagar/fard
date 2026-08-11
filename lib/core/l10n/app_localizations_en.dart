@@ -609,6 +609,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Displays a persistent notification with a live countdown to the next prayer (efficient countdown, no battery drain)';
 
   @override
+  String get countdownHiddenForCurrentPrayer =>
+      'Countdown hidden for the upcoming prayer';
+
+  @override
   String get exactAlarmPermissionRequired => 'Exact Alarm Permission Required';
 
   @override

@@ -63,8 +63,9 @@ class AdhanAlarmReceiver : BroadcastReceiver() {
 
         val prayerName = intent.getStringExtra("prayerName") ?: ""
         val audioFilePath = intent.getStringExtra("audioFilePath") ?: ""
+        val isAdhanAudioEnabled = intent.getBooleanExtra("isAdhanAudioEnabled", false)
 
-        Log.d(TAG, "onReceive: prayerName=$prayerName, audioFilePath=$audioFilePath")
+        Log.d(TAG, "onReceive: prayerName=$prayerName, audioFilePath=$audioFilePath, isAdhanAudioEnabled=$isAdhanAudioEnabled")
 
         // Reschedule Adhan alarms to ensure next alarm is set (chain-of-custody)
         try {
@@ -73,24 +74,30 @@ class AdhanAlarmReceiver : BroadcastReceiver() {
             Log.e(TAG, "Failed to reschedule Adhan alarms on receive", e)
         }
 
-        // Update persistent countdown notification immediately at prayer boundary zero-crossing
+        // CRITICAL: Always update persistent countdown notification immediately at prayer boundary zero-crossing
+        // to prevent SystemUI Chronometer from displaying negative numbers past 00:00.
         try {
             CountdownNotificationManager.updateCountdownNotification(context)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to update countdown notification on adhan alarm", e)
         }
 
-        // Start AdhanService as a Foreground Service
-        val serviceIntent = Intent(context, AdhanService::class.java).apply {
-            putExtra("prayerName", prayerName)
-            putExtra("audioFilePath", audioFilePath)
-        }
+        // Start AdhanService as a Foreground Service ONLY if custom audio is enabled
+        if (isAdhanAudioEnabled && audioFilePath.isNotEmpty()) {
+            val serviceIntent = Intent(context, AdhanService::class.java).apply {
+                putExtra("prayerName", prayerName)
+                putExtra("audioFilePath", audioFilePath)
+            }
 
-        try {
-            ContextCompat.startForegroundService(context, serviceIntent)
-            Log.d(TAG, "AdhanService started successfully")
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to start AdhanService, releasing WakeLock", e)
+            try {
+                ContextCompat.startForegroundService(context, serviceIntent)
+                Log.d(TAG, "AdhanService started successfully")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to start AdhanService, releasing WakeLock", e)
+                releaseWakeLock()
+            }
+        } else {
+            Log.d(TAG, "Boundary alarm triggered without custom Adhan audio, releasing WakeLock")
             releaseWakeLock()
         }
     }

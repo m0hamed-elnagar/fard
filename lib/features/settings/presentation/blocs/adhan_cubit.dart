@@ -23,6 +23,7 @@ class AdhanCubit extends Cubit<AdhanState> with WidgetsBindingObserver {
           isAudioPlayerExpanded: _repo.isAudioPlayerExpanded,
           useExactAlarmClock: _repo.useExactAlarmClock,
           showSalahCountdownNotification: _repo.showSalahCountdownNotification,
+          isCountdownHiddenForCurrentPrayer: _repo.isCountdownHiddenForCurrentPrayer,
           respectSilentDndMode: _repo.respectSilentDndMode,
         ),
       ) {
@@ -135,8 +136,8 @@ class AdhanCubit extends Cubit<AdhanState> with WidgetsBindingObserver {
   }
 
   Future<void> _toggleUseExactAlarmClockAsync(bool v) async {
-    await _repo.updateUseExactAlarmClock(v);
     emit(state.copyWith(useExactAlarmClock: v));
+    await _repo.updateUseExactAlarmClock(v);
     _sync();
   }
 
@@ -145,8 +146,11 @@ class AdhanCubit extends Cubit<AdhanState> with WidgetsBindingObserver {
   }
 
   Future<void> _toggleShowSalahCountdownNotificationAsync(bool v) async {
+    emit(state.copyWith(
+      showSalahCountdownNotification: v,
+      isCountdownHiddenForCurrentPrayer: v ? false : state.isCountdownHiddenForCurrentPrayer,
+    ));
     await _repo.updateShowSalahCountdownNotification(v);
-    emit(state.copyWith(showSalahCountdownNotification: v));
     _sync();
   }
 
@@ -155,8 +159,8 @@ class AdhanCubit extends Cubit<AdhanState> with WidgetsBindingObserver {
   }
 
   Future<void> _toggleRespectSilentDndModeAsync(bool v) async {
-    await _repo.updateRespectSilentDndMode(v);
     emit(state.copyWith(respectSilentDndMode: v));
+    await _repo.updateRespectSilentDndMode(v);
     _sync();
   }
 
@@ -176,6 +180,7 @@ class AdhanCubit extends Cubit<AdhanState> with WidgetsBindingObserver {
         isAudioPlayerExpanded: _repo.isAudioPlayerExpanded,
         useExactAlarmClock: _repo.useExactAlarmClock,
         showSalahCountdownNotification: _repo.showSalahCountdownNotification,
+        isCountdownHiddenForCurrentPrayer: _repo.isCountdownHiddenForCurrentPrayer,
         respectSilentDndMode: _repo.respectSilentDndMode,
       ),
     );

@@ -81,6 +81,9 @@ abstract interface class SettingsRepository {
   /// Whether to show the countdown to the next salah in a persistent notification
   bool get showSalahCountdownNotification;
 
+  /// Whether the countdown notification is currently temporarily hidden for the upcoming prayer
+  bool get isCountdownHiddenForCurrentPrayer;
+
   /// Whether to respect silent and Do Not Disturb (DND) modes
   bool get respectSilentDndMode;
 

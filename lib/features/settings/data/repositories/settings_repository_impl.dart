@@ -269,6 +269,24 @@ class SettingsRepositoryImpl implements SettingsRepository {
   );
 
   @override
+  bool get isCountdownHiddenForCurrentPrayer {
+    // Note: using raw keys with 'flutter.' prefix if they are written natively 
+    // by Android SharedPreferences without the flutter prefix on native side, 
+    // wait, Android code writes "flutter.dismissed_prayer_target" directly.
+    // In Dart, SharedPreferences automatically prefixes keys with "flutter.".
+    // So reading "dismissed_prayer_target" translates to "flutter.dismissed_prayer_target" natively.
+    final nextId = _storage.readString(SettingsKeys.nextPrayerId);
+    final nextDate = _storage.readString(SettingsKeys.nextPrayerDate);
+    final dismissed = _storage.readString(SettingsKeys.dismissedPrayerTarget);
+
+    if (nextId == null || nextDate == null || dismissed == null || dismissed.isEmpty) {
+      return false;
+    }
+
+    return '${nextId}_$nextDate' == dismissed;
+  }
+
+  @override
   bool get respectSilentDndMode => _storage.readBool(
     SettingsKeys.respectSilentDndMode,
     defaultValue: false,

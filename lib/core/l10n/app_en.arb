@@ -228,6 +228,7 @@
   "useExactAlarmClockDesc": "Guarantees hearing the Adhan exactly on time even when the device is idle (shows an alarm icon in status bar)",
   "showSalahCountdownNotification": "Next Salah Countdown Notification",
   "showSalahCountdownNotificationDesc": "Displays a persistent notification with a live countdown to the next prayer (efficient countdown, no battery drain)",
+  "countdownHiddenForCurrentPrayer": "Countdown hidden for the upcoming prayer",
   "exactAlarmPermissionRequired": "Exact Alarm Permission Required",
   "exactAlarmPermissionRequiredDesc": "Precise Adhan Alarms were auto-disabled because the exact alarm permission is missing. Without this permission, the Adhan may be delayed or fail during deep sleep.",
   "grantPermission": "Grant Permission",

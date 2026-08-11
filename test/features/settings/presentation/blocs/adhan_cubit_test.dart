@@ -46,6 +46,7 @@ void main() {
     when(() => mockRepo.isAudioPlayerExpanded).thenReturn(false);
     when(() => mockRepo.useExactAlarmClock).thenReturn(true);
     when(() => mockRepo.showSalahCountdownNotification).thenReturn(false);
+    when(() => mockRepo.isCountdownHiddenForCurrentPrayer).thenReturn(false);
     when(() => mockRepo.respectSilentDndMode).thenReturn(false);
 
     when(() => mockRepo.updateSalaahSettings(any())).thenAnswer((_) async {});

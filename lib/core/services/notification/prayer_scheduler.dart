@@ -169,7 +169,9 @@ class PrayerNotificationScheduler {
         futurePrayers.add((time: tzSalaahTime, salaah: salaahSetting.salaah));
         final dayOffset = day * prayersPerDay + salaahSetting.salaah.index;
 
-        if (day < 2) {
+        // CRITICAL: Preserve 3-day lookahead (day < 3) so native Android has 15 upcoming boundary entries
+        // to immediately update notification targets at prayer zero-crossing without showing negative numbers.
+        if (day < 3) {
           final absolutePath = await _getAbsoluteSoundPath(salaahSetting.azanSound);
           // Only enable native alarm if custom downloaded Adhan sound is selected
           final isNativeEnabled = salaahSetting.isAzanEnabled &&

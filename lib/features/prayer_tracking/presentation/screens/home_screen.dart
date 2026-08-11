@@ -46,6 +46,7 @@ class _HomeBody extends StatefulWidget {
 class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
   StreamSubscription<Salaah>? _markPrayedSubscription;
   bool _isNotificationBlocked = false;
+  bool _isNotificationBannerDismissed = false;
 
   @override
   void initState() {
@@ -222,7 +223,7 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
           getIt<NotificationService>().openNotificationSettings();
         },
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          padding: const EdgeInsets.only(left: 16.0, right: 8.0, top: 8.0, bottom: 8.0),
           child: Row(
             children: [
               Icon(
@@ -239,10 +240,16 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
                   ),
                 ),
               ),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 14.0,
-                color: colorScheme.onErrorContainer,
+              IconButton(
+                icon: Icon(
+                  Icons.close_rounded,
+                  color: colorScheme.onErrorContainer,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isNotificationBannerDismissed = true;
+                  });
+                },
               ),
             ],
           ),
@@ -389,7 +396,7 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
                   } catch (_) {
                     showCountdown = false;
                   }
-                  final showBanner = _isNotificationBlocked && showCountdown;
+                  final showBanner = _isNotificationBlocked && showCountdown && !_isNotificationBannerDismissed;
                   
                   final homeContent = HomeContent(
                     selectedDate: selectedDate,
@@ -399,16 +406,10 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
                     completedQadaToday: completedQadaToday,
                     monthRecords: monthRecords,
                     history: history,
+                    topBanner: showBanner ? _buildBlockedNotificationBanner(context) : null,
                   );
                   
-                  if (!showBanner) return homeContent;
-                  
-                  return Column(
-                    children: [
-                      _buildBlockedNotificationBanner(context),
-                      Expanded(child: homeContent),
-                    ],
-                  );
+                  return homeContent;
                 },
           );
         },

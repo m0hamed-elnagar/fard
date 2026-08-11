@@ -1,6 +1,7 @@
 import 'package:fard/core/services/location_service.dart';
 import 'package:fard/features/settings/domain/repositories/settings_repository.dart';
 import 'package:fard/features/settings/domain/usecases/sync_location_settings.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mocktail/mocktail.dart';
@@ -39,6 +40,7 @@ void main() {
     when(() => mockSettingsRepo.calculationMethod).thenReturn('muslim_league');
     when(() => mockSettingsRepo.hijriAdjustment).thenReturn(0);
     when(() => mockSettingsRepo.cityName).thenReturn('Old City');
+    when(() => mockSettingsRepo.locale).thenReturn(const Locale('en'));
 
     when(() => mockSettingsRepo.updateLocation(
           latitude: any(named: 'latitude'),
@@ -59,8 +61,9 @@ void main() {
           .thenAnswer((_) async => LocationStatus.success);
       when(() => mockLocationService.getCurrentPosition())
           .thenAnswer((_) async => dummyPosition);
-      when(() => mockLocationService.getLocationDataFromCoordinates(30.0444, 31.2357))
-          .thenAnswer((_) async => {'city': 'Cairo', 'countryCode': 'EG'});
+      when(() => mockLocationService.getLocationDataFromCoordinates(
+        30.0444, 31.2357, localeIdentifier: any(named: 'localeIdentifier')
+      )).thenAnswer((_) async => {'city': 'Cairo', 'countryCode': 'EG'});
 
       final result = await syncLocationSettings.execute();
 
@@ -83,8 +86,9 @@ void main() {
           .thenAnswer((_) async => LocationStatus.success);
       when(() => mockLocationService.getCurrentPosition())
           .thenAnswer((_) async => dummyPosition);
-      when(() => mockLocationService.getLocationDataFromCoordinates(30.0444, 31.2357))
-          .thenAnswer((_) async => null); // Geocoding failed
+      when(() => mockLocationService.getLocationDataFromCoordinates(
+        30.0444, 31.2357, localeIdentifier: any(named: 'localeIdentifier')
+      )).thenAnswer((_) async => null); // Geocoding failed
 
       // Let's set some existing settings that shouldn't be overwritten/lost
       when(() => mockSettingsRepo.cityName).thenReturn('Old City');
@@ -114,8 +118,9 @@ void main() {
           .thenAnswer((_) async => LocationStatus.success);
       when(() => mockLocationService.getCurrentPosition())
           .thenAnswer((_) async => dummyPosition);
-      when(() => mockLocationService.getLocationDataFromCoordinates(30.0444, 31.2357))
-          .thenAnswer((_) async => {'city': '   ', 'countryCode': 'EG'});
+      when(() => mockLocationService.getLocationDataFromCoordinates(
+        30.0444, 31.2357, localeIdentifier: any(named: 'localeIdentifier')
+      )).thenAnswer((_) async => {'city': '   ', 'countryCode': 'EG'});
 
       when(() => mockSettingsRepo.cityName).thenReturn('Old City');
 

@@ -102,6 +102,9 @@ class FakeSettingsRepository implements SettingsRepository {
   Map<String, dynamic> getAllSettings() => settings;
 
   @override
+  bool get isCountdownHiddenForCurrentPrayer => false;
+
+  @override
   Future<void> importSettings(Map<String, dynamic> settings) async {
     this.settings = Map.from(settings);
   }
