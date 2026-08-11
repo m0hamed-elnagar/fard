@@ -29,7 +29,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Runner (Code Generation)
-        run: dart run build_runner build -d
+        run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Analyze project source
         run: flutter analyze

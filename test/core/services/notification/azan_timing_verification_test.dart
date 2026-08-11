@@ -253,6 +253,11 @@ void main() {
   test(
     'Verification: Reminder is scheduled EXACTLY X minutes before Azan',
     () async {
+      // Skip on desktop platforms (WorkManager / Adhan MethodChannel not available)
+      if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+        return;
+      }
+
       const lat = 30.0444;
       const lon = 31.2357;
       const minutesBefore = 10;
@@ -313,6 +318,11 @@ void main() {
   test(
     'Verification: After Salah Azkar is scheduled configurable minutes AFTER Azan',
     () async {
+      // Skip on desktop platforms (WorkManager / Adhan MethodChannel not available)
+      if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+        return;
+      }
+
       const lat = 30.0444;
       const lon = 31.2357;
       const minutesAfter = 20;
