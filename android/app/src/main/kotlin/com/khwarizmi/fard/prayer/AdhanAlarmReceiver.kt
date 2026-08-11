@@ -93,7 +93,7 @@ class AdhanAlarmReceiver : BroadcastReceiver() {
                 ContextCompat.startForegroundService(context, serviceIntent)
                 Log.d(TAG, "AdhanService started successfully")
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to start AdhanService, releasing WakeLock", e)
+                Log.e(TAG, "Failed to start AdhanService (ForegroundServiceStartNotAllowedException on Android 14/15), releasing WakeLock and triggering notification fallback", e)
                 releaseWakeLock()
             }
         } else {

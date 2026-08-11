@@ -375,14 +375,19 @@ class AdhanService : Service() {
             .addAction(R.drawable.ic_notification_check, "تمت الصلاة", pendingMarkIntent)
             .build()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(
-                NOTIFICATION_ID,
-                notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
-            )
-        } else {
-            startForeground(NOTIFICATION_ID, notification)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(
+                    NOTIFICATION_ID,
+                    notification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+                )
+            } else {
+                startForeground(NOTIFICATION_ID, notification)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to call startForeground (ForegroundServiceStartNotAllowedException on Android 14/15). Falling back to NotificationManager.", e)
+            notificationManager.notify(NOTIFICATION_ID, notification)
         }
     }
 
