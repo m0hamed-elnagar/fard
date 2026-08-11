@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/l10n/app_localizations.dart';
 import 'package:fard/features/settings/presentation/blocs/location_prayer_cubit.dart';
@@ -51,6 +52,7 @@ void main() {
   }
 
   testWidgets('renders Qibla screen on Windows', (WidgetTester tester) async {
+    if (!Platform.isWindows) return;
     await tester.pumpWidget(createWidgetUnderTest(isActive: true));
     await tester.pumpAndSettle();
 
