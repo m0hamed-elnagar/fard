@@ -19,6 +19,7 @@ import 'package:fard/core/services/connectivity_service.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
 
+import 'package:fard/core/widgets/battery_instruction_dialog.dart';
 import 'package:fard/core/mixins/notification_permission_mixin.dart';
 import 'package:fard/core/utils/location_dialog_helper.dart';
 
@@ -35,9 +36,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   int _currentPage = 0;
   bool _isQadaEnabled = true;
   bool _isDownloading = false;
-  final int _totalPages = 5;
+  final int _totalPages = 6;
   Set<String> _downloadedVoices = {};
   bool _isOffline = false;
+  bool _isBatteryOptimizationIgnored = true;
+  bool _isOemDevice = false;
   StreamSubscription? _connectivitySubscription;
 
   @override
@@ -45,6 +48,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     super.initState();
     _loadDownloadedVoices();
     _checkConnectivity();
+    _checkBatteryStatus();
     _connectivitySubscription = getIt<ConnectivityService>()
         .onConnectivityChanged
         .listen((results) {
@@ -55,6 +59,18 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         });
       }
     });
+  }
+
+  Future<void> _checkBatteryStatus() async {
+    final ns = getIt<NotificationService>();
+    final isIgnored = await ns.isBatteryOptimizationIgnored();
+    final isOem = await ns.isOemDeviceForAutostart();
+    if (mounted) {
+      setState(() {
+        _isBatteryOptimizationIgnored = isIgnored;
+        _isOemDevice = isOem;
+      });
+    }
   }
 
   Future<void> _checkConnectivity() async {
@@ -176,6 +192,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                               }
                             } else if (index == 3) {
                               _checkPhoneSoundStatus();
+                            } else if (index == 4) {
+                              _checkBatteryStatus();
                             }
                           },
                           children: [
@@ -218,6 +236,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                 isDndActive: _isDndActive,
                                 isSilentMode: _isSilentMode,
                                 onRefreshSoundStatus: _checkPhoneSoundStatus,
+                                bottomPadding: bottomPadding,
+                              ),
+                            ),
+                            _AnimatedPageTransition(
+                              child: _BatteryOptimizationPage(
+                                isBatteryOptimizationIgnored: _isBatteryOptimizationIgnored,
+                                isOemDevice: _isOemDevice,
+                                onRefresh: _checkBatteryStatus,
                                 bottomPadding: bottomPadding,
                               ),
                             ),
@@ -1184,6 +1210,226 @@ class _AnimatedPageTransitionState extends State<_AnimatedPageTransition>
       child: SlideTransition(
         position: _slideAnimation,
         child: widget.child,
+      ),
+    );
+  }
+}
+
+class _BatteryOptimizationPage extends StatelessWidget {
+  final bool isBatteryOptimizationIgnored;
+  final bool isOemDevice;
+  final VoidCallback onRefresh;
+  final double bottomPadding;
+
+  const _BatteryOptimizationPage({
+    required this.isBatteryOptimizationIgnored,
+    required this.isOemDevice,
+    required this.onRefresh,
+    required this.bottomPadding,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(24.0, 24.0, 24.0, bottomPadding),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withAlpha(25),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.battery_charging_full_rounded,
+              size: 56.0,
+              color: colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 24.0),
+          Text(
+            l10n.batteryOptimization,
+            style: GoogleFonts.amiri(
+              fontSize: 26.0,
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12.0),
+          Text(
+            l10n.batteryOptimizationDesc,
+            style: textTheme.bodyLarge?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32.0),
+
+          // Card 1: Unrestricted Battery
+          Card(
+            elevation: 0,
+            color: colorScheme.surfaceContainerHighest.withAlpha(120),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.0),
+              side: BorderSide(
+                color: isBatteryOptimizationIgnored
+                    ? Colors.green.withAlpha(120)
+                    : colorScheme.outline.withAlpha(50),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        isBatteryOptimizationIgnored
+                            ? Icons.check_circle_rounded
+                            : Icons.battery_alert_rounded,
+                        color: isBatteryOptimizationIgnored
+                            ? Colors.green
+                            : colorScheme.primary,
+                      ),
+                      const SizedBox(width: 12.0),
+                      Expanded(
+                        child: Text(
+                          l10n.batteryOptimization,
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8.0),
+                  Text(
+                    isBatteryOptimizationIgnored
+                        ? l10n.batteryUnrestricted
+                        : l10n.batteryInstructionDesc,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      height: 1.4,
+                    ),
+                  ),
+                  if (!isBatteryOptimizationIgnored) ...[
+                    const SizedBox(height: 16.0),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          BatteryInstructionDialog.show(
+                            context: context,
+                            title: l10n.batteryInstructionTitle,
+                            message: l10n.batteryInstructionDesc,
+                            confirmLabel: l10n.disableRestrictions,
+                            onConfirm: () async {
+                              await getIt<NotificationService>()
+                                  .requestIgnoreBatteryOptimizations();
+                              onRefresh();
+                            },
+                          );
+                        },
+                        icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                        label: Text(l10n.disableRestrictions),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: colorScheme.primary,
+                          foregroundColor: colorScheme.onPrimary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+
+          if (isOemDevice) ...[
+            const SizedBox(height: 16.0),
+            // Card 2: OEM Autostart
+            Card(
+              elevation: 0,
+              color: colorScheme.surfaceContainerHighest.withAlpha(120),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.0),
+                side: BorderSide(
+                  color: colorScheme.outline.withAlpha(50),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.power_settings_new_rounded,
+                          color: colorScheme.primary,
+                        ),
+                        const SizedBox(width: 12.0),
+                        Expanded(
+                          child: Text(
+                            l10n.autostartWarningTitle,
+                            style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8.0),
+                    Text(
+                      l10n.autostartSettingsDesc,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 16.0),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          BatteryInstructionDialog.show(
+                            context: context,
+                            title: l10n.autostartInstructionTitle,
+                            message: l10n.autostartInstructionDesc,
+                            confirmLabel: l10n.openSettings,
+                            onConfirm: () async {
+                              await getIt<NotificationService>()
+                                  .openAutostartSettings();
+                              onRefresh();
+                            },
+                          );
+                        },
+                        icon: const Icon(Icons.settings_outlined, size: 18),
+                        label: Text(l10n.openSettings),
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

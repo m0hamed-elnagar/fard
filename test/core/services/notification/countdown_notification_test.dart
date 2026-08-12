@@ -3,6 +3,7 @@ import 'package:adhan/adhan.dart';
 import 'package:fard/core/services/notification/channel_manager.dart';
 import 'package:fard/core/services/notification/prayer_scheduler.dart';
 import 'package:fard/core/services/notification/sound_manager.dart';
+import 'package:fard/core/services/notification_service.dart';
 import 'package:fard/core/services/prayer_time_service.dart';
 import 'package:fard/features/azkar/data/azkar_repository.dart';
 import 'package:fard/features/prayer_tracking/domain/salaah.dart';
@@ -282,6 +283,21 @@ void main() {
       for (final item in schedule) {
         expect(item['prayerName'], isNotNull);
         expect(item['timeEpochMs'], isNotNull);
+      }
+    });
+
+    test('isOemDeviceForAutostart identifies OEM manufacturers correctly', () {
+      final oemManufacturers = ['Xiaomi', 'Redmi', 'POCO', 'HUAWEI', 'Honor', 'OPPO', 'Realme', 'vivo', 'OnePlus'];
+      final nonOemManufacturers = ['Google', 'Samsung', 'Motorola', 'Sony', 'none'];
+
+      for (final oem in oemManufacturers) {
+        final isOem = NotificationService.oemManufacturers.any((m) => oem.toLowerCase().contains(m));
+        expect(isOem, isTrue, reason: 'Expected $oem to be recognized as OEM');
+      }
+
+      for (final nonOem in nonOemManufacturers) {
+        final isOem = NotificationService.oemManufacturers.any((m) => nonOem.toLowerCase().contains(m));
+        expect(isOem, isFalse, reason: 'Expected $nonOem to NOT be recognized as OEM');
       }
     });
   });

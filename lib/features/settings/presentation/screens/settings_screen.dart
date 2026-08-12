@@ -21,6 +21,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:fard/features/settings/presentation/widgets/location_section.dart';
 import 'package:fard/features/settings/presentation/widgets/widget_preview_section.dart';
 import 'package:flutter/foundation.dart';
+import 'package:fard/core/widgets/battery_instruction_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -83,9 +84,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     final batteryDismissed = prefs.getBool('battery_warning_dismissed') ?? false;
     final isSpoofed = prefs.getBool('spoof_manufacturer') ?? false;
 
-    final String manufacturer = isSpoofed ? 'xiaomi' : (diagnosticResults['device_manufacturer'] ?? 'none');
-    final oemList = ['xiaomi', 'redmi', 'poco', 'huawei', 'honor', 'oppo', 'realme', 'vivo', 'oneplus'];
-    final isOem = oemList.any((oem) => manufacturer.contains(oem));
+    final bool isOem = isSpoofed ? true : await notificationService.isOemDeviceForAutostart();
 
     if (mounted) {
       setState(() {
@@ -146,7 +145,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                 Icons.battery_alert_rounded,
                 actionLabel: l10n.disableRestrictions,
                 onAction: () {
-                  _showInstructionDialog(
+                  BatteryInstructionDialog.show(
+                    context: context,
                     title: l10n.batteryInstructionTitle,
                     message: l10n.batteryInstructionDesc,
                     confirmLabel: l10n.disableRestrictions,
@@ -178,7 +178,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                 Icons.power_settings_new_rounded,
                 actionLabel: l10n.enable,
                 onAction: () {
-                  _showInstructionDialog(
+                  BatteryInstructionDialog.show(
+                    context: context,
                     title: l10n.autostartInstructionTitle,
                     message: l10n.autostartInstructionDesc,
                     confirmLabel: l10n.openSettings,
@@ -611,57 +612,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  Future<void> _showInstructionDialog({
-    required String title,
-    required String message,
-    required String confirmLabel,
-    required VoidCallback onConfirm,
-  }) async {
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: Text(
-            title,
-            style: GoogleFonts.amiri(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            ),
-          ),
-          content: Text(
-            message,
-            style: const TextStyle(fontSize: 14, height: 1.5),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                AppLocalizations.of(context)!.cancel,
-                style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                onConfirm();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              ),
-              child: Text(
-                confirmLabel,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+
 
   Widget _buildSectionTile({
     required String title,

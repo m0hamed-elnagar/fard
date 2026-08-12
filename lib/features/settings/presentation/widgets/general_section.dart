@@ -1,3 +1,4 @@
+import 'package:fard/core/widgets/battery_instruction_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -86,7 +87,8 @@ class _GeneralSectionState extends State<GeneralSection> {
                   ),
                 );
               } else {
-                _showInstructionDialog(
+                BatteryInstructionDialog.show(
+                  context: context,
                   title: l10n.batteryInstructionTitle,
                   message: l10n.batteryInstructionDesc,
                   confirmLabel: l10n.disableRestrictions,
@@ -106,7 +108,8 @@ class _GeneralSectionState extends State<GeneralSection> {
               icon: Icons.power_settings_new_rounded,
               onTap: () async {
                 HapticFeedback.lightImpact();
-                _showInstructionDialog(
+                BatteryInstructionDialog.show(
+                  context: context,
                   title: l10n.autostartInstructionTitle,
                   message: l10n.autostartInstructionDesc,
                   confirmLabel: l10n.openSettings,
@@ -314,55 +317,5 @@ class _GeneralSectionState extends State<GeneralSection> {
     );
   }
 
-  Future<void> _showInstructionDialog({
-    required String title,
-    required String message,
-    required String confirmLabel,
-    required VoidCallback onConfirm,
-  }) async {
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: Text(
-            title,
-            style: GoogleFonts.amiri(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            ),
-          ),
-          content: Text(
-            message,
-            style: const TextStyle(fontSize: 14, height: 1.5),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                AppLocalizations.of(context)!.cancel,
-                style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                onConfirm();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              ),
-              child: Text(
-                confirmLabel,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+
 }

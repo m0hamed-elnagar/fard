@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.5+22] - 2026-08-12
+
+### Added
+- **Battery Optimization & OEM Autostart Onboarding Page**: Added Page 4 to initial onboarding flow with dedicated cards for setting battery usage to "Unrestricted" and configuring OEM autostart toggles on supported brands (Xiaomi, Huawei, OPPO, Vivo, OnePlus, Samsung, Realme, Honor, POCO, Redmi).
+- **Dismissible Home Screen Warning Banner**: Added a top warning card on the Home Screen for existing Android installs when battery optimization is restricted, with a 1-tap permanent dismiss option (`battery_prompt_dismissed_v1`).
+- **Centralized Instruction Dialog**: Added `BatteryInstructionDialog` widget to centralize battery and OEM autostart guidance dialogs across Onboarding, Settings, and Home Screen.
+
+### Fixed
+- **Doze Mode Minute-Tick Self-Healing**: Updated `NextPrayerCountdownWidgetReceiver.kt` to evaluate `isTargetInvalid` (`now >= nextPrayerTime`) on minute-ticks and force persistent countdown notification updates when prayer target times have passed.
+- **Centralized OEM Manufacturer Logic**: Centralized OEM manufacturer detection in `NotificationService.isOemDeviceForAutostart()` to eliminate duplicate OEM checking logic between Settings, Onboarding, and HomeScreen.
+
 ## [1.6.4+21] - 2026-08-08
 
 ### Added
