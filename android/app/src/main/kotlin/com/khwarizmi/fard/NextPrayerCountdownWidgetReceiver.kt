@@ -53,9 +53,12 @@ class NextPrayerCountdownWidgetReceiver : GlanceAppWidgetReceiver() {
                     }
                 }
                 
-                // Update persistent countdown notification ONLY on non-minute-heartbeat actions
-                // (native Chronometer ticks continuously in SystemUI without needing minute-by-minute notify calls)
-                if (intent.action != actionMinuteUpdate) {
+                val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+                val nextPrayerTime = prefs.getLong("flutter.next_prayer_time", 0L)
+                val isTargetInvalid = nextPrayerTime == 0L || System.currentTimeMillis() >= nextPrayerTime
+
+                // Update persistent countdown notification on non-minute actions OR when target has passed
+                if (intent.action != actionMinuteUpdate || isTargetInvalid) {
                     try {
                         CountdownNotificationManager.updateCountdownNotification(context)
                     } catch (e: Exception) {

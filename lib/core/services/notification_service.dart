@@ -701,6 +701,18 @@ ${(results['channels'] as List).map((c) => '    • ${c['id']} (${c['importance'
     );
   }
 
+  static const List<String> oemManufacturers = [
+    'xiaomi',
+    'redmi',
+    'poco',
+    'huawei',
+    'honor',
+    'oppo',
+    'realme',
+    'vivo',
+    'oneplus',
+  ];
+
   Future<String> getDeviceManufacturer() async {
     if (!Platform.isAndroid) return 'none';
     try {
@@ -711,6 +723,12 @@ ${(results['channels'] as List).map((c) => '    • ${c['id']} (${c['importance'
       debugPrint('Error getting device manufacturer: $e');
       return 'none';
     }
+  }
+
+  Future<bool> isOemDeviceForAutostart() async {
+    if (!Platform.isAndroid) return false;
+    final manufacturer = (await getDeviceManufacturer()).toLowerCase();
+    return oemManufacturers.any((oem) => manufacturer.contains(oem));
   }
 
   Future<void> openAutostartSettings() async {

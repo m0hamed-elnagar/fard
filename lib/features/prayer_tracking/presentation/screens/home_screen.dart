@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:fard/core/widgets/battery_instruction_dialog.dart';
 import 'package:fard/core/di/injection.dart';
 import 'package:fard/core/services/widget_update_service.dart';
 import 'package:fard/core/services/notification_service.dart';
@@ -47,6 +49,8 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
   StreamSubscription<Salaah>? _markPrayedSubscription;
   bool _isNotificationBlocked = false;
   bool _isNotificationBannerDismissed = false;
+  bool _isBatteryOptimizationRestricted = false;
+  bool _isBatteryPromptDismissed = false;
 
   @override
   void initState() {
@@ -60,6 +64,7 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkRemovedVoiceNotice();
       _checkNotificationStatus();
+      _checkBatteryStatus();
       if (getIt.isRegistered<InAppUpdateService>()) {
         getIt<InAppUpdateService>().checkForUpdateSilently(context);
       }
@@ -71,6 +76,25 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
           context.read<PrayerTrackerBloc>().add(PrayerTrackerEvent.togglePrayer(salaah));
         }
       });
+    }
+  }
+
+  Future<void> _checkBatteryStatus() async {
+    if (Platform.isAndroid && getIt.isRegistered<NotificationService>()) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final dismissed = prefs.getBool('battery_prompt_dismissed_v1') ?? false;
+        final ns = getIt<NotificationService>();
+        final isIgnored = await ns.isBatteryOptimizationIgnored();
+        if (mounted) {
+          setState(() {
+            _isBatteryPromptDismissed = dismissed;
+            _isBatteryOptimizationRestricted = !isIgnored;
+          });
+        }
+      } catch (e) {
+        debugPrint('HomeScreen: Error checking battery status: $e');
+      }
     }
   }
 
@@ -173,6 +197,7 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
 
         // Check if notification settings changed while app was in background
         _checkNotificationStatus();
+        _checkBatteryStatus();
         if (getIt.isRegistered<InAppUpdateService>()) {
           getIt<InAppUpdateService>().onResumeCheck(context);
         }
@@ -248,6 +273,66 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
                 onPressed: () {
                   setState(() {
                     _isNotificationBannerDismissed = true;
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBatteryOptimizationBanner(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Material(
+      color: colorScheme.surfaceContainerHighest,
+      child: InkWell(
+        onTap: () {
+          BatteryInstructionDialog.show(
+            context: context,
+            title: l10n.batteryInstructionTitle,
+            message: l10n.batteryInstructionDesc,
+            confirmLabel: l10n.disableRestrictions,
+            onConfirm: () async {
+              await getIt<NotificationService>().requestIgnoreBatteryOptimizations();
+              _checkBatteryStatus();
+            },
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.only(left: 16.0, right: 8.0, top: 8.0, bottom: 8.0),
+          child: Row(
+            children: [
+              Icon(
+                Icons.battery_alert_rounded,
+                color: colorScheme.primary,
+              ),
+              const SizedBox(width: 12.0),
+              Expanded(
+                child: Text(
+                  l10n.batteryOptimizationDesc,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.close_rounded,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('battery_prompt_dismissed_v1', true);
+                  setState(() {
+                    _isBatteryPromptDismissed = true;
                   });
                 },
               ),
@@ -397,7 +482,15 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
                     showCountdown = false;
                   }
                   final showBanner = _isNotificationBlocked && showCountdown && !_isNotificationBannerDismissed;
-                  
+                  final showBatteryBanner = !_isNotificationBlocked && Platform.isAndroid && _isBatteryOptimizationRestricted && !_isBatteryPromptDismissed;
+
+                  Widget? bannerWidget;
+                  if (showBanner) {
+                    bannerWidget = _buildBlockedNotificationBanner(context);
+                  } else if (showBatteryBanner) {
+                    bannerWidget = _buildBatteryOptimizationBanner(context);
+                  }
+
                   final homeContent = HomeContent(
                     selectedDate: selectedDate,
                     missedToday: missedToday,
@@ -406,7 +499,7 @@ class _HomeBodyState extends State<_HomeBody> with WidgetsBindingObserver {
                     completedQadaToday: completedQadaToday,
                     monthRecords: monthRecords,
                     history: history,
-                    topBanner: showBanner ? _buildBlockedNotificationBanner(context) : null,
+                    topBanner: bannerWidget,
                   );
                   
                   return homeContent;
