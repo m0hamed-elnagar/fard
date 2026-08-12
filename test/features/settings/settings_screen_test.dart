@@ -16,7 +16,6 @@ import 'package:fard/features/settings/presentation/blocs/location_prayer_state.
 import 'package:fard/features/settings/presentation/blocs/theme_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/theme_state.dart';
 import 'package:fard/features/settings/presentation/screens/settings_screen.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
