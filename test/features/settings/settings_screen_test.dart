@@ -16,6 +16,7 @@ import 'package:fard/features/settings/presentation/blocs/location_prayer_state.
 import 'package:fard/features/settings/presentation/blocs/theme_cubit.dart';
 import 'package:fard/features/settings/presentation/blocs/theme_state.dart';
 import 'package:fard/features/settings/presentation/screens/settings_screen.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -70,6 +71,8 @@ void main() {
     getIt.registerSingleton<DailyRemindersCubit>(mockDailyRemindersCubit);
     getIt.registerSingleton<AzkarBloc>(mockAzkarBloc);
 
+    when(() => mockNotificationService.isBatteryOptimizationIgnored()).thenAnswer((_) async => true);
+    when(() => mockNotificationService.isOemDeviceForAutostart()).thenAnswer((_) async => false);
     when(() => mockNotificationService.runDiagnostics()).thenAnswer(
       (_) async => {
         'notifications_enabled': true,
@@ -129,6 +132,7 @@ void main() {
         BlocProvider<AzkarBloc>.value(value: mockAzkarBloc),
       ],
       child: MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('en'),
@@ -228,6 +232,12 @@ void main() {
   testWidgets('shows battery optimization warning when not ignored', (
     WidgetTester tester,
   ) async {
+    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    when(() => mockNotificationService.isBatteryOptimizationIgnored()).thenAnswer((_) async => false);
     when(() => mockNotificationService.runDiagnostics()).thenAnswer(
       (_) async => {
         'notifications_enabled': true,
@@ -243,12 +253,12 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
 
-    expect(find.text('Battery Optimization'), findsOneWidget);
-    // Tap the warning card action button
+    expect(find.text('Disable Restrictions'), findsOneWidget);
+    // Tap the top warning card action button to open instruction dialog
     await tester.tap(find.text('Disable Restrictions'));
     await tester.pumpAndSettle();
 
-    // Tap the dialog confirm button (which also has the same text, we find the last/active one)
+    // Tap the dialog confirm button (now 2 widgets with this text exist: card button & dialog button)
     await tester.tap(find.text('Disable Restrictions').last);
     await tester.pumpAndSettle();
 
@@ -258,6 +268,12 @@ void main() {
   testWidgets('shows autostart warning on Xiaomi device', (
     WidgetTester tester,
   ) async {
+    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    when(() => mockNotificationService.isOemDeviceForAutostart()).thenAnswer((_) async => true);
     when(() => mockNotificationService.runDiagnostics()).thenAnswer(
       (_) async => {
         'notifications_enabled': true,
@@ -273,9 +289,9 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
 
-    expect(find.text('Enable Autostart'), findsOneWidget);
-    // Tap the warning card action button
-    await tester.tap(find.text('Enable'));
+    expect(find.text('Enable'), findsWidgets);
+    // Tap the top warning card action button to open instruction dialog
+    await tester.tap(find.text('Enable').first);
     await tester.pumpAndSettle();
 
     // Tap the dialog confirm button

@@ -50,6 +50,12 @@ class MockPrayerTimeService extends Mock implements PrayerTimeService {}
 
 class MockNotificationService extends Mock implements NotificationService {
   @override
+  Future<bool> isBatteryOptimizationIgnored() async => true;
+
+  @override
+  Future<bool> isOemDeviceForAutostart() async => false;
+
+  @override
   Future<Map<String, dynamic>> runDiagnostics() async => {
     'notifications_enabled': true,
     'exact_alarm_permission': true,

@@ -66,7 +66,7 @@ class _GeneralSectionState extends State<GeneralSection> {
       isExpanded: _isExpanded,
       onToggle: () => setState(() => _isExpanded = !_isExpanded),
       children: [
-        if (Platform.isAndroid) ...[
+        if (Theme.of(context).platform == TargetPlatform.android || Platform.isAndroid) ...[
           _buildActionTile(
             context,
             title: l10n.batteryOptimization,
